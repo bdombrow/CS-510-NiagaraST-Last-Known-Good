@@ -20,9 +20,11 @@ public class FirehoseSpec extends StreamSpec {
     private int id; // unique number for this firehose stream
     private int dataType;
     private String descriptor;
+    private String descriptor2;
     private int numGenCalls; // number of times firehose will call generator
     private int numTLElts;     // num top-level elts in XMLB and AUCTION docs
     private long rate;
+    private boolean prettyPrint;
 
     /**
      * Initialize the firehose spec
@@ -30,26 +32,35 @@ public class FirehoseSpec extends StreamSpec {
      * @param listenerPortNum  The port number on which the firehose server
      *                           is listening
      * @param listenerHostName The host where the firehose server is running
-     * @param rate The rate at which the stream should run - currently
-     *              not used.
-     * @param type The type of stream - Valid values are  
-     *                 FirehoseClient.FCSTREAMTYPE_* (GEN and FILE) are
-     *                 what is currently supported
-     * @param descriptor If stream type is file - descriptor is the name
-     *                    of the file to read.  If stream type is gen -
-     *                    descriptor is the URI of the DTD to generate from
+     * @param dataType    Type of data to be generated, XMLB, Auction, etc.
+     * @param descriptor  If stream type is file - descriptor is the name
+     *                      of the file to read.  If stream type is gen -
+     *                      descriptor is the URI of the DTD to generate from
+     * @param descriptor2 An additional descriptor, right now used by auction
+     *                      to specify the type of auction data to generate
+     * @param numGenCalls Number of times to call the generator
+     * @param numTLElts   Number of top level elements to be included in a document
+     *                      applicable to some data types - including XMLB and Auction
+     * @param rate        The rate at which the stream should run - currently
+     *                      not used.
+     * @param streaming   Should the system expect and generate streaming data -
+     *                      right now this also forces the stream format to be used
+     * @param prettyPrint Include newlines or not??
      */
     public FirehoseSpec(int listenerPortNum, String listenerHostName,
-			int dataType, String descriptor, int numGenCalls,
-			int numTLElts, int rate, boolean streaming) {
+			int dataType, String descriptor, String descriptor2,
+			int numGenCalls,int numTLElts, int rate, 
+			boolean streaming, boolean prettyPrint) {
 	this.listenerPortNum = listenerPortNum;
 	this.listenerHostName = listenerHostName;
 	this.dataType = dataType;
 	this.descriptor = descriptor;
+	this.descriptor2 = descriptor2;
 	this.numGenCalls = numGenCalls;
 	this.numTLElts = numTLElts;
 	this.rate = rate;
 	this.streaming = streaming;
+	this.prettyPrint = prettyPrint;
 	return;
     }
 
@@ -77,6 +88,10 @@ public class FirehoseSpec extends StreamSpec {
 	return descriptor;
     }
 
+    public String getDescriptor2() {
+	return descriptor2;
+    }
+
     public int getNumGenCalls() {
 	return numGenCalls;
     }
@@ -89,16 +104,22 @@ public class FirehoseSpec extends StreamSpec {
 	return id;
     }
 
+    public boolean isPrettyPrint() {
+	return prettyPrint;
+    }
+
     public void dump(PrintStream os) {
 	os.println("Firehose Specification: (" + id + ") ");
 	os.println("  Listener Port " + String.valueOf(listenerPortNum) +
 		   "  Listener Host " + listenerHostName);
 	os.println(" DataType " + FirehoseConstants.typeNames[dataType] +
 		   ", Descriptor " + descriptor +
+		   ", Descriptor2 " + descriptor2 +
 		   ", NumGenCalls " + String.valueOf(numGenCalls) +
 		   ", NumTopLevelElts " + String.valueOf(numTLElts) +
 		   ", Rate " + String.valueOf(rate) +
-		   ", Streaming " + String.valueOf(streaming));
+		   ", Streaming " + String.valueOf(streaming) +
+		   ", PrettyPrint " + String.valueOf(prettyPrint));
     }
 
     // appends all the firehose spec info into the given string buffer
@@ -109,8 +130,15 @@ public class FirehoseSpec extends StreamSpec {
 	s.append(" ");
 	if(descriptor.length() == 0) {
 	    s.append("NULL");
-	} else
+	} else {
 	    s.append(descriptor);
+	}
+	s.append(" ");
+	if(descriptor2.length() == 0) {
+	    s.append("NULL");
+	} else {
+	    s.append(descriptor2);
+	}
 	s.append(" ");
 	s.append(numGenCalls);
 	s.append(" ");
@@ -119,6 +147,8 @@ public class FirehoseSpec extends StreamSpec {
 	s.append(rate);
 	s.append(" ");
 	s.append(streaming);
+	s.append(" ");
+	s.append(prettyPrint);
 	s.append(" ");
     }
 
@@ -151,6 +181,15 @@ public class FirehoseSpec extends StreamSpec {
 	    descriptor = input_stream.sval;
 	
 	ttype = input_stream.nextToken();
+	if(ttype != StreamTokenizer.TT_WORD) {
+	    throw new CorruptMsgException("invalid stream descriptor2");
+	}
+	if(input_stream.sval.equals("NULL"))
+	    descriptor2 = "";
+	else
+	    descriptor2 = input_stream.sval;
+	
+	ttype = input_stream.nextToken();
 	if(ttype != StreamTokenizer.TT_NUMBER) {
 	    throw new CorruptMsgException("invalid num gen calls");
 	}
@@ -173,5 +212,11 @@ public class FirehoseSpec extends StreamSpec {
 	    throw new CorruptMsgException("invalid streaming value");
 	}
 	streaming = (Boolean.valueOf(input_stream.sval)).booleanValue();     
+
+	ttype = input_stream.nextToken();
+	if(ttype != StreamTokenizer.TT_WORD) {
+	    throw new CorruptMsgException("invalid prettyPrint value");
+	}
+	prettyPrint = (Boolean.valueOf(input_stream.sval)).booleanValue();     
     }
 }

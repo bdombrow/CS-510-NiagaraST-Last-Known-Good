@@ -23,7 +23,6 @@ class XMLFirehoseThread extends Thread {
     }
   
     public void run() {
-
 	while(true) {
 	    try {
 		// get a message from the queue
@@ -34,18 +33,30 @@ class XMLFirehoseThread extends Thread {
 
 		// KT - better name than getDataType!! ???
 		fhSpec = msg.getSpec();
+		boolean useStreamingFormat = fhSpec.isStreaming();
+		boolean usePrettyPrint = fhSpec.isPrettyPrint();
 		switch(fhSpec.getDataType()) {
 		case FirehoseConstants.XMLB:
-		    xml_generator = new XMLBGenerator(fhSpec.getNumTLElts());
+		    xml_generator = new XMLBGenerator(fhSpec.getNumTLElts(), 
+						      useStreamingFormat,
+						      usePrettyPrint);
 		    break;
 		case FirehoseConstants.SUBFILE:
-		    xml_generator = new XMLSubfileGenerator(fhSpec.getDescriptor());
+		    xml_generator = new XMLSubfileGenerator(fhSpec.getDescriptor(), 
+							    useStreamingFormat,
+							    usePrettyPrint);
 		    break;
 		case FirehoseConstants.TEMP:
-		    xml_generator = new XMLTempGenerator(fhSpec.getDescriptor());
+		    xml_generator = new XMLTempGenerator(fhSpec.getDescriptor(), 
+							 useStreamingFormat,
+							 usePrettyPrint);
 		    break;
 		case FirehoseConstants.AUCTION:
-		    xml_generator = new XMLAuctionGenerator(fhSpec.getDescriptor(), fhSpec.getNumTLElts());
+		    xml_generator = new XMLAuctionGenerator(fhSpec.getDescriptor(), 
+							    fhSpec.getDescriptor2(),
+							    fhSpec.getNumTLElts(),
+							    useStreamingFormat, 
+							    usePrettyPrint);
 		    break;
 		case FirehoseConstants.DTD:
 		    // if the dtd_name contains :// assume it is a
@@ -58,21 +69,19 @@ class XMLFirehoseThread extends Thread {
 		    } else {
 			dtdName = fhSpec.getDescriptor();
 		    }
-		    xml_generator = new XMLDTDGenerator(dtdName);
+		    xml_generator = new XMLDTDGenerator(dtdName, useStreamingFormat, usePrettyPrint);
 		    break;
 		default:
 		    throw new PEException("KT unexpected stream data type");
 		}
-
 		int numGenCalls = fhSpec.getNumGenCalls();
 
 		// generate a and send the documents 
 		int count = 0;
-		boolean useStreamingFormat = fhSpec.isStreaming();
 		if(useStreamingFormat)
 		    client_out.write(FirehoseConstants.OPEN_STREAM.getBytes());
 		while(count < numGenCalls || numGenCalls == -1) {
-		    stDoc = xml_generator.generateXMLString(useStreamingFormat);
+		    stDoc = xml_generator.generateXMLString();
 		    client_out.write(stDoc.getBytes());
 		    count++; 
 		}	

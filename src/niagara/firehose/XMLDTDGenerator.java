@@ -10,12 +10,14 @@ class XMLDTDGenerator extends XMLFirehoseGen {
     private XMLGenerator xmlGenerator;
     private String dtdName;
 
-    public XMLDTDGenerator(String dtdName) {
+    public XMLDTDGenerator(String dtdName, boolean streaming, boolean prettyprint) {
 	this.dtdName = dtdName;
+	useStreamingFormat = streaming;
+	usePrettyPrint = prettyprint;
 	xmlGenerator = new XMLGenerator();
     }
 
-    public String generateXMLString(boolean useStreamingFormat) throws IOException{
+    public String generateXMLString() throws IOException{
         Document d = xmlGenerator.generateXML(dtdName);
 
 	// convert the document to a string and return, but check

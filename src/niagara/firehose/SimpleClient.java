@@ -41,12 +41,14 @@ class ClientMain {
     
     String host_name;
     int port_num = FirehoseConstants.LISTEN_PORT;
-    int stype = FirehoseConstants.XMLB;
-    String stream_descriptor = null;
+    int stype = FirehoseConstants.AUCTION;
+    String stream_descriptor = "";
+    String stream_descriptor2 = "bidperson";
     int client_wait = -1;
     int numGenCalls = 1;
     int numTLElts = 1;
     boolean streaming = true;
+    boolean prettyPrint = false;
     boolean quiet = false;
     boolean shutdown = false;
 
@@ -80,8 +82,8 @@ class ClientMain {
 		ok = true;
 	    }
 	    
-	    //get type and descriptor
-	    if ((idx+2) < args.length && args[idx].compareTo("-s") == 0) {
+	    //get type 
+	    if ((idx+1) < args.length && args[idx].compareTo("-s") == 0) {
 		for(int j = 0; j<FirehoseConstants.numDataTypes && !ok; j++) {
 		    if (args[idx+1].compareTo(FirehoseConstants.typeNames[j]) == 0) {
 			stype = j;
@@ -91,7 +93,7 @@ class ClientMain {
 		} 
 	    }
 	    
-	    //get number gen calls
+	    //get descriptor
 	    if ((idx+1) < args.length && args[idx].compareTo("-d") == 0) {
 		stream_descriptor = args[idx+1];
 		idx += 2;
@@ -100,8 +102,18 @@ class ClientMain {
 		    System.err.println("WARNING: stream descriptor ignored for XMLB");
 		}
 	    }
-	    
-	    //get number gen calls
+
+	    //get descriptor2
+	    if ((idx+1) < args.length && args[idx].compareTo("-d2") == 0) {
+		stream_descriptor2 = args[idx+1];
+		idx += 2;
+		ok = true;
+		if(stype == FirehoseConstants.XMLB) {
+		    System.err.println("WARNING: stream descriptor ignored for XMLB");
+		}
+	    }
+
+	    //get numgencalls
 	    if ((idx+1) < args.length && args[idx].compareTo("-ng") == 0) {
 		temp = new Integer(args[idx+1]);
 		numGenCalls = temp.intValue();
@@ -143,6 +155,13 @@ class ClientMain {
 		ok = true;
 	    }
 	    
+	    // get prettyprint mode
+	    if (idx < args.length && args[idx].compareTo("-pp") == 0) {
+		prettyPrint = true;
+		idx++;
+		ok = true;
+	    }
+	    
 	    //get shutdown
 	    if (idx < args.length && args[idx].compareTo("-shutdown") == 0) {
 		shutdown = true;
@@ -157,7 +176,7 @@ class ClientMain {
       stUsage.append(" [-h host_name] [-ng numGenCalls]");
       stUsage.append(" [-tl numTopLevelElts] [-cw client_wait]");
       stUsage.append(" [-ns ] (no streaming) [-q] (quiet)");
-      stUsage.append(" [-shutdown]");
+      stUsage.append(" [-pp ] (prettyprint) [-shutdown]");
       System.out.println(stUsage.toString());
     }
 
@@ -176,8 +195,9 @@ class ClientMain {
       tm.start();
       FirehoseSpec fhSpec = new FirehoseSpec(port_num, host_name,
 					     stype, stream_descriptor,
+					     stream_descriptor2,
 					     1, 1,
-					     1, streaming);
+					     1, streaming, prettyPrint);
 
       InputStream is = fhclient.open_stream(fhSpec);
       byte buffer[] = new byte[1024];

@@ -14,7 +14,7 @@ class XMLTempGenerator extends XMLFirehoseGen {
     private long m_cMinuteOffset;
     private String stFile;
 
-    public XMLTempGenerator(String fileName) {
+    public XMLTempGenerator(String fileName, boolean streaming, boolean prettyprint) {
 	m_iTempCurr = 70;
 	m_rnd = new Random();
 	m_iTime = 0;
@@ -22,9 +22,11 @@ class XMLTempGenerator extends XMLFirehoseGen {
 	m_stId = new String("X11");
 	m_cMinuteOffset = 0;
 	stFile = fileName;
+	useStreamingFormat = streaming;
+	usePrettyPrint = prettyprint;
     }
 
-    public String generateXMLString(boolean useStreamingFormat) {
+    public String generateXMLString() {
 	//The parameter contains the id for this sensor, and
 	// the time offset.
 	if (stFile.length() != 0) {

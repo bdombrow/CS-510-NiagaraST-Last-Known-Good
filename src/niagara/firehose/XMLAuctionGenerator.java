@@ -11,16 +11,33 @@ import javax.xml.parsers.SAXParserFactory;
 class XMLAuctionGenerator extends XMLFirehoseGen {
     private static AuctionValues m_av = null;
     private String stFile;
-    private int numTLElts;
+    private String desc2;
+    String tab = "";
+    String tab2 = "";
+    String tab3 = "";
+    String nl = "";
 
-  public XMLAuctionGenerator(String stFile, int numTLElts) {
+
+  public XMLAuctionGenerator(String stFile, String desc2,
+			     int numTLElts, boolean streaming,
+			     boolean prettyPrint) {
       this.stFile = stFile;
+      this.desc2 = desc2;
       this.numTLElts = numTLElts;
       if (m_av == null)
 	  m_av = new AuctionValues();
+      useStreamingFormat = streaming;
+      usePrettyPrint = prettyPrint;
+
+      if(usePrettyPrint) {
+	  tab = "   ";
+	  tab2 = tab + tab;
+	  tab3 = tab + tab + tab;
+	  nl = "\n";
+      }
   }
   
-  public String generateXMLString(boolean useStreamingFormat) {
+  public String generateXMLString() {
       // KT - appears we can ignore useStreamingFormat - don't see
       // the xml header being added anywhere
       
@@ -37,18 +54,24 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
 		       m_av.getPersonCount() + " persons, " + 
 		       m_av.getItemCount() + " items, " + 
 		       m_av.getOpenAuctionCount() + " open auctions");
-    
-    //Generate a new bid
-    //st = generateBid();
 
-    //Generate a new person
-    st = generatePerson();
-    
-    return st;
+    // Generate appropriate data
+    StringBuffer stringBuf = new StringBuffer();
+    stringBuf.append("<site>");
+    stringBuf.append(nl);
+    if(desc2.indexOf("bid") != -1) {
+	generateBid(stringBuf, numTLElts);
+    }
+    if(desc2.indexOf("person") != -1) {
+	generatePerson(stringBuf, numTLElts);
+    }
+    stringBuf.append("</site>");
+    stringBuf.append(nl);
+
+    return stringBuf.toString();
   }
 
-  private String generateBid() {
-    StringBuffer stb = new StringBuffer();
+  private void generateBid(StringBuffer stb, int numBids) {
     Random rnd = new Random();
     int iPerson, iItem, iAuction;
     SimpleDateFormat sdf =
@@ -58,88 +81,209 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     iPerson = rnd.nextInt(m_av.getPersonCount());
     iItem = rnd.nextInt(m_av.getItemCount());
     iAuction = rnd.nextInt(m_av.getOpenAuctionCount());
-    
-    stb.append("<site><open_auctions>");
-    for (int iDoc=0; iDoc<numTLElts;iDoc++) {
-      stb.append("<open_auction id=\"" +
-		 m_av.getOpenAuction(iAuction) + "\">");
-      stb.append("<bidder>");
-      stb.append(sdf.format(m_av.getCurrentTime()));
-      stb.append("<person_ref person=\"" +
-		 m_av.getPerson(iPerson) + "\"/>");
-      stb.append("<increase>" + rnd.nextInt(12) + ".00</increase>");
-      stb.append("<itemref item=\"" + m_av.getItem(iItem) + "\"/>");
-      stb.append("</bidder>");
-      stb.append("</open_auction>");
+
+    // KT - if this is too slow - make two cases with pretty print and
+    // without to reduce calls to append
+    stb.append("<open_auctions>");
+    stb.append(nl);
+    for (int iDoc=0; iDoc<numBids;iDoc++) {
+	stb.append(tab);
+	stb.append("<open_auction id=\"");
+	stb.append(m_av.getOpenAuction(iAuction));
+	stb.append("\">");
+	stb.append(nl);
+	
+	stb.append(tab2);
+	stb.append("<bidder>");
+	stb.append(sdf.format(m_av.getCurrentTime()));
+	stb.append(nl);
+	
+	stb.append(tab3);
+	stb.append("<person_ref person=\"");
+	stb.append(m_av.getPerson(iPerson));
+	stb.append("\"/>");
+	stb.append(nl);
+	
+	stb.append(tab3);
+	stb.append("<increase>");
+	stb.append(rnd.nextInt(12));
+	stb.append(".00</increase>");
+	stb.append(nl);
+	
+	stb.append(tab3);
+	stb.append("<itemref item=\"");
+	stb.append(m_av.getItem(iItem));
+	stb.append("\"/>");
+	stb.append(nl);
+	
+	stb.append(tab2);
+	stb.append("</bidder>");
+	stb.append(nl);
+	
+	stb.append(tab);
+	stb.append("</open_auction>");
+	stb.append(nl);
     }
-    stb.append("</open_auctions></site>");
-    
-    return stb.toString();
+    stb.append("</open_auctions>");
+    stb.append(nl);
   }
   
-  public String generatePerson() {
-    StringBuffer stb = new StringBuffer();
+  public void generatePerson(StringBuffer stb, int numPersons) {
+
+    // KT - if we need more speed - remove the pluses and also - to avoid excessive
+    // calls to append - remove the +s.
     
-    stb.append("<site><people>");
-    for (int iDoc=0; iDoc<numTLElts;iDoc++) {
+    stb.append("<people>");
+    stb.append(nl);
+    for (int iDoc=0; iDoc<numPersons;iDoc++) {
       Person p = new Person();
       p.init(m_av);
       String id = m_av.addPerson("person");
-    
-      stb.append("<person id=\"" + id + "\">");
-      if (p.m_stName != null)
-	stb.append("<name>" + p.m_stName + "</name>");
-      if (p.m_stEmail != null)
-	stb.append("<emailaddress>" + p.m_stEmail + "</emailaddress>");
-      if (p.m_stPhone != null)
-	stb.append("<phone>" + p.m_stPhone + "</phone>");
-      if (p.m_address.m_stStreet != null) {
-	stb.append("<address>");
-	stb.append("<street>" + p.m_address.m_stStreet + "</street>");
-	stb.append("<city>" + p.m_address.m_stCity + "</city>");
-	stb.append("<country>" + p.m_address.m_stCountry + "</country>");
-	if (p.m_address.m_stProvince != null)
-	  stb.append("<province>" + p.m_address.m_stProvince + "</province>");
-	stb.append("</address>");
-      }
-      if (p.m_stHomepage != null)
-	stb.append("<homepage>" + p.m_stHomepage + "</homepage>");
-      if (p.m_stCreditcard != null)
-	stb.append("<creditcard>" + p.m_stCreditcard + "</creditcard>");
 
+      stb.append(tab);
+      stb.append("<person id=\"");
+      stb.append(id);
+      stb.append("\">");
+      stb.append(nl);
+
+      if (p.m_stName != null) {
+	  stb.append(tab2);
+	  stb.append("<name>");
+	  stb.append(p.m_stName);
+	  stb.append("</name>");
+	  stb.append(nl);
+      }
+      if (p.m_stEmail != null) {
+	  stb.append(tab2);
+	  stb.append("<emailaddress>");
+	  stb.append(p.m_stEmail);
+	  stb.append("</emailaddress>");
+	  stb.append(nl);
+      }
+      if (p.m_stPhone != null) {
+	  stb.append(tab2);
+	  stb.append("<phone>");
+	  stb.append(p.m_stPhone);
+	  stb.append("</phone>");
+	  stb.append(nl);
+      }
+      if (p.m_address.m_stStreet != null) {
+	  stb.append(tab2);
+	  stb.append("<address>");
+	  stb.append(nl);
+
+	  stb.append(tab3);
+	  stb.append("<street>");
+	  stb.append(p.m_address.m_stStreet);
+	  stb.append("</street>");
+	  stb.append(nl);
+
+	  stb.append(tab3);
+	  stb.append("<city>");
+	  stb.append(p.m_address.m_stCity);
+	  stb.append("</city>");
+	  stb.append(nl);
+
+	  stb.append(tab3);
+	  stb.append("<country>");
+	  stb.append(p.m_address.m_stCountry);
+	  stb.append("</country>");
+	  stb.append(nl);
+	  
+	  if (p.m_address.m_stProvince != null) {
+	      stb.append(tab3);
+	      stb.append("<province>");
+	      stb.append(p.m_address.m_stProvince);
+	      stb.append("</province>");
+	      stb.append(nl);
+	  }
+	  stb.append(tab2);
+	  stb.append("</address>");
+	  stb.append(nl);
+      }
+      if (p.m_stHomepage != null) {
+	  stb.append(tab2);
+	  stb.append("<homepage>");
+	  stb.append(p.m_stHomepage);
+	  stb.append("</homepage>");
+	  stb.append(nl);
+      }
+      if (p.m_stCreditcard != null) {
+	  stb.append(tab2);
+	  stb.append("<creditcard>");
+	  stb.append(p.m_stCreditcard);
+	  stb.append("</creditcard>");
+	  stb.append(nl);
+      }
+      
       if (p.m_profile.m_stBusiness != null) {
-	stb.append("<profile income=\"" + p.m_profile.m_stIncome + "\">");
-	for (int i=0; i < p.m_profile.m_vctInterest.size(); i++) {
-	  stb.append("<interest category=\"" +
-		     p.m_profile.m_vctInterest.get(i) + "\"/>");
-	}
-	if (p.m_profile.m_stEducation != null) {
-	  stb.append("<education>" + p.m_profile.m_stEducation +
-		     "</education>");
-	}
-	if (p.m_profile.m_stGender != null) {
-	  stb.append("<gender>" + p.m_profile.m_stGender +
-		     "</gender>");
-	}
-	stb.append("<business>" + p.m_profile.m_stBusiness +
-		   "</business>");
-	if (p.m_profile.m_stAge != null) {
-	  stb.append("<age>" + p.m_profile.m_stAge + "</age>");
-	}
-	stb.append("</profile>");
+	  stb.append(tab2);
+	  stb.append("<profile income=\"");
+	  stb.append(p.m_profile.m_stIncome);
+	  stb.append("\">");
+	  stb.append(nl);
+
+	  for (int i=0; i < p.m_profile.m_vctInterest.size(); i++) {
+	      stb.append(tab3);
+	      stb.append("<interest category=\"");
+	      stb.append(p.m_profile.m_vctInterest.get(i));
+	      stb.append("\"/>");
+	      stb.append(nl);
+	  }
+	  if (p.m_profile.m_stEducation != null) {
+	      stb.append(tab3);
+	      stb.append("<education>");
+	      stb.append(p.m_profile.m_stEducation);
+	      stb.append("</education>");
+	      stb.append(nl);
+	  }
+	  if (p.m_profile.m_stGender != null) {
+	      stb.append(tab3);
+	      stb.append("<gender>");
+	      stb.append(p.m_profile.m_stGender);
+	      stb.append("</gender>");
+	      stb.append(nl);
+	  }
+
+	  stb.append(tab3);
+	  stb.append("<business>");
+	  stb.append(p.m_profile.m_stBusiness);
+	  stb.append("</business>");
+	  stb.append(nl);
+
+	  if (p.m_profile.m_stAge != null) {
+	      stb.append(tab3);
+	      stb.append("<age>");
+	      stb.append(p.m_profile.m_stAge);
+	      stb.append("</age>");
+	      stb.append(nl);
+	  }
+	  stb.append(tab2);
+	  stb.append("</profile>");
+	  stb.append(nl);
       }
       if (p.m_vctWatches.size() != 0) {
-	stb.append("<watches>");
-	for (int i=0; i<p.m_vctWatches.size(); i++) {
-	  stb.append("<watch>" + p.m_vctWatches.get(i) + "</watch>");
-	}
-	stb.append("</watches>");
+	  stb.append(tab2);
+	  stb.append("<watches>");
+	  stb.append(nl);
+	  for (int i=0; i<p.m_vctWatches.size(); i++) {
+	      stb.append(tab3);
+	      stb.append("<watch>");
+	      stb.append(p.m_vctWatches.get(i));
+	      stb.append("</watch>");
+	      stb.append(nl);
+	  }
+	  stb.append(tab2);
+	  stb.append("</watches>");
+	  stb.append(nl);
       }
-      stb.append("</person>");
-    }
-    stb.append("</people></site>");
 
-    return stb.toString();
+      stb.append(tab);
+      stb.append("</person>");
+      stb.append(nl);
+    }
+    stb.append("</people>");
+    stb.append(nl);
   }
 }
 

@@ -13,11 +13,13 @@ class XMLSubfileGenerator extends XMLFirehoseGen {
     private String stFile;
     private SubfileHandler m_sh;
 
-    public XMLSubfileGenerator(String fileName) {
+    public XMLSubfileGenerator(String fileName, boolean streaming, boolean prettyprint) {
 	stFile = fileName;
+	useStreamingFormat = streaming;
+	usePrettyPrint = prettyprint;
     }
 
-    public String generateXMLString(boolean useStreamingFormat) {
+    public String generateXMLString() {
 
 	// KT - WARNING - need to handle useStreamingFormat in this function
 	// but I don't see how to do it. if useStreamingFormat is true,

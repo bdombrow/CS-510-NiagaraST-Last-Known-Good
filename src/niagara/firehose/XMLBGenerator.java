@@ -13,10 +13,10 @@ class XMLBGenerator extends XMLFirehoseGen {
     static BufferedReader m_brdr;
     static int m_iXMLBFile = 0;
 
-    private int numTLElts;
-
-    public XMLBGenerator(int numTLElts) {
+    public XMLBGenerator(int numTLElts, boolean streaming, boolean prettyprint) {
 	this.numTLElts = numTLElts;
+	useStreamingFormat = streaming;
+	usePrettyPrint = prettyprint;
     }
 
     private void setupReader() {
@@ -36,7 +36,7 @@ class XMLBGenerator extends XMLFirehoseGen {
     }
 
     // was getXMLBData()
-    public String generateXMLString(boolean useStreamingFormat) {
+    public String generateXMLString() {
 
 	int iElement = -1;
 	String stEnd = null;
@@ -76,16 +76,18 @@ class XMLBGenerator extends XMLFirehoseGen {
 			}
 		    }
 		}
-
+		
 		while (stLine.indexOf(stEnd) == -1) {
 		    stb.append(stLine);
-		    stb.append("\n");
+		    if(usePrettyPrint)
+			stb.append("\n");
 		    stLine = m_brdr.readLine();
 		}
-
+		
 		//Get the end token
 		stb.append(stLine);
-		stb.append("\n");
+		if(usePrettyPrint)
+		    stb.append("\n");
 	    }
 	    stb.append("</GAMEDATA>\n");
 
