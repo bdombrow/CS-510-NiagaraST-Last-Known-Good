@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.12 2002/05/07 03:10:34 tufte Exp $
+  $Id: RequestHandler.java,v 1.13 2002/08/16 17:55:53 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -358,6 +358,7 @@ public class RequestHandler {
 	    }
 
 	} catch(InvalidQueryIDException e) {
+	    System.out.println("KT: Sending error message to client");
 	    ResponseMessage errMesg = 
 		new ResponseMessage(request,ResponseMessage.INVALID_SERVER_ID);
 	    sendResponse(errMesg);

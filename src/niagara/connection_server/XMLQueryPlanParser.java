@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.23 2002/05/23 06:30:47 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.24 2002/08/16 17:55:53 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -17,6 +17,7 @@ import niagara.query_engine.MTException;
 import niagara.utils.*;
 
 import niagara.ndom.*;
+import niagara.firehose.*;
 
 public class XMLQueryPlanParser {
 
@@ -93,10 +94,10 @@ public class XMLQueryPlanParser {
      * @exception InvalidPlanException the description of the plan was invalid
      */
     void parseOperator(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+	String id = e.getAttribute("id"); // VPAPAD/KT hangs here if id does not match input
 
 	// If we already visited this node, just return 
-	if (ids2nodes.containsKey(id))
+	if (ids2nodes.containsKey(id)) 
 	    return;
 	String nodeName = e.getNodeName();
 
@@ -143,12 +144,12 @@ public class XMLQueryPlanParser {
 	}
 	else if (nodeName.equals("construct")) {
 	    handleConstruct(e);
-	}
+	} 
 	else if (nodeName.equals("firehosescan")) {
 	    handleFirehoseScan(e);
 	} 
-	else if (nodeName.equals("streamscan")) {
-	    handleStreamScan(e);
+	else if (nodeName.equals("filescan")) {
+	    handleFileScan(e);
 	} 
 	else if (e.getNodeName().equals("accumulate")) {
 	    handleAccumulate(e);
@@ -813,23 +814,31 @@ public class XMLQueryPlanParser {
 
     void handleFirehoseScan(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
-
 	String host = e.getAttribute("host");
 	int port = Integer.parseInt(e.getAttribute("port"));
 	int rate = Integer.parseInt(e.getAttribute("rate"));
-	int iters = Integer.parseInt(e.getAttribute("iters"));
-	int docCount = Integer.parseInt(e.getAttribute("doccount"));
-	String typeStr = e.getAttribute("type");
-	int type;
-	// XXX FIXME we should import FirehoseClient to get to these values
-	if (typeStr.equals("file"))
-	    type = 1;
-	else // gen
-	    type = 2;
-	String desc = e.getAttribute("desc");
+	String dataTypeStr = e.getAttribute("datatype");
+	String descriptor = e.getAttribute("desc");
+	int numGenCalls = Integer.parseInt(e.getAttribute("num_gen_calls"));
+	int numTLElts = Integer.parseInt(e.getAttribute("num_tl_elts"));
+        boolean streaming = e.getAttribute("streaming").equals("yes");
+
+	int dataType = -1;
+	boolean found = false;
+	for(int i = 0; i< FirehoseConstants.numDataTypes; i++) {
+	    if(dataTypeStr.equalsIgnoreCase(FirehoseConstants.typeNames[i])) {
+		dataType = i;
+		found = true;
+		break;
+	    }
+	}
+	if(found == false)
+	    throw new InvalidPlanException("Invalid type - typeStr: " + 
+					   dataTypeStr);
+		 
 	FirehoseSpec fhspec = 
-	    new FirehoseSpec(port, host, rate, type, desc, 
-	                     iters, docCount);
+	    new FirehoseSpec(port, host, dataType, descriptor, 
+	                     numGenCalls, numTLElts, rate, streaming);
 	
 	FirehoseScanOp op = new FirehoseScanOp();
 	op.setSelectedAlgoIndex(0);
@@ -838,27 +847,14 @@ public class XMLQueryPlanParser {
 	ids2nodes.put(id, node);	    
     }
 
-    void handleStreamScan(Element e) throws InvalidPlanException {
+    void handleFileScan(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
+	boolean isStreaming = e.getAttribute("streaming").equals("yes");
+	FileScanSpec fsSpec = new FileScanSpec(e.getAttribute("fileName"), isStreaming); 
 
-	String typeStr = e.getAttribute("type");
-	StreamSpec sSpec;
-
-        boolean isStreaming = e.getAttribute("streaming").equals("yes");
-
-	if(typeStr.equals("file")) {
-	    sSpec = new StreamSpec(e.getAttribute("fileName"), isStreaming);
-	} else if (typeStr.equals("firehose")) {
-	    sSpec = new StreamSpec(e.getAttribute("host"),
-				   Integer.parseInt(e.getAttribute("port")),
-                                   isStreaming);
-	} else {
-	    throw new InvalidPlanException("Invalid type - typeStr: " + typeStr);
-	}
-
-	StreamScanOp op = new StreamScanOp();
+	FileScanOp op = new FileScanOp();
 	op.setSelectedAlgoIndex(0);
-	op.setStreamScan(sSpec);
+	op.setFileScan(fsSpec);
 	logNode node = new logNode(op);
 	ids2nodes.put(id, node);	    
     }
@@ -1113,4 +1109,5 @@ public class XMLQueryPlanParser {
 	    super("Invalid Plan Exception: " + msg + " ");
 	}
     }
+
 }

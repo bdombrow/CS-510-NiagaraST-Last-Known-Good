@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.15 2002/05/23 06:30:47 vpapad Exp $
+  $Id: NiagraServer.java,v 1.16 2002/08/16 17:55:53 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -67,7 +67,7 @@ public class NiagraServer
     // SAXDOM
     private static final int SAXDOM_DEFAULT_NUMBER_OF_PAGES = 1024;
     private static final int SAXDOM_DEFAULT_PAGE_SIZE = 1024;
-    private static boolean useSAXDOM = false;
+    private static boolean useSAXDOM = true;
     private static int saxdom_pages = SAXDOM_DEFAULT_NUMBER_OF_PAGES;
     private static int saxdom_page_size = SAXDOM_DEFAULT_PAGE_SIZE;
 
@@ -424,20 +424,10 @@ public class NiagraServer
     /**
      * see if int is valid
      */
-    private static boolean isInteger(String intValue)
-		{
-
-		    //try{
-
-				// Convert String to int
-				//
-				int tmpInt = Integer.parseInt(intValue);
-				return true;
-				//}catch(Exception e){
-				//System.err.println("* Invalid integer value *");
-				//return false;
-				//}
-		}
+    private static boolean isInteger(String intValue) {
+	int tmpInt = Integer.parseInt(intValue);
+	return true;
+    }
 
     /**
      *  see if host is valid
