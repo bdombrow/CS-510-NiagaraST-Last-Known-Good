@@ -1,45 +1,46 @@
 package niagara.optimizer.colombia;
 
+import java.util.ArrayList;
+
 //
 //	A set of attribute names
 //
-class CStrings: public std::vector<CString> {
-public:
+class Strings {
+    private ArrayList attrnames;
 
-	CStrings(){};
+    public Strings() {
+	attrnames = new ArrayList();
+    }
 
-	virtual ~CStrings() {}; // XXX Vassilis let's see...
+    public Strings(Strings other) {
+	attrnames.addAll(other.attrnames);
+    }
+    public boolean isEmpty() { return attrnames.isEmpty(); }
+    public boolean notEmpty() { return !attrnames.isEmpty(); }
 
-	CStrings(CStrings & attrnames){
-		for (uint i=0; i<attrnames.size(); i++){
-			push_back(attrnames.GetAt(i));
-		}
-	};
-	bool isEmpty(){return empty();}
-	bool notEmpty(){return !empty();}
-	// Check whether attrname is in this set
-	bool Contains(CString attrname)
-	{
-		for (uint i=0; i<size(); i++)
-		{
-			if (GetAt(i)==attrname) return true;
-		};
-		return false;
-	};
+    // Check whether attrname is in this set
+    public boolean contains(String attrname) {
+	for (int i = 0; i < size(); i++) {
+	    // XXX vpapad: changing == to equals options: equals,
+	    // ==, keep an extra hashtable, intern strings, ...
+	    if (attrnames.get(i).equals(attrname)) 
+		return true;
+	}
+	return false;
+    }
 
 	// Check whether attrnames is subset of this set
-	bool Contains(CStrings * other)
-	{
-		if (size() < other->size()) return false;
-		for (uint i=0; i<other->size(); i++)
-		{
-			if (!(Contains(other->GetAt(i)))) return false;
-		};
-		return true;
-	};
+    public boolean contains(Strings other) {
+	if (size() < other->size()) return false;
+	for (uint i=0; i<other->size(); i++)
+	    {
+		if (!(Contains(other->GetAt(i)))) return false;
+	    };
+	return true;
+    }
 
 	// Check whether there is overlap between this and other
-	bool Overlap(CStrings * other)
+	bool Overlap(Strings * other)
 	{
 		for (uint i=0; i<other->size(); i++)
 		{
@@ -52,7 +53,7 @@ public:
 		return false;
 	};
 	// Check if they are equivalet SETS
-	bool operator==(CStrings &other)
+	bool operator==(Strings &other)
 	{
 		if (size() != other.size()) return false;
 		for (uint i=0; i<size(); i++)
@@ -62,105 +63,97 @@ public:
 		return true;
 	};
 	
-	//remove the attributes that are not in the "attrs" list. 
-	CStrings * Projection(CStrings * AttrNames)
-	{
-		CStrings * attrs = new CStrings;
-		for (int i=size()-1;i>=0; i--) {
-			if (AttrNames->Contains(GetAt(i))) 
-				attrs->push_back(GetAt(i));
-		}
-		return attrs;
-	};
+    //remove the attributes that are not in the "attrs" list. 
+    Strings projection(Strings attrList) {
+	Strings attrs = new Strings;
+	for (int i=size()-1;i>=0; i--) {
+	    if (AttrNames->Contains(GetAt(i))) 
+		attrs->push_back(GetAt(i));
+	}
+	return attrs;
+    }
 
-	// To get around a bug in CArray<CString>: 
-	//		GetAt return "" for any index greater than 0;
-	CString & GetAt(int i) { return this->at(i);};
+// 	// To get around a bug in CArray<CString>: 
+// 	//		GetAt return "" for any index greater than 0;
+// 	CString & GetAt(int i) { return this->at(i);};
 
-	CStrings * Copy(){
-		return new CStrings(*this);
-	};
-	void AttachPathName(CString varname){
-		for (uint i=0; i<size(); i++) {
-			assert((*this)[i] != "");
-			(*this)[i] =  varname + "." + (*this)[i];
-		};
-	};
+    Strings copy() {
+	return new Strings(this);
+    }
+    
+    // XXX vpapad: why is this here?!?
+//     void attachPathName(CString varname) {
+// 	for (uint i=0; i<size(); i++) {
+// 	    assert((*this)[i] != "");
+// 	    (*this)[i] =  varname + "." + (*this)[i];
+// 	}
+//     }
+    
+    int findIdx(String s) {
+	return attrnames.lastIndexOf(s);
+    }
+    
+    // XXX vpapad: commented out from the C++ version
+    // Remove duplicates
+    //bool Add(CString c)
+    //{
+    //	if (Contains(c)) return false;
+    //	InsertAt(size(), c);
+    //	return true;
+    //};
+    
+    void addAll(Strings other) {
+	for (int i = 0; i < other.size(); i++)
+	    if (!(contains(other.get(i))))
+		attrnames.add(other.get(i));
+    }
+
+    // Same as AddAll unless duplicates are not removed
+    void concat(Strings other) {
+	attrnames.addAll(other.attrnames);
+    }
+    
+    // Remove an element 
+    public boolean remove(String str) {
+	int index = attrnames.lastIndexOf(str);
+	if (index >= 0) {
+	    attrnames.remove(index);
+	    return true;
+	}
 	
-	int FindIdx(CString c){
-		for (uint i=0; i<size(); i++) {
-			if(c==GetAt(i)) return i;
-		};
-		return -1;
-	};
-	// Remove duplicates
-	//bool Add(CString c)
-	//{
-	//	if (Contains(c)) return false;
-	//	InsertAt(size(), c);
-	//	return true;
-	//};
+	return false;
+    }	
 
-	void AddAll(CStrings & other)
-	{
-		for (uint i=0; i<other.size(); i++)
-			if (!(Contains(other[i]))) 
-				push_back(other[i]);
-	};
+    void distinct() {
+	// XXX vpapad: Horribly slow
+	ArrayList temp = new ArrayList(attrnames.size());
 
-	// Same as AddAll unless duplicates are not removed
-	void Concat(CStrings & other)
-	{
-		for (uint i=0; i<other.size(); i++)
-				push_back(other[i]);
-	};
+	for (int i = 0; i < size(); i++) {
+	    if (!temp.contains(attrnames.get(i))) 
+		temp.add(attrnames.get(i));
+	}
+	attrnames.clear();
+	attrnames.addAll(temp);
+    }
+    
+    String dump(string delimiter) {
+	if (size() == 0) 
+	    return "";
 
-	// Remove an element 
-	bool Remove(CString str)
-	{
-            uint i;
-		for (i=0; i< size()-1; i++)
-			if (GetAt(i) == str) break;
-                if(i == size()) return false;		
-                this->erase(begin()+i);  
-                return true;
-	}	
+	StringBuffer sb = new StringBuffer();
+	sb.append(attrnames.get(0));
+	for (int i = 1; i < size(); i++) {
+	    sb.append(delimiter);
+	    sb.append(attrnames.get(i));
+	}
+	return sb.toString();
+    }
 
-	void Distinct()
-	{
-		CStrings * temp = new CStrings;
-		for (uint i=0; i< size(); i++)
-		{
-			if (!temp->Contains(GetAt(i))) 
-                            temp->push_back(GetAt(i));
-		};
-		clear();
-		copy(temp->begin(), temp->end(), begin());
-	};
-
-	CString Dump(const char* delimiter) {
-		CString os;
-		if (size()==0) return "";
-		os = GetAt(0);
-		for (uint i=1; i<size(); i++)
-			os += delimiter + GetAt(i);
-		return os;
-	};
-
-        CString Dump() {
-            return Dump(", ");
-        }
+    String dump() {
+	return dump(", ");
+    }
         
-        CString DumpNewLine() {
-            return Dump("\n");
-        }
-
-	CString DumpJava() {
-		if (size()==0) return "{}";
-		CString os = "{\"" + GetAt(0) + "\"";
-		for (uint i=1; i<size(); i++)
-			os += ", \"" +GetAt(i)+"\"";
-		os +="}";
-		return os;
-	};
-};
+    String dumpNewLine() {
+	return dump("\n");
+    }
+}
