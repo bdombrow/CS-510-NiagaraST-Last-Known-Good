@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.23 2003/02/25 06:10:26 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.24 2003/02/26 06:35:12 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -215,11 +215,12 @@ implements SchemaProducer, SerializableToXML, Initializable {
 		checkForSinkCtrlMsg();
 	    } // end of while loop
 	} catch (java.lang.InterruptedException e) {
-	    shutDownOperator();
+	    shutDownOperator("Operator Interrupted");
 	    internalCleanUp("interrupted");
 	    return;
 	} catch (ShutdownException see) {
-	    shutDownOperator();
+	    // trys to send shutdown up and down op tree
+	    shutDownOperator(see.getMessage());
 	    internalCleanUp("shutdown exception");
 	    return;
 	} catch (UserErrorException uee) {
@@ -227,7 +228,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    // however, for now will just print error message
 	    System.err.println("USER ERROR: " + uee.getMessage());
 	    uee.printStackTrace();
-	    shutDownOperator();
+	    shutDownOperator("User Error " + uee.getMessage());
 	    internalCleanUp("user error");
 	    return;	    
 	}
@@ -297,7 +298,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
      * This function sends (best effort) shutdown messages to all
      * source and sink streams
      */
-    private void shutDownOperator () {	
+    private void shutDownOperator (String msg) {	
 	shutdownTrigOp();
 
 	// try to close each sink stream, even if we get an error closing
@@ -307,7 +308,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	for(int i = 0; i<numSourceStreams; i++) {
 	    if(!sourceStreams[i].isClosed()) {
 		try {
-		    sendCtrlMsgToSource(CtrlFlags.SHUTDOWN, i);
+		    sendCtrlMsgToSource(CtrlFlags.SHUTDOWN, msg, i);
 		} catch(ShutdownException e) {
 		}
 	    }
@@ -315,7 +316,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	for(int i = 0; i<numSinkStreams; i++) {
 	    if(!sinkStreams[i].isClosed()) {
 		try {
-		    sendCtrlMsgToSink(CtrlFlags.SHUTDOWN, i);
+		    sendCtrlMsgToSink(CtrlFlags.SHUTDOWN, msg, i);
 		} catch (ShutdownException e) {
 		} catch (InterruptedException e) {
 		}
@@ -584,9 +585,9 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    // If the output is a partial result, then put the appropriate
 	    // control msg, else send a synchronize partial message
 	    if (isPartialOutput) {
-		sendCtrlMsgToSinks(CtrlFlags.END_PARTIAL);
+		sendCtrlMsgToSinks(CtrlFlags.END_PARTIAL, null);
 	    } else {
-		sendCtrlMsgToSinks(CtrlFlags.SYNCH_PARTIAL);
+		sendCtrlMsgToSinks(CtrlFlags.SYNCH_PARTIAL, null);
 	    }
 	}
     }
@@ -644,7 +645,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    }
 	    // Send the control element to all the open source streams
 	    if(existsUnClosedSourceStream())
-		sendCtrlMsgToSources(CtrlFlags.GET_PARTIAL);
+		sendCtrlMsgToSources(CtrlFlags.GET_PARTIAL, null);
 	    // else ignore GET_PARTIAL, final results are coming soon KT
 	} else {
 	    // This is a duplicate control element
@@ -707,9 +708,11 @@ implements SchemaProducer, SerializableToXML, Initializable {
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void sendCtrlMsgToSource (int ctrlFlag, int streamId)
+    private void sendCtrlMsgToSource (int ctrlFlag, String ctrlMsg, 
+				      int streamId)
 	throws ShutdownException{
-	int retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag);
+	int retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag, 
+							     ctrlMsg);
 
 	// only control flag putCtrlMsg may return is EOS
 	if(retCtrlFlag != CtrlFlags.NULLFLAG) {
@@ -726,13 +729,13 @@ implements SchemaProducer, SerializableToXML, Initializable {
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void sendCtrlMsgToSources(int ctrlFlag)
+    private void sendCtrlMsgToSources(int ctrlFlag, String ctrlMsg)
 	throws ShutdownException {
 	// Loop over all source streams and put the control
 	// element in all open ones
 	for (int i = 0; i < numSourceStreams; i++) {
 	    if (!sourceStreams[i].isClosed()) {
-		sendCtrlMsgToSource(ctrlFlag, i);
+		sendCtrlMsgToSource(ctrlFlag, ctrlMsg, i);
 	    }
 	}
     }
@@ -747,11 +750,12 @@ implements SchemaProducer, SerializableToXML, Initializable {
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void sendCtrlMsgToSink(int ctrlFlag, int streamId)
+    private void sendCtrlMsgToSink(int ctrlFlag, String ctrlMsg, int streamId)
 	throws java.lang.InterruptedException, ShutdownException {
 	int newCtrlFlag;
 	do {
-	     newCtrlFlag = sinkStreams[streamId].putCtrlMsg(ctrlFlag);
+	     newCtrlFlag = sinkStreams[streamId].putCtrlMsg(ctrlFlag,
+							    ctrlMsg);
 	     if (newCtrlFlag != CtrlFlags.NULLFLAG) {
 		 processCtrlMsgFromSink(newCtrlFlag, streamId);
 	    }
@@ -768,14 +772,14 @@ implements SchemaProducer, SerializableToXML, Initializable {
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void sendCtrlMsgToSinks(int ctrlFlag)
+    private void sendCtrlMsgToSinks(int ctrlFlag, String ctrlMsg)
 	throws java.lang.InterruptedException, ShutdownException {
 
 	// Loop over all sink streams and put the control
 	// element in all open ones
 	for (int sinkId = 0; sinkId < numSinkStreams; sinkId++) {
 	    if (!sinkStreams[sinkId].isClosed()) {
-		sendCtrlMsgToSink(ctrlFlag, sinkId);
+		sendCtrlMsgToSink(ctrlFlag, ctrlMsg, sinkId);
 	    }
 	}
     }
@@ -960,6 +964,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    if(queryInfo.removeFromActiveQueries()) {
 		queryInfo.removeFromActiveQueryList();
 	    }
+	    // need to send message to client??
 	}   
         cleanUp();
     }

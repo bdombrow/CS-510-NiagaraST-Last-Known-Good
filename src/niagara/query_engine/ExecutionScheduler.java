@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.18 2003/02/25 06:10:25 vpapad Exp $
+  $Id: ExecutionScheduler.java,v 1.19 2003/02/26 06:35:12 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -104,7 +104,8 @@ public class ExecutionScheduler {
 	    outputStreams[0]= 
 		new SinkTupleStream(queryInfo.getOutputPageStream());
 	    
-	    opTreeOutput = new PageStream("To: Head");
+	    opTreeOutput = new PageStream(optimizedTree.getName() 
+					  + "-to-PhysicalHead");
 	    SourceTupleStream[] inputStreams = new SourceTupleStream[1];
 	    inputStreams[0] = new SourceTupleStream(opTreeOutput);
 	    
@@ -197,12 +198,16 @@ public class ExecutionScheduler {
 	    
 	    for (int child = 0; child < numInputs; ++child) {
 		// Create a new input stream
-		PageStream inputPageStream = new PageStream("To: " +
+		SchedulablePlan childPlan = node.getInput(child);
+
+		PageStream inputPageStream = new PageStream(
+						  childPlan.getName() + 
+						  "-to-" +
 						  node.getName());
 		inputStreams[child] = new SourceTupleStream(inputPageStream);
 		
 		// Recurse on child
-		scheduleForExecution(node.getInput(child),
+		scheduleForExecution(childPlan,
 				     inputPageStream,
 				     nodesScheduled, doc, null);
 	    }

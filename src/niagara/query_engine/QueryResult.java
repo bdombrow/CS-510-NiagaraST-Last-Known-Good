@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.10 2003/02/25 06:10:26 vpapad Exp $
+  $Id: QueryResult.java,v 1.11 2003/02/26 06:35:12 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -298,7 +298,7 @@ public class QueryResult {
 
 		// Send a request for a partial result		
 		System.out.println("QR putting partial request down stream");
-		outputStream.putCtrlMsg(CtrlFlags.GET_PARTIAL);
+		outputStream.putCtrlMsg(CtrlFlags.GET_PARTIAL, null);
 
 		// Set the status of generating partial results
 		generatingPartialResult = true;
@@ -314,7 +314,7 @@ public class QueryResult {
 	    // If the query is still active then kill it
 	    if (!errorInExecution && !endOfStream) {	    
 		// Dont worry about error, just attempt to put control message
-		outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN);	 
+		outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "execution error");	 
 		// Note that the query is in error
 		errorInExecution = true;
 	    }

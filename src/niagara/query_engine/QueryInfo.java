@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryInfo.java,v 1.4 2003/01/25 21:04:25 tufte Exp $
+  $Id: QueryInfo.java,v 1.5 2003/02/26 06:35:12 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -251,7 +251,7 @@ public class QueryInfo {
 	
 	try {
 	    // Send a shut down control message to the output stream
-	    sourceTupleStream.putCtrlMsg(CtrlFlags.SHUTDOWN);
+	    sourceTupleStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "Query Killed");
 	} catch (ShutdownException e) {
 	    // ignore since we are shutting down anyway...
 	}
