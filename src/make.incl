@@ -1,5 +1,5 @@
 #######################################################################
-#  $Id: make.incl,v 1.6 2002/05/23 06:28:43 vpapad Exp $
+#  $Id: make.incl,v 1.7 2002/08/16 17:55:33 tufte Exp $
 #
 #  Make include file - for common constant info
 #  Added 1-17-02 by Kristin Tufte - remove the fact that some 
@@ -11,10 +11,9 @@
 #-------------------------------------
 # Specify all relative path info here
 #-------------------------------------
-export NIAGROOT    = /home/projects/disc/niagara/vpapad/cvs/niagara_1_0
+export NIAGROOT    = /home/projects/disc/niagara/kristin/niagara_1_0
 export JAVA_HOME   = 
 export LIBDIR      = $(NIAGROOT)/lib
-export FIREHOSEDIR = //home/projects/disc/niagara/vpapad/cvs/firehose_1_0
 
 #------------------------------------
 # programs used
@@ -29,22 +28,24 @@ export JAVADOC     = $(JAVA_HOME)javadoc
 #  Specify required libs here
 #-------------------------------------
 export XML4J          = $(LIBDIR)/xml4j.jar
+# get ridd of XML4J - used by CacheManager
 export CUPLIB        = $(LIBDIR)/cup_all.jar
 export REGEXPLIB     = $(LIBDIR)/gnu-regexp.jar
 export SWINGLIB      = $(LIBDIR)/swingall.jar
 export SAX	      = $(LIBDIR)/aelfred.jar
+# get rid of aelfred - used by IndexMgr
 export DIFF	      	= $(LIBDIR)/diff.jar
 export JFLEX		= $(LIBDIR)/JFlex.zip:$(LIBDIR)/JLex.jar
-export FHOSE            = $(FIREHOSEDIR)
 export DIVA	    = $(LIBDIR)/diva.jar
 export JUNIT	    = $(LIBDIR)/junit.jar
 export DJAVA	    = $(LIBDIR)/djava.jar
 export HTMLLAYOUT   = $(LIBDIR)/htmllayout.jar
 export JETTY	    = $(LIBDIR)/com.mortbay.jetty.jar
 export SERVLET	    = $(LIBDIR)/javax.servlet.jar
-export XERCES	    = /disk/hopper/projects/disc/niagara/install/xerces-1_4_4/xerces.jar
+#export XERCES	    = /disk/hopper/projects/disc/niagara/install/xerces-1_4_4/xerces.jar
 export XERCES2      = /disk/hopper/projects/disc/niagara/install/xerces-2_0_1/xercesImpl.jar:/disk/hopper/projects/disc/niagara/install/xerces-2_0_1/xmlParserAPIs.jar
 export NIAGSRC     = $(NIAGROOT)/src
+export XMLGEN       = $(LIBDIR)/XMLGenerator.jar
 
 #----------------
 #  Niagra libs
@@ -60,7 +61,7 @@ export NIAGSRC     = $(NIAGROOT)/src
 #export TRIGLIB	      = $(LIBDIR)/trig.jar
 #export QBELIB2	      = $(LIBDIR)/qbe2.jar
 
-export CLASSPATH     = .:$(XERCES2):$(XML4J):$(SAX):$(REGEXPLIB):$(CUPLIB):$(DIFF):$(FHOSE):$(DIVA):$(JUNIT):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET):$(JFLEX):$(NIAGSRC)
+export CLASSPATH     = .:$(XERCES2):$(REGEXPLIB):$(CUPLIB):$(DIFF):$(DIVA):$(JUNIT):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET):$(JFLEX):$(NIAGSRC):$(XMLGEN):$(SAX):$(XML4J)
 
 export DEBUG = -O
 
