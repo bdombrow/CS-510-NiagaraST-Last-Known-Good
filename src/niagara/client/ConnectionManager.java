@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.11 2002/04/29 19:46:35 tufte Exp $
+  $Id: ConnectionManager.java,v 1.12 2002/05/07 03:10:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -98,7 +98,7 @@ public class ConnectionManager implements QueryExecutionIF
 	 */
 	private UIDriverIF ui;
 
-	private boolean KT_PERFORMANCE = false;
+	private boolean KT_PERFORMANCE = true;
 
     // Constructors
     public ConnectionManager(String hostname, int port, UIDriverIF ui) {
@@ -110,7 +110,7 @@ public class ConnectionManager implements QueryExecutionIF
 	dtdCache = new DTDCache();
 
 	// Create a ConnectionReader object
-	if (simple)
+	if (simple) 
 	    connectionReader = new SimpleConnectionReader(hostname, port, ui, dtdCache);
 	else 
 	    connectionReader = new ConnectionReader(hostname, port, ui, dtdCache);
@@ -142,29 +142,9 @@ public class ConnectionManager implements QueryExecutionIF
 	/**
 	 * Get the dtd list
 	 */
-	public Vector getDTDList()
-		{
-			Vector dtds = reg.getDTDList();
-			
-//  			try{
-//  				URL url = new URL((String)dtds.elementAt(0));
-//  				DefaultMutableTreeNode n = generateXMLQLTree(url);
-//  				if(n != null) new JTreeShowThread(n);
-				
-//  				url = new URL((String)dtds.elementAt(1));
-//  				n = generateXMLQLTree(url);
-//  				if(n != null) new JTreeShowThread(n);
-
-//  				url = new URL((String)dtds.elementAt(0));
-//  				n = generateXMLQLTree(url);
-//  				if(n != null) new JTreeShowThread(n);
-//  			}
-//  			catch(Exception e){
-//  				e.printStackTrace();
-//  			}			
-
-			return dtds;
-		}
+    public Vector getDTDList() {
+	return reg.getDTDList();			
+    }
 
     public AbstractConnectionReader getConnectionReader() {
 	return connectionReader;

@@ -10,7 +10,7 @@ public class DisplayServlet extends HttpServlet {
     private static boolean doDebug = false;
 
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        try {
+        //try {
             debug("handling POST request");
             BufferedReader in = new BufferedReader(new InputStreamReader(
                 req.getInputStream()));
@@ -28,11 +28,6 @@ public class DisplayServlet extends HttpServlet {
             
             debug("request handled");
             System.exit(0);
-        }
-        catch (Exception e) {
-            cerr("An exception occured:");
-            e.printStackTrace();
-        }
     }
 
     public static void cerr(String msg) {

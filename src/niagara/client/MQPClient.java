@@ -59,25 +59,25 @@ public class MQPClient {
         InputSource is = null;
         try {
             is = new InputSource(new FileInputStream(qfname));
-        }
-        catch (Exception e) {
+	}
+	catch (Exception e) {
             cerr("Could not open file: " + qfname);
             System.exit(-1);
-        }
+	}
 
-        try {
+	try {
             parser.parse(is);
-        }
-        catch (Exception e) {
+	}
+	catch (Exception e) {
             cerr("Exception while parsing plan file: ");
             e.printStackTrace();
             System.exit(-1);
-        }
+	}
 
 
         Element plan = null;
         String query = "";
-        try {
+        //try {
             // Get document
             Document d = parser.getDocument();
             
@@ -101,12 +101,12 @@ public class MQPClient {
 
             // Get the query in string format
             query = XMLUtils.flatten(plan);
-        }
-        catch (Exception e) {
-            cerr("Exception while building plan:");
-            e.printStackTrace();
-            System.exit(-1);
-        }
+	    //}
+        //catch (Exception e) {
+	//  cerr("Exception while building plan:");
+	//  e.printStackTrace();
+	//  System.exit(-1);
+        //}
 
         startHTTPServer();
 
@@ -125,12 +125,12 @@ public class MQPClient {
             out.close();
             
             connection.getInputStream().close();
-        }
-          catch (Exception e) {
-              System.out.println("Exception while sending query to server:");
-              e.printStackTrace();
-              System.exit(-1);
-          }
+	}
+	catch (Exception e) {
+	    System.out.println("Exception while sending query to server:");
+	    e.printStackTrace();
+	    System.exit(-1);
+	}
     }
 
     public static void main(String args[]) {
@@ -149,16 +149,16 @@ public class MQPClient {
 	}
         
 
-        try {
+        //try {
             client_host = args[opt];
             client_port = Integer.parseInt(args[opt+1]);
             server_host = args[opt+2];
             server_port = Integer.parseInt(args[opt+3]);
             qfname = args[opt+4];
-        }
-        catch (Exception e) {
-            cerr("Error parsing arguments.");
-        }
+	    //}
+	    //catch (Exception e) {
+            //cerr("Error parsing arguments.");
+	    //}
 
        MQPClient c = new MQPClient(client_host, client_port, server_host, server_port, qfname);
        c.run();

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionReader.java,v 1.2 2000/07/09 05:40:21 vpapad Exp $
+  $Id: ConnectionReader.java,v 1.3 2002/05/07 03:10:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,6 +31,7 @@ package niagara.client;
 import com.microstar.xml.XmlParser;
 import java.net.*;
 import java.io.*;
+import niagara.utils.*;
 
 /**
  * This class establishes a connection with the server.
@@ -70,13 +71,12 @@ class ConnectionReader extends AbstractConnectionReader implements Runnable
 	    System.err.println("Parsing started");
 	    parser.parse(null, null, cReader);
 	    System.err.println("Parsing finished. Client Exiting.");
-	}
-	catch(EOFException e){
+	} catch(EOFException e){
 	    System.err.println("Server side ended the session");
 	    try {
 		socket.close();
-	    }
-	    catch(IOException ee) {
+	    } catch(IOException ee) {
+		System.out.println("Error closing socket");
 		ee.printStackTrace();
 	    }
 	    return;
@@ -84,11 +84,10 @@ class ConnectionReader extends AbstractConnectionReader implements Runnable
 	catch(SocketException e){
 	    System.err.println("Parser Closed down the socket");
 	    return;
+	} catch(Exception e) {
+	    throw new PEException("ConnectionReader: error parsing message from server - I think - KT");
 	}
-	catch(Exception e){
-	    e.printStackTrace();
-	    // Parser exceptions will be caught and handled here
-	}
+	
 	System.exit(0);
     }
 

@@ -121,7 +121,6 @@ public class SimpleClient implements UIDriverIF {
 		    query = query + line;
 		    line = br.readLine();
 		} while (line != null);
-
 		sc.processQuery(query);
 		return;
 

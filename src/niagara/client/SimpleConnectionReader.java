@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.7 2002/04/21 04:11:01 vpapad Exp $
+  $Id: SimpleConnectionReader.java,v 1.8 2002/05/07 03:10:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,6 +33,8 @@ import java.io.*;
 import java.util.Vector;
 
 import gnu.regexp.*;
+import niagara.utils.PEException;
+
 
 class SimpleConnectionReader extends AbstractConnectionReader 
     implements Runnable {
@@ -93,10 +95,17 @@ class SimpleConnectionReader extends AbstractConnectionReader
 		}
 	    } while (line != null);
 	}
-	catch(Exception e){
-	    System.err.println("An exception in the server connection");
-	    ui.errorMessage("An exception in the server connection");
-	    ui.notifyFinalResult(local_id);
+	catch(gnu.regexp.REException e){
+	    throw new PEException("Invalid response message reg exception " +
+			       e.getMessage());
+	    
+	} catch (java.io.IOException ioe) {
+	    System.err.println("Unable to read from server " + ioe.getMessage());
+	    ioe.printStackTrace();
+	    throw new PEException("Unable to read from server");
 	}
     }
 }
+
+
+
