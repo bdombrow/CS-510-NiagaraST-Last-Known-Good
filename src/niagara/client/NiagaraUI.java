@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagaraUI.java,v 1.3 2000/06/13 00:08:02 vpapad Exp $
+  $Id: NiagaraUI.java,v 1.4 2000/06/26 21:48:12 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -694,7 +694,11 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
 	       queryType.setQueryType("Trigger");
 	   }
 	   else
-	       if ( queryText.getText().indexOf("WHERE") != -1 ) {
+	       if ( queryText.getText().startsWith("<?xml")) {
+		   queryId = qeIF.executeQPQuery(queryText.getText(), getNResults);
+		   queryType.setQueryType("QP");
+	       }
+	       else if ( queryText.getText().toUpperCase().indexOf("WHERE") != -1 ) {
 		   queryId = qeIF.executeQuery(queryText.getText(), getNResults);
 		   queryType.setQueryType("XMLQL");
 	       }

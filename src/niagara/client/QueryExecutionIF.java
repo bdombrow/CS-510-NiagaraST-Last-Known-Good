@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryExecutionIF.java,v 1.1 2000/05/30 21:03:24 tufte Exp $
+  $Id: QueryExecutionIF.java,v 1.2 2000/06/26 21:48:12 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -62,6 +62,14 @@ public interface QueryExecutionIF
 	 * @return the id of the query in the registry
 	 */
 	public int executeTriggerQuery(String query, int n);
+
+        /**
+	 * Execute a query, with the specified query plan
+	 * @param s the query plan in XML format
+	 * @param n limit of initial results (after this hitting getnext is required)
+	 * @return the id of the query in the registry
+	 */
+         public int executeQPQuery(String query, int n);
 
 	/**
 	 * Execute a Search Engine  query

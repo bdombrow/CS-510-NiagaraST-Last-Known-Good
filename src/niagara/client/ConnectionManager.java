@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.1 2000/05/30 21:03:24 tufte Exp $
+  $Id: ConnectionManager.java,v 1.2 2000/06/26 21:48:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -54,6 +54,8 @@ public class ConnectionManager implements QueryExecutionIF
 	
 	public static final String EXECUTE_QE_QUERY = "execute_qe_query";
 	public static final String EXECUTE_TRIGGER_QUERY = "execute_trigger_query";
+	public static final String EXECUTE_QP_QUERY = "execute_qp_query";
+
 	public static final String EXECUTE_SE_QUERY = "execute_se_query";
 	public static final String KILL_QUERY = "kill_query";
 	public static final String GET_NEXT = "get_next";
@@ -258,6 +260,17 @@ public class ConnectionManager implements QueryExecutionIF
 		}
 
 	/**
+	 * Execute a query, with the specified query plan
+	 * @param s the query plan in XML format
+	 * @param n limit of initial results (after this hitting getnext is required)
+	 * @return the id of the query in the registry
+	 */
+	public int executeQPQuery(String query, int n)
+		{
+			return this.executeQuery(query, n, QueryType.QP, EXECUTE_QP_QUERY);
+		}
+
+	/**
 	 * Execute a Search Engine  query
 	 * @param s the query string
 	 * @param n limit of initial results (after this hitting getnext is required)
@@ -304,7 +317,7 @@ public class ConnectionManager implements QueryExecutionIF
 			// TODO wait for server qid to come accross.
 
 			//this.getNext(id, nResults);
-			if(queryType == QueryType.XMLQL){
+			if(queryType == QueryType.XMLQL || queryType == QueryType.QP){
 				final ConnectionManager cm = this;
 				final int nRes = nResults;
 				final int qid = id;
@@ -364,7 +377,7 @@ public class ConnectionManager implements QueryExecutionIF
 	public void suspendQuery(int id)
 		{
 			int queryType = reg.getQueryType(id);
-			if(queryType == QueryType.XMLQL){
+			if(queryType == QueryType.XMLQL || queryType == QueryType.QP){
 				writeMessage(id, SUSPEND_QUERY);
 			} else if(queryType == QueryType.TRIG){
 				reg.pauseTrigger(id);
@@ -379,7 +392,7 @@ public class ConnectionManager implements QueryExecutionIF
 	public void resumeQuery(int id)
 		{
 			int queryType = reg.getQueryType(id);
-			if(queryType == QueryType.XMLQL){
+			if(queryType == QueryType.XMLQL || queryType == QueryType.QP){
 				writeMessage(id, RESUME_QUERY);
 			} else if(queryType == QueryType.TRIG){
 				reg.resumeTrigger(id);
@@ -558,3 +571,5 @@ public class ConnectionManager implements QueryExecutionIF
 			
 		}	
 }
+
+
