@@ -1,3 +1,3 @@
 rm -rf CACHE/*
 rm -rf SYS/*
-java -Xmx384m -classpath `cat ../classpath` niagara.connection_server.NiagraServer $*
+java -Xmx192m -classpath `cat ../classpath` niagara.connection_server.NiagraServer $*
