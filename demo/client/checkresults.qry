@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<plan top="result" x="318" y="115">
+<dtdscan id="accum" x="247" y="645">
+<url value="LeagueStats.xml"></url>
+</dtdscan>
+<scan root="" type="element" regexp="LEAGUESYSTEM.LEAGUE.TEAM" id="team" input="accum" x="94" y="552">
+</scan>
+<scan root="" type="element" regexp="NAME" id="teamname" input="team" x="239" y="550">
+</scan>
+<scan root="$team" type="content" regexp="STATS.RUNSCORED" id="s_runscored" input="teamname" x="360" y="549">
+</scan>
+<scan root="$team" type="content" regexp="STATS.BASES" id="s_bases" input="s_runscored" x="478" y="551">
+</scan>
+<scan root="$team" type="content" regexp="STATS.STRIKEOUT" id="s_strikeout" input="s_bases" x="610" y="550">
+</scan>
+<scan root="$team" type="content" regexp="STATS.RUNALLOWED" id="s_runallowed" input="s_strikeout" x="437" y="481">
+</scan>
+<scan root="$team" type="content" regexp="STATS.WIN" id="s_win" input="s_runallowed" x="300" y="481">
+</scan>
+<scan root="$team" type="content" regexp="STATS.STEAL" id="s_steal" input="s_win" x="168" y="482">
+</scan>
+<expression class="niagara.query_engine.XMLBScoring" id="final_score" input="s_steal" x="325" y="377">
+</expression>
+<sort order="descending" sort_by="$final_score" comparison="numeric" id="sort" input="final_score" x="321" y="300">
+</sort>
+<construct clear="no" id="result" input="sort" x="320" y="217">
+<team>
+	$teamname
+	$final_score
+	</team>
+</construct>
+</plan>

@@ -94,8 +94,8 @@
 
 <construct id="top_cons" input="sort">
 <team>
-<name>$teamname</name>
-<points>$sum2</points>
+   <NAME>$teamname</NAME>
+   <score>$sum2</score>
 </team>
 </construct>
 
