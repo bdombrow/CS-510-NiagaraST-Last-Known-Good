@@ -32,11 +32,12 @@ public class XMLUtils {
 
     public static void flatten(Node n, StringBuffer sb,
                                boolean explode, boolean prettyprint) {
-        flatten(n, sb, explode, prettyprint, 0, true);
+        flatten(n, sb, explode, prettyprint, 0, true, true);
     }
 
     public static void flatten(Node n, StringBuffer sb, boolean explode,
-			       boolean prettyprint, int level, boolean onlychild) {
+			       boolean prettyprint, int level, boolean onlychild,
+			       boolean firstchild) {
 	short type = n.getNodeType();
         if (type == Node.ELEMENT_NODE) {
 	    if(prettyprint) {
@@ -76,23 +77,29 @@ public class XMLUtils {
 		    sb.append("\n");
 	    } else {
                 sb.append(">");
-		if(prettyprint) {
-		    if(nDecendents > 1 && prettyprint)
-			sb.append("\n");
-		}
 		if(nChildren == 1)
 		    onekid = true;
-                for (int i = 0; i < nChildren; i++)
-                    flatten(nl.item(i), sb, explode, prettyprint, level+1, onekid);
+		if(prettyprint) {
+		    if(prettyprint && nl.item(0) instanceof Element)
+			sb.append("\n");
+		}
+		boolean isfirstchild = true;
+                for (int i = 0; i < nChildren; i++) {
+                    flatten(nl.item(i), sb, explode, prettyprint, level+1, onekid,
+			    isfirstchild);
+		    isfirstchild = false;
+		}
 		if(nDecendents > 1 && prettyprint) {
 		    sb.append(indent[level]);
 		}
+		if(prettyprint && onekid && nl.item(0) instanceof Element)
+		    sb.append(indent[level]);
                 sb.append("</").append(n.getNodeName()).append(">");
 		if(prettyprint)
 		    sb.append("\n");
             }
         } else if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE) {
-	    if(prettyprint && !onlychild)
+	    if(prettyprint && !firstchild)
 		sb.append(indent[level]);
             sb.append(n.getNodeValue());
 	    if(prettyprint && !onlychild)
