@@ -339,7 +339,7 @@ public class MergeTree {
 			 * that doesn't cause a set result from findMatch
 			 */
 			nextAccumElt = nextMergeTreeNode.
-			    findUniqueMatch(accumElt, nextFragElt, false);
+			    findUniqueMatch(accumElt, nextFragElt, true);
 		    } else {
 			/* matching is based on tag name - by
 			 * definition of accumulate - there can only
