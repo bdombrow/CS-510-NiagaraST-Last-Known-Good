@@ -6,7 +6,8 @@ package niagara.firehose;
  */
 
 import java.io.*;
-import niagara.xmlql_parser.op_tree.StreamSpec;
+
+import niagara.logical.StreamSpec;
 
 // oh boy, this extension is ugly, but necessary, just don't
 // have the energy to do this properly right now
