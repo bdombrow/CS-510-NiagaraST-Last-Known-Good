@@ -68,7 +68,7 @@ class XMLListenerThread extends Thread {
     }
 
     private void create_firehose_pool() {
-	pool_size = 200;
+	pool_size = 5;
 	firehose_pool = new XMLFirehoseThread[pool_size];
 	String name;
 
