@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.18 2003/09/13 03:48:40 vpapad Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.19 2003/09/30 19:36:49 jinli Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -100,6 +100,10 @@
     <logical name="count"
       class="niagara.xmlql_parser.op_tree.CountOp">
       <physical name="PhysicalCount" class="niagara.query_engine.PhysicalCountOperator"/>
+    </logical>
+    <logical name="windowCount"
+      class="niagara.xmlql_parser.op_tree.windowCountOp">
+      <physical name="PhysicalWindowCount" class="niagara.query_engine.PhysicalWindowCountOperator"/>
     </logical>
     <logical name="slidingCount"
       class="niagara.xmlql_parser.op_tree.SlidingCountOp">
@@ -211,6 +215,10 @@
   		<before><logical name="count"/></before>
  		<after><op name="PhysicalCount"/></after>
   	</rule>
+	<rule type="simple" name="windowCount to PhysicalWindowCount">
+		<before><logical name="windowCount"/></before>
+		<after><op name="PhysicalWindowCount"/></after>
+	</rule>
   	<rule type="simple" name="slidingCount to PhysicalSlidingCount">
   		<before><logical name="slidingCount"/></before>
  		<after><op name="PhysicalSlidingCount"/></after>
