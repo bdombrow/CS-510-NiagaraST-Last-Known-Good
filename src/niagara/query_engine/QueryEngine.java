@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.14 2003/09/22 00:15:42 vpapad Exp $
+  $Id: QueryEngine.java,v 1.15 2003/09/26 21:19:32 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -104,9 +104,6 @@ public class QueryEngine {
         10, // Fetch threads
     5); // URL Threads
 
-        // Initialize the query id
-        lastQueryId = 0;
-
         // Create a vector for operators scheduled for execution
         opQueue = new PhysicalOperatorQueue(maxOperators);
 
@@ -154,7 +151,7 @@ public class QueryEngine {
         ServerQueryInfo sqi,
         String query) {
         // Get the next qid
-        int qid = CUtil.getNextQueryId();
+        int qid = getNextQueryId();
 
         // Generate the output stream
         PageStream resultStream = new PageStream("To QueryResult");
@@ -203,7 +200,7 @@ public class QueryEngine {
         throws ShutdownException {
 
         // Get the next qid
-        int qid = CUtil.getNextQueryId();
+        int qid = getNextQueryId();
 
         // Generate the output streams for each query root
         PageStream resultStream = new PageStream("To Query Result");
@@ -241,16 +238,6 @@ public class QueryEngine {
         } catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
             assert false : "Error in Assigning Unique Query Ids!";
         }
-    }
-
-    /**
-     *  Get the DTD list from DM (which contacts ther YP if list is not cached)
-     * 
-     */
-    public Vector getDTDList() {
-        Vector ret = null;
-        ret = dataManager.getDTDList();
-        return ret;
     }
 
     /**
@@ -321,11 +308,15 @@ public class QueryEngine {
         return dataManager;
     }
 
-    public void enqueueQuery(QueryInfo queryInfo) {
-        queryQueue.addQuery(queryInfo);
-    }
-
     public ExecutionScheduler getScheduler() {
         return scheduler;
+    }
+
+    /**
+     *  getNextQueryId() - Increments and returns the next unique queryId
+     *  @return int - the next query id
+     */
+    private int getNextQueryId() { 
+        return lastQueryId++; 
     }
 }
