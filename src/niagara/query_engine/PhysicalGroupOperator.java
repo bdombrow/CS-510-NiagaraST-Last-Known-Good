@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.27 2003/07/27 02:35:16 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.28 2003/12/06 06:44:58 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -83,7 +83,11 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
             this.partialResultId = currPartialResultId;
 
             // Initialize the representative tuple
-            this.representativeTuple = representativeTuple;
+            //this.representativeTuple = representativeTuple;
+            
+            // to support window aggregates
+            this.representativeTuple = (StreamTupleElement) representativeTuple.clone();
+
         }
 
         /**
