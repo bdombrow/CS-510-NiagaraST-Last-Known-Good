@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestParser.java,v 1.10 2003/03/08 00:57:05 vpapad Exp $
+  $Id: RequestParser.java,v 1.11 2003/07/03 19:35:22 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -117,7 +117,7 @@ public class RequestParser extends HandlerBase implements Runnable {
 	     // do nothing, this is the first tag
 	 } else if (currentMesg == null) {
 	     // REQUEST MESSAGE tag should come first - this is just for debugging
-	     throw new PEException("KT - think this shouldn't happen RequestParser::startElement. Element tag is " + name);
+	     assert false : "KT - think this shouldn't happen RequestParser::startElement. Element tag is " + name;
 	 }
      }
 

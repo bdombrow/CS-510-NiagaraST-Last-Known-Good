@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.23 2003/03/12 22:43:39 tufte Exp $
+  $Id: RequestHandler.java,v 1.24 2003/07/03 19:35:22 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -66,6 +66,7 @@ public class RequestHandler {
 
     private XMLQueryPlanParser xqpp;
     private Optimizer optimizer;
+    private CPUTimer cpuTimer;
 
     /**Constructor
        @param sock The socket to read from 
@@ -134,6 +135,13 @@ public class RequestHandler {
             ShutdownException,
             IOException {
         Plan plan, optimizedPlan;
+
+	if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+	    if(cpuTimer == null)
+		cpuTimer = new CPUTimer();
+	    cpuTimer.start();
+	}
+
         // Handle the request according to requestType
         switch (request.getIntRequestType()) {
             //   EXECUTE_QUERY request
@@ -147,7 +155,8 @@ public class RequestHandler {
                 } catch (Exception e) {
                     System.err.println(
                         "XXX vpapad: exception occured during optimization");
-                    e.printStackTrace();
+		    e.printStackTrace();
+                    assert false;
                 }
                 xqpp.clear();
                 processQPQuery(optimizedPlan, request);
@@ -377,6 +386,12 @@ public class RequestHandler {
                     "ConnectionThread: INVALID_REQUEST "
                         + request.getIntRequestType());
         }
+
+	if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+	    cpuTimer.stop();
+	    cpuTimer.print("HandleRequest (" + request.requestType +")");
+	}
+
     }
 
     private void processQPQuery(Plan plan, RequestMessage request)

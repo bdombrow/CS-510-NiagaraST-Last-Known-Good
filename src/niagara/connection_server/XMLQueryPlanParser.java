@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.42 2003/03/07 23:41:11 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.43 2003/07/03 19:35:22 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -57,8 +57,8 @@ public class XMLQueryPlanParser {
         niagara.ndom.DOMParser p;
         Document document = null;
         try {
-            // p = DOMFactory.newValidatingParser(); // XXX vpapad TODO: do we want this?
-            p = DOMFactory.newParser();
+	    p = DOMFactory.newValidatingParser(); // XXX vpapad TODO: do we want this?
+            //p = DOMFactory.newParser();
             p.parse(
                 new InputSource(
                     new ByteArrayInputStream(description.getBytes())));
@@ -173,6 +173,7 @@ public class XMLQueryPlanParser {
             inputProperties[i] =
                 (LogicalProperty) ids2logprops.get(inputs.get(i));
         operator.loadFromXML(e, inputProperties);
+	operator.setId(id); // KT - for debugging/profiling output
         Plan[] inputPlans = new Plan[arity];
         for (int i = 0; i < arity; i++)
             inputPlans[i] = (Plan) ids2plans.get(inputs.get(i));

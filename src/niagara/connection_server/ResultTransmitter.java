@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.21 2003/03/12 22:43:39 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.22 2003/07/03 19:35:22 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,9 +76,9 @@ public class ResultTransmitter implements Runnable {
     private boolean prettyprint = true;
     private boolean timedOut = false; // true if last get timed out
     private boolean killThread = false;
+    private CPUTimer cpuTimer;
 
-    public static boolean QUIET = false;
-    
+    public static boolean QUIET = false;    
     /** Constructor
 	@param handler The request handler that created this transmitter
 	@param queryInfo The info about the query to be executed
@@ -100,6 +100,12 @@ public class ResultTransmitter implements Runnable {
 
     public void run() {
 	try {
+	    if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+		if(cpuTimer == null)
+		    cpuTimer = new CPUTimer();
+		cpuTimer.start();
+	    }
+
 	    if (queryInfo.isSEQuery()) 
 		handleSEQuery();
 	    else if(queryInfo.isQEQuery())
@@ -110,6 +116,18 @@ public class ResultTransmitter implements Runnable {
 		handleAccumQuery();
 	    else 
 		throw new PEException("Invalid query type");
+
+	    if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+		cpuTimer.stop();
+		cpuTimer.print("ResultTransmitter ");
+	    }	    
+
+	    if(NiagraServer.RUNNING_NIPROF) {
+		System.out.println("KT requesting data dump");
+		System.gc();
+		JProf.requestDataDump();
+	    }
+
 	} catch (ShutdownException se) {
 	    // send error message to client...
 	    response = 
@@ -330,8 +348,9 @@ public class ResultTransmitter implements Runnable {
 		    response = 
 			new ResponseMessage(request,
 					    ResponseMessage.QUERY_RESULT);
-		    response.appendData(getResultData(resultObject, 
-						      prettyprint));
+		    if(!QUIET)
+			response.appendData(getResultData(resultObject, 
+							  prettyprint));
 		    handler.sendResponse(response);
 		}
 	    }
