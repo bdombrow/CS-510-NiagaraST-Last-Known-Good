@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalExpression.java,v 1.1 2003/12/24 01:49:01 vpapad Exp $
+  $Id: PhysicalExpression.java,v 1.2 2003/12/24 02:54:13 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -71,7 +71,7 @@ public class PhysicalExpression extends PhysicalOperator {
             try {
 
                 String source =
-                    "package; import niagara.physical.TupleSchema; import niagara.utils.XMLUtils; import java.util.*; import niagara.ndom.*; import org.w3c.dom.*;  public class UserExpression extends XMLUtils implements "
+                    "package; import niagara.query_engine.TupleSchema; import niagara.utils.XMLUtils; import java.util.*; import niagara.ndom.*; import org.w3c.dom.*;  public class UserExpression extends XMLUtils implements "
                         + " niagara.logical.ExpressionIF {\n"
                         + "org.w3c.dom.Document doc = niagara.ndom.DOMFactory.newDocument();"
                          + " public void setupSchema(TupleSchema ts) {};\n"
