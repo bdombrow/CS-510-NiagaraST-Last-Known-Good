@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.44 2003/07/09 04:59:40 tufte Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.45 2003/09/16 05:05:04 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -56,8 +56,7 @@ public class XMLQueryPlanParser {
         niagara.ndom.DOMParser p;
         Document document = null;
         try {
-	    p = DOMFactory.newValidatingParser(); // XXX vpapad TODO: do we want this?
-            //p = DOMFactory.newParser();
+            p = DOMFactory.newValidatingParser(); 
             p.parse(
                 new InputSource(
                     new ByteArrayInputStream(description.getBytes())));

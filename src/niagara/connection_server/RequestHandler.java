@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.28 2003/08/01 16:57:55 tufte Exp $
+  $Id: RequestHandler.java,v 1.29 2003/09/16 05:05:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -375,7 +375,7 @@ public class RequestHandler {
         int qid = getNextConnServerQueryId();
 
         request.serverID = qid;
-	
+
 	boolean isSynchronous =
             (request.getIntRequestType() == RequestMessage.SYNCHRONOUS_QP_QUERY);
 

@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.9 2003/03/07 23:41:11 vpapad Exp $
+ * $Id: Catalog.java,v 1.10 2003/09/16 05:05:04 vpapad Exp $
  *
  */
 
@@ -28,10 +28,15 @@ public class Catalog implements ICatalog {
     // This primitive Catalog maintains a mapping from URNs to URLs, 
     // or location of servers that know to resolve the URNs
 
-    Hashtable urn2urls; // locally resolvable
-    Hashtable urn2resolvers;
+    private Hashtable urn2urls; // locally resolvable
+    private Hashtable urn2resolvers;
 
-    HashMap parameters; // Columbia cost model parameters
+    private HashMap parameters; // Columbia cost model parameters
+
+    /** Cache for double parameters lookups */
+    private HashMap doubleParams;
+    /** Cache for int parameters lookups */
+    private HashMap intParams;
 
     // Operator name <-> class mapping
     private HashMap name2class;
@@ -127,7 +132,8 @@ public class Catalog implements ICatalog {
             loadParameters(root, "config");
             loadRules(root);
         } catch (FileNotFoundException e) {
-            throw new ConfigurationError("Catalog file not found: " + e.getMessage());
+            throw new ConfigurationError(
+                "Catalog file not found: " + e.getMessage());
         } catch (org.xml.sax.SAXException se) {
             throw new PEException(
                 "Error parsing catalog file " + se.getMessage());
@@ -165,7 +171,7 @@ public class Catalog implements ICatalog {
             // Physical ops with no logical counterpart
             if (e.getTagName().equals("physical"))
                 continue;
-                
+
             ArrayList al = new ArrayList();
             NodeList physical = e.getChildNodes();
             for (int j = 0; j < physical.getLength(); j++) {
@@ -253,13 +259,13 @@ public class Catalog implements ICatalog {
                     rules.add(SimpleRule.fromXML(e, this));
                 else if (typeName.equals("custom")) {
                     rules.add(CustomRule.fromXML(e, this));
-                }
-                else if (typeName.equals("constructed")) {
+                } else if (typeName.equals("constructed")) {
                     rules.add(ConstructedRule.fromXML(e, this));
                 }
             }
             rulesets.put(name, rules);
-            NiagraServer.info("Loaded " + rules.size() + " optimizer rules for the " + name);
+            NiagraServer.info(
+                "Loaded " + rules.size() + " optimizer rules for the " + name);
         }
     }
 
@@ -310,6 +316,8 @@ public class Catalog implements ICatalog {
                 continue;
             Element e = (Element) n;
             parameters.put(e.getTagName(), e.getAttribute("value"));
+            intParams = new HashMap();
+            doubleParams = new HashMap();
         }
     }
 
@@ -334,13 +342,28 @@ public class Catalog implements ICatalog {
     }
 
     public int getInt(String param) {
-        String s = (String) parameters.get(param);
-        return Integer.parseInt(s);
+        Integer val;
+        if (intParams.containsKey(param)) {
+            val = (Integer) intParams.get(param);
+            return val.intValue();
+        } else {
+            String s = (String) parameters.get(param);
+            val = Integer.valueOf(s);
+            intParams.put(param, val);
+            return val.intValue();
+        }
     }
 
     public double getDouble(String param) {
-        String s = (String) parameters.get(param);
-        return Double.parseDouble(s);
+        Double val;
+        if (doubleParams.containsKey(param)) {
+            val = (Double) doubleParams.get(param);
+        } else {
+            String s = (String) parameters.get(param);
+            val = Double.valueOf(s);
+            doubleParams.put(param, val);
+        }
+        return val.doubleValue();
     }
 
     private String mustHaveAttribute(Element e, String attrName) {
