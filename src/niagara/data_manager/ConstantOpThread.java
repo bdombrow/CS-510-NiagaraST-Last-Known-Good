@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOpThread.java,v 1.6 2002/09/27 01:25:28 vpapad Exp $
+ * $Id: ConstantOpThread.java,v 1.7 2002/10/31 03:26:48 vpapad Exp $
  *
  */
 
@@ -18,18 +18,30 @@ import org.xml.sax.*;
 
 import niagara.query_engine.*;
 import niagara.utils.*;
+import niagara.xmlql_parser.op_tree.ConstantOp;
+import niagara.connection_server.NiagraServer;
 import niagara.ndom.*;
+import niagara.optimizer.colombia.*;
 
-public class ConstantOpThread implements Runnable {
+public class ConstantOpThread extends SourceThread {
+    // Optimization-time attributes
+    private Attrs vars;
+    
     private SinkTupleStream outputStream;
 
     private String content;
 
-    public ConstantOpThread(String content, SinkTupleStream outStream) {
+    public ConstantOpThread() {};
+    
+    public ConstantOpThread(String content, Attrs vars) {
 	this.content = content;
-	outputStream = outStream;
+        this.vars = vars;
     }
 
+    public void plugIn(SinkTupleStream outputStream, DataManager dm) {
+        this.outputStream = outputStream;
+    }
+    
     /**
      * Thread run method
      *
@@ -79,7 +91,8 @@ public class ConstantOpThread implements Runnable {
 	    parser.parse(new InputSource(new ByteArrayInputStream(content.getBytes())));
 	    Document doc = parser.getDocument();
 
-
+            // XXX vpapad: change this to niagara:tuplestream or something
+            // like that        
             if (doc.getDocumentElement().getTagName().equals("stream")) {
                 Hashtable elements = new Hashtable();
                 processStreamDoc(doc.getDocumentElement(), elements);
@@ -130,6 +143,81 @@ public class ConstantOpThread implements Runnable {
                 }
             }
         }
+    }
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
+     */
+    public Cost findLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] InputLogProp) {
+        return new Cost(catalog.getDouble("document_parsing_cost") +
+                        1*catalog.getDouble("tuple_construction_cost"));
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
+     */
+    public void initFrom(LogicalOp op) {
+        ConstantOp cop = (ConstantOp) op;
+        this.vars = cop.getVars();
+        this.content = cop.getContent();
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+        return new ConstantOpThread(content, vars);
+    }
+
+    public int hashCode() {
+        return content.hashCode() ^ vars.hashCode();
+    }
+    
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof ConstantOpThread)) return false;
+        if (o.getClass() != getClass()) return o.equals(this);
+        return content.equals(((ConstantOpThread) o).content)
+               && vars.equals(((ConstantOpThread) o).vars);
+    }
+
+    /**
+     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
+     */
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        // Do nothing
+    }
+
+    /**
+     * @see niagara.query_engine.SchemaProducer#getTupleSchema()
+     */
+    public TupleSchema getTupleSchema() {
+        TupleSchema ts = new TupleSchema();
+        ts.addMappings(vars);
+        return ts;
+    }
+    
+    /**
+     * @see niagara.utils.SerializableToXML#dumpAttributesInXML(StringBuffer)
+     */
+    public void dumpAttributesInXML(StringBuffer sb) {
+        if (vars.size() == 0) {
+            sb.append(">");
+            return;
+        }
+        sb.append(" vars='").append(vars.get(0).getName());
+        
+        for (int i = 1; i < vars.size(); i++) 
+            sb.append(",").append(vars.get(i).getName());
+     
+        sb.append("'>");   
+    }
+
+    /**
+     * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
+     */
+    public void dumpChildrenInXML(StringBuffer sb) {
+        sb.append(content).append("</").append(getName()).append(">");
     }
 }
 

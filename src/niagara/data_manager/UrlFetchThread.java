@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: UrlFetchThread.java,v 1.5 2002/05/07 03:10:49 tufte Exp $
+  $Id: UrlFetchThread.java,v 1.6 2002/10/31 03:26:48 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,7 +55,6 @@ public class UrlFetchThread implements Runnable {
         hCache = hc;
 	thread = new Thread(this);
 	thread.start();	
-	return;
     }
 
     /**

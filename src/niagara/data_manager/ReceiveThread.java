@@ -1,5 +1,5 @@
 /**
- * $Id: ReceiveThread.java,v 1.4 2002/05/07 03:10:49 tufte Exp $
+ * $Id: ReceiveThread.java,v 1.5 2002/10/31 03:26:48 vpapad Exp $
  *
  */
 
@@ -21,10 +21,12 @@ import java.util.*;
 import niagara.query_engine.*;
 import niagara.utils.*;
 import niagara.ndom.*;
+import niagara.optimizer.colombia.Op;
 
 import niagara.xmlql_parser.op_tree.ReceiveOp;
 
-public class ReceiveThread implements Runnable {
+//  XXX vpapad: hack to get CVS to compile
+public class ReceiveThread /* extends SourceThread */{
     private SinkTupleStream outputStream;
 
     private ReceiveOp op;
@@ -127,7 +129,7 @@ public class ReceiveThread implements Runnable {
 
     Hashtable elements = new Hashtable();
 
-    // XXX Must unify with eqv in ConstantOpThread
+    // XXX vpapad: Must unify with eqv in ConstantOpThread
     void processStreamDoc(Element root, Hashtable elements) {
         Stack toCheck = new Stack();
         toCheck.push(root);
@@ -155,7 +157,6 @@ public class ReceiveThread implements Runnable {
             }
         }
     }
-
 }
 
 

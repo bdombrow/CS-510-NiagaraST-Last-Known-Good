@@ -55,7 +55,7 @@ public class DTDThread extends SourceThread {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
      */
-    public Cost FindLocalCost(
+    public Cost findLocalCost(
         ICatalog catalog,
         LogicalProperty[] InputLogProp) {
         // XXX vpapad: assume constant parsing cost per document

@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.18 2002/10/26 04:26:23 vpapad Exp $
+ * $Id: StreamThread.java,v 1.19 2002/10/31 03:26:48 vpapad Exp $
  */
 
 package niagara.data_manager;
@@ -376,7 +376,7 @@ public class StreamThread extends SourceThread {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
      */
-    public Cost FindLocalCost(
+    public Cost findLocalCost(
         ICatalog catalog,
         LogicalProperty[] InputLogProp) {
         // XXX vpapad: totally bogus flat cost for stream scans
@@ -389,7 +389,7 @@ public class StreamThread extends SourceThread {
     public boolean equals(Object o) {
         if (o == null || !(o instanceof StreamThread)) return false;
         if (o.getClass() != getClass()) return o.equals(this);
-        // XXX vpapad: spec's equals is Object.equals()
+        // XXX vpapad: Spec.equals is Object.equals
         return spec.equals(((StreamThread) o).spec);
     }
 
@@ -408,6 +408,20 @@ public class StreamThread extends SourceThread {
         StreamThread st = new StreamThread();
         st.spec = spec;
         return st;
+    }
+    
+    /**
+     * @see niagara.utils.SerializableToXML#dumpAttributesInXML(StringBuffer)
+     */
+    public void dumpAttributesInXML(StringBuffer sb) {
+        // XXX vpapad: write this!
+    }
+
+    /**
+     * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
+     */
+    public void dumpChildrenInXML(StringBuffer sb) {
+        // XXX vpapad: write this!
     }
 }
 
