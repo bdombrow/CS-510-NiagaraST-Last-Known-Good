@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestMessage.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: RequestMessage.java,v 1.2 2000/06/26 22:14:55 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,6 +44,8 @@ public class RequestMessage {
     static final int GET_DTD_LIST = 7;
     static final int GET_PARTIAL = 8;
     static final int GET_DTD = 9;
+    // Execute a prepared query plan, described in XML
+    static final int EXECUTE_QP_QUERY = 10; 
 
     String requestType;
     int serverID;
@@ -74,6 +76,8 @@ public class RequestMessage {
 	case GET_DTD_LIST:this.requestType = "get_dtd_list";break;
 	case GET_PARTIAL:this.requestType = "get_partial";break;
 	case GET_DTD:this.requestType = "get_dtd";break;
+	case EXECUTE_QP_QUERY: this.requestType = "execute_qp_query";break;
+
 	default: throw new InvalidRequestTypeException();
 	}
     }
@@ -102,6 +106,8 @@ public class RequestMessage {
 	    intRequestType = GET_PARTIAL;
 	if (requestType.equals("get_dtd"))
 	    intRequestType = GET_DTD;
+	if (requestType.equals("execute_qp_query"))
+	    intRequestType = EXECUTE_QP_QUERY;
 	return intRequestType;
     }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: RequestHandler.java,v 1.2 2000/06/26 22:14:55 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,6 +33,7 @@ import java.util.*;
 import java.net.*;
 import niagara.query_engine.*;
 import niagara.trigger_engine.*;
+import niagara.xmlql_parser.op_tree.logNode;
 
 /**There is one request handler per client and receives all the requests from that client
    Then that request is further dispatched to the appropriate module and results sent back
@@ -95,6 +96,34 @@ public class RequestHandler {
 	    switch(request.getIntRequestType()){
 	    //   EXECUTE_QUERY request
 	    //-------------------------------------
+	    case RequestMessage.EXECUTE_QP_QUERY:
+		{
+		    // assign a new query id to this request
+		    int qid = getNextQueryId();
+
+		    XMLQueryPlanParser xp = new XMLQueryPlanParser();
+		    logNode topNode = xp.parse(request.requestData);
+		
+		    QueryResult qr = 
+			server.qe.executeOptimizedQuery(topNode);
+		    
+		    request.serverID = qid;
+		    
+		    // create and populate the query info
+		    ServerQueryInfo queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.QueryEngine);
+		    queryInfo.queryResult = qr;
+		    queryList.put(qid,queryInfo);
+
+		    // start the transmitter thread for sending results back
+		    queryInfo.transmitter = 
+			new ResultTransmitter(this,queryInfo,request);
+
+		
+		    //send the query ID out
+		    sendQueryId(request);
+		}
+		break;
+
 	    case RequestMessage.EXECUTE_QE_QUERY:
 		
 		// assign a new query id to this request
@@ -117,7 +146,6 @@ public class RequestHandler {
 		
 		//send the query ID out
 		sendQueryId(request);
-
 		break;
 	    
 
