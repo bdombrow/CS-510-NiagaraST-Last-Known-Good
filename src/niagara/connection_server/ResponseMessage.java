@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.7 2003/01/25 20:56:39 tufte Exp $
+  $Id: ResponseMessage.java,v 1.8 2003/03/07 20:59:07 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -86,7 +86,8 @@ class ResponseMessage
         responseData.append(moreData);
     }
     
-    public void appendResultData(QueryResult.ResultObject ro, boolean prettyprint) {
+    public void appendResultData(QueryResult.ResultObject ro, 
+				 boolean prettyprint) {
         // XXX vpapad: really, really ugly
         Node node = (Node) ro.result;
         if (node instanceof NodeImpl) {

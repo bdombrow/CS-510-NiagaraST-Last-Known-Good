@@ -1,15 +1,21 @@
-/* $Id: Predicate.java,v 1.3 2002/12/10 01:21:22 vpapad Exp $ */
+/* $Id: Predicate.java,v 1.4 2003/03/07 20:59:38 tufte Exp $ */
 package niagara.logical;
 
 import java.util.*;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import niagara.optimizer.colombia.Attrs;
+import niagara.optimizer.colombia.LogicalProperty;
 import niagara.query_engine.PredicateImpl;
 import niagara.utils.CUtil;
 import niagara.utils.PEException;
 import niagara.xmlql_parser.syntax_tree.condition;
 import niagara.xmlql_parser.syntax_tree.schemaAttribute;
 import niagara.xmlql_parser.syntax_tree.varTbl;
+import niagara.xmlql_parser.syntax_tree.opType;
+import niagara.connection_server.InvalidPlanException;
 
 abstract public class Predicate implements condition {
     /** Get an implementation for this predicate */
@@ -119,4 +125,88 @@ abstract public class Predicate implements condition {
             var.setSA(sa);
         }
     }
+
+    // XXX This code should be rewritten to take advantage of 
+    // XXX getName and getCode in opType KT - done
+    public static Predicate loadFromXML(Element e,
+					LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+    
+	if (e == null)
+	    return True.getTrue();
+	
+        Element l, r;
+        l = r = null;
+
+        Node c = e.getFirstChild();
+        do {
+            if (c.getNodeType() == Node.ELEMENT_NODE) {
+                if (l == null)
+                    l = (Element) c;
+                else if (r == null)
+                    r = (Element) c;
+            }
+            c = c.getNextSibling();
+        } while (c != null);
+
+        if (e.getNodeName().equals("and")) {
+            Predicate left = loadFromXML(l, inputProperties);
+            Predicate right = loadFromXML(r, inputProperties);
+
+            return new And(left, right);
+        } else if (e.getNodeName().equals("or")) {
+            Predicate left = loadFromXML(l, inputProperties);
+            Predicate right = loadFromXML(r, inputProperties);
+
+            return new Or(left, right);
+        } else if (e.getNodeName().equals("not")) {
+            Predicate child = loadFromXML(l, inputProperties);
+
+            return new Not(child);
+        } else { // Relational operator
+            Atom left = parseAtom(l, inputProperties);
+            Atom right = parseAtom(r, inputProperties);
+	    
+	    int type = opType.getCode(e.getAttribute("op"));
+	    if(type == opType.UNDEF) {
+                throw new InvalidPlanException(
+                    "Unrecognized predicate op: " + e.getAttribute("op"));
+	    }
+
+            return Comparison.newComparison(type, left, right);
+            // XXX vpapad: removed various toVarList @#$@#,
+            // supposed to help in toXML. Test it!
+        }
+    }
+
+    // assume leftv is 0 and rightv is 1
+    private static Atom parseAtom(Element e, 
+				  LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+
+	LogicalProperty left = inputProperties[0];
+	LogicalProperty right = null;
+	if(inputProperties.length == 2)
+	    right = inputProperties[1];
+
+        if (e.getNodeName().equals("number"))
+            return new NumericConstant(e.getAttribute("value"));
+        else if (e.getNodeName().equals("string"))
+            return new StringConstant(e.getAttribute("value"));
+        else { //var 
+            String varname = e.getAttribute("value");
+            // chop initial $ sign off
+            if (varname.charAt(0) == '$')
+                varname = varname.substring(1);
+            Variable v = (Variable) left.getAttr(varname);
+            if (v == null)
+                v = (Variable) right.getAttr(varname);
+            if (v != null)
+                return v;
+            else
+                throw new InvalidPlanException(
+                    "Unknown variable name: " + varname);
+        }
+    }
+
 }

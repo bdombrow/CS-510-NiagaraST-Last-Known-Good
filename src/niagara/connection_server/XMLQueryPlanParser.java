@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.40 2003/03/03 08:23:13 tufte Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.41 2003/03/07 20:59:07 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -146,8 +146,8 @@ public class XMLQueryPlanParser {
         // create a Plan for this operator
         if (nodeName.equals("unnest")) {
             handleUnnest(e);
-        } else if (nodeName.equals("select")) {
-            handleSelect(e);
+	    /*} else if (nodeName.equals("select")) {
+	      handleSelect(e); */
         } else if (nodeName.equals("sort")) {
             handleSort(e);
         } else if (nodeName.equals("join")) {
@@ -356,7 +356,7 @@ public class XMLQueryPlanParser {
             id,
             op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
-
+    /*
     void handleSelect(Element e) throws InvalidPlanException {
         String id = e.getAttribute("id");
         String inputAttr = e.getAttribute("input");
@@ -382,12 +382,9 @@ public class XMLQueryPlanParser {
             id,
             op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
-
+    */
     void handleUnion(Element e, Vector inputs) throws InvalidPlanException {
         String id = e.getAttribute("id");
-
-        UnionOp op = new UnionOp();
-        op.setArity(inputs.size());
 
         Plan[] input_arr = new Plan[inputs.size()];
         LogicalProperty[] inputLogProps = new LogicalProperty[inputs.size()];
@@ -398,6 +395,9 @@ public class XMLQueryPlanParser {
             if (inputLogProps[i].getDegree() != inputLogProps[0].getDegree())
                 throw new InvalidPlanException("Union inputs are not union-compatible");
         }
+
+        UnionOp op = new UnionOp();
+        op.setArity(inputs.size());
 
         Plan node = new Plan(op, input_arr);
         ids2plans.put(id, node);
@@ -481,7 +481,9 @@ public class XMLQueryPlanParser {
             }
         }
 
-        Predicate pred = parsePreds(predElt, leftLogProp, rightLogProp);
+	LogicalProperty[] logProps = 
+	    new LogicalProperty[] {leftLogProp, rightLogProp};
+        Predicate pred = Predicate.loadFromXML(predElt, logProps);
 
         // In case of an equijoin we have to parse "left" 
         // and "right" to get additional equality predicates
@@ -1211,97 +1213,6 @@ public class XMLQueryPlanParser {
         ids2logprops.put(
             id,
             op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
-    }
-
-    // XXX This code should be rewritten to take advantage of 
-    // XXX getName and getCode in opType
-    Predicate parsePreds(
-        Element e,
-        LogicalProperty leftv,
-        LogicalProperty rightv)
-        throws InvalidPlanException {
-        if (e == null)
-            return True.getTrue();
-
-        Element l, r;
-        l = r = null;
-
-        Node c = e.getFirstChild();
-        do {
-            if (c.getNodeType() == Node.ELEMENT_NODE) {
-                if (l == null)
-                    l = (Element) c;
-                else if (r == null)
-                    r = (Element) c;
-            }
-            c = c.getNextSibling();
-        } while (c != null);
-
-        if (e.getNodeName().equals("and")) {
-            Predicate left = parsePreds(l, leftv, rightv);
-            Predicate right = parsePreds(r, leftv, rightv);
-
-            return new And(left, right);
-        } else if (e.getNodeName().equals("or")) {
-            Predicate left = parsePreds(l, leftv, rightv);
-            Predicate right = parsePreds(r, leftv, rightv);
-
-            return new Or(left, right);
-        } else if (e.getNodeName().equals("not")) {
-            Predicate child = parsePreds(l, leftv, rightv);
-
-            return new Not(child);
-        } else { // Relational operator
-            Atom left = parseAtom(l, leftv, rightv);
-            Atom right = parseAtom(r, leftv, rightv);
-
-            int type;
-            String op = e.getAttribute("op");
-
-            if (op.equals("lt"))
-                type = opType.LT;
-            else if (op.equals("gt"))
-                type = opType.GT;
-            else if (op.equals("le"))
-                type = opType.LEQ;
-            else if (op.equals("ge"))
-                type = opType.GEQ;
-            else if (op.equals("ne"))
-                type = opType.NEQ;
-            else if (op.equals("eq"))
-                type = opType.EQ;
-            else if (op.equals("contain"))
-                type = opType.CONTAIN;
-            else
-                throw new InvalidPlanException(
-                    "Unrecognized predicate op: " + op);
-
-            return Comparison.newComparison(type, left, right);
-            // XXX vpapad: removed various toVarList @#$@#,
-            // supposed to help in toXML. Test it!
-        }
-    }
-
-    Atom parseAtom(Element e, LogicalProperty left, LogicalProperty right)
-        throws InvalidPlanException {
-        if (e.getNodeName().equals("number"))
-            return new NumericConstant(e.getAttribute("value"));
-        else if (e.getNodeName().equals("string"))
-            return new StringConstant(e.getAttribute("value"));
-        else { //var 
-            String varname = e.getAttribute("value");
-            // chop initial $ sign off
-            if (varname.charAt(0) == '$')
-                varname = varname.substring(1);
-            Variable v = (Variable) left.getAttr(varname);
-            if (v == null)
-                v = (Variable) right.getAttr(varname);
-            if (v != null)
-                return v;
-            else
-                throw new InvalidPlanException(
-                    "Unknown variable name: " + varname);
-        }
     }
 
     public ArrayList getRemotePlans() {
