@@ -62,8 +62,9 @@ public class SimpleClient implements UIDriverIF {
 	synchronized(this) {
 	    m_stop = System.currentTimeMillis();
 	    notify();
-            if (!silent)
+            if (!silent && m_start != 0) {
                 System.err.println("Total time: " + (m_stop - m_start) + "ms.");
+	    }
 	}
     }
     
@@ -83,7 +84,11 @@ public class SimpleClient implements UIDriverIF {
 	    // Wake up main thread which is holding the mutex on this 
 	    // object, must wake up otherwise we deadlock in queryDone
 	    // main thread may be waiting to get the server id
-	    cm.queryError(id);
+
+	    // note we may get an error during creation of connection
+	    // manager, if so, don't report the query error
+	    if(cm != null)
+		cm.queryError(id);
 	    queryDone(); // prints time used
 	}
         else {
