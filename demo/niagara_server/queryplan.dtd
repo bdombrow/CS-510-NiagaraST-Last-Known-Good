@@ -14,6 +14,7 @@
                     dtdscan | filescan | constant | resource | 
 		    firehosescan | accumulate | 
                     expression | send | display | topn |
+	            incrmax | incravg | 
 		    sort | dup | union)+>
 
 <!ATTLIST plan top IDREF        #REQUIRED
@@ -77,6 +78,19 @@
 <!ATTLIST count 
 	  groupby  CDATA	       #REQUIRED
 	  countattr  CDATA	       #REQUIRED
+	  %StandardAttributes;>
+
+<!ELEMENT incrmax     EMPTY>
+<!ATTLIST incrmax 
+	  groupby  CDATA	       #REQUIRED
+	  maxattr  CDATA	       #REQUIRED
+	  emptygroupvalue  CDATA       #REQUIRED
+	  %StandardAttributes;>
+
+<!ELEMENT incravg     EMPTY>
+<!ATTLIST incravg 
+	  groupby  CDATA	       #REQUIRED
+	  avgattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT select  (and | or | not | pred)>
