@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.5 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.6 2002/08/18 17:38:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -146,8 +146,7 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 	// Construct the result as per the template for the tuple
 	//
 	ArrayList resultList =
-	    physConstructResult(tupleElement,
-						      resultTemplate);
+	    physConstructResult(tupleElement, resultTemplate);
 
 	// The list can have a size of only one, get that result
 	//

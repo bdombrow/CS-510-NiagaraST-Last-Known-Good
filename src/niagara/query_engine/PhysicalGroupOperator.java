@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.11 2002/05/07 03:10:55 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.12 2002/08/18 17:38:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -325,9 +325,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	// First construct ungrouped result
 	//
 	Object ungroupedResult = this.constructUngroupedResult(tupleElement);
-	if(ungroupedResult == null) {
-	    System.out.println("ungrouped result is null here too");
-	}
 	
 	// Probe hash table to see whether result for this hashcode
 	// already exist
