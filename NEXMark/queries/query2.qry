@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<firehosescan id="fhscan" host="localhost" port="5000" rate="0"
+    datatype="auction_stream" num_gen_calls="100" desc=""
+    num_tl_elts="1" prettyprint="no"/>
+
+<!-- first get the auction item -->
+<unnest id="open_auction" regexp="site.open_auctions.open_auction" 
+    input="fhscan"/>
+
+<unnest id="price" regexp="bidder.bid" type="content"
+        input="open_auction"/>
+
+<unnest id="auctionid" root="$open_auction" regexp="id" 
+    type="content" input="price"/>
+
+<select id="select" input="auctionid">
+<or>
+  <pred op="eq"><var value="$auctionid"/><string value="1007"/></pred>
+  <or>
+    <pred op="eq"><var value="$auctionid"/><string value="100"/></pred>
+    <or>
+      <pred op="eq"><var value="$auctionid"/><string value="80"/></pred>
+      <or>
+      <pred op="eq"><var value="$auctionid"/>
+                    <string value="130"/></pred>
+      <pred op="eq"><var value="$auctionid"/>
+                    <string value="2087"/></pred>
+      </or>
+    </or>
+  </or>
+</or>
+</select>
+
+<construct id="cons" input="select">
+<![CDATA[<selected_bid> 
+<auctionid> $auctionid</auctionid> 
+<price>$price</price> 
+</selected_bid> ]]>
+</construct>
+
+</plan>

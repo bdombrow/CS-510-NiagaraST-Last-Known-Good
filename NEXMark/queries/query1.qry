@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<firehosescan id="fhscan" host="localhost" port="5000" rate="0" datatype="auction_stream" num_gen_calls="100" desc="" num_tl_elts="1" prettyprint="no">
+</firehosescan>
+
+<unnest id="auction" regexp="site.open_auctions.open_auction" input="fhscan"/>
+
+<unnest id="auctionid" root="$auction" regexp="id" input="auction"/>
+
+<!-- Would it be worth it to unnest bidder, then do the three
+     following unnests?? -->
+
+<unnest id="price" root="$auction" regexp="bidder.bid" 
+         input="auctionid"/>
+
+<unnest id="person_ref" root="$auction" regexp="bidder.person_ref" 
+         type = "element" input="price"/>
+
+<unnest id="time" root="$auction" regexp="bidder.time" 
+        type = "element" input="person_ref"/>
+
+<expression id="doltoeur" variables="price" 
+            class="niagara.query_engine.DOLTOEURExpression"
+	    input = "time"/>
+
+<!-- conversion should be price * 1.08380 -->
+
+<construct id="cons" input="doltoeur">
+<![CDATA[ <open_auction aid=$auctionid> 
+<bidder> 
+$person_ref 
+$time 
+$doltoeur
+</bidder> 
+</open_auction> ]]>
+</construct>
+
+</plan>
