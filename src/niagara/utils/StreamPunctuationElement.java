@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamPunctuationElement.java,v 1.1 2002/09/24 23:19:37 ptucker Exp $
+  $Id: StreamPunctuationElement.java,v 1.2 2002/10/02 22:13:27 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,19 +44,19 @@ public final class StreamPunctuationElement extends StreamTupleElement {
     public static final String STPUNCTNS = "PUNCT";
 
     public StreamPunctuationElement (boolean partial) {
-	super(partial);
+		super(partial);
     }
 
     public StreamPunctuationElement (boolean partial, int capacity) {
-	super(partial, capacity);
+		super(partial, capacity);
     }
 
     public StreamPunctuationElement(Element ele) {
-	super(ele);
+		super(ele);
     }
 
     public boolean isPunctuation() {
-	return true;
+		return true;
     }
 
     /**
