@@ -26,6 +26,7 @@ public class AccumulateOp extends unryOp {
     private MergeTree mergeTree;
     private int mergeIndex;
     private String accumFileName;
+    boolean clear; /* clear existing accum file or not */
 
     /**
      * Constructor for AccumulateOp.  Just calls the super constructor.
@@ -50,11 +51,12 @@ public class AccumulateOp extends unryOp {
      *              documents/fragments to be merged
      */
     public void setAccumulate(String mergeTemplateStr, int _mergeIndex,
-			      String _accumFileName) 
+			      String _accumFileName, boolean _clear) 
 	throws MTException {
 	mergeIndex = _mergeIndex;
 	mergeTree = new MergeTree();
 	accumFileName = _accumFileName;
+	clear = _clear;
 
 	/* true indicates that accumulate constraints should be checked */
 	mergeTree.create(mergeTemplateStr, true);
@@ -76,6 +78,10 @@ public class AccumulateOp extends unryOp {
 	return accumFileName;
     }
 
+    public boolean getClear() {
+	return clear;
+    }
+    
     public void dump() {
 	System.out.println("Accumulate Operator: ");
 	mergeTree.dump(System.out);

@@ -8,12 +8,13 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.utils.nitree.*;
+import niagara.data_manager.*;
 
 /**
  * This is the <code>PhysicalAccumulateOperator </code> that extends
  * the basic PhysicalOperator with the implementation of the Accumulate
  * operator.
- *
+ *				
  * @version 1.0
  *
  * @author Kristin Tufte
@@ -93,8 +94,21 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	 */
 	mapTable = new MapTable(); 
 
-	/* create an empty accumulator */
-	createEmptyAccumulator();
+	String afName = logicalAccumulateOperator.getAccumFileName();
+	if(afName != null && CacheUtil.isAccumFile(afName)) {
+	    if(logicalAccumulateOperator.getClear() == false) {
+		createAccumulatorFromDoc(afName);
+	    } else {
+		/* delete existing accumulated file and prepare
+		 * to create a new one 
+		 */
+		DataManager.AccumFileDir.remove(afName);
+		createEmptyAccumulator();
+	    }
+	} else {
+	    /* create an empty accumulator */
+	    createEmptyAccumulator();
+	}
 
 	recdData = false;
 
@@ -246,6 +260,22 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	accumDoc.initialize(mapTable, domDoc);
 	return;
     }
+
+    private void createAccumulatorFromDoc(String afName) {
+	Document accumDomDoc 
+	    = (Document)DataManager.AccumFileDir.get(afName);
+	accumDoc = new NIDocument();
+	accumDoc.initialize(mapTable, accumDomDoc);
+
+	/* now clone the accum doc itself so I can write to it 
+	 * code always assumes that document itself has been
+	 * cloned - this clone is not deep - just clones
+	 * the document and references the document element
+	 */
+	accumDoc = accumDoc.cloneDocRefDocElt(false);
+	return;
+    }
+
 }
 
 

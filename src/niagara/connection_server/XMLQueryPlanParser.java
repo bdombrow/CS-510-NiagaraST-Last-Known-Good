@@ -573,8 +573,16 @@ public class XMLQueryPlanParser {
 	    AccumulateOp op = (AccumulateOp) operators.Accumulate.clone();
 	    op.setSelectedAlgoIndex(0);
 	    
+	    String clear = e.getAttribute("clear");
+	    boolean cl;
+	    if(clear.equals("false")) {
+		cl = false;
+	    } else {
+		cl = true;
+	    }
+
 	    op.setAccumulate(mergeTemplate, Integer.parseInt(indexAttr),
-			     accumFileName);
+			     accumFileName, cl);
 	    
 	    logNode node = new logNode(op, 
 				       (logNode) ids2nodes.get(inputAttr));
