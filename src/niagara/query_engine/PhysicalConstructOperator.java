@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: PhysicalConstructOperator.java,v 1.2 2000/08/16 06:47:23 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,6 +31,7 @@ package niagara.query_engine;
 import java.util.ArrayList;
 import java.util.Vector;
 import com.ibm.xml.parser.TXElement;
+import com.ibm.xml.parser.TXText;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import niagara.utils.*;
@@ -213,7 +214,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 
 	    // Add the string value to the result
 	    //
-	    result.add(leafData.getValue());
+	    result.add(new TXText((String) leafData.getValue()));
 	}
 	else if (type == dataType.ATTR) {
 
