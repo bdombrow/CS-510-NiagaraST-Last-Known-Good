@@ -41,8 +41,8 @@ public class XMLQueryPlanParser {
 	niagara.ndom.DOMParser p;
 	Document document = null;
 	try {
-            p = DOMFactory.newParser();
-            p.parse(new InputSource(new ByteArrayInputStream(description.getBytes())));
+	    p = DOMFactory.newParser();
+	    p.parse(new InputSource(new ByteArrayInputStream(description.getBytes())));
 	    document = p.getDocument();
 	    Element root = (Element) document.getDocumentElement();
 	    return parsePlan(root);
@@ -54,7 +54,7 @@ public class XMLQueryPlanParser {
                                            + ioe.getMessage());
 	} catch (java.lang.CloneNotSupportedException cnse) {
 	    throw new PEException("Couldn't clone something " + cnse.getMessage());
-	}
+	} 
     }
 
     logNode parsePlan(Element root) 
@@ -518,8 +518,6 @@ public class XMLQueryPlanParser {
 		REMatch[] all_left = re.getAllMatches(leftattrs);
 		REMatch[] all_right = re.getAllMatches(rightattrs);
 		for (int i = 0; i < all_left.length; i++) {
-		    //KT System.out.println("i"+i);
-		    //KT System.out.println(all_left[i].toString());
 		    leftvect.addElement(leftv.lookUp(all_left[i].toString()));
 		    rightvect.addElement(rightv.lookUp(all_right[i].toString()));
 		    schemaAttribute sa = (schemaAttribute)leftvect.elementAt(0);
@@ -873,7 +871,7 @@ public class XMLQueryPlanParser {
 	    sSpec = new StreamSpec(e.getAttribute("host"),
 				   Integer.parseInt(e.getAttribute("port")));
 	} else {
-	    throw new InvalidPlanException("Invalid type");
+	    throw new InvalidPlanException("Invalid type - typeStr: " + typeStr);
 	}
 
 	StreamScanOp op = 
