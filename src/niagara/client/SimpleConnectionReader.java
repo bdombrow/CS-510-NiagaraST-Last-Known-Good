@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.1 2000/07/09 05:38:54 vpapad Exp $
+  $Id: SimpleConnectionReader.java,v 1.2 2000/08/28 22:08:34 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,6 +31,8 @@ package niagara.client;
 import java.net.*;
 import java.io.*;
 
+import java.util.Vector;
+
 import gnu.regexp.*;
 
 class SimpleConnectionReader extends AbstractConnectionReader 
@@ -41,6 +43,21 @@ class SimpleConnectionReader extends AbstractConnectionReader
 				  UIDriverIF ui, DTDCache dtdCache) {
 	super(hostname, port, ui, dtdCache);
 	this.ui = ui;
+    }
+
+    Vector results = new Vector();
+    
+    synchronized private void addResult(String line) {
+	    results.addElement(line);
+    }
+    
+    synchronized public String getResults() {
+	String resultStr = "";
+	for (int i=0; i < results.size(); i++) {
+	    resultStr += (String) results.elementAt(i);
+	}
+	results.clear();
+	return resultStr;
     }
 
     /**
@@ -58,6 +75,9 @@ class SimpleConnectionReader extends AbstractConnectionReader
 	    do {
 		line = br.readLine();
 		if (line.indexOf("<response") == 0  || line.indexOf("</response") == 0) {
+		    if (line.indexOf("\"parse_error\"") != -1) {
+			ui.errorMessage("Syntax error in query!\n");
+		    }
 		    if (!registered && line.indexOf("\"server_query_id\"") != -1) {
 			REMatch m = re.getMatch(line);
 			local_id = Integer.parseInt(m.substituteInto("$1"));
@@ -67,13 +87,15 @@ class SimpleConnectionReader extends AbstractConnectionReader
 		    if (line.indexOf("\"end_result\">") != -1)
 			ui.notifyFinalResult(local_id);
 		}
-		else System.out.println(line);
+		else {
+		    addResult(line);
+		    ((SimpleClient) ui).notifyNew(local_id);
+		}
 	    } while (line != null);
 	}
 	catch(Exception e){
 	    System.err.println("An exception in the server connection");
-	    e.printStackTrace();
-	    System.exit(-1);
+	    ui.errorMessage("An exception in the server connection");
 	}
     }
 }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.3 2000/07/09 05:39:46 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.4 2000/08/28 22:08:33 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,7 +44,7 @@ import niagara.client.dtdTree.DTD;
 public class ConnectionManager implements QueryExecutionIF
 {
 	// constants
-	public static final int SERVER_PORT = 9020;
+    public static final int SERVER_PORT = 9020;
 
 	public static final String REQUEST_MESSAGE = "requestMessage";
 	public static final String REQUEST_DATA = "requestData";
@@ -157,6 +157,10 @@ public class ConnectionManager implements QueryExecutionIF
 
 			return dtds;
 		}
+
+    public AbstractConnectionReader getConnectionReader() {
+	return connectionReader;
+    }
 
 	/**
 	 * Generate a tree for search engine

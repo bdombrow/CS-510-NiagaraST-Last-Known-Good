@@ -12,14 +12,45 @@ public class SimpleClient implements UIDriverIF {
 	cm = new ConnectionManager(host, port, this, true);
     }
 
-    public void notifyNew(int id) {}
+    public SimpleClient() {
+	this("localhost", ConnectionManager.SERVER_PORT);
+    }
+
+    public interface ResultsListener {
+	void notifyNewResults(String results);
+	void notifyError(String error);
+    }
+
+    Vector resultListeners = new Vector();
+    
+    public void addResultsListener(ResultsListener rl) {
+	resultListeners.addElement(rl);
+    }
+
+    public void notifyNew(int id) {
+	String results = ((SimpleConnectionReader) cm.getConnectionReader()).getResults();
+	if (resultListeners.size() == 0) 
+	    System.out.println(results);
+	else {
+	    for (int i=0; i < resultListeners.size(); i++) {
+		((ResultsListener) resultListeners.elementAt(i)).notifyNewResults(results);
+	    }
+	}
+    }
 
     public void notifyFinalResult(int id) {
-	System.exit(0);
+	if (resultListeners.size() == 0) 
+	    System.exit(0);
     }
 
     public void errorMessage(String err) {
-	System.err.println("SimpleClient error:" + err);
+	if (resultListeners.size() == 0)
+	    System.err.println("SimpleClient error:" + err);
+	else {
+	    for (int i=0; i < resultListeners.size(); i++) {
+		((ResultsListener) resultListeners.elementAt(i)).notifyError(err);
+	    }
+	}
     }
 
     public static void main(String args[]) {
@@ -78,13 +109,13 @@ public class SimpleClient implements UIDriverIF {
 		    line = br.readLine();
 		} while (line != null);
 
-		processQuery(query, sc);
+		sc.processQuery(query);
 		return;
 
 	    } else if (!shell) {
 		char cbuf[] = new char[MAX_QUERY_LEN];
 		query = getQueryFromFile(qfName, cbuf);
-		processQuery(query, sc);
+		sc.processQuery(query);
 		return;
 	    } else {
 		char cbuf[] = new char[MAX_QUERY_LEN];
@@ -105,7 +136,7 @@ public class SimpleClient implements UIDriverIF {
 			    String fn = getQueryFileName(stdIn);
 			    /* read a file name from std in */
 			    query = getQueryFromFile(fn, cbuf);
-			    processQuery(query, sc);
+			    sc.processQuery(query);
 			}
 		    } else if (tt == StreamTokenizer.TT_EOL) {
 			/* ignore eols */
@@ -139,7 +170,7 @@ public class SimpleClient implements UIDriverIF {
 	/* read the file into the buffer */
 	int qLen = br.read(cbuf, 0, MAX_QUERY_LEN);
 	if(qLen == MAX_QUERY_LEN) {
-	    System.out.println("Query exceeds maximum length (4096)");
+	    System.out.println("Query exceeds maximum length (" + MAX_QUERY_LEN + ")");
 	    return null;
 	}
 	return new String(cbuf, 0, qLen); /* copies cbuf */
@@ -147,11 +178,11 @@ public class SimpleClient implements UIDriverIF {
 
     }
 
-    private static void processQuery(String queryText, SimpleClient sc) {
+    public void processQuery(String queryText) {
 	System.out.println("Executing query " + queryText);
-	int id = sc.cm.executeQuery(QueryFactory.makeQuery(queryText), 
+	int id = cm.executeQuery(QueryFactory.makeQuery(queryText), 
 				    Integer.MAX_VALUE);
-        System.out.println("Query executed");
+        System.out.println("Query executing...");
 	return;
     }
     
