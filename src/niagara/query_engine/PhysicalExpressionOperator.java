@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.4 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.5 2001/07/17 11:11:30 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -106,7 +106,7 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
 		String source = "package; import niagara.utils.XMLUtils; import java.util.*; import niagara.ndom.*; import org.w3c.dom.*;  public class UserExpression extends XMLUtils implements " 
 		    + " niagara.xmlql_parser.op_tree.ExpressionIF {\n"  
 		    + "public void setupVarTable(HashMap hm) {};\n"
-		    + " public org.w3c.dom.Node processTuple(niagara.utils.StreamTupleElement ste) {\n";
+		    + " public org.w3c.dom.Node processTuple(niagara.utils.StreamTupleElement ste) throws Exception {\n";
 		HashMap hm = logicalExpressionOperator.getVarTable(); 
 		Iterator variables = hm.keySet().iterator();
 
@@ -117,10 +117,9 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
 		    source += " int "  + vname + " = XMLUtils.getInt(ste, " + attrpos + ");\n";
 		}
 		source += "int result; " + expression;
-  		source += "return DOMFactory.newText(Integer.toString(result));\n"
+  		source += "; org.w3c.dom.Element e = (org.w3c.dom.Element) ste.getAttribute(1); return e.getOwnerDocument().createTextNode(Integer.toString(result));\n"
   		    + "}} new UserExpression();";
 
-		// System.out.println("XXX Source is: " + source);
 		Interpreter interpreter = new TreeInterpreter(new JavaCCParserFactory());
 		expressionObject = (ExpressionIF) 
 		    interpreter.interpret(new StringReader(source), "user.java");

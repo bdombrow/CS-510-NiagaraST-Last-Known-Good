@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.6 2001/07/17 07:03:46 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.7 2001/07/17 11:11:30 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -69,6 +69,11 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     // We will use this Document as the "owner" of all the DOM nodes
     // we create
     private Document doc;
+    
+    // We check to see if elements in the input tuples have a document owner
+    // and use that in preference to the document specified in setResultDocument
+    // We use this member to only perform this check once
+    private boolean checkedInputTuples;
 
     ///////////////////////////////////////////////////////////////////////////
     // These are the methods of the PhysicalConstructOperator class          //
@@ -127,6 +132,19 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 						 StreamTupleElement tupleElement,
 						 int streamId,
 						 ResultTuples result) {
+
+        if (!checkedInputTuples) {
+            Document inputDoc = null;
+            for (int i = 0; i < tupleElement.size(); i++) {
+                Node n = (Node) tupleElement.getAttribute(i);
+                if (n != null && n.getOwnerDocument() != null) {
+                    System.out.println("XXX found another document owner!!!");
+                    doc = n.getOwnerDocument();
+                    break;
+                }
+            }
+            checkedInputTuples = true;
+        }
 
 	// Recurse down the result template to construct result
 	//
