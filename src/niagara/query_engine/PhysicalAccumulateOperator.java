@@ -1,4 +1,4 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.20 2003/07/03 19:56:52 tufte Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.21 2003/07/07 18:41:15 tufte Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -14,6 +14,8 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.data_manager.*;
 import niagara.connection_server.NiagraServer;
+
+/* This is a test */
 
 /**
  * This is the <code>PhysicalAccumulateOperator </code> that extends
