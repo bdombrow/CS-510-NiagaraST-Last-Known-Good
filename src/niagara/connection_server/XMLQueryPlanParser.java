@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.30 2002/10/31 04:20:30 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.31 2002/12/10 00:56:21 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -43,6 +43,12 @@ public class XMLQueryPlanParser {
         ids2plans = new Hashtable();
         ids2logprops = new Hashtable();
         catalog = NiagraServer.getCatalog();
+    }
+
+    public void clear() {
+        ids2els.clear();
+        ids2plans.clear();
+        ids2logprops.clear();
     }
 
     public XMLQueryPlanParser() {
@@ -93,7 +99,13 @@ public class XMLQueryPlanParser {
         }
         parseOperator(e);
 
-        return (Plan) ids2plans.get(top);
+        Plan p =  (Plan) ids2plans.get(top);
+        // Put an appropriate project in front of the user's top operator,
+        // projecting on the last output attribute for the top operator
+        Attrs outputSchema = ((LogicalProperty) ids2logprops.get(top)).getAttrs();
+        if (outputSchema.size() != 0)
+            outputSchema = new Attrs(outputSchema.get(outputSchema.size() - 1));
+        return new Plan(new Project(outputSchema), p);        
     }
 
     /**
@@ -240,7 +252,7 @@ public class XMLQueryPlanParser {
             root = attrs.get(attrs.size() - 1);
         }
 
-        Unnest op = new Unnest(unnestedVariable, root, redn);
+        Unnest op = new Unnest(unnestedVariable, root, redn, null);
 
         Plan scanNode = new Plan(op, input);
 
@@ -611,7 +623,8 @@ public class XMLQueryPlanParser {
 
         String vars = e.getAttribute("vars");
         // Parse the vars attribute 
-        StringTokenizer st = new StringTokenizer(vars);
+        // XXX vpapad: does this work?
+        StringTokenizer st = new StringTokenizer(vars, ",");
         ArrayList variables = new ArrayList();
         while (st.hasMoreTokens()) {
             variables.add(new Variable(st.nextToken()));

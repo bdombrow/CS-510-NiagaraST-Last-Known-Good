@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.18 2002/10/31 04:20:30 vpapad Exp $
+  $Id: NiagraServer.java,v 1.19 2002/12/10 00:56:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -133,6 +133,9 @@ public class NiagraServer {
         } catch (IOException ioe) {
             throw new UnrecoverableException(
                 "IO Error Unable to start server: " + ioe.getMessage());
+        } catch (ConfigurationError ce) {
+            System.err.println(ce.getMessage());
+            System.exit(-1);
         }
     }
 

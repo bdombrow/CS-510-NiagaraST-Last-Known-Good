@@ -1,10 +1,12 @@
 /**
- * $Id: Console.java,v 1.5 2002/10/31 04:20:30 vpapad Exp $
+ * $Id: Console.java,v 1.6 2002/12/10 00:56:21 vpapad Exp $
  */
 
 package niagara.connection_server;
 
 import java.io.*;
+
+import niagara.ndom.saxdom.BufferManager;
 
 /**
  * <code>Console</code> uses the standard input to provide
@@ -42,6 +44,9 @@ public class Console extends Thread {
 		System.gc();
 		System.out.println("... garbage collection complete.");
 	    }
+            else if (command.equals("info")) {
+                System.out.println("Free pages: " + BufferManager.numFreePages());
+            }
 	}
     }
 }

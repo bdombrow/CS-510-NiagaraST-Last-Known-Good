@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.7 2002/10/24 03:57:02 vpapad Exp $
+ * $Id: Catalog.java,v 1.8 2002/12/10 00:56:21 vpapad Exp $
  *
  */
 
@@ -22,6 +22,8 @@ import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Rule;
+import niagara.optimizer.rules.ConstructedRule;
+import niagara.optimizer.rules.CustomRule;
 import niagara.optimizer.rules.SimpleRule;
 
 public class Catalog implements ICatalog {
@@ -129,7 +131,7 @@ public class Catalog implements ICatalog {
             loadParameters(root, "config");
             loadRules(root);
         } catch (FileNotFoundException e) {
-            throw new PEException("Catalog file not found: " + e.getMessage());
+            throw new ConfigurationError("Catalog file not found: " + e.getMessage());
         } catch (org.xml.sax.SAXException se) {
             throw new PEException(
                 "Error parsing catalog file " + se.getMessage());
@@ -164,6 +166,10 @@ public class Catalog implements ICatalog {
             name2class.put(name, opClass);
             class2name.put(opClass, name);
 
+            // Physical ops with no logical counterpart
+            if (e.getTagName().equals("physical"))
+                continue;
+                
             ArrayList al = new ArrayList();
             NodeList physical = e.getChildNodes();
             for (int j = 0; j < physical.getLength(); j++) {
@@ -249,38 +255,11 @@ public class Catalog implements ICatalog {
                 String typeName = e.getAttribute("type");
                 if (typeName.equals("simple"))
                     rules.add(SimpleRule.fromXML(e, this));
-                if (typeName.equals("custom")) {
-                    String className = e.getAttribute("class");
-                    if (className.length() == 0)
-                        confError("Custom rules must specify a class name");
-                    try {
-                        Class c = Class.forName(className);
-                        // Rules must have a zero-argument public constructor
-                        Constructor ruleConstructor =
-                            c.getConstructor(new Class[] {
-                        });
-                        Rule rule =
-                            (Rule) ruleConstructor.newInstance(new Object[] {
-                        });
-                        rules.add(rule);
-                    } catch (ClassNotFoundException cnfe) {
-                        confError("Could not load class: " + className);
-                    } catch (NoSuchMethodException nsme) {
-                        throw new PEException(
-                            "Constructor could not be found for: " + className);
-                    } catch (InvocationTargetException ite) {
-                        throw new PEException(
-                            "Constructor of "
-                                + className
-                                + " has thrown an exception: "
-                                + ite.getTargetException());
-                    } catch (IllegalAccessException iae) {
-                        throw new PEException(
-                            "An illegal access exception occured: " + iae);
-                    } catch (InstantiationException ie) {
-                        throw new PEException(
-                            "An instantiation exception occured: " + ie);
-                    }
+                else if (typeName.equals("custom")) {
+                    rules.add(CustomRule.fromXML(e, this));
+                }
+                else if (typeName.equals("constructed")) {
+                    rules.add(ConstructedRule.fromXML(e, this));
                 }
             }
             rulesets.put(name, rules);
@@ -288,7 +267,7 @@ public class Catalog implements ICatalog {
         }
     }
 
-    private static void confError(String msg) {
+    public static void confError(String msg) {
         throw new ConfigurationError(msg);
     }
 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.16 2002/10/31 04:20:30 vpapad Exp $
+  $Id: RequestHandler.java,v 1.17 2002/12/10 00:56:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,6 +32,7 @@ import java.net.*;
 
 import niagara.optimizer.Optimizer;
 import niagara.optimizer.Plan;
+import niagara.optimizer.TracingOptimizer;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Op;
 import niagara.query_engine.*;
@@ -83,6 +84,8 @@ public class RequestHandler {
 
         this.xqpp = new XMLQueryPlanParser();
         this.optimizer = new Optimizer();
+        // XXX vpapad: uncomment next line to get the tracing optimizer
+        // this.optimizer = new TracingOptimizer();
 
         this.requestParser = new RequestParser(sock.getInputStream(), this);
         this.requestParser.startParsing();
@@ -148,7 +151,7 @@ public class RequestHandler {
                         "XXX vpapad: exception occured during optimization");
                     e.printStackTrace();
                 }
-
+                xqpp.clear();
                 processQPQuery(optimizedPlan, request);
                 //send the query ID out
                 sendQueryId(request);
@@ -157,6 +160,7 @@ public class RequestHandler {
             case RequestMessage.MQP_QUERY :
                 plan = xqpp.parse(request.requestData);
                 new MQPHandler(server.qe.getScheduler(), optimizer, plan);
+                xqpp.clear();
                 break;
 
             case RequestMessage.EXECUTE_QE_QUERY :
@@ -345,6 +349,7 @@ public class RequestHandler {
                     System.err.println("exception occured during optimization");
                     e.printStackTrace();
                 }
+                xqpp.clear();
 
                 processQPQuery(optimizedPlan, request);
                 // get the queryInfo of this query
@@ -362,6 +367,8 @@ public class RequestHandler {
                     System.err.println("exception occured during optimization");
                     e.printStackTrace();
                 }
+
+                xqpp.clear();
 
                 // We don't want to actually *run* the plan!
                 // Replace the plan with a constant operator 
