@@ -284,7 +284,7 @@ class MergeTreeNode {
      *
      * @return 
      */
-    public void createLocalKeyValue(Element elt, ArrayStack localKeyVal)
+    public void createLocalKeyValue(Element elt, MyStringBuffer localKeyVal)
 	throws UserErrorException {
 	localKey.createLocalKeyValue(elt, elt.getTagName(), localKeyVal);
 	return;
@@ -305,7 +305,7 @@ class MergeTreeNode {
      * @return 
      */
     public void createLocalKeyValue(Element elt, String tagName,
-				    ArrayStack localKeyVal)
+				    MyStringBuffer localKeyVal)
 	throws UserErrorException {
 	localKey.createLocalKeyValue(elt, tagName, localKeyVal);
 	return;
@@ -328,6 +328,8 @@ class MergeTreeNode {
      *
      * @return stack/array of local key values
      */
+    //KTKT track these two functions upwards-  localKeyValList
+    // is now a list of string buffers
     public void createLocalKeyValues(Element elt, String tagName,
 				     ArrayStack localKeyValList)
 	throws UserErrorException {

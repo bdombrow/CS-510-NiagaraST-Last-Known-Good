@@ -1,4 +1,4 @@
-// $Id: LocalKey.java,v 1.7 2003/01/13 05:09:47 tufte Exp $
+// $Id: LocalKey.java,v 1.8 2003/02/22 08:08:50 tufte Exp $
 package niagara.query_engine;
 
 import java.util.*;
@@ -44,6 +44,8 @@ public class LocalKey {
 
     public static final int TAG_EXISTENCE = 1;
     public static final int CONTENT = 2;
+    public static final String VALUE_SEPARATOR = ":";
+    public static final String PARENT_SEPARATOR = "::";
 
     /** 
      * Constructor 
@@ -165,18 +167,16 @@ public class LocalKey {
      *
      * @return  
      */
-    /* NOTE - for now local key value is an array of objects
-     * this can change just by changing this function and the 
-     * return types in Merge Tree Node
-     */
     void createLocalKeyValue(Element elt, String tagName, 
-			     ArrayStack localKeyVal)
+			     MyStringBuffer localKeyVal) 
 	throws UserErrorException {
 
-	localKeyVal.quickReset();
+	//localKeyVal.quickReset();
+	localKeyVal.setLength(0); // reset for safety
 
 	/* tag is always part of the key */
-	localKeyVal.push(tagName); 
+	//localKeyVal.push(tagName); 
+	localKeyVal.append(tagName);
 
 	/* case one - localKeySpec is null indicating the tag is the key*/
 	if(localKeySpec == null) {
@@ -194,8 +194,11 @@ public class LocalKey {
 	for(int i = 0; i< numPaths; i++) {
 	    AtomicKey atomicKey = (AtomicKey)localKeySpec.get(i);
 	    if(i == 0 && numPaths == 1 && atomicKey.isNever()) {
-		localKeyVal.pop();
-		localKeyVal.push("NEVER");
+		//localKeyVal.pop(); // removes tag??
+		//localKeyVal.push("NEVER");
+		localKeyVal.setLength(0); // remove tag
+		localKeyVal.append("NEVER");
+		return;
 	    } else {
 		reachableNodes.clear();
 		atomicKey.getMatches(elt, reachableNodes);
@@ -205,11 +208,12 @@ public class LocalKey {
 		    throw new UserErrorException("Document is not key-complete. Elt tagname " + tagName + " " + elt.getTagName());
 		} else  if(reachableNodes.size() != 1) {
 		throw new UserErrorException("Matches not allowed on set values when path is not singular. tagname " + tagName);
-		//+ " path " + atomicKey.path().toString());
 		}
-		
-		localKeyVal.push(getKeyValue(atomicKey, 
-					     (Node)reachableNodes.get(0)));
+		// localKeyVal.push(getKeyValue(atomicKey,
+		//                              (Node)reachbleNodes.get(0)));
+		localKeyVal.append(VALUE_SEPARATOR);
+		appendKeyValue(atomicKey, (Node)reachableNodes.get(0),
+			       localKeyVal);
 	    }
 	}
 	return;
@@ -247,16 +251,15 @@ public class LocalKey {
 	    numPaths = localKeySpec.size();
 
 	if(localKeySpec == null || numPaths > 1) {
-	    // believe localKeyValList should be empty here - am
-	    // just reusing the space
 	    Object temp = localKeyValList.getAllowExpand(0);
-	    ArrayStack localKeyVal;
-	    if(temp == null || !(temp instanceof ArrayStack)) {
-		localKeyVal = new ArrayStack();
+	    MyStringBuffer localKeyVal;
+	    if(temp == null || !(temp instanceof MyStringBuffer)) {
+		localKeyVal = new MyStringBuffer();
 	    } else {
-		localKeyVal = (ArrayStack) temp;
+		localKeyVal = (MyStringBuffer) temp;
 	    }
-
+	    localKeyVal.setLength(0);
+	    
 	    createLocalKeyValue(elt, tagName, localKeyVal);
 	    localKeyValList.push(localKeyVal);
 	    return;
@@ -274,22 +277,24 @@ public class LocalKey {
 	    int numNodes = reachableNodes.size();
 	    if(numNodes == 0) {
 		throw new UserErrorException("Document is not key-complete. Elt tagname " + tagName);
-		//+ " path " + atomicKey.path().toString());
 	    }
 	    
 	    for(int i =0; i<numNodes; i++) {
 		Object temp = localKeyValList.getAllowExpand(i);
-		ArrayStack localKeyVal;
-		if(temp == null || !(temp instanceof ArrayStack)) {
-		    localKeyVal = new ArrayStack(2);
+		MyStringBuffer localKeyVal;
+		if(temp == null || !(temp instanceof MyStringBuffer)) {
+		    localKeyVal = new MyStringBuffer();
 		} else {
-		    localKeyVal = (ArrayStack) temp;
+		    localKeyVal = (MyStringBuffer) temp;
 		}
+		localKeyVal.setLength(0);
 
 		/* the tag is always part of the key */
-		localKeyVal.push(tagName);
-		localKeyVal.push(getKeyValue(atomicKey,
-					 (Node)reachableNodes.get(i)));
+		localKeyVal.append(tagName);
+		localKeyVal.append(VALUE_SEPARATOR);
+		appendKeyValue(atomicKey,
+			       (Node)reachableNodes.get(i),
+			       localKeyVal);
 		localKeyValList.push(localKeyVal);
 	    }
 	    return;
@@ -298,11 +303,14 @@ public class LocalKey {
 	throw new PEException("Shouldn't get here!!!");
     }
 
-    private Object getKeyValue(AtomicKey atomicKey, Node node) {
+    private void appendKeyValue(AtomicKey atomicKey, Node node, 
+				MyStringBuffer localKeyVal) {
 
 	switch(atomicKey.mergeType()) {
 	case LocalKey.TAG_EXISTENCE:
-	    return node.getNodeName();
+	    localKeyVal.append(node.getNodeName());
+	    return;
+	    //return node.getNodeName();
 	    
 	case LocalKey.CONTENT:
 	    /* create the appropriate type of object -
@@ -311,9 +319,14 @@ public class LocalKey {
 	     */		    
 	    /* the node helper converts the node (actually
 	     * node.getNodeValue()) into an instance
-	     * of the appropriate type
+	     * of the appropriate type, we append the string
+	     * representation of this value - this will give
+	     * us a standard string for each value so even if
+	     * initial values 1.0 and 1.0000 would give
+	     * equivalent key values
 	     */
-	    return atomicKey.nodeHelper().valueOf(node);
+	    localKeyVal.append(atomicKey.nodeHelper().valueOf(node));
+	    return;
 	default:
 	    throw new PEException("Invalid merge type");
 	}

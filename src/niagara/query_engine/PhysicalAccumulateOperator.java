@@ -1,4 +1,4 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.16 2003/01/25 21:04:25 tufte Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.17 2003/02/22 08:08:50 tufte Exp $ */
 package niagara.query_engine;
 
 import java.util.Vector;
@@ -101,6 +101,9 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
         int streamId)
         throws ShutdownException, UserErrorException {
 
+	if(MergeTree.TRACE)
+	    System.out.println("KT: Phys Accum Processing Tuple");
+
 	if((tupleCount % 1000) == 0) {
 	    Runtime r = Runtime.getRuntime();
 	    System.out.println("KT: PhysAccum " + tupleCount + " tuples " +
@@ -111,7 +114,8 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	}
 
         /* get the fragment to be merged from the tuple, convert it
-         * to an element if necessary, then pass the work off to the merge tree
+         * to an element if necessary, then pass the work off to the 
+	 * merge tree
          */
         Element fragment = convertAttrToElement(tupleElement);
 

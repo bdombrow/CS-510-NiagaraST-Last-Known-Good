@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.8 2002/05/07 03:10:55 tufte Exp $
+  $Id: QueryResult.java,v 1.9 2003/02/22 08:08:50 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -504,13 +504,27 @@ public class QueryResult {
 	
 		if(lastAttribute instanceof Document) {
 		    return (Document)lastAttribute;
-		} else {
+		} else if (lastAttribute instanceof Element) {
 		    // Create a Document and add add the result to the Doc
 		    Document resultDocument = DOMFactory.newDocument();
 		    Node n = DOMFactory.importNode(resultDocument, 
 						   lastAttribute);
 		    resultDocument.appendChild(n);
 		    return resultDocument;
+		} else if (lastAttribute instanceof Attr) {
+		    Document resultDocument = DOMFactory.newDocument();
+		    // create an element from the attribute
+		    Element newElt = 
+			resultDocument.createElement(((Attr)lastAttribute)
+						     .getName());
+		    Text txt =
+			resultDocument.createTextNode(((Attr)lastAttribute)
+						      .getValue());
+		    newElt.appendChild(txt);
+		    resultDocument.appendChild(newElt);
+		    return resultDocument;
+		} else {
+		    throw new PEException("KT What did I get??");
 		}
     }
 
