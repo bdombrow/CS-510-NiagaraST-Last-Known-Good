@@ -63,6 +63,8 @@ public class XMLPacketGenerator extends XMLFirehoseGen {
 	    m_stb.append(XMLPacketGenerator.nl);
 	}
 
+	m_ph.genTimeStampPunct(m_stb);
+
 	if (m_fEOF)
 	    getEndPunctuation();
 
@@ -72,10 +74,6 @@ public class XMLPacketGenerator extends XMLFirehoseGen {
     }
 
     public void getEndPunctuation() {
-	m_stb.append("<punct:P xmlns:punct=\"PUNCT\">");
-	m_stb.append("<TS>*</TS><IP><SI>12.228.114.114</SI>");
-	m_stb.append("<DI>*</DI><FR>*</FR></IP><TCP>*</TCP>");
-	m_stb.append("<HTTP><URL>*</URL><R>*</R></HTTP></punct:P>");
 	m_stb.append("<punct:P xmlns:punct=\"PUNCT\">");
 	m_stb.append("*</punct:P>");
     }
@@ -487,10 +485,30 @@ class PacketHandler implements PacketListener
     byte[] seconds = new byte[4];
     byte[] micro = new byte[4];
     long m_secLast = 0;
-    int m_micLast = 0;
+    static int m_micLast = 0;
+    static long m_hrLast = 0;
+    static long m_punctHour = 0;
+
+    public void genTimeStampPunct(StringBuffer stbOut) {
+	//Only generate a punctuation if the hour has changed
+	if (m_punctHour != m_hrLast) {
+	    if (m_punctHour != 0) {
+		stbOut.append("<punct:P xmlns:punct=\"PUNCT\">");
+		stbOut.append("<TS><HR>");
+		stbOut.append(m_punctHour);
+		stbOut.append("</HR></TS><IP><SI>*</SI></IP><TCP>*</TCP>");
+		stbOut.append("<HTTP><URL>*</URL><R>*</R></HTTP>");
+		stbOut.append("</punct:P>");
+	    }
+
+	    m_punctHour = m_hrLast;
+	}
+    }
+
     private long genTimeStampElement(StringBuffer stbOut) {
 	long sec = 0;
 	int mic = 0;
+	long hr = 0;
 
 	// following lines are added to extract timestamp.
 	if (XMLPacketGenerator.m_iDataSource == XMLPacketGenerator.LIVE ||
@@ -521,7 +539,7 @@ class PacketHandler implements PacketListener
 		//If we are looping through the file, then we need to make
 		// sure the time stamp keeps increasing.
 		if (sec < m_secLast || (sec==m_secLast && mic<m_micLast)) {
-		    sec = m_secLast + 1;//Do the simple thing for now
+		    sec = m_secLast + 30;//Do the simple thing for now
 		}
 		m_secLast = sec;
 		m_micLast = mic;
@@ -530,8 +548,15 @@ class PacketHandler implements PacketListener
 	    } catch (IOException ex) {;}
 	}
 
+	hr = sec/3600;
+	if (hr > m_hrLast) {
+	    m_hrLast = hr;
+	}
 	stbOut.append(XMLPacketGenerator.tab2);
 	stbOut.append("<TS>");
+	stbOut.append("<HR>");
+	stbOut.append(hr);
+	stbOut.append("</HR>");
 	stbOut.append(sec);
 	stbOut.append(".");
 	stbOut.append(mic);
