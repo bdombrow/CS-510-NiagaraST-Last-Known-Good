@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: AggregateOp.java,v 1.1 2003/03/19 00:35:26 tufte Exp $
+  $Id: AggregateOp.java,v 1.2 2003/03/19 22:44:38 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -54,7 +54,7 @@ public abstract class AggregateOp extends groupOp {
 
         String aggAttrStr = e.getAttribute(aggrAttrName);
         aggrAttr = Variable.findVariable(inputProperties[0], aggAttrStr);
-	loadGroupingAttrsFromXML(e, inputProperties[0]);
+	loadGroupingAttrsFromXML(e, inputProperties[0], "groupby");
     }
 
     public Attribute getAggrAttr() {

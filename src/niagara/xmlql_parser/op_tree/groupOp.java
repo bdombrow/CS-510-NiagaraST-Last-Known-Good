@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: groupOp.java,v 1.5 2003/03/19 00:35:26 tufte Exp $
+  $Id: groupOp.java,v 1.6 2003/03/19 22:44:38 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -80,11 +80,23 @@ public abstract class groupOp extends unryOp {
         return  new LogicalProperty(card, attrs, inpLogProp.isLocal());
     }
 
+    /**
+     * create the groupingAttrs object by loading the grouping attributes
+     * from an xml element. the grouping attributes are specified in
+     * an attribute of element e.
+     *
+     * @param e The element which contains the grouping attributes 
+     *          (as one of its attributes)
+     * @param inputLogProp logical properties of the input??
+     * @param gpAttrName The attribute of element e which contains
+     *                   the grouping attributes.
+     */
     protected void loadGroupingAttrsFromXML(Element e,
-					    LogicalProperty inputLogProp) 
+					    LogicalProperty inputLogProp,
+					    String gpAttrName) 
 	throws InvalidPlanException {
         String id = e.getAttribute("id");
-        String groupbyStr = e.getAttribute("groupby");
+        String groupbyStr = e.getAttribute(gpAttrName);
 
         // Parse the groupby attribute to see what to group on
         Vector groupbyAttrs = new Vector();
