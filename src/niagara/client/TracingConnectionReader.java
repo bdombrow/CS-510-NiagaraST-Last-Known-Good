@@ -53,7 +53,7 @@ public class TracingConnectionReader extends AbstractConnectionReader {
                 while (!stop) {
                     start = 0;
                     while (start < 4096) {
-                        count = cReader.read(buf, start, 4096);
+                        count = cReader.read(buf, start, 4096-start);
                         if (count == -1) {
                             stop = true;
                             break;
