@@ -1,6 +1,6 @@
  
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.10 2002/03/26 23:52:31 tufte Exp $
+  $Id: ExecutionScheduler.java,v 1.11 2002/04/18 23:14:13 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -469,18 +469,6 @@ public class ExecutionScheduler {
 
     protected void processStreamScanOperator (StreamScanOp sScanOp,
 					      Stream outputStream) {
-	Stream[] outputStreams = new Stream[1];
-	outputStreams[0] = outputStream;
-	
-	Stream[] inputStreams = new Stream[1];
-	inputStreams[0] = new Stream();
-	
-	PhysicalPartialOperator partialOp = 
-	    new PhysicalPartialOperator(null,inputStreams, 
-					outputStreams, responsiveness);
-	
-	opQueue.putOperator(partialOp);
-	
 	
 	/* Create a StreamThread which will connect to the appropriate
 	 * stream (file or socket) and start reading documents from that 
@@ -488,12 +476,11 @@ public class ExecutionScheduler {
 	 */
 
 	StreamThread stream = new StreamThread(sScanOp.getSpec(),
-				     new SourceStream(inputStreams[0]));
+				     new SourceStream(outputStream));
 	
 	// start the thread
 	Thread sthread = new Thread(stream);
 	sthread.start();
-	return;
     }
 
     protected void processConstantOp (ConstantOp op,
