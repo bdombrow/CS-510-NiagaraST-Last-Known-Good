@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.20 2003/02/25 06:10:26 vpapad Exp $
+  $Id: PhysicalGroupOperator.java,v 1.21 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -232,7 +232,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     protected void blockingProcessSourceTupleElement(
         StreamTupleElement tupleElement,
         int streamId)
-        throws UserErrorException, ShutdownException {
+        throws ShutdownException {
 
         // First get the hash code for the grouping attributes
         String hashKey = hasher.hashKey(tupleElement);

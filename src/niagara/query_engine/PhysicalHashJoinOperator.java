@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.11 2003/02/25 06:10:26 vpapad Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.12 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -83,6 +83,7 @@ public class PhysicalHashJoinOperator extends PhysicalJoin {
         pred = joinPredicate.getImplementation();
         
         eqjoinPreds = join.getEquiJoinPredicates();
+	initExtensionJoin(join);
     }
 		     
 
@@ -108,50 +109,72 @@ public class PhysicalHashJoinOperator extends PhysicalJoin {
 
 	// Determine the id of the other stream
 	int otherStreamId = 1 - streamId;
-	boolean fMatch=false;
-	
-	// First add the tuple element to the appropriate hash table,
-	//  but only if we haven't yet seen a punctuation from the
-	//  other input that matches it
-	for (int i=0; i<rgPunct[otherStreamId].size() && fMatch==false; i++) {
-	    stPunctJoinKey =
-		hashers[otherStreamId].hashKey
-		((StreamPunctuationElement) rgPunct[otherStreamId].get(i));
 
-	    if (stPunctJoinKey != null) {
-		hashers[otherStreamId].getValuesFromKey(stPunctJoinKey,
-							rgstPValues);
-		hashers[streamId].getValuesFromKey(hashKey,
-						   rgstTValues);
-		boolean fMatchValue=true;
-
-		for (int j=0; j<rgstPValues.length && fMatchValue; j++) {
-		    fMatchValue =
-			StreamPunctuationElement.matchValue(rgstPValues[j],
-							    rgstTValues[j]);
-		}
-	    }
-	}
-
-	if (fMatch == false) {
-	    if (tupleElement.isPartial()) {
-		partialSourceTuples[streamId].put(hashKey, tupleElement);
-	    } else {
-		finalSourceTuples[streamId].put(hashKey, tupleElement);
-	    }
-	}
-	
 	// Now loop over all the partial elements of the other source 
 	// and evaluate the predicate and construct a result tuple if 
 	// the predicate is satisfied
-	constructJoinResult(tupleElement, streamId, hashKey,
-			    partialSourceTuples[otherStreamId]);
-	
-	// Now loop over all the final elements of the other source 
-	// and evaluate the predicate and construct a result tuple if 
-	// the predicate is satisfied
-	constructJoinResult(tupleElement, streamId, hashKey,
-			    finalSourceTuples[otherStreamId]);
+	boolean producedResult;
+	producedResult = constructJoinResult(tupleElement, streamId, hashKey,
+					     partialSourceTuples[otherStreamId]);
+
+	// Extension join note: Extension join indicates that we
+	// expect an extension join with referential integrity 
+	// meaning that tuples on the denoted extension join side
+	// join only with one tuple from the other side, if I
+	// join with a tuple, in partial, no need to check final
+	// if I join with tuple from partial or final, no need
+	// to insert in hash table
+
+	if(!extensionJoin[streamId] || !producedResult) {
+	    // Now loop over all the final elements of the other source 
+	    // and evaluate the predicate and construct a result tuple if 
+	    // the predicate is satisfied
+	    producedResult = constructJoinResult(tupleElement, streamId, 
+						 hashKey,
+					   finalSourceTuples[otherStreamId]);
+	}
+
+	if(!extensionJoin[streamId] || !producedResult) {
+	    //System.out.println("KT inserting in hash table streamID " + streamId);
+	    // we don't add to hash table if this is extension join
+	    // and already joined (see above)
+
+	    // Add the tuple element to the appropriate hash table,
+	    // but only if we haven't yet seen a punctuation from the
+	    // other input that matches it
+	    boolean fMatch=false;
+
+	    for (int i=0; 
+		 i<rgPunct[otherStreamId].size() && fMatch==false; i++) {
+		stPunctJoinKey =
+		    hashers[otherStreamId].hashKey
+		    ((StreamPunctuationElement) rgPunct[otherStreamId].get(i));
+		
+		if (stPunctJoinKey != null) {
+		    hashers[otherStreamId].getValuesFromKey(stPunctJoinKey,
+							    rgstPValues);
+		    hashers[streamId].getValuesFromKey(hashKey,
+						       rgstTValues);
+		    boolean fMatchValue=true;
+		    
+		    for (int j=0; j<rgstPValues.length && fMatchValue; j++) {
+			fMatchValue =
+			    StreamPunctuationElement.matchValue(rgstPValues[j],
+								rgstTValues[j]);
+		    }
+		}
+	    }
+	    
+	    if (fMatch == false) {
+		if (tupleElement.isPartial()) {
+		    partialSourceTuples[streamId].put(hashKey, tupleElement);
+		} else {
+		    finalSourceTuples[streamId].put(hashKey, tupleElement);
+		}
+	    }
+	} else {
+	    //System.out.println("KT: not inserting in hash table " + streamId);
+	}
     }
 
 
@@ -182,33 +205,33 @@ public class PhysicalHashJoinOperator extends PhysicalJoin {
      * @param streamId The stream id of tupleElement
      * @param hashCode The join hash code
      * @param otherStreamTuples The tuples to be joined with tupleElement
+     * @returns true if result produced (that is tupleElement joined
+     *  with something in otherStreamTuples)
      */
 
-    private void constructJoinResult(StreamTupleElement tupleElement,
-				      int streamId,
-				      String hashKey,
-				      DuplicateHashtable otherStreamTuples) 
+    private boolean constructJoinResult(StreamTupleElement tupleElement,
+					int streamId,
+					String hashKey,
+					DuplicateHashtable otherStreamTuples) 
 	throws ShutdownException, InterruptedException{
+
+	boolean producedResult = false;
 
 	// Get the list of tuple elements having the same hash code in
 	// otherStreamTuples
 	//
-	Vector sourceTuples = otherStreamTuples.get(hashKey);
+	Vector otherSourceTuples = otherStreamTuples.get(hashKey);
 
 	// Loop over all the elements of the other source stream and
 	// evaluate the predicate and construct a result tuple if the
 	// predicate is satisfied
-	//
-	int numTuples = 0;
+	if (otherSourceTuples == null) 
+	    return false;
 
-	if (sourceTuples != null) {
-	    numTuples = sourceTuples.size();
-	}
-
-	for (int tup = 0; tup < numTuples; ++tup) {
+	for (int tup = 0; tup < otherSourceTuples.size(); ) {
 	    // Get the appropriate tuple for the other source stream
 	    StreamTupleElement otherTupleElement = 
-		(StreamTupleElement) sourceTuples.get(tup);
+		(StreamTupleElement) otherSourceTuples.get(tup);
 
 	    // Make the right order for predicate evaluation
 	    //
@@ -224,10 +247,26 @@ public class PhysicalHashJoinOperator extends PhysicalJoin {
 		rightTuple = tupleElement;
 	    }
 
+	    boolean removed = false;
 	    // Check whether the predicate is satisfied
-	    if (pred.evaluate(leftTuple, rightTuple))
+	    if (pred.evaluate(leftTuple, rightTuple)) {
                 produceTuple(leftTuple, rightTuple);
+		producedResult = true;
+		if(extensionJoin[1-streamId]) {
+		    boolean success =
+			otherStreamTuples.remove(hashKey, otherTupleElement);
+		    if(!success)
+			throw new PEException("KT: removal from hash table failed");
+		    removed = true;
+		} 
+		if(extensionJoin[streamId])
+		    return producedResult;
+	    }
+	    if(!removed)
+		tup++;
+	    
 	}
+	return producedResult;
     }
 
     /**
@@ -363,6 +402,7 @@ public Cost findLocalCost(
         op.pred = pred;
         op.joinPredicate = joinPredicate;
         op.eqjoinPreds = eqjoinPreds;
+	op.extensionJoin = extensionJoin;
         return op;
     }
 }

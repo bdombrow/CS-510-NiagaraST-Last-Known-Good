@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSlidingMaxOperator.java,v 1.1 2003/02/05 21:17:50 jinli Exp $
+  $Id: PhysicalSlidingMaxOperator.java,v 1.2 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -231,7 +231,7 @@ public class PhysicalSlidingMaxOperator extends PhysicalWindowOperator {
 	    } catch (java.lang.NumberFormatException e) {
 		    // believe that atomicValue is generated, so it should
 		    // always be OK, if it isn't generated, should
-		    // throw UserErrorException... KT
+		    // throw ShutdownException... KT
 		    throw new PEException("Unable to convert atomicValue to double in PhysicalSlidingMaxOperator: " + e.getMessage());
 	    }
     }

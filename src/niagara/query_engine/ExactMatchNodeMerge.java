@@ -48,7 +48,7 @@ class ExactMatchNodeMerge extends NodeMerge {
      *         no updates need to be made based on this merge
      */
     boolean merge(Node lNode, Node rNode, Node resultNode) 
-	throws UserErrorException {
+	throws ShutdownException {
 
 	if(lNode == null) {
 	    if(rNode == null) {
@@ -63,7 +63,7 @@ class ExactMatchNodeMerge extends NodeMerge {
 
 	if(!comparator.nodeEquals(lNode, rNode)) {
 	    throw new 
-		UserErrorException("Non-matching elements in ExactMatchMerge. lNode: " 
+		ShutdownException("Non-matching elements in ExactMatchMerge. lNode: " 
 		   + lNode.getNodeName() + "(" + DOMHelper.getTextValue(lNode) +")" +
 				   "  rNode: "
 		   + rNode.getNodeName() + "(" + DOMHelper.getTextValue(rNode) +")");

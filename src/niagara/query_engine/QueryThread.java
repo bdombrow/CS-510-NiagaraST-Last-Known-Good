@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryThread.java,v 1.6 2003/02/25 06:10:25 vpapad Exp $
+  $Id: QueryThread.java,v 1.7 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -153,13 +153,10 @@ public class QueryThread implements Runnable {
 		
 		// Execute it
 		execute(queryInfo);
-	    } catch(UserErrorException uee) {
+	    } catch(ShutdownException se) {
 		// should pass this back to client, for now, just print
-		System.err.println("USER ERROR: " + uee.getMessage());
-	    } catch (ShutdownException se) {
-		// do nothing - just go to next query, is this correct?
-		System.err.println("QueryThread got Shutdown for current query");
-	    }
+		System.err.println("ERROR: " + se.getMessage());
+	    } 
 	} while (true);
     }
 
@@ -171,77 +168,64 @@ public class QueryThread implements Runnable {
      *                   the query to be run
      */
 
-    private void execute (QueryInfo queryInfo)
-    throws UserErrorException, ShutdownException {
+    private void execute (QueryInfo queryInfo) throws ShutdownException {
 
-		// Get the string version of the query
-		String queryString = queryInfo.getQueryString();
+	// Get the string version of the query
+	String queryString = queryInfo.getQueryString();
+	
+	// Create a scanner and query parser on the fly
+	// THIS HAS TO CHANGE TO REUSE SCANNER AND PARSER
+	Scanner scanner;
+	
+	scanner = new Scanner(new EscapedUnicodeReader(
+			      new StringReader(queryString)));
 
-		// Create a scanner and query parser on the fly
-		// THIS HAS TO CHANGE TO REUSE SCANNER AND PARSER
-		Scanner scanner;
-
-		//try {
-		    scanner = new Scanner(new EscapedUnicodeReader(
-				    new StringReader(queryString)));
-		    //} catch (Exception e) {
-		    // KT FIX - need to do better error checking than this!!
-		    //System.err.println("Problem with the query string "+queryString);
-		    //queryInfo.killQueryWithoutOperators();
-		    //return;
-		    //}
-
-		queryParser = new QueryParser(scanner);
-
-		// Get the parse tree
-		//
-		java_cup.runtime.Symbol parseTree;
-
-		try {
-		    parseTree = queryParser.parse();
-		} catch (Exception e) { // this is what cup throws
-		    queryInfo.killQueryWithoutOperators();
-		    throw new UserErrorException("Error parsing query");
-		}
-
-		// Get the query representation from the parse tree
-		//
-		query queryRep = ((xqlExt) parseTree.value).getQuery();
-
-		// Get the logical plan from the query representation
-		// THIS HAS TO CHANGE TO REUSE LOGICAL PLAN GENERATOR
-		//
-		logicalPlanGenerator = new logPlanGenerator(queryRep);
-
-		// Get the logical plan
-		//
-		logNode logicalPlan = logicalPlanGenerator.getLogPlan();
-
-		// Perform optimization on the logical plan and get optimized plan
-		//
-
-		logNode optimizedPlan = null;
-		try {
-		        optimizedPlan = queryOptimizer.optimize(logicalPlan);
-		}
-		catch (NoDataSourceException e) {
-			System.out.println("No Valid URLs returned");
-			queryInfo.killQueryWithoutOperators();
-			return;
-		}
-
-
-		// If there was an error, then exit
-		//
-		if (optimizedPlan == null) {
-			System.err.println("Error in Optimizing Query");
-			queryInfo.killQueryWithoutOperators();
-			return;
-		}
-
-		// Send the optimized plan to scheduler for execution
-		//
-		scheduler.executeOperators(optimizedPlan, queryInfo);
+	queryParser = new QueryParser(scanner);
+	
+	// Get the parse tree
+	java_cup.runtime.Symbol parseTree;
+	
+	try {
+	    parseTree = queryParser.parse();
+	} catch (Exception e) { // this is what cup throws
+	    queryInfo.killQueryWithoutOperators();
+	    throw new ShutdownException("Error parsing query " + e.getMessage());
+	}
+	
+	// Get the query representation from the parse tree
+	//
+	query queryRep = ((xqlExt) parseTree.value).getQuery();
+	
+	// Get the logical plan from the query representation
+	// THIS HAS TO CHANGE TO REUSE LOGICAL PLAN GENERATOR
+	//
+	logicalPlanGenerator = new logPlanGenerator(queryRep);
+	
+	// Get the logical plan
+	//
+	logNode logicalPlan = logicalPlanGenerator.getLogPlan();
+	
+	// Perform optimization on the logical plan and get optimized plan
+	logNode optimizedPlan = null;
+	try {
+	    optimizedPlan = queryOptimizer.optimize(logicalPlan);
+	}
+	catch (NoDataSourceException e) {
+	    System.out.println("No Valid URLs returned");
+	    queryInfo.killQueryWithoutOperators();
+	    return;
+	}
+	
+	
+	// If there was an error, then exit
+	if (optimizedPlan == null) {
+	    System.err.println("Error in Optimizing Query");
+	    queryInfo.killQueryWithoutOperators();
+	    return;
+	}
+	
+	// Send the optimized plan to scheduler for execution
+	scheduler.executeOperators(optimizedPlan, queryInfo);
     }
 }
 

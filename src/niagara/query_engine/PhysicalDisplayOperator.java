@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalDisplayOperator.java,v 1.8 2003/02/25 06:10:26 vpapad Exp $
+ * $Id: PhysicalDisplayOperator.java,v 1.9 2003/03/03 08:20:13 tufte Exp $
  *
  */
 
@@ -86,7 +86,7 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
     protected void nonblockingProcessSourceTupleElement(
         StreamTupleElement tupleElement,
         int streamId)
-        throws ShutdownException, UserErrorException {
+        throws ShutdownException {
         if (counter == 0) {
             try {
                 URL url = new URL(url_location);
@@ -96,10 +96,10 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
                 pw = new PrintWriter(out);
                 pw.println(query_id);
             } catch (java.net.MalformedURLException mue) {
-                throw new UserErrorException(
+                throw new ShutdownException(
                     "Bad url for client " + mue.getMessage());
             } catch (java.io.IOException ioe) {
-                throw new UserErrorException(
+                throw new ShutdownException(
                     "Unable to open connection to client "
                         + url_location
                         + " "

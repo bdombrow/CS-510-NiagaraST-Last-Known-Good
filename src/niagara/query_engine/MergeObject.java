@@ -39,10 +39,10 @@ abstract class MergeObject {
      * @return Returns nothing 
      */
     abstract void accumulate(Element accumElt, Element fragElt)
-	throws UserErrorException;
+	throws ShutdownException;
 
     abstract Element accumulateEmpty(Element fragElt, String accumTagName)
-	throws UserErrorException;
+	throws ShutdownException;
 
     /** 
      * merges two fragments together
@@ -56,7 +56,7 @@ abstract class MergeObject {
      */
     abstract Element merge(Element lElt, Element rElt, 
 			     Document resDoc, String tagName)
-	throws UserErrorException;
+	throws ShutdownException;
 
 
     /**

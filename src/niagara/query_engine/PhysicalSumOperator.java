@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSumOperator.java,v 1.13 2002/10/31 03:54:38 vpapad Exp $
+  $Id: PhysicalSumOperator.java,v 1.14 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -208,7 +208,7 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 	    } catch (java.lang.NumberFormatException e) {
 		    // believe that atomicValue is generated, so it should
 		    // always be OK, if it isn't generated, should
-		    // throw UserErrorException... KT
+		    // throw ShutdownException... KT
 		    throw new PEException("Unable to convert atomicValue to double in PhysicalSumOperator: " + e.getMessage());
 	    }
     }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.10 2003/02/25 06:10:26 vpapad Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.11 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -62,7 +62,8 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
         expressionOp = (ExpressionOp) logicalOperator;
     }
 
-    public void opInitialize() {
+    public void opInitialize() 
+    throws ShutdownException {
         boolean interpreted = expressionOp.isInterpreted();
 
         if (interpreted) {
@@ -98,7 +99,7 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
                         new StringReader(source),
                         "user.java");
             } catch (koala.dynamicjava.interpreter.InterpreterException ie) {
-                throw new UserErrorException(
+                throw new ShutdownException(
                     "invalid expression " + ie.getMessage());
             }
         } else {

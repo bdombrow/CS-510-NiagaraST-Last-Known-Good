@@ -70,8 +70,7 @@ class UnionMerge extends MergeObject {
      * @return Returns the result element
      */
     Element merge(Element rElt, Element lElt, Document resDoc,
-		  String tagName) 
-	throws UserErrorException {
+		  String tagName) {
 	throw new PEException("KT: Shouldn't call merge on union - can't find where this is called");
     }
 

@@ -103,7 +103,7 @@ class DeepReplaceMerge extends MergeObject {
      */
     Element merge(Element rElt, Element lElt, Document resDoc,
 		  String tagName) 
-	throws UserErrorException {
+	throws ShutdownException {
 	Element resElt = null;
 	if(keepLeft) {
 	    resElt = lElt;
@@ -115,7 +115,7 @@ class DeepReplaceMerge extends MergeObject {
 	if(resElt.getOwnerDocument() != resDoc ||
 	   resElt.getTagName() != tagName) {
 	    throw new 
-		UserErrorException("Tag or doc doesn't match in deep replace merge");
+		ShutdownException("Tag or doc doesn't match in deep replace merge");
 	}
 
 	return resElt;

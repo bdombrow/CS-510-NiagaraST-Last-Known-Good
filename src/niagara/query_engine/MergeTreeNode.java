@@ -250,7 +250,7 @@ class MergeTreeNode {
      * @return returns new result element 
      */
     Element merge(Element lElt, Element rElt, Document doc) 
-	throws UserErrorException {
+	throws ShutdownException {
 	return merger.merge(lElt, rElt, doc, resultTagName);
     }
 
@@ -265,12 +265,12 @@ class MergeTreeNode {
      *         should continue or not 
      */
     void accumulate(Element accumElt, Element fragElt) 
-	throws UserErrorException{
+	throws ShutdownException{
 	merger.accumulate(accumElt, fragElt);
     }
 
     Element accumulateEmpty(Element fragElt, String accumTagName) 
-	throws UserErrorException {
+	throws ShutdownException {
 	return merger.accumulateEmpty(fragElt, accumTagName);
     }
 
@@ -285,7 +285,7 @@ class MergeTreeNode {
      * @return 
      */
     public void createLocalKeyValue(Element elt, MyStringBuffer localKeyVal)
-	throws UserErrorException {
+	throws ShutdownException {
 	localKey.createLocalKeyValue(elt, elt.getTagName(), localKeyVal);
 	return;
     }
@@ -306,7 +306,7 @@ class MergeTreeNode {
      */
     public void createLocalKeyValue(Element elt, String tagName,
 				    MyStringBuffer localKeyVal)
-	throws UserErrorException {
+	throws ShutdownException {
 	localKey.createLocalKeyValue(elt, tagName, localKeyVal);
 	return;
     }
@@ -332,14 +332,14 @@ class MergeTreeNode {
     // is now a list of string buffers
     public void createLocalKeyValues(Element elt, String tagName,
 				     ArrayStack localKeyValList)
-	throws UserErrorException {
+	throws ShutdownException {
 	localKey.createLocalKeyValues(elt, tagName, localKeyValList);
 	return;
     }
 
     /* same, but no tag name */
     public void createLocalKeyValues(Element elt, ArrayStack localKeyValList)
-	throws UserErrorException {
+	throws ShutdownException {
 	localKey.createLocalKeyValues(elt, elt.getTagName(), localKeyValList);
 	return;
     }

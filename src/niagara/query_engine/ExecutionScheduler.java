@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.19 2003/02/26 06:35:12 tufte Exp $
+  $Id: ExecutionScheduler.java,v 1.20 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -93,6 +93,10 @@ public class ExecutionScheduler {
 					       QueryInfo queryInfo) 
 	throws ShutdownException {
 
+	// Very first - set up the sendImmediate flags for
+	// the streams
+	setStreamFlags(optimizedTree);
+
 	// First create a Physical Head Operator to handle this query
 	// in the system, only need to do this when top node
 	// is SourceOp and can't function as head
@@ -108,6 +112,10 @@ public class ExecutionScheduler {
 					  + "-to-PhysicalHead");
 	    SourceTupleStream[] inputStreams = new SourceTupleStream[1];
 	    inputStreams[0] = new SourceTupleStream(opTreeOutput);
+
+	    if(optimizedTree.isSendImmediate()) {
+		outputStreams[0].setSendImmediate();
+	    }
 	    
 	    PhysicalHeadOperator headOperator = 
 		new PhysicalHeadOperator(queryInfo,
@@ -226,6 +234,23 @@ public class ExecutionScheduler {
 		opQueue.putOperator(physicalOperator);
 	    }
 	    nodesScheduled.put(node, physicalOperator);
+	}
+    }
+
+    private void setStreamFlags(SchedulablePlan node) {
+	
+	int numInputs = node.getArity();
+
+	// we want to do this processing bottom up, so
+	// make recursive call first, then take action
+	SchedulablePlan childPlan = null;
+	for (int child = 0; child < numInputs; child++) {
+	    childPlan = node.getInput(child);
+	    setStreamFlags(childPlan);
+	}
+
+	if(numInputs == 1 && childPlan.isSendImmediate()) {
+	    node.setSendImmediate();
 	}
     }
 }

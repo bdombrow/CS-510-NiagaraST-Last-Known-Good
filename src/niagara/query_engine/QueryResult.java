@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.11 2003/02/26 06:35:12 tufte Exp $
+  $Id: QueryResult.java,v 1.12 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -314,7 +314,7 @@ public class QueryResult {
 	    // If the query is still active then kill it
 	    if (!errorInExecution && !endOfStream) {	    
 		// Dont worry about error, just attempt to put control message
-		outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "execution error");	 
+		outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "kill query"); 
 		// Note that the query is in error
 		errorInExecution = true;
 	    }
@@ -347,7 +347,7 @@ public class QueryResult {
 	throws InterruptedException,
 	       ResultsAlreadyReturnedException,
 	       ShutdownException {
-	
+
 	// Create a new result object
 	ResultObject resultObject;
 	if(!NiagraServer.QUIET) {
@@ -519,8 +519,19 @@ public class QueryResult {
 		    newElt.appendChild(txt);
 		    resultDocument.appendChild(newElt);
 		    return resultDocument;
+		} else if (lastAttribute instanceof Text) {
+		    Document resultDocument = DOMFactory.newDocument();
+		    // create an element from the attribute
+		    Element newElt = 
+			resultDocument.createElement("Text");
+		    Text txt =
+			resultDocument.createTextNode(lastAttribute.getNodeValue());
+		    newElt.appendChild(txt);
+		    resultDocument.appendChild(newElt);
+		    return resultDocument;
 		} else {
-		    throw new PEException("KT What did I get??");
+		    throw new PEException("KT What did I get?? " +
+					  lastAttribute.getClass().getName());
 		}
     }
 

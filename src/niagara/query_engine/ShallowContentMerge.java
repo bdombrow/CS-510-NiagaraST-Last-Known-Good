@@ -205,7 +205,7 @@ class ShallowContentMerge extends MergeObject {
      * @return Returns nothing.
      */
     void accumulate(Element accumElt, Element fragElt) 
-	throws UserErrorException{
+	throws ShutdownException{
 	/* traverse through all attributes and content - if an attribute 
 	 * value (or node content) matches, no action.  If a new 
 	 * attribute/content is found in fragElt, it is inserted into 
@@ -218,7 +218,7 @@ class ShallowContentMerge extends MergeObject {
     }
 
     Element accumulateEmpty(Element fragElt, String accumTagName) 
-	throws UserErrorException{
+	throws ShutdownException{
 	/* traverse through all attributes and content - if an attribute 
 	 * value (or node content) matches, no action.  If a new 
 	 * attribute/content is found in fragElt, it is inserted into 
@@ -248,7 +248,7 @@ class ShallowContentMerge extends MergeObject {
      */
     Element merge(Element lElt, Element rElt, Document resDoc,
 		  String tagName) 
-	throws UserErrorException {
+	throws ShutdownException {
 
 	Element resElt = resDoc.createElement(tagName);
 	internal_merge(rElt, lElt, resElt);
@@ -272,7 +272,7 @@ class ShallowContentMerge extends MergeObject {
      */
     private void internal_merge(Element lElt, Element rElt, 
 				Element resElt) 
-	throws UserErrorException {
+	throws ShutdownException {
 
 	/* first some setup */
 	leftElt = lElt;
@@ -311,7 +311,7 @@ class ShallowContentMerge extends MergeObject {
      * Maybe should turn this into a HashJoin class...
      */
     private void mergeAttributes() 
-	throws UserErrorException {
+	throws ShutdownException {
 	/* create hash maps from the attributes - I don't use
 	 * NamedNodeMap because I don't want attributes with
 	 * default values to be replaced, and because I don't
@@ -501,7 +501,7 @@ class ShallowContentMerge extends MergeObject {
     
 
     private void mergeContent() 
-	throws UserErrorException {
+	throws ShutdownException {
 	contentMerge.merge(leftElt, rightElt, resultElt);
 	return;
     }

@@ -1,4 +1,4 @@
-/* $Id: PhysicalIncrementalGroup.java,v 1.5 2002/12/10 01:17:45 vpapad Exp $ */
+/* $Id: PhysicalIncrementalGroup.java,v 1.6 2003/03/03 08:20:13 tufte Exp $ */
 package niagara.query_engine;
 
 import java.util.*;
@@ -73,7 +73,7 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
     protected void nonblockingProcessSourceTupleElement(
         StreamTupleElement tuple,
         int streamId)
-        throws ShutdownException, InterruptedException, UserErrorException {
+        throws ShutdownException, InterruptedException {
         String hash = hasher.hashKey(tuple);
 
         // Have we seen this group before?

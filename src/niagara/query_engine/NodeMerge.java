@@ -84,7 +84,7 @@ abstract class NodeMerge {
      *         no updates need to be made based on this merge
      */
     abstract boolean merge(Node lNode, Node rNode, Node resultNode)
-	throws UserErrorException;
+	throws ShutdownException;
 
     /**
      * Function to set name for this node merge object

@@ -1,5 +1,5 @@
 /*
-  $Id: PhysicalPrefix.java,v 1.2 2003/02/26 06:35:12 tufte Exp $
+  $Id: PhysicalPrefix.java,v 1.3 2003/03/03 08:20:13 tufte Exp $
 */
 
 package niagara.query_engine;
@@ -52,9 +52,9 @@ public class PhysicalPrefix extends PhysicalOperator {
     protected void nonblockingProcessSourceTupleElement(
         StreamTupleElement inputTuple,
         int streamId)
-        throws ShutdownException, InterruptedException {
+        throws ShutdownException, InterruptedException, OperatorDoneException {
         if (!inputTuple.isPartial() && ++tuplesPassed > length) {
-            throw new ShutdownException("Query shut down by Prefix Operator");
+	    throw new OperatorDoneException();
 	}
         else
             putTuple(inputTuple, 0);

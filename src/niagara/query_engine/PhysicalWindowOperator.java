@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowOperator.java,v 1.1 2003/02/05 21:17:50 jinli Exp $
+  $Id: PhysicalWindowOperator.java,v 1.2 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -141,7 +141,7 @@ public abstract class PhysicalWindowOperator extends PhysicalGroupOperator {
     protected final void blockingProcessSourceTupleElement (
 					 StreamTupleElement tupleElement,
 					 int streamId) 
-    throws UserErrorException, ShutdownException {
+    throws ShutdownException {
 
 	if (range > 0) {	
 		this.updateWindowStatus (tupleElement, streamId);
@@ -231,7 +231,7 @@ public abstract class PhysicalWindowOperator extends PhysicalGroupOperator {
      */
     
     protected void windowResults ()   
-	throws UserErrorException, ShutdownException {
+	throws ShutdownException {
 	
 	int size = 0;
 	try {

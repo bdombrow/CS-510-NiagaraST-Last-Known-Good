@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.11 2003/02/28 05:27:34 vpapad Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.12 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -66,6 +66,7 @@ public class PhysicalNLJoinOperator extends PhysicalJoin {
                 join.getNonEquiJoinPredicate());
 
         predEval = joinPredicate.getImplementation();
+	initExtensionJoin(join);
     }
 
     /**
@@ -83,32 +84,45 @@ public class PhysicalNLJoinOperator extends PhysicalJoin {
         StreamTupleElement tupleElement,
         int streamId)
         throws ShutdownException, InterruptedException {
-        // First add the tuple element to the appropriate source stream
-        //
-        if (tupleElement.isPartial()) {
-            partialSourceTuples[streamId].add(tupleElement);
-        } else {
-            finalSourceTuples[streamId].add(tupleElement);
-        }
 
         // Determine the id of the other stream
         int otherStreamId = 1 - streamId;
+	boolean producedResult;
 
         // Now loop over all the partial elements of the other source 
         // and evaluate the predicate and construct a result tuple 
         // if the predicate is satsfied
-        constructJoinResult(
-            tupleElement,
-            streamId,
-            partialSourceTuples[otherStreamId]);
+        producedResult = constructJoinResult(tupleElement,
+					     streamId,
+					     partialSourceTuples[otherStreamId]);
+
+	// Extension join note: Extension join indicates that we
+	// expect an extension join with referential integrity 
+	// meaning that tuples on the denoted extension join side
+	// join only with one tuple from the other side, if I
+	// join with a tuple, in partial, no need to check final
+	// if I join with tuple from partial or final, no need
+	// to insert in tuple list
 
         // Now loop over all the final elements of the other source 
         // and evaluate the predicate and construct a result tuple 
         // if the predicate is satisfied
-        constructJoinResult(
-            tupleElement,
-            streamId,
-            finalSourceTuples[otherStreamId]);
+	if(!extensionJoin[streamId] || !producedResult) {
+	    producedResult = constructJoinResult(tupleElement,
+						 streamId,
+					      finalSourceTuples[otherStreamId]);
+	}
+
+        // First add the tuple element to the appropriate source stream
+        //
+	if(!extensionJoin[streamId] || !producedResult) {
+	    if (tupleElement.isPartial()) {
+		partialSourceTuples[streamId].add(tupleElement);
+	    } else {
+		finalSourceTuples[streamId].add(tupleElement);
+	    }
+	} 
+
     }
 
     /**
@@ -138,20 +152,22 @@ public class PhysicalNLJoinOperator extends PhysicalJoin {
      *
      */
 
-    private void constructJoinResult(
+    private boolean constructJoinResult(
         StreamTupleElement tupleElement,
         int streamId,
-        ArrayList sourceTuples)
+        ArrayList otherSourceTuples)
         throws ShutdownException, InterruptedException {
+
+	boolean producedResult = false; 
+
         // Loop over all the elements of the other source stream and
         // evaluate the predicate and construct a result tuple if the
         // predicate is satisfied
         //
-        int numTuples = sourceTuples.size();
 
-        for (int tup = 0; tup < numTuples; ++tup) {
+        for (int tup = 0; tup < otherSourceTuples.size(); ) {
             StreamTupleElement otherTupleElement =
-                (StreamTupleElement) sourceTuples.get(tup);
+                (StreamTupleElement) otherSourceTuples.get(tup);
 
             // Make the right order for predicate evaluation
             StreamTupleElement leftTuple;
@@ -165,10 +181,26 @@ public class PhysicalNLJoinOperator extends PhysicalJoin {
                 rightTuple = tupleElement;
             }
 
+	    boolean removed = false;
             // Check whether the predicate is satisfied
-            if (predEval.evaluate(leftTuple, rightTuple))
+            if (predEval.evaluate(leftTuple, rightTuple)) {
                 produceTuple(leftTuple, rightTuple);
+		producedResult = true;
+		if(extensionJoin[1-streamId]) {
+		    // in extension join, know that tuple
+		    // needs to be removed once it has joined
+		    // we can return since we know will join with no more tuples
+		    otherSourceTuples.remove(tup);
+		    System.out.println("KT removing tuple " + (1-streamId));
+		    removed = true;
+		}
+		if(extensionJoin[streamId])
+		    return producedResult;
+	    }
+	    if(!removed)
+		tup++;
         }
+	return producedResult;
     }
 
     public boolean isStateful() {
@@ -213,6 +245,7 @@ public class PhysicalNLJoinOperator extends PhysicalJoin {
         PhysicalNLJoinOperator op = new PhysicalNLJoinOperator();
         op.joinPredicate = joinPredicate;
         op.predEval = predEval;
+	op.extensionJoin = extensionJoin;
         return op;
     }
 

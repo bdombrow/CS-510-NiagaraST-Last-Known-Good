@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.24 2003/02/26 06:35:12 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.25 2003/03/03 08:20:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,6 +64,8 @@ implements SchemaProducer, SerializableToXML, Initializable {
 
     //The required responsiveness to control messages
     private int responsiveness;
+    private int timeouts;
+    private int numTimeoutsToFlushBuffer;
 
     //  The vector of open source streams to read from 
     // active means we are currently reading from that stream,
@@ -140,6 +142,17 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    activeSourceStreams.add(src);
 	}
 
+	if(isSendImmediate) {
+	    assert numSinkStreams == 1 : "KT - Is it OK if there is more than one sink?";
+	    for (int i = 0; i < numSinkStreams; i++) {
+		sinkStreams[i].setSendImmediate();
+	    }
+	}
+
+	// set up timeouts to ensure timely buffer flushing
+	timeouts = 0; 
+	numTimeoutsToFlushBuffer = 5;
+
 	// Start reading from the first input stream
 	lastReadSourceStream = 0;
     }
@@ -177,18 +190,26 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	SourceStreamsObject sourceObject = new SourceStreamsObject();
 
 	try {
+	    assert false : " Test ";
 	    // First initialize any necessary data structures etc. for the
 	    // operator, shut down if this fails
 	    initialize();
+	    boolean timedOut = false;
 
 	    // Loop by reading inputs and processing them until there is at
 	    // least one open input stream
 	    while (existsUnClosedSourceStream()) {	
+		numTimeoutsToFlushBuffer = 5* activeSourceStreams.size();
+		if(numTimeoutsToFlushBuffer == 0)
+		    throw new PEException("KT FIX THIS!!!");
+
 		// Read the object from any of the valid input streams,
 		// timing out if nothing available in any input stream
-		getFromSourceStreams(sourceObject);
+		// does use a timeout
+		getFromSourceStreams(sourceObject, timedOut);
 
 		if (!(sourceObject.tuple == null)) {
+		    timedOut = false;
 		    //If this is a punctuation, then handle it specially
 		    if (sourceObject.tuple.isPunctuation())
 			processPunctuation
@@ -208,11 +229,28 @@ implements SchemaProducer, SerializableToXML, Initializable {
 				 sourceObject.streamId);
 			}
 		    }
+		} else {
+		    timedOut = true;
 		}
 
-		// Now check to see whether there are any control elements from
-		// the sink streams and process them if so.
+		// Now check to see whether there are any control elements 
+		// from the sink streams and process them if so.
+		// no timeout here
 		checkForSinkCtrlMsg();
+
+		if(timeouts == numTimeoutsToFlushBuffer) {
+		    timeouts = 0;
+		    int ctrlFlag = CtrlFlags.NULLFLAG;
+		    int sinkId = 0;
+		    for (; sinkId < numSinkStreams && 
+			     ctrlFlag == CtrlFlags.NULLFLAG; sinkId++) {
+			sinkStreams[sinkId].flushBuffer();
+			
+		    }
+		    if(ctrlFlag != CtrlFlags.NULLFLAG) {
+			processCtrlMsgFromSink(ctrlFlag, sinkId);
+		    }
+		}
 	    } // end of while loop
 	} catch (java.lang.InterruptedException e) {
 	    shutDownOperator("Operator Interrupted");
@@ -223,14 +261,11 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    shutDownOperator(see.getMessage());
 	    internalCleanUp("shutdown exception");
 	    return;
-	} catch (UserErrorException uee) {
-	    // KT - really should propagate this error back to client,
-	    // however, for now will just print error message
-	    System.err.println("USER ERROR: " + uee.getMessage());
-	    uee.printStackTrace();
-	    shutDownOperator("User Error " + uee.getMessage());
-	    internalCleanUp("user error");
-	    return;	    
+	} catch (OperatorDoneException ode) {
+	    // shutdown sent to source streams, close/eos to sinks
+	    endOperator();
+	    internalCleanUp("operator done");
+	    return;
 	}
 
 	// shut down normally by closing sink streams and do
@@ -325,6 +360,40 @@ implements SchemaProducer, SerializableToXML, Initializable {
     }
 
     /**
+     * This function sends (best effort) shutdown messages to all
+     * source streams and eos/close messages to sink streams
+     * this will shutdown all source operators, but allow 
+     * sink operators to complete processing as if stream
+     * from this operator ended
+     */
+    private void endOperator () {	
+	shutdownTrigOp();
+
+	// try to close each sink stream, even if we get an error closing
+	// one stream, we still try to close all the rest
+	// ignore all errors since we are shutting down (this is
+	// abnormal shutdown - some error has occurred or user requested this)
+	for(int i = 0; i<numSourceStreams; i++) {
+	    if(!sourceStreams[i].isClosed()) {
+		try {
+		    sendCtrlMsgToSource(CtrlFlags.SHUTDOWN, null, i);
+		} catch(ShutdownException e) {
+		}
+	    }
+	}
+	for(int i = 0; i<numSinkStreams; i++) {
+	    try {
+		sinkStreams[i].endOfStream();
+	    } catch (InterruptedException e) {
+		// code in fcn above calls internalCleanUp
+		shutDownOperator("operator interrupted");
+	    } catch (ShutdownException se) {
+		shutDownOperator("operator interrupted");
+	    }
+	}
+    }
+
+    /**
      * This function reads from a set of source streams specified by
      * the variable activeSourceStreams and modifies sourceObject that
      * contains the source element read and the stream from which it was
@@ -339,13 +408,20 @@ implements SchemaProducer, SerializableToXML, Initializable {
      *            write to a previously closed stream
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void getFromSourceStreams (SourceStreamsObject sourceObject)
+    private void getFromSourceStreams (SourceStreamsObject sourceObject,
+				       boolean timedOutLastTime)
 	throws java.lang.InterruptedException, ShutdownException {
 	
 	// Get the number of source streams to read from
 	// and calculate the time out for each stream
 	int numActiveSourceStreams = activeSourceStreams.size();
-	int timeout = responsiveness/numActiveSourceStreams;
+	int timeout;
+	if(!timedOutLastTime) {
+	    timeout = 0;
+	} else {
+	    timeout = responsiveness/numActiveSourceStreams;
+	}
+	//timeout = responsiveness/numActiveSourceStreams;
 	
 	// Make sure the last read source stream is a valid index
 	if (lastReadSourceStream >= numActiveSourceStreams) {
@@ -380,6 +456,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 
 		// if we timed out, try the next stream
 		if(sourceStreams[streamId].timedOut()) {
+		    timeouts++;
 		    lastReadSourceStream = 
 			(lastReadSourceStream + 1)%numActiveSourceStreams;
 		    continue;
@@ -788,7 +865,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
      * This function initializes the data structures for an operator
      *
      */
-    private void initialize() {
+    private void initialize() throws ShutdownException {
 	if(isHeadOperator)
 	    // Set this thread in the query info object
 	    queryInfo.setHeadOperatorThread(Thread.currentThread());
@@ -848,7 +925,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
      * if an operator needs to do initialization, it should override
      * this function
      */
-    protected void opInitialize() {}
+    protected void opInitialize() throws ShutdownException {}
 
     /**
      * does operator keep state??
@@ -869,7 +946,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
     protected void nonblockingProcessSourceTupleElement (
 					StreamTupleElement tuple,
 					int streamId) 
-	throws ShutdownException, InterruptedException, UserErrorException {
+	throws ShutdownException, InterruptedException, OperatorDoneException {
 	throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
     }
 
@@ -881,9 +958,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
      *
-     * @exception UserErrorException User made a mistake - bad url, bad
-     *                                file, parse error in user-provided
-     *                                doc, etc.
      * @exception ShutdownException Shutdown due to execution error or 
      *            client request
      */
@@ -891,7 +965,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
     protected void blockingProcessSourceTupleElement (
 						 StreamTupleElement tuple,
 						 int streamId) 
-	throws UserErrorException, ShutdownException {
+	throws ShutdownException {
 	throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
     }
 
@@ -964,7 +1038,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    if(queryInfo.removeFromActiveQueries()) {
 		queryInfo.removeFromActiveQueryList();
 	    }
-	    // need to send message to client??
 	}   
         cleanUp();
     }

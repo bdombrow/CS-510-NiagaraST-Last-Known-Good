@@ -42,7 +42,7 @@ class NoContentNodeMerge extends NodeMerge {
      *         no updates need to be made based on this merge
      */
     boolean merge(Node lNode, Node rNode, Node resultNode) 
-	throws UserErrorException {
+	throws ShutdownException {
 
 	return false;
     }

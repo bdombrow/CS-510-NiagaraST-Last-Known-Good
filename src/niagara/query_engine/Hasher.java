@@ -1,4 +1,4 @@
-/* $Id: Hasher.java,v 1.7 2003/02/25 06:10:25 vpapad Exp $ */
+/* $Id: Hasher.java,v 1.8 2003/03/03 08:20:13 tufte Exp $ */
 package niagara.query_engine;
 
 import niagara.optimizer.colombia.Attribute;
@@ -59,8 +59,9 @@ public class Hasher {
 	    evaluators[att].getAtomicValues(tupleElement, null, values[att]);
 
 	    // If there is not exactly one atomic value, then it is an error
-	    if (values[att].size() != 1)
-		throw new PEException("More than one atomic value in hashCode eval");
+	    if (values[att].size() != 1) {
+		throw new PEException("More than one atomic value in hashCode eval " + values[att].size());
+	    }
 
 	    // Add the atomic value (a string) to the current result
 	    hashResult.append('<');

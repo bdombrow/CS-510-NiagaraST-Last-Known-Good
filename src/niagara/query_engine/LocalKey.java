@@ -1,4 +1,4 @@
-// $Id: LocalKey.java,v 1.9 2003/02/25 06:10:25 vpapad Exp $
+// $Id: LocalKey.java,v 1.10 2003/03/03 08:20:13 tufte Exp $
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -167,7 +167,7 @@ public class LocalKey {
      */
     void createLocalKeyValue(Element elt, String tagName, 
 			     MyStringBuffer localKeyVal) 
-	throws UserErrorException {
+	throws ShutdownException {
 
 	//localKeyVal.quickReset();
 	localKeyVal.setLength(0); // reset for safety
@@ -203,9 +203,9 @@ public class LocalKey {
 		
 		if(reachableNodes.size() == 0) {
 		    DOMHelper.printElt(elt);
-		    throw new UserErrorException("Document is not key-complete. Elt tagname " + tagName + " " + elt.getTagName());
+		    throw new ShutdownException("Document is not key-complete. Elt tagname " + tagName + " " + elt.getTagName());
 		} else  if(reachableNodes.size() != 1) {
-		throw new UserErrorException("Matches not allowed on set values when path is not singular. tagname " + tagName);
+		throw new ShutdownException("Matches not allowed on set values when path is not singular. tagname " + tagName);
 		}
 		// localKeyVal.push(getKeyValue(atomicKey,
 		//                              (Node)reachbleNodes.get(0)));
@@ -239,7 +239,7 @@ public class LocalKey {
      */
     public void createLocalKeyValues(Element elt, String tagName,
 				     ArrayStack localKeyValList)
-	throws UserErrorException {
+	throws ShutdownException {
 	
 	localKeyValList.quickReset();
 
@@ -274,7 +274,7 @@ public class LocalKey {
 	    
 	    int numNodes = reachableNodes.size();
 	    if(numNodes == 0) {
-		throw new UserErrorException("Document is not key-complete. Elt tagname " + tagName);
+		throw new ShutdownException("Document is not key-complete. Elt tagname " + tagName);
 	    }
 	    
 	    for(int i =0; i<numNodes; i++) {

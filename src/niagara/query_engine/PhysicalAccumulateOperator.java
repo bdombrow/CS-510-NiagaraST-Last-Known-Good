@@ -1,4 +1,4 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.18 2003/02/25 06:10:25 vpapad Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.19 2003/03/03 08:20:13 tufte Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -97,7 +97,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     protected void blockingProcessSourceTupleElement(
         StreamTupleElement tupleElement,
         int streamId)
-        throws ShutdownException, UserErrorException {
+        throws ShutdownException {
 
 	if(MergeTree.TRACE)
 	    System.out.println("KT: Phys Accum Processing Tuple");
@@ -177,7 +177,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     }
 
     private Element convertAttrToElement(StreamTupleElement tupleElement)
-        throws UserErrorException {
+        throws ShutdownException {
         Object attr = tupleElement.getAttribute(mergeIndex);
 
         Element domElt;
@@ -194,11 +194,11 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
              * So what I do is just throw an exception
              */
             if (domElt == null) {
-                throw new UserErrorException("Got null document element - must mean there is a parsing problem with the fragment");
+                throw new ShutdownException("Got null document element - must mean there is a parsing problem with the fragment");
             }
 
         } else {
-            throw new UserErrorException("Invalid instance type");
+            throw new ShutdownException("Invalid instance type");
         }
 
         return domElt;

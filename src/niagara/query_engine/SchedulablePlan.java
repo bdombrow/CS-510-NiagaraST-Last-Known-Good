@@ -1,4 +1,4 @@
-/* $Id: SchedulablePlan.java,v 1.2 2003/02/25 06:10:26 vpapad Exp $ */
+/* $Id: SchedulablePlan.java,v 1.3 2003/03/03 08:20:13 tufte Exp $ */
 package niagara.query_engine;
 
 import niagara.data_manager.DataManager;
@@ -26,4 +26,7 @@ public interface SchedulablePlan {
     throws ShutdownException;
     
     int getNumberOfOutputs();
+
+    boolean isSendImmediate();
+    void setSendImmediate();
 }

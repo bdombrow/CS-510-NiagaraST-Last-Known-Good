@@ -236,7 +236,7 @@ public class MergeTree {
      */
 
     void accumulate(Element fragment)
-	throws UserErrorException {
+	throws ShutdownException {
 
 	/*
          * make it left and right frag and make treewalking code
@@ -299,7 +299,7 @@ public class MergeTree {
 				  MyStringBuffer accumEltKeyVal,
 				  Element fragElt, 
 				  MergeTreeNode mergeTreeNode)
-	throws UserErrorException {
+	throws ShutdownException {
 
 	boolean isBottom = true;
 	Element accumElt = accumEltArg;
@@ -496,7 +496,7 @@ public class MergeTree {
 					   MyStringBuffer parentKeyVal,
 					   String tagName, 
 					   MergeTreeNode mergeTreeNode) 
-	throws UserErrorException {
+	throws ShutdownException {
 
 	if(mergeTreeNode.isNever()) {
 	    return;
@@ -557,7 +557,7 @@ public class MergeTree {
 					MyStringBuffer parentKeyVal,
 					MergeTreeNode mergeTreeNode,
 					boolean multiKey) 
-	throws UserErrorException {
+	throws ShutdownException {
 
 	if(TRACE) {
 	    System.out.println("KT AddChildToRootedKeyMap " + 

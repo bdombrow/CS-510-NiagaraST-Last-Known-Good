@@ -1,10 +1,11 @@
-/* $Id: PhysicalJoin.java,v 1.1 2002/12/10 01:17:45 vpapad Exp $ */
+/* $Id: PhysicalJoin.java,v 1.2 2003/03/03 08:20:13 tufte Exp $ */
 package niagara.query_engine;
 
 import niagara.logical.Predicate;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.utils.ShutdownException;
 import niagara.utils.StreamTupleElement;
+import niagara.utils.PEException;
 import niagara.xmlql_parser.op_tree.joinOp;
 
 /** Common functionality for join implementations */
@@ -17,6 +18,7 @@ abstract public class PhysicalJoin extends PhysicalOperator {
 
     /** All predicates */
     protected Predicate joinPredicate;
+    protected boolean extensionJoin[];
 
     public final void initFrom(LogicalOp logicalOperator) {
         joinOp join = (joinOp) logicalOperator;
@@ -67,6 +69,35 @@ abstract public class PhysicalJoin extends PhysicalOperator {
             leftAttributeMap = inputSchemas[0].mapPositions(outputTupleSchema);
             rightAttributeMap = inputSchemas[1].mapPositions(outputTupleSchema);
         }
+    }
+
+    protected void initExtensionJoin(joinOp join) {
+	if(extensionJoin == null)
+	    extensionJoin = new boolean[2];
+	
+	switch(join.getExtensionJoin()) {
+	case joinOp.LEFT:
+	    extensionJoin[0] = true;
+	    extensionJoin[1] = false;
+	    break;
+	case joinOp.RIGHT:
+	    extensionJoin[0] = false;
+	    extensionJoin[1] = true;
+	    break;
+
+	case joinOp.BOTH:
+	    extensionJoin[0] = true;
+	    extensionJoin[1] = true;
+	    break;
+
+	case joinOp.NONE:
+	    extensionJoin[0] = false;
+	    extensionJoin[1] = false;
+	    break;
+	default:
+	    throw new PEException("Invalid extension join value");
+	}
+	return;
     }
     
     
