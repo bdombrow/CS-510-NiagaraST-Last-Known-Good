@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: predicate.java,v 1.3 2001/07/17 06:53:29 vpapad Exp $
+  $Id: predicate.java,v 1.4 2002/10/06 22:29:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,7 +40,7 @@ import java.util.*;
 
 import org.w3c.dom.*;
 
-public abstract class predicate extends condition {
+public abstract class predicate implements condition {
 
 //    Operators 	-- opType.AND, opType.OR, opType.NOT, 
 //			   opType.EQ, opType.NEQ, opType.GEQ,

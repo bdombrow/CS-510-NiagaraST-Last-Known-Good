@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: inClause.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: inClause.java,v 1.2 2002/10/06 22:29:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,7 +40,7 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
-public class inClause extends condition {
+public class inClause implements condition {
 	private pattern pat;   // pattern with the element names
 	private Vector source; // source of data to query
 	private String dtdType;// dtd type of documents to query (optional)

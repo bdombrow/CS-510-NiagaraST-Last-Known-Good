@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: set.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: set.java,v 1.2 2002/10/06 22:29:02 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,7 +37,7 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
-public class set extends condition {
+public class set implements condition {
 	private Vector set;     // list of identifiers (author and editor in
 			        //        the above example)
 	private String var;     // the set variable ($A in the above example)

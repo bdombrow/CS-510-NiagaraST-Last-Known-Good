@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: condition.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: condition.java,v 1.2 2002/10/06 22:29:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,6 +37,6 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
-public abstract class condition {
-	abstract public void dump(int i);
+public interface condition {
+	void dump(int i);
 }
