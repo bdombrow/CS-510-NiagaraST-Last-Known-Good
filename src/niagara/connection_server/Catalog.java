@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.2 2001/08/08 21:25:05 tufte Exp $
+ * $Id: Catalog.java,v 1.3 2002/03/26 22:04:28 vpapad Exp $
  *
  */
 
@@ -174,15 +174,6 @@ public class Catalog {
                 cerr("\t" + resolvables.get(i));
             }
         }
-    }
-
-    public static void main(String args[]) {
-        if (args.length != 1) {
-            cerr("usage: java niagara.connection_server.Catalog <catalog file name");
-            System.exit(-1);
-        }
-        Catalog c = new Catalog(args[0]);
-        c.dumpStats();
     }
 }
 

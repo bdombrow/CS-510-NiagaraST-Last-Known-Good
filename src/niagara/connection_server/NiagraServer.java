@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.6 2001/07/17 07:06:06 vpapad Exp $
+  $Id: NiagraServer.java,v 1.7 2002/03/26 22:04:28 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,6 +39,8 @@ import niagara.trigger_engine.TriggerManager;
 import niagara.query_engine.QueryEngine;
 import niagara.ndom.DOMFactory;
 
+import niagara.ndom.saxdom.BufferManager;
+
 import java.net.InetAddress;
 
 // For Jetty Servlet engine
@@ -61,6 +63,8 @@ public class NiagraServer
     private static int NUM_OP_THREADS;
 
     private static boolean connectToSE = true;
+
+    private static boolean useSAXDOM = false;
 
     // Defaults
     private static int DEFAULT_QUERY_THREADS = 10;
@@ -273,21 +277,17 @@ public class NiagraServer
                     NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS; // hard wired defaults
                     NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
                     valid_args = true;
-                }
-                else if (args[i].equals("-dtd-hack")) {
+                } else if (args[i].equals("-dtd-hack")) {
                     dtd_hack = true;
                     valid_args = true;
-                }
-                else if (args[i].equals("-console")) {
+                } else if (args[i].equals("-console")) {
                     startConsole = true;
                     valid_args = true;
-                }
-                else if (args[i].equals("-client-port")) {
+                } else if (args[i].equals("-client-port")) {
                     if ((i+1) >= args.length) {
                         cerr("Please supply a parameter to -client-port");
                         usage();
-                    }
-                    else {
+                    } else {
                         try {
                             client_port = Integer.parseInt(args[i+1]);
                         }
@@ -338,8 +338,14 @@ public class NiagraServer
                     i++; // Cover for argument
                     valid_args = true;
                 }
+                else if (args[i].equals("-saxdom")) {
+                    // XXX vpapad: number of pages and page size
+                    // should be a user-settable parameter
+                    BufferManager.createBufferManager(1024, 256);
+                    useSAXDOM = true;
 
-
+                    valid_args = true;
+                }
             }
             if (valid_args) return;
         }
@@ -441,7 +447,8 @@ public class NiagraServer
         cout("\t-client-port <number> Port number for client-server communication");
         cout("\t-server-port <number> Port number for inter-server communication");
         cout("\t-catalog <file> Catalog file.");
-        cout("\t-dom  <file> Default DOM implementation.");
+        cout("\t-dom  <implementation name> Default DOM implementation.");
+        cout("\t-saxdom  Use SAXDOM for input documents.");
         cout("\t-help   print this help screen");
         System.exit(-1);
     }
@@ -471,6 +478,10 @@ public class NiagraServer
         }
 
         return ret;
+    }
+
+    public static boolean usingSAXDOM() {
+        return useSAXDOM;
     }
 
     public static Catalog getCatalog() {
