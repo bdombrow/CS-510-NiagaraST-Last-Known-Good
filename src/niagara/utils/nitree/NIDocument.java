@@ -36,7 +36,7 @@ public class NIDocument extends NINode {
 
     private MapTable mapTable; 
     private Document domDoc;
-
+    static private int MAX_WR_ARRAY_SIZE = 300000;
     /*
      * permission flags (for copy on write) are kept in the NIDocument so it is
      * easy to set/unset all of a tree's permissions at one time
@@ -44,7 +44,9 @@ public class NIDocument extends NINode {
      * WeakReferences so that the Boolean writeable bits go away when
      * no NINode references them anymore
      */
-    private ArrayList writeableWR;
+    /*private ArrayList writeableWR; */
+    private boolean[] writeable;
+    private int wrIndex;
     private boolean initialized;
 
     /* 
@@ -60,7 +62,9 @@ public class NIDocument extends NINode {
 	mapTable = null;
 	domDoc = null;
 	initialized = false;
-	writeableWR = new ArrayList();
+	/*writeableWR = new ArrayList(); */
+	writeable = new boolean[MAX_WR_ARRAY_SIZE];
+	wrIndex = 0;
 	pw = new PrintWriter(System.out);
         return;
     }
@@ -91,14 +95,18 @@ public class NIDocument extends NINode {
      * much memory
      */
     public void globalSetWriteableFalse() {
-	int size = writeableWR.size();
+    for(int i=0; i<wrIndex; i++) {
+        writeable[i] = false;
+    }
+	/*int size = writeableWR.size(); 
+	System.out.println("gswf size " + String.valueOf(size));
 	for(int i = 0; i<size; i++) {
 	    BooleanHolder tmp = 
 		(BooleanHolder)((WeakReference)writeableWR.get(i)).get();
 	    if(tmp == null) {
-		/* this reference has been cleared (object referred to
+		* this reference has been cleared (object referred to
 		 * is no longer in use), so take it out of the list
-		 */
+		 *
 		writeableWR.remove(i);
 		size--;
 		i--;
@@ -106,8 +114,15 @@ public class NIDocument extends NINode {
 		tmp.setValue(false);
 	    }
 	}
-	return;
+	return; */
     }
+
+    /* indicates the value of the writeable array at the
+     * specified index
+     */
+   boolean isWriteable(int idx) {
+       return writeable[idx];
+   }
 
     /* 
      * returns the Dom Document associated with this NIDocument
@@ -256,11 +271,16 @@ public class NIDocument extends NINode {
 	 */
 	BooleanHolder tmp;
 	synchronized (this) {
-	    tmp = new BooleanHolder(true);
-	    writeableWR.add(new WeakReference(tmp));
+	   /* tmp = new BooleanHolder(true);
+	    writeableWR.add(new WeakReference(tmp)); */
+            writeable[wrIndex]=true;
 	}
 
-	niElt.initialize((TXElement)domElement, tmp, this);
+	niElt.initialize((TXElement)domElement, wrIndex, this);
+	wrIndex++;
+	if(wrIndex >= MAX_WR_ARRAY_SIZE) {
+           throw new PEException("This SUCKS!! writeable array bigger than " + String.valueOf(MAX_WR_ARRAY_SIZE) + " elements !!");
+	}
 
 	/* and insert into the map table to make association */
 	mapTable.insert(domElement, niElt);
