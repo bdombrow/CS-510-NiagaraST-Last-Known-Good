@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ExpressionOp.java,v 1.1 2000/08/21 00:38:37 vpapad Exp $
+  $Id: ExpressionOp.java,v 1.2 2000/08/28 22:05:51 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,6 +33,8 @@
  */
 
 package niagara.xmlql_parser.op_tree;
+
+import java.util.HashMap;
 
 public class ExpressionOp extends unryOp {
 
@@ -70,6 +72,34 @@ public class ExpressionOp extends unryOp {
      */
     public void setExpressionClass(Class expressionClass) {
 	this.expressionClass = expressionClass;
+    }
+
+    boolean interpreted;     
+    // If interpreted is set to true, this is the expression
+    // (containing variables) that we have to interpret
+    String expression; 
+
+    public void setExpression(String expression) {
+        interpreted = true;
+	this.expression = expression;
+    }
+
+    public String getExpression() {
+	return expression;
+    }
+
+    public boolean isInterpreted() {
+	return interpreted;
+    }
+
+    HashMap varTable;
+
+    public void setVarTable(HashMap varTable) {
+	this.varTable = varTable;
+    }
+
+    public HashMap getVarTable() {
+	return varTable;
     }
 
     public Class getExpressionClass() {
