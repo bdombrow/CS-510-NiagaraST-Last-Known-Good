@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.5 2002/04/29 19:54:57 tufte Exp $
+  $Id: StreamTupleElement.java,v 1.6 2002/09/24 23:19:37 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,18 +40,18 @@ package niagara.utils;
 import java.util.Vector;
 import org.w3c.dom.*;
 
-public final class StreamTupleElement {
+public class StreamTupleElement {
 
     // Members to create an expandable array of nodes
-    private Node tuple[];
-    private int allocSize;
-    private int tupleSize;
+    protected Node tuple[];
+    protected int allocSize;
+    protected int tupleSize;
 
     // A boolean flag that indicates whether this tuple represents
     // a (potentially) partial result
     //
-    private boolean partial;
-    private long timeStamp;
+    protected boolean partial;
+    protected long timeStamp;
 
     /*
      * Constructor that initializes a tuple
@@ -61,6 +61,7 @@ public final class StreamTupleElement {
      */
 
     public StreamTupleElement (boolean partial) {
+
 	// Initialize the tuple vector with the capacity
 	createTuple(8);
         timeStamp = 0;
@@ -77,7 +78,7 @@ public final class StreamTupleElement {
      */
 
     public StreamTupleElement (boolean partial, int capacity) {
-	
+
 	// Initialize the tuple vector with the capacity
 	createTuple(capacity);
         timeStamp = 0;
@@ -149,6 +150,10 @@ public final class StreamTupleElement {
 
     public boolean isPartial () {
 	return partial;
+    }
+
+    public boolean isPunctuation() {
+	return false;
     }
 
     public long getTimeStamp() {
@@ -305,6 +310,7 @@ public final class StreamTupleElement {
     }
 
     public StreamTupleElement(Element ele) {
+
         if(ele.getAttribute("PARTIAL").equals("TRUE")) 
             partial = true;
         else partial = false;

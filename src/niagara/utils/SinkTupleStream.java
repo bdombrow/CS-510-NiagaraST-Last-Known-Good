@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.2 2002/05/07 03:11:13 tufte Exp $
+  $Id: SinkTupleStream.java,v 1.3 2002/09/24 23:19:37 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -177,8 +177,21 @@ public final class SinkTupleStream {
      */
     public void put(Node node) 
         throws java.lang.InterruptedException, ShutdownException {
-        // First create a tuple that is not a partial result
-        StreamTupleElement tuple = new StreamTupleElement(false, 1);
+
+	StreamTupleElement tuple = null;
+
+	//Let's see if this is a punctuation or not
+	Node child = node.getFirstChild();
+	if (child != null) {
+	    //It will be a punctuation if it prefixed with "punct:"
+	    if (child.getPrefix() != null &&
+		child.getPrefix().equals(StreamPunctuationElement.STPUNCTNS))
+		tuple = new StreamPunctuationElement(false, 1);
+	}
+
+	if (tuple == null)
+	    // create a tuple that is not a partial result
+	    tuple = new StreamTupleElement(false, 1);
 
         // Add the object as an attribute of the tuple
         tuple.appendAttribute(node);
