@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.16 2003/01/25 20:56:39 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.17 2003/02/26 06:33:56 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -114,7 +114,18 @@ public class ResultTransmitter implements Runnable {
 	    else 
 		throw new PEException("Invalid query type");
 	} catch (ShutdownException se) {
-	    // don't think there is anything to do
+	    // send error message to client...
+	    response = 
+		new ResponseMessage(request,
+				    ResponseMessage.EXECUTION_ERROR);
+	    System.out.println("se message " + se.getMessage());
+	    response.setData("Message: " + se.getMessage());
+	    try {
+		handler.sendResponse(response);
+	    } catch (IOException ioe) {
+		// nothing to be done, we did our best
+		System.err.println("KT unable to send error message to client - io error: " + ioe.getMessage());
+	    }
 	} catch (InterruptedException ie) {
 	    // ditto...
 	} catch (IOException ioe) {
