@@ -1,4 +1,4 @@
-/* $Id: DOLTOEURExpression.java,v 1.2 2003/07/27 02:35:16 tufte Exp $ */
+/* $Id: DOLTOEURExpression.java,v 1.3 2003/09/30 21:28:05 ptucker Exp $ */
 package niagara.query_engine;
 
 import niagara.xmlql_parser.op_tree.*;
@@ -14,9 +14,9 @@ public class DOLTOEURExpression implements ExpressionIF {
     private int pricePos;
     private static Locale loc = new Locale("fr");
     private static NumberFormat nf = NumberFormat.getCurrencyInstance(loc);
+	private Document doc = DOMFactory.newDocument();
 
     public Node processTuple(StreamTupleElement ste) {
-        Document doc = DOMFactory.newDocument();
         Node priceNode = ste.getAttribute(pricePos);
         if(priceNode == null)
         	return null;
