@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<!-- "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd" -->
+
+<plan top="fh">
+
+<firehosescan id="fh" host="localhost" port="5000" rate="0" datatype="packet" num_gen_calls="1" streaming="yes" desc="/local/Niagara/NiagaraCVS/firehose_1_0/mashmaro/mashmaro.trace:dst:port:80:IP:SI:IP:TCP:SP:TCP:HTTP:MD:URL:R:HTTP" desc2="false" num_tl_elts="10" >
+</firehosescan>
+
+</plan>
+
+

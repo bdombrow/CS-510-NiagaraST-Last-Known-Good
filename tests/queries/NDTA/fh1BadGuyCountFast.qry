@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+<!--First, get a count for each incoming source IP -->
+<firehosescan id="fhTrace" datatype="packet" rate="0"
+	host="localhost" port="5000" streaming="yes"
+	desc="/local/Niagara/NiagaraCVS/firehose_1_0/mashmaro/mashmaro.trace:src:host:12.224.243.155:or:src:host:129.95.51.101:or:src:host:68.113.32.14:or:src:host:12.250.178.44:or:src:host:129.95.50.116"
+	desc2="false" num_gen_calls="-1" num_tl_elts="100"/>
+<scan id="inip" regexp="PS.P.IP.SI" input="fhTrace"/>
+<count id="count" groupby="$inip" countattr="$inip" input="inip"/>
+
+<!--Now, read in the suspect file-->
+<dtdscan id="suspect">
+   <url value="http://www.cse.ogi.edu/~ptucker/SuspectIP.xml"/>
+</dtdscan>
+<scan id="insus" regexp="Suspects.Suspect" input="suspect"/>
+<scan id="susip" regexp="IP" input="insus"/>
+<scan id="susname" regexp="Name" root="$insus" input="susip"/>
+
+<join id="join" left="$susip" right="$inip" input="susname count" physical="niagara.query_engine.PhysicalHashJoinOperator"/>
+
+<construct id="cons" input="join">
+   <res><CNT>$count</CNT> $susip $susname</res>
+</construct>
+
+</plan>
+

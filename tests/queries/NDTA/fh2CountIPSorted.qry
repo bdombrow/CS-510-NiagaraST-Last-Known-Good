@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+<!--First, get a count for each incoming source IP -->
+<firehosescan id="fhTrace" datatype="packet" rate="0"
+	host="localhost" port="5000" streaming="yes"
+	desc="/local/Niagara/NiagaraCVS/firehose_1_0/mashmaro/mashmaro2.trace:IP:SI:IP:TCP:TCP:HTTP:HTTP:dst:port:80"
+	desc2="false" num_gen_calls="-1" num_tl_elts="100"/>
+<scan id="inip" regexp="PS.P.IP.SI" input="fhTrace"/>
+<count id="count" groupby="$inip" countattr="$inip" input="inip"/>
+<sort id="sort" order="ascending" sort_by="$count" comparison="numeric" input="count" />
+
+<construct id="cons" input="sort">
+ <res><IP>$inip</IP><CNT>$count</CNT></res>
+</construct>
+</plan>
+
