@@ -337,6 +337,7 @@ public class NIDocument extends NINode {
      * @param deep Indicates if clone should copy children or not
      */
     public NIDocument cloneDocRefDocElt(boolean deep) {
+	 //System.out.println("cloneDocRefDoc elt called");
 	/* for now I set all the writeable bits to false so that any
 	 * node in the cloned tree must be itself cloned - haven't figured
 	 * out yet, how to pass on write permissions 
@@ -344,7 +345,8 @@ public class NIDocument extends NINode {
 	globalSetWriteableFalse();
 	
 	NIDocument cloneDoc = new NIDocument();
-	Document cloneDomDoc = (Document)domDoc.cloneNode(deep);
+	/* DEMO HACK */
+	Document cloneDomDoc = (Document)domDoc.cloneNode(true);
 	
 	cloneDoc.initialize(mapTable, cloneDomDoc); 
 
@@ -354,8 +356,20 @@ public class NIDocument extends NINode {
 	if(this.domDoc.getDocumentElement() == null) {
 	    System.out.println("here doc elt is null!!");
 	}
-	cloneDoc.domDoc.appendChild(this.domDoc.getDocumentElement());
-	
+	/*cloneDoc.domDoc.appendChild(this.domDoc.getDocumentElement());
+
+	if(this.domDoc.getDocumentElement() !=
+	   cloneDoc.domDoc.getDocumentElement()) {
+             System.out.println("Doc elts not equal");
+	     if(this.domDoc.getDocumentElement() == null) {
+                System.out.println("this doc elt null");
+	     }
+	     if(cloneDoc.domDoc.getDocumentElement() == null) {
+                System.out.println("clone doc elt null");
+	     }
+
+	   }
+	   */
 	/* don't copy the writeable array to the cloned NIDoc, we have
 	 * set all writeable bits to false, so if something needs to be
 	 * updated, it will get cloned and it will get a new 

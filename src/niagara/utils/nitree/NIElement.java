@@ -76,6 +76,12 @@ public class NIElement extends NINode {
 	/* writeable = _writeable */
 	writeableIdx = _writeableIdx;
 	initialized = true;
+
+	Node node = domElement.getParentNode();
+	if (node instanceof Document &&
+	     node != ownerDoc.getDomDoc()) {
+	     throw new PEException("INITIALIZATION FAILURE - WHY ME PROBLEM");
+	     }
 	return;
     }
 
@@ -314,7 +320,7 @@ public class NIElement extends NINode {
      *
      * @param replacementElt Element that should replace this element
      */
-    public void replaceYourself(NIElement replacementElt) 
+    private void replaceYourself(NIElement replacementElt) 
 	throws NITreeException {
 	getParentNode().replaceChild(replacementElt, this);
     }
@@ -322,14 +328,14 @@ public class NIElement extends NINode {
     /**
      * return the NINode which is the parent of this node
      */
-    public NINode getParentNode() {
+    private NINode getParentNode() {
 	Node node = domElement.getParentNode();
 	if(node instanceof Element) {
 	    return ownerDoc.getAssocNIElement((Element)node);
 	} else if (node instanceof Document) {
-	    if(node != ownerDoc.getDomDoc()) {
+	/*    if(node != ownerDoc.getDomDoc()) {
 		throw new PEException("Why me??!!");
-	    }
+	    } */
 	    return ownerDoc; /* this must be the parent ! */
 	} else {
 	    throw new PEException("Parent must be an Element or Document");
