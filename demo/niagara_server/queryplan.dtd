@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.27 2003/03/03 08:21:55 tufte Exp $
+<!-- $Id: queryplan.dtd,v 1.28 2003/03/15 17:51:36 ptucker Exp $
      DTD for query plans -->
 
 <!-- 
@@ -223,6 +223,16 @@
 <!ATTLIST prefix
           id       ID           #REQUIRED
           length   CDATA		#REQUIRED
+	  %PositionAttributes;>
+
+<!ELEMENT punct EMPTY>
+<!ATTLIST punct
+          id       ID           #REQUIRED
+	  datainput CDATA       #REQUIRED
+	  dataattr CDATA        #REQUIRED
+	  dataroot CDATA        #REQUIRED
+	  timer    CDATA        #REQUIRED
+	  input    IDREFS       #REQUIRED
 	  %PositionAttributes;>
 
 <!ELEMENT send EMPTY>
