@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: op.java,v 1.11 2002/10/27 01:20:21 vpapad Exp $
+  $Id: op.java,v 1.12 2002/12/10 00:51:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,6 +39,7 @@ import niagara.utils.SerializableToXML;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.connection_server.NiagraServer;
 
+import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.LogicalOp;
 
 public abstract class op extends LogicalOp implements SerializableToXML {
@@ -127,7 +128,6 @@ public abstract class op extends LogicalOp implements SerializableToXML {
     /**
      * to print the information on the screen
      */
-
     public abstract void dump();
 
     public void dumpAttributesInXML(StringBuffer sb) {}
@@ -146,6 +146,18 @@ public abstract class op extends LogicalOp implements SerializableToXML {
     public boolean isSourceOp() {
 	return false; // default is false
     } 
+ 
+    /** Attributes required by this operator locally */
+    public Attrs requiredInputAttributes(Attrs inputAttrs) {
+        // Default: the operator requires all input attributes
+        return inputAttrs;
+    }
+    
+    /** Implementations of this operator are free to project away
+     * any attribute that is not included in outputAttrs. */
+    public void projectedOutputAttributes(Attrs outputAttrs) {
+        // Default: do nothing   
+    }
 }
 
 

@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: constructInternalNode.java,v 1.3 2002/10/26 21:57:11 vpapad Exp $
+  $Id: constructInternalNode.java,v 1.4 2002/12/10 00:53:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,6 +36,7 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
+import niagara.optimizer.colombia.Attrs;
 import niagara.utils.CUtil;
 import org.w3c.dom.*;
 
@@ -151,5 +151,13 @@ public class constructInternalNode extends constructBaseNode {
 				System.out.println(((Integer)bn).intValue());
 		}
 	}
+
+    public Attrs requiredInputAttributes(Attrs attrs) {
+        Attrs reqAttrs = new Attrs();
+        reqAttrs.merge(st.requiredInputAttributes(attrs));
+        for (int i = 0; i < children.size(); i++)
+            reqAttrs.merge(((constructBaseNode) children.get(i)).requiredInputAttributes(attrs));
+        return reqAttrs;
+    }
 }
 

@@ -1,4 +1,4 @@
-// $Id: FileScanOp.java,v 1.2 2002/10/27 01:20:21 vpapad Exp $
+// $Id: FileScanOp.java,v 1.3 2002/12/10 00:51:53 vpapad Exp $
 
 package niagara.xmlql_parser.op_tree;
 
@@ -16,10 +16,7 @@ import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
-public class FileScanOp extends NullaryOp {
-    private FileScanSpec fileScanSpec;
-    private Attribute variable;
-    
+public class FileScanOp extends StreamOp {
     // Required zero-argument constructor
     public FileScanOp() {}
     
@@ -34,7 +31,7 @@ public class FileScanOp extends NullaryOp {
      *             the specifications necessary for the stream.
      */
     public void setFileScan(FileScanSpec spec, Attribute variable) {
-	fileScanSpec = spec;
+	streamSpec = spec;
         this.variable = variable;
     }
     
@@ -45,20 +42,12 @@ public class FileScanOp extends NullaryOp {
      *         object
      */
 
-    public FileScanSpec getSpec() {
-	return fileScanSpec;
-    }
-
     public void dump() {
 	System.out.println("FileScan Operator: ");
-	fileScanSpec.dump(System.out);
+	streamSpec.dump(System.out);
 	System.out.println();
     }
 
-    public boolean isSourceOp() {
-	return true;
-    }
-    
     public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
         return new LogicalProperty(
             1,
@@ -66,28 +55,19 @@ public class FileScanOp extends NullaryOp {
             true);
     }
     
-    /**
-     * @see niagara.optimizer.colombia.Op#copy()
-     */
     public Op copy() {
-        return new FileScanOp(fileScanSpec, variable);
+        return new FileScanOp((FileScanSpec) streamSpec, variable);
     }
 
-    /**
-     * @see java.lang.Object#equals(Object)
-     */
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof FileScanOp)) return false;
         if (obj.getClass() != FileScanOp.class) return obj.equals(this);
         FileScanOp other = (FileScanOp) obj;
-        return fileScanSpec.equals(other.fileScanSpec) && variable.equals(other.variable);
+        return streamSpec.equals(other.streamSpec) && variable.equals(other.variable);
     }
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
     public int hashCode() {
-        return fileScanSpec.hashCode() ^ variable.hashCode();
+        return streamSpec.hashCode() ^ variable.hashCode();
     }
 }
 

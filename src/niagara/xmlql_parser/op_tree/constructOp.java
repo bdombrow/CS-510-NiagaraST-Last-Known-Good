@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: constructOp.java,v 1.6 2002/10/26 04:30:28 vpapad Exp $
+  $Id: constructOp.java,v 1.7 2002/12/10 00:51:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -24,7 +24,6 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 /**
  * This operator is used to construct XML results. This is analogous to SELECT
  * of SQL.
@@ -40,100 +39,130 @@ import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
 
 public class constructOp extends unryOp {
-        private Variable variable;
-        
-	constructBaseNode resultTemplate; // internal node or leaf node
-					  // if it is the internal node, then
-					  // all its children are leaf node that
-					  // represents the schemaAttributes
+    private Variable variable;
 
-    public constructOp() {}
-                          
-    public constructOp(Variable variable, constructBaseNode resultTemplate) {
+    constructBaseNode resultTemplate; // internal node or leaf node
+    // if it is the internal node, then
+    // all its children are leaf node that
+    // represents the schemaAttributes
+
+    /** The attributes we're projecting on (null means keep all attributes) */
+    private Attrs projectedAttrs;
+
+    public constructOp() {
+    }
+
+    public constructOp(Variable variable, constructBaseNode resultTemplate, Attrs projectedAttrs) {
         this.variable = variable;
         this.resultTemplate = resultTemplate;
+        this.projectedAttrs = projectedAttrs;
     }
-    
+
     public constructOp(constructOp op) {
-        this(op.variable, op.resultTemplate);
+        this(op.variable, op.resultTemplate, op.projectedAttrs);
     }
-    
+
     public Op copy() {
         return new constructOp(this);
     }
-    
+
     /**
      * @see java.lang.Object#equals(Object)
      */
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof constructOp)) return false;
-        if (obj.getClass() != constructOp.class) return obj.equals(this);
+        if (obj == null || !(obj instanceof constructOp))
+            return false;
+        if (obj.getClass() != constructOp.class)
+            return obj.equals(this);
         constructOp other = (constructOp) obj;
-        return this.variable.equals(other.variable) 
-            // XXX vpapad: constructBaseNode.equals is still Object.equals
-            && this.resultTemplate.equals(other.resultTemplate);
+        return equalsNullsAllowed(variable, other.variable)
+            && equalsNullsAllowed(projectedAttrs, other.projectedAttrs)
+        // XXX vpapad: constructBaseNode.equals is still Object.equals
+        && this.resultTemplate.equals(other.resultTemplate);
     }
 
     public int hashCode() {
         // XXX vpapad: constructBaseNode.hashCode is still Object.hashCode
-        return (variable == null)?0:variable.hashCode() ^ resultTemplate.hashCode();
+        return hashCodeNullsAllowed(variable)
+            ^ hashCodeNullsAllowed(projectedAttrs)
+            ^ resultTemplate.hashCode();
     }
 
-	/**
-	 * @return the constructNode that has information about the tag names
-	 *         and children
-	 */
-	public constructBaseNode getResTemp() {
-		return resultTemplate;
-	}
+    /**
+     * @return the constructNode that has information about the tag names
+     *         and children
+     */
+    public constructBaseNode getResTemp() {
+        return resultTemplate;
+    }
 
-	/**
-	 * used to set parameter for the construct operator
-	 *
-	 * @param the construct part (tag names and children if any)
-	 */
-	public void setConstruct(constructBaseNode temp) {
-		resultTemplate = temp;
-	}
-    
-    // XXX vpapad: hack to get CVS to compile
-    public void setConstruct(constructBaseNode temp, boolean clear) {
-        setConstruct(temp);
+    /**
+     * used to set parameter for the construct operator
+     *
+     * @param the construct part (tag names and children if any)
+     */
+    public void setConstruct(constructBaseNode temp) {
+        resultTemplate = temp;
     }
 
     /**
      * print the operator to the standard output
      */
     public void dump() {
-	System.out.println("Construct : ");
-	resultTemplate.dump(1);
+        System.out.println("Construct : ");
+        resultTemplate.dump(1);
     }
 
-	/**
-	 * a dummy toString method
-	 *
-	 * @return String representation of this operator
-	 */
-	public String toString() {
-	   return "ConstructOp";
-        }
+    /**
+     * a dummy toString method
+     *
+     * @return String representation of this operator
+     */
+    public String toString() {
+        return "ConstructOp";
+    }
 
-    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+    public LogicalProperty findLogProp(
+        ICatalog catalog,
+        LogicalProperty[] input) {
         LogicalProperty result = input[0].copy();
         // XXX vpapad: We don't have a way yet to estimate what the 
-        // cardinality will be, assume same as input cardinality.
-        result.addAttr(variable);
+        // cardinality will be, assume same as input cardinality,
+        // which is only true as long as you don't have skolems etc.
+        if (projectedAttrs == null) 
+            result.addAttr(variable);
+        else
+            result.setAttrs(projectedAttrs);
         return result;
     }
-    
+
     public void setVariable(Variable variable) {
         this.variable = variable;
     }
-        /**
-         * Returns the variable.
-         * @return Variable
-         */
-        public Variable getVariable() {
-            return variable;
-        }
+    
+    /**
+     * Returns the variable.
+     * @return Variable
+     */
+    public Variable getVariable() {
+        return variable;
+    }
+
+    /**
+     * @see niagara.xmlql_parser.op_tree.op#projectedOutputAttributes(Attrs)
+     */
+    public void projectedOutputAttributes(Attrs outputAttrs) {
+        projectedAttrs = outputAttrs;
+    }
+
+    /**
+     * @see niagara.xmlql_parser.op_tree.op#requiredInputAttributes(Attrs)
+     */
+    public Attrs requiredInputAttributes(Attrs inputAttrs) {
+        return resultTemplate.requiredInputAttributes(inputAttrs);
+    }
+
+    public Attrs getProjectedAttrs() {
+        return projectedAttrs;
+    }
 }

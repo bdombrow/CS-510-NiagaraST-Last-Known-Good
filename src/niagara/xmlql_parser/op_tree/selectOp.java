@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: selectOp.java,v 1.5 2002/10/31 04:17:05 vpapad Exp $
+  $Id: selectOp.java,v 1.6 2002/12/10 00:51:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,16 +33,12 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 
-import niagara.logical.Predicate;
-import niagara.optimizer.colombia.ICatalog;
-import niagara.optimizer.colombia.LogicalProperty;
-import niagara.optimizer.colombia.Op;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.logical.*;
+import niagara.optimizer.colombia.*;
 
 public class selectOp extends unryOp {
     
    private Predicate pred;  // predicate for the selection
-
 
     public selectOp() {}
     
@@ -119,6 +115,25 @@ public class selectOp extends unryOp {
     
     public int hashCode() {
         return pred.hashCode();
+    }
+
+    public Attrs requiredInputAttributes(Attrs inputAttrs) {
+        ArrayList al = new ArrayList();
+        pred.getReferencedVariables(al);
+        Attrs reqd = new Attrs(al);
+        assert inputAttrs.contains(reqd);
+        return reqd;
+    }
+ 
+    public boolean isEmpty() {
+        return pred.equals(True.getTrue());
+    }
+    
+    /** Can we combine the selection with this unnesting? */   
+    public boolean isPushableInto(Unnest unnest) {
+        ArrayList al = new ArrayList();
+        pred.getReferencedVariables(al);
+        return (al.size() == 1 && ((Variable) al.get(0)).equals(unnest.getVariable()));
     }
 }
 

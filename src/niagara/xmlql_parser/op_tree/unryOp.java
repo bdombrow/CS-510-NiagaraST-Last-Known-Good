@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: unryOp.java,v 1.3 2002/06/28 01:28:32 vpapad Exp $
+  $Id: unryOp.java,v 1.4 2002/12/10 00:51:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,19 +24,15 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
-/**
- * This class is used to represent unary operators.
- *
- */
 package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 
+/** A unary operator */
 public abstract class unryOp extends op {
 
    /**
     * @return the arity of the operator
     */
-   public int getArity() { return 1; }
+   public final int getArity() { return 1; }
 }

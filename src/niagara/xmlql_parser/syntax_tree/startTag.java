@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: startTag.java,v 1.3 2002/10/26 21:57:11 vpapad Exp $
+  $Id: startTag.java,v 1.4 2002/12/10 00:53:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,7 +34,11 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
+import niagara.logical.Variable;
+import niagara.optimizer.colombia.Attrs;
 import niagara.utils.CUtil;
+import niagara.utils.PEException;
+
 import org.w3c.dom.*;
 
 public class startTag {
@@ -125,5 +128,15 @@ public class startTag {
 		for(int i = 0; i<attrList.size(); i++)
 			((attr)attrList.elementAt(i)).dump(depth);
 	}
-
+    
+    public Attrs requiredInputAttributes(Attrs attrs) {
+        Attrs reqAttrs = new Attrs();
+        if (sdata.type == dataType.VAR)
+            reqAttrs.add(new Variable((String) sdata.getValue()));
+        if (attrList.size() != 0)
+            throw new PEException("Cannot handle attributes yet");
+        if (skolemId != null)
+            throw new PEException("Cannot handle skolems yet");
+        return reqAttrs;
+    }
 }

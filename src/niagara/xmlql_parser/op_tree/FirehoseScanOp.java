@@ -1,4 +1,4 @@
-// $Id: FirehoseScanOp.java,v 1.7 2002/10/31 04:17:05 vpapad Exp $
+// $Id: FirehoseScanOp.java,v 1.8 2002/12/10 00:51:53 vpapad Exp $
 
 package niagara.xmlql_parser.op_tree;
 
@@ -11,15 +11,12 @@ package niagara.xmlql_parser.op_tree;
 import java.util.*;
 
 import niagara.logical.NullaryOp;
+import niagara.logical.StreamOp;
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.firehose.FirehoseSpec;
 
-public class FirehoseScanOp extends NullaryOp {
-    private FirehoseSpec fhSpec;
-
-    private Attribute variable;
-    
+public class FirehoseScanOp extends StreamOp {
     // Required zero-argument constructor
     public FirehoseScanOp() {}
     
@@ -27,7 +24,6 @@ public class FirehoseScanOp extends NullaryOp {
         setFirehoseScan(fhSpec, variable);
     }
     
-
     /**
      * Method for initializing the firehose scan operator. See
      * the FirehoseSpec constructor for descriptions of the
@@ -37,7 +33,7 @@ public class FirehoseScanOp extends NullaryOp {
      *             the specifications necessary for the firehose.
      */
     public void setFirehoseScan(FirehoseSpec spec, Attribute variable) {
-	fhSpec = spec;
+	streamSpec = spec;
         this.variable = variable;
     }
     
@@ -49,20 +45,12 @@ public class FirehoseScanOp extends NullaryOp {
      *         object
      */
 
-    public FirehoseSpec getSpec() {
-	return fhSpec;
-    }
-
     public void dump() {
 	System.out.println("FirehoseScan Operator: ");
-	fhSpec.dump(System.out);
+	streamSpec.dump(System.out);
 	System.out.println();
     }
 
-    public boolean isSourceOp() {
-	return true;
-    }
-    
     public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
         return new LogicalProperty(
             1,
@@ -71,18 +59,18 @@ public class FirehoseScanOp extends NullaryOp {
     }
     
     public Op copy() {
-        return new FirehoseScanOp(fhSpec, variable);
+        return new FirehoseScanOp((FirehoseSpec) streamSpec, variable);
     }
 
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof FileScanOp)) return false;
         if (obj.getClass() != FileScanOp.class) return obj.equals(this);
         FirehoseScanOp other = (FirehoseScanOp) obj;
-        return fhSpec.equals(other.fhSpec) && variable.equals(other.variable);
+        return streamSpec.equals(other.streamSpec) && variable.equals(other.variable);
     }
 
     public int hashCode() {
-        return fhSpec.hashCode() ^ variable.hashCode();
+        return streamSpec.hashCode() ^ variable.hashCode();
     }
 }
 

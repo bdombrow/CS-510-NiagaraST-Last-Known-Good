@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: constructBaseNode.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
+  $Id: constructBaseNode.java,v 1.3 2002/12/10 00:53:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,14 +34,16 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
+import niagara.optimizer.colombia.Attrs;
 import org.w3c.dom.*;
 
 public abstract class constructBaseNode {
-    
     // replace the occurences of variables with their corresponding 
     // schema attributes
     abstract public void replaceVar(varTbl vt);
     
     // to print to the standard output
     abstract public void dump(int n);
+    
+    abstract public Attrs requiredInputAttributes(Attrs attrs);
 }

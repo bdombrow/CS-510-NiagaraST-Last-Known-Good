@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: varTbl.java,v 1.6 2002/10/24 03:24:52 vpapad Exp $
+  $Id: varTbl.java,v 1.7 2002/12/10 00:53:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -162,19 +162,6 @@ public class varTbl {
 		}
 		return commonVar;
 	}
-
-    public HashMap getMapping() {
-	HashMap hm = new HashMap(varList.size());
-	for (int i=0; i < varList.size(); i++) {
-	    varToAttr vta = (varToAttr) varList.get(i);
-	    String varName = vta.getVar();
-	    schemaAttribute sa = (schemaAttribute) vta.
-		getAttributeList().get(0);
-	    int position = sa.getAttrId();
-	    hm.put(varName, new Integer(position));
-	}
-	return hm;
-    }
 
     public String getVars() {
         String toReturn = " vars='";
