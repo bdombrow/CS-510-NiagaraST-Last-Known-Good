@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.15 2002/10/03 15:37:53 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.16 2002/10/04 04:14:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -78,6 +78,9 @@ public abstract class PhysicalOperator {
     // for triggers
     protected static DataManager DM;
 
+    // keep track of operator names for debugging
+    protected String name = "OperatorImplemShouldSetThis"; 
+    
     /**
      * This class is used to store the result of a read operation from
      * a set of source streams. There are two components (a) the stream element
@@ -370,9 +373,9 @@ public abstract class PhysicalOperator {
 		// No tuple element to be returned
 		sourceObject.tuple = null;
 		processCtrlMsgFromSource(ctrlFlag, streamId);
+		return;
 	    } 
-	} while (startReadSourceStream != lastReadSourceStream &
-		 existsUnClosedSourceStream());
+	} while (startReadSourceStream != lastReadSourceStream);
 	
 	// No luck with any source stream, operator can still continue
 	sourceObject.tuple = null;
