@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: opType.java,v 1.2 2001/07/17 06:53:29 vpapad Exp $
+  $Id: opType.java,v 1.3 2002/09/09 16:44:00 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -100,6 +100,9 @@ public class opType {
 
         code2name[NOT] = "not";
         name2code.put("not", new Integer(NOT));
+
+	code2name[CONTAIN] = "contain";
+	name2code.put("contain", new Integer(CONTAIN));
     }
 
     public static String getName(int code) {
