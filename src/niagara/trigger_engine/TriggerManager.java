@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TriggerManager.java,v 1.3 2002/05/07 03:11:01 tufte Exp $
+  $Id: TriggerManager.java,v 1.4 2002/05/23 06:31:59 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -394,14 +394,7 @@ public class TriggerManager implements Runnable {
 		
         // and next thing to do, put a trigActionOp on top of
         // the query plan. 
-        trigActionOp top = null;
-        try { 
-	    top = (trigActionOp)operators.TrigAct.clone();
-        } catch (CloneNotSupportedException e) {
-            System.err.println("Error, cannot create trigger");
-            e.printStackTrace();
-	    return null;
-        }
+        trigActionOp top  = new trigActionOp();
         top.setAction(q.getActionList());        
         logNode trigPlan = new logNode(top, logicPlan); 
 

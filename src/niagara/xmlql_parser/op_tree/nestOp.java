@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: nestOp.java,v 1.3 2000/08/21 00:38:38 vpapad Exp $
+  $Id: nestOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -56,46 +56,6 @@ public class nestOp extends groupOp {
     /////////////////////////////////////////////////////////////////
 
     /**
-     * This is the constructor that initialize the class with the list
-     * of algorithms
-     *
-     * @param algoList The list of algorithms associated with this
-     *                 operator
-     */
-
-    public nestOp (Class[] algoList) {
-
-	// Call the constructor of the super class
-	//
-	super(new String("Nest"), algoList);
-
-	// No result template in the beginning
-	//
-	resultTemplate = null;
-    }
-
-
-    /**
-     * This constructor initialize the class with the operator name
-     * and the list of algorithms. This is used by derived classes
-     * (if any)
-     *
-     * @param operatorName The name of the operator
-     * @param algoList The list of algorithms for the operator
-     */
-
-    protected nestOp (String operatorName, Class[] algoList) {
-
-	// Call the constructor of the super class
-	//
-	super(operatorName, algoList);
-
-	// No result template in the beginning
-	//
-	resultTemplate = null;
-    }
-
-       /**
      * This function sets the construct part of the nest operator, which
      * specifies the result template
      *

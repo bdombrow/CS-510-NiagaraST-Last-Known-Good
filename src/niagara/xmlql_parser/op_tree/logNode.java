@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logNode.java,v 1.6 2002/05/07 03:11:27 tufte Exp $
+  $Id: logNode.java,v 1.7 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -319,7 +319,7 @@ public class logNode implements java.io.Serializable {
      */
     public String toXML() {
         // XXX convert to StringBuffer
-        String eltname = operators.getName(operator);
+        String eltname = operator.getName();
         String ret = "<" + eltname;
         // id = last variable in the variable table
         ret += " id='" + getName() + "'";

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: groupOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: groupOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -54,26 +54,6 @@ public abstract class groupOp extends unryOp {
     ///////////////////////////////////////////////////////////////////
     // These are the methods of the class                            //
     ///////////////////////////////////////////////////////////////////
-
-    /**
-     * This is the constructor that initializes an instance with a
-     * name and a list of algorithms
-     *
-     * @param name The name of the operator
-     * @param algoList The list of algorithms for the operator
-     */
-
-    public groupOp (String name, Class[] algoList) {
-
-	// Call constructor of super class
-	//
-	super(name, algoList);
-
-	// Initially, skolem attributes are not present
-	//
-	this.skolemAttributes = null;
-    }
-
 
     /**
      * This function sets the skolem attributes of the group operator

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: selectOp.java,v 1.2 2001/07/17 06:52:23 vpapad Exp $
+  $Id: selectOp.java,v 1.3 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,15 +38,6 @@ import niagara.xmlql_parser.syntax_tree.*;
 public class selectOp extends unryOp {
 
    private predicate pred;  // predicate for the selection
-
-   /**
-    * Constructor
-    *
-    * @param list of algorithm to implement this operator
-    */
-   public selectOp(Class[] al) {
-	super(new String("Select"),al);
-   }
 
    /**
     * @return the selection predicate
@@ -102,7 +93,7 @@ public class selectOp extends unryOp {
     }
 
     public String dumpAttributesInXML() {
-        return "clear='" + clearAttr + "'";
+        return " clear='" + clearAttr + "'";
     }
     public String dumpChildrenInXML() {
         return pred.toXML();

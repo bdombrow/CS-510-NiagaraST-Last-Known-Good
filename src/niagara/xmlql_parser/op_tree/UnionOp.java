@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UnionOp.java,v 1.1 2000/08/21 00:38:37 vpapad Exp $
+  $Id: UnionOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,16 +36,6 @@ import java.util.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class UnionOp extends op {
-   /**
-    * Constructor
-    *
-    * @param list of algorithm to implement this operator
-    */
-   public UnionOp(Class[] al) {
-	super("Union", al);
-   }
-  
-
    /**
     * print the operator to the standard output
     */

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: unryOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: unryOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,16 +35,6 @@ package niagara.xmlql_parser.op_tree;
 import java.util.*;
 
 public abstract class unryOp extends op {
-
-   /**
-    * Constructor
-    *
-    * @param name of the operator
-    * @param list of algorithms to implement this operator
-    */
-   public unryOp(String n, Class[] al) {
-	super(n, al);
-   }
 
    /**
     * @return the arity of the operator

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: GroupQueryOptimizer.java,v 1.2 2001/08/08 21:29:02 tufte Exp $
+  $Id: GroupQueryOptimizer.java,v 1.3 2002/05/23 06:31:59 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -363,12 +363,7 @@ public class GroupQueryOptimizer {
 	logNode curnode1;
 
 	//create a dtdScan operator
-	try {
-	    op1 = (dtdScanOp)operators.DtdScan.clone();	
-	} catch (java.lang.CloneNotSupportedException e) {           
-            System.out.println("Error in generating dtdScan operator");
-            e.printStackTrace();
-        }
+        op1 = new dtdScanOp();
 	
 	Vector v = new Vector();
 	//here is a "hack", we use tmpFileName&tid for tmp trigger 

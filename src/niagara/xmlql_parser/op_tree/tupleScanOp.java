@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: tupleScanOp.java,v 1.3 2000/08/21 00:38:39 vpapad Exp $
+  $Id: tupleScanOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,10 +43,6 @@ import org.w3c.dom.*;
 public class tupleScanOp extends unryOp {
 
    private Vector docs;
-
-   public tupleScanOp(Class[] al) {
-	super(new String("TupleScan"), al);
-   }
 
    public Vector getDocs() {
 	return docs;

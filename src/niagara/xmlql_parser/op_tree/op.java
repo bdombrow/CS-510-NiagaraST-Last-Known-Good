@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: op.java,v 1.6 2002/05/07 03:11:27 tufte Exp $
+  $Id: op.java,v 1.7 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,28 +36,16 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.connection_server.NiagraServer;
 
-public abstract class op implements Cloneable{
-
-    private final String name;  // name of the operator
-    private final Class[] AlgoList;  // List of algorithm to implement this operator
-
+public abstract class op {
     // This is the index of the selected algorithm
-    //
     int selectedAlgorithmIndex;
-
 
     /**
      * Constructor
-     *
-     * @param name of the operator
-     * @param list of physical operators that implement this operator
      */
-
-    public op(String n, Class[] al) {
-        name = n;
-        AlgoList = al;
-
+    public op() {
         // Initially, no algorithm is selected
         selectedAlgorithmIndex = -1;
     }
@@ -66,18 +53,16 @@ public abstract class op implements Cloneable{
     /**
      * @return name of the operators
      */
-
     public String getName() {
-        return name;
+        return NiagraServer.getCatalog().getOperatorName(getClass().getName());
     }
 
     /**
      * @return the list of Physical Operator Classes that implements this 
      *         operator
      */
-
     public Class[] getListOfAlgo() {
-        return AlgoList;
+        return NiagraServer.getCatalog().getPhysical(getClass().getName());
     }
 
     /**
@@ -87,7 +72,6 @@ public abstract class op implements Cloneable{
      */
 
     public void setSelectedAlgoIndex (int index) {
-
         // Set the index
         selectedAlgorithmIndex = index;
     }
@@ -99,12 +83,12 @@ public abstract class op implements Cloneable{
      */
 
     public void setSelectedAlgorithm (String className) 
-	throws ClassNotFoundException, InvalidAlgorithmException
-    {
+	throws ClassNotFoundException, InvalidAlgorithmException  {
 	Class c = Class.forName(className);
-
-	for (int i=0; i < AlgoList.length; i++) {
-	    if (AlgoList[i] == c) {
+        
+        Class[] algoList = getListOfAlgo();
+	for (int i=0; i < algoList.length; i++) {
+	    if (algoList[i] == c) {
 		setSelectedAlgoIndex(i);
 		return;
 	    }
@@ -130,29 +114,14 @@ public abstract class op implements Cloneable{
      */
 
     public Class getSelectedAlgo () {
-
         // If there is no selected algorithm return null
-        //
         if (selectedAlgorithmIndex < 0) {
             return null;
         }
         else {
-
-            // Return selected algorithm
-            //
-            return AlgoList[selectedAlgorithmIndex];
+            // Return selected algorith
+            return getListOfAlgo()[selectedAlgorithmIndex];
         }
-    }
-
-    /**
-     * @return the clone of this operator
-     */
-
-    public Object clone()throws CloneNotSupportedException { 
-        op nObj = (op)super.clone();	
-        //	nObj.AlgoList = (Vector)AlgoList.clone();
-        //	nObj.name = new String(name);
-        return nObj;
     }
 
     /**

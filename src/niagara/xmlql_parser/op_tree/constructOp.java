@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: constructOp.java,v 1.4 2000/08/21 04:07:42 vpapad Exp $
+  $Id: constructOp.java,v 1.5 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,15 +48,6 @@ public class constructOp extends unryOp {
      * not pass attributes from incoming tuples to the outgoing stream.
      */
     boolean clear;
-
-        /**
-	 * Constructor
-	 *
-	 * @param list of algorithm to implement this operator
-	 */
-	public constructOp(Class[] al) {
-		super(new String("Construct"),al);
-	}
 
 	/**
 	 * @return the constructNode that has information about the tag names

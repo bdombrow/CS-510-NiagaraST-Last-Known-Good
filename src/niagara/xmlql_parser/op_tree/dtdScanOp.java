@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: dtdScanOp.java,v 1.3 2002/05/07 03:11:27 tufte Exp $
+  $Id: dtdScanOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,15 +42,6 @@ public class dtdScanOp extends unryOp {
    private String type;// dtd name (e.g book.dtd)
    private Vector docsCpy = null; //trigger. the copy of the docs  
 
-   /**
-    * Constructor
-    *
-    * @param list of algorithm used to implement this operator
-    */
-   public dtdScanOp(Class[] al) {
-	super(new String("DtdScan"), al);
-   }
-  
    /**
     * @return list of XML data sources (either URLs or local files)
     */

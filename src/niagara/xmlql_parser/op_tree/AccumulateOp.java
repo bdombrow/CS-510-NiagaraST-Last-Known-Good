@@ -1,8 +1,5 @@
 /*
- * $RCSfile:
- * $Revision:
- * $Date:
- * $Author:
+ * $Id: AccumulateOp.java,v 1.6 2002/05/23 06:32:03 vpapad Exp $
  */
 
 package niagara.xmlql_parser.op_tree;
@@ -28,17 +25,6 @@ public class AccumulateOp extends unryOp {
     private String accumFileName;
     private String initialAccumFile;
     boolean clear; /* clear existing accum file or not */
-
-    /**
-     * Constructor for AccumulateOp.  Just calls the super constructor.
-     *
-     * @param al List of algorithms which can be used to implement this 
-     *           operator.
-     */
-    public AccumulateOp(Class[] al) {
-	super("Accumulate", al);
-	mergeTree = null;
-    }
 
     /**
      * Creates the AccumulateOp. Traverses the mergeTemplate tree and

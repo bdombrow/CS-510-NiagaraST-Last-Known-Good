@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ExpressionOp.java,v 1.2 2000/08/28 22:05:51 vpapad Exp $
+  $Id: ExpressionOp.java,v 1.3 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,15 +39,6 @@ import java.util.HashMap;
 public class ExpressionOp extends unryOp {
 
     private Class expressionClass;
-
-    /**
-     * Constructor
-     *
-     * @param list of algorithms to implement this operator
-     */
-    public ExpressionOp(Class[] al) {
-	super(new String("Expression"), al);
-    }
 
     /**
      * print the operator to the standard output

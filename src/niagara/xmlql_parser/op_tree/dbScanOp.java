@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: dbScanOp.java,v 1.2 2000/08/09 23:54:19 tufte Exp $
+  $Id: dbScanOp.java,v 1.3 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,15 +37,6 @@ import java.util.*;
 public class dbScanOp extends unryOp {
 
    private String relName;  // Name of the relation to read tuples from
-
-   /**
-    * Constructor
-    *
-    * @param list of algorithm to implement this operator
-    */
-   public dbScanOp(Class[] al) {
-	super(new String("DbScan"),al);
-   }
 
    /**
     * @return the name of the relation

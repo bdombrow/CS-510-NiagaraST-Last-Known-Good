@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: scanOp.java,v 1.3 2001/07/17 06:52:23 vpapad Exp $
+  $Id: scanOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,15 +42,6 @@ public class scanOp extends unryOp {
 				     // or one can call it the ancestor of the
 				     // element that is to be scanned
     private regExp regExpToScan;     // paths to the elements to scan
-
-    /**
-     * Constructor
-     *
-     * @param list of algorithms to implement this operator
-     */
-    public scanOp(Class[] al) {
-	super(new String("Scan"), al);
-    }
 
     /**
      * get the schemaAttribute that represent the root of the subtree at which

@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOp.java,v 1.2 2002/05/07 03:11:27 tufte Exp $
+ * $Id: ConstantOp.java,v 1.3 2002/05/23 06:32:03 vpapad Exp $
  *
  */
 
@@ -18,16 +18,6 @@ public class ConstantOp extends unryOp {
     private String content;
     
     private String vars;
-
-    /**
-     * Constructor
-     *
-     * @param algList A list of algorithms which can be used to implement
-     *      this operator.  Why is this passed as a parameter??
-     */
-    public ConstantOp(Class[] algList) {
-	super("ConstantOp", algList);
-    }
 
     public void setContent(String content) {
 	this.content = content;

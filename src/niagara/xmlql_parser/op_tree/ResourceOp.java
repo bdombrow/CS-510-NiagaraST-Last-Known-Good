@@ -1,5 +1,5 @@
 /**
- * $Id: ResourceOp.java,v 1.1 2001/07/17 06:52:23 vpapad Exp $
+ * $Id: ResourceOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
  *
  */
 
@@ -12,15 +12,6 @@ public class ResourceOp extends unryOp {
 
     private String urn; 
 
-    /**
-     * Constructor
-     *
-     * @param list of algorithms used to implement this operator
-     */
-    public ResourceOp(Class[] al) {
-	super("Resource", al);
-    }
-  
     public String getURN() {
 	return urn;
     }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: trigActionOp.java,v 1.3 2000/08/21 00:38:39 vpapad Exp $
+  $Id: trigActionOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,10 +41,6 @@ import org.w3c.dom.*;
 public class trigActionOp extends unryOp {
     private Vector action;
     
-    public trigActionOp(Class[] al) {
-        super(new String("TrigAction"), al);
-    }
-
     public void setAction(Vector act) {
         action = act;
     }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: joinOp.java,v 1.4 2001/07/17 06:52:23 vpapad Exp $
+  $Id: joinOp.java,v 1.5 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,14 +44,6 @@ public class joinOp extends binOp {
 	private Vector equiJoinAttr_Lrel;    // not used at present
 	private Vector equiJoinAttr_Rrel;    // in the query engine
 
-   /**
-    * Constructor
-    *
-    * @param list of algorithm to implement this operator
-    */
-   public joinOp(Class[] al) {
-	super(new String("Join"),al);
-   }
   
    /**
     * @return the join predicate

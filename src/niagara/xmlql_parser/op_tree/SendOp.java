@@ -1,5 +1,5 @@
 /**
- * $Id: SendOp.java,v 1.1 2001/07/17 06:52:23 vpapad Exp $
+ * $Id: SendOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
  *
  */
 
@@ -18,15 +18,6 @@ import niagara.connection_server.CommunicationServlet;
 public class SendOp extends unryOp {
     String query_id;
     CommunicationServlet cs;
-
-    /**
-     * Constructor
-     *
-     * @param list of algorithm to implement this operator
-     */
-    public SendOp(Class[] al) {
-        super(new String("Send"), al);
-    }
 
     public void setQueryId(String query_id) {
         this.query_id = query_id;

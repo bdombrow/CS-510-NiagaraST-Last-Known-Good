@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: splitOp.java,v 1.3 2000/08/21 00:38:39 vpapad Exp $
+  $Id: splitOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -50,11 +50,6 @@ public class splitOp extends unryOp {
     private int tmpid;
     private Hashtable mappingTbl;
             
-    public splitOp(Class [] al) {
-	super(new String("Split"), al);
-        // tmpid = -1;
-    }
-
     //set the destination 
     public void setDestFileName(String fileName) {
         destFileName = fileName;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SortOp.java,v 1.1 2000/08/21 00:38:37 vpapad Exp $
+  $Id: SortOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -52,15 +52,6 @@ public class SortOp extends unryOp {
      * The attribute we are sorting on
      */
     private schemaAttribute attr;
-
-   /**
-    * Constructor
-    *
-    * @param list of algorithm to implement this operator
-    */
-   public SortOp(Class[] al) {
-	super("Sort", al);
-   }
 
    /**
     * @return the comparison method

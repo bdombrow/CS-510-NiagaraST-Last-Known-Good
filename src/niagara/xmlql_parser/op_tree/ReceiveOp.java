@@ -1,5 +1,5 @@
 /**
- * $Id: ReceiveOp.java,v 1.2 2002/05/07 03:11:27 tufte Exp $
+ * $Id: ReceiveOp.java,v 1.3 2002/05/23 06:32:03 vpapad Exp $
  *
  */
 
@@ -17,15 +17,6 @@ public class ReceiveOp extends unryOp {
     String location;
     String query_id;
 
-    /**
-     * Constructor
-     *
-     * @param list of algorithm to implement this operator
-     */
-    public ReceiveOp(Class[] al) {
-        super(new String("Receive"), al);
-    }
-    
     public void setReceive(String location, String query_id) {
         this.location = location;
         this.query_id = query_id;

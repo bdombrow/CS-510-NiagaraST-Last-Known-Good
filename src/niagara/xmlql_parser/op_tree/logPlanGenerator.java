@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logPlanGenerator.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: logPlanGenerator.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -144,7 +144,7 @@ public class logPlanGenerator {
          * @param the IN clause
 	 * @return the partial tree
 	 */
-	private logNode genLogPlan(inClause inc) throws CloneNotSupportedException{
+	private logNode genLogPlan(inClause inc) {
 		
 		logNode childLogNode, curLogNode;
 		Vector listOfpnodes;
@@ -166,7 +166,7 @@ public class logPlanGenerator {
 
 		// create the leaf dtdScan operator for reading and parsing
 		// the XML data sources
-		dtdScanOp dtdOp = (dtdScanOp)operators.DtdScan.clone();
+		dtdScanOp dtdOp = new dtdScanOp();
 		dtdOp.setDtdScan(vec, inc.getDtdType());
 		curLogNode = childLogNode = new logNode(dtdOp);
 
@@ -269,7 +269,7 @@ public class logPlanGenerator {
 		// for each schema unit in the schema, generate a Scan node
 		// and add it to the top of the chain
 		for(int i=1;i<tupleDes.numAttr();i++) {
-			scan = (scanOp)operators.Scan.clone();
+			scan = new scanOp();
 			su = tupleDes.getSchemaUnit(i);
 			if(i==1)
 				scan.setScan(new schemaAttribute(su.getBackPtr(),varType.ELEMENT_VAR),su.getRegExp());
@@ -289,7 +289,7 @@ public class logPlanGenerator {
 	 * Generate a chain of Scan nodes for eact IN clause and add it
 	 * to the list of partial trees
 	 */
-	private void initialLogTrees() throws CloneNotSupportedException {
+	private void initialLogTrees() {
 		int numOfInClause = listOfInClause.size();
 		for(int i=0;i<numOfInClause;i++) 
 			partialTree.addElement(genLogPlan((inClause)listOfInClause.elementAt(i)));
@@ -302,7 +302,7 @@ public class logPlanGenerator {
 	 * of the partial trees. If yes, then add a Select node with these
 	 * predicates as the Selection condition.
 	 */
-	private void addSelect() throws CloneNotSupportedException {
+	private void addSelect() {
 		logNode curlogNode, childlogNode;
 		predicate curpredicate;
 		Vector variables;
@@ -335,7 +335,7 @@ public class logPlanGenerator {
 			// then add a Select operator to the top of the
 			// partial tree
 			if(preds.size()!=0) {
-				select = (selectOp)operators.Select.clone();
+				select = new selectOp();
 				select.setSelect(preds);
 				curlogNode = new logNode(select,childlogNode);
 				curlogNode.setVarTbl(childlogNode.getVarTbl());
@@ -353,7 +353,7 @@ public class logPlanGenerator {
 	 * @param list of common variables
 	 */
 	
-	private logNode joinTree(logNode leftTree, logNode rightTree, Vector comVar) throws CloneNotSupportedException {
+	private logNode joinTree(logNode leftTree, logNode rightTree, Vector comVar)  {
 		Vector leftJoinAttr, rightJoinAttr;
 		varTbl leftVarTbl, rightVarTbl, newVarTbl;
 		Schema leftSchema, rightSchema, newSchema;
@@ -435,7 +435,7 @@ public class logPlanGenerator {
 	
 		// add the join operator to the top of the tree with the
 		// new Schema and variable table
-		join = (joinOp)operators.Join.clone();
+		join = new joinOp();
 		join.setJoin(joinPredicate,leftJoinAttr,rightJoinAttr);
 		newTree = new logNode(join,leftTree,rightTree);
 		newTree.setVarTbl(newVarTbl);
@@ -450,7 +450,7 @@ public class logPlanGenerator {
 	 * variables in common and then replace it with their join. This
 	 * process is repeated until no more trees can be joined.
 	 */
-	private void addEquiJoin() throws CloneNotSupportedException {
+	private void addEquiJoin()  {
 		
 		logNode leftTree, rightTree, resultTree;
 		varTbl leftVar, rightVar;
@@ -499,7 +499,7 @@ public class logPlanGenerator {
 	 * Try to join the partial trees whose union of variables contain
 	 * all the variables of some predicates.
 	 */
-	private void addJoin() throws CloneNotSupportedException {
+	private void addJoin()  {
 		logNode leftTree, rightTree, newTree;
 		varTbl leftVarTbl, rightVarTbl, newVarTbl;
 		Schema leftSchema, rightSchema, newSchema;
@@ -556,7 +556,7 @@ public class logPlanGenerator {
 		        int leftRelSize = leftSchema.numAttr();	
 		        newSchema = Util.mergeSchemas(leftSchema, rightSchema);
 		        newVarTbl = Util.mergeVarTbl(leftVarTbl,rightVarTbl,leftRelSize);
-		        join = (joinOp)operators.Join.clone();
+		        join = new joinOp();
 		        join.setJoin(joinPredicate,new Vector(),new Vector());
 		        newTree = new logNode(join,leftTree,rightTree);
 		        newTree.setVarTbl(newVarTbl);
@@ -590,7 +590,7 @@ public class logPlanGenerator {
 	 * common with other, then they are joined without any join predicate
 	 * (i.e. cartesian product) to get only one tree.
 	 */
-	private void addCartesian() throws CloneNotSupportedException {
+	private void addCartesian()  {
 		logNode leftTree, rightTree, newTree;
 		varTbl leftVarTbl, rightVarTbl, newVarTbl;
 		Schema leftSchema, rightSchema, newSchema;
@@ -615,7 +615,7 @@ public class logPlanGenerator {
 		   newVarTbl = Util.mergeVarTbl(leftVarTbl, rightVarTbl, leftRelSize);
 
 		   // join without any predicate
-		   join = (joinOp)operators.Join.clone();
+		   join = new joinOp();
 		   join.setJoin(null,new Vector(), new Vector());
 		   newTree = new logNode(join,leftTree,rightTree);
 		   newTree.setVarTbl(newVarTbl);
@@ -701,7 +701,7 @@ public class logPlanGenerator {
 	 * pattern and then for each construct node in the list generate a
 	 * construct operator and add to the top of the tree
 	 */
-	private void addConstruct() throws CloneNotSupportedException {
+	private void addConstruct()  {
 
 		logNode curLogNode;
 		varTbl var_tbl;
@@ -734,7 +734,7 @@ public class logPlanGenerator {
 		// to the top of the tree
 		if(constructPart instanceof constructLeafNode) {
 			constructPart.replaceVar(var_tbl);			
-			construct = (constructOp)operators.Construct.clone();
+			construct = new constructOp();
 			construct.setConstruct(constructPart);
 			curLogNode = new logNode(construct,curLogNode);
 			curLogNode.setVarTbl(var_tbl);
@@ -760,7 +760,7 @@ public class logPlanGenerator {
 			
 			// no skolem function. add a construct operator.
 			if(sk == null) {
-				construct = (constructOp)operators.Construct.clone();
+				construct = new constructOp();
 				construct.setConstruct(constructTagPart);
 				curLogNode = new logNode(construct,curLogNode);
 				curLogNode.setVarTbl(var_tbl);
@@ -769,7 +769,7 @@ public class logPlanGenerator {
 			}
 
 			// skolem function is present. Add a nest operator
-			nest = (nestOp)operators.Nest.clone();
+			nest = new nestOp();
 
 			// to keep track of how many skolem function was
 			// encountered
@@ -801,7 +801,7 @@ public class logPlanGenerator {
 	/**
 	 * dump the plan to the standard output
 	 */
-	public void dumpPlan() throws CloneNotSupportedException {
+	public void dumpPlan() {
 		initialLogTrees();
 		addSelect();
 		addEquiJoin();
@@ -816,7 +816,7 @@ public class logPlanGenerator {
 	 *
 	 * @return the logical plan for the query
 	 */
-	public logNode getLogPlan() throws CloneNotSupportedException {
+	public logNode getLogPlan() {
 		// generate the chain of Scan nodes for all the IN clause
 		initialLogTrees();
 
@@ -853,7 +853,7 @@ public class logPlanGenerator {
 	/**
 	 * test program for testing the generation of logical plan
 	 */
-	public static void main (String argv[]) throws CloneNotSupportedException {
+	public static void main (String argv[]) {
       
      	 try {
 

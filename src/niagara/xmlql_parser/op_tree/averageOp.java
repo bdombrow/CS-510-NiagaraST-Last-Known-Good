@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: averageOp.java,v 1.3 2000/08/21 00:38:37 vpapad Exp $
+  $Id: averageOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,45 +55,6 @@ public class averageOp extends groupOp {
     // These are the methods of the class                          //
     /////////////////////////////////////////////////////////////////
 
-    /**
-     * This is the constructor that initialize the class with the list
-     * of algorithms
-     *
-     * @param algoList The list of algorithms associated with this
-     *                 operator
-     */
-
-    public averageOp (Class[] algoList) {
-
-	// Call the constructor of the super class
-	//
-	super(new String("Average"), algoList);
-
-	// Initially no average attribute
-	//
-	averageAttribute = null;
-    }
-
-    /**
-     * This constructor initialize the class with the operator name
-     * and the list of algorithms. This is used by derived classes
-     * (if any)
-     *
-     * @param operatorName The name of the operator
-     * @param algoList The list of algorithms for the operator
-     */
-
-    protected averageOp (String operatorName, Class[] algoList) {
-
-	// Call the constructor of the super class
-	//
-	super(operatorName, algoList);
-
-	// Initially no average attribute
-	//
-	averageAttribute = null;
-    }
-    
     /**
      * This function sets the skolem attributes on which grouping is
      * done, and the attribute that is average

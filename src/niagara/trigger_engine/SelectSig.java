@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SelectSig.java,v 1.2 2001/08/08 21:29:02 tufte Exp $
+  $Id: SelectSig.java,v 1.3 2002/05/23 06:31:59 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,133 +63,126 @@ public class SelectSig extends Signature {
         groupId = tm.getNextId();
 
         //create the signature logical plan
-        try {	
-            // System.err.println("Select Group : create a dtdscan node");
-            op1 = (dtdScanOp)operators.DtdScan.clone();
-            //int tmpint = tm.getNextId();
-            Vector v = new Vector();
-            v.addElement("SYS/constTbl"+groupId+".xml");
-            // v.addElement(constTblName);
-            String s = new String("selectConstTbl.dtd");
-            op1.setDtdScan(v,s);
-            curnode1 = new logNode(op1);
-            //curnode1.Id = tmpint;
-
-            // System.err.println("create a scan node for attribute pairs");
-            attr1 = new schemaAttribute(0);
-            op1 = (scanOp)operators.Scan.clone();
-            attr2 = new schemaAttribute(1);
-            // d=new data(dataType.ATTR, attr2);
-            d = new data(dataType.STRING, "pairs");
-            reg=new regExpDataNode(d);
-            ((scanOp)op1).setScan(attr1,reg);
-            prevnode1 = curnode1;
-            curnode1 = new logNode(op1,prevnode1);
-            //curnode1.Id = tm.getNextId();
-
-            // System.err.println("create a scan node for attribute pair");
-            attr1 = new schemaAttribute(1);
-            op1 = (scanOp)operators.Scan.clone();
-            attr2 = new schemaAttribute(2);
-            // d=new data(dataType.ATTR, attr2);
-            d = new data(dataType.STRING, "pair");
-            reg=new regExpDataNode(d);
-            ((scanOp)op1).setScan(attr1,reg);
-            prevnode1 = curnode1;
-            curnode1 = new logNode(op1,prevnode1);
-            //curnode1.Id = tm.getNextId();
-
-            // System.err.println("create a scan node for attribute value");
-            attr1 = new schemaAttribute(2);
-            op1 = (scanOp)operators.Scan.clone();
-            attr2 = new schemaAttribute(3);
-            //  d2=new data(dataType.ATTR, attr2);
-            d2=new data(dataType.STRING, "value");
-            reg=new regExpDataNode(d2);	
-            ((scanOp)op1).setScan(attr1,reg);
-            prevnode1 = curnode1;
-            curnode1 = new logNode(op1,prevnode1);
-            //curnode1.Id = tm.getNextId();
-
-            // System.err.println("create a scan node for attribute tmpFileName");
-            attr1 = new schemaAttribute(2);
-            op1 = (scanOp)operators.Scan.clone();
-            // attr2 = new schemaAttribute(4);
-            // d=new data(dataType.ATTR, attr2);
-            d=new data(dataType.STRING, "tmpFileName");
-            reg=new regExpDataNode(d);	
-            ((scanOp)op1).setScan(attr1,reg);
-            prevnode1 = curnode1;
-            curnode1 = new logNode(op1,prevnode1);
-            //curnode1.Id = tm.getNextId();
-
-            // System.err.println("create a join node");
-            op1 = (joinOp)operators.Join.clone();
-            prevnode2 = curnode1;
-            prevnode1 = node.input(0); //the scan node under select
-
-            //note we only consider select predicate with the format 
-            //attr op constant now. Thus the getLeftExp() will return
-            //the data associated with that attribute
-            attr2 = new schemaAttribute(3);
-            attr2.setStreamId(1);
-	    
-	    /* code for generating join which be picked up for Hash join algorithm
-	    //left attribute vector
-	    Vector lv=new Vector();
-	    d=((predArithOpNode)((selectOp)sigNode.getOperator()).getPredicate()).getLeftExp();
-	    debug.mesg("*****************dumping schemaAttribute.....");
-	    ((schemaAttribute)d.getValue()).dump();
-	    lv.addElement(d.getValue()); //get the schemaAttribute
-
-	    //right attribute vector
-	    Vector rv=new Vector();
-	    rv.addElement(attr2);
-	    
-	    //set the join
-	    ((joinOp)op1).setJoin((predicate)null,lv,rv);
-	    */
+        // System.err.println("Select Group : create a dtdscan node");
+        op1 = new dtdScanOp();
+        //int tmpint = tm.getNextId();
+        Vector v = new Vector();
+        v.addElement("SYS/constTbl"+groupId+".xml");
+        // v.addElement(constTblName);
+        String s = new String("selectConstTbl.dtd");
+        op1.setDtdScan(v,s);
+        curnode1 = new logNode(op1);
+        //curnode1.Id = tmpint;
+        
+        // System.err.println("create a scan node for attribute pairs");
+        attr1 = new schemaAttribute(0);
+        op1 = new scanOp();
+        attr2 = new schemaAttribute(1);
+        // d=new data(dataType.ATTR, attr2);
+        d = new data(dataType.STRING, "pairs");
+        reg=new regExpDataNode(d);
+        ((scanOp)op1).setScan(attr1,reg);
+        prevnode1 = curnode1;
+        curnode1 = new logNode(op1,prevnode1);
+        //curnode1.Id = tm.getNextId();
+        
+        // System.err.println("create a scan node for attribute pair");
+        attr1 = new schemaAttribute(1);
+        op1 = new scanOp();
+        attr2 = new schemaAttribute(2);
+        // d=new data(dataType.ATTR, attr2);
+        d = new data(dataType.STRING, "pair");
+        reg=new regExpDataNode(d);
+        ((scanOp)op1).setScan(attr1,reg);
+        prevnode1 = curnode1;
+        curnode1 = new logNode(op1,prevnode1);
+        //curnode1.Id = tm.getNextId();
+        
+        // System.err.println("create a scan node for attribute value");
+        attr1 = new schemaAttribute(2);
+        op1 = new scanOp();
+        attr2 = new schemaAttribute(3);
+        //  d2=new data(dataType.ATTR, attr2);
+        d2=new data(dataType.STRING, "value");
+        reg=new regExpDataNode(d2);	
+        ((scanOp)op1).setScan(attr1,reg);
+        prevnode1 = curnode1;
+        curnode1 = new logNode(op1,prevnode1);
+        //curnode1.Id = tm.getNextId();
+        
+        // System.err.println("create a scan node for attribute tmpFileName");
+        attr1 = new schemaAttribute(2);
+        op1 = new scanOp();
+        // attr2 = new schemaAttribute(4);
+        // d=new data(dataType.ATTR, attr2);
+        d=new data(dataType.STRING, "tmpFileName");
+        reg=new regExpDataNode(d);	
+        ((scanOp)op1).setScan(attr1,reg);
+        prevnode1 = curnode1;
+        curnode1 = new logNode(op1,prevnode1);
+        //curnode1.Id = tm.getNextId();
+        
+        // System.err.println("create a join node");
+        op1 = new joinOp();
+        prevnode2 = curnode1;
+        prevnode1 = node.input(0); //the scan node under select
+        
+        //note we only consider select predicate with the format 
+        //attr op constant now. Thus the getLeftExp() will return
+        //the data associated with that attribute
+        attr2 = new schemaAttribute(3);
+        attr2.setStreamId(1);
+        
+        /* code for generating join which be picked up for Hash join algorithm
+        //left attribute vector
+        Vector lv=new Vector();
+        d=((predArithOpNode)((selectOp)sigNode.getOperator()).getPredicate()).getLeftExp();
+        debug.mesg("*****************dumping schemaAttribute.....");
+        ((schemaAttribute)d.getValue()).dump();
+        lv.addElement(d.getValue()); //get the schemaAttribute
+        
+        //right attribute vector
+        Vector rv=new Vector();
+        rv.addElement(attr2);
+        
+        //set the join
+        ((joinOp)op1).setJoin((predicate)null,lv,rv);
+        */
 	
-	    predicate tmp = ((selectOp)node.getOperator()).getPredicate();
-	    if (tmp instanceof predLogOpNode) {
-		try {
-		    tmp=gOpt.getLeftMostConjunct(tmp);
-		}
-		catch (Exception ex) {
-		    //never reach here
-		}
-	    }	 
-            d=((predArithOpNode)tmp).getLeftExp();	
-	    
-            d2=new data(dataType.ATTR, attr2);
-
-            predicate pred=new predArithOpNode(tmp.getOperator(), d, d2);
-
-            //useless allocation
-            //this is because setJoin code does not allow left predicate vecotor
-            //to be null
-            Vector fooV=new Vector();
-
-            ((joinOp)op1).setJoin(pred,fooV,null);
-	    
-            curnode1 = new logNode(op1,prevnode1,prevnode2);
-            //curnode1.Id = tm.getNextId();
-            //create a split node
-            splitOp topOp=(splitOp)operators.Split.clone();	
-            //topOp.initMappingTbl();
-
-            root = new logNode(topOp,curnode1);
-
-	    // addMember(node, gOpt);
-            // System.err.println("GROUP SELECT DONE !!! ");
-
-        } catch (java.lang.CloneNotSupportedException e) {           
-            System.out.println("Error in generating select group logical plan");
-            e.printStackTrace();
-        }
-
+        predicate tmp = ((selectOp)node.getOperator()).getPredicate();
+        if (tmp instanceof predLogOpNode) {
+            try {
+                tmp=gOpt.getLeftMostConjunct(tmp);
+            }
+            catch (Exception ex) {
+                //never reach here
+            }
+        }	 
+        d=((predArithOpNode)tmp).getLeftExp();	
+        
+        d2=new data(dataType.ATTR, attr2);
+        
+        predicate pred=new predArithOpNode(tmp.getOperator(), d, d2);
+        
+        //useless allocation
+        //this is because setJoin code does not allow left predicate vecotor
+        //to be null
+        Vector fooV=new Vector();
+        
+        ((joinOp)op1).setJoin(pred,fooV,null);
+        
+        curnode1 = new logNode(op1,prevnode1,prevnode2);
+        //curnode1.Id = tm.getNextId();
+        //create a split node
+        splitOp topOp= new splitOp();
+        //topOp.initMappingTbl();
+        
+        root = new logNode(topOp,curnode1);
+        
+        // addMember(node, gOpt);
+        // System.err.println("GROUP SELECT DONE !!! ");
     }
-
+    
     /**
      * add a member to this select group
      * @param pred the predicate used for grouping

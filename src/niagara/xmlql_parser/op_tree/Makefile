@@ -38,7 +38,6 @@ OBJ =   op.class		\
 	groupOp.class		\
 	nestOp.class		\
 	averageOp.class		\
-	operators.class		\
 	logNode.class		\
 	logPlanGenerator.class  \
         trigActionOp.class

@@ -12,15 +12,6 @@ public class DisplayOp extends unryOp {
     String query_id;
     String client_location;
 
-    /**
-     * Constructor
-     *
-     * @param list of algorithm to implement this operator
-     */
-    public DisplayOp(Class[] al) {
-        super("Display", al);
-    }
-
     public void setQueryId(String query_id) {
         this.query_id = query_id;
     }

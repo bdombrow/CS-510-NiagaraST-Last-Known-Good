@@ -21,17 +21,6 @@ public class FirehoseScanOp extends unryOp {
     private FirehoseSpec fhSpec;
 
     /**
-     * Constructor
-     *
-     * @param algList A list of algorithms which can be used to implement
-     *      this operator.  Why is this passed as a parameter??
-     */
-    public FirehoseScanOp(Class[] algList) {
-	super("Firehose Scan", algList);
-	fhSpec = null;
-    }
-
-    /**
      * Method for initializing the firehose scan operator. See
      * the FirehoseSpec constructor for descriptions of the
      * FirehoseSpec variables

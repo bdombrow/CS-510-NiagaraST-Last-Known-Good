@@ -21,17 +21,6 @@ public class StreamScanOp extends unryOp {
     private StreamSpec streamSpec;
 
     /**
-     * Constructor
-     *
-     * @param algList A list of algorithms which can be used to implement
-     *      this operator.  Why is this passed as a parameter??
-     */
-    public StreamScanOp(Class[] algList) {
-	super("Stream Scan", algList);
-	streamSpec = null;
-    }
-
-    /**
      * Method for initializing the stream scan operator. 
      *
      * @param spec A completed StreamSpec object with all

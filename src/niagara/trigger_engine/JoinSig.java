@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: JoinSig.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: JoinSig.java,v 1.2 2002/05/23 06:31:59 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,16 +55,11 @@ public class JoinSig extends Signature {
         groupId = tm.getNextId();
 
         //create the signature logical plan
-        try {	
-            //create a split node, note this split node equls a store node.
-            splitOp topOp=(splitOp)operators.Split.clone();
-	    destFileName = gOpt.getTrigFileMgr().getTmpFileName(groupId,"Join");
-	    topOp.setDestFileName(destFileName);
-            root = new logNode(topOp,node);
-        } catch (java.lang.CloneNotSupportedException e) {           
-            System.out.println("Error in generating join group logical plan");
-            e.printStackTrace();
-        }
+        //create a split node, note this split node equls a store node.
+        splitOp topOp = new splitOp();
+        destFileName = gOpt.getTrigFileMgr().getTmpFileName(groupId,"Join");
+        topOp.setDestFileName(destFileName);
+        root = new logNode(topOp,node);
     }
 
     /**
