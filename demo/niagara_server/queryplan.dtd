@@ -11,7 +11,7 @@
           y CDATA #IMPLIED">
 
 <!ELEMENT plan     (scan | select | join | avg | construct | 
-                    dtdscan | streamscan | constant | resource | 
+                    dtdscan | filescan | constant | resource | 
 		    firehosescan | accumulate | 
                     expression | send | display | topn |
 		    sort | dup | union)+>
@@ -181,24 +181,50 @@
 
 <!ELEMENT firehosescan  EMPTY>
 <!ATTLIST firehosescan 
-          id       ID           #REQUIRED
-	  host	   CDATA	#REQUIRED
-	  port	   CDATA	#REQUIRED
-	  rate	   CDATA	#REQUIRED
-	  type	   (gen | file) "gen"
-	  desc     CDATA        #REQUIRED
-	  iters    CDATA        #REQUIRED
-	  doccount CDATA       "1"
-	  %PositionAttributes;>
+	  host	         CDATA   #REQUIRED
+	  port	         CDATA   #REQUIRED
+	  rate	         CDATA   #REQUIRED 
+	  datatype  (xmlb | subfile | temp | auction | dtd ) "auction"
+	  num_gen_calls  CDATA   #REQUIRED  
+	  streaming      (yes | no)  "yes"
+	  desc           CDATA   "empty"
+	  num_tl_elts    CDATA   "1"   
+	  %StandardAttributes;>
 
-<!ELEMENT streamscan  EMPTY>
-<!ATTLIST streamscan 
+<!-- NOTE: num_gen_calls is the number of times the generator will be called 
+           to generate data. if num_gen_calls is 0, the generator will be
+           called over and over until the stream is shutdown.
+           
+           num_tl_elts is the number of top level elements in a document
+           generated in one call to the generator. This value controls, 
+           for example, how many PLAY elements there are in a GAMEDATA
+           document in the XMLB data. This attribute is applicable to
+           XMLB and AUCTION generators only.
+
+           comments on attributes:
+           id, host, port, rate, datatype, num_gen_calls, streaming   - required for all types
+                                                                      (or use defaults)
+
+           desc and num_tl_elts are applicable as follows:
+
+           xmlb:    num_tl_elts   (no desc)
+           subfile: desc          (no num_tl_elts)
+           temp:    desc              "
+           auction: desc, num_tl_elts
+           dtd:     desc          (no num_tl_elts)
+
+    also note, streaming is used to indicate to query engine that
+    data should be processed in streaming fashion and also used to
+    indicate to firehose that streaming format should be used -
+    only type of streaming we support now is saxdom style streaming
+-->
+
+
+<!ELEMENT filescan  EMPTY>
+<!ATTLIST filescan 
           id       ID           #REQUIRED
-          type     (file | firehose) "file"
 	  streaming (yes | no) "yes"
-	  host	   CDATA	#IMPLIED
- 	  port	   CDATA	#IMPLIED
-          fileName CDATA        #IMPLIED
+          fileName CDATA        #REQUIRED
 	  %PositionAttributes;>
 
 
