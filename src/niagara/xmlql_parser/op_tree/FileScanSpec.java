@@ -14,17 +14,12 @@ public class FileScanSpec extends StreamSpec{
     /**
      * Initialize the stream spec
      */
-    public FileScanSpec(String file_name, boolean streaming) {
+    public FileScanSpec(String file_name) {
 	this.file_name = file_name;
-        this.streaming = streaming;
     }
 
     public String getFileName() {
 	return file_name;
-    }
-
-    public boolean isStreaming() {
-        return streaming;
     }
 
     public void dump(PrintStream os) {
