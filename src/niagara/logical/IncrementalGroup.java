@@ -8,11 +8,17 @@ public abstract class IncrementalGroup extends unryOp {
     // The skolem attributes associated with the group operator
     protected skolem skolemAttributes;
 
-    public void setSkolemAttributes (skolem skolemAttributes) {
+    public IncrementalGroup() {}
+    
+    public IncrementalGroup(skolem skolemAttributes) {
+        this.skolemAttributes = skolemAttributes;
+    }
+    
+    public void setSkolemAttributes(skolem skolemAttributes) {
 	this.skolemAttributes = skolemAttributes;
     }
 
-    public skolem getSkolemAttributes () {
+    public skolem getSkolemAttributes() {
 	return skolemAttributes;
     }
 }

@@ -1,12 +1,18 @@
 /* $Id */
 package niagara.logical;
 
+import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.op_tree.unryOp;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class IncrementalMax extends IncrementalGroup {
     private schemaAttribute maxAttribute;
     private Double emptyGroupValue;
+
+    public IncrementalMax(skolem skolemAttributes, schemaAttribute maxAttribute) {
+        super(skolemAttributes);
+        this.maxAttribute = maxAttribute;
+    }
 
     public void setMaxAttribute(schemaAttribute maxAttribute) {
         this.maxAttribute = maxAttribute;
@@ -25,5 +31,13 @@ public class IncrementalMax extends IncrementalGroup {
     }
 
     public void dump() {System.out.println(getName());}
+
+    public Op copy() {
+        return new IncrementalAverage(skolemAttributes, maxAttribute);
+    }
+    
+    public int hashCode() {
+        return skolemAttributes.hashCode() ^ maxAttribute.hashCode();
+    }
 }
 
