@@ -29,9 +29,11 @@ ASTLIB	     = $(LIBDIR)/ast.jar
 REGEXPLIB     = $(LIBDIR)/gnu-regexp.jar
 JETTY        = $(LIBDIR)/com.mortbay.jetty.jar
 SERVLET      = $(LIBDIR)/javax.servlet.jar
+export SAX   = $(LIBDIR)/aelfred.jar
 
 
-CLASSPATH  = .:$(NIAGROOT)/src:$(PARSELIB):$(BASELIB):$(CUPLIB):$(ASTLIB):$(COMMONLIB):$(NIAGROOT)/src/$(FHOSE):$(REGEXPLIB):$(JETTY):$(SERVLET)
+
+CLASSPATH  = .:$(NIAGROOT)/src:$(PARSELIB):$(BASELIB):$(CUPLIB):$(ASTLIB):$(COMMONLIB):$(NIAGROOT)/src/$(FHOSE):$(REGEXPLIB):$(JETTY):$(SERVLET):$(SAX)
 JAVAFLAGS  = -classpath $(CLASSPATH)
 
 
