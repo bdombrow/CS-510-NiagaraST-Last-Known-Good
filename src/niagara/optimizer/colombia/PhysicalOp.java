@@ -1,4 +1,4 @@
-/* $Id: PhysicalOp.java,v 1.7 2003/02/25 06:19:08 vpapad Exp $
+/* $Id: PhysicalOp.java,v 1.8 2003/03/03 08:25:27 tufte Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -32,6 +32,14 @@ public abstract class PhysicalOp extends Op {
     /** Logical properties of this operator's group */
     protected LogicalProperty logProp;
 
+    /** does this operator need a sendImmediate output stream?
+     *  This can be true because the operator itself requires
+     *  a send Immed stream (i.e. timer thread) or can be true
+     *  because it was set to be true due to this operators's
+     *  placement in the query tree
+     */
+    protected boolean isSendImmediate;
+
     public PhysicalOp() {
     }
 
@@ -41,6 +49,7 @@ public abstract class PhysicalOp extends Op {
 
     PhysicalOp(PhysicalOp other) {
         logProp = other.getLogProp();
+	isSendImmediate = other.isSendImmediate;
     }
 
     /** What physical properties will this operator guarantee, given
@@ -102,5 +111,13 @@ public abstract class PhysicalOp extends Op {
 
     public void setLogProp(LogicalProperty logProp) {
         this.logProp = logProp;
+    }
+
+    public boolean isSendImmediate() {
+	return isSendImmediate;
+    }
+
+    public void setSendImmediate() {
+	isSendImmediate = true;
     }
 }

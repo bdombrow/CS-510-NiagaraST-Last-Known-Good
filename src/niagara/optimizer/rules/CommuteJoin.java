@@ -32,8 +32,24 @@ public class CommuteJoin extends CustomRule {
         EquiJoinPredicateList eqPreds = op.getEquiJoinPredicates().reversed();
         Predicate pred = op.getNonEquiJoinPredicate().copy();
 
+	int newExtJoin = joinOp.NONE;
+	switch(op.getExtensionJoin()) {
+	case joinOp.LEFT:
+	    newExtJoin = joinOp.RIGHT;
+	    break;
+	case joinOp.RIGHT:
+	    newExtJoin = joinOp.LEFT;
+	    break;
+	case joinOp.NONE:
+	    newExtJoin = joinOp.NONE;
+	    break;
+	case joinOp.BOTH:
+	    newExtJoin = joinOp.BOTH;
+	    break;
+	}
+
         return new Expr(
-            new joinOp(pred, eqPreds),
+            new joinOp(pred, eqPreds, newExtJoin),
             new Expr((before.getInput(1))),
             new Expr((before.getInput(0))));
     }

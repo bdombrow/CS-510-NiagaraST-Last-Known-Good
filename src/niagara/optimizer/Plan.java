@@ -9,6 +9,7 @@ import niagara.data_manager.SourceThread;
 import niagara.optimizer.colombia.Expr;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.Op;
+import niagara.optimizer.colombia.PhysicalOp;
 import niagara.query_engine.PhysicalOperator;
 import niagara.query_engine.SchedulablePlan;
 import niagara.query_engine.SchemaProducer;
@@ -112,9 +113,10 @@ public class Plan implements SchedulablePlan {
      */
     public PhysicalOperator getPhysicalOperator() {
         PhysicalOperator pop;
-        if (operator.is_physical())
+        if (operator.is_physical()) {
+	    // KT - will this croak if operator is a SourceThread??
             pop = (PhysicalOperator) operator;
-        else
+	} else
             throw new PEException("unexpected request for physical op");
 
         // Construct the tuple schema, if it's not there        
@@ -181,6 +183,22 @@ public class Plan implements SchedulablePlan {
      */
     public boolean isHead() {
         return isHead;
+    }
+
+    /**
+     * @see niagara.query_engine.SchedulablePlan#setSendImmed()
+     */
+    public void setSendImmediate() {
+	assert operator.is_physical() : "SendImmediate is a physical property";
+	((PhysicalOp)operator).setSendImmediate();
+    }
+
+    /**
+     * @see niagara.query_engine.SchedulablePlan#isSendImmed()
+     */
+    public boolean isSendImmediate() {
+	assert operator.is_physical() : "SendImmediate is a physical property";
+        return ((PhysicalOp)operator).isSendImmediate();
     }
 
     /**

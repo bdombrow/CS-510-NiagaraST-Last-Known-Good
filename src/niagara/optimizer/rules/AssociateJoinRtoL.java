@@ -113,10 +113,15 @@ public class AssociateJoinRtoL extends CustomRule {
         ab.merge(bAttrs);
         And split2 = (And) op2.getNonEquiJoinPredicate().split(ab);
         Predicate abPred = split2.getLeft();
-        joinOp newOp1 = new joinOp(abPred, newPreds1);
+	// KT - we can lose extension join property during association
+	// no good way to know if new joins are extension joins or not
+	// extension join is only optimization issue, not correctness issue
+	// anyway. In future, should examine catalogs to see if these
+	// are extension joins
+        joinOp newOp1 = new joinOp(abPred, newPreds1,joinOp.NONE);
         Predicate abcPred =
             And.conjunction(split2.getRight(), op1.getNonEquiJoinPredicate());
-        joinOp newOp2 = new joinOp(abcPred, newPreds2);
+        joinOp newOp2 = new joinOp(abcPred, newPreds2,joinOp.NONE);
 
         // Phew!
         return new Expr(

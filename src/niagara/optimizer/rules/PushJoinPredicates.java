@@ -1,4 +1,4 @@
-/* $Id: PushJoinPredicates.java,v 1.1 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: PushJoinPredicates.java,v 1.2 2003/03/03 08:25:29 tufte Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.And;
@@ -60,7 +60,8 @@ public class PushJoinPredicates extends CustomRule {
             right = new Expr(new selectOp(pushRight), right);
 
         EquiJoinPredicateList eq = j.getEquiJoinPredicates();
-        joinOp newJ = new joinOp(remJoin, eq, j.getProjectedAttrs());
+        joinOp newJ = new joinOp(remJoin, eq, j.getProjectedAttrs(),
+				 j.getExtensionJoin());
         return new Expr(newJ, left, right);
     }
     
