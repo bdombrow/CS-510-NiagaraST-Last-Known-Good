@@ -1,5 +1,5 @@
 #######################################################################
-# $Id: Makefile,v 1.14 2002/05/23 06:28:43 vpapad Exp $
+# $Id: Makefile,v 1.15 2002/06/28 01:28:30 vpapad Exp $
 #
 #  Makefile to build query engine related stuff
 #
@@ -42,7 +42,6 @@ qe:
 	$(JAVAC) $(JAVACFLAGS) niagara/query_engine/*.java
 optimizer: 
 	$(JAVAC) $(JAVACFLAGS) niagara/optimizer/*.java
-	$(JAVAH) $(JAVAFLAGS) -jni -d niagara/optimizer niagara.optimizer.Optimizer 
 dm:
 	$(JAVAC) $(JAVACFLAGS) niagara/data_manager/*.java
 

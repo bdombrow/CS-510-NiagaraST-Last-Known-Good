@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: op.java,v 1.7 2002/05/23 06:32:03 vpapad Exp $
+  $Id: op.java,v 1.8 2002/06/28 01:28:32 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,6 @@
  * This class is used as a base class for all the classes that represents
  * different logical operators.
  *
- *
  */
 
 package niagara.xmlql_parser.op_tree;
@@ -38,7 +37,9 @@ import java.util.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.connection_server.NiagraServer;
 
-public abstract class op {
+import niagara.optimizer.colombia.LogicalOperator;
+
+public abstract class op extends LogicalOperator {
     // This is the index of the selected algorithm
     int selectedAlgorithmIndex;
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UnionOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
+  $Id: UnionOp.java,v 1.3 2002/06/28 01:28:32 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,7 +35,7 @@ package niagara.xmlql_parser.op_tree;
 import java.util.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
-public class UnionOp extends op {
+public class UnionOp extends binOp {
    /**
     * print the operator to the standard output
     */

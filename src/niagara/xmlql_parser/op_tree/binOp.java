@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: binOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
+  $Id: binOp.java,v 1.3 2002/06/28 01:28:32 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,5 +38,5 @@ abstract public class binOp extends op {
    /**
     * @return the arity of the operator (2 in this case)
     */
-   public int arity() { return 2; }
+   public int getArity() { return 2; }
 }
