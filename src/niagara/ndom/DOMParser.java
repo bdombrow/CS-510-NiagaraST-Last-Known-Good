@@ -1,5 +1,5 @@
 /**
- * $Id: DOMParser.java,v 1.3 2002/10/31 04:29:27 vpapad Exp $
+ * $Id: DOMParser.java,v 1.4 2003/03/07 23:45:30 vpapad Exp $
  *
  */
 
@@ -41,6 +41,11 @@ public interface DOMParser {
      */
     boolean hasErrors();
 
+    /** @return the error messages accumulated so far, if possible */
+    String getErrorStrings();
+
+    /** @return the warning messages accumulated so far, if possible  */    
+    String getWarningStrings();
     /**
      * <code>hasWarnings</code> 
      *

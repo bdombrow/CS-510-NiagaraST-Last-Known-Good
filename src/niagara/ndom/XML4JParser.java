@@ -1,5 +1,5 @@
 /**
- * $Id: XML4JParser.java,v 1.4 2002/10/31 04:29:27 vpapad Exp $
+ * $Id: XML4JParser.java,v 1.5 2003/03/07 23:45:29 vpapad Exp $
  *
  */
 
@@ -47,6 +47,21 @@ public class XML4JParser implements niagara.ndom.DOMParser {
 
     public boolean supportsStreaming() {
 	return false;
+    }
+    
+
+    /* 
+     * @see niagara.ndom.DOMParser#getErrorStrings()
+     */
+    public String getErrorStrings() {
+        return null;
+    }
+
+    /* 
+     * @see niagara.ndom.DOMParser#getWarningStrings()
+     */
+    public String getWarningStrings() {
+        return null;
     }
 }
 

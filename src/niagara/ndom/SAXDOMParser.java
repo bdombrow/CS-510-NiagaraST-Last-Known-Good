@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.14 2002/10/31 04:29:27 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.15 2003/03/07 23:45:30 vpapad Exp $
  *
  */
 
@@ -23,7 +23,6 @@ import org.xml.sax.SAXParseException;
 
 import niagara.ndom.saxdom.*;
 import niagara.utils.*;
-import niagara.ndom.DOMParser;
 
 /**
  * <code>SAXDOMParser</code> constructs read-only SAXDOM documents
@@ -310,4 +309,17 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
         hasWarnings = true;
     }
 
+    /* 
+     * @see niagara.ndom.DOMParser#getErrorStrings()
+     */
+    public String getErrorStrings() {
+        return null;
+    }
+
+    /* 
+     * @see niagara.ndom.DOMParser#getWarningStrings()
+     */
+    public String getWarningStrings() {
+        return null;
+    }
 }

@@ -1,5 +1,5 @@
 /**
- * $Id: DOMFactory.java,v 1.5 2003/01/25 20:59:46 tufte Exp $
+ * $Id: DOMFactory.java,v 1.6 2003/03/07 23:45:30 vpapad Exp $
  *
  */
 
@@ -78,6 +78,17 @@ public class DOMFactory {
         return impl.newParser();
     }
 
+    /**
+     * @return a new validating parser with the
+     * default implementation, if that's possible,
+     * otherwise return a regular parser.
+     *
+     * @return a <code>DOMParser</code> value
+     */
+    public static DOMParser newValidatingParser() {
+            return impl.newValidatingParser();
+    }
+    
     /**
      * <code>newParser</code> creates a new Parser for
      * the requested implementation.

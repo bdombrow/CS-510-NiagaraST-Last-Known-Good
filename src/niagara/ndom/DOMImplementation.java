@@ -1,5 +1,5 @@
 /**
- * $Id: DOMImplementation.java,v 1.2 2002/10/31 04:29:27 vpapad Exp $
+ * $Id: DOMImplementation.java,v 1.3 2003/03/07 23:45:30 vpapad Exp $
  *
  */
 
@@ -30,6 +30,15 @@ public interface DOMImplementation {
      */
     DOMParser newParser();
 
+    /**
+     * <code>newParser</code> creates a new validating parser
+     * for this particular DOM implementation, if that's possible
+     * otherwise it returns a regular parser
+     *
+     * @return the new <code>DOMParser</code> 
+     */
+    DOMParser newValidatingParser();
+    
     /**
      * Returns a version of a node that can be inserted in 
      * a (possibly different than its current) document 

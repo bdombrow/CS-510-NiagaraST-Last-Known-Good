@@ -1,5 +1,5 @@
 /**
- * $Id: XercesJ2Parser.java,v 1.2 2002/10/31 04:29:27 vpapad Exp $
+ * $Id: XercesJ2Parser.java,v 1.3 2003/03/07 23:45:29 vpapad Exp $
  *
  */
 
@@ -24,17 +24,17 @@ public class XercesJ2Parser implements niagara.ndom.DOMParser {
 
     public XercesJ2Parser(DocumentBuilderFactory dbf) {
 
-	try {
-	    parser = dbf.newDocumentBuilder();
-	    sh = new SimpleHandler2();
-	} catch (javax.xml.parsers.ParserConfigurationException pce) {
-	    System.err.println("Unable to create XercesJ2Parser " + 
-			       pce.getMessage());
-	}
+        try {
+            parser = dbf.newDocumentBuilder();
+            sh = new SimpleHandler2();
+        } catch (javax.xml.parsers.ParserConfigurationException pce) {
+            System.err.println(
+                "Unable to create XercesJ2Parser " + pce.getMessage());
+        }
     }
 
-    public void parse(org.xml.sax.InputSource is) 
-	throws SAXException, IOException {
+    public void parse(org.xml.sax.InputSource is)
+        throws SAXException, IOException {
         sh.reset();
         parser.setErrorHandler(sh);
         d = parser.parse(is);
@@ -47,21 +47,38 @@ public class XercesJ2Parser implements niagara.ndom.DOMParser {
     public boolean hasErrors() {
         return sh.hasErrors();
     }
-    
+
     public boolean hasWarnings() {
         return sh.hasWarnings();
     }
 
     public boolean supportsStreaming() {
-	return true;
+        return true;
     }
 
+    /* 
+     * @see niagara.ndom.DOMParser#getErrorStrings()
+     */
+    public String getErrorStrings() {
+        return sh.getErrorStrings();
+    }
+
+    /* 
+     * @see niagara.ndom.DOMParser#getWarningStrings()
+     */
+    public String getWarningStrings() {
+        return sh.getWarningStrings();
+    }
 }
 
 class SimpleHandler2 extends DefaultHandler {
     private boolean hasErrors, hasWarnings;
+    private StringBuffer errors;
+    private StringBuffer warnings;
 
     public SimpleHandler2() {
+        errors = new StringBuffer();
+        warnings = new StringBuffer();
         reset();
     }
 
@@ -75,13 +92,25 @@ class SimpleHandler2 extends DefaultHandler {
 
     public void reset() {
         hasErrors = hasWarnings = false;
+        errors.setLength(0);
+        errors.setLength(0);
     }
 
     public void error(SAXParseException e) {
         hasErrors = true;
+        errors.append(e.getMessage()).append("\n");
     }
 
     public void warning(SAXParseException e) {
         hasWarnings = true;
+        warnings.append(e.getMessage()).append("\n");
+    }
+
+    public String getErrorStrings() {
+        return errors.toString();
+    }
+
+    public String getWarningStrings() {
+        return warnings.toString();
     }
 }

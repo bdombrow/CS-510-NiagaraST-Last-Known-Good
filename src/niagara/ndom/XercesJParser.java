@@ -1,5 +1,5 @@
 /**
- * $Id: XercesJParser.java,v 1.3 2002/10/31 04:29:27 vpapad Exp $
+ * $Id: XercesJParser.java,v 1.4 2003/03/07 23:45:30 vpapad Exp $
  *
  */
 
@@ -46,6 +46,20 @@ public class XercesJParser implements niagara.ndom.DOMParser {
 
     public boolean supportsStreaming() {
 	return false;
+    }
+    
+    /* 
+     * @see niagara.ndom.DOMParser#getErrorStrings()
+     */
+    public String getErrorStrings() {
+        return null;
+    }
+
+    /* 
+     * @see niagara.ndom.DOMParser#getWarningStrings()
+     */
+    public String getWarningStrings() {
+        return null;
     }
 }
 
