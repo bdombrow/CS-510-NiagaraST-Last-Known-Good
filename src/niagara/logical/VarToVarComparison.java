@@ -1,4 +1,4 @@
-/* $Id: VarToVarComparison.java,v 1.1 2002/10/27 00:50:34 vpapad Exp $ */
+/* $Id: VarToVarComparison.java,v 1.2 2002/10/31 03:32:21 vpapad Exp $ */
 package niagara.logical;
 import java.util.ArrayList;
 
@@ -22,8 +22,8 @@ public class VarToVarComparison extends Comparison {
     }
 
     public void getReferencedVariables(ArrayList al) {
-        al.add(left.getName());
-        al.add(right.getName());
+        al.add(left);
+        al.add(right);
     }
 
     public Atom getLeft() { return left; }

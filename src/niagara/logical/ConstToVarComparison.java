@@ -1,4 +1,4 @@
-/* ConstToVarComparison.java,v 1.1 2002/10/27 00:50:34 vpapad Exp */
+/* ConstToVarComparison.java,v 1.2 2002/10/31 03:32:21 vpapad Exp */
 package niagara.logical;
 import java.util.ArrayList;
 
@@ -22,7 +22,7 @@ public class ConstToVarComparison extends Comparison {
     }
 
     public void getReferencedVariables(ArrayList al) {
-        al.add(right.getName());
+        al.add(right);
     }
     
     public Atom getLeft() {return left;}

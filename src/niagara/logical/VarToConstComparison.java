@@ -23,7 +23,7 @@ public class VarToConstComparison extends Comparison {
     }
 
     public void getReferencedVariables(ArrayList al) {
-        al.add(left.getName());
+        al.add(left);
     }
     
     public Atom getLeft() { return left; }

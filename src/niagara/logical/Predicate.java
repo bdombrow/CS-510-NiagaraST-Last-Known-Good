@@ -1,4 +1,4 @@
-/* $Id: Predicate.java,v 1.1 2002/10/06 23:40:13 vpapad Exp $ */
+/* $Id: Predicate.java,v 1.2 2002/10/31 03:32:21 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.*;
@@ -14,7 +14,7 @@ abstract public class Predicate implements condition {
     /** Get an implementation for this predicate */
     public abstract PredicateImpl getImplementation();
 
-    /** Gather all the variable names referenced in this predicate */
+    /** Gather all the variables referenced in this predicate */
     public abstract void getReferencedVariables(ArrayList al);
 
     public abstract Predicate copy();
