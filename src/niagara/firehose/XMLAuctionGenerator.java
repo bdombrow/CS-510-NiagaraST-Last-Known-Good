@@ -11,25 +11,32 @@ import javax.xml.parsers.SAXParserFactory;
 class XMLAuctionGenerator extends XMLFirehoseGen {
     private static AuctionValues m_av = null;
     private String stFile;
-    private String desc2;
+    private boolean doBid;
+    private boolean doPerson;
     String tab = "";
     String tab2 = "";
     String tab3 = "";
     String nl = "";
     private long idTrace = 0;
     private Writer wrtTrace;
+    StringBuffer stringBuf;
+    GregorianCalendar cal;
+    SimpleDateFormat sdf;
 
   public XMLAuctionGenerator(String stFile, String desc2,
 			     int numTLElts, boolean streaming,
 			     boolean prettyPrint, Writer wrtTrace) {
       this.stFile = stFile;
-      this.desc2 = desc2;
+      doBid = (desc2.indexOf("bid") != -1);
+      doPerson = (desc2.indexOf("person") != -1);
+
       this.numTLElts = numTLElts;
       this.wrtTrace = wrtTrace;
       if (m_av == null)
 	  m_av = new AuctionValues();
       useStreamingFormat = streaming;
       usePrettyPrint = prettyPrint;
+      stringBuf = new StringBuffer();
 
       if(usePrettyPrint) {
 	  tab = "   ";
@@ -37,20 +44,23 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
 	  tab3 = tab + tab + tab;
 	  nl = "\n";
       }
+
+      cal = new GregorianCalendar();
+      cal.set(2001,10,2,1,12,53);
+
+      //stFile points to the existing auction file
+      //Get the auction values
+      m_av.init(stFile, cal);
+
+      sdf = new SimpleDateFormat("'<date>'MM/dd/yyyy'</date>" +
+				 "<time>'hh:mm:ss'</time>'");
   }
   
   public byte[] generateXMLBytes() {
       // KT - appears we can ignore useStreamingFormat - don't see
       // the xml header being added anywhere
-      
-    //stFile points to the existing auction file
-    String st = new String();
-    GregorianCalendar cal = new GregorianCalendar();
-    
-    cal.set(2001,10,2,1,12,53);
 
-    //Get the auction values
-    m_av.init(stFile, cal);
+    stringBuf.setLength(0);
     
     //System.out.println("Initial Auction Values: " +
     //		       m_av.getPersonCount() + " persons, " + 
@@ -58,13 +68,12 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     //		       m_av.getOpenAuctionCount() + " open auctions");
 
     // Generate appropriate data
-    StringBuffer stringBuf = new StringBuffer();
     stringBuf.append("<site>");
     stringBuf.append(nl);
-    if(desc2.indexOf("bid") != -1) {
+    if(doBid) {
 	generateBid(stringBuf, numTLElts);
     }
-    if(desc2.indexOf("person") != -1) {
+    if(doPerson) {
 	generatePerson(stringBuf, numTLElts);
     }
     stringBuf.append("</site>");
@@ -76,9 +85,6 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
   private void generateBid(StringBuffer stb, int numBids) {
     Random rnd = new Random();
     int iPerson, iItem, iAuction;
-    SimpleDateFormat sdf =
-      new SimpleDateFormat("'<date>'MM/dd/yyyy'</date>" +
-			   "<time>'hh:mm:ss'</time>'");
     
     iPerson = rnd.nextInt(m_av.getPersonCount());
     iItem = rnd.nextInt(m_av.getItemCount());
@@ -143,10 +149,11 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
 	writeTrace(stb);
     stb.append(">");
     stb.append(nl);
+    StringBuffer strbuf = new StringBuffer("person");
     for (int iDoc=0; iDoc<numPersons;iDoc++) {
       Person p = new Person();
       p.init(m_av);
-      String id = m_av.addPerson("person");
+      String id = m_av.addPersonWithNewId(strbuf, 1);
 
       stb.append(tab);
       stb.append("<person id=\"");
@@ -318,13 +325,13 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
 
 class AuctionValues extends HandlerBase {
   private String m_stFile = null;
-  private Vector m_vctItems;
+  private ArrayList m_vctItems;
   private int m_nNextItemId = 0;
-  private Vector m_vctPersons;
+  private ArrayList m_vctPersons;
   private int m_nNextPersonId = 0;
-  private Vector m_vctOpenAuctions;
+  private ArrayList m_vctOpenAuctions;
   private int m_nNextOpenAuctionId = 0;
-  private Vector m_vctCategories;
+  private ArrayList m_vctCategories;
   private int m_nNextCategoryId = 0;
   private Calendar m_cal;
   private Random m_rnd = new Random();
@@ -333,15 +340,18 @@ class AuctionValues extends HandlerBase {
   //Max wait between bids is 37 minutes
   private static final int MAXSECONDS = 2220;
   
+  private StringBuffer stb;
+  
   public AuctionValues() {
+    stb = new StringBuffer();
     clear();
   }
   
   private void clear() {
-    m_vctItems = new Vector();
-    m_vctPersons = new Vector();
-    m_vctOpenAuctions = new Vector();
-    m_vctCategories = new Vector();
+    m_vctItems = new ArrayList();
+    m_vctPersons = new ArrayList();
+    m_vctOpenAuctions = new ArrayList();
+    m_vctCategories = new ArrayList();
   }
   
   public int getItemCount() {
@@ -364,15 +374,28 @@ class AuctionValues extends HandlerBase {
     m_vctItems.add(stb.toString());
     return stb.toString();
   }
+
+  public void addItemWithNewId(StringBuffer stb, int howMany) {
+      for (int i = 0; i < howMany; i++) {
+	  stb.setLength(0);
+	  stb.append("item");
+
+	  m_nNextItemId++;
+	  stb.append(m_nNextItemId);
+	  m_vctItems.add(stb.toString());
+      }
+  }
+  
   public int getPersonCount() {
     return m_vctPersons.size();
   }
   public String getPerson(int i) {
     return (String) m_vctPersons.get(i);
   }
+  
   public String addPerson(String stPersonId) {
-    int id = getId(stPersonId);
     StringBuffer stb = new StringBuffer(stPersonId);
+    int id = getId(stPersonId);
     
     m_nNextPersonId = Math.max(id, m_nNextPersonId) + 1;
 
@@ -384,6 +407,20 @@ class AuctionValues extends HandlerBase {
     m_vctPersons.add(stb.toString());
     return stb.toString();
   }
+  
+  public String addPersonWithNewId(StringBuffer stb, int howMany) {
+      String person = null;
+      for (int i = 0; i < howMany; i++) {
+	  stb.setLength(0);
+	  stb.append("person");
+	  m_nNextPersonId++;
+	  stb.append(m_nNextPersonId);
+	  person = stb.toString();
+	  m_vctPersons.add(person);
+      }
+      return person;
+  }  
+  
   public int getOpenAuctionCount() {
     return m_vctOpenAuctions.size();
   }
@@ -404,6 +441,17 @@ class AuctionValues extends HandlerBase {
     m_vctOpenAuctions.add(stb.toString());
     return stb.toString();
   }
+
+  public void addOpenAuctionWithNewId(StringBuffer stb, int howMany) {
+      for (int i = 0; i < howMany; i++) {
+	  stb.setLength(0); stb.append("open_auction");
+
+	  m_nNextOpenAuctionId++;
+	  
+	  stb.append(m_nNextOpenAuctionId);
+	  m_vctOpenAuctions.add(stb.toString());
+      }
+  }
   
   public int getCategoryCount() {
     return m_vctCategories.size();
@@ -411,7 +459,8 @@ class AuctionValues extends HandlerBase {
   public String getCategory(int i) {
     return (String) m_vctCategories.get(i);
   }
-  public String addCategory(String stCategoryId) {
+
+  public void addCategory(String stCategoryId) {
     int id = getId(stCategoryId);
     StringBuffer stb = new StringBuffer(stCategoryId);
     
@@ -423,9 +472,18 @@ class AuctionValues extends HandlerBase {
     }
     
     m_vctCategories.add(stb.toString());
-    return stb.toString();
+  }
+
+  public void addCategoryWithNewId(StringBuffer stb, int howMany) {
+      for (int i = 0; i < howMany; i++) {
+	  stb.setLength(0); stb.append("category");
+	  m_nNextCategoryId++;
+	  stb.append(m_nNextCategoryId);
+	  m_vctCategories.add(stb.toString());
+      }
   }
   
+    // XXX vpapad: this method makes baby Jesus cry
   public int getId(String st) {
     int id = 0, i = 0;
     
@@ -448,13 +506,13 @@ class AuctionValues extends HandlerBase {
   }
   
   public void init(String stFile, Calendar cal) {
-    if (m_stFile != null && m_stFile.compareTo(stFile) == 0)
+    if (m_stFile == stFile)
       return;
     
     m_cal = cal;
     clear();
     
-    m_stFile = new String(stFile);
+    m_stFile = stFile;
     if (stFile == null || stFile.length() == 0) {
       System.out.println("No xmark file specified," +
 			 " using default values...");
@@ -480,12 +538,10 @@ class AuctionValues extends HandlerBase {
   }
   
   private void defaultValues() {
-    addPerson("person");
-    addPerson("person");
-    addItem("item");
-    addItem("item");
-    addOpenAuction("open_auction");
-    addCategory("category");
+    addPersonWithNewId(stb, 2); 
+    addItemWithNewId(stb, 2);
+    addOpenAuctionWithNewId(stb, 1);
+    addCategoryWithNewId(stb, 1);
   }
   
   public void startElement (String name, AttributeList attrs)
@@ -543,7 +599,7 @@ class AuctionValues extends HandlerBase {
 
 class Person {
   class Profile {
-    public Vector m_vctInterest = new Vector();
+    public ArrayList m_vctInterest = new ArrayList();
     public String m_stEducation;
     public String m_stGender;
     public String m_stBusiness;
@@ -565,7 +621,7 @@ class Person {
   public String m_stHomepage;
   public String m_stCreditcard;
   public Profile m_profile = new Profile();
-  public Vector m_vctWatches = new Vector();
+  public ArrayList m_vctWatches = new ArrayList();
 
   private static Random m_rnd;
 
@@ -581,28 +637,28 @@ class Person {
 			       ValueGen.lastnames[iln]);
     this.m_stEmail = new String(ValueGen.lastnames[iln] + "@" +
 				ValueGen.emails[iem]);
-    if (m_rnd.nextInt(2) == 1) {
+    if (m_rnd.nextBoolean()) {
       this.m_stPhone = new String("+" + (m_rnd.nextInt(98) + 1) +
 				  " (" + (m_rnd.nextInt(989) + 10) +
 				  ") " + (m_rnd.nextInt(9864196) + 123457));
     }
-    if (m_rnd.nextInt(2) == 1) {
+    if (m_rnd.nextBoolean()) {
       genAddress();
     }
-    if (m_rnd.nextInt(2) == 1) {
+    if (m_rnd.nextBoolean()) {
       this.m_stHomepage = new String("http://www." + ValueGen.emails[iem] +
 				     "/~" + ValueGen.lastnames[iln]);
     }
-    if (m_rnd.nextInt(2) == 1) {
+    if (m_rnd.nextBoolean()) {
       this.m_stCreditcard = new String((m_rnd.nextInt(9000) + 1000) + " " + 
 				       (m_rnd.nextInt(9000) + 1000) + " " + 
 				       (m_rnd.nextInt(9000) + 1000) + " " + 
 				       (m_rnd.nextInt(9000) + 1000));
     }
-    if (m_rnd.nextInt(2) == 1) {
+    if (m_rnd.nextBoolean()) {
       genProfile(av);
     }
-    if (m_rnd.nextInt(2) == 1) {
+    if (m_rnd.nextBoolean()) {
       int cWatches = m_rnd.nextInt(20) + 1;
       int iWatch;
       for (int i=0; i<cWatches; i++) {
@@ -633,16 +689,16 @@ class Person {
   }
 
   private void genProfile(AuctionValues av) {
-    if (m_rnd.nextInt(2) == 1)
+    if (m_rnd.nextBoolean())
       this.m_profile.m_stEducation =
 	ValueGen.education[m_rnd.nextInt(ValueGen.education.length)];
 
-    if (m_rnd.nextInt(2) == 1)
-      this.m_profile.m_stGender = (m_rnd.nextInt(2) == 1) ? "male" : "female";
+    if (m_rnd.nextBoolean())
+      this.m_profile.m_stGender = (m_rnd.nextBoolean()) ? "male" : "female";
 
-    this.m_profile.m_stBusiness = (m_rnd.nextInt(2) == 1) ? "Yes" : "No";
+    this.m_profile.m_stBusiness = (m_rnd.nextBoolean()) ? "Yes" : "No";
 
-    if (m_rnd.nextInt(2) == 1)
+    if (m_rnd.nextBoolean())
       this.m_profile.m_stAge = String.valueOf((m_rnd.nextInt(15) + 30));
 
     this.m_profile.m_stIncome = new String((m_rnd.nextInt(30000) + 40000) +
