@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.21 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalConstructOperator.java,v 1.22 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -138,7 +138,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     throws ShutdownException {
         // Check if the template root is an internal node or a leaf node
         // and process accordingly
-        //
+       
         if (templateRoot instanceof constructLeafNode) {
             processLeafNode(
                 tupleElement,
@@ -178,29 +178,28 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	    break;
 
 	case dataType.ATTR:
-            // First get the schema attribute
-            schemaAttribute schema = (schemaAttribute) leafData.getValue();
+		// First get the schema attribute
+        schemaAttribute schema = (schemaAttribute) leafData.getValue();
 
-            // Now construct result based on whether it is to be interpreted
-            // as an element or a parent
-	    int attributeId;
+        // Now construct result based on whether it is to be interpreted
+        // as an element or a parent
+		//		The value of the leafData is a schema attribute - from it
+		// get the attribute id in the tuple to construct from
+	    int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
+	    Node n = tupleElement.getAttribute(attributeId);
+	    if(n == null) {
+	    	return;
+	    }
+	    
 	    switch(schema.getType()) {
 	    case varType.ELEMENT_VAR:
-                // The value of the leafData is a schema attribute - from it
-                // get the attribute id in the tuple to construct from
-                attributeId =
-                    ((schemaAttribute) leafData.getValue()).getAttrId();
-		
-                // Add the attribute as the result
-                localResult.add(tupleElement.getAttribute(attributeId));
+        	localResult.add(n);
 		break;
-
-            case varType.CONTENT_VAR:
-                // The value of the leafData is a schema attribute - from it
-                // get the attribute id in the tuple to construct from
-                attributeId =
-                    ((schemaAttribute) leafData.getValue()).getAttrId();
-
+        
+        case varType.CONTENT_VAR:
+        	// The value of the leafData is a schema attribute - from it
+            // get the attribute id in the tuple to construct from
+            
                 // Get the children of the attribute
                 NodeList nodeList =
                     tupleElement.getAttribute(attributeId).getChildNodes();
@@ -246,17 +245,17 @@ public class PhysicalConstructOperator extends PhysicalOperator {
         if (tagData.getType() == dataType.ATTR) {
             schemaAttribute sattr = (schemaAttribute) tagData.getValue();
             int attrId = sattr.getAttrId();
+            // TODO HERE what to do if we get null attribute??
             tagName = tupleElement.getAttribute(attrId).getNodeName();
         } else
             tagName = (String) tagData.getValue();
 
         Element resultElement = localDoc.createElement(tagName);
 
-	// appends any appropriate attributes to the resultElement
-	addAttributes(tupleElement, internalNode, resultElement);
+	    // appends any appropriate attributes to the resultElement
+	    addAttributes(tupleElement, internalNode, resultElement);
 
         // Recurse on all children and construct result
-        //
         Vector children = internalNode.getChildren();
 
         int numChildren = children.size();
@@ -321,7 +320,10 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 
                     // Add the attribute as the result
                     // This better BE an attribute!
+                 
 		    Node na = tupleElement.getAttribute(attributeId);
+		    if(na == null)
+		    	break;
 		    if(!(na instanceof Attr)) {
 			throw new ShutdownException("Can not use element type variable to create attribute");
 		    }
@@ -332,8 +334,10 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 		case varType.CONTENT_VAR:
 		    attributeId =
                         ((schemaAttribute) attrData.getValue()).getAttrId();
-
+			
 		    Node attr = tupleElement.getAttribute(attributeId);
+		    if(attr == null)
+		    	break;
 		    if(attr instanceof Element) {
 			Element elt = (Element)attr;
 			

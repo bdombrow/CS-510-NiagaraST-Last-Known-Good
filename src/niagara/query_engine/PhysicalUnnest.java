@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.8 2003/07/03 19:56:52 tufte Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.9 2003/07/27 02:35:16 tufte Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -23,11 +23,16 @@ public class PhysicalUnnest extends PhysicalOperator {
     private boolean projecting;
     /** Maps shared attribute positions between incoming and outgoing tuples */
     private int[] attributeMap;
+    /** indicates if tuples should be dropped or kept if they do not
+     * match path expression
+     */
+	private boolean outer;
 
     // Runtime attributes
     private PathExprEvaluator pev;
     private NodeVector elementList;
     private int scanField;
+    
 
     public PhysicalUnnest() {
         setBlockingSourceStreams(blockingSourceStreams);
@@ -43,6 +48,7 @@ public class PhysicalUnnest extends PhysicalOperator {
         this.path = logicalUnnest.getPath();
         this.root = logicalUnnest.getRoot();
         this.variable = logicalUnnest.getVariable();
+        this.outer = logicalUnnest.outer();
     }
 
     /**
@@ -68,10 +74,6 @@ public class PhysicalUnnest extends PhysicalOperator {
         pev.getMatches(attribute, elementList);
 
         int numNodes = elementList.size();
-
-        if (numNodes == 0)
-            return;
-
         int outSize = outputTupleSchema.getLength();
 
         // Prototype for output tuples
@@ -95,6 +97,11 @@ public class PhysicalUnnest extends PhysicalOperator {
             // and put the tuple in the output stream
             tuple.appendAttribute(elementList.get(node));
             putTuple(tuple, 0);
+        }
+        
+        if(numNodes == 0 && outer) {
+        	protoTuple.appendAttribute(null);
+        	putTuple(protoTuple, 0);
         }
 
         elementList.clear();
@@ -144,6 +151,7 @@ public class PhysicalUnnest extends PhysicalOperator {
         op.path = path;
         op.root = root;
         op.variable = variable;
+        op.outer = outer;
         return op;
     }
 

@@ -1,4 +1,4 @@
-/* $Id: SimpleAtomicEvaluator.java,v 1.2 2003/02/25 06:10:25 vpapad Exp $ */
+/* $Id: SimpleAtomicEvaluator.java,v 1.3 2003/07/27 02:35:16 tufte Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.Node;
@@ -47,8 +47,11 @@ public class SimpleAtomicEvaluator {
             tuple = t1;
         else
             tuple = t2;
-
-        return getAtomicValue(tuple.getAttribute(attributeId));
+		Node n = tuple.getAttribute(attributeId);
+		if(n == null)
+			return null;
+        else
+        	return getAtomicValue(n);
     }
     
     public static final String getAtomicValue(Node node) {

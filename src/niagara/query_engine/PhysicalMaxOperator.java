@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalMaxOperator.java,v 1.7 2003/07/09 04:59:35 tufte Exp $
+  $Id: PhysicalMaxOperator.java,v 1.8 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -130,7 +130,7 @@ public class PhysicalMaxOperator extends PhysicalAggregateOperator {
 	    //return null;
 	}
 
-	Element resultElement = doc.createElement("Max");
+	Element resultElement = doc.createElement("niagara:max");
 	Text childElement = doc.createTextNode(Double.toString(max));
 	resultElement.appendChild(childElement);
 	return resultElement;

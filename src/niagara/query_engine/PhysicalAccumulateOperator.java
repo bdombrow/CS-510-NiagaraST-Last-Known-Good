@@ -1,4 +1,4 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.22 2003/07/09 04:59:35 tufte Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.23 2003/07/27 02:35:16 tufte Exp $ */
 package niagara.query_engine;
 
 import java.io.ByteArrayInputStream;
@@ -48,7 +48,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     private int mergeIndex;
     private String initialAccumFile;
     private String afName;
-    private int tupleCount;
     private boolean clear;
 
     /* The object into which things are being accumulated */
@@ -67,7 +66,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
         mergeAttr = logicalAccumulateOperator.getMergeAttr();
         initialAccumFile = logicalAccumulateOperator.getInitialAccumFile();
         afName = logicalAccumulateOperator.getAccumFileName();
-	clear = logicalAccumulateOperator.getClear();
+		clear = logicalAccumulateOperator.getClear();
     }
 
     public void opInitialize() 
@@ -89,9 +88,8 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
             /* create an empty accumulator */
             createEmptyAccumulator();
         }
-	mergeTree.setAccumulator(accumDoc);
+		mergeTree.setAccumulator(accumDoc);
         recdData = false;
-	tupleCount = 0;
     }
 
     /**
@@ -109,33 +107,24 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
         int streamId)
         throws ShutdownException {
 
-	if(MergeTree.TRACE)
-	    System.out.println("KT: Phys Accum Processing Tuple");
+		if(MergeTree.TRACE)
+		    System.out.println("KT: Phys Accum Processing Tuple");
 
-	// set the tuple pointer for the magic elements
-	tupleElement.setMagicTuple();
-
-	/*
-	if((tupleCount % 1000) == 0) {
-	    Runtime r = Runtime.getRuntime();
-	    System.out.println("KT: PhysAccum " + tupleCount + " tuples " +
-			       " Free mem " + r.freeMemory() +
-			       " Total mem " + r.totalMemory() +
-			       " Used mem " + (r.totalMemory() -
-					       r.freeMemory()));
-					       }*/
+		// set the tuple pointer for the magic elements
+		tupleElement.setMagicTuple();
 
         /* get the fragment to be merged from the tuple, convert it
          * to an element if necessary, then pass the work off to the 
-	 * merge tree
+	 	 * merge tree
          */
         Element fragment = convertAttrToElement(tupleElement);
-
-        // merge the fragment into the accumulated document
-        mergeTree.accumulate(fragment);
+        
+		// merge the fragment into the accumulated document
+		// ignore null values	
+        if(fragment != null)
+        	mergeTree.accumulate(fragment);
 
         recdData = true;
-	tupleCount++;
     }
 
     /**
@@ -194,6 +183,8 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     private Element convertAttrToElement(StreamTupleElement tupleElement)
         throws ShutdownException {
         Object attr = tupleElement.getAttribute(mergeIndex);
+        if(attr == null)
+        	return null;
 
         Element domElt;
         if (attr instanceof Element) {

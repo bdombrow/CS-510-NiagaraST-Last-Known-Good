@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSlidingMaxOperator.java,v 1.4 2003/07/09 04:59:36 tufte Exp $
+  $Id: PhysicalSlidingMaxOperator.java,v 1.5 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -207,25 +207,24 @@ public class PhysicalSlidingMaxOperator extends PhysicalWindowOperator {
     protected final Object constructUngroupedResult (StreamTupleElement 
 						     tupleElement) {
 	    try {
-		// First get the atomic values
-		atomicValues.clear();
-		ae.getAtomicValues(tupleElement, atomicValues);
+			// First get the atomic values
+			atomicValues.clear();
+			ae.getAtomicValues(tupleElement, atomicValues);
 		
-		// If there is not exactly one atomic value, skip
-		if (atomicValues.size() != 1) {
-		    throw new PEException("Need exactly one atomic value");
-		} else {
+			if(atomicValues.size() == 0)
+				return null;
+		
+			// If there is not exactly one atomic value, skip
+			assert atomicValues.size() == 1 : "Need exactly one atomic value";
 		    
-		    // Get the string atomic value
-		    //
-		    String atomicValue = (String) atomicValues.get(0);
+			// Get the string atomic value
+			String atomicValue = (String) atomicValues.get(0);
 		    
-		    // Try to convert to double 
-		    Double doubleValue = new Double(atomicValue);
+			// Try to convert to double 
+			Double doubleValue = new Double(atomicValue);
 		    
-		    // Return the double value
-		    return doubleValue;
-		}
+			// Return the double value
+			return doubleValue;
 	    } catch (java.lang.NumberFormatException e) {
 		    // believe that atomicValue is generated, so it should
 		    // always be OK, if it isn't generated, should

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.31 2003/07/09 04:59:35 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.32 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,16 +41,7 @@ import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.PhysicalOp;
 import niagara.optimizer.rules.Initializable;
-import niagara.utils.CPUTimer;
-import niagara.utils.CtrlFlags;
-import niagara.utils.OperatorDoneException;
-import niagara.utils.PageStream;
-import niagara.utils.SerializableToXML;
-import niagara.utils.ShutdownException;
-import niagara.utils.SinkTupleStream;
-import niagara.utils.SourceTupleStream;
-import niagara.utils.StreamPunctuationElement;
-import niagara.utils.StreamTupleElement;
+import niagara.utils.*;
 
 import org.w3c.dom.Document;
 

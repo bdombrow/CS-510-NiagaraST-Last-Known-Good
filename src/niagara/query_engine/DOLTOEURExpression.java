@@ -1,4 +1,4 @@
-/* $Id: DOLTOEURExpression.java,v 1.1 2003/02/22 08:08:50 tufte Exp $ */
+/* $Id: DOLTOEURExpression.java,v 1.2 2003/07/27 02:35:16 tufte Exp $ */
 package niagara.query_engine;
 
 import niagara.xmlql_parser.op_tree.*;
@@ -18,15 +18,17 @@ public class DOLTOEURExpression implements ExpressionIF {
     public Node processTuple(StreamTupleElement ste) {
         Document doc = DOMFactory.newDocument();
         Node priceNode = ste.getAttribute(pricePos);
-	float priceNum;
+        if(priceNode == null)
+        	return null;
+		float priceNum;
         try {
             priceNum = Float.parseFloat(priceNode.getFirstChild().getNodeValue());
         } catch (NumberFormatException nfe) {
 	    priceNum = 0;
         }
-	Element res = doc.createElement("bid");
-	res.appendChild(doc.createTextNode(nf.format(priceNum*1.08380)));
-	return res;
+		Element res = doc.createElement("bid");
+		res.appendChild(doc.createTextNode(nf.format(priceNum*1.08380)));
+		return res;
     }
     public void setupSchema(TupleSchema ts) {
         pricePos = ts.getPosition("price");

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.16 2003/07/09 04:59:35 tufte Exp $
+  $Id: PhysicalCountOperator.java,v 1.17 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -95,8 +95,11 @@ public class PhysicalCountOperator extends PhysicalAggregateOperator {
         atomicValues.clear();
         ae.getAtomicValues(tupleElement, atomicValues);
 
-	assert atomicValues.size() == 1 : "Must have exactly one atomic value";
-	return new Integer(1);
+		if(atomicValues.size() == 0)
+			return null;
+
+		assert atomicValues.size() == 1 : "Must have exactly one atomic value";
+		return new Integer(1);
     }
 
     /**

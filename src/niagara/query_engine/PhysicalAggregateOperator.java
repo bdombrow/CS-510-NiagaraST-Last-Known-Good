@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalAggregateOperator.java,v 1.3 2003/07/09 04:59:36 tufte Exp $
+  $Id: PhysicalAggregateOperator.java,v 1.4 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -75,8 +75,11 @@ public abstract class PhysicalAggregateOperator extends PhysicalGroupOperator {
 	    // First get the atomic values
 	    atomicValues.clear();
 	    ae.getAtomicValues(tupleElement, atomicValues);
-	    assert atomicValues.size() == 1 : "Need exactly one atomic value";
 	    
+	    assert atomicValues.size() <= 1 : "Need exactly one atomic value";
+	    if(atomicValues.size() == 0)
+	    	return null;
+	    	
 	    // Try to convert to double 
 	    return new Double((String)(atomicValues.get(0)));
 	} catch (java.lang.NumberFormatException nfe) {

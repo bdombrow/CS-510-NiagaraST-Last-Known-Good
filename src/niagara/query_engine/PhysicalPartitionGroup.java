@@ -1,4 +1,4 @@
-/* $Id: PhysicalPartitionGroup.java,v 1.1 2003/07/23 21:06:41 jinli Exp $ */
+/* $Id: PhysicalPartitionGroup.java,v 1.2 2003/07/27 02:35:16 tufte Exp $ */
 package niagara.query_engine;
 
 import java.util.*;
@@ -83,7 +83,10 @@ public abstract class PhysicalPartitionGroup extends PhysicalOperator {
 		StreamTupleElement tuple,
 		int streamId)
 	throws ShutdownException, InterruptedException {
-	String hash = hasher.hashKey(tuple);	
+	String hash = hasher.hashKey(tuple);
+	
+	if(hash == null)
+		return;	
 
 	// Have we seen this group before?
 	StreamTupleElement representativeTuple =

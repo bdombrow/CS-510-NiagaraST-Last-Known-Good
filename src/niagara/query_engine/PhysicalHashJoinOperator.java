@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.13 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.14 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -102,13 +102,18 @@ public class PhysicalHashJoinOperator extends PhysicalJoin {
 				     StreamTupleElement tupleElement,
 				     int streamId) 
 	throws ShutdownException, InterruptedException {
-	// Get the hash code corresponding to the tuple element
-	//
-	String hashKey = hashers[streamId].hashKey(tupleElement);
-	String stPunctJoinKey = null;
+		
+		// Get the hash code corresponding to the tuple element
+		String hashKey = hashers[streamId].hashKey(tupleElement);
+		
+		// ignore null attributes...
+		if(hashKey == null)
+			return;
+			
+		String stPunctJoinKey = null;
 
-	// Determine the id of the other stream
-	int otherStreamId = 1 - streamId;
+		// Determine the id of the other stream
+		int otherStreamId = 1 - streamId;
 
 	// Now loop over all the partial elements of the other source 
 	// and evaluate the predicate and construct a result tuple if 

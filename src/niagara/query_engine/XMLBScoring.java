@@ -1,4 +1,4 @@
-/* $Id: XMLBScoring.java,v 1.5 2002/10/31 03:54:38 vpapad Exp $ */
+/* $Id: XMLBScoring.java,v 1.6 2003/07/27 02:35:16 tufte Exp $ */
 package niagara.query_engine;
 
 import niagara.xmlql_parser.op_tree.*;
@@ -34,7 +34,9 @@ public class XMLBScoring implements ExpressionIF {
     }
 
     private int getInt(StreamTupleElement ste, String v) {
-	Node n = (Node) ste.getAttribute(((Integer) varTable.get(v)).intValue());
+		Node n = (Node) ste.getAttribute(((Integer) varTable.get(v)).intValue());
+		if(n == null)
+			return -1;
 	    if (n instanceof Text) {
 		return Integer.parseInt(n.getNodeValue());
 	    }

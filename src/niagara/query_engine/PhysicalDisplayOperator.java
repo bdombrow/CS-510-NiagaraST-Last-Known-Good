@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalDisplayOperator.java,v 1.10 2003/07/03 19:56:52 tufte Exp $
+ * $Id: PhysicalDisplayOperator.java,v 1.11 2003/07/27 02:35:16 tufte Exp $
  *
  */
 
@@ -10,6 +10,7 @@ import org.w3c.dom.*;
 import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
+import niagara.ndom.DOMFactory;
 
 import java.io.*;
 import java.net.*;
@@ -32,6 +33,8 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
 
     private String query_id;
 
+	private Element nullElt;
+
     String url_location;
 
     URLConnection connection;
@@ -51,13 +54,19 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
     public Op opCopy() {
         return new PhysicalDisplayOperator(query_id, url_location);
     }
+    
     public void opInitFrom(LogicalOp logicalOperator) {
         DisplayOp display = (DisplayOp) logicalOperator;
         query_id = display.getQueryId();
         url_location = display.getClientLocation();
         toDisplay = new StringBuffer();
     }
-
+    
+    public void opInitialize() {
+    	Document doc = DOMFactory.newDocument();
+    	nullElt = doc.createElement("niagara:null");
+    }
+    
     public int hashCode() {
         return query_id.hashCode() ^ url_location.hashCode();
     }
@@ -111,6 +120,10 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
 
         // We assume result is the last element of the tuple...
         Object attribute = tupleElement.getAttribute(tupleElement.size() - 1);
+    
+    	if(attribute == null)
+    		attribute = nullElt;    
+         
         if (attribute instanceof Document) {
             // Serialize its root element instead
             attribute = ((Document) attribute).getDocumentElement();

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.16 2003/07/09 04:59:35 tufte Exp $
+  $Id: QueryResult.java,v 1.17 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,13 +25,13 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.query_engine;
 
 import org.w3c.dom.*;
 
 import niagara.utils.*;
 import niagara.ndom.*;
+import niagara.connection_server.ResultTransmitter;
 
 /**
  * QueryResult is the class at the client that interacts with the
@@ -52,16 +52,14 @@ public class QueryResult {
 
     }
 
-
     /**
      * This is a class for returning result to the user
      */
 
     public class ResultObject {
-	public Document result; // the value read from stream
-	public boolean isPartial; // is result partial or final
+        public Document result; // the value read from stream
+        public boolean isPartial; // is result partial or final
     }
-
 
     /////////////////////////////////////////////////////////////
     // These are the private data members of the class         //
@@ -85,12 +83,11 @@ public class QueryResult {
      * @param outputStream The output stream of the query
      */
 
-    public QueryResult (int queryId, PageStream outputPageStream) {
-	this.queryId = queryId;
-	this.outputStream = new SourceTupleStream(outputPageStream);
-	this.generatingPartialResult = false;
+    public QueryResult(int queryId, PageStream outputPageStream) {
+        this.queryId = queryId;
+        this.outputStream = new SourceTupleStream(outputPageStream);
+        this.generatingPartialResult = false;
     }
-
 
     /**
      * This function returns the query id assigned by the query engine
@@ -98,17 +95,16 @@ public class QueryResult {
      * @return query id assigned by the query engine
      */
 
-    public int getQueryId () {
-	return queryId;
+    public int getQueryId() {
+        return queryId;
     }
 
     // KT - hack so I don't have to put ResultObject in it's own class,
     // as it is I'm removing about 10,000 extra allocations, so I get
     // one teeny weeny hack
     public ResultObject getNewResultObject() {
-	return new ResultObject();
+        return new ResultObject();
     }
-    
 
     /**
      * This function blocks and waits for the next result from the output
@@ -119,13 +115,11 @@ public class QueryResult {
      *
      * @returns Returns the control flag received from stream
      */
-    public int getNextResult (ResultObject resultObject)
-	throws java.lang.InterruptedException,
-	       ShutdownException {
-	// -1 indicates no timeout - infinite timeout
-	return internalGetNext(-1, resultObject);
+    public int getNextResult(ResultObject resultObject)
+        throws java.lang.InterruptedException, ShutdownException {
+        // -1 indicates no timeout - infinite timeout
+        return internalGetNext(-1, resultObject);
     }
-
 
     /**
      * This function waits for the next result from the output stream for
@@ -135,11 +129,10 @@ public class QueryResult {
      * @param resultObject An object to be filled in with the result
      *
      */
-    public int getNextResult (int timeout, ResultObject resultObject)
-	throws ShutdownException, InterruptedException {
-	return internalGetNext(timeout, resultObject);
+    public int getNextResult(int timeout, ResultObject resultObject)
+        throws ShutdownException, InterruptedException {
+        return internalGetNext(timeout, resultObject);
     }
-
 
     /**
      * This function request partial results to be sent
@@ -148,47 +141,45 @@ public class QueryResult {
      *            request is pending
      */
 
-    public void requestPartialResult ()
-	throws AlreadyReturningPartialException,
-	       ShutdownException {
-		
-	// If partial results are already invoked, 
-	// then raise an exception
-	if (generatingPartialResult) {
-	    throw new AlreadyReturningPartialException();
-	}
-	
-	// Send a request for a partial result		
-	System.out.println("QR putting partial request down stream");
-	// May return EOS, throw ShutdonwnEx or return NULLFLAG
-	// Think I can ignore EOS...famous last words
-	int ctrlFlag = outputStream.putCtrlMsg(CtrlFlags.GET_PARTIAL, null);
+    public void requestPartialResult()
+        throws AlreadyReturningPartialException, ShutdownException {
 
-	assert (ctrlFlag == CtrlFlags.EOS || ctrlFlag == CtrlFlags.NULLFLAG) :
-	    "Unexpected control flag";
-	
-	// Set the status of generating partial results
-	generatingPartialResult = true;
+        // If partial results are already invoked, 
+        // then raise an exception
+        if (generatingPartialResult) {
+            throw new AlreadyReturningPartialException();
+        }
+
+        // Send a request for a partial result		
+        System.out.println("QR putting partial request down stream");
+        // May return EOS, throw ShutdonwnEx or return NULLFLAG
+        // Think I can ignore EOS...famous last words
+        int ctrlFlag = outputStream.putCtrlMsg(CtrlFlags.GET_PARTIAL, null);
+
+        assert(
+            ctrlFlag == CtrlFlags.EOS
+                || ctrlFlag == CtrlFlags.NULLFLAG) : "Unexpected control flag";
+
+        // Set the status of generating partial results
+        generatingPartialResult = true;
     }
-
 
     /**
      * This function kills a query
      */
 
-    public void kill() { 
-	try {
-	    // Attempt to kill the query - best effort - ignore errors
+    public void kill() {
+        try {
+            // Attempt to kill the query - best effort - ignore errors
 
-	    // return from outputStream.putCtrlMsg could be:
-	    // NULLFLAG, SHUTDOWN, SYNCH_PARTIAL, END_PARTIAL, EOS
-	    // can ignore all of them
-	    outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "kill query"); 
-	} catch(ShutdownException e) {
-	    // ignore since we are killing query...
-	}
+            // return from outputStream.putCtrlMsg could be:
+            // NULLFLAG, SHUTDOWN, SYNCH_PARTIAL, END_PARTIAL, EOS
+            // can ignore all of them
+            outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "kill query");
+        } catch (ShutdownException e) {
+            // ignore since we are killing query...
+        }
     }
-
 
     /**
      * send a request for buffer flush down stream - we've been waiting
@@ -196,12 +187,10 @@ public class QueryResult {
      *
      * @returns a result status, similar to what is in resultObject.status
      */
-    public int requestBufFlush() 
-	throws ShutdownException {
-	return outputStream.putCtrlMsg(CtrlFlags.REQUEST_BUF_FLUSH, null);
+    public int requestBufFlush() throws ShutdownException {
+        return outputStream.putCtrlMsg(CtrlFlags.REQUEST_BUF_FLUSH, null);
     }
 
-     
     /**
      * This function blocks and waits for the next result from the output stream.
      *
@@ -214,118 +203,95 @@ public class QueryResult {
      *            during execution. This happens only without a timeout
      */
 
-    private int internalGetNext (int timeout, ResultObject resultObject) 
-	throws InterruptedException,
-	       ShutdownException {
+    private int internalGetNext(int timeout, ResultObject resultObject)
+        throws InterruptedException, ShutdownException {
 
-	// Get the next element from the query output stream
-	resultObject.result = null;
-	
-	if(timeout < 0) {
-	    // neg or 0 implies no timeout, we use
-	    // maxDelay, so we get tuples even from slow streams
-	    timeout = PageStream.MAX_DELAY; 
-	}
+        // Get the next element from the query output stream
+        resultObject.result = null;
 
-	StreamTupleElement tuple = outputStream.getTuple(timeout);	
-	int ctrlFlag = outputStream.getCtrlFlag();	
+        if (timeout < 0) {
+            // neg or 0 implies no timeout, we use
+            // maxDelay, so we get tuples even from slow streams
+            timeout = PageStream.MAX_DELAY;
+        }
 
-	// Now handle the various types of results
-	if (tuple ==  null) {
-	    // process the control message
-	    if(ctrlFlag == CtrlFlags.END_PARTIAL ||
-	       ctrlFlag == CtrlFlags.SYNCH_PARTIAL) {
-		assert generatingPartialResult : "Unexpected partial result";
-		generatingPartialResult = false;
-	    }
-	} else {
-	    assert ctrlFlag == CtrlFlags.NULLFLAG :
-		"Unexpected control flag " + CtrlFlags.name[ctrlFlag];
-	    resultObject.isPartial = tuple.isPartial();
-	    resultObject.result = extractXMLDocument(tuple);
-	} 
-	return ctrlFlag;
+        StreamTupleElement tuple = outputStream.getTuple(timeout);
+        int ctrlFlag = outputStream.getCtrlFlag();
+
+        // Now handle the various types of results
+        if (tuple == null) {
+            // process the control message
+            if (ctrlFlag == CtrlFlags.END_PARTIAL
+                || ctrlFlag == CtrlFlags.SYNCH_PARTIAL) {
+                assert generatingPartialResult : "Unexpected partial result";
+                generatingPartialResult = false;
+            }
+        } else {
+            assert ctrlFlag
+                == CtrlFlags.NULLFLAG : "Unexpected control flag "
+                    + CtrlFlags.name[ctrlFlag];
+            resultObject.isPartial = tuple.isPartial();
+            resultObject.result = extractXMLDocument(tuple);
+        }
+        return ctrlFlag;
     }
 
-    private Document extractXMLDocument (StreamTupleElement tupleElement) {
-	// First get the last attribute of the tuple
-	// KT HACK
-	/* for outputting foraccum
+    private Document extractXMLDocument(StreamTupleElement tupleElement) {
+        // First get the last attribute of the tuple
 
-	Node attr1 = tupleElement.getAttribute(1);
-	
-	if(attr1 instanceof Document) {
-	    return (Document)attr1;
-	} else {
-	    Document resultDocument = DOMFactory.newDocument();
-	    Element docElt = resultDocument.createElement("docElt");
-	    resultDocument.appendChild(docElt);
+        if (ResultTransmitter.OUTPUT_FULL_TUPLE) {
+            Document resultDoc = DOMFactory.newDocument();
+            Element root = resultDoc.createElement("niagara:tuple");
+            resultDoc.appendChild(root);
+            for (int i = 0; i < tupleElement.size(); i++) {
+                Node tupAttr = tupleElement.getAttribute(i);
+                Element elt = tupleAttrToElt(tupAttr, resultDoc);
+                root.appendChild(elt);
+            }
+            return resultDoc;
+        }
 
-	    assert attr1 instanceof Element : attr1.getClass().getName();
-	    Node n1 = DOMFactory.importNode(resultDocument, 
-					    attr1);
-	    docElt.appendChild(n1);
-	    
-	    Node attr2 = tupleElement.getAttribute(2);
-	    assert attr2 instanceof Attr;
-	    
-	    Element n2 = 
-		resultDocument.createElement(((Attr)attr2)
-					     .getName());
-	    Text txt =
-		resultDocument.createTextNode(((Attr)attr2)
-					      .getValue());
-	    n2.appendChild(txt);
-	    docElt.appendChild(n2);
-	    
-	    return resultDocument;
-	}
-	*/
-
-	//orig code
-	Node lastAttribute = 
-	    tupleElement.getAttribute(tupleElement.size() - 1);
-	
-	if(lastAttribute instanceof Document) {
-	    return (Document)lastAttribute;
-	} else if (lastAttribute instanceof Element) {
-	    // Create a Document and add add the result to the Doc
- 	    Document resultDocument = DOMFactory.newDocument();
-	    Node n = DOMFactory.importNode(resultDocument, 
-					   lastAttribute);
-	    resultDocument.appendChild(n);
-	    return resultDocument;
-	} else if (lastAttribute instanceof Attr) {
-	    Document resultDocument = DOMFactory.newDocument();
-	    // create an element from the attribute
-	    Element newElt = 
-		resultDocument.createElement(((Attr)lastAttribute)
-					     .getName());
-	    Text txt =
-		resultDocument.createTextNode(((Attr)lastAttribute)
-					      .getValue());
-	    newElt.appendChild(txt);
-	    resultDocument.appendChild(newElt);
-	    return resultDocument;
-	} else if (lastAttribute instanceof Text) {
-	    Document resultDocument = DOMFactory.newDocument();
-	    // create an element from the attribute
-	    Element newElt = 
-		resultDocument.createElement("Text");
-	    Text txt =
-		resultDocument.createTextNode(lastAttribute.getNodeValue());
-	    newElt.appendChild(txt);
-	    resultDocument.appendChild(newElt);
-	    return resultDocument;
-	} else {
-	    assert false : "KT What did I get?? " +
-		lastAttribute.getClass().getName();
-	    return null;
-	}
+        Node lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
+        return tupleAttrToDoc(lastAttribute);
     }
-    
+
+    private Document tupleAttrToDoc(Node tupAttr) {
+
+        if (tupAttr instanceof Document) {
+            return (Document) tupAttr;
+        } else {
+            Document resultDoc = DOMFactory.newDocument();
+            Element elt = tupleAttrToElt(tupAttr, resultDoc);
+            resultDoc.appendChild(elt);
+            return resultDoc;
+        }
+    }
+
+    private Element tupleAttrToElt(Node tupAttr, Document resultDoc) {
+
+        if (tupAttr instanceof Element) {
+            return (Element) DOMFactory.importNode(resultDoc, tupAttr);
+        } else if (tupAttr instanceof Attr) {
+            Element newElt =
+                resultDoc.createElement(((Attr) tupAttr).getName());
+            Text txt = resultDoc.createTextNode(((Attr) tupAttr).getValue());
+            newElt.appendChild(txt);
+            return newElt;
+        } else if (tupAttr instanceof Text) {
+            Element newElt = resultDoc.createElement("Text");
+            Text txt = resultDoc.createTextNode(tupAttr.getNodeValue());
+            newElt.appendChild(txt);
+            return newElt;
+        } else if (tupAttr == null) {
+            return resultDoc.createElement("niagara:null");
+        } else {
+            assert false : "KT What did I get?? "
+                + tupAttr.getClass().getName();
+            return null;
+        }
+    }
 
     public String toString() {
-		return ("Query Result Object for Query "+queryId);
+        return ("Query Result Object for Query " + queryId);
     }
 }

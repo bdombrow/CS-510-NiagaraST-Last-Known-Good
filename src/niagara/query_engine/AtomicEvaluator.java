@@ -1,4 +1,4 @@
-/* $Id: AtomicEvaluator.java,v 1.8 2003/02/25 06:10:26 vpapad Exp $ */
+/* $Id: AtomicEvaluator.java,v 1.9 2003/07/27 02:35:16 tufte Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -80,6 +80,9 @@ public class AtomicEvaluator {
         else
             tuple = t2;
 
+		Node n = tuple.getAttribute(attributeId);
+		if(n == null)
+			return ;
         getAtomicValues(tuple.getAttribute(attributeId), values);
     }
     
@@ -109,7 +112,6 @@ public class AtomicEvaluator {
             }
         }
         reachableNodes.clear();
-        
     } 
  
      public void getAtomicValues(

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.12 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.13 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -140,11 +140,13 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
         int streamId)
         throws ShutdownException, InterruptedException {
         Node res = expressionObject.processTuple(inputTuple);
-        StreamTupleElement outputTuple =
-            (StreamTupleElement) inputTuple.clone();
-        outputTuple.appendAttribute(res);
-        // Add the output tuple to the result
-        putTuple(outputTuple, 0);
+        if(res != null) {
+        	StreamTupleElement outputTuple =
+            	(StreamTupleElement) inputTuple.clone();
+        	outputTuple.appendAttribute(res);
+        	// Add the output tuple to the result
+        	putTuple(outputTuple, 0);
+        }
     }
 
     public boolean isStateful() {

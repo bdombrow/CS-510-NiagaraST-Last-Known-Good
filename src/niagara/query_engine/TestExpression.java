@@ -15,6 +15,8 @@ public class TestExpression implements ExpressionIF {
         Document doc = DOMFactory.newDocument();
         Node aNode = ste.getAttribute(aPos);
         Node bNode = ste.getAttribute(bPos);
+        if(aNode == null || bNode == null)
+        	return null;
         int aNum, bNum;
         try {
             aNum = Integer.parseInt(aNode.getFirstChild().getNodeValue());

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSlidingSumOperator.java,v 1.4 2003/07/09 04:59:35 tufte Exp $
+  $Id: PhysicalSlidingSumOperator.java,v 1.5 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -209,6 +209,9 @@ public class PhysicalSlidingSumOperator extends PhysicalWindowOperator {
 		// First get the atomic values
 		atomicValues.clear();
 		ae.getAtomicValues(tupleElement, atomicValues);
+		
+		if(atomicValues.size() == 0)
+			return null;
 		
 		// If there is not exactly one atomic value, skip
 		if (atomicValues.size() != 1) {

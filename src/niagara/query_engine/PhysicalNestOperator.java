@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.15 2003/07/24 19:18:34 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.16 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,10 +48,6 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
     // The result template for the nest operator
     private constructBaseNode resultTemplate;
-
-    // The root tag of the constructed results
-    private String rootTag;
-
     private int numGroupingAttributes;
 
     // temporary result list storage place
@@ -77,7 +73,9 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
      */
     public void localInitFrom(LogicalOp logicalOp) {
-	this.resultTemplate = ((Nest)logicalOp).getResTemp();
+		resultTemplate = ((Nest)logicalOp).getResTemp();
+		assert resultTemplate instanceof constructInternalNode :
+			"KT I believe the system only supports nests that have a specified top node";
     }
 
     /**
@@ -115,8 +113,6 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      */
 
     protected final void initializeForExecution () {
-	rootTag = (String) ((constructInternalNode)
-			 resultTemplate).getStartTag().getSdata().getValue();
 	numGroupingAttributes = groupAttributeList.size();
 	resultList = new NodeVector();
     }
@@ -142,6 +138,8 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
 	// The list can have a size of only one, get that result
 	// and return it
+		if(resultList.size() == 0)  // this means we got a null
+			return null;
 	assert resultList.size() == 1;
 	return resultList.get(0);
     }
@@ -200,15 +198,18 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      */
 
     protected final Node constructEmptyResult () {
-
-	// If the number of grouping attributes is 0, then construct result,
-	// else return null
-	if (numGroupingAttributes == 0) {
-	    // Just create and return a Element with the root tag
-	    return doc.createElement(rootTag);
-	} else {
-	    return null;
-	}
+		// If the number of grouping attributes is 0, then construct result,
+		// else return null
+		if (numGroupingAttributes == 0) {
+	    	// Code used to create and return a Element with the root tag
+	    	// if possible - KT - hope we don't get schema attribute for
+	    	// root tag!!
+			String rootTag = (String) ((constructInternalNode)
+						 resultTemplate).getStartTag().getSdata().getValue();
+	    	return doc.createElement(rootTag);
+		} else {
+			return null;
+		}
     }
 
 

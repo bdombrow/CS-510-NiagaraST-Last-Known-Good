@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.26 2003/07/24 19:56:12 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.27 2003/07/27 02:35:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -261,12 +261,18 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
 	Object ungroupedResult = 
 	    this.constructUngroupedResult(tupleElement);
+	if(ungroupedResult == null)
+		return;
 
 	HashEntry prevResult;
 	String hashKey = null;
 	if(numGroupingAttributes > 0) {
 	    // First get the hash code for the grouping attributes
 	    hashKey = hasher.hashKey(tupleElement);
+	    
+	    // Ignore null values...
+	    if(hashKey == null)
+	    	return;
 	    
 	    // Probe hash table to see whether result for this hashcode
 	    // already exist
@@ -329,12 +335,10 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
         throws InterruptedException, ShutdownException {
 
 	if(numGroupingAttributes == 0) {
-	    System.out.println("numGroupingAttrs is zero");
 	    if(singleGroupResult == null) {
-		System.out.println("singleGroupResult is null");
-		putEmptyResult(partial);
+			putEmptyResult(partial);
 	    } else {
-		putResult(singleGroupResult, partial);
+			putResult(singleGroupResult, partial);
 	    }
 	    return;
 	}
@@ -345,15 +349,15 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
         // If the iterator does not have any values, then call empty construct
         if (!iter.hasNext()) {
-	    putEmptyResult(partial);
+	    	putEmptyResult(partial);
         } else {
-	    // For each group, construct results
-	    while (iter.hasNext()) {
-		// Get the next element in the hash table
-		HashEntry hashEntry = (HashEntry) iter.next();
-		putResult(hashEntry, partial);
-	    }
-	}
+	    	// For each group, construct results
+	    	while (iter.hasNext()) {
+				// Get the next element in the hash table
+				HashEntry hashEntry = (HashEntry) iter.next();
+				putResult(hashEntry, partial);
+	    	}
+		}
     }
 
     private void putEmptyResult(boolean partial) 
