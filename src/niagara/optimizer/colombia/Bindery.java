@@ -1,4 +1,4 @@
-/* $Id: Bindery.java,v 1.7 2003/09/16 04:45:29 vpapad Exp $
+/* $Id: Bindery.java,v 1.8 2003/09/22 00:16:50 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -455,13 +455,7 @@ public class Bindery {
                     } // successful bindings for the Operator without inputs
                     else {
                         // Create a group bindery for each input
-                        input = new Bindery[arity];
-                        for (input_no = 0; input_no < arity; input_no++)
-                            input[input_no] =
-                                new Bindery(
-                                    cur_expr.getInput(input_no),
-                                    pattern.getInput(input_no),
-                                    ssp);
+                        newBindery(arity);
 
                         // Try to advance each (new) input bindery to a binding
                         // a failure is failure for the expr
@@ -533,4 +527,12 @@ public class Bindery {
             }
         }
     } // Bindery::advance
+
+    private void newBindery(int arity) {
+        if (input == null || input.length != arity)
+            input = new Bindery[arity];
+        for (int i = 0; i < arity; i++)
+            input[i] =
+                new Bindery(cur_expr.getInput(i), pattern.getInput(i), ssp);
+    }
 }
