@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.37 2003/02/22 08:06:08 tufte Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.38 2003/02/23 05:00:08 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -996,8 +996,10 @@ public class XMLQueryPlanParser {
 
     void handleFileScan(Element e) throws InvalidPlanException {
         String id = e.getAttribute("id");
+	boolean isStream =
+            e.getAttribute("isStream").equalsIgnoreCase("yes");
         FileScanSpec fsSpec =
-            new FileScanSpec(e.getAttribute("fileName"));
+            new FileScanSpec(e.getAttribute("fileName"), isStream);
 
         FileScanOp op = new FileScanOp();
         op.setFileScan(fsSpec, new Variable(id));
