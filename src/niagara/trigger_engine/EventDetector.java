@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: EventDetector.java,v 1.1 2000/05/30 21:03:28 tufte Exp $
+  $Id: EventDetector.java,v 1.2 2002/03/26 23:53:14 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -1971,7 +1971,7 @@ public class EventDetector implements Runnable {
     /**
      * For debugging purpose.
      */
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 
     /**
      * Special DTD file extension name for '*'.
