@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Nest.java,v 1.1 2003/03/19 00:36:49 tufte Exp $
+  $Id: Nest.java,v 1.2 2003/03/19 22:42:30 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,6 +37,7 @@
 package niagara.logical;
 
 import java.io.StringReader;
+import java.util.Vector;
 
 import org.w3c.dom.*;
 
@@ -140,9 +141,80 @@ public class Nest extends niagara.xmlql_parser.op_tree.groupOp {
             throw new InvalidPlanException("Error while parsing Nest construct template: "
 					   + content);
         }
-	loadGroupingAttrsFromXML(e, inputProperties[0]);
+	loadGroupingAttrsFromXML(e, inputProperties[0], "neston");
 	//groupingAttrs = 
-	//    ((constructInternalNode) resultTemplate).getSkolem();
-	assert groupingAttrs != null : "uh oh, grouping attrs null";
+	//((constructInternalNode) resultTemplate).getSkolem();
+	verifyTopLevelAttrs();
+    }
+
+    // verify that only attributes used to nest are used in the
+    // creation of attributes in the top-level node (this is 
+    // similar to restriction that only grouping attributes
+    // can appear in the select clause of a query with groupby)
+    private void verifyTopLevelAttrs() //LogicalProperty inputLogProp) 
+	throws InvalidPlanException {
+	// get attribute from the resultTemplate 
+	// appears we know that resultTemplate is a constructInternalNode
+        Vector attrs = ((constructInternalNode)resultTemplate).
+	                            getStartTag().getAttrList();
+	int numAttrs = attrs.size();
+	for(int i = 0; i<numAttrs; i++) {
+	    attr attribute = (attr)attrs.get(i);
+	    data attrData = attribute.getValue();
+	    switch(attrData.getType()) {
+	    case dataType.STRING:
+		// think ok - nothing to check
+		break;
+		
+	    case dataType.ATTR:
+		// maybe I don't need this code...
+		assert false : "KT Don't think I should get attrs here";
+		break;
+		/* old code frm when I thought there might be attrs,
+		   save for a bit...
+                schemaAttribute schema = (schemaAttribute) attrData.getValue();
+                switch(schema.getType()) {
+		case varType.ELEMENT_VAR:
+		case varType.CONTENT_VAR:
+		    int attributeId =
+                        ((schemaAttribute) attrData.getValue()).getAttrId();
+		    // look up attribute id in something??
+		    //Attribute a = inputLogProp.GetAttr(attributeId);
+		    //assert a != null: "Couldn't find attribute in log prop ";
+ 		    //String attrName = a.getName(); 
+		    Vector v = groupingAttrs.getVarList(); 
+		    boolean ok = false;
+		    for(int j = 0; j<v.size(); j++) {
+			schemaAttribute sa = (schemaAttribute)v.get(j);
+			if(sa.getAttrId() == attributeId)
+			    ok = true;
+		    }
+		    if(!ok)
+			throw new InvalidPlanException("Detected invalid top level attribute in Nest"); 
+		default:
+		    assert false: "Unknown var type in attribute constructor";
+		}
+		break;*/
+
+	    case dataType.VAR:
+		String varname = (String)attrData.getValue();
+		if (varname.charAt(0) == '$')
+		    varname = varname.substring(1);
+		Vector v = groupingAttrs.getVarList(); 
+		boolean ok = false;
+		for(int j = 0; j<v.size(); j++) {
+		    // v.get(j) is of type Variable
+		    String gpname  = ((Variable)v.get(j)).getName();
+		    if(gpname.equals(varname))
+			ok = true;
+		}
+		if(!ok) 
+		    throw new InvalidPlanException("Detected invalid top level attribute in Nest");
+		break;
+		
+	    default:
+		assert false: "Unknown data type " + attrData.getType();
+            }    
+	}
     }
 }
