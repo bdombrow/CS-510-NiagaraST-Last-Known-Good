@@ -555,7 +555,7 @@ public class XMLQueryPlanParser {
 	logNode node = new logNode(op, (logNode) ids2nodes.get(inputAttr));
 
 	schemaAttribute resultSA = 
-	    new schemaAttribute(sc.numAttr());
+	    new schemaAttribute(sc.numAttr(), varType.ELEMENT_VAR);
 	
 	// Register variable -> resultSA
 	qpVarTbl.addVar("$" + id, resultSA);
@@ -714,49 +714,3 @@ public class XMLQueryPlanParser {
 	}
     }
 }
-
-/*
-
-	    try {
-		scanner = new Scanner(new StringReader(content));
-		ConstructParser cep = new ConstructParser(scanner);
-		cn = (constructBaseNode) cep.parse().value;
-		cep.done_parsing();
-	    }
-	    catch (Exception ex) {
-		System.err.println("Error while parsing: "+ content);
-		throw new InvalidPlanException();
-	    }
-	    
-	    cn.replaceVar(qpVarTbl);
-	    op.setConstruct(cn);
-
-	    logNode node = new logNode(op, (logNode) ids2nodes.get(inputAttr));
-	    ids2nodes.put(id, node);
-	}
-	else if (e.getNodeName().equals("firehosescan")) {
-	    System.out.println("firehosescan");
-
-	    String host = e.getAttribute("host");
-	    int port = Integer.parseInt(e.getAttribute("port"));
-	    int rate = Integer.parseInt(e.getAttribute("rate"));
-	    int iters = Integer.parseInt(e.getAttribute("iters"));
-	    String typeStr = e.getAttribute("type");
-	    int type;
-	    // XXX FIXME we should import FirehoseClient to get to these values
-	    if (typeStr.equals("file"))
-		type = 1;
-	    else // gen
-		type = 2;
-	    String desc = e.getAttribute("desc");
-	    FirehoseSpec fhspec = 
-		new FirehoseSpec(port, host, rate, type, desc, iters);
-	    
-	    FirehoseScanOp op = 
-		(FirehoseScanOp) operators.FirehoseScan.clone();
-	    
-	    op.setFirehoseScan(fhspec);
-	    logNode node = new logNode(op);
-	    ids2nodes.put(id, node);	    
-	}
-*/
