@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+<dtdscan id="dtd">
+<url value="http://www.cse.ogi.edu/~jinli/xml/numbers_1.xml"/>
+</dtdscan>
+
+<unnest id="scan" regexp="PLAY.NUM" input="dtd"/>
+<unnest id="scan1" regexp="NUM1" input="scan"/>
+<bucket id="bucket" winattr="$scan1" wintype="0" range="7" slide="3" input="scan1"/>
+<construct id="cons" input="bucket">
+<bucket>
+$scan1 $wid_from $wid_to 
+</bucket>
+</construct>
+</plan>

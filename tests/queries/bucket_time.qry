@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<timer id="timer" period="1 second" warp="10" delay="10 seconds" 
+		slack="5 second" granularity="1 second" relative=""/>
+
+<prefix id="prefix" length="100" input="timer"/>
+
+<firehosescan id="fhscan" host="localhost" port="5000" rate="0" datatype="auction_stream" num_gen_calls="100" desc="" num_tl_elts="1" prettyprint="no"/>
+
+
+<!--Now, get persons from the right locations-->
+<unnest id="bids" regexp="site.open_auctions.open_auction" input="fhscan"/>
+<unnest id="bprice" regexp="bidder.bid" input="bids"/>
+<unnest id="btime" regexp="bidder.time" input="bprice" root="bids"/>
+<unnest id="bid" regexp="id" input="btime" root="bids"/>
+					     
+<punctuate id="punct" datainput="1" dataattr="$btime" timer="$timer" input="prefix bid"/>
+						       
+<bucket id="bucket" wintype="1" winattr="$TIMESTAMP" range="60 seconds" slide="1 second" input="punct"/>
+<construct id="cons" input="bucket">
+  <![CDATA[<bucket id=$bid>
+<price>$bprice</price>
+<time>$btime</time>
+<TS>$TIMESTAMP</TS>
+<wid_from>$wid_from</wid_from>
+<wid_to>$wid_to</wid_to>
+</bucket>]]>     
+</construct>
+</plan>
