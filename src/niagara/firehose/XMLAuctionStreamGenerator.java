@@ -31,6 +31,11 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
     private MyBuffer myBuf;
     private XMLFirehoseThread writer;
     private int numGenCalls;
+    
+    private static int MAXINCREMENT_MILLISEC = 1000;
+    private static int WARP = 10;
+    private static int DELAY = 24000;
+    //private Random rnd;    rnd.nextInt(MAXINCREMENT_SEC)    
 
     public boolean LIMIT_ATTRIBUTES = false;
 
@@ -122,7 +127,10 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 	writer.write_chars(myBuf.array(), myBuf.length());
     } 
     
-    private void generateBid(MyBuffer myb, int numBids) throws IOException {
+    private void generateBid(MyBuffer myb, int numBids) throws IOException { 
+    	long ts=0, temp;
+    	boolean start=true;
+    	
 	cal.incrementTime();
 	myb.append("<open_auctions");
 	if (wrtTrace != null)
@@ -145,7 +153,10 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 	    
 	    myb.append(tab3);
 	    myb.append("<time>");
-	    myb.append(cal.getTimeInSecs());
+	    //myb.append(cal.getTimeInSecs());//here, datetime is in second;
+	    //myb.append(System.currentTimeMillis() - rnd.nextInt(MAXINCREMENT_MILLISEC));     
+	    ts = System.currentTimeMillis() * WARP + DELAY;
+	    myb.append(ts);	    	
 	    myb.append("</time>");
 	    myb.append(nl);
 	    
@@ -283,7 +294,8 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 		myb.append(cal.getTimeInSecs());
 		myb.append("</start>");
 		myb.append("<end>");
-		myb.append(openAuctions.getEndTime(auctionId));
+		//myb.append(openAuctions.getEndTime(auctionId));
+		myb.append(System.currentTimeMillis() * WARP + DELAY + rnd.nextInt(MAXINCREMENT_MILLISEC));
 		myb.append("</end>");
 		myb.append("</interval>");
 		myb.append(nl);
