@@ -1,12 +1,5 @@
+/* $Id: NodeVector.java,v 1.3 2003/09/22 00:11:42 vpapad Exp $ */
 package niagara.utils;
-
-/*
- * $RCSfile:
- * $Revision:
- * $Date:
- * $Author:
- */
-
 
 /**
  * Class to implement a simple list of nodes
