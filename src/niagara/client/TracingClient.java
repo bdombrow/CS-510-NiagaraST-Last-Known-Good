@@ -1,5 +1,4 @@
 package niagara.client;
-//testline
 public class TracingClient extends SimpleClient {
     boolean firstTime;
     public TracingClient(String host, int port, String outputFileName) {
