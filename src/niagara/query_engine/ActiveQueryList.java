@@ -1,6 +1,7 @@
 
+
 /**********************************************************************
-  $Id: ActiveQueryList.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: ActiveQueryList.java,v 1.2 2000/06/01 05:55:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
