@@ -1,0 +1,75 @@
+<!-- DTD for merge templates -->
+
+<!-- One merge node for the root of the tree -->
+<!ELEMENT DocumentMerge (ElementMerge) >
+<!ATTLIST DocumentMerge 
+            MergeType (outer | left-outer | right-outer | inner)  "outer" 
+            DominantSide (left | right | exactMatch) "right"
+>
+
+<!-- First two children describe how to match and merge the current
+ element, respectively and one MergeNode for each potential element
+ child. If no MatchTemplate, matching is on element names -->
+<!ELEMENT ElementMerge (MatchTemplate?, 
+	(ShallowContent | DeepReplace | Union | ExactMatch | DoNotCare),
+           ElementMerge*) 
+>
+
+<!-- Name is the Name of the result element. Recall limited reg
+      expressions will be allowed here -->
+<!-- LInputName is the name of the left input element used to create the
+     result. If not defined is taken to be the same as Name. 
+     By convention, accumulator is left - if this is supplied
+     for an accumulator-it must be the same as Name  -->
+<!-- RInputName is the name of the right input element used to create 
+     the result. If not defined is taken to be the same as Name -->
+<!ATTLIST ElementMerge
+       Name   CDATA   #REQUIRED  
+       LInputName   CDATA   #IMPLIED
+       RInputName   CDATA   #IMPLIED
+ >
+
+<!-- Specification of a Shallow Content merge.  Info about how to merge the element and it's attributes. -->
+<!ELEMENT ShallowContent (AttributeMerge*) >
+
+<!-- Specifies Function to be used to update the value -->
+<!ATTLIST ShallowContent
+	Function (replace | sum | average | max | min | exactMatch) "replace" 
+	LValueType (int | double | float | string) "string"
+	RValueType (int | double | float | string) "string"
+>
+
+<!-- A default for all attributes of this element can be specified by 
+  using the attribute name ATTR_DEFAULT. Attibutes are always 
+  matched on AttrName --> 
+<!ELEMENT AttributeMerge (ShallowContent?) >
+   <!ATTLIST AttributeMerge
+	AttrName CDATA #REQUIRED
+>
+
+<!ELEMENT DeepReplace EMPTY >
+
+<!ELEMENT Union EMPTY> 
+
+<!ELEMENT ExactMatch EMPTY> 
+
+<!ELEMENT MatchTemplate (MatchNode*) >
+
+<!ELEMENT MatchNode (Path, (Content | Existence)) >
+
+<!-- Path to element or attribute - use @ convention for 
+     attributes - don't know if parsers handle this or not, 
+     may have to add it in -->
+<!ELEMENT Path    (#PCDATA) >
+
+<!ELEMENT Content EMPTY>
+
+<!ATTLIST Content 
+      ValueType (int | double | float | string)  "string"
+>
+
+<!ELEMENT Existence EMPTY>
+
+
+
+
