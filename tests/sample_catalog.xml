@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.15 2003/03/19 22:40:06 tufte Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.16 2003/07/03 19:27:18 tufte Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -46,6 +46,10 @@
     <logical name="construct"
       class="niagara.xmlql_parser.op_tree.constructOp">
       <physical name="PhysicalConstruct" class="niagara.query_engine.PhysicalConstructOperator"/>
+    </logical>
+    <logical name="magic_construct"
+      class="niagara.logical.MagicConstruct">
+      <physical name="PhysicalMagicConstruct" class="niagara.query_engine.PhysicalMagicConstruct"/>
     </logical>
     <logical name="avg"
       class="niagara.xmlql_parser.op_tree.averageOp">
@@ -150,6 +154,10 @@
   		<before><logical name="construct"/></before>
  		<after><op name="PhysicalConstruct"/></after>
   	</rule>
+	<rule type="simple" name="magicCons to PhysicalMagicConst">
+	         <before><logical name="magic_construct"/></before>
+		 <after><op name="PhysicalMagicConstruct"/></after>
+        </rule>
   	<rule type="simple" name="display to PhysicalDisplay">
   		<before><logical name="display"/></before>
  		<after><op name="PhysicalDisplay"/></after>
