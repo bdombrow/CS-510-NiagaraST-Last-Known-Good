@@ -5,7 +5,7 @@ import java.util.*;
 
 public class SimpleClient implements UIDriverIF {
     ConnectionManager cm; 
-    static final int MAX_QUERY_LEN = 2048;
+    static final int MAX_QUERY_LEN = 3096;
     static String queryFilePath = "/disk/hopper/projects/disc/niagara/query_files/";
 
     public SimpleClient(String host, int port) {
