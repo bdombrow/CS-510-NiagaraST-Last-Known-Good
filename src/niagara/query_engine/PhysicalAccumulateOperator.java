@@ -105,7 +105,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
 	if(!initialAccumFile.equals("")) {
 	    createAccumulatorFromDisk(initialAccumFile);
-	    System.out.println("crfromdsk done");
+	    // System.out.println("crfromdsk done");
 	} else if(!afName.equals("") && CacheUtil.isAccumFile(afName)) {
 	    if(logicalAccumulateOperator.getClear() == false) {
 		createAccumulatorFromDoc(afName);
@@ -202,8 +202,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     protected boolean getCurrentOutput (ResultTuples resultTuples, 
 					boolean partial) {
 
-	//System.out.println("PhysAccumOp: getCurrentOutput called");
-
 	if(recdData == false) {
 	    System.out.println("PhysAccumOp: WARNING - OUTPUTTING BEFORE DATA RECEIVED");
 	}
@@ -296,27 +294,27 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
 	try {
 	    TXDOMParser p;
-	    System.out.println("Creating parser");
+	    // System.out.println("Creating parser");
 	    p = new TXDOMParser();
 	    
 	    /* Parse the initial accumulate	file */
 	    if(initialAF.startsWith("<?xml")) {
 		p.parse(new InputSource(new ByteArrayInputStream(initialAF.getBytes())));
 	    } else { 
-		System.out.println("Creating File");
+		// System.out.println("Creating File");
 		FileInputStream f = new FileInputStream(initialAF);
-		System.out.println("Calling Parse");
+		// System.out.println("Calling Parse");
 		p.parse(new InputSource(f));
-		System.out.println("parse done");
+		// System.out.println("parse done");
 	    } 
 	
-	    System.out.println("calling getdocument");
+	    // System.out.println("calling getdocument");
 	    Document accumDomDoc = p.getDocument(); 
-	    System.out.println("get document done");
+	    // System.out.println("get document done");
 	    if(accumDomDoc.getDocumentElement() == null) {
 		System.out.println("Doc elt null");
 	    } else {
-		System.out.println("Doc elt ok");
+		// System.out.println("Doc elt ok");
 	    }
 
 	    accumDoc = new NIDocument();
@@ -327,9 +325,9 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	     * cloned - this clone is not deep - just clones
 	     * the document and references the document element
 	     */
-	    System.out.println("calling clone");
+	    // System.out.println("calling clone");
 	    accumDoc = accumDoc.cloneDocRefDocElt(false);
-	    System.out.println("createAccum done");
+	    // System.out.println("createAccum done");
 	    return;
 	} catch (java.io.IOException e) {
 	    System.err.println("Initial Accumulate File Corrupt - creating empty accumulator " + e.getMessage());

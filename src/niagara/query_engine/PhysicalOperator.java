@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.4 2000/08/23 03:55:57 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.5 2000/08/28 21:57:54 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -1016,7 +1016,7 @@ public abstract class PhysicalOperator {
      *            write to a previously closed stream
      */
 
-    private boolean processSourceControlElement (
+    protected boolean processSourceControlElement (
 				      StreamControlElement controlElement,
 				      int streamId)
 	throws java.lang.InterruptedException,
@@ -1063,7 +1063,6 @@ public abstract class PhysicalOperator {
 	    return updatePartialResultCreation ();
 
 	default:
-
 	    // Unhandled control element, just ignore
 	    //
 	    return true;
@@ -1551,8 +1550,8 @@ public abstract class PhysicalOperator {
 
 	for (int src = 0; src < numSourceStreams; ++src) {
 
+	    
 	    if (getSourceStreamStatus(src) != SourceStreamStatus.Closed) {
-
 		boolean proceed = 
 		    putControlElementToSourceStream(controlElement, src);
 
@@ -1592,11 +1591,19 @@ public abstract class PhysicalOperator {
 	// Put the control element up the stream
 	//
         if(destinationStreams[streamId]==null) return true;
-	destinationStreams[streamId].putControlElementUpStream(controlElement);
+	StreamControlElement sce; boolean cont = true;
+	do {
+	    // Gasp!!! This code was silently dropping control elements!!!! 
+	     sce = destinationStreams[streamId].putControlElementUpStream(controlElement);
+	    if (sce != null) {
+		cont = processDestinationControlElement(sce, streamId);
+	    }
+	}
+	while (sce != null); // *NEVER* give up!
 
 	// Continue with the operator
 	//
-	return true;
+	return cont;
     }
 
 
@@ -1628,9 +1635,9 @@ public abstract class PhysicalOperator {
 
 	for (int dest = 0; dest < numDestinationStreams; ++dest) {
 
+
 	    if (getDestinationStreamStatus(dest) !=
 		DestinationStreamStatus.Closed) {
-
 		boolean proceed = 
 		    putControlElementToDestinationStream(controlElement, dest);
 

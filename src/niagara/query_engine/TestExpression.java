@@ -4,6 +4,7 @@ import niagara.xmlql_parser.op_tree.*;
 import niagara.utils.*;
 
 import org.w3c.dom.*;
+import java.util.*;
 import com.ibm.xml.parser.*;
 
 public class TestExpression implements ExpressionIF {
@@ -11,5 +12,8 @@ public class TestExpression implements ExpressionIF {
 	Element res = new TXElement("aNumber");
 	res.appendChild(new TXText("100"));
 	return res;
+    }
+    public void setupVarTable(HashMap varTable) {
+	// Do nothing
     }
 }

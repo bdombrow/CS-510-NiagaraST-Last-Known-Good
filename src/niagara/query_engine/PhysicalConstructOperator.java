@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.4 2000/08/23 09:10:48 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.5 2000/08/28 21:57:54 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -107,6 +107,8 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	// Initialize the result template and the "clear" flag
 	this.resultTemplate = constructLogicalOp.getResTemp();
 	this.clear = constructLogicalOp.isClear();
+
+	txd = new TXDocument();
     }
     
 

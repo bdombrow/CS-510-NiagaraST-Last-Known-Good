@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.1 2000/08/21 00:59:19 vpapad Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.2 2000/08/28 21:57:54 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,10 +30,14 @@ package niagara.query_engine;
 
 import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
-import java.util.Vector;
+import java.util.*;
+import java.io.StringReader;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+
+import koala.dynamicjava.interpreter.*;
+import koala.dynamicjava.parser.wrapper.*;
 
 /**
  * The <code>PhysicalExpressionOperator</code> class is derived from the abstract class
@@ -54,8 +58,9 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
     //
     private static final boolean[] blockingSourceStreams = { false };
 
-    private ExpressionIF expressionObject; 
-    // An object of a clas that implements ExpressionIF
+    private ExpressionIF expressionObject; // An object of a clas that implements ExpressionIF
+    private String expression; // A string to be interpreted for every tuple
+    boolean interpreted;
 
     ///////////////////////////////////////////////////////////////////////////
     // These are the methods of the PhysicalExpressionOperatorClass                //
@@ -91,14 +96,51 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
 	// Type cast the logical operator to a Expression operator
 	//
 	ExpressionOp logicalExpressionOperator = (ExpressionOp) logicalOperator;
-	Class expressionClass = logicalExpressionOperator.getExpressionClass();
-	// Create an object of the class specified in the logical op
-	try {
-	    expressionObject = (ExpressionIF) expressionClass.newInstance();
+	interpreted = logicalExpressionOperator.isInterpreted();
+
+	if (interpreted) {
+	    expression = logicalExpressionOperator.getExpression();
+	    try {
+
+		String source = "package; import niagara.utils.XMLUtils; import java.util.*; import com.ibm.xml.parser.*; import org.w3c.dom.*;  public class UserExpression extends XMLUtils implements " 
+		    + " niagara.xmlql_parser.op_tree.ExpressionIF {\n"  
+		    + "public void setupVarTable(HashMap hm) {};\n"
+		    + " public org.w3c.dom.Node processTuple(niagara.utils.StreamTupleElement ste) {\n";
+		HashMap hm = logicalExpressionOperator.getVarTable(); 
+		Iterator variables = hm.keySet().iterator();
+
+		while (variables.hasNext()) {
+		    String varname = (String) variables.next();
+		    int attrpos = ((Integer) hm.get(varname)).intValue();
+		    String vname = varname.substring(1);
+		    source += " int "  + vname + " = XMLUtils.getInt(ste, " + attrpos + ");\n";
+		}
+		source += "int result; " + expression;
+		source += "com.ibm.xml.parser.TXElement txe = new com.ibm.xml.parser.TXElement(\"result\");\n" 
+		    + "txe.appendChild(new com.ibm.xml.parser.TXText(Integer.toString(result)));\n"
+		    + "return txe; }} new UserExpression();";
+
+		// System.out.println("XXX Source is: " + source);
+		Interpreter interpreter = new TreeInterpreter(new JavaCCParserFactory());
+		expressionObject = (ExpressionIF) 
+		    interpreter.interpret(new StringReader(source), "user.java");
+	    }
+
+	    catch (Exception e) {
+		e.printStackTrace(); // XXX
+	    }
 	}
-	catch (Exception e) {
-	    System.err.println("ExpressionOp: An error occured while constructing an object of the class:\n" 
-			       + expressionClass);
+	else {
+	    Class expressionClass = logicalExpressionOperator.getExpressionClass();
+	    // Create an object of the class specified in the logical op
+	    try {
+		expressionObject = (ExpressionIF) expressionClass.newInstance();
+		expressionObject.setupVarTable(logicalExpressionOperator.getVarTable());
+	    }
+	    catch (Exception e) {
+		System.err.println("ExpressionOp: An error occured while constructing an object of the class:\n" 
+				   + expressionClass);
+	    }
 	}
     }
 
