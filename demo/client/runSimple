@@ -1,1 +1,1 @@
-java -classpath `cat ../classpath` niagara.client.SimpleClient $*
+java niagara.client.SimpleClient $*
