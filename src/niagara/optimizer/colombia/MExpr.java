@@ -1,4 +1,4 @@
-/* $Id: MExpr.java,v 1.5 2003/02/25 06:19:08 vpapad Exp $ 
+/* $Id: MExpr.java,v 1.6 2003/07/27 02:32:28 tufte Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -86,7 +86,7 @@ public class MExpr {
     // May involve creating new Groups.
     public MExpr(Expr expr, int grpid, SSP ssp) {
         op = expr.getOp().copy();
-        grpID = (grpid == ssp.NEW_GRPID) ? ssp.getNewGrpID() : grpid;
+        grpID = (grpid == SSP.NEW_GRPID) ? ssp.getNewGrpID() : grpid;
         Expr input;
         ruleMask = new BitSet(ssp.getRulesetSize());
 
@@ -101,7 +101,7 @@ public class MExpr {
                 inputs[i] = ((LeafOp) input.getOp()).getGroup();
             else {
                 // create a new sub group
-                MExpr MExpr = ssp.copyIn(input, ssp.NEW_GRPID, true);
+                MExpr MExpr = ssp.copyIn(input, SSP.NEW_GRPID, true);
                 inputs[i] = MExpr.getGroup();
             }
         }

@@ -1,4 +1,4 @@
-/* $Id: Group.java,v 1.7 2003/06/03 07:56:51 vpapad Exp $ 
+/* $Id: Group.java,v 1.8 2003/07/27 02:32:28 tufte Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -209,7 +209,7 @@ public class Group {
 
     // XXX vpapad #ifdef FIRSTPLAN
     void setfirstplan(boolean firstplan) {
-        this.firstplan = firstplan;
+        Group.firstplan = firstplan;
     }
     boolean getfirstplan() {
         return firstplan;
