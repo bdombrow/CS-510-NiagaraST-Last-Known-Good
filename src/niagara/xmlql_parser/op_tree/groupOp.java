@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: groupOp.java,v 1.6 2003/03/19 22:44:38 tufte Exp $
+  $Id: groupOp.java,v 1.7 2003/07/27 02:45:30 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -75,9 +75,16 @@ public abstract class groupOp extends unryOp {
             Attribute a = (Attribute) groupbyAttrs.get(i);
             attrs.add(a);
         }
-        attrs.add(new Variable(groupingAttrs.getName(), varType.CONTENT_VAR));
         
+        int type = getResultType();
+        attrs.add(new Variable(groupingAttrs.getName(), type));
         return  new LogicalProperty(card, attrs, inpLogProp.isLocal());
+    }
+    
+    // return type (element, content, tag) of the result
+    protected int getResultType() {
+  		// this is the default - currently used for everything but nest
+  		return varType.CONTENT_VAR;
     }
 
     /**

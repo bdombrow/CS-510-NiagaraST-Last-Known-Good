@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UnionOp.java,v 1.8 2003/07/09 04:59:38 tufte Exp $
+  $Id: UnionOp.java,v 1.9 2003/07/27 02:45:30 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -198,16 +198,21 @@ public class UnionOp extends op {
 		for(int i = 0; i<arity; i++) {
 		    // Get attribute for input - this also serves
 		    // to verify that the input attr is valid
-		    Attribute attr = 
-			Variable.findVariable(inputProperties[i], 
-					      inputAttrNames[i]);
+		    // findVariable throws InvalidPlan if it can't find variable
+		    Attribute attr;
+		    if(inputAttrNames[i].equalsIgnoreCase("NONE")) {
+		    	attr = null;
+		    } else {
+		    	attr = Variable.findVariable(inputProperties[i], 
+										      inputAttrNames[i]);
+		    }
 		    if(inputAttrs[i] == null)
 			inputAttrs[i] = new Attrs();
 		    inputAttrs[i].add(attr);
 		    if(outputDom == null && attr != null) {
-			outputDom = attr.getDomain();
+			    outputDom = attr.getDomain();
 		    } else {
-			if(outputDom != null &&
+			if(attr != null && outputDom != null &&
 			       !outputDom.equals(attr.getDomain())) {}
 			    //throw new InvalidPlanException("Input types are not union compatible");
 		    }
