@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+<filescan id="catfile" fileName = "../../NEXMark/data/categories.xml"/>
+
+<unnest id="category" regexp="Categories.category" input="catfile"/>
+
+<unnest id="catid" regexp="id" input="category"/>
+<unnest id="catname" regexp="name" root = "category" 
+        input="catid" type="content"/>
+
+<firehosescan id="fhscan" host="localhost" port="5000" rate="0" 
+	datatype="auction_stream" num_gen_calls="100" 
+	num_tl_elts="1" prettyprint="no"/>
+<unnest id="auction" regexp="site.open_auctions.open_auction"
+	input = "fhscan"/>
+<unnest id="auctioncat" regexp="category" input="auction"/>
+<unnest id="auctionseller" regexp="seller.person" root="auction"
+	input="auctioncat" type="content"/>
+
+<join id="join" left="auctioncat" right="catid"
+	physical="niagara.query_engine.PhysicalHashJoinOperator"
+	input="auctionseller catname"/>
+
+<construct id="cons" input="join">
+<item>
+<category>$catname</category>
+<seller>$auctionseller</seller>
+</item>
+</construct>
+
+</plan>

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+<filescan id="catfile" fileName = "../../NEXMark/data/categories.xml"/>
+
+<unnest id="category" regexp="Categories.category" input="catfile"/>
+
+<unnest id="catid" regexp="id" input="category" type="content"/>
+<unnest id="catname" regexp="name" root = "category" 
+        input="catid" type="content"/>
+
+<construct id="conselt" input="catname">
+<category><cid>$catid</cid><name>$catname</name></category>
+</construct>
+
+<construct id="cons" input="catname">
+<![CDATA[<category cid=$catid name=$catname></category>]]>
+</construct>
+</plan>
