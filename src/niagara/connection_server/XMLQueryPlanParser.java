@@ -755,11 +755,14 @@ public class XMLQueryPlanParser {
 	     * of attribute to work on 
 	     */
 	    String inputAttr = e.getAttribute("input");
-	    String indexAttr = e.getAttribute("index");
+	    String mergeAttr = e.getAttribute("mergeAttr");
 	    
 	    /* name by which the accumulated file should be referred to */
 	    String accumFileName = e.getAttribute("accumFileName");
-	    
+
+	    /* file containing the initial input to the accumulate */
+	    String initialAccumFile = e.getAttribute("initialAccumFile");
+
 	    AccumulateOp op = (AccumulateOp) operators.Accumulate.clone();
 	    op.setSelectedAlgoIndex(0);
 	    
@@ -771,12 +774,27 @@ public class XMLQueryPlanParser {
 		cl = true;
 	    }
 
-	    op.setAccumulate(mergeTemplate, Integer.parseInt(indexAttr),
-			     accumFileName, cl);
+	    /* Copy the varTbl and schema from the node downstream, or create 
+	     * empty ones if they don't exist
+	     */
+	
+	    varTbl qpVarTbl; 
+	    logNode inputNode = (logNode) ids2nodes.get(inputAttr);
 	    
-	    logNode node = new logNode(op, 
-				       (logNode) ids2nodes.get(inputAttr));
-	    ids2nodes.put(id, node);	   
+	    if (inputNode.getVarTbl() != null) {
+		qpVarTbl = new varTbl(inputNode.getVarTbl());
+	    } else {
+		qpVarTbl = new varTbl();
+	    }
+	    
+	    schemaAttribute mergeSA;
+	    mergeSA = new schemaAttribute(qpVarTbl.lookUp(mergeAttr));
+	    op.setAccumulate(mergeTemplate, mergeSA, accumFileName,
+			     initialAccumFile, cl);
+
+	    logNode accumNode = new logNode(op, inputNode);
+	    ids2nodes.put(id, accumNode);	   
+
 	} catch (MTException mte) {
 	    throw new InvalidPlanException("Invalid Merge Template" + 
 					   mte.getMessage());
