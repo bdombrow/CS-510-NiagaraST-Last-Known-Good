@@ -1,5 +1,5 @@
 #######################################################################
-#  $Id: make.incl,v 1.5 2002/05/07 03:27:29 tufte Exp $
+#  $Id: make.incl,v 1.6 2002/05/23 06:28:43 vpapad Exp $
 #
 #  Make include file - for common constant info
 #  Added 1-17-02 by Kristin Tufte - remove the fact that some 
@@ -20,6 +20,7 @@ export FIREHOSEDIR = //home/projects/disc/niagara/vpapad/cvs/firehose_1_0
 # programs used
 #------------------------------------
 export JAVAC       = $(JAVA_HOME)javac
+export JAVAH       = $(JAVA_HOME)javah
 export JAVA        = $(JAVA_HOME)java
 export JAR         = $(JAVA_HOME)jar
 export JAVADOC     = $(JAVA_HOME)javadoc

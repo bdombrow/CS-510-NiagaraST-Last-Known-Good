@@ -1,4 +1,5 @@
 #######################################################################
+# $Id: Makefile,v 1.14 2002/05/23 06:28:43 vpapad Exp $
 #
 #  Makefile to build query engine related stuff
 #
@@ -20,12 +21,10 @@ include make.incl
 #  list and it will be built using 'make all'
 #
 ##############################################################################
-all:	se_server ql_parser con_server ndom qe trigger client mqpclient dm applet type_system saxdom
+all:	se_server ql_parser con_server ndom qe trigger client mqpclient dm applet type_system saxdom optimizer
 
 client:
 	$(JAVAC) $(JAVAFLAGS) niagara/client/*.java niagara/client/qpclient/*.java
-
-#$(JAVAC) $(JAVACFLAGS) niagara/client/NiagaraUI.java niagara/client/SimpleClient.java niagara/client/qpclient/*.java
 
 mqpclient:
 	$(JAVAC) $(JAVACFLAGS) niagara/client/MQPClient.java niagara/client/DisplayServlet.java 
@@ -41,6 +40,9 @@ trigger:
 	$(JAVAC) $(JAVACFLAGS) niagara/trigger_engine/*.java
 qe:
 	$(JAVAC) $(JAVACFLAGS) niagara/query_engine/*.java
+optimizer: 
+	$(JAVAC) $(JAVACFLAGS) niagara/optimizer/*.java
+	$(JAVAH) $(JAVAFLAGS) -jni -d niagara/optimizer niagara.optimizer.Optimizer 
 dm:
 	$(JAVAC) $(JAVACFLAGS) niagara/data_manager/*.java
 
