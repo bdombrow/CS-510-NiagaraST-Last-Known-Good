@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+<dtdscan id="dtd">
+<url value="http://www.cse.ogi.edu/~vpapad/xml/numbers.xml"/>
+</dtdscan>
+<scan id="scan" regexp="PLAY" input="dtd"/>
+<scan id="scan1" regexp="NUM" input="scan"/>
+<avg id="avg" groupby="$scan" avgattr="$scan1" input="scan1"/>
+<construct id="cons" input="avg">
+<Average>$avg</Average>
+</construct>
+</plan>
