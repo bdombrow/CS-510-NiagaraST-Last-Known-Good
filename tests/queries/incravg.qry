@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<plan top="cons">
+<constant id="const">
+<![CDATA[
+<xxx>
+<item group="1" value="10"/>
+<item group="2" value="5"/>
+<item group="1" value="10"/>
+<item group="3" value="15"/>
+<item group="1" value="20"/>
+<item group="2" value="-5"/>
+<item group="1" value="20"/>
+<item group="4" value="20"/>
+</xxx>
+]]>
+</constant>
+<scan id="item" regexp="xxx.item" input="const"/>
+<scan id="group" regexp="group" input="item"/>
+<scan id="value" root="$item" regexp="value" input="group"/>
+<incravg id="avg" groupby="$group" avgattr="$value" input="value"/>
+
+<construct id="cons" input="avg">
+<group>
+<name>$group</name>
+<avg>$avg</avg>
+</group>
+</construct>
+</plan>
