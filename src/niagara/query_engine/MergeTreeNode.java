@@ -33,7 +33,7 @@ class MergeTreeNode {
      */
     private MergeObject merger;
     private LocalKey localKey;
-    private ArrayList children;
+    private MTNList children;
     
     private String lInputTagName; 
     private String rInputTagName;
@@ -42,6 +42,8 @@ class MergeTreeNode {
     private String accumTagName;
     
     private boolean hasNonDefaultKey;
+    
+    protected MergeTreeNode next;
 
     /*
      * METHODS
@@ -69,7 +71,7 @@ class MergeTreeNode {
 		  boolean checkAccumConstraints, MergeTree mergeTree)
 	throws MTException {
 
-	children = new ArrayList();
+	children = new MTNList();
 
 	/* First get the tag names: ResultName, LInputName, RInputName
 	 * These are specified as attributes
@@ -217,19 +219,11 @@ class MergeTreeNode {
      * fragName.
      */
     MergeTreeNode getChildWithFragTagName(String fragName) {
-	ListIterator iter = children.listIterator();
 	
-	MergeTreeNode child = null;
-	if(iter.hasNext()) {
-	    child = (MergeTreeNode) iter.next();
-	}
+	MergeTreeNode child = children.getHead();
 
 	while(child != null && !child.getFragTagName().equals(fragName)) {
-	    if(iter.hasNext()) {
-		child = (MergeTreeNode) iter.next();
-	    } else {
-		child = null;
-	    }
+	    child = child.next;
 	}
 	return child;
     }
@@ -356,8 +350,10 @@ class MergeTreeNode {
 		   ", r:" + rInputTagName);
 	merger.dump(os);
 	localKey.dump(os);
-	for(int i=0; i<children.size(); i++) {
-	    ((MergeTreeNode)children.get(i)).dump(os);
+	MergeTreeNode child = children.getHead();
+	while(child != null) {
+	    child.dump(os);
+	    child = child.next;
 	}
     }
 

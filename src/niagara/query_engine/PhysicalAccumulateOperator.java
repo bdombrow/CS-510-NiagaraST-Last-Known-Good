@@ -1,4 +1,4 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.15 2003/01/13 05:09:47 tufte Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.16 2003/01/25 21:04:25 tufte Exp $ */
 package niagara.query_engine;
 
 import java.util.Vector;
@@ -15,6 +15,7 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.data_manager.*;
+import niagara.connection_server.NiagraServer;
 
 /**
  * This is the <code>PhysicalAccumulateOperator </code> that extends
@@ -42,6 +43,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     private String initialAccumFile;
     private String afName;
     private boolean clear;
+    private int tupleCount;
 
     /* The object into which things are being accumulated */
     private Document accumDoc;
@@ -81,6 +83,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
         }
 	mergeTree.setAccumulator(accumDoc);
         recdData = false;
+	tupleCount = 0;
     }
 
     /**
@@ -98,6 +101,15 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
         int streamId)
         throws ShutdownException, UserErrorException {
 
+	if((tupleCount % 1000) == 0) {
+	    Runtime r = Runtime.getRuntime();
+	    System.out.println("KT: PhysAccum " + tupleCount + " tuples " +
+			       " Free mem " + r.freeMemory() +
+			       " Total mem " + r.totalMemory() +
+			       " Used mem " + (r.totalMemory() -
+					       r.freeMemory()));
+	}
+
         /* get the fragment to be merged from the tuple, convert it
          * to an element if necessary, then pass the work off to the merge tree
          */
@@ -107,6 +119,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
         mergeTree.accumulate(fragment);
 
         recdData = true;
+	tupleCount++;
     }
 
     /**
@@ -136,6 +149,15 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     protected void flushCurrentResults(boolean partial)
         throws ShutdownException, InterruptedException {
+
+	System.out.println("KT PhysAccumOp flushCurrentResults called");
+
+	if(NiagraServer.RUNNING_NIPROF) {
+	    System.out.println("KT requesting data dump");
+	    System.gc();
+	    JProf.requestDataDump();
+	}
+
         if (recdData == false) {
             System.out.println(
                 "PhysAccumOp: WARNING - OUTPUTTING BEFORE DATA RECEIVED");
@@ -183,32 +205,16 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     private void createEmptyAccumulator() {
         accumDoc = DOMFactory.newDocument();
-        /* MTND Document domDoc = DOMFactory.newDocument(); 
-         * accumDoc.initialize(mapTable, domDoc); 
-         */
+	if(accumDoc == null)
+	    throw new PEException("num accumulator");
         return;
     }
 
     private void createAccumulatorFromDoc(String afName) {
         accumDoc = (Document) DataManager.AccumFileDir.get(afName);
-
         if (accumDoc == null) {
             throw new PEException("AccumFileDir.get returned null in createAccumulatorFromDoc");
         }
-
-        /* MTND - don't think I need any of this
-         *	accumDoc = DOMFactory.newDocument();
-         * accumDoc.initialize(mapTable, accumDomDoc);
-        
-        * now clone the accum doc itself so I can write to it 
-         * code always assumes that document itself has been
-         * cloned - this clone is not deep - just clones
-         * the document and references the document element
-         *
-        
-         *accumDoc = accumDoc.cloneDocRefDocElt(false);
-         */
-
         return;
     }
 
@@ -231,20 +237,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
             if (accumDoc.getDocumentElement() == null) {
                 System.out.println("Doc elt null");
             }
-
-            /* MTND - dont need 
-             * accumDoc = DOMFactory.newDocument();
-             * accumDoc.initialize(mapTable, accumDomDoc);
-             *
-             * now clone the accum doc itself so I can write to it 
-             * code always assumes that document itself has been
-             * cloned - this clone is not deep - just clones
-             * the document and references the document element
-             *
-             * accumDoc = accumDoc.cloneDocRefDocElt(false);
-             * System.out.println("createAccum done");
-            */
-
             return;
         } catch (java.io.IOException e) {
             System.err.println(

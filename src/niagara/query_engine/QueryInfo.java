@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryInfo.java,v 1.3 2002/05/07 03:10:55 tufte Exp $
+  $Id: QueryInfo.java,v 1.4 2003/01/25 21:04:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -315,7 +315,8 @@ public class QueryInfo {
 	    throw new PEException("Query Info object for query id " + queryId + " not present in active query list");
 	}
 	
-	System.out.println("KT: Query with id " + queryId + " removed from QueryEngine.activeQueries");
+	System.out.println("KT: Query with id " + queryId 
+			   + " removed from QueryEngine.activeQueries");
 	
 	// Clear the interrupted flag of this thread in case it was interrupted
 	// for this query

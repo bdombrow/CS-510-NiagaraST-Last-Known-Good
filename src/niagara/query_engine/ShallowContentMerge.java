@@ -39,6 +39,10 @@ class ShallowContentMerge extends MergeObject {
     private Element resultElt;
     private boolean leftIsResult;
     private boolean rightIsResult;
+    private ArrayList addAttrs;
+    private ArrayList changeAttrs;
+    private ArrayList delAttrs;
+    private HashMap procLeftAttrs;
 
     /**
      * Constructor for ShallowContentMerge - reads in a ShallowContent
@@ -92,6 +96,11 @@ class ShallowContentMerge extends MergeObject {
 	}
 
 	this.mergeTree = mergeTree;
+
+	addAttrs = new ArrayList(); 
+	changeAttrs = new ArrayList();
+	delAttrs = new ArrayList();
+	procLeftAttrs = new HashMap(); 
 
 	return;
     }
@@ -315,12 +324,12 @@ class ShallowContentMerge extends MergeObject {
 
 	/* array of attributes to be added to, changed in and
 	 * delete from the result element */
-	ArrayList addAttrs = new ArrayList(); 
-	ArrayList changeAttrs = new ArrayList();
-	ArrayList delAttrs = new ArrayList();
+	addAttrs.clear();
+	changeAttrs.clear();
+	delAttrs.clear();
 
 	/* left attrs which have been processed */
-	HashMap procLeftAttrs = new HashMap(); 
+	procLeftAttrs.clear();
 	int numLAttrs = lAttrsMap.getLength();
 	int numRAttrs = rAttrsMap.getLength();
 
