@@ -9,8 +9,13 @@
 -->
 
 <!ELEMENT plan     (scan | select | join | avg | construct | 
-                    dtdscan | firehosescan)+>
+                    dtdscan | firehosescan | accumulate | expression | 
+		    sort | dup | union)+>
+
 <!ATTLIST plan top IDREF        #REQUIRED>
+
+<!ENTITY % PositionAttributes "X CDATA #IMPLIED
+          Y CDATA #IMPLIED">
 
 <!-- 
      For all operators, an "id" attribute is required, so that other 
@@ -18,6 +23,10 @@
      multiple physical implementations available, a "physical" attribute
      may be attached, specifying the class name of the physical operator.
 -->
+<!ENTITY % StandardAttributes "id ID   #REQUIRED
+         physical  CDATA               #IMPLIED
+	 input     IDREF               #REQUIRED
+	 %PositionAttributes;">
 
 <!-- 
      type : Whether we want the element itself, its content, or its tag name
@@ -27,45 +36,62 @@
 
 <!ELEMENT scan     EMPTY>
 <!ATTLIST scan 
-          id       ID                    #REQUIRED
 
 	  type	   (tag|element|content) "element"
 	  root	   CDATA                 ""
 	  regexp   CDATA               #REQUIRED
+	  %StandardAttributes;>
 
-          physical CDATA               #IMPLIED
-          input   IDREF                #REQUIRED>
+<!ELEMENT sort     EMPTY>
+<!ATTLIST sort 
+
+	  order	   (descending|ascending) "descending"
+	  comparison (alphabetic|numeric) "alphabetic"
+	  sort_by  CDATA               #REQUIRED
+	  %StandardAttributes;>
+
+<!ELEMENT expression     EMPTY>
+<!ATTLIST expression 
+
+	  class   CDATA               #REQUIRED
+	  %StandardAttributes;>
+
 
 <!ELEMENT avg     EMPTY>
 <!ATTLIST avg 
-          id       ID                  #REQUIRED
 	  groupby  CDATA	       #REQUIRED
 	  avgattr  CDATA	       #REQUIRED
-          physical CDATA               #IMPLIED
-          input   IDREF                #REQUIRED>
+	  %StandardAttributes;>
 
 <!ELEMENT sum     EMPTY>
 <!ATTLIST sum 
-          id       ID                  #REQUIRED
 	  groupby  CDATA	       #REQUIRED
 	  sumattr  CDATA	       #REQUIRED
-          physical CDATA               #IMPLIED
-          input   IDREF                #REQUIRED>
+	  %StandardAttributes;;>
 
 <!ELEMENT count     EMPTY>
 <!ATTLIST count 
-          id       ID                  #REQUIRED
 	  groupby  CDATA	       #REQUIRED
 	  countattr  CDATA	       #REQUIRED
-          physical CDATA               #IMPLIED
-          input   IDREF                #REQUIRED>
+	  %StandardAttributes;>
 
 <!ELEMENT select  (and | or | not | pred)>
 <!ATTLIST select 
-          id       ID                  #REQUIRED
+	  %StandardAttributes;>
 
-          physical CDATA               #IMPLIED
-          input    IDREF               #REQUIRED>
+<!ELEMENT dup  EMPTY>
+<!ATTLIST dup
+          branch   CDATA    #REQUIRED 
+	  %StandardAttributes;>
+
+<!ELEMENT union  EMPTY>
+<!ATTLIST union
+         id ID                         #REQUIRED
+         physical  CDATA               #IMPLIED 
+         input    IDREFS               #REQUIRED
+	 %StandardAttributes;>
+
+
 <!--
         "left" and "right" are lists of variables used in an equijoin.
 	It's necessary to specify them when using a hash join 
@@ -77,8 +103,8 @@
 	  left	   CDATA		#IMPLIED
 	  right	   CDATA		#IMPLIED
 	  physical CDATA		""
-          input    IDREFS               #REQUIRED>
-
+          input    IDREFS               #REQUIRED
+	  %PositionAttributes;>
 
 <!ELEMENT and     (and | or | not | pred)+>
 <!ELEMENT or      (and | or | not | pred)+>
@@ -102,7 +128,8 @@
 <!ELEMENT dtdscan  (url)+>
 <!ATTLIST dtdscan 
           id       ID           #REQUIRED
-          physical CDATA        #IMPLIED>
+          physical CDATA        #IMPLIED
+	  %PositionAttributes;>
 
 <!ELEMENT firehosescan  EMPTY>
 <!ATTLIST firehosescan 
@@ -112,25 +139,26 @@
 	  rate	   CDATA	#REQUIRED
 	  type	   (gen | file) gen
 	  desc     CDATA        #REQUIRED
-	  iters    CDATA        #REQUIRED>
+	  iters    CDATA        #REQUIRED
+	  %PositionAttributes;>
 
 
 <!ELEMENT url        EMPTY >
 <!ATTLIST url
           value    CDATA        #REQUIRED>
 
+<!-- If the clear attribute is set to "yes", construct will not keep
+     any old attributes in the outgoing version of each tuple -->
+
 <!ELEMENT construct  ANY>
-<!ATTLIST construct 
-          id       ID           #REQUIRED
-	  input   IDREF         #REQUIRED
-          physical CDATA        #IMPLIED>
+<!ATTLIST construct  
+          clear    (yes|no)     "no"
+          %StandardAttributes;>
 
 <!ELEMENT accumulate EMPTY>
 <!ATTLIST accumulate
-	  id       ID		#REQUIRED
 	  index	   CDATA	#REQUIRED
 	  mergeTemplate CDATA	#REQUIRED
 	  accumFileName CDATA	#REQUIRED
-	  physical      CDATA   ""
-	  input         IDREF   #REQUIRED
-	  clear     (true | false) "false">
+	  clear     (true | false) "false"
+	  %StandardAttributes;>
