@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.22 2002/12/10 01:23:59 vpapad Exp $
+<!-- $Id: queryplan.dtd,v 1.23 2003/02/05 22:18:35 jinli Exp $
      DTD for query plans -->
 
 <!-- 
@@ -68,14 +68,44 @@
 	  avgattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
 
+<!ELEMENT slidingAvg     EMPTY>
+<!ATTLIST slidingavg 
+	  groupby  CDATA	       #REQUIRED
+	  avgattr  CDATA	       #REQUIRED
+	  %StandardAttributes;>
+
 <!ELEMENT sum     EMPTY>
 <!ATTLIST sum 
 	  groupby  CDATA	       #REQUIRED
 	  sumattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
 
+<!ELEMENT slidingSum     EMPTY>
+<!ATTLIST slidingsum 
+	  groupby  CDATA	       #REQUIRED
+	  sumattr  CDATA	       #REQUIRED
+	  %StandardAttributes;>
+
+<!ELEMENT max     EMPTY>
+<!ATTLIST max 
+	  groupby  CDATA	       #REQUIRED
+	  maxattr  CDATA	       #REQUIRED
+	  %StandardAttributes;>
+
+<!ELEMENT slidingMax     EMPTY>
+<!ATTLIST slidingmax 
+	  groupby  CDATA	       #REQUIRED
+	  maxattr  CDATA	       #REQUIRED
+	  %StandardAttributes;>
+
 <!ELEMENT count     EMPTY>
 <!ATTLIST count 
+	  groupby  CDATA	       #REQUIRED
+	  countattr  CDATA	       #REQUIRED
+	  %StandardAttributes;>
+
+<!ELEMENT slidingCount     EMPTY>
+<!ATTLIST slidingcount 
 	  groupby  CDATA	       #REQUIRED
 	  countattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
