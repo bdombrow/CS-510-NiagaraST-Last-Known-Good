@@ -1,7 +1,7 @@
 /* $Id$ */
 package niagara.optimizer.rules;
 
-import niagara.logical.EquiJoinPredicateList;
+//import niagara.logical.EquiJoinPredicateList;
 import niagara.logical.Predicate;
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.op_tree.joinOp;

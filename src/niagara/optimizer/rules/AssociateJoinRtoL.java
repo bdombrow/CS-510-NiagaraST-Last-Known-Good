@@ -42,6 +42,15 @@ public class AssociateJoinRtoL extends Rule {
     public void initialize() {
     }
 
+//XXX vpapad hack
+    public Expr next_substitute(
+        Expr before,
+        MExpr mexpr,
+        PhysicalProperty ReqdProp) {
+            return null;
+        }
+/*
+
     public Expr next_substitute(
         Expr before,
         MExpr mexpr,
@@ -59,11 +68,10 @@ public class AssociateJoinRtoL extends Rule {
         LEAF_OP A = (LEAF_OP) (before.getInput(0).getOp());
         Attrs aAttrs = A.getGroup().getLogProp().GetAttrs();
 
-        /*
-         * Join numbering convention:
-         *         2  1               1  2		
-         *        Ax(BxC) ->        (AxB)xC
-         */
+         // Join numbering convention:
+         //         2  1               1  2		
+         //       Ax(BxC) ->        (AxB)xC
+        
         // from upper (second) join
         joinOp op2 = (joinOp) before.getOp();
         EquiJoinPredicateList preds2 = op2.getEquiJoinPredicates();
@@ -195,4 +203,5 @@ public class AssociateJoinRtoL extends Rule {
         // otherwise just return true
         return true;
     }
+*/    
 }
