@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DiskCache.java,v 1.4 2001/08/08 21:25:48 tufte Exp $
+  $Id: DiskCache.java,v 1.5 2002/05/07 03:10:49 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -89,12 +89,12 @@ class DiskCache implements DMCache {
             dfn = dirName + CacheUtil.urlToFile(key);
         else 
             dfn = dirName + CacheUtil.pathToFile(key);
-        try {
+        //try {
             File tmpF = new File(dfn);
             if(tmpF.exists()) tmpF.delete();
-        } catch (Exception fe) {
-            throw(new CacheUnpinException("Unpin failed"));
-        }
+	    //} catch (Exception fe) {
+            //throw(new CacheUnpinException("Unpin failed"));
+	    //}
     }
 
     /** Given File or URL name, fetch Document 

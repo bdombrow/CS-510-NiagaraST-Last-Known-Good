@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TrigExecutionScheduler.java,v 1.4 2002/04/29 19:51:24 tufte Exp $
+  $Id: TrigExecutionScheduler.java,v 1.5 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -136,7 +136,8 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
     }
 
     public synchronized void executeOperators (Vector trigPlanRoots,
-					       Vector queryInfos) {
+					       Vector queryInfos) 
+    throws ShutdownException {
 
 	// First create Physical Head Operators for each root to handle this query
 	// in the system
@@ -185,14 +186,16 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 
     private void scheduleForExecution (logNode parentLogicalNode,
 				       logNode rootLogicalNode,
-				       PageStream outputPageStream) {
+				       PageStream outputPageStream) 
+	throws ShutdownException {
         
 	// Get the operator corresponding to the logical node
 	op operator = rootLogicalNode.getOperator();
         
 	// If this is a DTD Scan operator, then process accordingly
 	if (operator instanceof dtdScanOp) {
-	    processDTDScanOperator((dtdScanOp) operator, outputPageStream);
+	    SinkTupleStream sinkStream = new SinkTupleStream(outputPageStream);
+	    processDTDScanOperator((dtdScanOp) operator, sinkStream);
 	} else {
 	    // This is a regular operator node ... Create the output streams
 	    // array
@@ -303,11 +306,14 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 	    try {
 		physicalOperator = 
 		    (PhysicalOperator) constructors[0].newInstance(parameters);
+	    } catch (InstantiationException ie) {
+		throw new PEException("Error in Instantiating Physical Operator " + physicalOperatorClass.getName() + "  " + ie.getMessage());
+	    } catch (IllegalAccessException iae) {
+		throw new PEException("Error in Instantiating Physical Operator " + physicalOperatorClass.getName() + "  " + iae.getMessage());
+	    } catch (java.lang.reflect.InvocationTargetException ite) {
+		throw new PEException("Error in Instantiating Physical Operator " + physicalOperatorClass.getName() + "  " + ite.getMessage());
 	    }
-	    catch (Exception e) {
-		System.err.println("Error in Instantiating Physical Operator");
-		return;
-	    }
+
 	    //split op which is the first time we traverse the tree
 	    //and meet split and dup op.
 

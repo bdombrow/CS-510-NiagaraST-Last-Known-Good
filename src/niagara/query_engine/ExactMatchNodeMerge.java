@@ -23,6 +23,7 @@ import java.io.*;
 
 import org.w3c.dom.*;
 
+import niagara.utils.*;
 import niagara.utils.type_system.*;
 
 class ExactMatchNodeMerge extends NodeMerge {
@@ -47,11 +48,11 @@ class ExactMatchNodeMerge extends NodeMerge {
      *         no updates need to be made based on this merge
      */
     boolean merge(Node lNode, Node rNode, Node resultNode) 
-	throws OpExecException {
+	throws UserErrorException {
 
 	if(!comparator.nodeEquals(lNode, rNode)) {
 	    throw new 
-		OpExecException("Non-matching elements in ExactMatchMerge");
+		UserErrorException("Non-matching elements in ExactMatchMerge");
 	} else {
 	    /* everything is OK */
 	    return false;

@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalDisplayOperator.java,v 1.2 2002/04/29 19:51:23 tufte Exp $
+ * $Id: PhysicalDisplayOperator.java,v 1.3 2002/05/07 03:10:55 tufte Exp $
  *
  */
 
@@ -95,7 +95,7 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
     protected void nonblockingProcessSourceTupleElement (
 		     			 StreamTupleElement tupleElement,
 						 int streamId) 
-	throws ShutdownException{
+	throws ShutdownException, UserErrorException {
         if (counter == 0) {
             try {
                 URL url = new URL(url_location);
@@ -104,11 +104,12 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
                 out = connection.getOutputStream();
                 pw = new PrintWriter(out);
                 pw.println(query_id);
-            }
-            catch (Exception e) {
-                System.out.println("Could not connect to client: " + url_location);
-                e.printStackTrace();
-            }
+	    } catch(java.net.MalformedURLException mue) {
+		throw new UserErrorException("Bad url for client " +
+					     mue.getMessage());
+	    } catch(java.io.IOException ioe) {
+		throw new UserErrorException("Unable to open connection to client " + url_location + " " + ioe.getMessage());
+	    }
         }
 
         counter++;
@@ -149,19 +150,18 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
     }
 
     protected void cleanUp () {
-          try {
+	try {
               System.out.println("XXX display transmitted " + counter  + " tuples");
               pw.flush();
               out.close();
               connection.getInputStream().close();
               Date d = new Date();
               System.out.println("Query done: " + d.getTime() % (60 * 60 * 1000));
-          }
-          catch (Exception e) {
-              System.out.println("Display: error while sending results to client:" + url_location);
-              e.printStackTrace();
-              System.exit(-1);
-          }
+	} catch (java.io.IOException e) {
+	    System.out.println("Display: error while sending results to client:" + url_location);
+	    e.printStackTrace();
+	    System.exit(-1);
+	}
     }
 
     public boolean isStateful() {

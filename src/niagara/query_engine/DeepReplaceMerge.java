@@ -53,10 +53,8 @@ class DeepReplaceMerge extends MergeObject {
      * @param fragElt The element to accumulate into accumElt (accumulatee)
      *
      * @return Returns nothing.
-     * @exception OpExecException Thrown if exact match criteria isn't met
      */
-    void accumulate(Element accumElt, Element fragElt) 
-	throws OpExecException {
+    void accumulate(Element accumElt, Element fragElt) {
 
 	/* convention - accumulator is always left */
 
@@ -98,7 +96,7 @@ class DeepReplaceMerge extends MergeObject {
      */
     Element merge(Element rElt, Element lElt, Document resDoc,
 		  String tagName) 
-	throws OpExecException {
+	throws UserErrorException {
 	Element resElt = null;
 	if(keepLeft) {
 	    resElt = lElt;
@@ -110,7 +108,7 @@ class DeepReplaceMerge extends MergeObject {
 	if(resElt.getOwnerDocument() != resDoc ||
 	   resElt.getTagName() != tagName) {
 	    throw new 
-		OpExecException("Tag or doc doesn't match in deep replace merge");
+		UserErrorException("Tag or doc doesn't match in deep replace merge");
 	}
 
 	return resElt;

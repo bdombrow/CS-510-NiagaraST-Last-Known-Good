@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryInfo.java,v 1.2 2002/04/29 19:51:24 tufte Exp $
+  $Id: QueryInfo.java,v 1.3 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -300,28 +300,26 @@ public class QueryInfo {
 
     synchronized public void removeFromActiveQueryList () {
 
-		// Change state of query to dead. This is necessary because there
-		// could be other parts of the system trying to kill the query
-		// just after this. They should realize that the query is already
-		// dead.
-		//
-		queryState = STATE_DEAD;
-
-		// Remove query from active list
-		//
-		try {
-			activeQueryList.removeQueryInfo(queryId);
-		}
-		catch (ActiveQueryList.NoSuchQueryException e) {
-			System.err.println("Query Info object for query id " + queryId + " not present in active query list");
-		}
-
-		System.out.println("Query with id " + queryId + " removed from system");
-
-		// Clear the interrupted flag of this thread in case it was interrupted
-		// for this query
-		//
-		Thread.currentThread().interrupted();
+	// Change state of query to dead. This is necessary because there
+	// could be other parts of the system trying to kill the query
+	// just after this. They should realize that the query is already
+	// dead.
+	//
+	queryState = STATE_DEAD;
+	
+	// Remove query from active list
+	try {
+	    activeQueryList.removeQueryInfo(queryId);
+	}
+	catch (ActiveQueryList.NoSuchQueryException e) {
+	    throw new PEException("Query Info object for query id " + queryId + " not present in active query list");
+	}
+	
+	System.out.println("KT: Query with id " + queryId + " removed from QueryEngine.activeQueries");
+	
+	// Clear the interrupted flag of this thread in case it was interrupted
+	// for this query
+	Thread.currentThread().interrupted();
     }
 
 

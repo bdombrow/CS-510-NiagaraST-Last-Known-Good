@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalTrigActionOperator.java,v 1.4 2002/04/29 19:51:24 tufte Exp $
+  $Id: PhysicalTrigActionOperator.java,v 1.5 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -161,7 +161,9 @@ public class PhysicalTrigActionOperator extends PhysicalOperator {
 		    fw.flush();
 		    Runtime rt = Runtime.getRuntime();
 		    rt.exec("M " + mailto + " " + fn);
-		} catch (Exception ioe) {
+		} catch (IOException ioe) {
+		    System.err.println("shutdownTrigOp got IO exception : " +
+				       ioe.getMessage());
 		    ioe.printStackTrace();
 		}
               } else {

@@ -28,17 +28,17 @@ public class XMLBScoring implements ExpressionIF {
 
     private int getInt(StreamTupleElement ste, String v) {
 	Node n = (Node) ste.getAttribute(((Integer) varTable.get(v)).intValue());
-	try {
+	//try {
 	    if (n instanceof Text) {
 		return Integer.parseInt(n.getNodeValue());
 	    }
 	    else { // This better be instanceof Element
 		return Integer.parseInt(((Text) n.getChildNodes().item(0)).getNodeValue());
 	    }
-	}
-	catch (Exception e) {
-	    return 0;
-	}
+	    //}
+	//catch (Exception e) {
+	//  return 0;
+	//}
     }
 
     public Node processTuple(StreamTupleElement ste) {

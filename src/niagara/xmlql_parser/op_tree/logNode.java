@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logNode.java,v 1.5 2001/07/17 06:52:23 vpapad Exp $
+  $Id: logNode.java,v 1.6 2002/05/07 03:11:27 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -59,6 +59,7 @@ public class logNode implements java.io.Serializable {
 
     private String name;
 
+    protected boolean isHead;
 
    /**
     * Constructor without any parameter
@@ -396,6 +397,15 @@ public class logNode implements java.io.Serializable {
 	}
 	return ((AccumulateOp)operator).getAccumFileName();
     }
+
+    public boolean isHead() {
+	return isHead;
+    }
+
+    public void setIsHead() {
+	isHead = true;
+    }
+
 }
 
 

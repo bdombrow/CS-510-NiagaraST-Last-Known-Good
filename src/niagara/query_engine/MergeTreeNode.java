@@ -255,7 +255,7 @@ class MergeTreeNode {
      * @return returns new result element 
      */
     Element merge(Element lElt, Element rElt, Document doc) 
-	throws OpExecException {
+	throws UserErrorException {
 	return merger.merge(lElt, rElt, doc, resultTagName);
     }
 
@@ -270,7 +270,7 @@ class MergeTreeNode {
      *         should continue or not 
      */
     void accumulate(Element accumElt, Element fragElt) 
-	throws OpExecException {
+	throws UserErrorException{
 	merger.accumulate(accumElt, fragElt);
     }
 
@@ -284,7 +284,7 @@ class MergeTreeNode {
      * @return 
      */
     public void createLocalKeyValue(Element elt, ArrayStack localKeyVal)
-	throws OpExecException {
+	throws UserErrorException {
 	localKey.createLocalKeyValue(elt, elt.getTagName(), localKeyVal);
 	return;
     }
@@ -305,7 +305,7 @@ class MergeTreeNode {
      */
     public void createLocalKeyValue(Element elt, String tagName,
 				    ArrayStack localKeyVal)
-	throws OpExecException {
+	throws UserErrorException {
 	localKey.createLocalKeyValue(elt, tagName, localKeyVal);
 	return;
     }
@@ -329,14 +329,14 @@ class MergeTreeNode {
      */
     public void createLocalKeyValues(Element elt, String tagName,
 				     ArrayStack localKeyValList)
-	throws OpExecException {
+	throws UserErrorException {
 	localKey.createLocalKeyValues(elt, tagName, localKeyValList);
 	return;
     }
 
     /* same, but no tag name */
     public void createLocalKeyValues(Element elt, ArrayStack localKeyValList)
-	throws OpExecException {
+	throws UserErrorException {
 	localKey.createLocalKeyValues(elt, elt.getTagName(), localKeyValList);
 	return;
     }

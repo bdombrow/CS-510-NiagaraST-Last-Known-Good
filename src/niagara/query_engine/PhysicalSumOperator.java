@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSumOperator.java,v 1.7 2002/04/29 19:51:24 tufte Exp $
+  $Id: PhysicalSumOperator.java,v 1.8 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -218,41 +218,33 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
      */
 
     protected final Object constructUngroupedResult (StreamTupleElement 
-						     tupleElement) 
-	throws OpExecException {
-
-	// First get the atomic values
-        atomicValues.clear();
-        ae.getAtomicValues(tupleElement, atomicValues);
-
-	// If there is not exactly one atomic value, skip
-	//
-	if (atomicValues.size() != 1) {
-	    System.out.println("Warning: not exactly one atomic value");
-	    return null;
-	}
-	else {
-
-	    // Get the string atomic value
-	    //
-	    String atomicValue = (String) atomicValues.get(0);
-
-	    // Try to convert to double - if that fails, just return null
-	    //
+						     tupleElement) {
 	    try {
-
-		// Get the double value
-		//
-		Double doubleValue = new Double(atomicValue);
-
-		// Return the double value
-		//
-		return doubleValue;
+		// First get the atomic values
+		atomicValues.clear();
+		ae.getAtomicValues(tupleElement, atomicValues);
+		
+		// If there is not exactly one atomic value, skip
+		if (atomicValues.size() != 1) {
+		    throw new PEException("Need exactly one atomic value");
+		} else {
+		    
+		    // Get the string atomic value
+		    //
+		    String atomicValue = (String) atomicValues.get(0);
+		    
+		    // Try to convert to double 
+		    Double doubleValue = new Double(atomicValue);
+		    
+		    // Return the double value
+		    return doubleValue;
+		}
+	    } catch (java.lang.NumberFormatException e) {
+		    // believe that atomicValue is generated, so it should
+		    // always be OK, if it isn't generated, should
+		    // throw UserErrorException... KT
+		    throw new PEException("Unable to convert atomicValue to double in PhysicalSumOperator: " + e.getMessage());
 	    }
-	    catch (java.lang.NumberFormatException e) {
-		throw new OpExecException("Unable to convert atomicValue to double in PhysicalSumOperator");
-	    }
-	}
     }
 
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: WebCache.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: WebCache.java,v 1.2 2002/05/07 03:10:49 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -88,11 +88,11 @@ class WebCache implements DMCache {
     public void release() throws CacheReleaseException {
         boolean needThrow = false;
         for(int i=0; i<urlth.length; i++) {
-            try {   
+            //try {   
                 urlth[i].interrupt();
-            } catch (Exception ie) {
-                needThrow = true;
-            }
+		//} catch (Exception ie) {
+                //needThrow = true;
+		//}
         }
         if(needThrow) 
             throw(new CacheReleaseException("Shutdown UrlFetchThread failed"));

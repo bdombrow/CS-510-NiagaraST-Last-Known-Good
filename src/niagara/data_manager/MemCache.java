@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCache.java,v 1.3 2002/04/29 19:48:41 tufte Exp $
+  $Id: MemCache.java,v 1.4 2002/05/07 03:10:49 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,6 +42,7 @@ import niagara.ndom.*;
 import niagara.trigger_engine.*;
 import niagara.query_engine.*;
 import niagara.data_manager.XMLDiff.*;
+import niagara.utils.*;
 
 abstract class MemCache implements DMCache {
     // System wide entryHash, thus _Sharing_ between
@@ -123,16 +124,16 @@ abstract class MemCache implements DMCache {
                 // only used in a controlled way by DM.  If this DOES
                 // happen, it is expensive -- since we had to preserv
                 // the timespan of the Vec file.
-                try {
+                //try {
                     // System.err.println("Once Vec should never be here");
                     MemCacheEntry mme = new MemCacheEntry(k, val);
                     mme.setDirty(true);
                     if(vc!=0) mme.setTimeStamp(vc);
                     _entryHash.put(k, mme);
                     addentry(mme);
-                } catch(Exception cpe) { 
+		    //} catch(Exception cpe) { 
                     // System.err.println("remap: failed adding a new vec entry to cache.");
-                }
+		    //}
             }
         }
     }
@@ -202,8 +203,11 @@ abstract class MemCache implements DMCache {
                         // fetch_reload.
                         try {
                             unpin(key);
-                        } catch (Exception upe) {
-                        }
+			} catch (CacheUnpinException upe) {
+			    // this exception was ignored before... KT
+			    throw new PEException("CacheUnpinException " +
+						  upe.getMessage());
+			}
                         throw( new CacheFetchException("Pin Remote File"));
                     }
                     ret._addWaitingThread(fth);
@@ -413,8 +417,10 @@ abstract class MemCache implements DMCache {
         Document ret = null;
         try {
             ret = (Document)fetch_reload(s, null);
-        } catch (Exception fe) {
-        }
+	} catch (CacheFetchException fe) {
+	    // was ignored before... KT
+	    throw new PEException("CacheFetchException " + fe.getMessage());
+	}
         return ret;
     }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DataManager.java,v 1.6 2002/04/29 19:48:41 tufte Exp $
+  $Id: DataManager.java,v 1.7 2002/05/07 03:10:49 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -105,9 +105,8 @@ public class DataManager {
 	    
 	    try {
 		client = new SEClient(SEhost);
-	    }
-	    catch (Exception e) { 
-		System.err.println("Error: Can't connect to Search Engine..."+e);
+	    } catch (IOException ioe) { // KT-ERROR
+		System.err.println("Error: Can't connect to Search Engine..."+ ioe.getMessage());
 	    }
 	    
         } else {
@@ -165,8 +164,8 @@ public class DataManager {
 
 	    responseDoc = parseXML(response);
 	}
-	catch (Exception e) { 
-	    System.out.println("DM Error: Unable to get DTD Info: "+e);
+	catch (IOException ioe) { 
+	    System.out.println("DM Error: Unable to get DTD Info: "+ioe.getMessage());
 	    responseDoc = null; 
 	}
 
@@ -189,8 +188,8 @@ public class DataManager {
 
 	    responseDoc = parseXML(response);
 	}
-	catch (Exception e) { 
-	    System.out.println("DM Error: Unable to get DTD List: "+e);
+	catch (IOException e) { 
+	    System.out.println("DM Error: Unable to get DTD List: "+e.getMessage());
 	    responseDoc = null; 
 	}
 
@@ -330,10 +329,17 @@ public class DataManager {
 
         try {
 	    p.parse(new InputSource(new StringReader(str)));
-        }   catch (Exception e) {
-            e.printStackTrace();
+	}   catch (SAXException e) {
+	    System.err.println("Error parsing " + e.getMessage() +
+			       " XML: " + str);
+	    e.printStackTrace();
             return null;
-        }
+	} catch(IOException ioe) {
+	    System.err.println("Error parsing " + ioe.getMessage() +
+			       " XML: " + str);
+	    ioe.printStackTrace();
+            return null;	    
+	}
 	return doc;
     }
     

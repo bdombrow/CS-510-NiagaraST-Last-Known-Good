@@ -37,10 +37,8 @@ class DoNotCareMerge extends MergeObject {
      * @param fragElt The element to accumulate into accumElt (accumulatee)
      *
      * @return Returns nothing.
-     * @exception OpExecException Thrown if exact match criteria isn't met
      */
-    void accumulate(Element accumElt, Element fragElt) 
-	throws OpExecException {
+    void accumulate(Element accumElt, Element fragElt) {
 	/* Return without doing anything.  Since this is a DoNotCare,
 	 * means there are no attributes or content to deal with
 	 */
@@ -58,8 +56,7 @@ class DoNotCareMerge extends MergeObject {
      * @return Returns the result element
      */
     Element merge(Element rElt, Element lElt, Document resDoc,
-		    String tagName) 
-	throws OpExecException {
+		  String tagName) {
 	Element resElt = resDoc.createElement(tagName);
 	return resElt;
     }

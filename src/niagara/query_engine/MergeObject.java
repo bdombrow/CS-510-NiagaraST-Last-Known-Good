@@ -21,8 +21,8 @@ package niagara.query_engine;
  */
 
 import java.io.*;
-
 import org.w3c.dom.*;
+import niagara.utils.*;
 
 abstract class MergeObject {
 
@@ -37,8 +37,8 @@ abstract class MergeObject {
      *
      * @return Returns nothing 
      */
-    abstract void accumulate(Element accumElt, Element fragElt) 
-	throws OpExecException;
+    abstract void accumulate(Element accumElt, Element fragElt)
+	throws UserErrorException;
 
     /** 
      * merges two fragments together
@@ -52,7 +52,7 @@ abstract class MergeObject {
      */
     abstract Element merge(Element lElt, Element rElt, 
 			     Document resDoc, String tagName)
-	throws OpExecException;
+	throws UserErrorException;
 
 
     /**

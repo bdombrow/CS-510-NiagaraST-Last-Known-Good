@@ -63,13 +63,13 @@ class AggNodeMerge extends NodeMerge {
      */
 
     boolean merge(Node lNode, Node rNode, Node resultNode) 
-	throws OpExecException {
+	throws UserErrorException {
 	Object[] args = {lNode, rNode, resultNode};
 	try {
 	    return ((Boolean)aggMethod.invoke(aggObject, args)).booleanValue();
 	} catch (IllegalAccessException e1){
 	    throw new 
-		OpExecException("Invalid Method Invocation - Illegal Access - on " + aggMethod.getName() + "  " + e1.getMessage());
+		UserErrorException("Invalid Method Invocation - Illegal Access - on " + aggMethod.getName() + "  " + e1.getMessage());
 	} catch (InvocationTargetException e2) {
 	    if(aggObject == null) {
 		System.out.println("aggObject is null");
@@ -77,7 +77,7 @@ class AggNodeMerge extends NodeMerge {
 		System.out.println("aggObject is " + aggObject.getClass().getName());
 	    }
 	    throw new 
-		OpExecException("Invalid Method Invocation - Invocation Target - on " + aggMethod.getName() + "  " + e2.getMessage());
+		UserErrorException("Invalid Method Invocation - Invocation Target - on " + aggMethod.getName() + "  " + e2.getMessage());
 	}
     }
 

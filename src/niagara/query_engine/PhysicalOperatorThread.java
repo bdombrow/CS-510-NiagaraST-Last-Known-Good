@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperatorThread.java,v 1.3 2001/08/08 21:27:57 tufte Exp $
+  $Id: PhysicalOperatorThread.java,v 1.4 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -121,18 +121,14 @@ public class PhysicalOperatorThread implements Runnable {
 	    //
 	    PhysicalOperator op = opQueue.getOperator();
 
-	    try {
-		// Execute the operator
-		//
-		op.execute();
-
-		// Garbage collect the memory occupied by the operator
-		// *now*, instead of waiting for the next time this thread
-		// executes an operator
-		op = null;
-	    } catch (OpExecException oee) {
-		System.out.println("Error executing operator " + oee.getMessage());
-	    }
+	    // Execute the operator
+	    //
+	    op.execute();
+	    
+	    // Garbage collect the memory occupied by the operator
+	    // *now*, instead of waiting for the next time this thread
+	    // executes an operator
+	    op = null;
 	} while (true);
     }
 }

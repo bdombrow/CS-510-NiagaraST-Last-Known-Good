@@ -121,7 +121,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     protected void blockingProcessSourceTupleElement (
 					StreamTupleElement tupleElement,
 							 int streamId) 
-	throws ShutdownException, OpExecException {
+	throws ShutdownException, UserErrorException {
 
 	/* get the fragment to be merged from the tuple, convert it
 	 * to an element if necessary, then pass the work off to the merge tree
@@ -179,7 +179,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
 
     private Element convertAttrToElement(StreamTupleElement tupleElement) 
-	throws OpExecException {
+	throws UserErrorException {
 	Object attr = tupleElement.getAttribute(mergeIndex);
 
 	Element domElt;
@@ -197,11 +197,11 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	     * So what I do is just throw an exception
 	     */
 	    if(domElt == null) {
-		throw new OpExecException("Got null document element - must mean there is a parsing problem with the fragment");
+		throw new UserErrorException("Got null document element - must mean there is a parsing problem with the fragment");
 	    }
 
 	} else {
-	    throw new OpExecException("Invalid instance type");
+	    throw new UserErrorException("Invalid instance type");
 	}
 	
 	return domElt;

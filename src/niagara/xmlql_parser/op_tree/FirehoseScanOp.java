@@ -63,6 +63,9 @@ public class FirehoseScanOp extends unryOp {
 	System.out.println();
     }
 
+    public boolean isSourceOp() {
+	return true;
+    }
 }
 
 

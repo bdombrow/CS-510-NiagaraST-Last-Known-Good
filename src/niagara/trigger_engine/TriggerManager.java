@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TriggerManager.java,v 1.2 2001/08/08 21:29:02 tufte Exp $
+  $Id: TriggerManager.java,v 1.3 2002/05/07 03:11:01 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -85,9 +85,16 @@ class TrigExecutor implements Runnable {
      * method to execute the firing trigger
      **/
     public void run() { 
-    	System.err.println("TM:: Will fire " + trigId + " on file " + changedFileNames);
-	TM.fire(trigId, changedFileNames);
-	// Timing.recordTrig(trigId);
+	try {
+	    System.err.println("TM:: Will fire " + trigId + " on file " + changedFileNames);
+	    TM.fire(trigId, changedFileNames);
+	    // Timing.recordTrig(trigId);
+	} catch (ShutdownException se) {
+	    System.err.println("TriggerManager.fire got shutdown exception " +
+			       se.getMessage());
+	    // just return and quit.
+	    return;
+	}
     }
 }
 
@@ -538,7 +545,8 @@ public class TriggerManager implements Runnable {
         return trigName;
     }
 
-    void fire(Integer trigId, Vector changedFileNames) {
+    void fire(Integer trigId, Vector changedFileNames) 
+	throws ShutdownException {
 
 	//debug.mesg("trigger start firing...");
 

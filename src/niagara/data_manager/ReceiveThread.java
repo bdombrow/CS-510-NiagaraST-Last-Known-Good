@@ -1,5 +1,5 @@
 /**
- * $Id: ReceiveThread.java,v 1.3 2002/04/29 19:48:41 tufte Exp $
+ * $Id: ReceiveThread.java,v 1.4 2002/05/07 03:10:49 tufte Exp $
  *
  */
 
@@ -40,12 +40,12 @@ public class ReceiveThread implements Runnable {
      *
      */
     public void run() {
+	String url_location = "http://" + op.getLocation()
+	    + "/servlet/communication?type=get_tuples&id=" + op.getQueryId();
+
 	try {
             // Connect to remote SCS with location and query_id
             // and establish connection
-            String url_location = "http://" + op.getLocation()
-                + "/servlet/communication?type=get_tuples&id=" + op.getQueryId();
-
             URL url = new URL(url_location);
             URLConnection connection = url.openConnection();
 
@@ -72,14 +72,25 @@ public class ReceiveThread implements Runnable {
 	    outputStream.endOfStream();
             //System.out.println("XXX received : " + counter + " tuples.");
             
-	}
-	catch (Exception e) {
-            System.err.println("Exception while receiving tuples: ");
-            e.printStackTrace();
+	} catch (MalformedURLException e) {
+	    System.err.println("Bad URL " + url_location + " " + e.getMessage());
+	    e.printStackTrace();
+	} catch (java.io.IOException ioe) {
+	    System.err.println("Unable to open connection or read from inputstream, or close stream " + ioe.getMessage());
+	    ioe.printStackTrace();
+	} catch (InterruptedException ie) {
+	    // nothing to do, just print a warning and stop
+	    System.err.println("Receive thread interrupted "+ ie.getMessage());
+	    return;
+	} catch (ShutdownException se) {
+	    // nothing to do, just print a warning and stop
+	    System.err.println("Receive thread interrupted "+ se.getMessage());
+	    return;
 	}
     }
 
-    private void processReceive(String tuplestr) {
+    private void processReceive(String tuplestr) 
+	throws ShutdownException{
 	try {
             niagara.ndom.DOMParser parser = DOMFactory.newParser();
 
@@ -102,10 +113,13 @@ public class ReceiveThread implements Runnable {
 	    outputStream.putTupleNoCtrlMsg(ste);
 	} catch(java.lang.InterruptedException e) {
 	    System.err.println("Thread interrupted in ReceiveThread::processMessageBuffer");
-	} 
-	catch (Exception ex) {
-	    ex.printStackTrace();
-            System.out.println("erroneous string was:#" + tuplestr + "#");
+	}  catch(org.xml.sax.SAXException se) {
+	    se.printStackTrace();
+	    System.out.println("erroneous string was:#" + tuplestr + "#");
+	    return;
+	} catch (java.io.IOException ioe) {
+	    ioe.printStackTrace();
+	    System.err.println("Thread shutdown received in ReceiveThread::processMessageBuffer");
 	    return;
 	}
 	return;

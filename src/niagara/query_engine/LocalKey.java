@@ -1,4 +1,4 @@
-// $Id: LocalKey.java,v 1.4 2002/04/26 02:38:31 vpapad Exp $
+// $Id: LocalKey.java,v 1.5 2002/05/07 03:10:55 tufte Exp $
 package niagara.query_engine;
 
 /*
@@ -154,7 +154,7 @@ public class LocalKey {
 	    return pathExp;
 	} catch (Exception e) {
 	    throw new MTException("Error parsing path String " + pathString + "  " + e.getMessage());
-	}
+	    }
     }
     
     /**
@@ -178,7 +178,7 @@ public class LocalKey {
      */
     void createLocalKeyValue(Element elt, String tagName, 
 			     ArrayStack localKeyVal)
-	throws OpExecException {
+	throws UserErrorException {
 
 	localKeyVal.quickReset();
 
@@ -209,10 +209,10 @@ public class LocalKey {
 		
 		if(reachableNodes.size() == 0) {
 		    DOMHelper.printElt(elt);
-		    throw new OpExecException("Document is not key-complete. Elt tagname " + tagName + " " + elt.getTagName());
+		    throw new UserErrorException("Document is not key-complete. Elt tagname " + tagName + " " + elt.getTagName());
 		    //" path " + atomicKey.path().toString());
 		} else  if(reachableNodes.size() != 1) {
-		throw new OpExecException("Matches not allowed on set values when path is not singular. tagname " + tagName);
+		throw new UserErrorException("Matches not allowed on set values when path is not singular. tagname " + tagName);
 		//+ " path " + atomicKey.path().toString());
 		}
 		
@@ -245,7 +245,7 @@ public class LocalKey {
      */
     public void createLocalKeyValues(Element elt, String tagName,
 				     ArrayStack localKeyValList)
-	throws OpExecException {
+	throws UserErrorException {
 	
 	localKeyValList.quickReset();
 
@@ -281,7 +281,7 @@ public class LocalKey {
 	    
 	    int numNodes = reachableNodes.size();
 	    if(numNodes == 0) {
-		throw new OpExecException("Document is not key-complete. Elt tagname " + tagName);
+		throw new UserErrorException("Document is not key-complete. Elt tagname " + tagName);
 		//+ " path " + atomicKey.path().toString());
 	    }
 	    
@@ -306,8 +306,7 @@ public class LocalKey {
 	throw new PEException("Shouldn't get here!!!");
     }
 
-    private Object getKeyValue(AtomicKey atomicKey, Node node) 
-	throws OpExecException{
+    private Object getKeyValue(AtomicKey atomicKey, Node node) {
 
 	switch(atomicKey.mergeType()) {
 	case LocalKey.TAG_EXISTENCE:

@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOp.java,v 1.1 2001/07/17 06:52:23 vpapad Exp $
+ * $Id: ConstantOp.java,v 1.2 2002/05/07 03:11:27 tufte Exp $
  *
  */
 
@@ -52,6 +52,10 @@ public class ConstantOp extends unryOp {
     
     public String dumpAttributesInXML() {
         return vars;
+    }
+
+    public boolean isSourceOp() {
+	return true;
     }
 }
 

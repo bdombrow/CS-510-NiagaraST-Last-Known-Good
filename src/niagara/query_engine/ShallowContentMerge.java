@@ -181,10 +181,9 @@ class ShallowContentMerge extends MergeObject {
      * @param fragElt The element to accumulate into accumElt (accumulatee)
      *
      * @return Returns nothing.
-     * @exception OpExecException Thrown if exact match criteria isn't met
      */
     void accumulate(Element accumElt, Element fragElt) 
-	throws OpExecException {
+	throws UserErrorException{
 	/* traverse through all attributes and content - if an attribute 
 	 * value (or node content) matches, no action.  If a new 
 	 * attribute/content is found in fragElt, it is inserted into 
@@ -216,13 +215,11 @@ class ShallowContentMerge extends MergeObject {
      * @return Returns new result element
      */
     Element merge(Element lElt, Element rElt, Document resDoc,
-		    String tagName) 
-	throws OpExecException {
+		  String tagName) 
+	throws UserErrorException {
 
 	Element resElt = resDoc.createElement(tagName);
-	
 	internal_merge(rElt, lElt, resElt);
-
 	return resElt;
     }
 
@@ -243,7 +240,7 @@ class ShallowContentMerge extends MergeObject {
      */
     private void internal_merge(Element lElt, Element rElt, 
 				Element resElt) 
-	throws OpExecException {
+	throws UserErrorException {
 
 	/* first some setup */
 	leftElt = lElt;
@@ -280,7 +277,7 @@ class ShallowContentMerge extends MergeObject {
      * Maybe should turn this into a HashJoin class...
      */
     private void mergeAttributes() 
-	throws OpExecException {
+	throws UserErrorException {
 	/* create hash maps from the attributes - I don't use
 	 * NamedNodeMap because I don't want attributes with
 	 * default values to be replaced, and because I don't
@@ -464,7 +461,7 @@ class ShallowContentMerge extends MergeObject {
     
 
     private void mergeContent() 
-	throws OpExecException {
+	throws UserErrorException {
 	contentMerge.merge(leftElt, rightElt, resultElt);
 	return;
     }

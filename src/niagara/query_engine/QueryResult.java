@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.7 2002/04/29 19:51:24 tufte Exp $
+  $Id: QueryResult.java,v 1.8 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -346,12 +346,11 @@ public class QueryResult {
      */
 
     public ResultObject internalGetNext (int timeout) 
-	throws java.lang.InterruptedException,
+	throws InterruptedException,
 	       ResultsAlreadyReturnedException,
 	       ShutdownException {
 	
 	// Create a new result object
-	//
 	ResultObject resultObject;
 	if(!NiagraServer.QUIET) {
 	    resultObject = new ResultObject();
@@ -360,13 +359,11 @@ public class QueryResult {
 	}
 
 	// Check to make sure that stream has not been previously closed
-	//
 	if (endOfStream) {
 	    throw new ResultsAlreadyReturnedException();
 	}
 	
 	// If there has been an error in execution, notify
-	//
 	if (errorInExecution) {
 	    resultObject.status = QueryError;
 	    return resultObject;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheManager.java,v 1.5 2002/04/29 19:48:41 tufte Exp $
+  $Id: CacheManager.java,v 1.6 2002/05/07 03:10:49 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -178,10 +178,10 @@ public class CacheManager {
                 return;
             }
             else doc = (Document)memCache.fetch_reload(tmp, null);
-        } catch(Exception fe) {
+	} catch(CacheFetchException fe) {
             memCache.setTimeSpan(s, span);
             inMemVec = true;
-        }
+	}
         if(inMemVec) return;
         
         // System.err.println("**** Temp/Diff fetch done! *** " + tmp);
@@ -287,9 +287,9 @@ public class CacheManager {
 
         try {
             resDoc = (Document)(memCache.fetch(tmp+"_DIFF_.xml", null));
-        } catch ( Exception fe) {
-            // System.err.println("Fetch Error, in GetDiff resDoc");
-        }
+	} catch (CacheFetchException fe) {
+            System.err.println("Fetch Error, in GetDiff resDoc");
+	}
         if(resDoc.getDocumentElement()==null) {
             // System.err.println("====== %%%%%% Dummy resDoc");
             Element tmpEle = resDoc.createElement("ROOT"); 
@@ -340,9 +340,12 @@ public class CacheManager {
 		    CacheUtil.fetchUrl(s2, s1);
 		else
 		    CacheUtil.fetchLocal(s2,s1);
-		} catch (Exception e) {
+		} catch (ParseException e) {
+		    System.err.print("Illegal XML DOC! " + e.getMessage());
 		    e.printStackTrace();
-		    System.err.print("Illegal XML DOC!");
+		} catch (IOException ioe) {
+		    System.err.println("IOException " + ioe.getMessage());
+		    ioe.printStackTrace();
 		}
 	    }
             Document doc1 = null;
@@ -360,15 +363,15 @@ public class CacheManager {
 		 * This code requires TXDocument and an old version
 		 * of ibm's xml4j parser
 		 */
-		try { 
+		//try { 
 		    XMLDiff.getDiffDoc((TXDocument)doc1.cloneNode(true), 
 				       (TXDocument)doc2.cloneNode(true), 
 				       (TXDocument)resDoc,
 				       tsp);
-		} catch (Exception e) {
-		    e.printStackTrace();
-		    System.err.println("Diffing get exception: ");
-		}	     
+		    //} catch (Exception e) {
+		    //e.printStackTrace();
+		    //System.err.println("Diffing get exception: ");
+		    //}	     
 	    } else {
 		throw new InvalidDOMRepException("XMLDiff doesn't work unless you use old version of XML4J");
 	    }
@@ -443,7 +446,8 @@ public class CacheManager {
     }
 
     private void getTrigDocument(String tmps, 
-				 regExp pathExpr, SinkTupleStream sinkStream) {
+				 regExp pathExpr, SinkTupleStream sinkStream) 
+	throws ShutdownException {
         int id = CacheUtil.tupleGetTrigId(tmps);
         String fn = CacheUtil.tupleGetTrigFile(tmps);
 
@@ -476,9 +480,12 @@ public class CacheManager {
                 sinkStream.put(doc);
             }
             sinkStream.endOfStream();
-        } catch (Exception e) {
+	} catch (InterruptedException e) {
+	    System.err.println("InterruptedException in CacheManager.getTrigDoc");
             e.printStackTrace();
-        }
+	} catch (InvalidDOMRepException idre) {
+	    throw new PEException("Invalid DOM Representation");
+	}
     }
 
     /** Function to retrieve the most current document associated

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.5 2002/04/29 19:51:24 tufte Exp $
+  $Id: QueryEngine.java,v 1.6 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -243,56 +243,6 @@ public class QueryEngine
      *  run a trigger query.  A new query information object is created, entered into
      *  the query queue and active query list, and wrapped in a query result
      *  object which is returned to the trigger manager 
-     *  This function takes a fixed output stream as the output stream of the
-     *  query  result.
-     *  This interface is used to run a already optimized plan
-     *  @param optimized logicalPlan root
-     *  @param Stream resultStream
-     *  @return QueryResult
-     */
-    /*
-    public synchronized QueryResult executeOptimizedQuery(logNode planRoot, Stream resultStream){
-
-	    //
-	    // Get the next qid
-	    //		
-	    int qid = CUtil.getNextQueryId();
-		
-	    
-	    // Create a query information object
-	    //
-	    QueryInfo queryInfo;
-
-	    try {
-	    	queryInfo = new QueryInfo("",
-					  qid,
-					  resultStream,
-					  activeQueries,
-					  true);		
-	    }
-	    catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
-	    	System.err.println("Error in Assigning Unique Query Ids!");
-	    	return null;
-	    }
-	    
-	    // Create the query result object to return to the caller
-	    //
-	    QueryResult queryResult = new QueryResult(qid, resultStream);
-	
-
-	    //
-	    //call Execution Scheduler to generate the physical
-	    //plan and execute the group plan.
-	    scheduler.executeOperators(planRoot,queryInfo);
-	    
-	    return queryResult;
-    }
-    */
-    /**
-     *  The function called by trigger manager  to 
-     *  run a trigger query.  A new query information object is created, entered into
-     *  the query queue and active query list, and wrapped in a query result
-     *  object which is returned to the trigger manager 
      * 
      *  This interface is used to run a already optimized plan
      *  @param optimized logicalPlan root
@@ -300,7 +250,8 @@ public class QueryEngine
      *  @return QueryResult
      */
 
-    public synchronized QueryResult executeOptimizedQuery(logNode planRoot){
+    public synchronized QueryResult executeOptimizedQuery(logNode planRoot)
+    throws ShutdownException {
         
 	// Get the next qid
 	int qid = CUtil.getNextQueryId();
@@ -319,16 +270,13 @@ public class QueryEngine
 				      true);		
 	}
 	catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
-	    System.err.println("Error in Assigning Unique Query Ids!");
-	    return null;
+	    throw new PEException("Error in Assigning Unique Query Ids!");
 	}
 	
 	// Create the query result object to return to the caller
 	//
 	QueryResult queryResult = new QueryResult(qid, resultStream);
 	
-	
-	//
 	//call Execution Scheduler to generate the physical
 	//plan and execute the group plan.
 	scheduler.executeOperators(planRoot,queryInfo);
@@ -347,7 +295,8 @@ public class QueryEngine
      *  @return vector of QueryResults
      */
 
-    public synchronized Vector executeGroupQuery(Vector queryRoots){
+    public synchronized Vector executeGroupQuery(Vector queryRoots)
+    throws ShutdownException {
 	
 		//this is the vector of query results
 		Vector queryResults = new Vector();
@@ -408,14 +357,14 @@ public class QueryEngine
     public Vector getDTDList()
 		{
 			Vector ret = null;
-			try{
+			//try{
 
 			ret = dataManager.getDTDList();
 
-			}catch(Exception dmce){
-				System.out.println("The data manager has been previously shutdown, re-start the system");
-				return null;
-			}
+			//}catch(Exception dmce){
+				//System.out.println("The data manager has been previously shutdown, re-start the system");
+				//return null;
+			//}
 			return ret;
 		}
 

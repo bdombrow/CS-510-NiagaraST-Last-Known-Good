@@ -1,5 +1,5 @@
 /**
- * $Id: ReceiveOp.java,v 1.1 2001/07/17 06:52:23 vpapad Exp $
+ * $Id: ReceiveOp.java,v 1.2 2002/05/07 03:11:27 tufte Exp $
  *
  */
 
@@ -52,4 +52,9 @@ public class ReceiveOp extends unryOp {
     public String toString() {
         return "ReceiveOp [" + location + "@" + query_id + "]";
     }
+
+    public boolean isSourceOp() {
+	return true;
+    }
 }
+

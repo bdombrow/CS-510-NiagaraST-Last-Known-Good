@@ -60,6 +60,9 @@ public class StreamScanOp extends unryOp {
 	System.out.println();
     }
 
+    public boolean isSourceOp() {
+	return true;
+    }
 }
 
 

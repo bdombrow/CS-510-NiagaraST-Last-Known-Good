@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOpThread.java,v 1.3 2002/04/29 19:48:41 tufte Exp $
+ * $Id: ConstantOpThread.java,v 1.4 2002/05/07 03:10:49 tufte Exp $
  *
  */
 
@@ -39,9 +39,25 @@ public class ConstantOpThread implements Runnable {
 	try {
             processDocument();
 	    outputStream.endOfStream();
-	}
-	catch (Exception e) {
-	    System.err.println("The output stream for the firehose thread was already closed.");
+	} catch (SAXException e) {
+	    // not sure what should be done here, just throw this error 
+	    // for now, someone should fix, this KT
+	    throw new PEException("Error processing document in ConstantOpThread ");
+	} catch (InterruptedException ie) {
+	    // same here
+	    System.out.println("IOError closing stream in ConstantOpThread " +
+			       ie.getMessage());
+	    ie.printStackTrace();
+	} catch (ShutdownException se) {
+	    // same here
+	    System.out.println("IOError closing stream in ConstantOpThread " +
+			       se.getMessage());
+	    se.printStackTrace();
+	} catch(java.io.IOException ioe) {
+	    // same here
+	    System.out.println("IOError closing stream in ConstantOpThread " +
+			       ioe.getMessage());
+	    ioe.printStackTrace();
 	}
 
 	return;

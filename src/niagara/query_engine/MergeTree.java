@@ -223,7 +223,7 @@ public class MergeTree {
      */
 
     void accumulate(Document accumDoc, Element fragment)
-	throws OpExecException {
+	throws UserErrorException {
 
 	/*
          * make it left and right frag and make treewalking code
@@ -288,7 +288,7 @@ public class MergeTree {
 			       Element fragElt, 
 			       MergeTreeNode mergeTreeNode,
 			       Document accumDoc)
-	throws OpExecException {
+	throws UserErrorException {
 
 	boolean isBottom = true;
 
@@ -489,7 +489,7 @@ public class MergeTree {
 					   ArrayStack parentKeyVal,
 					   String tagName, 
 					   MergeTreeNode mergeTreeNode) 
-	throws OpExecException {
+	throws UserErrorException {
 
 	if(mergeTreeNode.isNever()) {
 	    return;
@@ -549,7 +549,7 @@ public class MergeTree {
 					ArrayStack parentKeyVal,
 					MergeTreeNode mergeTreeNode,
 					boolean multiKey) 
-	throws OpExecException {
+	throws UserErrorException {
 
 	if(TRACE) {
 	    System.out.println("KT AddChildToRootedKeyMap " + 

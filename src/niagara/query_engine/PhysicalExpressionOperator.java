@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.6 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.7 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -85,7 +85,8 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
     public PhysicalExpressionOperator (op logicalOperator,
 				       SourceTupleStream[] sourceStreams,
 				       SinkTupleStream[] sinkStreams,
-				       Integer responsiveness) {
+				       Integer responsiveness) 
+	throws UserErrorException{
 
 	// Call the constructor on the super class
 	//
@@ -123,10 +124,9 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
 		Interpreter interpreter = new TreeInterpreter(new JavaCCParserFactory());
 		expressionObject = (ExpressionIF) 
 		    interpreter.interpret(new StringReader(source), "user.java");
-	    }
-
-	    catch (Exception e) {
-		e.printStackTrace(); // XXX
+	    } catch(koala.dynamicjava.interpreter.InterpreterException ie) {
+		throw new UserErrorException("invalid expression " +
+					      ie.getMessage());
 	    }
 	}
 	else {
@@ -135,10 +135,14 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
 	    try {
 		expressionObject = (ExpressionIF) expressionClass.newInstance();
 		expressionObject.setupVarTable(logicalExpressionOperator.getVarTable());
-	    }
-	    catch (Exception e) {
+	    } catch(InstantiationException ie) {
 		System.err.println("ExpressionOp: An error occured while constructing an object of the class:\n" 
-				   + expressionClass);
+				   + expressionClass +
+				   " " + ie.getMessage());
+	    } catch (IllegalAccessException iae) {
+		System.err.println("ExpressionOp: An error occured while constructing an object of the class:\n" 
+				   + expressionClass +
+				   " " + iae.getMessage());
 	    }
 	}
     }

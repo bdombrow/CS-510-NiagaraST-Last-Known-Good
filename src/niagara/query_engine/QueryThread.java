@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryThread.java,v 1.2 2002/04/29 19:51:24 tufte Exp $
+  $Id: QueryThread.java,v 1.3 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,7 @@ import java.io.StringReader;
 import niagara.data_manager.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.utils.*;
 
 /**
  *  The QueryThread class is used to run queries after they are entered 
@@ -150,21 +151,24 @@ public class QueryThread implements Runnable {
 
     public void run () {
 
-		// Waiting on the Query Queue until there is a new query to
-		// be scheduled. Then once an query is obtained, run it to completion.
-		// Then repeat the process.
-		//
-		do {
-
-			// Get a query
-			//
-			QueryInfo queryInfo = queryQueue.getQuery();
-
-			// Execute it
-			//
-			execute(queryInfo);
-
-		} while (true);
+	    // Waiting on the Query Queue until there is a new query to
+	    // be scheduled. Then once an query is obtained, run it to completion.
+	    // Then repeat the process.
+	do {
+	    try {
+		// Get a query
+		QueryInfo queryInfo = queryQueue.getQuery();
+		
+		// Execute it
+		execute(queryInfo);
+	    } catch(UserErrorException uee) {
+		// should pass this back to client, for now, just print
+		System.err.println("USER ERROR: " + uee.getMessage());
+	    } catch (ShutdownException se) {
+		// do nothing - just go to next query, is this correct?
+		System.err.println("QueryThread got Shutdown for current query");
+	    }
+	} while (true);
     }
 
 
@@ -175,26 +179,25 @@ public class QueryThread implements Runnable {
      *                   the query to be run
      */
 
-    private void execute (QueryInfo queryInfo){
+    private void execute (QueryInfo queryInfo)
+    throws UserErrorException, ShutdownException {
 
 		// Get the string version of the query
-		//
 		String queryString = queryInfo.getQueryString();
 
 		// Create a scanner and query parser on the fly
 		// THIS HAS TO CHANGE TO REUSE SCANNER AND PARSER
-		//
 		Scanner scanner;
 
-		try {
-			scanner = new Scanner(new EscapedUnicodeReader(
-				new StringReader(queryString)));
-		}
-		catch (Exception e) {
-			System.err.println("Problem with the query string "+queryString);
-			queryInfo.killQueryWithoutOperators();
-			return;
-		}
+		//try {
+		    scanner = new Scanner(new EscapedUnicodeReader(
+				    new StringReader(queryString)));
+		    //} catch (Exception e) {
+		    // KT FIX - need to do better error checking than this!!
+		    //System.err.println("Problem with the query string "+queryString);
+		    //queryInfo.killQueryWithoutOperators();
+		    //return;
+		    //}
 
 		queryParser = new QueryParser(scanner);
 
@@ -203,12 +206,10 @@ public class QueryThread implements Runnable {
 		java_cup.runtime.Symbol parseTree;
 
 		try {
-			parseTree = queryParser.parse();
-		}
-		catch (java.lang.Exception e) {
-			System.err.println("Error in parsing Query");
-			queryInfo.killQueryWithoutOperators();
-			return;
+		    parseTree = queryParser.parse();
+		} catch (Exception e) { // this is what cup throws
+		    queryInfo.killQueryWithoutOperators();
+		    throw new UserErrorException("Error parsing query");
 		}
 
 		// Get the query representation from the parse tree
@@ -226,11 +227,9 @@ public class QueryThread implements Runnable {
 
 		try {
 			logicalPlan = logicalPlanGenerator.getLogPlan();
-		}
-		catch (java.lang.CloneNotSupportedException e) {
-			System.out.println("Error in generating logical plan");
-			queryInfo.killQueryWithoutOperators();
-			return;
+		} catch (java.lang.CloneNotSupportedException e) {
+		    queryInfo.killQueryWithoutOperators();
+		    throw new PEException("error cloning in logical plan generation " + e.getMessage());
 		}
 
 		// Perform optimization on the logical plan and get optimized plan
@@ -257,7 +256,8 @@ public class QueryThread implements Runnable {
 
 		// Send the optimized plan to scheduler for execution
 		//
-		scheduler.executeOperators(optimizedPlan,
-								   queryInfo);
+		scheduler.executeOperators(optimizedPlan, queryInfo);
     }
 }
+
+

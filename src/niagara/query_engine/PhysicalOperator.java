@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.10 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.11 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -153,10 +153,8 @@ public abstract class PhysicalOperator {
      * reading from input streams and writing to sink streams. All
      * control messages are handled here.
      *
-     * @exception OpExecException This should be a user error
      */
-    public final void execute () 
-	throws OpExecException {
+    public final void execute () {
 
 	// Set up an object for reading from source streams
 	SourceStreamsObject sourceObject = new SourceStreamsObject();
@@ -192,12 +190,19 @@ public abstract class PhysicalOperator {
 	    } // end of while loop
 	} catch (java.lang.InterruptedException e) {
 	    shutDownOperator();
-	    this.cleanUp();
+	    cleanUp();
 	    return;
 	} catch (ShutdownException see) {
 	    shutDownOperator();
 	    cleanUp();
 	    return;
+	} catch (UserErrorException uee) {
+	    // KT - really should propagate this error back to client,
+	    // however, for now will just print error message
+	    System.err.println("USER ERROR: " + uee.getMessage());
+	    shutDownOperator();
+	    cleanUp();
+	    return;	    
 	}
 
 	// shut down normally by closing sink streams and do
@@ -790,7 +795,7 @@ public abstract class PhysicalOperator {
     protected void nonblockingProcessSourceTupleElement (
 					StreamTupleElement tuple,
 					int streamId) 
-	throws ShutdownException, InterruptedException {
+	throws ShutdownException, InterruptedException, UserErrorException {
 	throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
     }
 
@@ -802,7 +807,9 @@ public abstract class PhysicalOperator {
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
      *
-     * @exception OpExecException This should be a user error
+     * @exception UserErrorException User made a mistake - bad url, bad
+     *                                file, parse error in user-provided
+     *                                doc, etc.
      * @exception ShutdownException Shutdown due to execution error or 
      *            client request
      */
@@ -810,7 +817,7 @@ public abstract class PhysicalOperator {
     protected void blockingProcessSourceTupleElement (
 						 StreamTupleElement tuple,
 						 int streamId) 
-	throws OpExecException, ShutdownException {
+	throws UserErrorException, ShutdownException {
 	throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
     }
 
@@ -855,13 +862,17 @@ public abstract class PhysicalOperator {
 	    // Remove the query info object from the active query list
 	    // Hack added so client server queries are not removed
 	    // from their respective connections activeQuery list
-	    if(queryInfo.removeFromActiveQueries())
+	    if(queryInfo.removeFromActiveQueries()) {
 		queryInfo.removeFromActiveQueryList();
+	    }
 	}   
     }
 
     public void setAsHead(QueryInfo queryInfo) {
 	this.queryInfo = queryInfo;
+	if(queryInfo == null) {
+	    throw new PEException("null query info in PhysOp.setAsHead");
+	}
 	isHeadOperator = true;
     }
 

@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: UrlFetchThread.java,v 1.4 2001/08/08 21:25:48 tufte Exp $
+  $Id: UrlFetchThread.java,v 1.5 2002/05/07 03:10:49 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -66,13 +65,13 @@ public class UrlFetchThread implements Runnable {
     public void run () {
 	do {
 	    UrlQueueElement nextUrl = (UrlQueueElement)urlQueue.getUrl();
-            try {
+            //try {
                 // System.err.println("URL Fetch Thread running");
                 execute(nextUrl);
-            } catch (Exception e) {
+		//} catch (Exception e) {
                 // System.err.println("URL Fecth exception");
-                e.printStackTrace();
-            }
+                //e.printStackTrace();
+		//}
 	} while (true);
     }
     public void interrupt() {
@@ -91,8 +90,9 @@ public class UrlFetchThread implements Runnable {
         try {
 	    doc = CUtil.parseXML(url);
 
-	} catch (Exception e) {
+	} catch (ParseException e) {
 	    System.err.println("WARNING: Exception occurred during parsing of: " + url);
+	    return false;
 	}
 
 	if(doc==null) {

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalDuplicateOperator.java,v 1.3 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalDuplicateOperator.java,v 1.4 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -109,12 +109,12 @@ public class PhysicalDuplicateOperator extends PhysicalOperator {
 					 int streamId)
 	throws ShutdownException, InterruptedException {
 	// Copy the input tuple to all the sink streams
-        try {
+        //try {
             Document doc = (Document) tupleElement.getAttribute(0);
             String rootName = doc.getDocumentElement().getTagName();
-        } catch (Exception e) {
-	    throw new PEException("KT?? Non doc tupleElement. Go on");
-        }
+	    //} catch (Exception e) {
+	    //throw new PEException("KT?? Non doc tupleElement. Go on");
+	    //}
     
 	for (int dest = 0; dest < numSinkStreams; ++dest) {
 	    putTuple(tupleElement, dest);

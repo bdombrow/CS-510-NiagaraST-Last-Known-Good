@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheUtil.java,v 1.3 2001/08/08 21:25:48 tufte Exp $
+  $Id: CacheUtil.java,v 1.4 2002/05/07 03:10:49 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -50,24 +50,33 @@ public class CacheUtil {
         RE ret = null;
         try {
             ret = new RE("http:.*", RE.REG_ICASE);
-        } catch (Exception e) {
-        }
+	} catch (gnu.regexp.REException e) {
+	    // KT - not sure what to do, throw this for now
+	    // previous code just ignored this exception @*#$*@
+	    throw new PEException("gnu regexp exception: " + e.getMessage());
+	}
         return ret;
     }
     private static RE initPathRE() {
         RE ret = null;
         try {
             ret = new RE("file:(.*)", RE.REG_ICASE);
-        } catch (Exception e) {
-        }
+	} catch (gnu.regexp.REException e) {
+	    // KT - not sure what to do, throw this for now
+	    // previous code just ignored this exception @*#$*@
+	    throw new PEException("gnu regexp exception: " + e.getMessage());
+	}
         return ret;
     }
     private static RE initRE(String re) {
         RE ret = null;
         try {
             ret = new RE(re);
-        } catch(Exception e) {
-        }
+	} catch (gnu.regexp.REException e) {
+	    // KT - not sure what to do, throw this for now, previous
+	    // code just ignored this exception @*#$*@
+	    throw new PEException("gnu regexp exception: " + e.getMessage());
+	}
         return ret;
     }
     public static final RE UrlRex = initUrlRE();
@@ -184,13 +193,20 @@ public class CacheUtil {
         }
         else {
             try {
-            URL Url = new URL(s);
-            URLConnection uc = Url.openConnection();
-            ret = uc.getLastModified();
-            } catch (Exception nete) {
-                // System.err.println("Cannot get network TimeStamp");
-                return 0;
-            }
+		URL Url = new URL(s);
+		URLConnection uc = Url.openConnection();
+		ret = uc.getLastModified();
+	    } catch (java.net.MalformedURLException mue) {
+		System.err.println("Cannot get network TimeStamp " + 
+				   mue.getMessage());
+		mue.printStackTrace();
+		return 0;
+            } catch (java.io.IOException ioe) {
+		System.err.println("IO exception getting time stamp " +
+				   ioe.getMessage());
+		ioe.printStackTrace();
+		return 0;
+	    }
         }
         return ret;
     }
@@ -353,7 +369,7 @@ public class CacheUtil {
         long tmp = laststamp - span - 5000;
         Element next;
         int shrinked = 0;
-        try {
+        //try {
             while(true) {
                 next = (Element)root.getFirstChild();
                 if( next!=null &&
@@ -365,9 +381,9 @@ public class CacheUtil {
                 else 
                     break;
             }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+	    //} catch(Exception e) {
+            //e.printStackTrace();
+	    //}
         return shrinked;
     }
 
@@ -410,16 +426,5 @@ public class CacheUtil {
         }
 
         System.exit(0);
-        try {
-            while(true) {
-                Document doc = CUtil.parseXML(test4);
-
-                CUtil.printTree(doc.getDocumentElement(), "");
-                System.err.println("Parse Done");
-                Thread.sleep(10);
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
     }
 }

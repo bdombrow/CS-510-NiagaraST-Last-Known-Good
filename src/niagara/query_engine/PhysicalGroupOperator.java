@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.10 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.11 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -314,7 +314,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     protected final void blockingProcessSourceTupleElement (
 					 StreamTupleElement tupleElement,
 					 int streamId) 
-    throws OpExecException, ShutdownException {
+    throws UserErrorException, ShutdownException {
 
 	// First get the hash code for the grouping attributes
 	//
@@ -560,7 +560,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *         null
      */
 
-    protected abstract Object constructUngroupedResult (StreamTupleElement tupleElement) throws OpExecException;
+    protected abstract Object constructUngroupedResult (StreamTupleElement tupleElement);
 
 
     /**

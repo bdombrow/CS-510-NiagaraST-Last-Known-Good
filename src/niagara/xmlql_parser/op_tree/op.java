@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: op.java,v 1.5 2001/07/17 06:52:23 vpapad Exp $
+  $Id: op.java,v 1.6 2002/05/07 03:11:27 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -209,6 +209,15 @@ public abstract class op implements Cloneable{
 
     public String dumpChildrenInXML() {
         return "";
+    }
+
+    // source ops are those that read off an input source and
+    // feed that source into the operator tree, sourceOps have
+    // different control structures than normal operators and
+    // are not inherited from PhysicalOperator, sourceOps can
+    // not be at the head of a query
+    public boolean isSourceOp() {
+	return false; // default is false
     }
 }
 

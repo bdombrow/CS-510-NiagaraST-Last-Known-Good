@@ -73,8 +73,7 @@ class ReplaceNodeMerge extends NodeMerge {
      *         no updates need to be made based on this merge
      */
 
-    boolean merge(Node lNode, Node rNode, Node resultNode) 
-	throws OpExecException {
+    boolean merge(Node lNode, Node rNode, Node resultNode) {
 
 	Node dominantNode = null;
 	Node submissiveNode = null;

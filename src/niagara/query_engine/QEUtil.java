@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QEUtil.java,v 1.5 2001/07/17 07:03:47 vpapad Exp $
+  $Id: QEUtil.java,v 1.6 2002/05/07 03:10:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -57,37 +57,37 @@ public class QEUtil {
      *  
      */
     public static regExp getRegExp(String filename) 
-    {
+	throws java.io.FileNotFoundException, ParseException {
 	
 	condition c;
 	pattern pa;
 	regExp rexp= null;
 	
-	try {
+	// Parse the query in file on command line
+	Scanner s = new Scanner(new EscapedUnicodeReader(new FileReader(filename)));
+	QueryParser p = new QueryParser(s);
 
-	    // Parse the query in file on command line
-	    //
-	    Scanner s = new Scanner(new EscapedUnicodeReader(new FileReader(filename)));
-	    QueryParser p = new QueryParser(s);
-	    java_cup.runtime.Symbol parse_tree = p.parse();
+	java_cup.runtime.Symbol parse_tree;
+	try{ // ugly, cup parser returns "Exception"
+	    parse_tree = p.parse();
+	} catch (Exception e) {
+	    throw new ParseException("Error parsing " + filename);
+	}
 	    
-	    // Get the conditions
-	    //
-	    query q = ((xqlExt)(parse_tree.value)).getQuery();
-	    if(q == null) return null;
-	    Vector v = q.getConditions();
-	    
-	    // Find the first in clause
-	    //
-	    for(int i= 0; i< v.size(); i++) {
-		c = (condition)v.elementAt(i);
-		if(c instanceof inClause) {
-		    pa = ((inClause)c).getPattern();
-		    rexp = pa.getRegExp();
-		    break;
-		}
+	// Get the conditions
+	query q = ((xqlExt)(parse_tree.value)).getQuery();
+	if(q == null) return null;
+	Vector v = q.getConditions();
+	
+	// Find the first in clause
+	for(int i= 0; i< v.size(); i++) {
+	    c = (condition)v.elementAt(i);
+	    if(c instanceof inClause) {
+		pa = ((inClause)c).getPattern();
+		rexp = pa.getRegExp();
+		break;
 	    }
-	}catch(Exception ee) {System.out.println(ee);}
+	}
 	return rexp;
     }
 
@@ -98,34 +98,36 @@ public class QEUtil {
      *  
      */
     public static predicate getPredicate(String filename) 
-    {
+	throws java.io.FileNotFoundException, ParseException {
 	
 	condition c;
 	predicate pred = null;
 	
-	try {
+	// Parse the query in file on command line
+	Scanner s = new Scanner(new EscapedUnicodeReader(new FileReader(filename)));
+	QueryParser p = new QueryParser(s);
 
-	    // Parse the query in file on command line
-	    //
-	    Scanner s = new Scanner(new EscapedUnicodeReader(new FileReader(filename)));
-	    QueryParser p = new QueryParser(s);
-	    java_cup.runtime.Symbol parse_tree = p.parse();
+	java_cup.runtime.Symbol parse_tree;
+	try {
+	    parse_tree = p.parse();
+	} catch (Exception e) { // cup throws "Exception"
+	    throw new ParseException("Error parsing " + filename);
+	}
 	    
-	    // Get the conditions
-	    //
-	    query q = ((xqlExt)(parse_tree.value)).getQuery();
-	    if(q == null) return null;
-	    Vector v = q.getConditions();
-	    
-	    // Find the first predicate and return itmake
-	    //
-	    for(int i= 0; i< v.size(); i++) {
-		c = (condition)v.elementAt(i);
-		if(c instanceof predicate) {
-		    return (predicate)c;
-		}
+	// Get the conditions
+	//
+	query q = ((xqlExt)(parse_tree.value)).getQuery();
+	if(q == null) return null;
+	Vector v = q.getConditions();
+	
+	// Find the first predicate and return itmake
+	//
+	for(int i= 0; i< v.size(); i++) {
+	    c = (condition)v.elementAt(i);
+	    if(c instanceof predicate) {
+		return (predicate)c;
 	    }
-	}catch(Exception ee) {System.out.println(ee);}
+	}
 	return pred;
     }
 
