@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.14 2003/07/27 02:35:16 tufte Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.15 2003/09/16 05:02:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,13 +76,12 @@ public class PhysicalHashJoinOperator extends PhysicalJoin {
     }
     
     public void initJoin(joinOp join) {
+        eqjoinPreds = join.getEquiJoinPredicates();
         // In hash join, we hope that most tuples that hash the same
         // do indeed pass the equijoin predicates, so we put them last
         joinPredicate = And.conjunction(join.getNonEquiJoinPredicate(), 
-                                        join.getEquiJoinPredicates().toPredicate());
+                                        eqjoinPreds.toPredicate());
         pred = joinPredicate.getImplementation();
-        
-        eqjoinPreds = join.getEquiJoinPredicates();
 	initExtensionJoin(join);
     }
 		     
@@ -338,21 +337,21 @@ public class PhysicalHashJoinOperator extends PhysicalJoin {
  */
 public Cost findLocalCost(
     ICatalog catalog,
-    LogicalProperty[] InputLogProp) {
-    float LeftCard = InputLogProp[0].getCardinality();
-    float RightCard = InputLogProp[1].getCardinality();
-    float OutputCard = logProp.getCardinality();
+    LogicalProperty[] inputLogProp) {
+    float leftCard = inputLogProp[0].getCardinality();
+    float rightCard = inputLogProp[1].getCardinality();
+    float inputCard = leftCard + rightCard;
+    float outputCard = logProp.getCardinality();
 
-    double cost = 0;
-    cost += (LeftCard + RightCard) * catalog.getDouble("tuple_reading_cost");
-    cost += (LeftCard + RightCard) * catalog.getDouble("tuple_hashing_cost");
-    cost += OutputCard * constructTupleCost(catalog);
+    double cost = inputCard * catalog.getDouble("tuple_reading_cost");
+    cost += inputCard * catalog.getDouble("tuple_hashing_cost");
+    cost += outputCard * constructTupleCost(catalog);
     Cost c = new Cost(cost);
     // XXX vpapad: We must compute the predicate on all the tuple combinations
     // that pass the equality predicates we're hashing on; but how do we
     // compute that? We'll just assume that's the same as the tuples that
     // appear in the output (best case)
-    c.add(pred.getCost(catalog).times(OutputCard));
+    c.add(pred.getCost(catalog).times(outputCard));
     return c;
 }
 

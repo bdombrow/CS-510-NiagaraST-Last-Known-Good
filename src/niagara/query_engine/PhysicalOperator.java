@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.32 2003/07/27 02:35:16 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.33 2003/09/16 05:02:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,6 +48,32 @@ import org.w3c.dom.Document;
 public abstract class PhysicalOperator extends PhysicalOp 
 implements SchemaProducer, SerializableToXML, Initializable {
 
+/*
+  The lifecycle of a physical operator can be divided in three 
+  phases: 
+   
+  1. First, all physical ops have a no argument constructor, and so they may
+  exist without any initialization whatsoever. This is mainly for use in
+  rule patterns, where they just stand for representatives of their class.
+                                                                                
+  2. When a rule fires and a physical operator is copied from one of these
+  prototypes, initFrom is usually called on the second generation operator
+  to initialize it from a logical op. It's a method so that it can be
+  called as many times as you want (or never for "prototype" ops).
+  Optimization is the only time where copy() is called - that's why
+  it doesn't care about the run time data members of the operator.
+  Many copies of a physical operator may be around, and most of them
+  will never be executed, so it makes no sense to initialize things
+  that are just used for operator execution at this point.
+                                                                                
+  3. After the optimization is complete, the scheduler initializes the
+  physical operator with opInitialize() (called by initialize()).
+  If a physical operator survived this far, it's going to be executed,
+  so opInitialize() does the rest of the required initializations (and
+  also if there's anything that doesn't need to be there for optimization,
+  like hashtable allocations etc. is done in opInitialize()).
+ */
+ 
     // Source streams and information about them
     // blocking indicates if the operator blocks on that source stream or not
     private SourceTupleStream[] sourceStreams;
