@@ -184,14 +184,14 @@
 	  host	         CDATA   #REQUIRED
 	  port	         CDATA   #REQUIRED
 	  rate	         CDATA   #REQUIRED 
-	  datatype  (xmlb | subfile | temp | auction | dtd ) "auction"
+	  datatype  (xmlb | subfile | temp | auction | dtd | packet) "auction"
 	  num_gen_calls  CDATA   #REQUIRED  
 	  streaming      (yes | no)  "yes"
 	  desc           CDATA   ""
 	  desc2          CDATA   "bidperson"
 	  num_tl_elts    CDATA   "1"   
 	  prettyprint   (yes | no)  "no"
-	  trace         (yes | no)  "no"
+	  trace          CDATA   ""
 	  %StandardAttributes;>
 
 <!-- NOTE: num_gen_calls is the number of times the generator will be called 
