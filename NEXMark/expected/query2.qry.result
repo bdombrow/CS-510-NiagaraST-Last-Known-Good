@@ -3,59 +3,67 @@
 
 <selected_bid>
    <auctionid>80</auctionid>
-   <price>160.00</price>
+   <price>167.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>100</auctionid>
+   <price>130.00</price>
 </selected_bid>
 <selected_bid>
    <auctionid>80</auctionid>
-   <price>166.00</price>
+   <price>168.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>100</auctionid>
+   <price>155.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>169.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>191.00</price>
 </selected_bid>
 <selected_bid>
    <auctionid>100</auctionid>
    <price>176.00</price>
 </selected_bid>
 <selected_bid>
-   <auctionid>80</auctionid>
-   <price>167.00</price>
-</selected_bid>
-<selected_bid>
    <auctionid>100</auctionid>
-   <price>185.00</price>
+   <price>194.00</price>
 </selected_bid>
 <selected_bid>
    <auctionid>80</auctionid>
-   <price>178.00</price>
-</selected_bid>
-<selected_bid>
-   <auctionid>100</auctionid>
-   <price>203.00</price>
+   <price>200.00</price>
 </selected_bid>
 <selected_bid>
    <auctionid>80</auctionid>
-   <price>179.00</price>
-</selected_bid>
-<selected_bid>
-   <auctionid>100</auctionid>
-   <price>204.00</price>
-</selected_bid>
-<selected_bid>
-   <auctionid>80</auctionid>
-   <price>193.00</price>
-</selected_bid>
-<selected_bid>
-   <auctionid>80</auctionid>
-   <price>202.00</price>
+   <price>224.00</price>
 </selected_bid>
 <selected_bid>
    <auctionid>130</auctionid>
-   <price>60.00</price>
+   <price>165.00</price>
 </selected_bid>
 <selected_bid>
    <auctionid>80</auctionid>
-   <price>208.00</price>
+   <price>230.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>130</auctionid>
+   <price>183.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>246.00</price>
 </selected_bid>
 <selected_bid>
    <auctionid>100</auctionid>
-   <price>209.00</price>
+   <price>211.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>271.00</price>
 </selected_bid>
 
 </niagara:results>
