@@ -1,0 +1,6968 @@
+<?xml version = "1.0"?>
+<!DOCTYPE LEAGUESYSTEM SYSTEM "league.dtd">
+<LEAGUESYSTEM>
+<LEAGUE>
+	<TEAM>
+		<NAME> Chen's Chiefs </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Lou Thornton" </PNAME>
+				<PLRID> thorl001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Eric Show" </PNAME>
+				<PLRID> showe001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mickey Hatcher" </PNAME>
+				<PLRID> hatcm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Todd Burns" </PNAME>
+				<PLRID> burnt001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Honeycutt" </PNAME>
+				<PLRID> honer001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Franklin Stubbs" </PNAME>
+				<PLRID> stubf001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gene Petralli" </PNAME>
+				<PLRID> petrg001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Henke" </PNAME>
+				<PLRID> henkt001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Daryl Boston" </PNAME>
+				<PLRID> bostd001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Wally Backman" </PNAME>
+				<PLRID> backw001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Balboni" </PNAME>
+				<PLRID> balbs001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Laga" </PNAME>
+				<PLRID> lagam001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pete O'Brien" </PNAME>
+				<PLRID> obrip001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Luis Quinones" </PNAME>
+				<PLRID> quinl001 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gus Polidor" </PNAME>
+				<PLRID> polig001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Fred Manrique" </PNAME>
+				<PLRID> manrf001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Barry Larkin" </PNAME>
+				<PLRID> larkb001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Vince Coleman" </PNAME>
+				<PLRID> colev001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Dernier" </PNAME>
+				<PLRID> dernb001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tommy Gregg" </PNAME>
+				<PLRID> gregt001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Shelby" </PNAME>
+				<PLRID> shelj001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Clark" </PNAME>
+				<PLRID> clard001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Leonard" </PNAME>
+				<PLRID> leonj001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Buddy Bell" </PNAME>
+				<PLRID> bellb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Buckner" </PNAME>
+				<PLRID> buckb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Sam Horn" </PNAME>
+				<PLRID> horns001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Spiers" </PNAME>
+				<PLRID> spieb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "? Shaefer" </PNAME>
+				<PLRID> shead001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Cecil Espy" </PNAME>
+				<PLRID> espyc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jerry Browne" </PNAME>
+				<PLRID> browj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Glenallen Hill" </PNAME>
+				<PLRID> hillg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Acker" </PNAME>
+				<PLRID> ackej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Treadway" </PNAME>
+				<PLRID> treaj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Wallace Johnson" </PNAME>
+				<PLRID> johnw001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pete Smith" </PNAME>
+				<PLRID> smitp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chuck Finley" </PNAME>
+				<PLRID> finlc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pat Perry" </PNAME>
+				<PLRID> perrp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Davis" </PNAME>
+				<PLRID> davim002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Gross" </PNAME>
+				<PLRID> grosg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Robinson" </PNAME>
+				<PLRID> robij002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lee Guetterman" </PNAME>
+				<PLRID> guetl001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Varsho" </PNAME>
+				<PLRID> varsg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Cecilio Guante" </PNAME>
+				<PLRID> guanc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Erik Hanson" </PNAME>
+				<PLRID> hanse001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Doyle Alexander" </PNAME>
+				<PLRID> alexd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Barry Jones" </PNAME>
+				<PLRID> joneb002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Glenn Wilson" </PNAME>
+				<PLRID> wilsg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Abbott" </PNAME>
+				<PLRID> abboj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Otis Nixon" </PNAME>
+				<PLRID> nixoo001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Brown" </PNAME>
+				<PLRID> browk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Erik Yelding" </PNAME>
+				<PLRID> yelde001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Pagnozzi" </PNAME>
+				<PLRID> pagnt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Parent" </PNAME>
+				<PLRID> parem001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Charlie Puleo" </PNAME>
+				<PLRID> pulec001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ken Hill" </PNAME>
+				<PLRID> hillk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Swift" </PNAME>
+				<PLRID> swifb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rob Brower" </PNAME>
+				<PLRID> browb002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy O'Neal" </PNAME>
+				<PLRID> onear001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Teufel" </PNAME>
+				<PLRID> teuft001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Eppard" </PNAME>
+				<PLRID> eppaj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Mielke" </PNAME>
+				<PLRID> mielg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Schwabe" </PNAME>
+				<PLRID> schwm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Clint Zavaras" </PNAME>
+				<PLRID> zavac001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Scudder" </PNAME>
+				<PLRID> scuds001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ernie Camacho" </PNAME>
+				<PLRID> camae001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Innis" </PNAME>
+				<PLRID> innij001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chad Kreuter" </PNAME>
+				<PLRID> kreuc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Phil Lombardi" </PNAME>
+				<PLRID> lombp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bruce Fields" </PNAME>
+				<PLRID> fielb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Wally Whitehurst" </PNAME>
+				<PLRID> whitw001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "L Delos Santos" </PNAME>
+				<PLRID> delol001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mauro Gozzo" </PNAME>
+				<PLRID> gozzm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brian DuBois" </PNAME>
+				<PLRID> dubob001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Drummond" </PNAME>
+				<PLRID> drumt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Keith Miller" </PNAME>
+				<PLRID> millk002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Barfield" </PNAME>
+				<PLRID> barfj002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Kingery" </PNAME>
+				<PLRID> kingm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "S Lombardozzi" </PNAME>
+				<PLRID> lombs001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Wilson" </PNAME>
+				<PLRID> wilsj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Green" </PNAME>
+				<PLRID> greeg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joey Cora" </PNAME>
+				<PLRID> coraj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Larry Arndt" </PNAME>
+				<PLRID> arndl001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Disarcina" </PNAME>
+				<PLRID> disag001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> DeWitt's Demolition Crew </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Tim Belcher" </PNAME>
+				<PLRID> belct001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Aldrete" </PNAME>
+				<PLRID> aldrm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Lawless" </PNAME>
+				<PLRID> lawlt001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark McLemore" </PNAME>
+				<PLRID> mclem001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chris Speier" </PNAME>
+				<PLRID> speic001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Milt Thompson" </PNAME>
+				<PLRID> thomm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mickey Weston" </PNAME>
+				<PLRID> westm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rob Murphy" </PNAME>
+				<PLRID> murpr001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Luis DeLeon" </PNAME>
+				<PLRID> delel001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rob Ducey" </PNAME>
+				<PLRID> duceb001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Terry Steinbach" </PNAME>
+				<PLRID> steit001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Alvin Davis" </PNAME>
+				<PLRID> davia002 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kent Hrbek" </PNAME>
+				<PLRID> hrbek001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff McKnight" </PNAME>
+				<PLRID> mcknj001 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom O'Malley" </PNAME>
+				<PLRID> omalt001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Kunkel" </PNAME>
+				<PLRID> kunkj001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Cal Ripken" </PNAME>
+				<PLRID> ripkc001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kirk Gibson" </PNAME>
+				<PLRID> gibsk001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Glenn Braggs" </PNAME>
+				<PLRID> bragg001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Henry Cotto" </PNAME>
+				<PLRID> cotth001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Doug Dascenzo" </PNAME>
+				<PLRID> dascd001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dwight Evans" </PNAME>
+				<PLRID> evand002 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joey Meyer" </PNAME>
+				<PLRID> meyej001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ivan Calderon" </PNAME>
+				<PLRID> caldi001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Melvin" </PNAME>
+				<PLRID> melvb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chris Hoiles" </PNAME>
+				<PLRID> hoilc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Presley" </PNAME>
+				<PLRID> presj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Fletcher" </PNAME>
+				<PLRID> flets001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Francisco Cabrera" </PNAME>
+				<PLRID> cabrf001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dan Pasqua" </PNAME>
+				<PLRID> pasqd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dean Palmer" </PNAME>
+				<PLRID> palmd002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Booker" </PNAME>
+				<PLRID> bookg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Robinson" </PNAME>
+				<PLRID> robij001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Curt Ford" </PNAME>
+				<PLRID> fordc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Doug Drabek" </PNAME>
+				<PLRID> drabd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "C Leibrandt" </PNAME>
+				<PLRID> leibc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Michael Jackson" </PNAME>
+				<PLRID> jackm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Lindeman" </PNAME>
+				<PLRID> lindj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Juan Agosto" </PNAME>
+				<PLRID> agosj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Paul Kilgus" </PNAME>
+				<PLRID> kilgp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ken Patterson" </PNAME>
+				<PLRID> pattk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Landrum" </PNAME>
+				<PLRID> landb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Vance Lovelace" </PNAME>
+				<PLRID> lovev001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Wegman" </PNAME>
+				<PLRID> wegmb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Floyd Bannister" </PNAME>
+				<PLRID> bannf001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dan Petry" </PNAME>
+				<PLRID> petrd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dennis Lamp" </PNAME>
+				<PLRID> lampd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Frank Tanana" </PNAME>
+				<PLRID> tanaf001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brad Havens" </PNAME>
+				<PLRID> haveb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Dopson" </PNAME>
+				<PLRID> dopsj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "P Assenmacher" </PNAME>
+				<PLRID> assep001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Foley" </PNAME>
+				<PLRID> folet001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Felix Jose" </PNAME>
+				<PLRID> josef001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brian Fisher" </PNAME>
+				<PLRID> fishb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gregg Jefferies" </PNAME>
+				<PLRID> jeffg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ramon Pena" </PNAME>
+				<PLRID> penar001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Teddy Higuera" </PNAME>
+				<PLRID> higut001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Charlie Hayes" </PNAME>
+				<PLRID> hayec001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Stoddard" </PNAME>
+				<PLRID> stodt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Grace" </PNAME>
+				<PLRID> gracm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Huismann" </PNAME>
+				<PLRID> huism001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chris James" </PNAME>
+				<PLRID> jamec001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Appier" </PNAME>
+				<PLRID> appik001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Luecken" </PNAME>
+				<PLRID> luecr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kelly Gruber" </PNAME>
+				<PLRID> grubk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Shawon Dunston" </PNAME>
+				<PLRID> dunss001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Tudor" </PNAME>
+				<PLRID> tudoj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Davis" </PNAME>
+				<PLRID> davis002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Russ Morman" </PNAME>
+				<PLRID> mormr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Davidson" </PNAME>
+				<PLRID> davim003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Velarde" </PNAME>
+				<PLRID> velar001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Roesler" </PNAME>
+				<PLRID> roesm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Todd Zeile" </PNAME>
+				<PLRID> zeilt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lance Johnson" </PNAME>
+				<PLRID> johnl001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pat Combs" </PNAME>
+				<PLRID> combp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Julio Machado" </PNAME>
+				<PLRID> machj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Hartley" </PNAME>
+				<PLRID> hartm002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dann Howitt" </PNAME>
+				<PLRID> howid001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Sandy Alomar" </PNAME>
+				<PLRID> aloms001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Orlando Mercado" </PNAME>
+				<PLRID> merco001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kelly Mann" </PNAME>
+				<PLRID> mannk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Drew Denson" </PNAME>
+				<PLRID> densd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ruben Sierra" </PNAME>
+				<PLRID> sierr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> Galanis' Gladiators </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Joe Magrane" </PNAME>
+				<PLRID> magrj001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rich Gossage" </PNAME>
+				<PLRID> gossr001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Paul O'Neill" </PNAME>
+				<PLRID> oneip001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Dravecky" </PNAME>
+				<PLRID> dravd001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Spike Owen" </PNAME>
+				<PLRID> owens001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Brenly" </PNAME>
+				<PLRID> brenb001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Harris" </PNAME>
+				<PLRID> harrg002 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Will Clark" </PNAME>
+				<PLRID> clarw001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Zane Smith" </PNAME>
+				<PLRID> smitz001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Terry Kennedy" </PNAME>
+				<PLRID> kennt001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Keith Moreland" </PNAME>
+				<PLRID> morek001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Eddie Murray" </PNAME>
+				<PLRID> murre001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Traber" </PNAME>
+				<PLRID> trabj001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tommy Hinzo" </PNAME>
+				<PLRID> hinzt001 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rance Mulliniks" </PNAME>
+				<PLRID> mullr001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Sheffield" </PNAME>
+				<PLRID> shefg001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Elster" </PNAME>
+				<PLRID> elstk001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dana Williams" </PNAME>
+				<PLRID> willd001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Hal Morris" </PNAME>
+				<PLRID> morrh001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lee Mazzilli" </PNAME>
+				<PLRID> mazzl001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Marquis Grissom" </PNAME>
+				<PLRID> grism001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rob Deer" </PNAME>
+				<PLRID> deerr001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Larry Sheets" </PNAME>
+				<PLRID> sheel001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Ward" </PNAME>
+				<PLRID> wardg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dan Tartabull" </PNAME>
+				<PLRID> tartd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Glenn Hubbard" </PNAME>
+				<PLRID> hubbg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bo Jackson" </PNAME>
+				<PLRID> jackb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Romine" </PNAME>
+				<PLRID> romik001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Heath" </PNAME>
+				<PLRID> heatm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Vaughn" </PNAME>
+				<PLRID> vaugg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Coolbaugh" </PNAME>
+				<PLRID> cools001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Wilson" </PNAME>
+				<PLRID> wilss001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob McClure" </PNAME>
+				<PLRID> mcclb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bryan Harvey" </PNAME>
+				<PLRID> harvb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose DeLeon" </PNAME>
+				<PLRID> delej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Allan Anderson" </PNAME>
+				<PLRID> andea001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Norm Charlton" </PNAME>
+				<PLRID> charn001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Niedenfuer" </PNAME>
+				<PLRID> niedt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Ontiveros" </PNAME>
+				<PLRID> ontis001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Mahler" </PNAME>
+				<PLRID> mahlr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Cook" </PNAME>
+				<PLRID> cookm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Frank Williams" </PNAME>
+				<PLRID> willf001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tony Castillo" </PNAME>
+				<PLRID> castt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Milacki" </PNAME>
+				<PLRID> milab001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Roy Smith" </PNAME>
+				<PLRID> smitr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joel Youngblood" </PNAME>
+				<PLRID> younj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Manny Trillo" </PNAME>
+				<PLRID> trilm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Fred Toliver" </PNAME>
+				<PLRID> tolif001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Kruk" </PNAME>
+				<PLRID> krukj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Sundberg" </PNAME>
+				<PLRID> sundj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Alex Trevino" </PNAME>
+				<PLRID> treva001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dan Quisenberry" </PNAME>
+				<PLRID> quisd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jody Davis" </PNAME>
+				<PLRID> davij001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ron Jones" </PNAME>
+				<PLRID> joner004 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Terry Blocker" </PNAME>
+				<PLRID> bloct001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dan Schatzeder" </PNAME>
+				<PLRID> schad001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mitch Webster" </PNAME>
+				<PLRID> websm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jay Tibbs" </PNAME>
+				<PLRID> tibbj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Junior Noboa" </PNAME>
+				<PLRID> noboj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Segura" </PNAME>
+				<PLRID> seguj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jay Aldrich" </PNAME>
+				<PLRID> aldrj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Corsi" </PNAME>
+				<PLRID> corsj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Xavier Hernandez" </PNAME>
+				<PLRID> hernx001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tracy Woodson" </PNAME>
+				<PLRID> woodt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Van Snider" </PNAME>
+				<PLRID> snidv001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pat Clements" </PNAME>
+				<PLRID> clemp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Marty Clary" </PNAME>
+				<PLRID> clarm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Don Schulze" </PNAME>
+				<PLRID> schud001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Benjamin" </PNAME>
+				<PLRID> benjm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Beard" </PNAME>
+				<PLRID> beard001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Smith" </PNAME>
+				<PLRID> smitm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rich Thompson" </PNAME>
+				<PLRID> thomr002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ozzie Smith" </PNAME>
+				<PLRID> smito001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Patterson" </PNAME>
+				<PLRID> pattb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Tewksbury" </PNAME>
+				<PLRID> tewkb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jason Grimsley" </PNAME>
+				<PLRID> grimj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Wayne Edwards" </PNAME>
+				<PLRID> edwaw001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Doug Jennings" </PNAME>
+				<PLRID> jennd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Robin Ventura" </PNAME>
+				<PLRID> ventr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "David Justice" </PNAME>
+				<PLRID> justd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brian Dorsett" </PNAME>
+				<PLRID> dorsb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Sax" </PNAME>
+				<PLRID> sax-s001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> Kang's Crusaders </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Rick Reuschel" </PNAME>
+				<PLRID> reusr001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Adam Peterson" </PNAME>
+				<PLRID> petea001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bert Blyleven" </PNAME>
+				<PLRID> blylb001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Rice" </PNAME>
+				<PLRID> ricej001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Gordon" </PNAME>
+				<PLRID> gordt001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Craig Lefferts" </PNAME>
+				<PLRID> leffc001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy McCament" </PNAME>
+				<PLRID> mccar001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike LaCoss" </PNAME>
+				<PLRID> lacom001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Roberto Kelly" </PNAME>
+				<PLRID> kellb002 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lloyd McClendon" </PNAME>
+				<PLRID> mccll001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Terry McGriff" </PNAME>
+				<PLRID> mcgrt002 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pedro Guerrero" </PNAME>
+				<PLRID> guerp001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ken Oberkfell" </PNAME>
+				<PLRID> oberk001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "L Blankenship" </PNAME>
+				<PLRID> blanl001 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Terry Pendleton" </PNAME>
+				<PLRID> pendt001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Alfredo Griffin" </PNAME>
+				<PLRID> grifa001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Manuel Lee" </PNAME>
+				<PLRID> lee-m001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Phil Bradley" </PNAME>
+				<PLRID> bradp001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chris Gwynn" </PNAME>
+				<PLRID> gwync001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Willie Wilson" </PNAME>
+				<PLRID> wilsw001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mookie Wilson" </PNAME>
+				<PLRID> wilsm001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Darnell Coles" </PNAME>
+				<PLRID> coled001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pat Tabler" </PNAME>
+				<PLRID> tablp001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ron Kittle" </PNAME>
+				<PLRID> kittr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lance Parrish" </PNAME>
+				<PLRID> parrl001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Stone" </PNAME>
+				<PLRID> stonj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Matt Nokes" </PNAME>
+				<PLRID> nokem001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brook Jacoby" </PNAME>
+				<PLRID> jacob001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Bush" </PNAME>
+				<PLRID> bushr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rafael Palmeiro" </PNAME>
+				<PLRID> palmr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jack Morris" </PNAME>
+				<PLRID> morrj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joe Hesketh" </PNAME>
+				<PLRID> heskj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Parrett" </PNAME>
+				<PLRID> parrj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joe Price" </PNAME>
+				<PLRID> pricj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Don Robinson" </PNAME>
+				<PLRID> robid001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Welch" </PNAME>
+				<PLRID> welcb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Magadan" </PNAME>
+				<PLRID> magad001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "T Stottlemyre" </PNAME>
+				<PLRID> stott001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Leary" </PNAME>
+				<PLRID> leart001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Deshaies" </PNAME>
+				<PLRID> deshj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Willie Fraser" </PNAME>
+				<PLRID> frasw001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kent Tekulve" </PNAME>
+				<PLRID> tekuk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Reardon" </PNAME>
+				<PLRID> rearj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rich Yett" </PNAME>
+				<PLRID> yettr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Candelaria" </PNAME>
+				<PLRID> candj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "G Hernandez" </PNAME>
+				<PLRID> hernw001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Neal Heaton" </PNAME>
+				<PLRID> heatn001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Al Leiter" </PNAME>
+				<PLRID> leita001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Luis Aquino" </PNAME>
+				<PLRID> aquil001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jay Howell" </PNAME>
+				<PLRID> howej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Russell" </PNAME>
+				<PLRID> russj002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Doran" </PNAME>
+				<PLRID> dorab001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Julio Solano" </PNAME>
+				<PLRID> solaj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Matt Merullo" </PNAME>
+				<PLRID> merum001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Drew Hall" </PNAME>
+				<PLRID> halld001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Nunez" </PNAME>
+				<PLRID> nunej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jack Armstrong" </PNAME>
+				<PLRID> armsj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom McCarthy" </PNAME>
+				<PLRID> mccam001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Clay Parker" </PNAME>
+				<PLRID> parkc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Sebra" </PNAME>
+				<PLRID> sebrb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rolando Roomes" </PNAME>
+				<PLRID> roomr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Stan Clarke" </PNAME>
+				<PLRID> clars001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tony Fossas" </PNAME>
+				<PLRID> fosst001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Wetherby" </PNAME>
+				<PLRID> wethj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Devon White" </PNAME>
+				<PLRID> whitd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy St.Claire" </PNAME>
+				<PLRID> stclr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Neil Allen" </PNAME>
+				<PLRID> allen001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Tapani" </PNAME>
+				<PLRID> tapak001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Paul Zuvella" </PNAME>
+				<PLRID> zuvep001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scotti Madison" </PNAME>
+				<PLRID> madis001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Olin" </PNAME>
+				<PLRID> olins001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Wickander" </PNAME>
+				<PLRID> wickk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Searcy" </PNAME>
+				<PLRID> sears001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Albert Hall" </PNAME>
+				<PLRID> halla001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Stanicek" </PNAME>
+				<PLRID> stans001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Stan Belinda" </PNAME>
+				<PLRID> belis001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Juan Gonzalez" </PNAME>
+				<PLRID> gonzj002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Manny Hernandez" </PNAME>
+				<PLRID> hernm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Marzano" </PNAME>
+				<PLRID> marzj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill McGuire" </PNAME>
+				<PLRID> mcgub001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ron Tingley" </PNAME>
+				<PLRID> tingr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Howard Johnson" </PNAME>
+				<PLRID> johnh001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> Krishnamurthy's Crushers </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Roger Clemens" </PNAME>
+				<PLRID> clemr001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Schmidt" </PNAME>
+				<PLRID> schmd001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Crews" </PNAME>
+				<PLRID> crewt001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Knudson" </PNAME>
+				<PLRID> knudm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Frank DiPino" </PNAME>
+				<PLRID> dipif001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Carreon" </PNAME>
+				<PLRID> carrm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Geren" </PNAME>
+				<PLRID> gereb001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Todd Worrell" </PNAME>
+				<PLRID> worrt001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Walk" </PNAME>
+				<PLRID> walkb001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lenny Dykstra" </PNAME>
+				<PLRID> dyksl001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Carter" </PNAME>
+				<PLRID> cartg001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Todd Benzinger" </PNAME>
+				<PLRID> benzt001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Torri Lovullo" </PNAME>
+				<PLRID> lovut001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Harold Reynolds" </PNAME>
+				<PLRID> reynh001 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lenny Harris" </PNAME>
+				<PLRID> harrl001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tony Fernandez" </PNAME>
+				<PLRID> fernt001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Garry Templeton" </PNAME>
+				<PLRID> tempg001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Greenwell" </PNAME>
+				<PLRID> greem001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Briley" </PNAME>
+				<PLRID> brilg001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lloyd Moseby" </PNAME>
+				<PLRID> mosel001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brady Anderson" </PNAME>
+				<PLRID> andeb001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Brunansky" </PNAME>
+				<PLRID> brunt001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pete Incaviglia" </PNAME>
+				<PLRID> incap001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Bergman" </PNAME>
+				<PLRID> bergd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Leach" </PNAME>
+				<PLRID> leacr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Junior Felix" </PNAME>
+				<PLRID> felij001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Buechele" </PNAME>
+				<PLRID> buecs001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Sammy Sosa" </PNAME>
+				<PLRID> sosas001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rich Schu" </PNAME>
+				<PLRID> schur001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ron Karkovice" </PNAME>
+				<PLRID> karkr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Sutcliffe" </PNAME>
+				<PLRID> sutcr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Minton" </PNAME>
+				<PLRID> mintg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Eichhorn" </PNAME>
+				<PLRID> eichm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Craig Reynolds" </PNAME>
+				<PLRID> reync001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Eric King" </PNAME>
+				<PLRID> kinge001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Rosenberg" </PNAME>
+				<PLRID> roses001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rafael Ramirez" </PNAME>
+				<PLRID> ramir001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "German Gonzalez" </PNAME>
+				<PLRID> gonzg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Smoltz" </PNAME>
+				<PLRID> smolj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pascual Perez" </PNAME>
+				<PLRID> perep001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Burke" </PNAME>
+				<PLRID> burkt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Trout" </PNAME>
+				<PLRID> trous001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Farr" </PNAME>
+				<PLRID> farrs001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Long" </PNAME>
+				<PLRID> longb002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Curt Young" </PNAME>
+				<PLRID> younc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mackey Sasser" </PNAME>
+				<PLRID> sassm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Walt Terrell" </PNAME>
+				<PLRID> terrw001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Moore" </PNAME>
+				<PLRID> moorm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dan Plesac" </PNAME>
+				<PLRID> plesd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Cris Carpenter" </PNAME>
+				<PLRID> carpc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Franc Melendez" </PNAME>
+				<PLRID> melef001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Derek Lilliquist" </PNAME>
+				<PLRID> lilld001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rex Hudler" </PNAME>
+				<PLRID> hudlr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dante Bichette" </PNAME>
+				<PLRID> bichd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Logan Easley" </PNAME>
+				<PLRID> easll001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ray Krawczyk" </PNAME>
+				<PLRID> krawr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Alex Madrid" </PNAME>
+				<PLRID> madra001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Gagne" </PNAME>
+				<PLRID> gagng001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Trujillo" </PNAME>
+				<PLRID> trujm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Seitzer" </PNAME>
+				<PLRID> seitk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Glenn Davis" </PNAME>
+				<PLRID> davig001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jimmy Jones" </PNAME>
+				<PLRID> jonej002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Hengel" </PNAME>
+				<PLRID> hengd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dennis Cook" </PNAME>
+				<PLRID> cookd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ron Washington" </PNAME>
+				<PLRID> washr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Eric Bullock" </PNAME>
+				<PLRID> bulle001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Marty Pevey" </PNAME>
+				<PLRID> pevem001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Pettis" </PNAME>
+				<PLRID> pettg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rod Nichols" </PNAME>
+				<PLRID> nichr002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bobby Bonilla" </PNAME>
+				<PLRID> bonib001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Huson" </PNAME>
+				<PLRID> husoj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dan Murphy" </PNAME>
+				<PLRID> murpd003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dean Wilkins" </PNAME>
+				<PLRID> wilkd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Sherman Corbett" </PNAME>
+				<PLRID> corbs001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Shawn Holman" </PNAME>
+				<PLRID> holms001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Butch Davis" </PNAME>
+				<PLRID> davib001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Roger Mason" </PNAME>
+				<PLRID> masor001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Blaine Beatty" </PNAME>
+				<PLRID> beatb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joe Girardi" </PNAME>
+				<PLRID> giraj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dann Bilardello" </PNAME>
+				<PLRID> bilad001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Craig Shipley" </PNAME>
+				<PLRID> shipc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "C Worthington" </PNAME>
+				<PLRID> wortc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> Maier's Movers </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Don August" </PNAME>
+				<PLRID> augud001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Swindell" </PNAME>
+				<PLRID> swing001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Costello" </PNAME>
+				<PLRID> costj001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Wallach" </PNAME>
+				<PLRID> wallt001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Doug Jones" </PNAME>
+				<PLRID> joned001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Ready" </PNAME>
+				<PLRID> readr001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Oil Can Boyd" </PNAME>
+				<PLRID> boydo001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Milligan" </PNAME>
+				<PLRID> millr002 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kelly Downs" </PNAME>
+				<PLRID> downk001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ernie Whitt" </PNAME>
+				<PLRID> white002 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "M Tettleton" </PNAME>
+				<PLRID> tettm001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joe Carter" </PNAME>
+				<PLRID> cartj001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Benny Distefano" </PNAME>
+				<PLRID> distb001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Willie Randolph" </PNAME>
+				<PLRID> randw001 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Hamilton" </PNAME>
+				<PLRID> hamij001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Lyons" </PNAME>
+				<PLRID> lyons001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kurt Stillwell" </PNAME>
+				<PLRID> stilk001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "George Bell" </PNAME>
+				<PLRID> bellg001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Oddibe McDowell" </PNAME>
+				<PLRID> mcdoo001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brett Butler" </PNAME>
+				<PLRID> butlb001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Henderson" </PNAME>
+				<PLRID> hendd001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brian Harper" </PNAME>
+				<PLRID> harpb001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chip Hale" </PNAME>
+				<PLRID> halec001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mickey Brantley" </PNAME>
+				<PLRID> branm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Paul Molitor" </PNAME>
+				<PLRID> molip001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Laudner" </PNAME>
+				<PLRID> laudt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Macfarlane" </PNAME>
+				<PLRID> macfm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Myers" </PNAME>
+				<PLRID> myerg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tony Armas" </PNAME>
+				<PLRID> armat001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rob Richie" </PNAME>
+				<PLRID> richr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Scott" </PNAME>
+				<PLRID> scotm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ricky Jordan" </PNAME>
+				<PLRID> jordr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Grant" </PNAME>
+				<PLRID> granm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Larry McWilliams" </PNAME>
+				<PLRID> mcwil001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Stieb" </PNAME>
+				<PLRID> stied001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Pico" </PNAME>
+				<PLRID> picoj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Maddux" </PNAME>
+				<PLRID> maddm002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Dempsey" </PNAME>
+				<PLRID> dempr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Smiley" </PNAME>
+				<PLRID> smilj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Bautista" </PNAME>
+				<PLRID> bautj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Montgomery" </PNAME>
+				<PLRID> montj002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Kipper" </PNAME>
+				<PLRID> kippb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Russell" </PNAME>
+				<PLRID> russj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Musselman" </PNAME>
+				<PLRID> mussj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bobby Witt" </PNAME>
+				<PLRID> wittb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Terry Leach" </PNAME>
+				<PLRID> leact001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "David Cone" </PNAME>
+				<PLRID> coned001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jamie Moyer" </PNAME>
+				<PLRID> moyej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Frank White" </PNAME>
+				<PLRID> whitf001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Alejandro Pena" </PNAME>
+				<PLRID> penaa001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Darren Daulton" </PNAME>
+				<PLRID> dauld001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Birkbeck" </PNAME>
+				<PLRID> birkm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "N Santovenia" </PNAME>
+				<PLRID> santn001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Curt Wilkerson" </PNAME>
+				<PLRID> wilkc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jack Howell" </PNAME>
+				<PLRID> howej002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Carlos Martinez" </PNAME>
+				<PLRID> martc002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rey Palacios" </PNAME>
+				<PLRID> palar001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gerald Young" </PNAME>
+				<PLRID> young001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Skeeter Barnes" </PNAME>
+				<PLRID> barns001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Lind" </PNAME>
+				<PLRID> lindj002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Herr" </PNAME>
+				<PLRID> herrt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Hibbard" </PNAME>
+				<PLRID> hibbg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Wrona" </PNAME>
+				<PLRID> wronr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Bathe" </PNAME>
+				<PLRID> bathb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Doug Bair" </PNAME>
+				<PLRID> baird001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "? Snyder" </PNAME>
+				<PLRID> snydb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Marty Brown" </PNAME>
+				<PLRID> browm004 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Shawn Abner" </PNAME>
+				<PLRID> abnes001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Buchanan" </PNAME>
+				<PLRID> buchb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jay Bell" </PNAME>
+				<PLRID> bellj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ed Wojna" </PNAME>
+				<PLRID> wojne001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Andy Benes" </PNAME>
+				<PLRID> benea001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joe Kraemer" </PNAME>
+				<PLRID> kraej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Blowers" </PNAME>
+				<PLRID> blowm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Barrett" </PNAME>
+				<PLRID> barrt002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Weaver" </PNAME>
+				<PLRID> weavj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Hulett" </PNAME>
+				<PLRID> hulet001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "George Canale" </PNAME>
+				<PLRID> canag001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Charlie O'Brien" </PNAME>
+				<PLRID> obric001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Batiste" </PNAME>
+				<PLRID> batik001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Magrann" </PNAME>
+				<PLRID> magrt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Schmidt" </PNAME>
+				<PLRID> schmm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> Naughton's Notorious Nine </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Bobby Ojeda" </PNAME>
+				<PLRID> ojedb001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Gubicza" </PNAME>
+				<PLRID> gubim001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Brantley" </PNAME>
+				<PLRID> branj001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Leiper" </PNAME>
+				<PLRID> leipd001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Wayne Tolleson" </PNAME>
+				<PLRID> tollw001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Reimer" </PNAME>
+				<PLRID> reimk001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rob Nelson" </PNAME>
+				<PLRID> nelsr002 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Stanley" </PNAME>
+				<PLRID> stanb001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Brumley" </PNAME>
+				<PLRID> brumm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Valle" </PNAME>
+				<PLRID> valld001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Reed" </PNAME>
+				<PLRID> reedj001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Fred McGriff" </PNAME>
+				<PLRID> mcgrf001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Von Hayes" </PNAME>
+				<PLRID> hayev001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ed Romero" </PNAME>
+				<PLRID> romee001 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jamie Quirk" </PNAME>
+				<PLRID> quirj001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Oquendo" </PNAME>
+				<PLRID> oquej001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Walt Weiss" </PNAME>
+				<PLRID> weisw001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jerald Clark" </PNAME>
+				<PLRID> clarj002 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Larry Walker" </PNAME>
+				<PLRID> walkl001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ken Griffey" </PNAME>
+				<PLRID> grifk002 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Eric Davis" </PNAME>
+				<PLRID> davie001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Candy Maldonado" </PNAME>
+				<PLRID> maldc001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Parker" </PNAME>
+				<PLRID> parkd001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Luis Medina" </PNAME>
+				<PLRID> medil001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Stanley" </PNAME>
+				<PLRID> stanm002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joe Orsulak" </PNAME>
+				<PLRID> orsuj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mel Hall" </PNAME>
+				<PLRID> hallm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dion James" </PNAME>
+				<PLRID> jamed001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joey Belle" </PNAME>
+				<PLRID> bellj002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kirby Puckett" </PNAME>
+				<PLRID> puckk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dennis Martinez" </PNAME>
+				<PLRID> martd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Lake" </PNAME>
+				<PLRID> lakes001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dale Mohorcic" </PNAME>
+				<PLRID> mohod001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Bedrosian" </PNAME>
+				<PLRID> bedrs001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Andy Hawkins" </PNAME>
+				<PLRID> hawka001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Danny Darwin" </PNAME>
+				<PLRID> darwd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gene Harris" </PNAME>
+				<PLRID> harrg003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Davis" </PNAME>
+				<PLRID> davim001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Boddicker" </PNAME>
+				<PLRID> boddm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bud Black" </PNAME>
+				<PLRID> blacb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Keith Atherton" </PNAME>
+				<PLRID> athek001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Stan Javier" </PNAME>
+				<PLRID> javis001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Henneman" </PNAME>
+				<PLRID> hennm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Glavine" </PNAME>
+				<PLRID> glavt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brad Arnsberg" </PNAME>
+				<PLRID> arnsb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jesse Orosco" </PNAME>
+				<PLRID> orosj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Terry" </PNAME>
+				<PLRID> terrs001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dwayne Murphy" </PNAME>
+				<PLRID> murpd002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Jeltz" </PNAME>
+				<PLRID> jelts001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Damaso Garcia" </PNAME>
+				<PLRID> garcd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Charlie Hudson" </PNAME>
+				<PLRID> hudsc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rod Booker" </PNAME>
+				<PLRID> bookr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Farrell" </PNAME>
+				<PLRID> farrj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "C Martinez" </PNAME>
+				<PLRID> martc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Bass" </PNAME>
+				<PLRID> bassk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Krukow" </PNAME>
+				<PLRID> krukm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ron Oester" </PNAME>
+				<PLRID> oestr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kirt Manwaring" </PNAME>
+				<PLRID> manwk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Gardner" </PNAME>
+				<PLRID> gardm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Bockus" </PNAME>
+				<PLRID> bockr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rafael Belliard" </PNAME>
+				<PLRID> bellr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Roger Samuels" </PNAME>
+				<PLRID> samur001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ramon Martinez" </PNAME>
+				<PLRID> martr002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave West" </PNAME>
+				<PLRID> westd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Lusader" </PNAME>
+				<PLRID> lusas001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Dawley" </PNAME>
+				<PLRID> dawlb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Dyer" </PNAME>
+				<PLRID> dyerm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Sergio Valdez" </PNAME>
+				<PLRID> valds001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Ritz" </PNAME>
+				<PLRID> ritzk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dick Schofield" </PNAME>
+				<PLRID> schod001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Johnson" </PNAME>
+				<PLRID> johnd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Marcus Lawton" </PNAME>
+				<PLRID> lawtm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Stanton" </PNAME>
+				<PLRID> stanm003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rosario Rodriguez" </PNAME>
+				<PLRID> rodrr003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Curt Schilling" </PNAME>
+				<PLRID> schic002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Mmahat" </PNAME>
+				<PLRID> mmahk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Luis Rivera" </PNAME>
+				<PLRID> rivel001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Smith" </PNAME>
+				<PLRID> smitg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Schroeder" </PNAME>
+				<PLRID> schrb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Olson" </PNAME>
+				<PLRID> olsog002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Juan Bell" </PNAME>
+				<PLRID> bellj003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chris Brown" </PNAME>
+				<PLRID> browc002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> Papadimos' Padres </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Jimmy Key" </PNAME>
+				<PLRID> key-j001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jack Clark" </PNAME>
+				<PLRID> clarj001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gene Nelson" </PNAME>
+				<PLRID> nelsg001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Les Lancaster" </PNAME>
+				<PLRID> lancl001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Don Slaught" </PNAME>
+				<PLRID> slaud001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ken Caminiti" </PNAME>
+				<PLRID> camik001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Franco" </PNAME>
+				<PLRID> franj001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Morris" </PNAME>
+				<PLRID> morrj003 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jerry Reuss" </PNAME>
+				<PLRID> reusj001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tony Pena" </PNAME>
+				<PLRID> penat001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Benito Santiago" </PNAME>
+				<PLRID> santb001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Gaetti" </PNAME>
+				<PLRID> gaetg001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gerald Perry" </PNAME>
+				<PLRID> perrg001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Brookens" </PNAME>
+				<PLRID> broot001 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Matt Williams" </PNAME>
+				<PLRID> willm003 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Uribe" </PNAME>
+				<PLRID> uribj001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ozzie Guillen" </PNAME>
+				<PLRID> guilo001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Billy Beane" </PNAME>
+				<PLRID> beanb001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tony Phillips" </PNAME>
+				<PLRID> philt001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Willie McGee" </PNAME>
+				<PLRID> mcgew001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Stan Jefferson" </PNAME>
+				<PLRID> jeffs001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Devereaux" </PNAME>
+				<PLRID> devem001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Harold Baines" </PNAME>
+				<PLRID> bainh001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "LaVel Freeman" </PNAME>
+				<PLRID> freel001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Dwyer" </PNAME>
+				<PLRID> dwyej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Engle" </PNAME>
+				<PLRID> engld001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Carlton Fisk" </PNAME>
+				<PLRID> fiskc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Thad Bosley" </PNAME>
+				<PLRID> boslt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dan Gladden" </PNAME>
+				<PLRID> gladd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Brock" </PNAME>
+				<PLRID> brocg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bruce Hurst" </PNAME>
+				<PLRID> hursb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "C Schiraldi" </PNAME>
+				<PLRID> schic001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Larry Andersen" </PNAME>
+				<PLRID> andel001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Smith" </PNAME>
+				<PLRID> smitd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Bankhead" </PNAME>
+				<PLRID> banks001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Phil Stephenson" </PNAME>
+				<PLRID> stepp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Myers" </PNAME>
+				<PLRID> myerr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ray Searage" </PNAME>
+				<PLRID> searr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Shawn Hillegas" </PNAME>
+				<PLRID> hills001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bret Saberhagen" </PNAME>
+				<PLRID> sabeb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Craig McMurtry" </PNAME>
+				<PLRID> mcmuc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Fitzgerald" </PNAME>
+				<PLRID> fitzm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "F Valenzuela" </PNAME>
+				<PLRID> valef001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Sanderson" </PNAME>
+				<PLRID> sands001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Aguilera" </PNAME>
+				<PLRID> aguir001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chuck Crim" </PNAME>
+				<PLRID> crimc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Melido Perez" </PNAME>
+				<PLRID> perem001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Medvin" </PNAME>
+				<PLRID> medvs001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Wes Gardner" </PNAME>
+				<PLRID> gardw001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "A Galarraga" </PNAME>
+				<PLRID> galaa001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Geronimo Berroa" </PNAME>
+				<PLRID> berrg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Thurman" </PNAME>
+				<PLRID> thurg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Donell Nixon" </PNAME>
+				<PLRID> nixod001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Morris Madden" </PNAME>
+				<PLRID> maddm003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Johnny Ray" </PNAME>
+				<PLRID> ray-j001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Kramer" </PNAME>
+				<PLRID> kramr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Francisco Oliveras" </PNAME>
+				<PLRID> olivf001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Frey" </PNAME>
+				<PLRID> freys001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Louis Meadows" </PNAME>
+				<PLRID> meadl001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Bittiger" </PNAME>
+				<PLRID> bittj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "T Mulholland" </PNAME>
+				<PLRID> mulht001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Darrel Akerfelds" </PNAME>
+				<PLRID> akerd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Portugal" </PNAME>
+				<PLRID> portm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Raines" </PNAME>
+				<PLRID> raint001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Gallego" </PNAME>
+				<PLRID> gallm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Trevor Wilson" </PNAME>
+				<PLRID> wilst002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Edwin Nunez" </PNAME>
+				<PLRID> nunee001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Adduci" </PNAME>
+				<PLRID> adduj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Davidson" </PNAME>
+				<PLRID> davib002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Reed" </PNAME>
+				<PLRID> reedr002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Harry Spilman" </PNAME>
+				<PLRID> spilh001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Doug Strange" </PNAME>
+				<PLRID> strad002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brian Meyer" </PNAME>
+				<PLRID> meyeb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Schulz" </PNAME>
+				<PLRID> schuj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ben McDonald" </PNAME>
+				<PLRID> mcdob001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Max Venable" </PNAME>
+				<PLRID> venam001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Vizcaino" </PNAME>
+				<PLRID> vizcj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Eave" </PNAME>
+				<PLRID> eaveg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Pecota" </PNAME>
+				<PLRID> pecob001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jay Buhner" </PNAME>
+				<PLRID> buhnj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Hemond" </PNAME>
+				<PLRID> hemos001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Kiefer" </PNAME>
+				<PLRID> kiefs001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> Ramamurthy's Rams </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Mark Langston" </PNAME>
+				<PLRID> langm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Stewart" </PNAME>
+				<PLRID> stewd001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "James Steels" </PNAME>
+				<PLRID> steej001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Felder" </PNAME>
+				<PLRID> feldm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kent Mercker" </PNAME>
+				<PLRID> merck001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ken Dayley" </PNAME>
+				<PLRID> daylk001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Deion Sanders" </PNAME>
+				<PLRID> sandd001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Marvell Wynne" </PNAME>
+				<PLRID> wynnm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Marshall" </PNAME>
+				<PLRID> marsm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rich Gedman" </PNAME>
+				<PLRID> gedmr001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Canseco" </PNAME>
+				<PLRID> cansj001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Terry Francona" </PNAME>
+				<PLRID> frant001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ken Griffey" </PNAME>
+				<PLRID> grifk001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Marty Barrett" </PNAME>
+				<PLRID> barrm001 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Edgar Martinez" </PNAME>
+				<PLRID> marte001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jody Reed" </PNAME>
+				<PLRID> reedj003 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pat Keedy" </PNAME>
+				<PLRID> keedp001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brad Komminsk" </PNAME>
+				<PLRID> kommb001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Gonzalez" </PNAME>
+				<PLRID> gonzj001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Robin Yount" </PNAME>
+				<PLRID> younr001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Kutcher" </PNAME>
+				<PLRID> kutcr001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jesse Barfield" </PNAME>
+				<PLRID> barfj001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pat Sheridan" </PNAME>
+				<PLRID> sherp001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Don Mattingly" </PNAME>
+				<PLRID> mattd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chili Davis" </PNAME>
+				<PLRID> davic001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Carney Lansford" </PNAME>
+				<PLRID> lansc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Carlos Quintana" </PNAME>
+				<PLRID> quinc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jack Daugherty" </PNAME>
+				<PLRID> daugj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lou Whitaker" </PNAME>
+				<PLRID> whitl001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Denny Gonzalez" </PNAME>
+				<PLRID> gonzd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Witt" </PNAME>
+				<PLRID> wittm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Juan Berenguer" </PNAME>
+				<PLRID> berej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ernest Riles" </PNAME>
+				<PLRID> rilee001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Darrell Evans" </PNAME>
+				<PLRID> evand001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Maddux" </PNAME>
+				<PLRID> maddg002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lance McCullers" </PNAME>
+				<PLRID> mccul001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Richard Dotson" </PNAME>
+				<PLRID> dotsr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Cadaret" </PNAME>
+				<PLRID> cadag001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chris Bosio" </PNAME>
+				<PLRID> bosic001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Shane Rawley" </PNAME>
+				<PLRID> rawls001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Gott" </PNAME>
+				<PLRID> gottj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Righetti" </PNAME>
+				<PLRID> righd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Dunne" </PNAME>
+				<PLRID> dunnm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Rijo" </PNAME>
+				<PLRID> rijoj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Wells" </PNAME>
+				<PLRID> welld001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Thurmond" </PNAME>
+				<PLRID> thurm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Bielecki" </PNAME>
+				<PLRID> bielm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Andy Van Slyke" </PNAME>
+				<PLRID> vansa001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Ballard" </PNAME>
+				<PLRID> ballj002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "don heinkel" </PNAME>
+				<PLRID> heind001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Martinez" </PNAME>
+				<PLRID> martd002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Blauser" </PNAME>
+				<PLRID> blauj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Carter" </PNAME>
+				<PLRID> carts001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Billy Bean" </PNAME>
+				<PLRID> beanb002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Schaefer" </PNAME>
+				<PLRID> schaj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Darrin Jackson" </PNAME>
+				<PLRID> jackd002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Cochrane" </PNAME>
+				<PLRID> cochd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bruce Benedict" </PNAME>
+				<PLRID> beneb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "DeWayne Buice" </PNAME>
+				<PLRID> buicd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dwight Smith" </PNAME>
+				<PLRID> smitd003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lee Tunnell" </PNAME>
+				<PLRID> tunnl001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Wetteland" </PNAME>
+				<PLRID> wettj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Palmer" </PNAME>
+				<PLRID> palmd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Damon Berryhill" </PNAME>
+				<PLRID> berrd002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Matt Young" </PNAME>
+				<PLRID> younm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Rochford" </PNAME>
+				<PLRID> rochm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Smith" </PNAME>
+				<PLRID> smitm003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike LaValliere" </PNAME>
+				<PLRID> lavam001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Andre Dawson" </PNAME>
+				<PLRID> dawsa001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Wilson Alvarez" </PNAME>
+				<PLRID> alvaw001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Russ Swan" </PNAME>
+				<PLRID> swanr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bobby Rose" </PNAME>
+				<PLRID> roseb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Urbano Lugo" </PNAME>
+				<PLRID> lugor001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Eric Anthony" </PNAME>
+				<PLRID> anthe001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Craig Wilson" </PNAME>
+				<PLRID> wilsc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jerry Hairston" </PNAME>
+				<PLRID> hairj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Fischer" </PNAME>
+				<PLRID> fiscj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rusty Richards" </PNAME>
+				<PLRID> richr002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joel Skinner" </PNAME>
+				<PLRID> skinj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Matt Sinatro" </PNAME>
+				<PLRID> sinam001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Al Pardo" </PNAME>
+				<PLRID> parda001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Hensley Meulens" </PNAME>
+				<PLRID> meulh001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> Tian's Titans </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Mark McGwire" </PNAME>
+				<PLRID> mcgwm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Frank Viola" </PNAME>
+				<PLRID> violf001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Duane Ward" </PNAME>
+				<PLRID> wardd001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Alexis Infante" </PNAME>
+				<PLRID> infaa001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rich Monteleone" </PNAME>
+				<PLRID> montr002 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ricky Horton" </PNAME>
+				<PLRID> hortr001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Wade Boggs" </PNAME>
+				<PLRID> boggw001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Smithson" </PNAME>
+				<PLRID> smitm002 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Paul Mirabella" </PNAME>
+				<PLRID> mirap001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Leon Durham" </PNAME>
+				<PLRID> durhl001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Boone" </PNAME>
+				<PLRID> boonb001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Nick Esasky" </PNAME>
+				<PLRID> esasn001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Walker" </PNAME>
+				<PLRID> walkg001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rob Thompson" </PNAME>
+				<PLRID> thomr003 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ed Jurak" </PNAME>
+				<PLRID> jurae001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Doug Baker" </PNAME>
+				<PLRID> baked001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Alan Trammell" </PNAME>
+				<PLRID> trama001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Al Newman" </PNAME>
+				<PLRID> newma001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kal Daniels" </PNAME>
+				<PLRID> danik001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ellis Burks" </PNAME>
+				<PLRID> burke001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tony Gwynn" </PNAME>
+				<PLRID> gwynt001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Redus" </PNAME>
+				<PLRID> redug001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Carmen Castillo" </PNAME>
+				<PLRID> castc001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ron Hassey" </PNAME>
+				<PLRID> hassr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Young" </PNAME>
+				<PLRID> younm002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Gantner" </PNAME>
+				<PLRID> gantj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Matt Winters" </PNAME>
+				<PLRID> wintm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tracy Jones" </PNAME>
+				<PLRID> jonet001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kent Anderson" </PNAME>
+				<PLRID> andek001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Paul Sorrento" </PNAME>
+				<PLRID> sorrp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Charlie Hough" </PNAME>
+				<PLRID> hougc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Andy McGaffigan" </PNAME>
+				<PLRID> mcgaa001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Moses" </PNAME>
+				<PLRID> mosej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ed Whitson" </PNAME>
+				<PLRID> white001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Browning" </PNAME>
+				<PLRID> browt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Roger McDowell" </PNAME>
+				<PLRID> mcdor001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bobby Thigpen" </PNAME>
+				<PLRID> thigb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Anderson" </PNAME>
+				<PLRID> anded001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Flanagan" </PNAME>
+				<PLRID> flanm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Storm Davis" </PNAME>
+				<PLRID> davis001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Pagliarulo" </PNAME>
+				<PLRID> paglm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kenny Rogers" </PNAME>
+				<PLRID> rogek001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Garrelts" </PNAME>
+				<PLRID> garrs001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Rhoden" </PNAME>
+				<PLRID> rhodr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dorn Taylor" </PNAME>
+				<PLRID> tayld002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jerry Gleaton" </PNAME>
+				<PLRID> gleaj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Clancy" </PNAME>
+				<PLRID> clanj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Flannery" </PNAME>
+				<PLRID> flant001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Candiotti" </PNAME>
+				<PLRID> candt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joe Skalski" </PNAME>
+				<PLRID> skalj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Paul Gibson" </PNAME>
+				<PLRID> gibsp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Denny Walling" </PNAME>
+				<PLRID> walld001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Todd Frohwirth" </PNAME>
+				<PLRID> froht001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bo Diaz" </PNAME>
+				<PLRID> diazb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Marvin Freeman" </PNAME>
+				<PLRID> freem001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Domingo Ramos" </PNAME>
+				<PLRID> ramod001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Wally Joyner" </PNAME>
+				<PLRID> joynw001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chuck Cary" </PNAME>
+				<PLRID> caryc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Frank Wills" </PNAME>
+				<PLRID> willf002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Alex Sanchez" </PNAME>
+				<PLRID> sanca002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Litton" </PNAME>
+				<PLRID> littg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Jeffcoat" </PNAME>
+				<PLRID> jeffm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mario Diaz" </PNAME>
+				<PLRID> diazm002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Miguel Garcia" </PNAME>
+				<PLRID> garcm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Eiland" </PNAME>
+				<PLRID> eilad001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Griffin" </PNAME>
+				<PLRID> grifm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Veres" </PNAME>
+				<PLRID> verer001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ed Whited" </PNAME>
+				<PLRID> white003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joe Oliver" </PNAME>
+				<PLRID> olivj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Guthrie" </PNAME>
+				<PLRID> guthm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Bolton" </PNAME>
+				<PLRID> boltt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Gallagher" </PNAME>
+				<PLRID> galld001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Terry Clark" </PNAME>
+				<PLRID> clart001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Blankenship" </PNAME>
+				<PLRID> blank001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Munoz" </PNAME>
+				<PLRID> munom001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Kaiser" </PNAME>
+				<PLRID> kaisj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose DeJesus" </PNAME>
+				<PLRID> dejej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Stu Tate" </PNAME>
+				<PLRID> tates001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Billy Ripken" </PNAME>
+				<PLRID> ripkb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Victor Rodriguez" </PNAME>
+				<PLRID> rodrv001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Mizerock" </PNAME>
+				<PLRID> mizej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Terry Jorgenson" </PNAME>
+				<PLRID> jorgt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> Tucker's Truckers </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Danny Jackson" </PNAME>
+				<PLRID> jackd001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Morgan" </PNAME>
+				<PLRID> morgm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rob Dibble" </PNAME>
+				<PLRID> dibbr001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brian Holton" </PNAME>
+				<PLRID> holtb001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lenny Webster" </PNAME>
+				<PLRID> websl001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lee Smith" </PNAME>
+				<PLRID> smitl001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Luis Salazar" </PNAME>
+				<PLRID> salal001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rick Cerone" </PNAME>
+				<PLRID> ceror001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tommy John" </PNAME>
+				<PLRID> johnt001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "B.J. Surhoff" </PNAME>
+				<PLRID> surhb001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Herm Winningham" </PNAME>
+				<PLRID> winnh001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Keith Hernandez" </PNAME>
+				<PLRID> hernk001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Sid Bream" </PNAME>
+				<PLRID> breas001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Felix Fermin" </PNAME>
+				<PLRID> fermf001 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chris Sabo" </PNAME>
+				<PLRID> saboc001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rey Quinones" </PNAME>
+				<PLRID> quinr001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dickie Thon" </PNAME>
+				<PLRID> thond001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "B.J. Robidoux" </PNAME>
+				<PLRID> robib001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jim Eisenreich" </PNAME>
+				<PLRID> eisej001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jerome Walton" </PNAME>
+				<PLRID> waltj001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Cangelosi" </PNAME>
+				<PLRID> cangj001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Finley" </PNAME>
+				<PLRID> finls001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ozzie Virgil" </PNAME>
+				<PLRID> virgo001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Julio Franco" </PNAME>
+				<PLRID> franj002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pat Borders" </PNAME>
+				<PLRID> bordp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Salas" </PNAME>
+				<PLRID> salam001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chet Lemon" </PNAME>
+				<PLRID> lemoc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Peter Dalena" </PNAME>
+				<PLRID> dalep001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Glenn Hoffman" </PNAME>
+				<PLRID> hoffg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Luis Polonia" </PNAME>
+				<PLRID> polol001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Alvarez" </PNAME>
+				<PLRID> alvaj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Donn Pall" </PNAME>
+				<PLRID> palld001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mitch Williams" </PNAME>
+				<PLRID> willm002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ken Howell" </PNAME>
+				<PLRID> howek001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Knepper" </PNAME>
+				<PLRID> knepb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dennis Powell" </PNAME>
+				<PLRID> powed001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bob Forsch" </PNAME>
+				<PLRID> forsb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Joe Boever" </PNAME>
+				<PLRID> boevj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Lapoint" </PNAME>
+				<PLRID> lapod001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Nolan Ryan" </PNAME>
+				<PLRID> ryann001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Birtsas" </PNAME>
+				<PLRID> birtt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Schooler" </PNAME>
+				<PLRID> schom001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "D Rasmussen" </PNAME>
+				<PLRID> rasmd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "kevin gross" </PNAME>
+				<PLRID> grosk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gregg Olson" </PNAME>
+				<PLRID> olsog001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Alan Ashby" </PNAME>
+				<PLRID> ashba001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bryn Smith" </PNAME>
+				<PLRID> smitb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Vance Law" </PNAME>
+				<PLRID> law-v001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Cerutti" </PNAME>
+				<PLRID> ceruj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Pete Harnisch" </PNAME>
+				<PLRID> harnp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "R.J. Reynolds" </PNAME>
+				<PLRID> reynr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ron Gant" </PNAME>
+				<PLRID> gantr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brian Brady" </PNAME>
+				<PLRID> bradb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Craig Biggio" </PNAME>
+				<PLRID> biggc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bill Krueger" </PNAME>
+				<PLRID> krueb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Roberto Alomar" </PNAME>
+				<PLRID> alomr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gordon Dillard" </PNAME>
+				<PLRID> dillg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Al Pedrique" </PNAME>
+				<PLRID> pedra001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Sharperson" </PNAME>
+				<PLRID> sharm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jack Hardy" </PNAME>
+				<PLRID> hardj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brad Wellman" </PNAME>
+				<PLRID> wellb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff King" </PNAME>
+				<PLRID> kingj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Barry Bonds" </PNAME>
+				<PLRID> bondb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Nielsen" </PNAME>
+				<PLRID> niels001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jaime Navarro" </PNAME>
+				<PLRID> navaj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Cummings" </PNAME>
+				<PLRID> cumms001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Eric Hetzel" </PNAME>
+				<PLRID> hetze001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "unknown crawford" </PNAME>
+				<PLRID> craws001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Filer" </PNAME>
+				<PLRID> filet001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Paul Wilmet" </PNAME>
+				<PLRID> wilmp001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rene Gonzales" </PNAME>
+				<PLRID> gonzr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Peterek" </PNAME>
+				<PLRID> petej001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Mitchell" </PNAME>
+				<PLRID> mitcj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Carl Nichols" </PNAME>
+				<PLRID> nichc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Beau Allred" </PNAME>
+				<PLRID> allrb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tommy Greene" </PNAME>
+				<PLRID> greet001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Darrin Fletcher" </PNAME>
+				<PLRID> fletd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Higgins" </PNAME>
+				<PLRID> higgm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Juan Castillo" </PNAME>
+				<PLRID> castj002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Orton" </PNAME>
+				<PLRID> ortoj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Billy Bates" </PNAME>
+				<PLRID> bateb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Alvaro Espinoza" </PNAME>
+				<PLRID> espia001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+	<TEAM>
+		<NAME> Tufte's Tough Guys </NAME>
+		<ROSTER>
+			<PLAYER>
+				<PNAME> "Dwight Gooden" </PNAME>
+				<PLRID> goodd001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dwayne Henry" </PNAME>
+				<PLRID> henrd001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Hickey" </PNAME>
+				<PLRID> hickk001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Nelson Liriano" </PNAME>
+				<PLRID> lirin001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "D Eckersley" </PNAME>
+				<PLRID> ecked001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mariano Duncan" </PNAME>
+				<PLRID> duncm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Don Aase" </PNAME>
+				<PLRID> aased001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Floyd Youmans" </PNAME>
+				<PLRID> youmf001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Fetters" </PNAME>
+				<PLRID> fettm001 </PLRID>
+				<POSITION> P  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Scioscia" </PNAME>
+				<PLRID> sciom001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Andy Allanson" </PNAME>
+				<PLRID> allaa001 </PLRID>
+				<POSITION> C  </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "George Brett" </PNAME>
+				<PLRID> bretg001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gene Larkin" </PNAME>
+				<PLRID> larkg001 </PLRID>
+				<POSITION> 1B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tim Jones" </PNAME>
+				<PLRID> jonet002 </PLRID>
+				<POSITION> 2B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Luis Aguayo" </PNAME>
+				<PLRID> agual001 </PLRID>
+				<POSITION> 3B </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Omar Vizquel" </PNAME>
+				<PLRID> vizqo001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Richardson" </PNAME>
+				<PLRID> richj001 </PLRID>
+				<POSITION> SS </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kevin Mitchell" </PNAME>
+				<PLRID> mitck001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "K McReynolds" </PNAME>
+				<PLRID> mcrek001 </PLRID>
+				<POSITION> LF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Billy Hatcher" </PNAME>
+				<PLRID> hatcb001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ken Williams" </PNAME>
+				<PLRID> willk001 </PLRID>
+				<POSITION> CF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "D Strawberry" </PNAME>
+				<PLRID> strad001 </PLRID>
+				<POSITION> RF </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brian Downing" </PNAME>
+				<PLRID> downb001 </PLRID>
+				<POSITION> DH </POSITION>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ken Phelps" </PNAME>
+				<PLRID> phelk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Fred Lynn" </PNAME>
+				<PLRID> lynnf001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Bradley" </PNAME>
+				<PLRID> brads001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Danny Heep" </PNAME>
+				<PLRID> heepd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "R Henderson" </PNAME>
+				<PLRID> hendr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Cl Washington" </PNAME>
+				<PLRID> washc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jeff Datz" </PNAME>
+				<PLRID> datzj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bip Roberts" </PNAME>
+				<PLRID> robeb002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Greg Harris" </PNAME>
+				<PLRID> harrg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Terry Puhl" </PNAME>
+				<PLRID> puhlt001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Orel Hershiser" </PNAME>
+				<PLRID> herso001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Johnson" </PNAME>
+				<PLRID> johnr005 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dave Collins" </PNAME>
+				<PLRID> colld001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Atlee Hammaker" </PNAME>
+				<PLRID> hamma001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Eric Plunk" </PNAME>
+				<PLRID> plune001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Campbell" </PNAME>
+				<PLRID> campm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jerry Reed" </PNAME>
+				<PLRID> reedj002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Bailes" </PNAME>
+				<PLRID> bails001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Williamson" </PNAME>
+				<PLRID> willm004 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ron Darling" </PNAME>
+				<PLRID> darlr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Kirk McCaskill" </PNAME>
+				<PLRID> mccak001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Sid Fernandez" </PNAME>
+				<PLRID> ferns001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gary Wayne" </PNAME>
+				<PLRID> wayng001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Don Carman" </PNAME>
+				<PLRID> carmd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Ryal" </PNAME>
+				<PLRID> ryalm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bruce Ruffin" </PNAME>
+				<PLRID> ruffb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brian Holman" </PNAME>
+				<PLRID> holmb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Bryan Clutterbuck" </PNAME>
+				<PLRID> clutb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Junior Ortiz" </PNAME>
+				<PLRID> ortij001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Hubie Brooks" </PNAME>
+				<PLRID> brooh001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Juan Samuel" </PNAME>
+				<PLRID> samuj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Andres Thomas" </PNAME>
+				<PLRID> thoma001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Barry Lyons" </PNAME>
+				<PLRID> lyonb002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ted Power" </PNAME>
+				<PLRID> powet001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Steve Shields" </PNAME>
+				<PLRID> shies001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Matt Kinzer" </PNAME>
+				<PLRID> kinzm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ryne Sandberg" </PNAME>
+				<PLRID> sandr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Randy Nosek" </PNAME>
+				<PLRID> noser001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Brett Gideon" </PNAME>
+				<PLRID> gideb001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Keith Miller" </PNAME>
+				<PLRID> millk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Lonnie Smith" </PNAME>
+				<PLRID> smitl002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Davis" </PNAME>
+				<PLRID> davij003 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Eddie Williams" </PNAME>
+				<PLRID> wille001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Cory Snyder" </PNAME>
+				<PLRID> snydc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Keith Comstock" </PNAME>
+				<PLRID> comsk001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Ron Robinson" </PNAME>
+				<PLRID> robir001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Scott Little" </PNAME>
+				<PLRID> litts001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mike Huff" </PNAME>
+				<PLRID> huffm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dale Murphy" </PNAME>
+				<PLRID> murpd001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Jose Cano" </PNAME>
+				<PLRID> canoj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Chuck McElroy" </PNAME>
+				<PLRID> mcelc001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Rudy Seanez" </PNAME>
+				<PLRID> seanr001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Eric Nolte" </PNAME>
+				<PLRID> nolte001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Mark Lemke" </PNAME>
+				<PLRID> lemkm001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "John Olerud" </PNAME>
+				<PLRID> olerj001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Prince" </PNAME>
+				<PLRID> print001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Tom Nieto" </PNAME>
+				<PLRID> niett001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Gil Reyes" </PNAME>
+				<PLRID> reyeg001 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+			<PLAYER>
+				<PNAME> "Dickie Scott" </PNAME>
+				<PLRID> scotd002 </PLRID>
+				<RESERVE/>
+				<STDATE> 04/01/89 </STDATE>
+				<ENDDATE> 10/03/89 </ENDDATE>
+			</PLAYER>
+		</ROSTER>
+	</TEAM>
+</LEAGUE>
+</LEAGUESYSTEM>

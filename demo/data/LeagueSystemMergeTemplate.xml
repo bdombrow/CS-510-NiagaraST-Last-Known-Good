@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!DOCTYPE DocumentMerge SYSTEM "/disk/hopper/projects/disc/niagara/dtds/MergeTemplate.dtd">
+
+<DocumentMerge>
+
+  <ElementMerge Name="LEAGUESYSTEM">
+     <DoNotCare/>
+ 
+  <ElementMerge Name="LEAGUE">
+     <DoNotCare/>
+
+  <ElementMerge Name="TEAM">
+     <MatchTemplate>
+       <MatchNode>
+          <Path>ROSTER.PLAYER.PLRID</Path>
+          <Content/>
+       </MatchNode>
+     </MatchTemplate>
+
+     <DoNotCare/>
+
+     <ElementMerge Name = "STATS">
+	<DoNotCare/>
+        <ElementMerge Name="RUNSCORED">
+	   <ShallowContent Function="sum" LValueType="int" RValueType="int"></ShallowContent>
+        </ElementMerge>
+        <ElementMerge Name="BASES">
+	   <ShallowContent Function="sum" LValueType="int" RValueType="int"></ShallowContent>
+        </ElementMerge>
+        <ElementMerge Name="STEAL">
+	   <ShallowContent Function="sum" LValueType="int" RValueType="int"></ShallowContent>
+        </ElementMerge>
+        <ElementMerge Name="STRIKEOUT">
+	   <ShallowContent Function="sum" LValueType="int" RValueType="int"></ShallowContent>
+        </ElementMerge>
+        <ElementMerge Name="RUNALLOWED">
+	   <ShallowContent Function="sum" LValueType="int" RValueType="int"></ShallowContent>
+        </ElementMerge>
+        <ElementMerge Name="WIN">
+	   <ShallowContent Function="sum" LValueType="int" RValueType="int"></ShallowContent>
+        </ElementMerge>
+     </ElementMerge>
+  </ElementMerge>
+  
+  </ElementMerge>
+
+  </ElementMerge>
+
+</DocumentMerge>
+
