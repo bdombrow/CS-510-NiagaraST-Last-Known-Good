@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: BucketOp.java,v 1.1 2003/07/23 22:19:28 jinli Exp $
+  $Id: BucketOp.java,v 1.2 2003/07/24 00:53:22 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -104,9 +104,15 @@ public class BucketOp extends unryOp {
 		windowType = -1;
 	}
 	else {
-		range = parseTimeInterval(windowRange);
-		slide = parseTimeInterval(windowSlide);
 		windowType = new Integer(type).intValue();
+		if (windowType == 0) {
+			range = (Integer.valueOf(windowRange)).intValue();
+			slide = (Integer.valueOf(windowSlide)).intValue();
+		} else {
+			range = parseTimeInterval(windowRange);
+			slide = parseTimeInterval(windowSlide);
+		}
+		
 		if(windowAttribute.length() != 0)
 			windowAttr = Variable.findVariable(inputLogProp, windowAttribute);					    					
 	}			
