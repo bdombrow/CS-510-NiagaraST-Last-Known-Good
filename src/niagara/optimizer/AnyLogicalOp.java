@@ -54,12 +54,10 @@ public class AnyLogicalOp extends LogicalOp {
         return 0;
     }
 
-    /**
-     * @see niagara.optimizer.colombia.LogicalOp#opMatch(LogicalOp)
-     */
-    public boolean opMatch(LogicalOp other) {
+    public boolean opMatch(Class other) {
         return true;
     }
+    
     /**
      * @see niagara.optimizer.colombia.Op#matches(Op)
      */

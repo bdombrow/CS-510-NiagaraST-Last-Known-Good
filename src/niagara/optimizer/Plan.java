@@ -70,7 +70,7 @@ public class Plan implements SchedulablePlan {
         hm.put(expr, this);
         operator = expr.getOp();
         inputs = new Plan[expr.getArity()];
-        if (operator.is_physical())
+        if (operator.isPhysical())
             setCost(expr.getCost(catalog).getValue());
         isSchedulable = (! (operator instanceof ResourceOp));
         for (int i = 0; i < inputs.length; i++) {
@@ -113,7 +113,7 @@ public class Plan implements SchedulablePlan {
      */
     public PhysicalOperator getPhysicalOperator() {
         PhysicalOperator pop;
-        if (operator.is_physical()) {
+        if (operator.isPhysical()) {
 	    // KT - will this croak if operator is a SourceThread??
             pop = (PhysicalOperator) operator;
 	} else
@@ -189,7 +189,7 @@ public class Plan implements SchedulablePlan {
      * @see niagara.query_engine.SchedulablePlan#setSendImmed()
      */
     public void setSendImmediate() {
-	assert operator.is_physical() : "SendImmediate is a physical property";
+	assert operator.isPhysical() : "SendImmediate is a physical property";
 	((PhysicalOp)operator).setSendImmediate();
     }
 
@@ -197,7 +197,7 @@ public class Plan implements SchedulablePlan {
      * @see niagara.query_engine.SchedulablePlan#isSendImmed()
      */
     public boolean isSendImmediate() {
-	assert operator.is_physical() : "SendImmediate is a physical property";
+	assert operator.isPhysical() : "SendImmediate is a physical property";
         return ((PhysicalOp)operator).isSendImmediate();
     }
 
