@@ -3,7 +3,6 @@ package niagara.logical;
 
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Op;
-import niagara.xmlql_parser.op_tree.unryOp;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class IncrementalAverage extends IncrementalGroup {

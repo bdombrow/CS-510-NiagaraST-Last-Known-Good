@@ -2,7 +2,6 @@
 package niagara.logical;
 
 import niagara.optimizer.colombia.Attrs;
-import niagara.utils.CUtil;
 import niagara.utils.PEException;
 import niagara.xmlql_parser.syntax_tree.opType;
 

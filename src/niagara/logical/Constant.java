@@ -1,9 +1,6 @@
 /* $Id */
 package niagara.logical;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public abstract class Constant implements Atom {
     public abstract String getValue();
     

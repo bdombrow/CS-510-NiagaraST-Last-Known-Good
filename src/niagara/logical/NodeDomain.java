@@ -1,9 +1,7 @@
-/* $Id: NodeDomain.java,v 1.2 2002/10/24 03:59:43 vpapad Exp $ */
+/* $Id: NodeDomain.java,v 1.3 2003/02/25 06:13:16 vpapad Exp $ */
 
 package niagara.logical;
 
-import niagara.optimizer.colombia.Attribute;
-import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Domain;
 import niagara.utils.PEException;
 import niagara.xmlql_parser.syntax_tree.varType;

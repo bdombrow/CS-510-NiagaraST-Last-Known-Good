@@ -1,9 +1,6 @@
-/* $Id: NullaryOp.java,v 1.1 2002/10/06 23:40:12 vpapad Exp $ */
+/* $Id: NullaryOp.java,v 1.2 2003/02/25 06:13:16 vpapad Exp $ */
 package niagara.logical;
 
-import java.util.ArrayList;
-
-import niagara.optimizer.colombia.LogicalProperty;
 import niagara.xmlql_parser.op_tree.op;
 
 /**

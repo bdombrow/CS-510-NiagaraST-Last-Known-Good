@@ -1,7 +1,5 @@
-/* $Id: Unnest.java,v 1.3 2002/12/10 01:21:22 vpapad Exp $ */
+/* $Id: Unnest.java,v 1.4 2003/02/25 06:13:16 vpapad Exp $ */
 package niagara.logical;
-
-import java.util.ArrayList;
 
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.op_tree.unryOp;
