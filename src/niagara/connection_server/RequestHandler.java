@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.26 2003/07/18 01:03:10 tufte Exp $
+  $Id: RequestHandler.java,v 1.27 2003/07/27 04:16:44 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -426,7 +426,7 @@ public class RequestHandler {
         // assign a new query id to this request
         int qid = getNextConnServerQueryId();
 
-        QueryResult qr = server.qe.executeOptimizedQuery(plan);
+
 
         request.serverID = qid;
 
@@ -461,15 +461,21 @@ public class RequestHandler {
                     ServerQueryInfo.QueryEngine,
                     isSynchronous);
         }
+	boolean stpp = true;
+
+	if (top instanceof StreamThread) {
+	    stpp = ((StreamThread)top).prettyprint();
+        }
+
+        QueryResult qr = server.qe.executeOptimizedQuery(plan);
         serverQueryInfo.queryResult = qr;
         queryList.put(qid, serverQueryInfo);
 
         // start the transmitter thread for sending results back
         serverQueryInfo.transmitter =
             new ResultTransmitter(this, serverQueryInfo, request);
-	if (top instanceof StreamThread) {
-	    if(((StreamThread)top).prettyprint())
-	      serverQueryInfo.transmitter.setPrettyprint(false);
+	if (top instanceof StreamThread && stpp) {
+	    serverQueryInfo.transmitter.setPrettyprint(false);
         }
     }
 
