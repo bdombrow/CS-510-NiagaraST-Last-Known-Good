@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.2 2000/07/11 21:53:56 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -537,14 +537,14 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	// level, all that has to be done is to uncomment the following fragment
 	// This ensures that the grouping attributes are part of the tuple result
 	//
-	/*
+	
 	// For each grouping attribute, add the corresponding element
 	// to the result tuple from the representative tuple
 	//
 	int numGroupingAttributes = groupAttributeList.size();
 
 	for (int grp = 0; grp < numGroupingAttributes; ++grp) {
-
+	    
 	    // Get the group attribute
 	    //
 	    int attributeId = 
@@ -555,7 +555,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	    //
 	    tupleElement.appendAttribute(representativeTuple.getAttribute(attributeId));
 	}
-	*/
+	
 
 	// Add the grouped result as the attribute
 	//

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: PhysicalAverageOperator.java,v 1.2 2000/07/11 21:53:56 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -102,7 +102,6 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	 */
 
 	public void updateStatistics (double newValue) {
-
 	    // Increment the number of values
 	    //
 	    ++numValues;
@@ -223,7 +222,6 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	// If there is not exactly one atomic value, skip
 	//
 	if (atomicValues.size() != 1) {
-
 	    return null;
 	}
 	else {
@@ -245,7 +243,6 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 		return doubleValue;
 	    }
 	    catch (java.lang.NumberFormatException e) {
-		
 		// Cannot convert to double
 		//
 		return null;
@@ -272,7 +269,6 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	// create holder for final result, else just use groupedResult
 	//
 	AverageSufficientStatistics finalResult = null;
-
 	if (groupedResult == null) {
 	    finalResult = new AverageSufficientStatistics();
 	}
