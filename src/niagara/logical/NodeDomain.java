@@ -1,4 +1,4 @@
-/* $Id: NodeDomain.java,v 1.3 2003/02/25 06:13:16 vpapad Exp $ */
+/* $Id: NodeDomain.java,v 1.4 2003/08/01 17:28:45 tufte Exp $ */
 
 package niagara.logical;
 
@@ -16,20 +16,12 @@ public class NodeDomain extends Domain {
     private static NodeDomain elementDomNode;
     private static NodeDomain tagDomNode;
     private static NodeDomain contentDomNode;
+    private static NodeDomain nullDomain;
 
     private int type;
     
     public String getTypeDescription() {
-        switch (type) {
-            case varType.ELEMENT_VAR:
-                return "element";
-            case varType.TAG_VAR:
-                return "tag";
-            case varType.CONTENT_VAR:
-                return "content";
-            default:
-                throw new PEException("Unexpected variable type");
-        }
+        return varType.names[type];
     }
 
     public int getType() {
@@ -39,7 +31,8 @@ public class NodeDomain extends Domain {
     static {
         elementDomNode = new NodeDomain(varType.ELEMENT_VAR);
         tagDomNode = new NodeDomain(varType.TAG_VAR);
-        contentDomNode = new NodeDomain(varType.CONTENT_VAR);        
+        contentDomNode = new NodeDomain(varType.CONTENT_VAR);
+        nullDomain = new NodeDomain(varType.NULL_VAR);        
     }
     
     
@@ -56,7 +49,23 @@ public class NodeDomain extends Domain {
             case varType.CONTENT_VAR:
                 return contentDomNode;
             default:
-                throw new PEException("Unexpected variable type");
+                assert false : "Unexpected variable type " + type;
+                return null;
+        }
+    }
+    
+    public static NodeDomain getDomain(int type) {
+        switch (type) {
+        case varType.ELEMENT_VAR:
+        case varType.TAG_VAR:
+        case varType.CONTENT_VAR:
+            return getDOMNode(type);
+        case varType.NULL_VAR:
+            return nullDomain;
+        default:
+            assert false: "Unexpected type";
+            return null;     
+       
         }
     }
     

@@ -1,4 +1,4 @@
-/* $Id: Variable.java,v 1.6 2003/03/07 23:39:22 vpapad Exp $ */
+/* $Id: Variable.java,v 1.7 2003/08/01 17:28:45 tufte Exp $ */
 package niagara.logical;
 
 import niagara.connection_server.InvalidPlanException;
@@ -8,6 +8,7 @@ import niagara.optimizer.colombia.LogicalProperty;
 import niagara.query_engine.AtomicEvaluator;
 import niagara.query_engine.SimpleAtomicEvaluator;
 import niagara.xmlql_parser.syntax_tree.regExp;
+import niagara.xmlql_parser.syntax_tree.varType;
 
 public class Variable implements Atom, Attribute {
     private String name;
@@ -16,6 +17,8 @@ public class Variable implements Atom, Attribute {
     public Variable(String name, Domain domain) {
         this.name = name;
         this.domain = domain;
+        if(domain == null)
+            this.domain = NodeDomain.getDomain(varType.NULL_VAR);
     }
 
     public Variable(String name) {

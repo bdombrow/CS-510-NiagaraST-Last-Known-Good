@@ -1,4 +1,4 @@
-/* $Id: Unnest.java,v 1.8 2003/07/27 02:30:43 tufte Exp $ */
+/* $Id: Unnest.java,v 1.9 2003/08/01 17:28:45 tufte Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -72,10 +72,9 @@ public class Unnest extends unryOp {
 
     public void dumpAttributesInXML(StringBuffer sb) {
         sb.append(" regexp='").append(path).append("'");
-        sb
-            .append(" type='")
-            .append(((NodeDomain) variable.getDomain()).getTypeDescription())
-            .append("'");
+        sb.append(" type='");
+        sb.append(((NodeDomain) variable.getDomain()).getTypeDescription());
+        sb.append("'");
         sb.append(" root='").append(root.getName()).append("'");
         sb.append(" non matches= ").append(String.valueOf(outer));
     }
