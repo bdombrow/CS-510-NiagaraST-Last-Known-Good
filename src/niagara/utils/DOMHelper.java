@@ -25,7 +25,7 @@ import java.util.*;
 public class DOMHelper {
 
     /* this class should never be instantiated */
-    private void DOMHelper() {}
+    private DOMHelper() {}
 
     /**
      * Returns the first child that is of type element. This and function
