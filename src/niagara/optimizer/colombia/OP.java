@@ -1,3 +1,4 @@
+/* $Id: OP.java,v 1.6 2002/10/23 22:32:42 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 /** Abstract superclass for all operators, logical or physical */
@@ -7,15 +8,17 @@ public abstract class Op {
      * as clone() - updateable fields of an operator such as 
      * predicates attached to <code>join</code>s should be deep cloned.
      */
-    public abstract Op copy();
+    // XXX vpapad temporary hack
+    /* public abstract Op copy(); */
+    public Op copy() { return null; }
 
     public abstract String getName(); 
     
     /** number of inputs */
     public abstract int getArity();
 
-    //public abstract boolean equals(Object other);
-    //public abstract int hashCode();
+    public abstract boolean equals(Object other);
+    public abstract int hashCode();
 
     public int getNumberOfOutputs() { return 1;}
     
