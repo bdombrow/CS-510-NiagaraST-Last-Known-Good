@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.7 2002/03/31 04:48:15 vpapad Exp $
+  $Id: PathExprEvaluator.java,v 1.8 2002/04/06 02:16:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,294 +28,612 @@
 package niagara.query_engine;
 
 import org.w3c.dom.*;
-import java.io.*;
-import java.lang.*;
 import java.util.*;
+
+import niagara.ndom.saxdom.DOMImplementationImpl;
+
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.xmlql_parser.op_tree.*;
+import niagara.utils.*;
 
-/**
- *  This class provides functions to get all reachable nodes 
- *  Given an XML Element node and a regular expression.  The
- *  regular expression is in the form of a regExpOpNode.  For
- *  example, the path expression '<CODE>book.(author|editor).name</CODE>'
- *  is represented as:
- *  <pre>
- *               .
- *              / \
- *             .   name
- *            / \
- *         book  |
- *              / \
- *         author editor
- *
- *  </pre>
- *        
- *
- */
+public class PathExprEvaluator {
+    private DFA dfa;
+    private ArrayList nodes;
+    private ArrayList states;
+    private int top;
 
-public class PathExprEvaluator 
-{
-            
-    /**
-     *  Static function used to get all reachable nodes given a path 
-     *  expression and an element node to start with
-     *
-     *  @param inNode the input xml element
-     *  @param regExp the regular expression to apply
-     *  @return the vector of nodes reachable from inNode by applying regExp
-     */
-    public static Vector getReachableNodes(Object inNode, regExp rExp)
-    {
-        // This cannot be true.
-        if (inNode==null) System.err.println("Null inNode!!!!");
-		
-		Vector nodesReached = new Vector();
-		int i = 0, j = 0;
-		
-		if (rExp == null) {
-			
-			// Incoming regular expression is null - just return the inNode
-			//
-			nodesReached.add(inNode);
-			
-			return nodesReached;
-		}
-		
-		// If this is a leaf node, just get all child nodes mathching data name and return
-		//
-		if (rExp instanceof regExpDataNode) {
-		    
-			regExpDataNode re = (regExpDataNode)rExp;
-			data regExpData = re.getData();
-			Object o  = regExpData.getValue();
-			String val = null;
-			
-			if (o instanceof String)
-				val = (String)o;
-			else{
-                System.err.println("Error: Leaf is " + o);
-                ((schemaAttribute)o).dump();
-				System.err.println("ERROR: leaf of path expression is not a string");
-				return nodesReached;
-			}
-			
-			
-			// made this a 'switch' in case we add diff type later
-			// for now, all types at this point better be strings
-			// 
-			switch(regExpData.getType()) {
-			case dataType.STRING: 
-				
-				Class inNodeClass = inNode.getClass();
-				// if this is not the doc root, get children with name val
-				//
-				if (inNode instanceof Element) {
-                                    // Get all child elements 
-                                    Element element = (Element)inNode;
-                                 
-                                    Node child = element.getFirstChild();
-                                    while (child != null) {
-                                        if (val.equals(child.getNodeName()))
-                                            nodesReached.add(child);
-                                        child = child.getNextSibling();
-                                    }
-                                    
-                                    // Get the attributes of the element
-                                    NamedNodeMap attrs = element.getAttributes();
+    private HashSet matches;
 
-                                    // Add the reachable attribute to the vector
-                                    Node attr_node = attrs.getNamedItem(val);
-                                    if (attr_node != null) {
-                                        nodesReached.add(attrs.getNamedItem(val));
-                                    }
-                                    
-                                    return nodesReached;		    
-				}
-				
-				// Else if it is the root of the document, get the doc
-				// element if its name == val
-				//
-				else if (inNode instanceof Document) {
-					Element docroot = (Element)((Document)inNode).getDocumentElement();
-					if (docroot != null) {
-						if (val.equals(docroot.getNodeName()))
-							nodesReached.add(docroot);
-					}
-					return nodesReached;
-				}
-				else if (inNode instanceof Attr) {
-					// If the inNode is an attribute then the path should 
-					// definitely be null
-					System.out.println("PRED_EV: Bad Attribute Encountered");
-				}
-				
-			case dataType.ATTR:
-				System.err.println("Attr type data node in PathExpr");
-				break;
-				
-			default:
-				System.err.println("invalid type for dataRegExpr node");
-				System.exit(1);
-			}
-		}
-		
-		
-		// If this is an op node, make the appropriate recursive calls
-		//
-		else if (rExp instanceof regExpOpNode) {
-			
-			regExpOpNode re = (regExpOpNode)rExp;
-			Vector leftNodes = null;
-			Vector rightNodes = null;
-			Vector[] all = null;
-			int size;
-			
-			switch(re.getOperator()) {
-				
-			case opType.BAR:
-				
-				// Make recursive calls on left and right nodes
-				//
-				leftNodes = getReachableNodes(inNode, re.getLeftChild());
-				rightNodes = getReachableNodes(inNode, re.getRightChild());
-				
-				// Add the smaller result vector to the larger one
-				// and return the result
-				//
-				if (leftNodes.size() < rightNodes.size()) {
-					for (i=0; i<leftNodes.size(); i++)
-						rightNodes.add(leftNodes.get(i));
-					return rightNodes;
-				}
-				for (i=0; i<rightNodes.size(); i++)
-					leftNodes.add(rightNodes.get(i));
-				return leftNodes;
-				
-			case opType.DOT:
-				
-				// Get the nodes reachable on the left side of the dot
-				//
-				leftNodes = getReachableNodes(inNode, re.getLeftChild());
-				
-				// for each reachable left node, get all reachable right nodes
-				//
-				int lsize = leftNodes.size();
-				for (i = 0; i < lsize; i++) {
-					
-				    rightNodes = getReachableNodes(leftNodes.get(i), 
-								   re.getRightChild());
-					
-					// Add each reachable right node to the return nodeList
-					//
-					for (j=0; j< rightNodes.size(); j++)
-						nodesReached.add(rightNodes.get(j));
-				}
-				return nodesReached;
-				
-				
-			case opType.DOLLAR:
-				
-				// If it is the root, insert the document element to reachable
-				//
-				if (inNode instanceof Document) {
-					nodesReached.add( ((Document)inNode).getDocumentElement() );
-				}
-				
-				// Otherwise put all child elements in reachable
-				//
-				else if (inNode instanceof Element) {
-					
-					// Get all child elements
-					//
-					NodeList nl = ((Element)inNode).getChildNodes();
-					size = nl.getLength();
-					
-					// add each item from node list to the return vector, return it
-					//		
-					for (i = 0; i < size; i++) {
-					    Node n = nl.item(i);
-					    if (n instanceof Element)
-						nodesReached.add(n);
-					}
-				}
-				
-				return nodesReached;
-				
-				
-			case opType.QMARK:
-				
-				// Get the nodes reachable on the left side of the dot
-				//
-				leftNodes = getReachableNodes(inNode, re.getLeftChild());
-				
-				// Append the inNode to this set and return it
-				//
-				if (inNode instanceof Document)
-					leftNodes.add(((Document)inNode).getDocumentElement());
-				else
-					leftNodes.add(inNode);
-				return leftNodes;		
-				
-			case opType.STAR:
-				
-				//int size;		
-				//Vector [] all;
-				
-				nodesReached.add(inNode);
-				leftNodes = getReachableNodes(inNode, re.getLeftChild());
-				while(leftNodes.size() != 0)
-				{
-					size = leftNodes.size();			
-					for (i=0; i<size; i++)
-						nodesReached.add(leftNodes.get(i));
-					
-					all = new Vector[size];			
-					for (i=0; i<size; i++)
-						all[i] = getReachableNodes(leftNodes.get(i), re.getLeftChild());
-					
-					leftNodes = new Vector();
-					for (i=0; i<size; i++)
-						for (j = 0; j < all[i].size(); ++j)
-							leftNodes.add(all[i].get(j));
-				}		
-				
-				return nodesReached;
-				
-			case opType.PLUS:
-				
-				//Xint size;		
-				//Vector [] all;
-				
-				leftNodes = getReachableNodes(inNode, re.getLeftChild());
-				while(leftNodes.size() != 0)
-				{
-					size = leftNodes.size();			
-					for (i=0; i<size; i++)
-						nodesReached.add(leftNodes.get(i));
-					
-					all = new Vector[size];			
-					for (i=0; i<size; i++)
-						all[i] = getReachableNodes(leftNodes.get(i), re.getLeftChild());
-					
-					leftNodes = new Vector();
-					for (i=0; i<size; i++)
-						for (j = 0; j < all[i].size(); ++j)
-							leftNodes.add(all[i].get(j));
-				}		
-				
-				return nodesReached;
-				
-			default:
-				System.err.println("Invalid op type in path exp evaluator: ");
-				System.exit(1);
-			}
-		}
-		System.err.println("Invalid type for regular expression");
-		return nodesReached;
+    public PathExprEvaluator(regExp r) {
+        RE re = regExp2RE(r);
+
+        NFA nfa = new NFA();
+
+        // Add an accepting state
+        State start = nfa.addState(true);
+        nfa.setStartState(start);
+        
+        // Attach the regular expression
+        re.attachToNFA(nfa);
+        
+        // Create the DFA
+        dfa = nfa.getDFA();
+
+        System.out.println("XXX vpapad: " + dfa.toString());
+
+        nodes = new ArrayList();
+        states = new ArrayList();
+        matches = new HashSet();
+    }
+
+    public void getMatches(Node n, ArrayList results) {
+
+        DFAState s = dfa.startState;
+        top = -1;
+
+        // XXX vpapad not handling attributes yet
+
+        while (top >= 0 || n != null ) {
+            if (n == null) {
+                n = (Node) nodes.get(top);
+                s = (DFAState) states.get(top);
+                top--;
+            }
+
+            // If the state is accepting, add node to results,
+            // if it's not already there
+            if (s.accepting && matches.add(n))
+                    results.add(n);
+
+            // Reverse the order of the children, to account for the stack
+            Node c = n.getLastChild();
+            n = null;
+
+            HashMap transitions = s.transitions;
+            DFAState onWildcard = s.onWildcard;
+
+            while (c != null) {
+                // Ignore text nodes for path following
+                if (c.getNodeType() != Node.TEXT_NODE) {
+                    String label = c.getNodeName();
+                    DFAState next = (DFAState) transitions.get(label);
+                    if (next != null) {
+                        if (n != null) {
+                            top++;
+                            nodes.add(top, n);
+                            states.add(top, s);
+                        }
+                        n = c;
+                        s = next;
+                    }
+                    if (onWildcard != null && onWildcard != next) {
+                        if (n != null) {
+                            top++;
+                            nodes.add(top, n);
+                            states.add(top, s);
+                        } 
+                        n = c;
+                        s = onWildcard;
+                    }
+                }
+                c = c.getPreviousSibling();
+            }
+        }
+
+        // Clean up stacks
+        nodes.clear();
+        states.clear();
+        matches.clear();
+    }
+
+    // XXX vpapad: this method is here just to get old code that called
+    // getReachableNodes to compile. EXTREMELY INEFFICIENT.
+    public static Vector getReachableNodes(Object o, regExp r) {
+        PathExprEvaluator pev = new PathExprEvaluator(r);
+        ArrayList results = new ArrayList();
+        pev.getMatches((Node) o, results);
+        Vector v = new Vector(results.size());
+        v.addAll(results);
+        return v;
+    }
+
+    private static RE regExp2RE(regExp r) {
+        if (r == null)
+            return new Epsilon();
+
+        if (r instanceof regExpDataNode) 
+            return new Constant(((String) ((regExpDataNode) r).getData().getValue()));
+
+        regExpOpNode rop = (regExpOpNode) r;
+        switch (rop.getOperator()) {
+        case opType.BAR:
+            return new Bar(regExp2RE(rop.getLeftChild()), 
+                           regExp2RE(rop.getRightChild()));
+        case opType.DOT:
+            return new Dot(regExp2RE(rop.getLeftChild()), 
+                           regExp2RE(rop.getRightChild()));
+        case opType.DOLLAR:
+            return new Wildcard();
+        case opType.QMARK:
+            return new ZeroOne(regExp2RE(rop.getLeftChild()));
+        case opType.STAR:
+            return new Star(regExp2RE(rop.getLeftChild()));
+        case opType.PLUS:
+            return new Plus(regExp2RE(rop.getLeftChild()));
+        default: 
+            throw new PEException("Unknown operator in regExp2RE");
+        }
     }
 }
 
+class NFA {
+    int nextStateId;
+    State startState;
+    ArrayList states;
+    ArrayList transitions;
+
+    HashMap closureMemo; // maps state to list of epsilon-reachable states
+
+    NFA() {
+        nextStateId = 0;
+        states = new ArrayList();
+        transitions = new ArrayList();
+        closureMemo = new HashMap();
+    }
+
+    State addState(boolean accepting) {
+        State s = new State(nextStateId++, accepting);
+        states.add(s);
+        return s;
+    }
+
+    void addTransition(State from, String label, State to) {
+        transitions.add(new Transition(from, label, to));
+    }
+
+    void setStartState(State state) {
+        startState = state;
+    }
+
+    ArrayList epsilonClosure(State state) {
+        // Have we computed the epsilon closure for this state
+        // before? Look it up in closureMemo
+        if (closureMemo.containsKey(state))
+            return (ArrayList) closureMemo.get(state);
+        
+        HashMap statesToCheck = new HashMap();
+        ArrayList results = new ArrayList();
+        results.add(state);
+        int count = 0;
+
+        boolean changed = true;
+
+        while (changed) {
+            changed = false;
+
+            for (int j = count; j < results.size(); j++)
+                statesToCheck.put(results.get(j), Boolean.FALSE);
+
+            count = results.size();
+
+            Iterator keys = statesToCheck.keySet().iterator();
+
+            // For each state in the set, add all the nodes reachable
+            // from it with epsilon transitions
+            while (keys.hasNext()) {
+                State k = (State) keys.next();
+                
+                // Do nothing if we have already explored this state
+                if (statesToCheck.get(k) == Boolean.TRUE)
+                    continue;
 
 
+                for (int i = 0; i < transitions.size(); i++) {
+                    Transition t = (Transition) transitions.get(i);
+                    if (t.from == k && t.label == Transition.epsilon) {
+                        if (statesToCheck.containsKey(t.to))
+                            continue;
+                        results.add(t.to);
+                        changed = true;
+                    }
+                }
+
+                // The state is explored
+                statesToCheck.put(k, Boolean.TRUE);
+            }
+            
+        }
+        
+        closureMemo.put(state, results);
+
+        return results;
+    }
+
+    // Subset construction
+    public DFA getDFA() {
+        // Create an empty DFA with {epsclosure(startState)} as its only state
+        DFA dfa = new DFA();
+        DFAState start = dfa.addState(epsilonClosure(startState));
+        dfa.setStartState(start);
+
+        boolean allVisited = false;
+        HashMap destinations = new HashMap();
+
+        while (!allVisited) {
+            allVisited = true;
+
+            for (int k = 0; k < dfa.states.size(); k++) {
+                DFAState src = (DFAState) dfa.states.get(k);
+
+                if (src.visited)
+                    continue;
+                
+                allVisited = false;
+                destinations.clear();
+
+                for (int i = 0; i < transitions.size(); i++) {
+                    Transition t = (Transition) transitions.get(i);
+
+                    // ignore epsilon transitions
+                    if (t.label == Transition.epsilon                    
+                        || !src.nfaStates.contains(t.from))
+                        continue;
+                    if (destinations.get(t.label) == null)
+                        destinations.put(t.label, new ArrayList());
+                    else if (((ArrayList) destinations.get(t.label))
+                             .contains(t.to))
+                        continue;
+                    
+                    ((ArrayList) destinations.get(t.label))
+                            .addAll(epsilonClosure(t.to));
+                }
+                
+                
+                Iterator labels = destinations.keySet().iterator();
+                while (labels.hasNext()) {
+                    String label = (String) labels.next();
+                    DFAState dst = 
+                        dfa.addState((ArrayList) destinations.get(label));
+                    src.addTransition(label, dst);
+                }
+
+                destinations.clear();
+                src.visited = true;
+            }
+        }
+
+        return dfa;
+    }
+
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("NFA has " + states.size());
+        sb.append(" states, starting state is " + startState.id);
+        sb.append("\n");
+        for (int i = 0; i < states.size(); i++) {
+            State state = (State) states.get(i);
+
+            sb.append("State " + state.id);
+            if (state.accepting)
+                sb.append(" (accepting)");
+            sb.append("\n");
+            
+            sb.append("Epsilon closure = " 
+                      + arrayListToString(epsilonClosure(state)) + "\n");
+
+            for (int j = 0; j < transitions.size(); j++) {
+                Transition t = (Transition) transitions.get(j);
+                if (t.from == state) 
+                    sb.append("\t on " + t.label + " -> " + t.to.id + "\n");
+            }
+        }
+       
+        return sb.toString();
+    }
+
+    static String arrayListToString(ArrayList ec) {
+        StringBuffer sb = new StringBuffer("{");
+        for (int j = 0; j < ec.size(); j++) {
+            sb.append("" + ((State) ec.get(j)).id + ", ");
+        }
+        sb.setLength(sb.length() - 2); // Remove the final ", "
+        sb.append("}");
+        return sb.toString();
+    }
+
+}
+
+class DFAState extends State {
+    HashMap transitions;
+    DFAState onWildcard;
+
+    // set of NFA states this state corresponds to
+    ArrayList nfaStates; 
+    boolean visited;
+
+    DFAState(int id, boolean accepting, ArrayList nfaStates) {
+        super(id, accepting);
+        transitions = new HashMap();    
+        this.nfaStates = nfaStates;
+
+        visited = false;
+        onWildcard = null;
+    }
+
+
+    void addTransition(String label, DFAState to) {
+        if (label == Transition.wildcard)
+            onWildcard = to;
+        else
+            transitions.put(label, to);
+    }
+    
+    public String toString() {
+        StringBuffer sb = new StringBuffer("State " + id);
+        if (accepting)
+            sb.append(" (accepting)");
+        
+        sb.append(" " + NFA.arrayListToString(nfaStates));
+        sb.append("\n");
+
+        Iterator labels = transitions.keySet().iterator();
+        while (labels.hasNext()) {
+            String label = (String) labels.next();
+            DFAState dst = (DFAState) transitions.get(label);
+            sb.append("\t on " + label + " -> " + dst.id + "\n");
+        }
+        
+        if (onWildcard != null) 
+            sb.append("\t on * -> " + onWildcard.id + "\n");
+        return sb.toString();
+    }
+}
+
+class DFA {
+    ArrayList states;
+    DFAState startState;
+    int nextStateId;
+
+    DFA() {
+        states = new ArrayList();
+        nextStateId = 0;
+    }
+
+    void setStartState(DFAState startState) {
+        this.startState = startState;
+    }
+
+    public String toString() {
+        StringBuffer sb = 
+            new StringBuffer("DFA has " + states.size() 
+                             + " states, starting state is " 
+                             + startState.id + "\n");
+        for (int i = 0; i < states.size(); i++) {
+            sb.append(states.get(i).toString());
+        }
+        return sb.toString();
+    }
+
+    DFAState addState(ArrayList nfaStates) {
+        // Check if we already have this state
+        for (int i = 0; i < states.size(); i++) {
+            DFAState s = (DFAState) states.get(i);
+
+            if (nfaStates.size() != s.nfaStates.size())
+                continue;
+
+            int j;
+            for (j = 0; j < s.nfaStates.size(); j++) {
+                if (!nfaStates.contains(s.nfaStates.get(j)))
+                    break;
+            }
+            
+            if (j == s.nfaStates.size())
+                return s;
+        }
+
+        
+        // If any of the NFA states was accepting, this
+        // DFA state is also accepting
+        boolean accepting = false;
+        for (int i = 0; i < nfaStates.size(); i++)
+            if (((State) nfaStates.get(i)).accepting) {
+                accepting = true;
+                break;
+            }
+
+        DFAState s = new DFAState(nextStateId++, accepting, nfaStates);
+        states.add(s);
+        return s;
+    }
+}
+
+// Regular expressions
+
+abstract class RE {
+    // Transform an NFA to accept this regular expression
+    // and then whatever it accepted before
+    abstract void attachToNFA(NFA nfa);
+}
+
+class Epsilon extends RE {
+    void attachToNFA(NFA nfa) {
+        ;
+    }
+}
+
+class Constant extends RE {
+    String label;
+    
+    Constant(String label) {
+        this.label = label;
+    }
+
+    void attachToNFA(NFA nfa) {
+        State s = nfa.addState(false);
+        nfa.addTransition(s, label, nfa.startState);
+        nfa.setStartState(s);
+    }
+}
+
+class Wildcard extends RE {
+
+    void attachToNFA(NFA nfa) {
+        State s = nfa.addState(false);
+        nfa.addTransition(s, Transition.wildcard, nfa.startState);
+        nfa.setStartState(s);
+    }
+}
+
+class Dot extends RE {
+    RE left, right;
+
+    Dot(RE left, RE right) {
+        this.left = left;
+        this.right = right;
+    }
+    
+    void attachToNFA(NFA nfa) {
+        // attach in reverse order
+        right.attachToNFA(nfa);
+        left.attachToNFA(nfa);
+    }
+}
+
+class Bar extends RE {
+    RE left, right;
+
+    Bar (RE left, RE right) {
+        this.left = left;
+        this.right = right;
+    }
+
+    void attachToNFA(NFA nfa) {
+        // Old start state
+        State os = nfa.startState;
+
+        // Attach left expression to NFA
+        left.attachToNFA(nfa);
+        State lstart = nfa.startState;
+        // Restore old start state
+        nfa.setStartState(os);
+
+        // Attach right expression to NFA
+        right.attachToNFA(nfa);
+        State rstart = nfa.startState;
+        
+        // Create a new start state
+        State ns = nfa.addState(false);
+        
+        // Add epsilon transitions from ns
+        nfa.addTransition(ns, Transition.epsilon, lstart);
+        nfa.addTransition(ns, Transition.epsilon, rstart);
+
+        // Start state is ns
+        nfa.setStartState(ns);
+    }
+}
+
+class Star extends RE {
+    RE re;
+
+    Star(RE re) {
+        this.re = re;
+    }
+
+    void attachToNFA(NFA nfa) {
+        // Old start state
+        State os = nfa.startState;
+
+        // New start state
+        State ns = nfa.addState(false);
+        nfa.setStartState(ns);
+
+        // Add epsilon transition ns -> os
+        nfa.addTransition(ns, Transition.epsilon, os);
+
+        // Add sub-expression
+        re.attachToNFA(nfa);
+
+        // Add epsilon transition from ns -> sub-expression start state
+        nfa.addTransition(ns, Transition.epsilon, nfa.startState);
+
+        // Start state is still ns
+        nfa.setStartState(ns);
+    }
+}
+
+class Plus extends RE {
+    RE re;
+
+    Plus(RE re) {
+        this.re = re;
+    }
+
+    void attachToNFA(NFA nfa) {
+        // Old start state
+        State os = nfa.startState;
+
+        // Add sub-expression
+        re.attachToNFA(nfa);
+
+        // Add epsilon transition from os -> sub-expression start state
+        nfa.addTransition(os, Transition.epsilon, nfa.startState);
+    }
+}
+
+class ZeroOne extends RE{
+    RE re;
+    
+    ZeroOne(RE re) {
+        this.re = re;
+    }
+
+    void attachToNFA(NFA nfa) {
+        // Old start state
+        State os = nfa.startState;
+
+        // New start state
+        State ns = nfa.addState(false);
+
+        // Add epsilon transition ns -> os
+        nfa.addTransition(ns, Transition.epsilon, os);
+
+        // Connect sub-expression to old start state
+        re.attachToNFA(nfa);
+
+        // Add epsilon transition from ns -> sub-expression start state
+        nfa.addTransition(ns, Transition.epsilon, nfa.startState);
+
+        // Start state is still ns
+        nfa.setStartState(ns);
+    }
+}
+
+class Transition {
+    State from;
+    String label;
+    State to;
+    
+    Transition(State from, String label, State to) {
+        this.from = from;
+        this.label = label;
+        this.to = to;
+    }
+
+    // special constants
+    static String epsilon = new String("epsilon");
+    static String wildcard = new String("*");
+}
+
+
+class State {
+    int id;
+    boolean accepting;
+
+    State(int id, boolean accepting) {
+        this.id = id;
+        this.accepting = accepting;
+    }
+}
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.9 2002/03/31 15:57:31 tufte Exp $
+  $Id: PhysicalScanOperator.java,v 1.10 2002/04/06 02:16:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,7 @@
 package niagara.query_engine;
 
 import org.w3c.dom.*;
-import java.util.Vector;
+import java.util.ArrayList;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -60,7 +60,9 @@ public class PhysicalScanOperator extends PhysicalOperator {
     // The attribute on which the scan is to be performed
     //
     private int scanField;
-    
+
+    private PathExprEvaluator pev;
+    private ArrayList elementList;
 
     ///////////////////////////////////////////////////////////////////////////
     // These are the methods of the PhysicalScanOperatorClass                //
@@ -105,7 +107,8 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	//
 	this.scanField = logicalScanOperator.getParent().getAttrId();
 
-
+        pev = new PathExprEvaluator(rExp);
+        elementList = new ArrayList();
 	}
 
 
@@ -141,8 +144,8 @@ public class PhysicalScanOperator extends PhysicalOperator {
                 System.err.println("Got you!, NULL Root of DOC");
             }
         }
-	
-	Vector elementList = PathExprEvaluator.getReachableNodes(attribute, rExp);	
+
+	pev.getMatches((Node) attribute, elementList);	
 		
 	// Append all the nodes returned to the inputTuple and add these
 	// to the result
@@ -159,11 +162,13 @@ public class PhysicalScanOperator extends PhysicalOperator {
 
 	    // Append a reachable node to the output tuple
 	    //
-	    outputTuple.appendAttribute(elementList.elementAt(node));
+	    outputTuple.appendAttribute(elementList.get(node));
 	    // Add the output tuple to the result
 	    //
 	    result.add(outputTuple, 0);
 	}
+
+        elementList.clear();
 
 	// No problem - continue execution
 	//
