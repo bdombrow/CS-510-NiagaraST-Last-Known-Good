@@ -73,7 +73,7 @@ public class SimpleClient implements UIDriverIF {
 	}
     }
     
-    private static void usage() {
+    protected static void usage() {
 	System.err.println("Usage: SimpleClient [-h host] [-t timeout] [-p port] [-qf QueryFileName]");
 	System.exit(-1);
     }
@@ -178,7 +178,7 @@ public class SimpleClient implements UIDriverIF {
     }
 
     
-    private static String getQueryFromFile(String fileName, char cbuf[]) 
+    protected static String getQueryFromFile(String fileName, char cbuf[]) 
     throws FileNotFoundException, IOException{
 	BufferedReader br;
 	try {
