@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="select">
+
+<filescan id="scan"
+          filename ="../../tests/data/simple.xml"
+	  isstream="no"/>
+
+<unnest id="unnestplay" 
+        regexp="ROOT.PLAY" 
+	input="scan"/>
+
+<unnest id="unnestnum"
+        regexp="NUM"
+	input="unnestplay"
+	outer="yes"/>
+
+<select id="select"
+        input="unnestnum">
+<pred op="eq">
+    <var value="$unnestnum"/>
+    <string value="1"/>
+</pred>
+</select>
+
+</plan>

@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<plan top="cons">
+
+<filescan id="fhscan" 
+          filename="../../tests/data/fhXSnowh.xml"
+	  isstream="yes"/>
+
+<!-- split into persons and open_auction stream -->
+<dup   id="dupfirehose" 
+       branch="2" 
+       input="fhscan"/>
+
+<!-- select persons -->
+<unnest id="person"
+        root="" 
+        regexp="site.people.person"
+	input="dupfirehose"/>
+
+<nest id="personnest" 
+      neston="" 
+      input="person">
+<![CDATA[ <people> $person </people> ]]>
+</nest>
+
+<!-- select open_auctions (this includes items and bids) -->
+<unnest id="open_auction"
+	root=""
+        regexp="site.open_auctions.open_auction"
+	input="dupfirehose"/>
+
+<!-- group the auctions -->
+<nest id="auctionnest"
+      neston=""
+      input="open_auction">
+<![CDATA[ <open_auctions> $open_auction </open_auctions> ]]>
+</nest>
+
+<union id = "union"
+       input = "personnest auctionnest">
+<mapping outputattr = "people" inputattrs = "personnest NONE"/>
+<mapping outputattr = "open_auctions" inputattrs = "NONE auctionnest"/>
+</union>
+
+<construct id="cons" input="union">
+<![CDATA[ 
+<site> $people $open_auctions </site> ]]>
+</construct>
+
+</plan>
+
+

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="unnestnum">
+
+<filescan id="scan"
+          filename ="../../tests/data/simple.xml"
+	  isstream="no"/>
+
+<unnest id="unnestplay" 
+        regexp="ROOT.PLAY" 
+	input="scan"/>
+
+<unnest id="unnestnum"
+        regexp="NUM"
+	input="unnestplay"
+	outer="yes"/>
+</plan>
