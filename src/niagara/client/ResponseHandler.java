@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseHandler.java,v 1.4 2003/07/08 02:10:37 tufte Exp $
+  $Id: ResponseHandler.java,v 1.5 2003/09/22 01:16:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -56,11 +56,8 @@ class ResponseHandler extends HandlerBase
     private static final String RESPONSE_TYPE ="responseType";
 	
 	private static final String SERVER_QUERY_ID = "server_query_id";
-	private static final String SE_QUERY_RESULT = "se_query_result";
 	private static final String QUERY_RESULT = "query_result";
 	private static final String END_RESULT = "end_result";
-	private static final String DTD_LIST = "dtd_list";
-	private static final String DTD = "dtd";
 	private static final String PARSE_ERROR = "parse_error";
 	private static final String ERROR = "error";
 
@@ -147,8 +144,6 @@ class ResponseHandler extends HandlerBase
 	private QueryRegistry reg;
 	// The Runnable that is going to interact with th gui
 	private UIDriverIF ui;
-	// dtd cache for getting dtd strings from the server
-	private DTDCache dtdCache;
     // State of parser
     private int parserState;
     // This shows the nesting of the result document
@@ -183,11 +178,10 @@ class ResponseHandler extends HandlerBase
      * @param reg the registry to update
 	 * @param obj the object to notify for changes
      */
-    public ResponseHandler(QueryRegistry reg, UIDriverIF ui, DTDCache dtdCache)
+    public ResponseHandler(QueryRegistry reg, UIDriverIF ui)
 		{
 			this.reg = reg;
 			this.ui = ui;
-			this.dtdCache = dtdCache;
 		}
 	
 	/**
@@ -438,10 +432,6 @@ class ResponseHandler extends HandlerBase
 				}
 				// check to see if the query is killed
 				if(!reg.isKilled(lid)){
-					// if the id corresponds to an already fired trigger then clear the tree
-					if(reg.wasAlreadyFired(lid) && !(reg.isTriggerPaused(lid))){
-						reg.clearTree(lid);
-					}
 					reg.addResults(lid, sid, nList);
 					// notify waiting thread of new result
 					ui.notifyNew(lid);
@@ -455,33 +445,6 @@ class ResponseHandler extends HandlerBase
 				
 				reg.setServerId(lid, sid);
 			}
-			else if(rtype.equals(SE_QUERY_RESULT)){
-				// Jaewoo gives
-				// <!ELEMENT result (item*)>
-				// <!ELEMENT item (#PCDATA)>
-				if(nList.size() != 1){
-					System.err.println("Illegal list size=" + nList.size());
-					System.err.println("Search engine query should return one item only");
-					return;
-				}
-				// get the node from the list
-				DefaultMutableTreeNode n = (DefaultMutableTreeNode)(nList.get(0));
-				
-				Enumeration nChildren = n.children();
-				List l = new LinkedList();
-
-				while(nChildren.hasMoreElements()){
-					DefaultMutableTreeNode nn = 
-						(DefaultMutableTreeNode)(nChildren.nextElement());
-					l.add(nn.getChildAt(0));
-				}					
-
-				reg.addResults(lid, sid, l);
-				// notify waiting thread of new result
-				if(l.size() > 0) {
-					ui.notifyNew(lid);				
-				}
-			}
 			else if(rtype.equals(END_RESULT)){
 				// Mark the specific result as final and 
 				// notify the listener
@@ -489,30 +452,6 @@ class ResponseHandler extends HandlerBase
 				int queryType = reg.getQueryType(lid);
     			        reg.markFinal(lid);
 				ui.notifyFinalResult(lid);
-			}
-			else if(rtype.equals(DTD_LIST)){
-				// Construct a DTD_LIST object
-				if(nList.size() != 1){
-					System.err.println("Illegal list size. Should be one and is " + nList.size());
-					System.err.println("Server sent no dtd's or server sent bad format");
-					return;
-				}
-				DefaultMutableTreeNode n = (DefaultMutableTreeNode)(nList.get(0));
-				reg.constructDTDList((String)(n.getUserObject()));
-				// remove all nodes from the node list
-				nList.clear();
-			}
-			else if(rtype.equals(DTD)){
-				// Put the dtd you got in the cache
-				// and notify any waiting threads
-				if(nList.size() != 1){
-					System.err.println("Illegal list size. Should be one and is " + nList.size());
-					System.err.println("Server sent bad dtd format");
-					return;
-				}
-				DefaultMutableTreeNode n = (DefaultMutableTreeNode)(nList.get(0));
-				String s = (String)(n.getUserObject());
-				dtdCache.putDTD(lid, s);
 			}
 			else if(rtype.equals(PARSE_ERROR)){
 				// Put a message to be displayed and 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ConnectionReader.java,v 1.4 2002/10/29 01:56:21 vpapad Exp $
+  $Id: ConnectionReader.java,v 1.5 2003/09/22 01:16:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -53,9 +53,9 @@ class ConnectionReader extends AbstractConnectionReader implements Runnable
      */
     private ResponseHandler responseHandler;
 
-    public ConnectionReader(String hostname, int port, UIDriverIF ui, DTDCache dtdCache) {
-	super(hostname, port, ui, dtdCache);
-	initialize(ui, dtdCache);
+    public ConnectionReader(String hostname, int port, UIDriverIF ui) {
+	super(hostname, port, ui);
+	initialize(ui);
     }
 
     /**
@@ -87,9 +87,9 @@ class ConnectionReader extends AbstractConnectionReader implements Runnable
 	System.exit(0);
     }
 
-    void initialize(UIDriverIF ui, DTDCache dtdCache) {
+    void initialize(UIDriverIF ui) {
 	// create a response handler and pass to it the registry
-	responseHandler = new ResponseHandler(queryRegistry, ui, dtdCache);
+	responseHandler = new ResponseHandler(queryRegistry, ui);
 	parser = new XmlParser();
 	parser.setHandler(responseHandler);
     }

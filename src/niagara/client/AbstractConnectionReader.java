@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: AbstractConnectionReader.java,v 1.4 2002/10/29 02:01:29 vpapad Exp $
+  $Id: AbstractConnectionReader.java,v 1.5 2003/09/22 01:16:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -72,7 +72,7 @@ public abstract class AbstractConnectionReader implements Runnable
 	 * @param port Server port
 	 * @param 
 	 */
-	public AbstractConnectionReader(String hostname, int port, UIDriverIF ui, DTDCache dtdCache)
+	public AbstractConnectionReader(String hostname, int port, UIDriverIF ui)
 		{
 			// Set up the connection
 			try{
@@ -94,7 +94,7 @@ public abstract class AbstractConnectionReader implements Runnable
                                 return;
 			}
 
-			initializeConnectionReader(ui, dtdCache);
+			initializeConnectionReader(ui);
                     initialized = true;
 		}
 	
@@ -106,12 +106,12 @@ public abstract class AbstractConnectionReader implements Runnable
 	 * @param reader Some reader
 	 * @param writer Some writer
 	 */
-	public AbstractConnectionReader(Reader reader, Writer writer, UIDriverIF ui, DTDCache dtdCache)
+	public AbstractConnectionReader(Reader reader, Writer writer, UIDriverIF ui)
 		{
 			// initialize the input streams
 			cReader = reader;
 			cWriter = writer;
-			initializeConnectionReader(ui, dtdCache);
+			initializeConnectionReader(ui);
 		}
 
 	// Public MemberFunctions
@@ -180,7 +180,7 @@ public abstract class AbstractConnectionReader implements Runnable
 	/**
 	 * Common constructor initializations
 	 */
-	private void initializeConnectionReader(UIDriverIF ui, DTDCache dtdCache)
+	private void initializeConnectionReader(UIDriverIF ui)
 		{
                         this.ui = ui;
                         

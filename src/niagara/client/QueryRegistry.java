@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryRegistry.java,v 1.5 2003/03/08 02:20:09 vpapad Exp $
+  $Id: QueryRegistry.java,v 1.6 2003/09/22 01:16:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,6 @@
 package niagara.client;
 
 import java.util.*;
-import javax.swing.tree.*;
 
 /**
  * This class holds the result trees for all the active queries 
@@ -43,23 +42,12 @@ class QueryRegistry
      */
     private Map queryMap;
     
-    /**
-     * This vector stores the current dtd list (Vector of Strings)
-     */
-    private Vector dtdList;
-    private Object dtdListMon = new Object();
-    
     // Inner Classes
     /**
      * Objects of this class are the entries of Map
      */
     public class Entry
     {
-	// the root of the tree to be displayed
-	public DefaultMutableTreeNode 
-	    resultTree = new DefaultMutableTreeNode(
-						    "Results",true);
-	
 	// the result in text
 	public StringBuffer resultText = new StringBuffer();
 	
@@ -97,13 +85,6 @@ class QueryRegistry
 	public Entry(String s, int queryType)  {
 	    queryString = s;
 	    type = queryType;
-	}
-	
-	public String toString() {
-	    resultTree.setUserObject("isFinal = " + isFinal
-				     + " server ID = " + serverId);
-	    new JTreeShowThread(resultTree);
-	    return ".";
 	}
 	
 	/**
@@ -206,13 +187,6 @@ class QueryRegistry
 	    System.err.println("ID mismatch: Server sent " + sid + " Registry has " + e.serverId);
 	}
 	
-	DefaultMutableTreeNode node = 
-	    (DefaultMutableTreeNode)(e.resultTree);
-	Iterator it = results.iterator();
-	while(it.hasNext()){
-	    // add direct leaves to the Entry tree node
-	    node.add((MutableTreeNode)(it.next()));
-	}
 	// clear the node list to avoid accidental removal of nodes
 	results.clear();
     }
@@ -285,42 +259,6 @@ class QueryRegistry
     }
     
     /**
-     * returns true if the trigger was fired already
-     * @param id the id
-     * @return true if the trigger was fired
-     */
-    public boolean wasAlreadyFired(int id)
-    {
-	return getQueryInfo(id).alreadyFired;
-    }
-    
-    public void pauseTrigger(int id)
-    {
-	getQueryInfo(id).triggerPaused = true;
-    }
-    
-    
-    public void resumeTrigger(int id)
-    {
-	getQueryInfo(id).triggerPaused = false;
-    }
-    
-    public boolean isTriggerPaused(int id)
-    {
-	return getQueryInfo(id).triggerPaused;
-    }
-    
-    /**
-     * This clears the tree for the new trigger results
-     * @param id the trigger id
-     */
-    public void clearTree(int id)
-    {
-	getQueryInfo(id).resultTree = 
-	    new DefaultMutableTreeNode("Results",true);
-    }
-    
-    /**
      * Check to see if the query was killed so that you don't notify
      * the client needlessly
      * @param id the query id
@@ -332,52 +270,6 @@ class QueryRegistry
 	Entry e = (Entry)(queryMap.get(rid));
 	return e.isKilled;
     }
-    
-    /**
-     * This constructs the dtd list given a string of 
-     * newline separated urls
-     * @param dtds a newline separated list of dtd's
-     */
-    public void constructDTDList(String dtds)
-    {
-	StringTokenizer st = new StringTokenizer(dtds);
-	
-	synchronized(dtdListMon){
-	    dtdList = new Vector();
-	    while(st.hasMoreElements()){
-		dtdList.add(st.nextToken());
-	    }
-	    
-	    // Notify waiter
-	    dtdListMon.notify();
-	    
-	    System.err.println(dtdList);
-	}
-    }
-    
-    /**
-     * This returns a vector of url strings for dtd's
-     * @return a vector of dtd strings
-     */
-    public Vector getDTDList()
-    {
-	if(dtdList == null){
-	    synchronized(dtdListMon){
-		while(dtdList == null){
-		    try{
-			dtdListMon.wait();
-		    }
-		    catch(InterruptedException e){
-		    }
-		}
-	    }
-	}
-	
-	return dtdList;
-    }
-    
-    
-    
     
     /**
      * This method removes a query from the query list. The removal happens 

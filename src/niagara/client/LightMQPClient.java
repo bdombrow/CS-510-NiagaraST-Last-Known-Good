@@ -28,10 +28,6 @@ public class LightMQPClient extends MQPClient {
         }
     }
             
-    private void stop() {
-        cm.endSession();
-    }
-    
     /**
      * @see niagara.client.UIDriverIF#errorMessage(String)
      */

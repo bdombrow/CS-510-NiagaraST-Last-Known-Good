@@ -21,13 +21,12 @@ public class TracingConnectionReader extends AbstractConnectionReader {
     Writer writer;
 
     public TracingConnectionReader(
-	UIDriverIF ui,
+        UIDriverIF ui,
         String hostname,
         int port,
-        DTDCache dtdCache,
         String outputFileName) {
-        super(hostname, port, ui, dtdCache);
-	this.ui = ui;
+        super(hostname, port, ui);
+        this.ui = ui;
         th = new TracingHandler();
         if (outputFileName != null)
             try {
@@ -50,7 +49,7 @@ public class TracingConnectionReader extends AbstractConnectionReader {
                 while (!stop) {
                     start = 0;
                     while (start < 4096) {
-                        count = cReader.read(buf, start, 4096-start);
+                        count = cReader.read(buf, start, 4096 - start);
                         if (count == -1) {
                             stop = true;
                             break;
@@ -121,7 +120,7 @@ public class TracingConnectionReader extends AbstractConnectionReader {
                 fw.close();
             } catch (IOException ioe) {
             }
-	    ui.notifyFinalResult(0);
+            ui.notifyFinalResult(0);
         }
     }
 }

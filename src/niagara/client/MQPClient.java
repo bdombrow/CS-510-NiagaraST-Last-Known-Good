@@ -1,5 +1,5 @@
 /**
- * $Id: MQPClient.java,v 1.7 2003/07/08 02:10:37 tufte Exp $
+ * $Id: MQPClient.java,v 1.8 2003/09/22 01:16:01 vpapad Exp $
  */
 
 package niagara.client;
@@ -30,7 +30,7 @@ public class MQPClient extends SimpleClient {
     }
     
     public MQPClient(String host, int port) {
-        SimpleConnectionReader cr = new SimpleConnectionReader(host, port, this, new DTDCache());
+        SimpleConnectionReader cr = new SimpleConnectionReader(host, port, this);
         // Do not proceed if we didn't manage to connect
         if (!cr.isInitialized()) 
             return;
@@ -82,8 +82,9 @@ public class MQPClient extends SimpleClient {
         // Get the query in string format
 	// don't use prettyprint - vassilis is a unix guy, he certainly
 	// won't want any extra characters messing up his query
-        query = XMLUtils.flatten(plan, false); 
-        
+        // XXX vassilis: of course not!
+        query = XMLUtils.flatten(d, false); 
+
         // Send plan to server, and wait for results
         m_start = System.currentTimeMillis();
         try {

@@ -21,7 +21,7 @@ public class SimpleClient implements UIDriverIF {
     public SimpleClient(String host, int port) {
         cm =
             new ConnectionManager(
-                new SimpleConnectionReader(host, port, this, new DTDCache()));
+                new SimpleConnectionReader(host, port, this));
     }
 
     public SimpleClient(String host) {

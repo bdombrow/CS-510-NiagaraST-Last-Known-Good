@@ -8,6 +8,6 @@ public class QueryFactory {
 	   else if (text.toUpperCase().indexOf("WHERE") != -1) 
 	       return new XMLQLQuery(text);
 	   else 
-	       return new SEQuery(text);
+	       return null;
     }
 }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.17 2003/03/08 02:20:09 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.18 2003/09/22 01:16:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,13 +29,9 @@
 package niagara.client;
 
 import java.io.*;
-import java.net.*;
-import javax.swing.tree.*;
-import java.util.*; 
 
 import gnu.regexp.*;
 
-import niagara.client.dtdTree.DTD;
 import niagara.utils.*;
 
 /**
@@ -79,11 +75,6 @@ public class ConnectionManager implements QueryExecutionIF {
     private AbstractConnectionReader connectionReader;
     
     /**
-     * The dtd cache for the client
-     */
-    private DTDCache dtdCache;
-    
-    /**
      * The output writer to write control 
      * information to the server
      */
@@ -103,7 +94,7 @@ public class ConnectionManager implements QueryExecutionIF {
 
     // Constructors
     public ConnectionManager(String hostname, int port, UIDriverIF ui) {
-	this(new ConnectionReader(hostname, port, ui, new DTDCache()));
+	this(new ConnectionReader(hostname, port, ui));
     }
     
     public ConnectionManager(AbstractConnectionReader cr) {
@@ -133,85 +124,10 @@ public class ConnectionManager implements QueryExecutionIF {
 	
     // QueryExecutionIF methods
 
-    /**
-     * Get the dtd list
-     */
-    public Vector getDTDList() {
-	return reg.getDTDList();			
-    }
-
     public AbstractConnectionReader getConnectionReader() {
 	return connectionReader;
     }
 
-    /**
-     * Generate a tree for search engine
-     * @param url the dtd url
-     */
-    public DefaultMutableTreeNode generateSETree(URL dtdURL)
-    {
-	String s = dtdCache.getDTD(dtdURL.toString());
-	if(s != null){
-	    return DTD.generateSETree(s);
-	} else {
-	    return DTD.generateSETree(
-				      getDTDFromServer(dtdURL.toString()));
-	}
-    }
-
-    /**
-     * Generate a tree for xmlql
-     * @param url the dtd url
-     */
-    public DefaultMutableTreeNode generateXMLQLTree(URL dtdURL)
-    {
-	String s = dtdCache.getDTD(dtdURL.toString());
-	if(s != null){
-	    return DTD.generateXMLQLTree(s);
-	} else {
-	    return DTD.generateXMLQLTree(
-					 getDTDFromServer(dtdURL.toString()));
-	}
-    }
-
-    /**
-     * Send a request message to get the 
-     * text of a dtd. It returns when the dtd
-     * from the server has arrived in the 
-     * cache
-     * @param dtdURL the URL of the dtd
-     */
-	
-    String getDTDFromServer(String dtdURL)
-    {
-	// get the next id for the dtd request
-	final int id = dtdCache.registerDTD(dtdURL);
-			
-	// write the request to the server
-	synchronized(writer){
-	    // Send the query to the server
-	    writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" + id +"\" "+ SERVER_ID +"=\"-1\""
-			   + " " + REQUEST_TYPE +"= \"" + GET_DTD + "\">");
-	    writer.print("<" + REQUEST_DATA + ">");
-	    writer.print(dtdURL.toString());
-	    writer.println("</" + REQUEST_DATA + ">");
-	    writer.println("</" + REQUEST_MESSAGE + ">");
-	}
-
-	synchronized(this){
-	    while(!(dtdCache.hasDTDArrived(id))){
-		try{
-		    wait(500);
-		}
-		catch(InterruptedException ee){
-		    ee.printStackTrace();
-		}
-	    }
-	}
-						
-	String ret = (String) dtdCache.getDTD(dtdURL);
-	return ret;
-    }
 	
 
     /**
@@ -279,10 +195,6 @@ public class ConnectionManager implements QueryExecutionIF {
 	    reg.getQueryInfo(id);
 	
 	int sid = e.getServerId();
-	if(e.type == QueryType.SEQL){
-	    // Kill action has nothing to do.
-	    return;
-	}
 	
 	synchronized(writer){
 	    // Send the request to the server
@@ -369,24 +281,7 @@ public class ConnectionManager implements QueryExecutionIF {
 		
 	}
     }
-    /**
-     * Get result of a query given the query id. DO NOT mess 
-     * with this node just display it
-     * @param id The id of the query
-     * @return the MutableTreeNode object to be displayed
-     */
-    public DefaultMutableTreeNode getQueryResultTree(int id)
-    {
-	QueryRegistry.Entry e =
-	    reg.getQueryInfo(id);
-	
-	if(e != null){
-	    return e.resultTree;
-	} else {
-	    return new DefaultMutableTreeNode("NULL in registry. RECODE!!");
-	}
-    }
-    
+
     /**
      * Get the query string
      * @param id the id of the query

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryExecutionIF.java,v 1.6 2003/01/13 05:04:56 tufte Exp $
+  $Id: QueryExecutionIF.java,v 1.7 2003/09/22 01:16:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,10 +27,6 @@
 
 
 package niagara.client;
-
-import javax.swing.tree.*;
-import java.net.*;
-import java.util.*;
 
 /**
  * This interface defines the methods that are called in response to 
@@ -93,13 +89,6 @@ public interface QueryExecutionIF
 	public boolean isResultFinal(int id);
 
 	/**
-	 * Get result of a query given the query id
-	 * @param id The id of the query
-	 * @return the MutableTreeNode object to be displayed
-	 */
-	public DefaultMutableTreeNode getQueryResultTree(int id);
-
-	/**
 	 * End the session with the server
 	 */
 	public void endSession();
@@ -110,22 +99,4 @@ public interface QueryExecutionIF
 	 * @return the query string
 	 */
 	public String getQueryString(int id);
-
-	/** 
-	 * Get the dtd list from the server
-	 */
-	public Vector getDTDList();
-
-	/**
-	 * Generate a tree for search engine
-	 * @param url the dtd url
-	 */
-	public DefaultMutableTreeNode generateSETree(URL dtdURL);
-	
-	/**
-	 * Generate a tree for xmlql
-	 * @param url the dtd url
-	 */
-	public DefaultMutableTreeNode generateXMLQLTree(URL dtdURL);
-
 }
