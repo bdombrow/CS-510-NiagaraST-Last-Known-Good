@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<Students>
+<Student>
+  <Class> 1 </Class>
+  <Name> Sue </Name>
+</Student>
+<Student>
+  <Class> 2 </Class>
+  <Name> Bob </Name>
+</Student>
+<Student>
+  <Class> 1 </Class>
+  <Name> Doug </Name>
+</Student>
+<Student>
+  <Class> 2 </Class>
+  <Name> Anne </Name>
+</Student>
+</Students>
+

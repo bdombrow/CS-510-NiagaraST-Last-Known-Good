@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- This query tests having a construct operator in the middle
+of the operator tree -->
+
+<plan top="nest">
+
+<filescan id="data" filename = "../../tests/data/nestdata.xml"/>
+
+<unnest id="student" regexp="Students.Student" input="data"/>
+
+<unnest id="class" regexp="Class" input = "student"/>
+
+<unnest id="name" regexp="Name" root="student" input="class"/>
+
+<nest id="nest" groupby="$class" input="name">
+<class id = "$class">
+<name>$name</name>
+</class>
+</nest> 
+
+</plan>

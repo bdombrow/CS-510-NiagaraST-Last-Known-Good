@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.13 2003/03/15 17:53:21 ptucker Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.14 2003/03/19 00:33:20 tufte Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -128,7 +128,7 @@
                 class="niagara.query_engine.PhysicalPunctuateOperator"/>
     </logical>
     <logical name="nest"
-      class="niagara.xmlql_parser.op_tree.nestOp">
+      class="niagara.logical.Nest">
       <physical name="PhysicalNest" class="niagara.query_engine.PhysicalNestOperator"/>
     </logical>
     <logical name="scanOp"
