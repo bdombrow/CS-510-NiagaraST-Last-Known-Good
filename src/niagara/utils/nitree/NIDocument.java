@@ -74,6 +74,7 @@ public class NIDocument extends NINode {
     public void initialize(MapTable _mapTable, Document _domDoc) {
 	mapTable = _mapTable;
 	domDoc = _domDoc;
+	mapTable.insert(domDoc, this);
 	initialized = true;
 	return;
     }
@@ -189,9 +190,15 @@ public class NIDocument extends NINode {
 
     public static NIDocument getAssocNIDocument(Document _domDoc, 
 						MapTable _mapTable) {
-        Object o = _mapTable.lookup(_domDoc);
-	if(o != null) {
-             return (NIDocument)o;
+	/* handle orphan elements */
+	Object o = null;
+	if(_domDoc == null) {
+	    _domDoc = new TXDocument();
+	} else {
+	    o = _mapTable.lookup(_domDoc);
+	    if(o != null) {
+		return (NIDocument)o;
+	    }
 	}
 
 	/* else have to create a new NIDocument */
@@ -324,6 +331,9 @@ public class NIDocument extends NINode {
 	/* Set the document element of the cloned doc
 	 * to the doc element of the clonee
 	 */
+	if(this.domDoc.getDocumentElement() == null) {
+	    System.out.println("here doc elt is null!!");
+	}
 	cloneDoc.domDoc.appendChild(this.domDoc.getDocumentElement());
 	
 	/* don't copy the writeable array to the cloned NIDoc, we have
