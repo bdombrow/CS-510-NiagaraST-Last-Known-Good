@@ -64,12 +64,9 @@ class XMLFirehoseThread extends Thread {
 							    bwTrace);
 		    break;
 		case FirehoseConstants.PACKET:
-		    boolean fLive = false;
 		    System.out.println("Generating Packets");
-		    if (fhSpec.getDescriptor2() != null)
-			fLive = Boolean.valueOf(fhSpec.getDescriptor2()).booleanValue();
 		    xml_generator = new XMLPacketGenerator(fhSpec.getDescriptor(),
-							   fLive,
+							   fhSpec.getDescriptor2(),
 							   fhSpec.getNumTLElts(),
 							   useStreamingFormat,
 							   usePrettyPrint);

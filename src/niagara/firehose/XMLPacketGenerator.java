@@ -5,25 +5,31 @@ import java.net.*;
 import java.util.*;
 import com.ibm.XMLGenerator.*;
 import net.sourceforge.jpcap.capture.*;
+import net.sourceforge.jpcap.simulator.*;
 import net.sourceforge.jpcap.net.*;
 import net.sourceforge.jpcap.util.*;
 
 public class XMLPacketGenerator extends XMLFirehoseGen {
     private static PacketHandler m_ph = null;
-    private static boolean m_fLive;
+    private static String m_stSource;
     private String m_stFile;
     private boolean m_fEOF = false;
     private StringBuffer m_stb = null;
-    String tab = "";
-    String tab2 = "";
-    String tab3 = "";
-    String nl = "";
+    public static String tab = "";
+    public static String tab2 = "";
+    public static String tab3 = "";
+    public static String nl = "";
+    public static final int FINITEFILE=1; // data from file until EOF
+    public static final int LOOPFILE=2;   // data from file looping forever
+    public static final int LIVE=3;       // data from NIC (live feed)
+    public static final int GEN=4;        // generated data from jpcap
+    public static int m_iDataSource;      // which one are we using?
 
-    public XMLPacketGenerator(String stFile, boolean fLive,
+    public XMLPacketGenerator(String stFile, String stSource,
 			      int numTLElts, boolean streaming,
 			      boolean prettyPrint) {
 	m_ph = new PacketHandler();
-	m_fLive = fLive;
+	m_stSource = stSource;
 	m_stFile = stFile;
 	this.numTLElts = numTLElts;
 	useStreamingFormat = streaming;
@@ -38,30 +44,39 @@ public class XMLPacketGenerator extends XMLFirehoseGen {
     }
 
     public byte[] generateXMLBytes() {
-	if (m_stb == null) {
+	if (m_stb == null)
 	    m_stb = new StringBuffer(1000*numTLElts);
-	}
-	m_stb.append("<PS>");
-	m_stb.append(nl);
-	m_ph.init(m_stFile, m_fLive, usePrettyPrint);
+
+	m_ph.init(m_stFile, m_stSource);
+	m_stb.append(XMLPacketGenerator.nl);
 	for (int iDoc = 0; m_fEOF == false && iDoc < numTLElts; iDoc++) {
-	    m_stb.append(tab);
+	    m_stb.append(XMLPacketGenerator.tab);
 	    m_stb.append("<P>");
-	    m_stb.append(nl);
+	    m_stb.append(XMLPacketGenerator.nl);
 
-	    m_ph.getPacket(m_fLive, m_stb);
-
-	    m_stb.append(tab);
-	    m_stb.append("</P>");
-	    m_stb.append(nl);
+	    m_ph.getPacket(m_stb);
 	    m_fEOF = m_ph.getEOF();
+
+	    m_stb.append(XMLPacketGenerator.tab);
+	    m_stb.append("</P>");
+	    m_stb.append(XMLPacketGenerator.nl);
 	}
-	m_stb.append("</PS>");
-	m_stb.append(nl);
+
+	if (m_fEOF)
+	    getEndPunctuation();
 
 	String stOut = m_stb.toString();
 	m_stb.setLength(0);
 	return stOut.getBytes();
+    }
+
+    public void getEndPunctuation() {
+	m_stb.append("<punct:P xmlns:punct=\"PUNCT\">");
+	m_stb.append("<TS>*</TS><IP><SI>12.228.114.114</SI>");
+	m_stb.append("<DI>*</DI><FR>*</FR></IP><TCP>*</TCP>");
+	m_stb.append("<HTTP><URL>*</URL><R>*</R></HTTP></punct:P>");
+	m_stb.append("<punct:P xmlns:punct=\"PUNCT\">");
+	m_stb.append("*</punct:P>");
     }
 
     public boolean getEOF() { return m_fEOF; }
@@ -84,11 +99,11 @@ class PacketInit extends Thread {
    }
 
    public void run() {
-      PacketCapture pcap;
+      PacketCaptureCapable pcap;
 
       try {
-         // Step 1:  Instantiate Capturing Engine
-         pcap = new PacketCapture();
+	  // Step 1:  Instantiate Capturing Engine
+	  pcap = new PacketCapture();
 
          // Step 2:  Check for devices
          m_device = pcap.findDevice();
@@ -113,76 +128,33 @@ class PacketInit extends Thread {
 
 class PacketHandler implements PacketListener
 {
-    class ByteArrayHandler {
-	private byte[][] m_rgrgb;
-	private int[] m_rgc;
-	private int m_iNext = 0;
-	private int m_crg = 0;
-
-	public ByteArrayHandler(int cRg) {
-	    m_crg = cRg;
-	    m_rgrgb = new byte[cRg][];
-	    m_rgc = new int[cRg];
-	    for (int i=0; i<cRg; i++) {
-		m_rgc[i] = 0;
-	    }
-	}
-
-	public byte[] newArray(int cb) {
-	    int i;
-
-	    //see if we already have this allocated
-	    for (i=0; i < m_crg; i++) {
-		if (cb == m_rgc[i])
-		    break;
-	    }
-
-	    if (i == m_crg) {
-		m_rgrgb[m_iNext] = new byte[cb];
-		m_rgc[m_iNext] = cb;
-		i = m_iNext;
-		m_iNext = (m_iNext+1) % m_crg;
-	    }
-
-	    return m_rgrgb[i];
-	}
-    }
-
     private static PacketInit m_pi = null;
-    private static int m_counter = 0;
     static private Vector m_vctPackets = new Vector();
     static private InputStream m_tcpdump = null;
     private ArrayHelper array = new ArrayHelper();
     private String m_stFile;
-    private int m_cbRead = 0;
     private ByteReader m_br = new ByteReader();
     private byte[] m_rgbPacketLength = new byte[4];
-    private ByteArrayHandler m_bah = new ByteArrayHandler(10);
     private static int m_rgbitIP = 0xFFFF;   //all IP fields
     private static int m_rgbitTCP = 0x0001 | 0x0002;  //only Src & Dst Port
     private static int m_rgbitHTTP = 0xFFFF; //all HTTP fields
-    private static int m_nSessionGap = -1;
-    private static Hashtable m_htSession = new Hashtable();
-    private static long m_idSession = 0;
     private HTTPFields m_hf = new HTTPFields();
-    boolean m_fEOF = false;
-    String tab = "";
-    String tab2 = "";
-    String tab3 = "";
-    String nl = "";
+    private boolean m_fEOF = false;
 
-    public void init(String stFile, boolean fLive, boolean usePrettyPrint) {
+    public void init(String stFile, String stSource) {
 	m_stFile = stFile;
-	m_cbRead = 0;
 
-	if(usePrettyPrint) {
-	    tab = "   ";
-	    tab2 = tab + tab;
-	    tab3 = tab + tab + tab;
-	    nl = "\n";
-	}
+	if (stSource.equals("live"))
+	    XMLPacketGenerator.m_iDataSource=XMLPacketGenerator.LIVE;
+	else if (stSource.equals("gen"))
+	    XMLPacketGenerator.m_iDataSource=XMLPacketGenerator.GEN;
+	else if (stSource.equals("loop"))
+	    XMLPacketGenerator.m_iDataSource=XMLPacketGenerator.LOOPFILE;
+	else
+	    XMLPacketGenerator.m_iDataSource=XMLPacketGenerator.FINITEFILE;
 
-	if (m_pi == null && fLive) {
+	if (m_pi == null &&
+	    XMLPacketGenerator.m_iDataSource == XMLPacketGenerator.LIVE) {
 	    StringTokenizer stok = new StringTokenizer(stFile, ":");
 	    StringBuffer stb = new StringBuffer();
 	    while (stok.hasMoreTokens()) {
@@ -194,19 +166,15 @@ class PacketHandler implements PacketListener
         }
     }
 
-    public int getBytesRead() {
-	return m_cbRead;
-    }
-
     public boolean getEOF() {
 	return m_fEOF;
     }
 
-    public void getPacket(boolean fLive, StringBuffer stb) {
+    public void getPacket(StringBuffer stb) {
 	TCPPacket tcppkt;
 
 	try{
-	    if (fLive) {
+	    if (XMLPacketGenerator.m_iDataSource == XMLPacketGenerator.LIVE) {
 		//Wait until there are packets available
 		synchronized(m_vctPackets) {
 		    if (m_vctPackets.size() == 0)
@@ -215,91 +183,83 @@ class PacketHandler implements PacketListener
 		    m_vctPackets.removeElementAt(0);
 		}
 
-		long ts = genTimeStampElement(fLive, stb);
+		long ts = genTimeStampElement(stb);
 
-		getTCPPacket(fLive, tcppkt, stb, ts);
+		getTCPPacket(tcppkt, stb, ts);
+	    } else if (XMLPacketGenerator.m_iDataSource ==
+		       XMLPacketGenerator.GEN) {
+		byte[] rgbPacket = PacketGenerator.generate();
+		EthernetPacket eth_packet = new EthernetPacket(14, rgbPacket);
+		if(eth_packet.getProtocol() == EthernetProtocols.IP) {
+		    TCPPacket packet = new TCPPacket  (14, rgbPacket);
+		    if (packet.getProtocol() == IPProtocols.TCP) {
+			long ts = genTimeStampElement(stb);
+			getTCPPacket(packet, stb, ts);
+		    }
+		}
 	    } else
 		HTTP_Parser(stb);
 
-	} catch (IOException e) { ;
-	} catch (InterruptedException ex) {;}
-    }
-
-    class SessionProps {
-	public long m_idSession;
-	public long m_tsLast;
-    }
-
-    private void getTCPPacket(boolean fLive, TCPPacket pkt, 
-			      StringBuffer stb, long ts)
-	throws java.io.IOException {
-	//Define a session by the source IP and source port.
-	String stSIP = null;
-	long idSession = m_idSession;
-
-	if (m_nSessionGap != -1) {
-	    if (stSIP == null)
-		stSIP = pkt.getSourceAddress();
-	    m_idSession++;
-
-	    //Determine the session id
-	    SessionProps prp = (SessionProps) m_htSession.get(stSIP);
-	    if (prp != null) {
-		if (ts - prp.m_tsLast < m_nSessionGap) {
-		    idSession = prp.m_idSession;
-		    m_idSession--;
-		}
-	    } else
-		prp = new SessionProps();
-
-	    prp.m_idSession = idSession;
-	    prp.m_tsLast = ts;
-	    m_htSession.put(stSIP, prp);
-	    genElem("SES", idSession, stb, tab2);
+	} catch (IOException e) {
+	    System.out.println("IOException: " + e.getMessage());
+	} catch (InterruptedException ex) {
+	    System.out.println("InteruptedException: " + ex.getMessage());
 	}
+    }
+
+    private void getTCPPacket(TCPPacket pkt, StringBuffer stb, long ts)
+	throws java.io.IOException {
 
 	//Get the IP information
 	if (m_rgbitIP != 0) {
-	    stb.append(tab2);
+	    stb.append(XMLPacketGenerator.tab2);
 	    stb.append("<IP>");
-	    stb.append(nl);
-	    if ((m_rgbitIP & 0x0001) != 0) {
-		if (stSIP == null)
-		    genElem("SI", pkt.getSourceAddress(), stb, tab3);
-		else
-		    genElem("SI", stSIP, stb, tab3);
-	    }
+	    stb.append(XMLPacketGenerator.nl);
+	    if ((m_rgbitIP & 0x0001) != 0)
+		genElem("SI", pkt.getSourceAddress(), stb, 
+			XMLPacketGenerator.tab3);
 	    if ((m_rgbitIP & 0x0002) != 0)
-		genElem("DI", pkt.getDestinationAddress(), stb, tab3);
+		genElem("DI", pkt.getDestinationAddress(), stb,
+			XMLPacketGenerator.tab3);
 	    if ((m_rgbitIP & 0x0004) != 0)
-		genElem("ID", pkt.getId(), stb, tab3);
+		genElem("ID", pkt.getId(), stb,
+			XMLPacketGenerator.tab3);
 	    if ((m_rgbitIP & 0x0008) != 0)
-		genElem("FR", pkt.getFragmentOffset(), stb, tab3);
+		genElem("FR", pkt.getFragmentOffset(), stb,
+			XMLPacketGenerator.tab3);
+	    if ((m_rgbitIP & 0x0010) != 0)
+		genElem("FF", pkt.getFragmentFlags(), stb,
+			XMLPacketGenerator.tab3);
 	    //if (pkt.getFragmentFlags() & 0x0001)
 	    //Punctuation: No more packets with this ID.
-	    stb.append(tab2);
+	    stb.append(XMLPacketGenerator.tab2);
 	    stb.append("</IP>");
-	    stb.append(nl);
+	    stb.append(XMLPacketGenerator.nl);
 	}
 
 	//Get the TCP information
 	if (m_rgbitTCP != 0) {
-	    stb.append(tab2);
+	    stb.append(XMLPacketGenerator.tab2);
 	    stb.append("<TCP>");
-	    stb.append(nl);
+	    stb.append(XMLPacketGenerator.nl);
 	    if ((m_rgbitTCP & 0x0001) != 0)
-		genElem("SP", pkt.getSourcePort(), stb, tab3);
+		genElem("SP", pkt.getSourcePort(), stb,
+			XMLPacketGenerator.tab3);
 	    if ((m_rgbitTCP & 0x0002) != 0)
-		genElem("DP", pkt.getDestinationPort(), stb, tab3);
+		genElem("DP", pkt.getDestinationPort(), stb,
+			XMLPacketGenerator.tab3);
 	    if ((m_rgbitTCP & 0x0004) != 0)
-		genElem("SQ", pkt.getSequenceNumber(), stb, tab3);
+		genElem("SQ", pkt.getSequenceNumber(), stb,
+			XMLPacketGenerator.tab3);
 	    if ((m_rgbitTCP & 0x0008) != 0)
-		genElem("AN", pkt.getAcknowledgmentNumber(), stb, tab3);
+		genElem("AN", pkt.getAcknowledgmentNumber(), stb,
+			XMLPacketGenerator.tab3);
 	    if ((m_rgbitTCP & 0x0010) != 0)
-		genElem("WS", pkt.getWindowSize(), stb, tab3);
-	    stb.append(tab2);
+		genElem("WS", pkt.getWindowSize(), stb,
+			XMLPacketGenerator.tab3);
+	    stb.append(XMLPacketGenerator.tab2);
 	    stb.append("</TCP>");
-	    stb.append(nl);
+	    stb.append(XMLPacketGenerator.nl);
 	}
 
 	if (m_rgbitHTTP != 0) {
@@ -314,7 +274,6 @@ class PacketHandler implements PacketListener
     }
 
     public void packetArrived(Packet packet) {
-	m_counter++;
 	StringBuffer stbOut = new StringBuffer(120);
 
 	// cast packet onto TCPPacket to extract source and
@@ -346,9 +305,8 @@ class PacketHandler implements PacketListener
 
 	while (stok.hasMoreTokens()) {
 	    String stTok = (String) stok.nextElement();
-	    if (stTok.startsWith("SGAP")) {
-		m_nSessionGap = Integer.parseInt(stTok.substring(4));
-	    } else if (stTok.startsWith("IP")) {
+	    
+	    if (stTok.startsWith("IP")) {
 		m_rgbitIP = 0;
 		stTok = (String) stok.nextElement();
 		while (stTok.equals("IP") == false && stok.hasMoreTokens()) {
@@ -360,6 +318,8 @@ class PacketHandler implements PacketListener
 			m_rgbitIP |= 0x04;
 		    else if (stTok.equals("FR"))
 			m_rgbitIP |= 0x08;
+		    else if (stTok.equals("FF"))
+			m_rgbitIP |= 0x10;
 
 		    stTok = (String) stok.nextElement();
 		}
@@ -452,7 +412,6 @@ class PacketHandler implements PacketListener
 
     byte[] temp = new byte[4];
     public String HTTP_Parser (StringBuffer stbOut) {
-	m_counter = 0;
 	long i = 0;
 	int len = 0;
 	byte[] rgbPacket = null;
@@ -461,14 +420,18 @@ class PacketHandler implements PacketListener
 	    if (m_tcpdump == null)
 		openTraceFile(m_stFile);
 
-	    long ts = genTimeStampElement(false, stbOut);
+	    long ts = genTimeStampElement(stbOut);
 
 	    i = completeRead(m_tcpdump, temp, 0, temp.length);
 	    if (i == -1) {
 		closeTraceFile();
-		return "";
+		if (XMLPacketGenerator.m_iDataSource ==
+		    XMLPacketGenerator.LOOPFILE) {
+		    openTraceFile(m_stFile);
+		    System.out.println("looping...");
+		} else
+		    return "";
 	    }
-	    m_counter++;
 
 	    for(l=0;l<4;l++) m_rgbPacketLength[l] = temp[3-l];
 
@@ -476,23 +439,28 @@ class PacketHandler implements PacketListener
 	    len = array.extractInteger(m_rgbPacketLength, 0, 4);
 
 	    if (completeSkip(m_tcpdump, 4) == -1) {
-               m_tcpdump.close();
-               m_fEOF = true;
+		closeTraceFile();
+		if (XMLPacketGenerator.m_iDataSource ==
+		    XMLPacketGenerator.LOOPFILE)
+		    openTraceFile(m_stFile);
 	    }
 
-	    m_cbRead += len;
-	    rgbPacket = m_bah.newArray(len);
+	    rgbPacket = new byte[len];
 
 	    if (completeRead(m_tcpdump, rgbPacket, 0, len) == -1) {
 		closeTraceFile();
-		return "";
+		if (XMLPacketGenerator.m_iDataSource ==
+		    XMLPacketGenerator.LOOPFILE)
+		    openTraceFile(m_stFile);
+		else
+		    return "";
 	    }
 
 	    EthernetPacket eth_packet = new EthernetPacket(14, rgbPacket);
 	    if(eth_packet.getProtocol() == EthernetProtocols.IP) {
 		TCPPacket packet = new TCPPacket  (14, rgbPacket);
 		if (packet.getProtocol() == IPProtocols.TCP) {
-		    getTCPPacket(false, packet, stbOut, ts);
+		    getTCPPacket(packet, stbOut, ts);
 		}
 	    }
         } catch (IOException e) {
@@ -517,12 +485,15 @@ class PacketHandler implements PacketListener
 
     byte[] seconds = new byte[4];
     byte[] micro = new byte[4];
-    private long genTimeStampElement(boolean fLive, StringBuffer stbOut) {
+    long m_secLast = 0;
+    int m_micLast = 0;
+    private long genTimeStampElement(StringBuffer stbOut) {
 	long sec = 0;
 	int mic = 0;
 
 	// following lines are added to extract timestamp.
-	if (fLive) {
+	if (XMLPacketGenerator.m_iDataSource == XMLPacketGenerator.LIVE ||
+	    XMLPacketGenerator.m_iDataSource == XMLPacketGenerator.GEN) {
 	    long ms = System.currentTimeMillis();
 	    sec = ms/1000;
 	    mic = (int) (ms % 1000) * 1000;
@@ -546,17 +517,25 @@ class PacketHandler implements PacketListener
 		sec = array.extractLong(seconds, 0, 4);
 		mic = array.extractInteger(micro, 0, 4);
 
+		//If we are looping through the file, then we need to make
+		// sure the time stamp keeps increasing.
+		if (sec < m_secLast || (sec==m_secLast && mic<m_micLast)) {
+		    sec = m_secLast + 1;//Do the simple thing for now
+		}
+		m_secLast = sec;
+		m_micLast = mic;
+
 		// code for timestamps ends here...
 	    } catch (IOException ex) {;}
 	}
 
-	stbOut.append(tab2);
+	stbOut.append(XMLPacketGenerator.tab2);
 	stbOut.append("<TS>");
 	stbOut.append(sec);
 	stbOut.append(".");
 	stbOut.append(mic);
 	stbOut.append("</TS>");
-	stbOut.append(nl);
+	stbOut.append(XMLPacketGenerator.nl);
 
 	return ((sec*1000) + mic);
     }
@@ -565,15 +544,15 @@ class PacketHandler implements PacketListener
 	throws java.io.IOException {
 	StringTokenizer stok = new StringTokenizer(stRequest);
 
-	stbOut.append(tab2);
+	stbOut.append(XMLPacketGenerator.tab2);
 	stbOut.append("<HTTP>");
-	stbOut.append(nl);
+	stbOut.append(XMLPacketGenerator.nl);
         //First token is the method
 	if ((m_rgbitHTTP & 0x1000) != 0)
-	    genElem("MD", stok.nextToken(), stbOut, tab3);
+	    genElem("MD", stok.nextToken(), stbOut, XMLPacketGenerator.tab3);
 	//Second token is the URL
 	if ((m_rgbitHTTP & 0x2000) != 0)
-	    genElem("URL", stok.nextToken(), stbOut, tab3);
+	    genElem("URL", stok.nextToken(), stbOut, XMLPacketGenerator.tab3);
 
 	while (m_br.nextLine()) {
 	    String stValue = null;
@@ -585,12 +564,12 @@ class PacketHandler implements PacketListener
 	    }
 
 	    if (stTag != null && stValue != null)
-		genElem(stTag, stValue, stbOut, tab3);
+		genElem(stTag, stValue, stbOut, XMLPacketGenerator.tab3);
 	}
 
-	stbOut.append(tab2);
+	stbOut.append(XMLPacketGenerator.tab2);
 	stbOut.append("</HTTP>");
-	stbOut.append(nl);
+	stbOut.append(XMLPacketGenerator.nl);
     }
 
     private void genElem(String stTag, long nValue, StringBuffer stb,
@@ -605,7 +584,7 @@ class PacketHandler implements PacketListener
 	stb.append("</");
 	stb.append(stTag);
 	stb.append(">");
-	stb.append(nl);
+	stb.append(XMLPacketGenerator.nl);
     }
 
     private void genElem(String stTag, String stValue, StringBuffer stb,
@@ -658,7 +637,7 @@ class PacketHandler implements PacketListener
 	stb.append("</");
 	stb.append(stTag);
 	stb.append(">");
-	stb.append(nl);
+	stb.append(XMLPacketGenerator.nl);
     }
 
     private int completeRead(InputStream is, byte[] rgb, int iOffset,
@@ -675,8 +654,6 @@ class PacketHandler implements PacketListener
 	    iOffset += iRead;
 	}
 
-	if (iRead == -1)
-	    System.out.println("EOF occurred");
 	return iRead;
     }
 
@@ -1008,8 +985,6 @@ class FirehoseBufferedInputStream extends InputStream {
 	    }
 	}
 
-	if (m_cbBuffer == -1)
-	    System.out.println("EOF occurred");
 	return (m_cbBuffer == -1) ? -1 : (iOut - iOffset);
     }
 
