@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.8 2002/03/26 23:51:33 tufte Exp $
+  $Id: NiagraServer.java,v 1.9 2002/03/27 10:11:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -352,7 +352,7 @@ public class NiagraServer
                 else if (args[i].equals("-saxdom")) {
                     // XXX vpapad: number of pages and page size
                     // should be a user-settable parameter
-                    BufferManager.createBufferManager(1024, 256);
+                    BufferManager.createBufferManager(1024, 1024);
                     useSAXDOM = true;
 
                     valid_args = true;
