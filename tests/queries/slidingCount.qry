@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+<dtdscan id="dtd">
+<url value="http://www.cse.ogi.edu/~jinli/xml/numbers_1.xml"/>
+</dtdscan>
+<scan id="scan" regexp="PLAY.NUM" input="dtd"/>
+<scan id="scan1" regexp="NUM1" input="scan"/>
+<scan id="scan2" root="$scan" regexp="NUM2" input="scan1"/>
+<slidingCount id="slidingCount" groupby="$scan1" countattr="$scan2" input="scan2" range = "5" every = "5"/>
+<construct id="cons" input="slidingCount">
+<Count><index>$index</index><groupby>$scan1</groupby>$slidingCount</Count>
+</construct>
+</plan>

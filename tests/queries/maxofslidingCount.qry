@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~jinli/xml/bids.dtd">
+
+<plan top="cons">
+<dtdscan id="dtd">
+<url value="http://www.cse.ogi.edu/~jinli/xml/bids.xml"/>
+</dtdscan>
+<unnest id="scan" regexp="BIDS.BID" input="dtd"/>
+<unnest id="auction" regexp="auction" input="scan"/>
+<slidingCount id="slidingCount"  groupby="$auction" countattr="$auction" input="auction" range="5" every="3"/>
+<max id="max" groupby="$index" maxattr="$slidingCount" input="slidingCount"/>
+<construct id="cons" input="max">
+<max><index>$index</index>$max</max>
+</construct>
+</plan>
