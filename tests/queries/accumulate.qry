@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd">
 
-<plan top="accum" x="301" y="31">
+<plan top="accum">
 
 <dtdscan id="docroot">
 
@@ -10,6 +10,6 @@
 
 </dtdscan>
 
-<accumulate clear="true" accumFileName="AvgGrade.xml" mergeAttr="$docroot" mergeTemplate="/disk/hopper/projects/disc/niagara/kristin/niagara_1_0/demo/data/AvgGradeMT.xml" id="accum" input="docroot" x="301" y="103">
+<accumulate clear="true" accumFileName="AvgGrade.xml" mergeAttr="$docroot" mergeTemplate="/disk/hopper/projects/disc/niagara/mergeTemplates/AvgGradeMT.xml" id="accum" input="docroot">
 </accumulate>
 </plan>

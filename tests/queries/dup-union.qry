@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd">
 <plan top="cons">
 <dtdscan id="dtd">
 <url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/>
