@@ -42,7 +42,7 @@ public class IntegerNodeHelper extends NumberNodeHelperBase
     public Class getNodeClass() { return myClass; }
 
     public Object valueOf(NINode node) {
-	String valString = node.myGetNodeValue();
+	String valString = node.myGetNodeValue().trim();
 	return Integer.valueOf(valString);
     }
     

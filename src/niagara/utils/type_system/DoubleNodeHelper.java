@@ -38,7 +38,7 @@ public class DoubleNodeHelper extends NumberNodeHelperBase
     public Class getNodeClass() { return myClass; }
 
     public Object valueOf(NINode node) {
-	return Double.valueOf(node.myGetNodeValue());
+	return Double.valueOf(node.myGetNodeValue().trim());
     }
     
     public boolean nodeEquals(NINode lNode, NINode rNode) {
