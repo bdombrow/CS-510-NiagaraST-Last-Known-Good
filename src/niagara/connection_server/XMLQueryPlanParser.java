@@ -41,15 +41,17 @@ public class XMLQueryPlanParser {
 	niagara.ndom.DOMParser p;
 	Document document = null;
 	try {
-	    p = DOMFactory.newParser();
-	    p.parse(new InputSource(new ByteArrayInputStream(description.getBytes())));
+            p = DOMFactory.newParser();
+            p.parse(new InputSource(new ByteArrayInputStream(description.getBytes())));
 	    document = p.getDocument();
 	    Element root = (Element) document.getDocumentElement();
 	    return parsePlan(root);
 	} catch (org.xml.sax.SAXException se) {
-	    throw new InvalidPlanException("Error parsing plan string " + se.getMessage());
+	    throw new InvalidPlanException("Error parsing plan string " 
+                                           + se.getMessage());
 	} catch (java.io.IOException ioe) {
-	    throw new InvalidPlanException("IO Exception reading plan string " + ioe.getMessage());
+	    throw new InvalidPlanException("IO Exception reading plan string " 
+                                           + ioe.getMessage());
 	} catch (java.lang.CloneNotSupportedException cnse) {
 	    throw new PEException("Couldn't clone something " + cnse.getMessage());
 	}
@@ -234,7 +236,8 @@ public class XMLQueryPlanParser {
 	}
 	catch (Exception ex) {
 	    ex.printStackTrace();
-	    throw new InvalidPlanException("Error while parsing: " + regexpAttr + " in " + id);
+	    throw new InvalidPlanException("Error while parsing: " 
+                                           + regexpAttr + " in " + id);
 	}
 	
 	schemaAttribute resultSA = 
@@ -1045,34 +1048,38 @@ public class XMLQueryPlanParser {
 	if (e == null)
 	    return null;
 
-	NodeList children = e.getChildNodes();
-	// Remove superfluous Text Nodes!
-	for (int i=0; i < children.getLength(); i++) {
-	    if (!(children.item(i) instanceof Element)) {
-		e.removeChild(children.item(i));
-	    }
-	}
+        Element l, r;
+        l = r = null;
+
+        Node c = e.getFirstChild();
+        do {
+            if (c.getNodeType() == Node.ELEMENT_NODE) {
+                if (l == null) l = (Element) c;
+                else if (r == null) r = (Element) c;
+            }
+            c = c.getNextSibling();
+        } while (c != null);
 
 	if (e.getNodeName().equals("and")) {
-	    predicate left = parsePreds((Element) e.getChildNodes().item(0), leftv, rightv);
-	    predicate right = parsePreds((Element) e.getChildNodes().item(1), leftv, rightv);
+	    predicate left = parsePreds(l, leftv, rightv);
+	    predicate right = parsePreds(r, leftv, rightv);
 
 	    return new predLogOpNode(opType.AND, left, right);
 	}
 	else if (e.getNodeName().equals("or")) {
-	    predicate left = parsePreds((Element) e.getChildNodes().item(0), leftv, rightv);
-	    predicate right = parsePreds((Element) e.getChildNodes().item(1), leftv, rightv);
+	    predicate left = parsePreds(l, leftv, rightv);
+	    predicate right = parsePreds(r, leftv, rightv);
 
 	    return new predLogOpNode(opType.OR, left, right);
 	}
 	else if (e.getNodeName().equals("not")) {
-	    predicate child = parsePreds((Element) e.getChildNodes().item(0), leftv, rightv);
+	    predicate child = parsePreds(l, leftv, rightv);
 
 	    return new predLogOpNode(opType.NOT, child);
 	}
 	else { // Relational operator
-	    data left = parseAtom((Element) e.getChildNodes().item(0), leftv, rightv);
-	    data right = parseAtom((Element) e.getChildNodes().item(1), leftv, rightv);
+	    data left = parseAtom(l, leftv, rightv);
+	    data right = parseAtom(r, leftv, rightv);
 
 	    int type;
 	    String op = e.getAttribute("op");
@@ -1094,10 +1101,10 @@ public class XMLQueryPlanParser {
             predArithOpNode toReturn = new predArithOpNode(type, left, right);
             Vector varlist = new Vector();
             if (left.getType() == dataType.ATTR) {
-                varlist.add(((Element) e.getChildNodes().item(0)).getAttribute("value"));
+                varlist.add(l.getAttribute("value"));
             }
             if (right.getType() == dataType.ATTR) {
-                varlist.add(((Element) e.getChildNodes().item(1)).getAttribute("value"));
+                varlist.add(r.getAttribute("value"));
             }
             toReturn.setVarList(varlist);
 	    return toReturn;
