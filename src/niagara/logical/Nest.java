@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Nest.java,v 1.5 2003/07/27 02:30:43 tufte Exp $
+  $Id: Nest.java,v 1.6 2003/07/27 02:31:28 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -136,7 +136,7 @@ public class Nest extends niagara.xmlql_parser.op_tree.groupOp {
         try {
             Scanner scanner = new Scanner(new StringReader(content));
             ConstructParser cep = new ConstructParser(scanner);
-            resultTemplate = (constructBaseNode) cep.parse().value;
+            resultTemplate = (constructInternalNode) cep.parse().value;
             cep.done_parsing();
         } catch (Exception ex) {
             throw new InvalidPlanException("Error while parsing Nest construct template: "
