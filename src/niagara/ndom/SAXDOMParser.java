@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.17 2004/02/10 03:30:21 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.18 2004/02/11 01:11:10 vpapad Exp $
  *
  */
 
@@ -99,7 +99,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
 	seenHeader = false;
     }
 
-    public Document getDocument() {
+    public DocumentImpl getDocument() {
         return doc;
     }
 
@@ -137,7 +137,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
         if (streaming) return;
 
         page.setParser(this);
-        page.addEvent(doc, SAXEvent.START_DOCUMENT, null);
+        page.addEvent(SAXEvent.START_DOCUMENT, null);
         doc = new DocumentImpl(page, page.getLastIndex());
         
         depth = 0; 
@@ -149,7 +149,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
         if (streaming) return;
 
         handleText();
-        page.addEvent(doc, SAXEvent.END_DOCUMENT, null);
+        page.addEvent(SAXEvent.END_DOCUMENT, null);
 
         if (--depth != -1) 
             throw new PEException("Unbalanced open nodes list.");
@@ -175,16 +175,16 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
 
             page.setParser(this);
 
-            page.addEvent(doc, SAXEvent.START_DOCUMENT, null);
+            page.addEvent(SAXEvent.START_DOCUMENT, null);
             doc = new DocumentImpl(page, page.getLastIndex());
 
             depth = 0; 
             open_nodes[0] = -1;            
         }
             
-	page.addEvent(doc, SAXEvent.START_ELEMENT, localName);
+	page.addEvent(SAXEvent.START_ELEMENT, localName);
 	if (namespaceURI != null && namespaceURI.length() != 0)
-	    page.addEvent(doc, SAXEvent.NAMESPACE_URI, namespaceURI);
+	    page.addEvent(SAXEvent.NAMESPACE_URI, namespaceURI);
 
         int current = page.getLastIndex(); 
         int previous = open_nodes[depth];
@@ -198,8 +198,8 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
         open_nodes[depth] = -1; // ... and there are no nodes yet in this level
  
         for (int i = 0; i < attrs.getLength(); i++) {
-            page.addEvent(doc, SAXEvent.ATTR_NAME, attrs.getQName(i));
-            page.addEvent(doc, SAXEvent.ATTR_VALUE, attrs.getValue(i));
+            page.addEvent(SAXEvent.ATTR_NAME, attrs.getQName(i));
+            page.addEvent(SAXEvent.ATTR_VALUE, attrs.getValue(i));
         }
     }
 
@@ -214,13 +214,13 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
 
         // The next_sibling pointer in END_ELEMENT points to the
         // beginning of the element
-        page.addEvent(doc, SAXEvent.END_ELEMENT, localName);
+        page.addEvent(SAXEvent.END_ELEMENT, localName);
         page.setNextSibling(page.getLastOffset(), open_nodes[depth]);
 
         // if we're streaming, and this is a top-level element
         // pretend we just received an end document event
         if(streaming && depth == 0) {
-            page.addEvent(doc, SAXEvent.END_DOCUMENT, null);
+            page.addEvent(SAXEvent.END_DOCUMENT, null);
 
 	    // for now throw fatal errors on these exceptions, if
 	    // they happen, I'll have to figure out what the right
@@ -258,9 +258,9 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
         if (length > 0) {
             // Special case for newlines
             if (length == 1 && sb.charAt(0) == '\n')
-                page.addEvent(doc, SAXEvent.TEXT, newLine);
+                page.addEvent(SAXEvent.TEXT, newLine);
             else
-                page.addEvent(doc, SAXEvent.TEXT, sb.toString());
+                page.addEvent(SAXEvent.TEXT, sb.toString());
             sb.setLength(0);
 
             int current = page.getLastIndex(); 
