@@ -1,4 +1,4 @@
-package niagara.xmlql_parser.syntax_tree;
+package niagara.xmlql_parser;
 
 import java_cup.runtime.*;
 
