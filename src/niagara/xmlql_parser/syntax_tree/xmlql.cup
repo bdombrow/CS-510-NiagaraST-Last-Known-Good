@@ -109,7 +109,6 @@ terminal String NUMBER;
 
 terminal String STRING;
 
-
 non terminal xqlExt XmlqlExt;
 non terminal query  Xmlql;
 
@@ -292,6 +291,12 @@ Element ::= StartTag:s QueryInConstructList:ql EndTag
 		{:
 			Vector v1 = new Vector();
 			v1.addElement(new constructLeafNode(new data(dataType.IDEN,i)));
+			RESULT = new constructInternalNode(s,v1);
+		:}
+	  | StartTag:s NUMBER:i EndTag
+		{:
+			Vector v1 = new Vector();
+			v1.addElement(new constructLeafNode(new data(dataType.STRING,i)));
 			RESULT = new constructInternalNode(s,v1);
 		:}
 	  | StartTag:s VAR:v EndTag

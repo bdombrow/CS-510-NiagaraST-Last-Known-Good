@@ -101,7 +101,6 @@ StringChar = [^\"\n]
   \" 		{ yybegin(STRING); s = new String();}
 
   "id"		{ return symbol(sym.ID); }
-
   {Identifier} 	{ return symbol(sym.IDEN, new String(yytext())); }
   {Var} 	{ return symbol(sym.VAR, new String(yytext())); }
   {Number}      { return symbol(sym.NUMBER,new String(yytext())); }

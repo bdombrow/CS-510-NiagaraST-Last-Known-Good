@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: varToAttr.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: varToAttr.java,v 1.2 2000/08/21 00:41:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,7 +34,7 @@
 package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
-import com.ibm.xml.parser.*;
+
 import org.w3c.dom.*;
 
 public class varToAttr {
@@ -104,9 +104,7 @@ public class varToAttr {
 	 */
 
 	public void dump() {
-		System.out.println("varToAttr");
 		System.out.println("var : " + var);
-		System.out.println("Attribute List");
 		for(int i=0;i<attrs.size();i++)
 		       ((schemaAttribute)attrs.elementAt(i)).dump();
 	}

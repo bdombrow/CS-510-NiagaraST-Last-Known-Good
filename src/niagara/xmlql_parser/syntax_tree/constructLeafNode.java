@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: constructLeafNode.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: constructLeafNode.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,7 +33,7 @@
 */
 package niagara.xmlql_parser.syntax_tree;
 
-import com.ibm.xml.parser.*;
+
 import org.w3c.dom.*;
 
 public class constructLeafNode extends constructBaseNode {

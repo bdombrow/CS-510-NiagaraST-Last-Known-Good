@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Schema.java,v 1.2 2000/07/08 05:16:43 vpapad Exp $
+  $Id: Schema.java,v 1.3 2000/08/21 00:41:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,7 +37,7 @@
 package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
-import com.ibm.xml.parser.*;
+
 import org.w3c.dom.*;
 
 public class Schema {
