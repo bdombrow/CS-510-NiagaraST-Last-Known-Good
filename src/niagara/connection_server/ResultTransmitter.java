@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.8 2002/03/26 23:51:33 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.9 2002/03/31 15:53:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,8 +76,6 @@ public class ResultTransmitter implements Runnable {
     // Tags for element and attribute list
     private static final String ELEMENT = "<!ELEMENT";
     private static final String ATTLIST = "<!ATTLIST";
-
-    private boolean quiet;
     
     /** Constructor
 	@param handler The request handler that created this transmitter
@@ -85,11 +83,10 @@ public class ResultTransmitter implements Runnable {
 	@param request The request that contained the query
     */
     public ResultTransmitter(RequestHandler handler, ServerQueryInfo queryInfo,
-			     RequestMessage request, boolean quiet) {
+			     RequestMessage request) {
 	this.handler=handler;
 	this.queryInfo = queryInfo;
 	this.request = request;
-	this.quiet = quiet;
 	totalResults = 0;
 	transmitThread = new Thread(this,"ResultTransmitter:"+queryInfo.getQueryId());
 	transmitThread.start();
@@ -209,7 +206,7 @@ public class ResultTransmitter implements Runnable {
 	    boolean suspend = checkSuspension();		    
 	    
 	    // if we are going to suspend, better send the results collected so far
-	    if (suspend && !quiet)
+	    if (suspend && !NiagraServer.QUIET)
 		sendResults();
 	    
 	    // as long as atleast one suspension condition is true, keep waiting
@@ -225,8 +222,7 @@ public class ResultTransmitter implements Runnable {
 				//get the next result (KT: gets one result)
 	    try {
 		resultObject = queryResult.getNext(2000);
-	    }
-	    catch (QueryResult.ResultsAlreadyReturnedException e) {
+	    } catch (QueryResult.ResultsAlreadyReturnedException e) {
 		return;
 	    }
 	    
@@ -234,7 +230,7 @@ public class ResultTransmitter implements Runnable {
 		// If this was the last stream element this query is done
 	    case QueryResult.EndOfResult:
 		try{
-		    if(!quiet)
+		    if(!NiagraServer.QUIET)
 			sendResults();
 
 		    // send the end result response
@@ -260,11 +256,11 @@ public class ResultTransmitter implements Runnable {
 		// add the result to responseData
 		totalResults--;
 		resultsSoFar++;
-		if (resultsSoFar > BatchSize && !quiet)
+		if (resultsSoFar > BatchSize && !NiagraServer.QUIET)
 		    sendResults();
 		// KT - what is this??? - don't need a response for each
 		// result element do we???
-		if(!quiet) {
+		if(!NiagraServer.QUIET) {
 		    response.responseData += getResultData(resultObject);
 		    handler.sendResponse(response);
 		}
@@ -276,7 +272,7 @@ public class ResultTransmitter implements Runnable {
 		
 		// if no more new results have come in a while
 	    case QueryResult.TimedOut:
-		if(!quiet)
+		if(!NiagraServer.QUIET)
 		    sendResults();
 		break;
 	    }

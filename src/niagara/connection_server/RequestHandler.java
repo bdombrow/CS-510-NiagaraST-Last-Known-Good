@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.8 2002/03/26 23:51:33 tufte Exp $
+  $Id: RequestHandler.java,v 1.9 2002/03/31 15:53:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -57,20 +57,16 @@ public class RequestHandler {
     // Every query is given a server query id. This is the counter for giving out that service id
     int lastQueryId = 0;
 
-    // quiet causes no result to be sent to client - for testing purposes
-    // only - KT
-    private boolean quiet = false;
-
     private boolean dtd_hack; // True if we want to add HTML entities to the result    
 
     /**Constructor
        @param sock The socket to read from 
        @param server The server that has access to other modules
     */
-    public RequestHandler(Socket sock, NiagraServer server, boolean dtd_hack,
-			  boolean quiet) throws IOException{
+    public RequestHandler(Socket sock, NiagraServer server, boolean dtd_hack)
+	throws IOException{
 	this.dtd_hack = dtd_hack;
-	this.quiet = quiet;
+
 	// A hashtable of queries with qid as key
 	this.queryList = new QueryList();
 	this.outputWriter = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
@@ -82,11 +78,9 @@ public class RequestHandler {
     }
 
 
-    public RequestHandler(InputStream is, OutputStream os, NiagraServer server,
-			  boolean quiet) 
+    public RequestHandler(InputStream is, OutputStream os, NiagraServer server)
         throws IOException{
 	this.dtd_hack = false;
-	this.quiet = quiet;
 	// A hashtable of queries with qid as key
 	System.out.println("inter-server request handler started...");
 	this.queryList = new QueryList();
@@ -100,9 +94,9 @@ public class RequestHandler {
 
 
 
-    public RequestHandler(Socket sock, NiagraServer server, boolean quiet) 
+    public RequestHandler(Socket sock, NiagraServer server) 
 	throws IOException {
-	    this(sock, server, true, quiet);
+	    this(sock, server, true);
     }
 
     // Send the initial string to the client
@@ -167,7 +161,7 @@ public class RequestHandler {
 
 		    // start the transmitter thread for sending results back
 		    queryInfo.transmitter = 
-			new ResultTransmitter(this,queryInfo,request, quiet);
+			new ResultTransmitter(this,queryInfo,request);
 
 		
 		    //send the query ID out
@@ -192,7 +186,7 @@ public class RequestHandler {
 
 		// start the transmitter thread for sending results back
 		queryInfo.transmitter = 
-			new ResultTransmitter(this,queryInfo,request,quiet);
+			new ResultTransmitter(this,queryInfo,request);
 
 		
 		//send the query ID out
@@ -223,7 +217,7 @@ public class RequestHandler {
 
 		// start the transmitter thread for sending results back		    
 		queryInfo.transmitter = 
-		    new ResultTransmitter(this,queryInfo,request,quiet);
+		    new ResultTransmitter(this,queryInfo,request);
 				    		
 		queryList.put(qid,queryInfo);
     
@@ -246,7 +240,7 @@ public class RequestHandler {
 
 		// start the transmitter thread for sending results back
 		queryInfo.transmitter = 
-		    new ResultTransmitter(this,queryInfo,request,quiet);
+		    new ResultTransmitter(this,queryInfo,request);
 		
 		//send the query ID out
 		sendQueryId(request);
@@ -261,7 +255,7 @@ public class RequestHandler {
 		queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.GetDTD);
 		// start the transmitter thread for sending results back
 		queryInfo.transmitter = 
-		    new ResultTransmitter(this,queryInfo,request,quiet);
+		    new ResultTransmitter(this,queryInfo,request);
 		break;
 
  	    case RequestMessage.SUSPEND_QUERY:

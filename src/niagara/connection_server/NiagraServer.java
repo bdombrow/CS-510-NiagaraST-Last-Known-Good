@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.9 2002/03/27 10:11:53 vpapad Exp $
+  $Id: NiagraServer.java,v 1.10 2002/03/31 15:53:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -91,9 +91,8 @@ public class NiagraServer
 
     private static Catalog catalog = null;
 
-    private static boolean quiet = false;
-
     public static boolean STREAM = false;
+    public static boolean QUIET = false;
 
     public static boolean KT_PERFORMANCE = false;
 
@@ -114,7 +113,7 @@ public class NiagraServer
 	    
             // Create and start the connection manager
             connectionManager =
-                new ConnectionManager (client_port, this, dtd_hack,quiet);
+                new ConnectionManager (client_port, this, dtd_hack);
 
             if (startConsole) {
                 Console console = new Console(this, System.in);
@@ -285,7 +284,7 @@ public class NiagraServer
                     NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
                     valid_args = true;
                 } else if (args[i].equals("-quiet")) {
-		    quiet = true;
+		    QUIET = true;
 		} else if (args[i].equals("-stream")) {
 		    STREAM = true;
 		} else if (args[i].equals("-dtd-hack")) {
