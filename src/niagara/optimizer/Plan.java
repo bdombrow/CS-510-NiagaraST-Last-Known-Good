@@ -17,7 +17,6 @@ import niagara.utils.PEException;
 import niagara.utils.SerializableToXML;
 import niagara.utils.SinkTupleStream;
 import niagara.xmlql_parser.op_tree.ResourceOp;
-import niagara.xmlql_parser.op_tree.op;
 
 public class Plan implements SchedulablePlan {
     private Op operator;
@@ -83,14 +82,23 @@ public class Plan implements SchedulablePlan {
         }
     }
 
-    public Expr toEXPR() {
-        Expr[] inputExprs = new Expr[inputs.length];
-        for (int i = 0; i < inputs.length; i++) {
-            inputExprs[i] = inputs[i].toEXPR();
-        }
-        return new Expr(operator, inputExprs);
+    public Expr toExpr() {
+        return toExpr(new HashMap());
     }
 
+    private Expr toExpr(HashMap seen) {
+        Expr[] inputExprs = new Expr[inputs.length];
+        for (int i = 0; i < inputs.length; i++) {
+            if (seen.containsKey(inputs[i]))
+                inputExprs[i] = (Expr) seen.get(inputs[i]);
+            else
+                inputExprs[i] = inputs[i].toExpr(seen);
+        }
+        Expr e = new Expr(operator, inputExprs);
+        seen.put(this, e);
+        return e;
+    }
+    
     public ResourceOp getResource() {
         return (ResourceOp) operator;
     }

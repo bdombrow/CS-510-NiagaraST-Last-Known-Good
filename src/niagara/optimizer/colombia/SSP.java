@@ -1,4 +1,28 @@
-/* $Id: SSP.java,v 1.5 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: SSP.java,v 1.6 2003/02/25 06:19:08 vpapad Exp $
+   Colombia -- Java version of the Columbia Database Optimization Framework
+
+   Copyright (c)    Dept. of Computer Science , Portland State
+   University and Dept. of  Computer Science & Engineering,
+   OGI School of Science & Engineering, OHSU. All Rights Reserved.
+
+   Permission to use, copy, modify, and distribute this software and
+   its documentation is hereby granted, provided that both the
+   copyright notice and this permission notice appear in all copies
+   of the software, derivative works or modified versions, and any
+   portions thereof, and that both notices appear in supporting
+   documentation.
+
+   THE AUTHORS, THE DEPT. OF COMPUTER SCIENCE DEPT. OF PORTLAND STATE
+   UNIVERSITY AND DEPT. OF COMPUTER SCIENCE & ENGINEERING AT OHSU ALLOW
+   USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION, AND THEY DISCLAIM ANY
+   LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE
+   USE OF THIS SOFTWARE.
+
+   This software was developed with support of NSF grants IRI-9118360,
+   IRI-9119446, IRI-9509955, IRI-9610013, IRI-9619977, IIS 0086002,
+   and DARPA (ARPA order #8230, CECOM contract DAAB07-91-C-Q518).
+*/
+
 package niagara.optimizer.colombia;
 
 import java.util.ArrayList;
@@ -281,7 +305,7 @@ public class SSP {
      *  to <code>MExpr</code>, register <code>MExpr</code> and return null 
      *  if there is none.
      */
-    MExpr FindDup(MExpr mexpr) {
+    MExpr findDup(MExpr mexpr) {
         MExpr dup = (MExpr) mexprs.get(mexpr);
         if (mexpr.equals(dup)) {
             tracer.duplicateMExprFound(mexpr);
@@ -297,8 +321,7 @@ public class SSP {
 
     // // Merge already existing group is problematic!! What about parents.  
     // // QuanW 5/ 2000 
-    int MergeGroups(int group_no1, int group_no2) {
-
+    int mergeGroups(int group_no1, int group_no2) {
         //XXX vpapad: We can't handle group merging yet;
 
         assert !ruleSet.isUnique() : "Duplicates detected in unique rule set";
@@ -323,12 +346,12 @@ public class SSP {
     // NEW_GRPID(-1), make a new group with that ID.
     // XXX vpapad: GrpId was passed by reference
 
-    public MExpr copyIn(Expr Expr, int GrpID) {
-        return copyIn(Expr, GrpID, false);
+    public MExpr copyIn(Expr expr, int grpID) {
+        return copyIn(expr, grpID, false);
     }
 
     public MExpr copyIn(Expr Expr, int GrpID, boolean returnDuplicate) {
-        Group Group;
+        Group group;
 
         // create the M_Expr which will reside in the group
         MExpr MExpr = new MExpr(Expr, GrpID, this);
@@ -336,7 +359,7 @@ public class SSP {
 
         // find duplicate.  Done only for logical, not physical, expressions.
         if (MExpr.getOp().is_logical()) {
-            MExpr DupMExpr = FindDup(MExpr);
+            MExpr DupMExpr = findDup(MExpr);
             if (DupMExpr != null) { // not null ,there is a duplicate
                 //PTRACE0("duplicate mexpr : " + MExpr.LightDump());
 
@@ -362,7 +385,7 @@ public class SSP {
                 } else {
                     // otherwise, i.e., GrpID != DupMExpr.GrpID
                     // need do the merge
-                    MergeGroups(GrpID, DupMExpr.getGrpID());
+                    mergeGroups(GrpID, DupMExpr.getGrpID());
                     if (returnDuplicate)
                         return DupMExpr;
                     else
@@ -374,10 +397,10 @@ public class SSP {
         // no duplicate found
         if (GrpID == NEW_GRPID) {
             // create a new group
-            Group = new Group(MExpr, this);
+            group = new Group(MExpr, this);
 
             // insert the new group into ssp
-            GrpID = Group.getGroupID();
+            GrpID = group.getGroupID();
 
             if (GrpID >= Groups.size()) {
                 Groups.ensureCapacity(GrpID + 1);
@@ -386,9 +409,9 @@ public class SSP {
                 for (int i = Groups.size(); i < GrpID; i++) {
                     Groups.add(null);
                 }
-                Groups.add(Group);
+                Groups.add(group);
             } else {
-                Groups.set(GrpID, Group);
+                Groups.set(GrpID, group);
             }
 
             PrevGID = GrpID;
@@ -403,7 +426,7 @@ public class SSP {
                 } else {
                     // XXX vpapad: seriously messed up
                     // get the relevant attributes from the schema for this group
-                    Strings tmpKeySet = Group.getLogProp().GetAttrNames();
+                    Strings tmpKeySet = group.getLogProp().GetAttrNames();
                     int ksize = tmpKeySet.size();
 
                     MultiWinner MWin = new MultiWinner(ksize + 1);
@@ -422,82 +445,82 @@ public class SSP {
                 }
             }
         } else {
-            Group = getGroup(GrpID);
+            group = getGroup(GrpID);
 
             // include the new MEXPR
-            Group.newMExpr(MExpr);
+            group.newMExpr(MExpr);
         }
         // set the flag
-        Group.setChanged(true);
+        group.setChanged(true);
 
         return MExpr;
     } // CopyIn
 
     /** Return the optimal expression that satisfies this property, 
      * null otherwise */
-    public Expr CopyOut(Group group, PhysicalProperty PhysProp, HashMap seen) {
-        Winner ThisWinner;
+    public Expr copyOut(Group group, PhysicalProperty physProp, HashMap seen) {
+        Winner thisWinner;
 
-        MExpr WinnerMExpr;
-        Op WinnerOp;
+        MExpr winnerMExpr;
+        Op winnerOp;
 
         //special case for item groups
         if (group.getFirstLogMExpr().getOp().is_item()) {
             if (IRPROP) {
-                WinnerMExpr = getMc(group.getGroupID()).getBPlan(PhysProp);
-                if (WinnerMExpr == null) {
+                winnerMExpr = getMc(group.getGroupID()).getBPlan(physProp);
+                if (winnerMExpr == null) {
                     return null;
                 }
             } else {
-                ThisWinner = group.getWinner(PhysProp);
-                if (ThisWinner == null) {
+                thisWinner = group.getWinner(physProp);
+                if (thisWinner == null) {
                     return null;
                 }
 
-                assert(ThisWinner.getDone());
-                WinnerMExpr = ThisWinner.getMPlan();
+                assert(thisWinner.getDone());
+                winnerMExpr = thisWinner.getMPlan();
             }
-            WinnerOp = WinnerMExpr.getOp();
+            winnerOp = winnerMExpr.getOp();
 
-            Expr[] inputs = new Expr[WinnerMExpr.getArity()];
-            for (int i = 0; i < WinnerMExpr.getArity(); i++) {
-                Group inputGroup = WinnerMExpr.getInput(i);
+            Expr[] inputs = new Expr[winnerMExpr.getArity()];
+            for (int i = 0; i < winnerMExpr.getArity(); i++) {
+                Group inputGroup = winnerMExpr.getInput(i);
                 if (seen.containsKey(inputGroup))
                     inputs[i] = (Expr) seen.get(inputGroup);
                 else
                     inputs[i] =
-                        CopyOut(
-                            WinnerMExpr.getInput(i),
+                        copyOut(
+                            winnerMExpr.getInput(i),
                             PhysicalProperty.ANY,
                             seen);
             }
-            Expr e = new Expr(WinnerOp, inputs);
+            Expr e = new Expr(winnerOp, inputs);
             seen.put(group, e);
             return e;
         } else { // normal case
             if (!IRPROP) {
-                ThisWinner = group.getWinner(PhysProp);
+                thisWinner = group.getWinner(physProp);
 
-                if (ThisWinner == null) {
+                if (thisWinner == null) {
                     return null;
                 }
 
-                assert(ThisWinner.getDone());
-                WinnerMExpr = ThisWinner.getMPlan();
-                if (WinnerMExpr == null) {
+                assert(thisWinner.getDone());
+                winnerMExpr = thisWinner.getMPlan();
+                if (winnerMExpr == null) {
                     return null;
                 }
 
             } else {
-                WinnerMExpr = getMc(group.getGroupID()).getBPlan(PhysProp);
+                winnerMExpr = getMc(group.getGroupID()).getBPlan(physProp);
             }
 
-            WinnerOp = WinnerMExpr.getOp();
+            winnerOp = winnerMExpr.getOp();
 
-            int Arity = WinnerOp.getArity();
-            Expr[] inputs = new Expr[Arity];
-            for (int i = 0; i < Arity; i++) {
-                Group inputGroup = WinnerMExpr.getInput(i);
+            int arity = winnerOp.getArity();
+            Expr[] inputs = new Expr[arity];
+            for (int i = 0; i < arity; i++) {
+                Group inputGroup = winnerMExpr.getInput(i);
 
                 if (seen.containsKey(inputGroup)) {
                     inputs[i] = (Expr) seen.get(inputGroup);
@@ -505,23 +528,23 @@ public class SSP {
                 }
                 
                 PhysicalProperty[] properties =
-                    ((PhysicalOp) WinnerOp).inputReqdProp(
-                        PhysProp,
+                    ((PhysicalOp) winnerOp).inputReqdProp(
+                        physProp,
                         inputGroup.getLogProp(),
                         i);
 
                 if (properties == null)
                     return null;
 
-                PhysicalProperty ReqProp;
+                PhysicalProperty reqProp;
                 if (properties.length > 0)
-                    ReqProp = properties[0];
+                    reqProp = properties[0];
                 else
-                    ReqProp = PhysicalProperty.ANY;
+                    reqProp = PhysicalProperty.ANY;
 
-                inputs[i] = CopyOut(inputGroup, ReqProp, seen);
+                inputs[i] = copyOut(inputGroup, reqProp, seen);
             }
-            Expr e = new Expr(WinnerOp, inputs);
+            Expr e = new Expr(winnerOp, inputs);
             seen.put(group, e);
             return e;
         }

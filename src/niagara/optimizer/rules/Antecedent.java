@@ -1,10 +1,9 @@
-/* $Id: Antecedent.java,v 1.1 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: Antecedent.java,v 1.2 2003/02/25 06:19:10 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashMap;
 
 import org.w3c.dom.Element;
@@ -13,11 +12,8 @@ import org.w3c.dom.NodeList;
 
 import niagara.connection_server.Catalog;
 import niagara.connection_server.ConfigurationError;
-import niagara.optimizer.colombia.Expr;
 import niagara.optimizer.colombia.LeafOp;
-import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.Op;
-import niagara.optimizer.colombia.PhysicalOp;
 import niagara.utils.PEException;
 
 /** Antecedent patterns for <code>ConstructedRule</code>s.

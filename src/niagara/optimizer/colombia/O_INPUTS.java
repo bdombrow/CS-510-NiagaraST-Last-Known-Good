@@ -1,4 +1,28 @@
-/* $Id: O_INPUTS.java,v 1.4 2003/02/08 02:12:04 vpapad Exp $ */
+/* $Id: O_INPUTS.java,v 1.5 2003/02/25 06:19:08 vpapad Exp $
+   Colombia -- Java version of the Columbia Database Optimization Framework
+
+   Copyright (c)    Dept. of Computer Science , Portland State
+   University and Dept. of  Computer Science & Engineering,
+   OGI School of Science & Engineering, OHSU. All Rights Reserved.
+
+   Permission to use, copy, modify, and distribute this software and
+   its documentation is hereby granted, provided that both the
+   copyright notice and this permission notice appear in all copies
+   of the software, derivative works or modified versions, and any
+   portions thereof, and that both notices appear in supporting
+   documentation.
+
+   THE AUTHORS, THE DEPT. OF COMPUTER SCIENCE DEPT. OF PORTLAND STATE
+   UNIVERSITY AND DEPT. OF COMPUTER SCIENCE & ENGINEERING AT OHSU ALLOW
+   USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION, AND THEY DISCLAIM ANY
+   LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE
+   USE OF THIS SOFTWARE.
+
+   This software was developed with support of NSF grants IRI-9118360,
+   IRI-9119446, IRI-9509955, IRI-9610013, IRI-9619977, IIS 0086002,
+   and DARPA (ARPA order #8230, CECOM contract DAAB07-91-C-Q518).
+*/
+
 package niagara.optimizer.colombia;
 
 /*
@@ -21,25 +45,21 @@ package niagara.optimizer.colombia;
 */
 public class O_INPUTS extends Task {
 
-    private MExpr MExpr; // expression whose inputs we are optimizing
+    private MExpr mexpr; // expression whose inputs we are optimizing
     int arity;
-    int InputNo; // input currently being or about to be optimized, initially 0
-    int PrevInputNo; // keep track of the previous optimized input no
-    Cost LocalCost; // the local cost of the mexpr
+    int inputNo; // input currently being or about to be optimized, initially 0
+    int prevInputNo; // keep track of the previous optimized input no
+    Cost localCost; // the local cost of the mexpr
     boolean Last; // if this task is the last task for the group
-    Cost EpsBound;
+    Cost epsBound;
     // if global eps pruning is on, this is the eps bound for eps pruning
     // else it is zero
-    int ContNo; // keep track of number of contexts 
+    int contNo; // keep track of number of contexts 
 
     //Costs and properties of input winners and groups.  Computed incrementally
     // by this method.
-    Cost[] InputCost;
-    LogicalProperty[] InputLogProp;
-
-    public O_INPUTS(MExpr MExpr, int ContextID) {
-        this(MExpr, ContextID, false, null, 0);
-    }
+    Cost[] inputCost;
+    LogicalProperty[] inputLogProp;
 
     public O_INPUTS(MExpr MExpr, int ContextID, boolean last) {
         this(MExpr, ContextID, last, null, 0);
@@ -54,14 +74,14 @@ public class O_INPUTS extends Task {
         int ContextID,
         boolean last,
         Cost bound,
-        int ContNo) {
+        int contNo) {
         super(MExpr.getGroup().getSSP(), ContextID);
-        this.MExpr = MExpr;
-        InputNo = -1;
+        this.mexpr = MExpr;
+        inputNo = -1;
         Last = last;
-        PrevInputNo = -1;
-        EpsBound = bound;
-        ContNo = ContNo;
+        prevInputNo = -1;
+        epsBound = bound;
+        this.contNo = contNo;
 
         assert(MExpr.getOp().is_physical() || MExpr.getOp().is_item());
         //We can only calculate cost for physical operators
@@ -72,8 +92,8 @@ public class O_INPUTS extends Task {
 
         // create the arrays of input costs and logical properties
         if (arity > 0) {
-            InputCost = new Cost[arity];
-            InputLogProp = new LogicalProperty[arity];
+            inputCost = new Cost[arity];
+            inputLogProp = new LogicalProperty[arity];
         }
 
     }
@@ -183,11 +203,11 @@ public class O_INPUTS extends Task {
     public void perform() {
         //Cache local properties of G and the expression being optimized
 
-        assert MExpr.getOp().is_physical() 
+        assert mexpr.getOp().is_physical() 
             : "We can only optimize the inputs of physical expressions";
-        PhysicalOp Op = (PhysicalOp) MExpr.getOp(); //the op of the expr
+        PhysicalOp Op = (PhysicalOp) mexpr.getOp(); //the op of the expr
 
-        Group LocalGroup = MExpr.getGroup();
+        Group LocalGroup = mexpr.getGroup();
 
         Context context = ssp.getVc(ContextID);
         PhysicalProperty LocalReqdProp = context.getPhysProp();
@@ -213,19 +233,19 @@ public class O_INPUTS extends Task {
 
         //On the first (and no other) execution, code must initialize some O_INPUTS members.
         //The only nontrivial member is InputCost.
-        if (InputNo == -1) {
+        if (inputNo == -1) {
             // init inputLogProp
             for (input = 0; input < arity; input++) {
-                Group InputGroup = MExpr.getInput(input);
+                Group InputGroup = mexpr.getInput(input);
                 //Group of current input
-                InputLogProp[input] = InputGroup.getLogProp();
+                inputLogProp[input] = InputGroup.getLogProp();
             }
 
             // get the localcost of the mexpr being optimized in G
-            LocalCost =
+            localCost =
                 Op.findLocalCost(
                     ssp.getCatalog(),
-                    InputLogProp);
+                    inputLogProp);
 
             //For each input group IG
             for (input = 0; input < arity; input++) {
@@ -236,11 +256,11 @@ public class O_INPUTS extends Task {
                         //                            "%s",
                         //                            "Not pruning so all InputCost elements are set to zero");
                         assert(!ssp.CuCardPruning);
-                    InputCost[input] = Zero;
+                    inputCost[input] = Zero;
                     continue;
                 }
 
-                IG = MExpr.getInput(input); //Group of current input
+                IG = mexpr.getInput(input); //Group of current input
 
                 PhysicalProperty[] properties;
                 PhysicalProperty ReqProp = null;
@@ -249,12 +269,12 @@ public class O_INPUTS extends Task {
                     properties =
                         ((PhysicalOp) Op).inputReqdProp(
                             LocalReqdProp,
-                            InputLogProp[input],
+                            inputLogProp[input],
                             input);
                     // if not possible, means no such input prop can satisfied
                     if (properties == null) {
                         //PTRACE("Impossible search: Bad input %d", input);
-                        TerminateThisTask(LocalWinner);
+                        terminateThisTask(LocalWinner);
                         return;
                     } else {
                         if (properties.length == 0) {
@@ -284,46 +304,46 @@ public class O_INPUTS extends Task {
                 //If case (1), impossible, then terminate this task
                 if (sr.isImpossible()) {
                     //                    PTRACE("Impossible search: Bad input %d", input);
-                    TerminateThisTask(LocalWinner);
+                    terminateThisTask(LocalWinner);
                     return;
                 }
                 //If search_circle returns a non-null Winner from InputGroup, case (2)
                 //InputCost[InputGroup] = cost of that winner
                 else if (sr.haveWinner()) {
-                    InputCost[input] = IG.getWinner(ReqProp).getCost();
+                    inputCost[input] = IG.getWinner(ReqProp).getCost();
                     assert IG.getWinner(ReqProp).getDone() : "XXX @$@#$@#$";
                 }
                 //else if (!CuCardPruning) //Group Pruning case (since Starburst not relevant here)
                 //InputCost[IG] = 0
                 else if (!ssp.CuCardPruning)
-                    InputCost[input] = Zero;
+                    inputCost[input] = Zero;
                 //remainder applies only in CuCardPruning case
                 else
-                    InputCost[input] = IG.getLowerBd();
+                    inputCost[input] = IG.getLowerBd();
 
                 IGContext = null;
             } // initialize some O_INPUTS members
 
-            InputNo++;
+            inputNo++;
             // Ensure that previous code will not be executed again; begin with Input 0
         }
 
         //If Global Pruning and cost so far is greater than upper bound for this context, then terminate
-        CostSoFar.finalCost(LocalCost, InputCost);
+        CostSoFar.finalCost(localCost, inputCost);
         if (ssp.Pruning && CostSoFar.greaterThanEqual(LocalUB)) {
             //            PTRACE2(
             //                "Expr LowerBd %s, exceed Cond UpperBd %s,Pruning applied!",
             //                (const char *) CostSoFar.Dump(),
             //                (const char *) LocalUB.Dump());
 
-            TerminateThisTask(LocalWinner);
+            terminateThisTask(LocalWinner);
             return;
         }
 
         //Calculate the cost of remaining inputs
-        for (input = InputNo; input < arity; input++) {
+        for (input = inputNo; input < arity; input++) {
             //set up local variables
-            IG = MExpr.getInput(input); //Group of current input
+            IG = mexpr.getInput(input); //Group of current input
             //generate appropriate property for search of IG
             PhysicalProperty[] properties = null;
             PhysicalProperty ReqProp = null;
@@ -332,7 +352,7 @@ public class O_INPUTS extends Task {
                 properties =
                     ((PhysicalOp) Op).inputReqdProp(
                         LocalReqdProp,
-                        InputLogProp[input],
+                        inputLogProp[input],
                         input);
 
                 if (ssp.Pruning)
@@ -341,7 +361,7 @@ public class O_INPUTS extends Task {
 
                 if (properties == null) {
                     ReqProp = null;
-                    TerminateThisTask(LocalWinner);
+                    terminateThisTask(LocalWinner);
                     return;
                 } else if (properties.length > 0) {
                     ReqProp = (PhysicalProperty) properties[0];
@@ -360,7 +380,7 @@ public class O_INPUTS extends Task {
             if (sr.isImpossible()) {
                 //                PTRACE("Impossible search: Bad input %d", input);
                 IGContext = null;
-                TerminateThisTask(LocalWinner);
+                terminateThisTask(LocalWinner);
                 return;
             }
 
@@ -371,9 +391,9 @@ public class O_INPUTS extends Task {
                 assert Winner.getDone() : "XXX ^$$%^$%^$%^$%^%";
 
                 //store its cost in InputCost[]
-                InputCost[input] = Winner.getCost();
+                inputCost[input] = Winner.getCost();
 
-                CostSoFar.finalCost(LocalCost, InputCost);
+                CostSoFar.finalCost(localCost, inputCost);
                 //if (Pruning && CostSoFar >= upper bound) terminate this task
                 if (ssp.Pruning && CostSoFar.greaterThanEqual(LocalUB)) {
                     //                    PTRACE2(
@@ -383,20 +403,20 @@ public class O_INPUTS extends Task {
                     //                    PTRACE("This happened at group %d ", IGNo);
 
                     IGContext = null;
-                    TerminateThisTask(LocalWinner);
+                    terminateThisTask(LocalWinner);
                     return;
                 }
                 IGContext = null;
             }
 
             //Remaining cases are (3) and (4)
-            else if (input != PrevInputNo) {
+            else if (input != prevInputNo) {
                 // no winner, and we did not just return from O_GROUP
                 //                PTRACE("No Winner for Input : %d", input);
 
                 //Adjust PrevInputNo and InputNo to track progress after returning from pushes
-                PrevInputNo = input;
-                InputNo = input;
+                prevInputNo = input;
+                inputNo = input;
 
                 //push this task
                 ssp.addTask(this);
@@ -409,9 +429,9 @@ public class O_INPUTS extends Task {
                 //Start with upper bound of G's context
                 if (ssp.Pruning) {
                     //                    PTRACE0("LocalCost is " + LocalCost.Dump());
-                    CostSoFar.finalCost(LocalCost, InputCost);
+                    CostSoFar.finalCost(localCost, inputCost);
                     InputBd.subtract(CostSoFar); //Subtract CostSoFar
-                    InputBd.add(InputCost[input]);
+                    InputBd.add(inputCost[input]);
                     //Add IG's contribution to CostSoFar
                 }
 
@@ -428,10 +448,10 @@ public class O_INPUTS extends Task {
 
                 if (ssp.GlobepsPruning) {
                     Cost eps_bound;
-                    if (EpsBound.greaterThan(LocalCost)) {
-                        eps_bound = new Cost(EpsBound);
+                    if (epsBound.greaterThan(localCost)) {
+                        eps_bound = new Cost(epsBound);
                         // calculate the cost, the lower nodes should have lower eps bound
-                        eps_bound.subtract(LocalCost);
+                        eps_bound.subtract(localCost);
                     } else
                         eps_bound = new Cost(0);
                     if (arity > 0)
@@ -439,13 +459,13 @@ public class O_INPUTS extends Task {
                     ssp.addTask(
                         new O_GROUP(
                             ssp,
-                            MExpr.getInput(input),
+                            mexpr.getInput(input),
                             ContID,
                             true,
                             eps_bound));
                 } else
                     ssp.addTask(
-                        new O_GROUP(ssp, MExpr.getInput(input), ContID));
+                        new O_GROUP(ssp, mexpr.getInput(input), ContID));
 
                 return;
             } else { // We just returned from O_GROUP on IG
@@ -454,7 +474,7 @@ public class O_INPUTS extends Task {
                 //                    "impossible plan since no winner possible at input %d",
                 //                    InputNo);
 
-                TerminateThisTask(LocalWinner);
+                terminateThisTask(LocalWinner);
                 return;
             }
         } //Calculate the cost of remaining inputs
@@ -472,7 +492,7 @@ public class O_INPUTS extends Task {
                 //                    (const char *) LocalReqdProp.Dump());
                 OutputPhysProp = null;
 
-                TerminateThisTask(LocalWinner);
+                terminateThisTask(LocalWinner);
                 return;
             }
         }
@@ -481,19 +501,19 @@ public class O_INPUTS extends Task {
 
         if (ssp.FIRSTPLAN) {
             //If we are in the root group and no plan in it has been costed
-            if (!(MExpr.getGrpID() == 0) && !(LocalGroup.getfirstplan())) {
+            if (!(mexpr.getGrpID() == 0) && !(LocalGroup.getfirstplan())) {
                 // OUTPUT("First Plan is costed at task %d\r\n", TaskNo);
                 LocalGroup.setfirstplan(true);
             }
         }
-        CostSoFar.finalCost(LocalCost, InputCost);
+        CostSoFar.finalCost(localCost, inputCost);
         // PTRACE0("Expression's Cost is " + CostSoFar.Dump());
         // OUTPUT("COSTED %s  ", MExpr - > Dump());
         // OUTPUT("%s\r\n", CostSoFar.Dump());
         if (ssp.GlobepsPruning) {
             //PTRACE0("Current Epsilon Bound is " + EpsBound.Dump());
             //If global epsilon pruning is on, we may have an easy winner
-            if (EpsBound.greaterThanEqual(CostSoFar)) {
+            if (epsBound.greaterThanEqual(CostSoFar)) {
                 //we are done with this search, we have a final winner
                 //                PTRACE(
                 //                    "Global Epsilon Pruning fired, %s",
@@ -501,11 +521,11 @@ public class O_INPUTS extends Task {
 
                 Cost WinCost = new Cost(CostSoFar);
                 //Cost WinCost(CostSoFar);
-                LocalGroup.newWinner(LocalReqdProp, MExpr, WinCost, true);
+                LocalGroup.newWinner(LocalReqdProp, mexpr, WinCost, true);
                 // update the upperbound of the current context
                  ssp.getVc(ContextID).setUpperBound(CostSoFar);
                 ssp.getVc(ContextID).setFinished();
-                TerminateThisTask(LocalWinner);
+                terminateThisTask(LocalWinner);
                 return;
             }
         }
@@ -521,7 +541,7 @@ public class O_INPUTS extends Task {
             //                (const char *) CostSoFar.Dump(),
             //                (const char *) LocalUB.Dump());
 
-            TerminateThisTask(LocalWinner);
+            terminateThisTask(LocalWinner);
             return;
         }
 
@@ -535,13 +555,13 @@ public class O_INPUTS extends Task {
                     .getCost()) //and current expression is more expensive
         ) {
             //Leave the non-null local winner alone
-            TerminateThisTask(LocalWinner);
+            terminateThisTask(LocalWinner);
             return;
         }
         else {
             //The expression being optimized is a new winner
             Cost WinCost = new Cost(CostSoFar);
-            LocalGroup.newWinner(LocalReqdProp, MExpr, WinCost, Last);
+            LocalGroup.newWinner(LocalReqdProp, mexpr, WinCost, Last);
 
             // update the upperbound of the current context
              ssp.getVc(ContextID).setUpperBound(CostSoFar);
@@ -550,13 +570,13 @@ public class O_INPUTS extends Task {
 
             if (Last)
                 // this's the last task for the group, so mark the group with completed optimizing
-                MExpr.getGroup().setOptimized(true);
+                mexpr.getGroup().setOptimized(true);
 
             return;
         }
     } // perform
 
-    void TerminateThisTask(Winner LocalWinner) {
+    void terminateThisTask(Winner LocalWinner) {
         // PTRACE("O_INPUTS %s", "this task is terminating.");
         //delete (void*) CostSoFar;
 
@@ -575,17 +595,17 @@ public class O_INPUTS extends Task {
 
         if (Last)
             // this's the last task for the group, so mark the group with completed optimizing
-            MExpr.getGroup().setOptimized(true);
+            mexpr.getGroup().setOptimized(true);
 
         if (ssp.NO_PHYS_IN_GROUP)
             // delete this physical mexpr to save memory; it may not be used again.
-            MExpr = null;
+            mexpr = null;
 
         // tasks must destroy themselves
         // XXX vpapad: Let's hope that the garbage collector does...
     }
     
     public String toString() {
-        return "Optimizing inputs of " + MExpr;
+        return "Optimizing inputs of " + mexpr;
     }
 } 

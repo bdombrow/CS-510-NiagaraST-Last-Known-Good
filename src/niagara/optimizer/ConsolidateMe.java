@@ -2,7 +2,6 @@
 package niagara.optimizer;
 
 import niagara.optimizer.colombia.*;
-import niagara.utils.PEException;
 
 /** ConsolidateMe is a pseudo-physical op that forces Colombia to 
  * optimize its input groups */

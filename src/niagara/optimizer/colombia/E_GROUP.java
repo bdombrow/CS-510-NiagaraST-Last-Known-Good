@@ -1,4 +1,28 @@
-/* $Id: E_GROUP.java,v 1.3 2003/02/08 02:12:03 vpapad Exp $ */
+/* $Id: E_GROUP.java,v 1.4 2003/02/25 06:19:08 vpapad Exp $ 
+   Colombia -- Java version of the Columbia Database Optimization Framework
+
+   Copyright (c)    Dept. of Computer Science , Portland State
+   University and Dept. of  Computer Science & Engineering,
+   OGI School of Science & Engineering, OHSU. All Rights Reserved.
+
+   Permission to use, copy, modify, and distribute this software and
+   its documentation is hereby granted, provided that both the
+   copyright notice and this permission notice appear in all copies
+   of the software, derivative works or modified versions, and any
+   portions thereof, and that both notices appear in supporting
+   documentation.
+
+   THE AUTHORS, THE DEPT. OF COMPUTER SCIENCE DEPT. OF PORTLAND STATE
+   UNIVERSITY AND DEPT. OF COMPUTER SCIENCE & ENGINEERING AT OHSU ALLOW
+   USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION, AND THEY DISCLAIM ANY
+   LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE
+   USE OF THIS SOFTWARE.
+
+   This software was developed with support of NSF grants IRI-9118360,
+   IRI-9119446, IRI-9509955, IRI-9610013, IRI-9619977, IIS 0086002,
+   and DARPA (ARPA order #8230, CECOM contract DAAB07-91-C-Q518).
+*/
+
 package niagara.optimizer.colombia;
 
 /*
@@ -32,8 +56,8 @@ pruning, then need to explore.  For now we will put a flag in E_GROUP to catch w
 public class E_GROUP extends Task {
 
     private Group group; //Group to be explored
-    boolean Last; // is it the last task in this group
-    Cost EpsBound;
+    private boolean last; // is it the last task in this group
+    private Cost epsBound;
     // if global eps pruning is on, this is the eps bound for eps pruning
     // else it is zero
 
@@ -41,8 +65,8 @@ public class E_GROUP extends Task {
     E_GROUP(SSP ssp, Group group, int ContextID, boolean last, Cost bound) {
         super(ssp, ContextID);
         this.group = group;
-        this.Last = last;
-        this.EpsBound = bound;
+        this.last = last;
+        this.epsBound = bound;
     }
 
     E_GROUP(SSP ssp, Group group, int ContextID) {
@@ -50,45 +74,35 @@ public class E_GROUP extends Task {
     }
 
     public void perform() {
-        Group Group = group;
-
-        if (Group.isOptimized() || Group.isExplored()) {
+        if (group.isOptimized() || group.isExplored()) {
             //See discussion in E_GROUP class declaration
             return;
         }
 
-        if (Group.isExploring())
-            assert false;
-        else {
-            // the group will be explored, let other tasks don't do it again
-            Group.setExploring(true);
+        assert !group.isExploring();
+        
+        // the group will be explored, let other tasks don't do it again
+        group.setExploring(true);
 
-            // mark the group not explored since we will begin exploration
-            Group.setExplored(false);
+        // mark the group not explored since we will begin exploration
+        group.setExplored(false);
 
-            MExpr LogMExpr = Group.getFirstLogMExpr();
+        MExpr LogMExpr = group.getFirstLogMExpr();
 
-            // only need to E_EXPR the first log expr, 
-            // because it will generate all logical exprs by applying appropriate rules
-            // it won't generate dups because rule bit vector 
-            //            PTRACE0("pushing O_EXPR exploring " + LogMExpr.Dump());
-            // this logical mexpr will be the last optimized one, mark it as the last task for this group
-            if (ssp.GlobepsPruning) {
-                Cost eps_bound = new Cost(EpsBound);
-                ssp.addTask(
-                    new O_EXPR(
-                        ssp,
-                        LogMExpr,
-                        true,
-                        ContextID,
-                        true,
-                        eps_bound));
-            } else
-                ssp.addTask(new O_EXPR(ssp, LogMExpr, true, ContextID, true));
-        }
-    } //perform
+        // only need to E_EXPR the first log expr, 
+        // because it will generate all logical exprs by applying appropriate rules
+        // it won't generate dups because rule bit vector 
+        //            PTRACE0("pushing O_EXPR exploring " + LogMExpr.Dump());
+        // this logical mexpr will be the last optimized one, mark it as the last task for this group
+        if (ssp.GlobepsPruning) {
+            Cost eps_bound = new Cost(epsBound);
+            ssp.addTask(
+                new O_EXPR(ssp, LogMExpr, true, ContextID, true, eps_bound));
+        } else
+            ssp.addTask(new O_EXPR(ssp, LogMExpr, true, ContextID, true));
+    } 
 
     public String toString() {
         return "Exploring " + group;
     }
-} // E_GROUP
+} 

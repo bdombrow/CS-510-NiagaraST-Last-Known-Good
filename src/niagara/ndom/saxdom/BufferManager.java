@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.19 2003/01/13 05:07:44 tufte Exp $
+ * $Id: BufferManager.java,v 1.20 2003/02/25 06:18:51 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -26,9 +26,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.ref.ReferenceQueue;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Arrays;
 
 public class BufferManager {
     protected static Page[] pages;
@@ -37,12 +35,12 @@ public class BufferManager {
 
     private static int page_size;
 
-    private static Map firstPageRegistry;
-    private static Map lastPageRegistry;
+    protected static Map firstPageRegistry;
+    protected static Map lastPageRegistry;
 
     /** The garbage collector will enqueue garbage collected
      * documents here */
-    private static ReferenceQueue usedDocuments;
+    protected static ReferenceQueue usedDocuments;
 
     /** We will wait for <code>timeout</code> milliseconds
      * for free pages to appear before throwing an insufficient
@@ -74,7 +72,7 @@ public class BufferManager {
             free_pages.push(pages[i]);
         }
 
-        this.page_size = page_size;
+        BufferManager.page_size = page_size;
 
         (new PageReclaimer()).start();
     }
@@ -766,8 +764,6 @@ public class BufferManager {
         int depth = -1;
         boolean[] closedStartTag = new boolean[1025];
 	boolean prevWasStartEl = false;
-
-        String currentTag = null;
 
         while (true) {
             switch (page.getEventType(offset)) {
