@@ -1,8 +1,10 @@
-/* $Id: Variable.java,v 1.5 2003/02/25 06:13:16 vpapad Exp $ */
+/* $Id: Variable.java,v 1.6 2003/03/07 23:39:22 vpapad Exp $ */
 package niagara.logical;
 
+import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Domain;
+import niagara.optimizer.colombia.LogicalProperty;
 import niagara.query_engine.AtomicEvaluator;
 import niagara.query_engine.SimpleAtomicEvaluator;
 import niagara.xmlql_parser.syntax_tree.regExp;
@@ -22,6 +24,18 @@ public class Variable implements Atom, Attribute {
 
     public Variable(String name, int type) {
         this(name, NodeDomain.getDOMNode(type));
+    }
+
+    public static Attribute findVariable(LogicalProperty lp, String varName)
+        throws InvalidPlanException {
+        // Strip dollar signs from varName 
+        if (varName.charAt(0) == '$')
+            varName = varName.substring(1);
+
+        Attribute attr = lp.getAttr(varName);
+        if (attr == null)
+            throw new InvalidPlanException("Unknown variable: " + varName);
+        return attr;
     }
     
     public String getName() {

@@ -1,10 +1,16 @@
 /* $Id */
 package niagara.logical;
 
+import org.w3c.dom.Element;
+
+import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
-import niagara.xmlql_parser.op_tree.unryOp;
 import niagara.xmlql_parser.syntax_tree.*;
+
+import java.util.Vector;
+import java.util.StringTokenizer;
 
 public class IncrementalMax extends IncrementalGroup {
     private Attribute maxAttribute;
@@ -15,14 +21,6 @@ public class IncrementalMax extends IncrementalGroup {
     public IncrementalMax(skolem skolemAttributes, Attribute maxAttribute) {
         super(skolemAttributes);
         this.maxAttribute = maxAttribute;
-    }
-
-    public void setMaxAttribute(Attribute maxAttribute) {
-        this.maxAttribute = maxAttribute;
-    }
-
-    public void setEmptyGroupValue(Double emptyGroupValue) {
-	this.emptyGroupValue = emptyGroupValue;
     }
 
     public Double getEmptyGroupValue() {
@@ -41,7 +39,7 @@ public class IncrementalMax extends IncrementalGroup {
 
     public Op copy() {
         IncrementalMax op = new IncrementalMax(skolemAttributes, maxAttribute);
-        op.setEmptyGroupValue(emptyGroupValue);
+        op.emptyGroupValue = emptyGroupValue;
         return op;
     }
     
@@ -57,6 +55,29 @@ public class IncrementalMax extends IncrementalGroup {
     
     public int hashCode() {
         return skolemAttributes.hashCode() ^ maxAttribute.hashCode();
+    }
+ 
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String maxattr = e.getAttribute("maxattr");
+        String emptyGroupValueAttr = e.getAttribute("emptygroupvalue");
+
+        LogicalProperty inputLogProp = inputProperties[0];
+            
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = Variable.findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        maxAttribute = Variable.findVariable(inputLogProp, maxattr);
+        setSkolemAttributes(new skolem(id, groupbyAttrs));
+        emptyGroupValue = Double.valueOf(emptyGroupValueAttr);
     }
 }
 

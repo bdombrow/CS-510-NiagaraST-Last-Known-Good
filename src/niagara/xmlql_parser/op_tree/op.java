@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: op.java,v 1.13 2003/02/25 06:05:48 vpapad Exp $
+  $Id: op.java,v 1.14 2003/03/07 23:36:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -154,6 +154,12 @@ public abstract class op extends LogicalOp implements SerializableToXML {
         return false; // default is false
     }
 
+
+    /** Is this operator schedulable locally? */
+    public boolean isSchedulable() {
+            return true;
+    }
+    
     /**Set up this logical operator from an XML description */
     public void loadFromXML(Element e, LogicalProperty[] inputProperties)
         throws InvalidPlanException {

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: dtdScanOp.java,v 1.6 2002/10/31 04:17:05 vpapad Exp $
+  $Id: dtdScanOp.java,v 1.7 2003/03/07 23:36:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,6 +29,11 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import niagara.connection_server.InvalidPlanException;
 import niagara.logical.*;
 import niagara.optimizer.colombia.*;
 import niagara.optimizer.rules.Initializable;
@@ -63,7 +68,6 @@ public class dtdScanOp extends NullaryOp implements Initializable {
         return new dtdScanOp(this);
     }
     
-   
     public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
         LogicalProperty lp = null;
 
@@ -138,10 +142,6 @@ public class dtdScanOp extends NullaryOp implements Initializable {
 	docs = docVector;
     }
 
-    public void setVariable(Attribute variable) {
-        this.variable = variable;
-    }
-    
     public Attribute getVariable() {
         return variable;
     }
@@ -221,5 +221,23 @@ public class dtdScanOp extends NullaryOp implements Initializable {
         if (type != null)
             hashCode ^= type.hashCode();
         return hashCode;
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        String id = e.getAttribute("id");
+
+        // The node's children contain URLs
+        Vector urls = new Vector();
+        NodeList children = ((Element) e).getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            urls.addElement(((Element) child).getAttribute("value"));
+        }
+
+        setDocs(urls);
+        variable = new Variable(id, NodeDomain.getDOMNode());
     }
 }

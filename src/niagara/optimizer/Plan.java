@@ -18,6 +18,7 @@ import niagara.utils.PEException;
 import niagara.utils.SerializableToXML;
 import niagara.utils.SinkTupleStream;
 import niagara.xmlql_parser.op_tree.ResourceOp;
+import niagara.xmlql_parser.op_tree.op;
 
 public class Plan implements SchedulablePlan {
     private Op operator;
@@ -32,14 +33,13 @@ public class Plan implements SchedulablePlan {
     private String name;
 
     public Plan(Op operator) {
-        this(operator, true);
-    }
-
-    public Plan(Op operator, boolean isSchedulable) {
         this.operator = operator;
         this.inputs = new Plan[] {
         };
-        this.isSchedulable = isSchedulable;
+        if (operator instanceof op) 
+            isSchedulable = ((op) operator).isSchedulable();
+        else
+            isSchedulable = true;
     }
 
     public Plan(Op operator, Plan oneInput) {

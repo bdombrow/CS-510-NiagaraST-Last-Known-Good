@@ -1,4 +1,4 @@
-// $Id: FileScanOp.java,v 1.3 2002/12/10 00:51:53 vpapad Exp $
+// $Id: FileScanOp.java,v 1.4 2003/03/07 23:36:43 vpapad Exp $
 
 package niagara.xmlql_parser.op_tree;
 
@@ -8,30 +8,19 @@ package niagara.xmlql_parser.op_tree;
  * above it. 
  */
 
-import java.util.*;
+import org.w3c.dom.Element;
 
+import niagara.connection_server.InvalidPlanException;
 import niagara.logical.*;
-import niagara.logical.NodeDomain;
 import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.syntax_tree.*;
 
 public class FileScanOp extends StreamOp {
     // Required zero-argument constructor
     public FileScanOp() {}
     
     public FileScanOp(FileScanSpec fileScanSpec, Attribute variable) {
-        setFileScan(fileScanSpec, variable);
-    }
-    
-    /**
-     * Method for initializing the stream scan operator. 
-     *
-     * @param spec A completed FileSpec object with all
-     *             the specifications necessary for the stream.
-     */
-    public void setFileScan(FileScanSpec spec, Attribute variable) {
-	streamSpec = spec;
+        this.streamSpec = fileScanSpec;
         this.variable = variable;
     }
     
@@ -68,6 +57,14 @@ public class FileScanOp extends StreamOp {
 
     public int hashCode() {
         return streamSpec.hashCode() ^ variable.hashCode();
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        boolean isStream = e.getAttribute("isstream").equalsIgnoreCase("yes");
+        streamSpec =
+            new FileScanSpec(e.getAttribute("filename"), isStream);
+        variable = new Variable(e.getAttribute("id"));
     }
 }
 

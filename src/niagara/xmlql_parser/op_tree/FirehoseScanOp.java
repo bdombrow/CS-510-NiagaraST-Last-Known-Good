@@ -1,4 +1,4 @@
-// $Id: FirehoseScanOp.java,v 1.9 2003/02/07 08:57:34 vpapad Exp $
+// $Id: FirehoseScanOp.java,v 1.10 2003/03/07 23:36:42 vpapad Exp $
 
 package niagara.xmlql_parser.op_tree;
 
@@ -8,12 +8,14 @@ package niagara.xmlql_parser.op_tree;
  * above it. 
  */
 
-import java.util.*;
+import org.w3c.dom.Element;
 
-import niagara.logical.NullaryOp;
 import niagara.logical.StreamOp;
+import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.connection_server.InvalidPlanException;
+import niagara.connection_server.NiagraServer;
+import niagara.firehose.FirehoseConstants;
 import niagara.firehose.FirehoseSpec;
 
 public class FirehoseScanOp extends StreamOp {
@@ -21,20 +23,8 @@ public class FirehoseScanOp extends StreamOp {
     public FirehoseScanOp() {}
     
     public FirehoseScanOp(FirehoseSpec fhSpec, Attribute variable) {
-        setFirehoseScan(fhSpec, variable);
-    }
-    
-    /**
-     * Method for initializing the firehose scan operator. See
-     * the FirehoseSpec constructor for descriptions of the
-     * FirehoseSpec variables
-     *
-     * @param spec A completed FirehoseSpec object with all
-     *             the specifications necessary for the firehose.
-     */
-    public void setFirehoseScan(FirehoseSpec spec, Attribute variable) {
-	streamSpec = spec;
-        this.variable = variable;
+            this.streamSpec = fhSpec;
+            this.variable = variable;
     }
     
     /**
@@ -71,6 +61,54 @@ public class FirehoseScanOp extends StreamOp {
 
     public int hashCode() {
         return streamSpec.hashCode() ^ variable.hashCode();
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        String id = e.getAttribute("id");
+        String host = e.getAttribute("host");
+        int port = Integer.parseInt(e.getAttribute("port"));
+        int rate = Integer.parseInt(e.getAttribute("rate"));
+        String dataTypeStr = e.getAttribute("datatype");
+        String descriptor = e.getAttribute("desc");
+        String descriptor2 = e.getAttribute("desc2");
+
+        int numGenCalls = Integer.parseInt(e.getAttribute("num_gen_calls"));
+        int numTLElts = Integer.parseInt(e.getAttribute("num_tl_elts"));
+        boolean prettyPrint =
+            e.getAttribute("prettyprint").equalsIgnoreCase("yes");
+        String trace = e.getAttribute("trace");
+
+        int dataType = -1;
+        boolean found = false;
+        for (int i = 0; i < FirehoseConstants.numDataTypes; i++) {
+            if (dataTypeStr.equalsIgnoreCase(FirehoseConstants.typeNames[i])) {
+                dataType = i;
+                found = true;
+                break;
+            }
+        }
+        if (found == false)
+            throw new InvalidPlanException(
+                "Invalid type - typeStr: " + dataTypeStr);
+
+        boolean useStreamFormat = NiagraServer.usingSAXDOM();
+
+        streamSpec =
+            new FirehoseSpec(
+                port,
+                host,
+                dataType,
+                descriptor,
+                descriptor2,
+                numGenCalls,
+                numTLElts,
+                rate,
+                useStreamFormat,
+                prettyPrint,
+                trace);
+
+        variable = new Variable(id);
     }
 }
 

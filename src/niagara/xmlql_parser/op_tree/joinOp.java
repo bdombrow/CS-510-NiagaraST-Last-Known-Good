@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: joinOp.java,v 1.9 2003/03/03 08:26:41 tufte Exp $
+  $Id: joinOp.java,v 1.10 2003/03/07 23:36:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,10 +32,19 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import gnu.regexp.*;
+
+import niagara.connection_server.InvalidPlanException;
 import niagara.logical.And;
 import niagara.logical.EquiJoinPredicateList;
 import niagara.logical.Predicate;
 import niagara.logical.True;
+import niagara.logical.Variable;
+import niagara.optimizer.Plan;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
@@ -268,5 +277,70 @@ public class joinOp extends binOp {
         
         newJoin.pred = And.conjunction(nonEquiPred, pred);
         return newJoin;
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        String id = e.getAttribute("id");
+
+        NodeList children = e.getChildNodes();
+        Element predElt = null;
+
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i) instanceof Element) {
+                predElt = (Element) children.item(i);
+                break;
+            }
+        }
+
+        Predicate pred = Predicate.loadFromXML(predElt, inputProperties);
+
+        // In case of an equijoin we have to parse "left" 
+        // and "right" to get additional equality predicates
+        String leftattrs = e.getAttribute("left");
+        String rightattrs = e.getAttribute("right");
+
+        ArrayList leftVars = new ArrayList();
+        ArrayList rightVars = new ArrayList();
+
+        if (leftattrs.length() > 0) {
+            try {
+                RE re = new RE("(\\$)?[a-zA-Z0-9_]+");
+                REMatch[] all_left = re.getAllMatches(leftattrs);
+                REMatch[] all_right = re.getAllMatches(rightattrs);
+                for (int i = 0; i < all_left.length; i++) {
+                    Attribute leftAttr =
+                        Variable.findVariable(
+                            inputProperties[0],
+                            all_left[i].toString());
+                    Attribute rightAttr =
+                        Variable.findVariable(
+                            inputProperties[1],
+                            all_right[i].toString());
+                    leftVars.add(leftAttr);
+                    rightVars.add(rightAttr);
+                }
+            } catch (REException rx) {
+                throw new InvalidPlanException(
+                    "Syntax error in equijoin predicate specification for "
+                        + id);
+            }
+        }
+        String extensionJoinAttr = e.getAttribute("extensionjoin");
+        int extJoin;
+        if (extensionJoinAttr.equals("right")) {
+            extJoin = joinOp.RIGHT;
+        } else if (extensionJoinAttr.equals("left")) {
+            extJoin = joinOp.LEFT;
+        } else if (extensionJoinAttr.equals("none")) {
+            extJoin = joinOp.NONE;
+        } else if (extensionJoinAttr.equals("both")) {
+            extJoin = joinOp.BOTH;
+        } else {
+            throw new InvalidPlanException(
+                "Invalid extension join value " + extensionJoinAttr);
+        }
+
+        setJoin(pred, leftVars, rightVars, extJoin);
     }
 }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: dupOp.java,v 1.6 2002/10/31 04:17:05 vpapad Exp $
+  $Id: dupOp.java,v 1.7 2003/03/07 23:36:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,6 +36,9 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.ArrayList;
 
+import org.w3c.dom.Element;
+
+import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
@@ -47,10 +50,6 @@ public class dupOp extends unryOp {
     public void addDestinationStreams(){
         numDestinationStreams++;
     };
-
-    public void setDup(int numDestinationStreams) {
-	this.numDestinationStreams = numDestinationStreams;
-    }
 
     public void dump() {
 	System.out.println("dupOp");
@@ -79,6 +78,14 @@ public class dupOp extends unryOp {
         if (obj.getClass() != dupOp.class) return obj.equals(this);
         dupOp other = (dupOp) obj;
         return numDestinationStreams == other.numDestinationStreams;
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        String branchAttr = e.getAttribute("branch");
+        // XXX vpapad: catch format exception, check that we really have
+        // that many output streams - why do we have to specify this here?
+        numDestinationStreams = Integer.parseInt(branchAttr);
     }
 }
 

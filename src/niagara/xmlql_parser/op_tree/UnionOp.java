@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UnionOp.java,v 1.5 2002/10/31 04:17:06 vpapad Exp $
+  $Id: UnionOp.java,v 1.6 2003/03/07 23:36:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,6 +30,9 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 
+import org.w3c.dom.Element;
+
+import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
@@ -105,5 +108,16 @@ public class UnionOp extends op {
         if (arity == 0) // Special case arity = 0 => match any Union
             return (other instanceof UnionOp);
         return super.matches(other);
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        arity = inputProperties.length;
+
+        for (int i = 0; i < arity; i++) {
+            if (inputProperties[i].getDegree()
+                != inputProperties[0].getDegree())
+                throw new InvalidPlanException("Union inputs are not union-compatible");
+        }
     }
 }

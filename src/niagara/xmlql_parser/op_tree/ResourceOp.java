@@ -1,31 +1,31 @@
 /**
- * $Id: ResourceOp.java,v 1.4 2002/10/24 04:00:01 vpapad Exp $
+ * $Id: ResourceOp.java,v 1.5 2003/03/07 23:36:42 vpapad Exp $
  *
  */
 
 package niagara.xmlql_parser.op_tree;
 
-import java.util.*;
+import org.w3c.dom.Element;
 
 import niagara.connection_server.Catalog;
+import niagara.connection_server.InvalidPlanException;
+import niagara.connection_server.NiagraServer;
+import niagara.logical.NodeDomain;
 import niagara.logical.NullaryOp;
+import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.syntax_tree.*;
 
 public class ResourceOp extends NullaryOp {
     private Attribute variable;
     private String urn;
 
-    private Catalog catalog;
-
     // Required zero-argument constructor
     public ResourceOp() {
     }
 
-    public ResourceOp(Attribute variable, String urn, Catalog catalog) {
+    public ResourceOp(Attribute variable, String urn) {
         this.variable = variable;
         this.urn = urn;
-        this.catalog = catalog;
     }
 
     public Attribute getVariable() {
@@ -83,18 +83,21 @@ public class ResourceOp extends NullaryOp {
      * @see niagara.optimizer.colombia.Op#copy()
      */
     public Op copy() {
-        return new ResourceOp(variable.copy(), urn, catalog);
+        return new ResourceOp(variable.copy(), urn);
     }
 
     /**
      * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, LogicalProperty[])
      */
     public LogicalProperty findLogProp(ICatalog cat, LogicalProperty[] input) {
-       return new LogicalProperty(0, new Attrs(variable), isLocallyResolvable());
+        return new LogicalProperty(
+            0,
+            new Attrs(variable),
+            isLocallyResolvable());
     }
 
     public boolean isLocallyResolvable() {
-        return catalog.isLocallyResolvable(urn);
+        return getCatalog().isLocallyResolvable(urn);
     }
 
     /**
@@ -102,6 +105,18 @@ public class ResourceOp extends NullaryOp {
      * @return Catalog
      */
     public Catalog getCatalog() {
-        return catalog;
+        return NiagraServer.getCatalog();
+    }
+
+    // XXX vpapad: I have to rethink this method...
+    public boolean isSchedulable() {
+        return false;
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        this.variable =
+            new Variable(e.getAttribute("id"), NodeDomain.getDOMNode());
+        this.urn = e.getAttribute("urn");
     }
 }

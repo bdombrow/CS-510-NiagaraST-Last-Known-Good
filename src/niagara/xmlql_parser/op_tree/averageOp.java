@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: averageOp.java,v 1.6 2002/10/31 04:17:05 vpapad Exp $
+  $Id: averageOp.java,v 1.7 2003/03/07 23:36:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,7 +39,12 @@ package niagara.xmlql_parser.op_tree;
 
 import org.w3c.dom.*;
 
+import java.util.*;
+
+import niagara.connection_server.InvalidPlanException;
+import niagara.logical.Variable;
 import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.syntax_tree.*;
 
@@ -102,6 +107,28 @@ public class averageOp extends groupOp {
         averageOp other = (averageOp) obj;
         return skolemAttributes.equals(other.skolemAttributes) &&
                 averageAttribute.equals(other.averageAttribute);
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String avgattr = e.getAttribute("avgattr");
+
+        LogicalProperty inputLogProp = inputProperties[0];
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = Variable.findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        Attribute averagingAttribute =
+            Variable.findVariable(inputLogProp, avgattr);
+        setAverageInfo(new skolem(id, groupbyAttrs), averagingAttribute);
     }
 }
 

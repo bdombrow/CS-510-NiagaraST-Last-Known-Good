@@ -1,9 +1,17 @@
-/* $Id: Unnest.java,v 1.5 2003/02/28 05:30:48 vpapad Exp $ */
+/* $Id: Unnest.java,v 1.6 2003/03/07 23:39:22 vpapad Exp $ */
 package niagara.logical;
 
+import org.w3c.dom.Element;
+
+import java.io.StringReader;
+
+import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.op_tree.unryOp;
+import niagara.xmlql_parser.syntax_tree.REParser;
+import niagara.xmlql_parser.syntax_tree.Scanner;
 import niagara.xmlql_parser.syntax_tree.regExp;
+import niagara.xmlql_parser.syntax_tree.varType;
 
 public class Unnest extends unryOp {
     /** Variable name of the result */
@@ -139,5 +147,47 @@ public class Unnest extends unryOp {
 
     public Attrs getProjectedAttrs() {
         return projectedAttrs;
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        String id = e.getAttribute("id");
+        String typeAttr = e.getAttribute("type");
+        String rootAttr = e.getAttribute("root");
+        String regexpAttr = e.getAttribute("regexp");
+
+        int type;
+        if (typeAttr.equals("tag")) {
+            type = varType.TAG_VAR;
+        } else if (typeAttr.equals("element")) {
+            type = varType.ELEMENT_VAR;
+        } else { // (typeAttr.equals("content"))
+            type = varType.CONTENT_VAR;
+        }
+
+        variable = new Variable(id, type);
+
+        Scanner scanner;
+        try {
+            scanner = new Scanner(new StringReader(regexpAttr));
+            REParser rep = new REParser(scanner);
+            path  = (regExp) rep.parse().value;
+            rep.done_parsing();
+        } catch (Exception ex) { // ugh cup throws "Exception!!!"
+            ex.printStackTrace();
+            throw new InvalidPlanException(
+                "Error while parsing: " + regexpAttr + " in " + id);
+        }
+
+        LogicalProperty inputLogProp = inputProperties[0];
+
+        if (rootAttr.length() > 0) {
+            root = Variable.findVariable(inputLogProp, rootAttr);
+        } else {
+            // If root attr is left blank, we start the regexp from the last
+            // attribute added to the input tuple
+            Attrs attrs = inputLogProp.getAttrs();
+            root = attrs.get(attrs.size() - 1);
+        }
     }
 }

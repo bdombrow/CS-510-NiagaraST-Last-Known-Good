@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ExpressionOp.java,v 1.5 2002/10/31 04:17:05 vpapad Exp $
+  $Id: ExpressionOp.java,v 1.6 2003/03/07 23:36:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,9 +33,11 @@
 
 package niagara.xmlql_parser.op_tree;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
+import org.w3c.dom.Element;
+
+import niagara.connection_server.InvalidPlanException;
 import niagara.logical.NodeDomain;
 import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
@@ -83,7 +85,7 @@ public class ExpressionOp extends unryOp {
 	this.expressionClass = expressionClass;
     }
 
-    boolean interpreted;     
+    private boolean interpreted;     
     // If interpreted is set to true, this is the expression
     // (containing variables) that we have to interpret
     String expression; 
@@ -141,6 +143,41 @@ public class ExpressionOp extends unryOp {
 
     public Attrs getVariablesUsed() {
         return variablesUsed;
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        variableName = e.getAttribute("id");
+        String classAttr = e.getAttribute("class");
+        String exprAttr = e.getAttribute("expression");
+        String variablesAttr = e.getAttribute("variables");
+
+        LogicalProperty inputLogProp = inputProperties[0];
+
+        if (!classAttr.equals("")) {
+            try {
+                expressionClass = Class.forName(classAttr);
+            } catch (ClassNotFoundException cnfe) {
+                throw new InvalidPlanException(
+                    "Class " + classAttr + " could not be found");
+            }
+        } else if (!exprAttr.equals("")) {
+                interpreted = true;
+                expression = exprAttr;
+        } else
+            throw new InvalidPlanException("Either a class, or an expression to be interpreted must be defined for an expression operator");
+
+        variablesUsed = new Attrs();
+        if (variablesAttr.equals("*")) {
+            variablesUsed = inputLogProp.getAttrs().copy();
+        } else {
+            StringTokenizer st = new StringTokenizer(variablesAttr);
+            while (st.hasMoreTokens()) {
+                String varName = st.nextToken();
+                Attribute attr = Variable.findVariable(inputLogProp, varName);
+                variablesUsed.add(attr);
+            }
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: AccumulateOp.java,v 1.8 2002/10/31 04:17:05 vpapad Exp $
+ * $Id: AccumulateOp.java,v 1.9 2003/03/07 23:36:43 vpapad Exp $
  */
 
 package niagara.xmlql_parser.op_tree;
@@ -11,11 +11,10 @@ package niagara.xmlql_parser.op_tree;
  * together to create a new XML document.
  */
 
-import java.util.*;
-import org.w3c.dom.*;
+import org.w3c.dom.Element;
 
-import niagara.utils.PEException;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.connection_server.InvalidPlanException;
+import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
 import niagara.query_engine.MergeTree;
 import niagara.query_engine.MTException;
@@ -128,5 +127,48 @@ public class AccumulateOp extends unryOp {
             ^ accumFileName.hashCode()
             ^ initialAccumFile.hashCode()
             ^ (clear ? 1 : 0);
+    }
+    
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        try {
+            /* Need to create an AccumulateOp
+             * 1) The MergeTemplate
+             * 2) The MergeIndex - index of attribute to work on
+             */
+            String id = e.getAttribute("id");
+
+            /* Either a file name, URI or Merge template string */
+            String mergeTemplate = e.getAttribute("mergeTemplate");
+
+            /* input specifies input operator, index specifies index
+             * of attribute to work on 
+             */
+            String inputAttr = e.getAttribute("input");
+            String mergeAttr = e.getAttribute("mergeAttr");
+
+            /* name by which the accumulated file should be referred to */
+            String accumFileName = e.getAttribute("accumFileName");
+
+            /* file containing the initial input to the accumulate */
+            String initialAccumFile = e.getAttribute("initialAccumFile");
+
+            String clear = e.getAttribute("clear");
+            boolean cl = (!clear.equals("false"));
+
+            LogicalProperty inputLogProp = inputProperties[0];
+            Attribute mergeAttribute =
+                Variable.findVariable(inputLogProp, mergeAttr);
+
+            setAccumulate(
+                mergeTemplate,
+                mergeAttribute,
+                accumFileName,
+                initialAccumFile,
+                cl);
+        } catch (MTException mte) {
+            throw new InvalidPlanException(
+                "Invalid Merge Template" + mte.getMessage());
+        }
     }
 }

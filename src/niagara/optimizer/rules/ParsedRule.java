@@ -1,7 +1,6 @@
-/* $Id: ParsedRule.java,v 1.1 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: ParsedRule.java,v 1.2 2003/03/07 23:37:33 vpapad Exp $ */
 package niagara.optimizer.rules;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.regex.Pattern;
@@ -9,7 +8,6 @@ import java.util.regex.Pattern;
 import org.w3c.dom.Element;
 
 import niagara.connection_server.Catalog;
-import niagara.connection_server.ConfigurationError;
 import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 

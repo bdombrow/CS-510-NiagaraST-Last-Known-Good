@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SortOp.java,v 1.4 2002/10/31 04:17:05 vpapad Exp $
+  $Id: SortOp.java,v 1.5 2003/03/07 23:36:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +34,10 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 
+import org.w3c.dom.Element;
+
+import niagara.connection_server.InvalidPlanException;
+import niagara.logical.Variable;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
@@ -137,6 +141,26 @@ public class SortOp extends unryOp {
         int result = comparisonMethod ^ attr.hashCode();
         if (ascending) result = ~result;
         return result;
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        LogicalProperty inputLogProp = inputProperties[0];
+
+        String sortbyAttr = e.getAttribute("sort_by");
+        Attribute sortBy = Variable.findVariable(inputLogProp, sortbyAttr);
+
+        short comparisonMethod;
+        String comparisonAttr = e.getAttribute("comparison");
+        if (comparisonAttr.equals("alphabetic"))
+            comparisonMethod = SortOp.ALPHABETIC_COMPARISON;
+        else
+            comparisonMethod = SortOp.NUMERIC_COMPARISON;
+
+        boolean ascending;
+        String orderAttr = e.getAttribute("order");
+        ascending = !orderAttr.equals("descending");
+        setSort(sortBy, comparisonMethod, ascending);
     }
 }
 

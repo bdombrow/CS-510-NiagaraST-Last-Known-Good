@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOp.java,v 1.4 2002/10/27 01:20:21 vpapad Exp $
+ * $Id: ConstantOp.java,v 1.5 2003/03/07 23:36:43 vpapad Exp $
  *
  */
 
@@ -12,13 +12,16 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import niagara.connection_server.InvalidPlanException;
 import niagara.logical.*;
-import niagara.logical.NodeDomain;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.utils.XMLUtils;
 
 public class ConstantOp extends NullaryOp {
 
@@ -26,17 +29,15 @@ public class ConstantOp extends NullaryOp {
     
     private String content;
 
-
-    public void setContent(String content) {
-        this.content = content;
+    public ConstantOp() {}
+    
+    public ConstantOp(String content, Attrs vars) {
+            this.vars = vars;
+            this.content = content;
     }
 
     public String getContent() {
         return content;
-    }
-
-    public void setVars(ArrayList vars) {
-        this.vars = new Attrs(vars);
     }
 
     public void dump() {
@@ -101,4 +102,28 @@ public class ConstantOp extends NullaryOp {
         return vars;
     }
 
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        String id = e.getAttribute("id");
+        content = "";
+        NodeList children = e.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            content = content + XMLUtils.flatten(children.item(i), false);
+        }
+
+        String vars = e.getAttribute("vars");
+        // Parse the vars attribute 
+        // XXX vpapad: does this work?
+        StringTokenizer st = new StringTokenizer(vars, ",");
+        ArrayList variables = new ArrayList();
+        while (st.hasMoreTokens()) {
+            variables.add(new Variable(st.nextToken()));
+        }
+
+        if (variables.size() == 0) {
+            variables.add(new Variable(id));
+        }
+        
+        this.vars = new Attrs(variables);
+    }
 }

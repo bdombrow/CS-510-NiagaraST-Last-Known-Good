@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: constructOp.java,v 1.7 2002/12/10 00:51:53 vpapad Exp $
+  $Id: constructOp.java,v 1.8 2003/03/07 23:36:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,10 +31,13 @@
  */
 package niagara.xmlql_parser.op_tree;
 
-import java.util.*;
+import java.io.StringReader;
+import org.w3c.dom.*;
+
+import niagara.utils.XMLUtils;
 import niagara.xmlql_parser.syntax_tree.*;
 
-import niagara.logical.NodeDomain;
+import niagara.connection_server.InvalidPlanException;
 import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
 
@@ -164,5 +167,32 @@ public class constructOp extends unryOp {
 
     public Attrs getProjectedAttrs() {
         return projectedAttrs;
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        variable = new Variable(e.getAttribute("id"));
+
+        NodeList children = e.getChildNodes();
+        String content = "";
+        for (int i = 0; i < children.getLength(); i++) {
+            int nodeType = children.item(i).getNodeType();
+            if (nodeType == Node.ELEMENT_NODE)
+                content += XMLUtils.explosiveFlatten(children.item(i));
+            else if (nodeType == Node.CDATA_SECTION_NODE)
+                content += children.item(i).getNodeValue();
+        }
+
+        Scanner scanner;
+        resultTemplate = null;
+
+        try {
+            scanner = new Scanner(new StringReader(content));
+            ConstructParser cep = new ConstructParser(scanner);
+            resultTemplate = (constructBaseNode) cep.parse().value;
+            cep.done_parsing();
+        } catch (Exception ex) {
+            throw new InvalidPlanException("Error while parsing: " + content);
+        }
     }
 }

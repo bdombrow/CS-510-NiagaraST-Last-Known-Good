@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SlidingSumOp.java,v 1.2 2003/02/05 21:46:03 jinli Exp $
+  $Id: SlidingSumOp.java,v 1.3 2003/03/07 23:36:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,25 +37,21 @@
 package niagara.xmlql_parser.op_tree;
 
 import org.w3c.dom.*;
+
+import java.util.*;
+
+import niagara.connection_server.InvalidPlanException;
+import niagara.logical.Variable;
 import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class SlidingSumOp extends SlidingWindowOp {
-
-    /////////////////////////////////////////////////////////////////
-    // These are the private members of the summing operator       //
-    /////////////////////////////////////////////////////////////////
-
     // This is the attribute on which summing is done
-    //
     Attribute summingAttribute;
     int range;
     int every;
-
-    /////////////////////////////////////////////////////////////////
-    // These are the methods of the class                          //
-    /////////////////////////////////////////////////////////////////
 
     /**
      * This function sets the skolem attributes on which grouping is
@@ -127,6 +123,46 @@ public class SlidingSumOp extends SlidingWindowOp {
                 summingAttribute.equals(other.summingAttribute);
     }
     
-    
-    
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String sumattr = e.getAttribute("sumattr");
+        String range = e.getAttribute("range");
+        String every = e.getAttribute("every");
+
+        // set the range and every parameter for the sliding window;
+        //
+        Integer rangeValue;
+        Integer everyValue;
+        if (range != "") {
+            rangeValue = new Integer(range);
+            if (rangeValue.intValue() <= 0)
+                throw new InvalidPlanException("range must greater than zero");
+        } else
+            throw new InvalidPlanException("range ???");
+        if (every != "") {
+            everyValue = new Integer(every);
+            if (everyValue.intValue() <= 0)
+                throw new InvalidPlanException("every must greater than zero");
+        } else
+            throw new InvalidPlanException("every ???");
+
+        setWindowInfo(rangeValue.intValue(), everyValue.intValue());
+
+        LogicalProperty inputLogProp = inputProperties[0];
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = Variable.findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        Attribute summingAttribute =
+            Variable.findVariable(inputLogProp, sumattr);
+        setSummingInfo(new skolem(id, groupbyAttrs), summingAttribute);
+    }
 }

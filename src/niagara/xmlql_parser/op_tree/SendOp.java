@@ -1,5 +1,5 @@
 /**
- * $Id: SendOp.java,v 1.4 2002/10/31 04:17:05 vpapad Exp $
+ * $Id: SendOp.java,v 1.5 2003/03/07 23:36:43 vpapad Exp $
  *
  */
 
@@ -10,10 +10,11 @@
  */
 package niagara.xmlql_parser.op_tree;
 
-import java.io.OutputStream;
-import niagara.xmlql_parser.syntax_tree.*;
+import org.w3c.dom.Element;
 
 import niagara.connection_server.CommunicationServlet;
+import niagara.connection_server.InvalidPlanException;
+import niagara.optimizer.colombia.LogicalProperty;
 
 // XXX vpapad: hack to get CVS to compile
 public class SendOp extends UnoptimizableLogicalOperator {
@@ -56,5 +57,9 @@ public class SendOp extends UnoptimizableLogicalOperator {
      */
     public String toString() {
         return "SendOp [" + query_id + "]";
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
     }
 }

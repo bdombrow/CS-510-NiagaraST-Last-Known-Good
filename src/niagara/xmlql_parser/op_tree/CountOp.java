@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: CountOp.java,v 1.7 2003/02/25 06:05:48 vpapad Exp $
+  $Id: CountOp.java,v 1.8 2003/03/07 23:36:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,10 +36,12 @@
 package niagara.xmlql_parser.op_tree;
 
 
-import java.util.ArrayList;
+import java.util.*;
 
 import org.w3c.dom.*;
 
+import niagara.connection_server.InvalidPlanException;
+import niagara.logical.Variable;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
@@ -96,5 +98,27 @@ public class CountOp extends groupOp {
     
     public int hashCode() {
         return skolemAttributes.hashCode() ^ countingAttribute.hashCode();
+    }
+
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+        throws InvalidPlanException {
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String countattr = e.getAttribute("countattr");
+
+        LogicalProperty inputLogProp = inputProperties[0];
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = Variable.findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        Attribute countingAttribute =
+            Variable.findVariable(inputLogProp, countattr);
+        setCountingInfo(new skolem(id, groupbyAttrs), countingAttribute);
     }
 }
