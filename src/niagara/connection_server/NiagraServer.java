@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.14 2002/05/07 03:10:34 tufte Exp $
+  $Id: NiagraServer.java,v 1.15 2002/05/23 06:30:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,7 +24,6 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.connection_server;
 
 import java.io.IOException;
@@ -38,6 +36,7 @@ import niagara.search_engine.server.SEClient;
 import niagara.trigger_engine.TriggerManager;
 import niagara.query_engine.QueryEngine;
 import niagara.ndom.DOMFactory;
+import niagara.optimizer.Optimizer;
 import niagara.utils.*;
 
 import niagara.ndom.saxdom.BufferManager;
@@ -95,6 +94,8 @@ public class NiagraServer
 
     private static boolean startConsole = false;
 
+    // Catalog
+    private static String catalogFileName = "catalog.xml";
     private static Catalog catalog = null;
 
     public static boolean QUIET = false;
@@ -104,7 +105,6 @@ public class NiagraServer
     public NiagraServer() {
 	try {
             // Create the query engine
-            //
             qe = new QueryEngine(this, NUM_QUERY_THREADS,
                                  NUM_OP_THREADS, 
                                  SEHOST, 
@@ -124,10 +124,11 @@ public class NiagraServer
                 Console console = new Console(this, System.in);
                 console.start();
             }
-
             if (useSAXDOM)
 		BufferManager.createBufferManager(saxdom_pages,
 						  saxdom_page_size);
+
+            catalog = new Catalog(catalogFileName);
 
             if (connectToSE)
                 seClient = new SEClient(SEHOST);
@@ -335,7 +336,7 @@ public class NiagraServer
                         usage();
                     }
                     else {
-                        catalog = new Catalog(args[i+1]);
+                        catalogFileName = args[i+1];
                     }
                     i++; // Cover for argument
                     valid_args = true;
@@ -352,6 +353,9 @@ public class NiagraServer
                 } else if (args[i].equals("-saxdom")) {
                     useSAXDOM = true;
                     valid_args = true;
+                } else if (args[i].equals("-optimizer")) {
+                    Optimizer.init();
+                    valid_args = true;
                 } else if (args[i].equals("-saxdom-pages")) {
 		    saxdom_pages = parseIntArgument(args, i);
                     i++; // Cover for argument
@@ -360,6 +364,9 @@ public class NiagraServer
 		    saxdom_page_size = parseIntArgument(args, i);
                     i++; // Cover for argument
                     valid_args = true;
+                } else {
+                    cerr("Unknown option: " + args[i]);
+                    usage();
                 }
             }
             if (valid_args) return;
@@ -412,7 +419,6 @@ public class NiagraServer
         
         cout("\nNo confing file, start server with '-init' flag");
         usage();
-        System.exit(-1);
     }
     
     /**
@@ -480,8 +486,10 @@ public class NiagraServer
         cout("\t-console      Rudimentary control of the server from stdin");
         cout("\t-client-port <number> Port number for client-server communication");
         cout("\t-server-port <number> Port number for inter-server communication");
-        cout("\t-catalog <file> Catalog file.");
+        cout("\t-catalog <file> Specify catalog file (default is:" 
+             + catalogFileName +")");
         cout("\t-dom  <implementation name> Default DOM implementation.");
+        cout("\t-optimizer  Use the Columbia optimizer.");
         cout("\t-saxdom  Use SAXDOM for input documents.");
 	cout("\t-saxdom-pages <number> Number of SAXDOM pages.");
 	cout("\t-saxdom-page-size <number> Size of each SAXDOM page.");

@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.22 2002/05/07 03:10:34 tufte Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.23 2002/05/23 06:30:47 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -52,14 +52,10 @@ public class XMLQueryPlanParser {
 	} catch (java.io.IOException ioe) {
 	    throw new InvalidPlanException("IO Exception reading plan string " 
                                            + ioe.getMessage());
-	} catch (java.lang.CloneNotSupportedException cnse) {
-	    throw new PEException("Couldn't clone something " + cnse.getMessage());
-	} 
+        }
     }
 
-    logNode parsePlan(Element root) 
-	throws InvalidPlanException, CloneNotSupportedException 
-    {
+    logNode parsePlan(Element root) throws InvalidPlanException {
 	NodeList children = root.getChildNodes();
 	for (int i=0; i < children.getLength(); i++) {
 	    if (children.item(i).getNodeType() != Node.ELEMENT_NODE)
@@ -95,10 +91,8 @@ public class XMLQueryPlanParser {
     /**
      * @param e an <code>Element</code> describing a logical plan operator
      * @exception InvalidPlanException the description of the plan was invalid
-     * @exception CloneNotSupportedException 
      */
-    void parseOperator(Element e) 
-	throws InvalidPlanException, CloneNotSupportedException {
+    void parseOperator(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
 	// If we already visited this node, just return 
@@ -182,9 +176,8 @@ public class XMLQueryPlanParser {
         }
     }
 
-    void handleScan(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
-	scanOp op = (scanOp) operators.Scan.clone();
+    void handleScan(Element e) throws InvalidPlanException {
+	scanOp op = new scanOp();
 	op.setSelectedAlgoIndex(0);
 
 	String id = e.getAttribute("id");
@@ -273,9 +266,8 @@ public class XMLQueryPlanParser {
 	scanNode.setVarTbl(qpVarTbl);
     }
 
-    void handleExpression(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
-	ExpressionOp op = (ExpressionOp) operators.expression.clone();
+    void handleExpression(Element e) throws InvalidPlanException {
+	ExpressionOp op = new ExpressionOp();
 	op.setSelectedAlgoIndex(0);
 
 	String id = e.getAttribute("id");
@@ -333,11 +325,10 @@ public class XMLQueryPlanParser {
 	expressionNode.setVarTbl(qpVarTbl);
     }
 
-    void handleSelect(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleSelect(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
-	selectOp op = (selectOp) operators.Select.clone();
+	selectOp op = new selectOp();
 	op.setSelectedAlgoIndex(0);
 	
 	String inputAttr = e.getAttribute("input");
@@ -386,11 +377,10 @@ public class XMLQueryPlanParser {
 	selectNode.setVarTbl(qpVarTbl);
     }
 
-    void handleUnion(Element e, Vector inputs) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleUnion(Element e, Vector inputs) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
-	UnionOp op = (UnionOp) operators.union.clone();
+	UnionOp op = new UnionOp();
 	op.setSelectedAlgoIndex(0);
 	
 	String inputAttr = e.getAttribute("input");
@@ -410,11 +400,10 @@ public class XMLQueryPlanParser {
 	node.setVarTbl(first_input.getVarTbl());
     }
 
-    void handleDup(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleDup(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
-	dupOp op = (dupOp) operators.Duplicate.clone();
+	dupOp op = new dupOp();
 	op.setSelectedAlgoIndex(0);
 	
 	String inputAttr = e.getAttribute("input");
@@ -433,11 +422,10 @@ public class XMLQueryPlanParser {
 	node.setVarTbl(input.getVarTbl());
     }
 
-    void handleSort(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleSort(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
-	SortOp op = (SortOp) operators.sort.clone();
+	SortOp op = new SortOp();
 	op.setSelectedAlgoIndex(0);
 	
 	String inputAttr = e.getAttribute("input");
@@ -473,11 +461,10 @@ public class XMLQueryPlanParser {
 	sortNode.setVarTbl(qpVarTbl);
     }
 
-    void handleJoin(Element e, Vector inputs) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleJoin(Element e, Vector inputs) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
-	joinOp op = (joinOp) operators.Join.clone();
+	joinOp op = new joinOp();
 	String className = e.getAttributeNode("physical").getValue();
 	try {
 	    op.setSelectedAlgorithm(className);
@@ -548,9 +535,8 @@ public class XMLQueryPlanParser {
 	joinNode.setVarTbl(Util.mergeVarTbl(leftv, rightv, left.getSchema().numAttr()));
     }
 
-    void handleAvg(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
-	averageOp op = (averageOp) operators.Average.clone();
+    void handleAvg(Element e) throws InvalidPlanException {
+	averageOp op = new averageOp();
 	op.setSelectedAlgoIndex(0);
 
 	String id = e.getAttribute("id");
@@ -596,9 +582,8 @@ public class XMLQueryPlanParser {
 	avgNode.setVarTbl(qpVarTbl);
     }
 
-    void handleSum(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
-	SumOp op = (SumOp) operators.Sum.clone();
+    void handleSum(Element e) throws InvalidPlanException {
+	SumOp op = new SumOp();
 	op.setSelectedAlgoIndex(0);
 
 	String id = e.getAttribute("id");
@@ -643,9 +628,8 @@ public class XMLQueryPlanParser {
 	sumNode.setVarTbl(qpVarTbl);
     }
 
-    void handleCount(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
-	CountOp op = (CountOp) operators.Count.clone();
+    void handleCount(Element e) throws InvalidPlanException {
+	CountOp op = new CountOp();
 	op.setSelectedAlgoIndex(0);
 
 	String id = e.getAttribute("id");
@@ -690,8 +674,7 @@ public class XMLQueryPlanParser {
 	countNode.setVarTbl(qpVarTbl);
     }
 
-    void handleDtdScan(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleDtdScan(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
 	// The node's children contain URLs
@@ -704,7 +687,7 @@ public class XMLQueryPlanParser {
 	    urls.addElement(((Element) child).getAttribute("value"));
 	}
 	
-	dtdScanOp op = (dtdScanOp) operators.DtdScan.clone();
+	dtdScanOp op = new dtdScanOp();
 	op.setDocs(urls);
 	logNode node = new logNode(op);
 	ids2nodes.put(id, node);
@@ -728,12 +711,11 @@ public class XMLQueryPlanParser {
 	node.setVarTbl(qpVarTbl);
     }
 
-    void handleResource(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleResource(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
         String urn = e.getAttribute("urn");
 	
-	ResourceOp op = (ResourceOp) operators.resourceOp.clone();
+	ResourceOp op = new ResourceOp();
 	op.setURN(urn);
 	logNode node = new logNode(op);
 	ids2nodes.put(id, node);
@@ -757,8 +739,7 @@ public class XMLQueryPlanParser {
 	node.setVarTbl(qpVarTbl);
     }
 
-    void handleConstant(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleConstant(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
         String content = "";
         NodeList children = e.getChildNodes();
@@ -785,7 +766,7 @@ public class XMLQueryPlanParser {
             pos++;
 	}
 
-        ConstantOp op = (ConstantOp) operators.constantOp.clone();
+        ConstantOp op = new ConstantOp();
         op.setContent(content);
 
   	op.setSelectedAlgoIndex(0);
@@ -800,11 +781,10 @@ public class XMLQueryPlanParser {
 
     }
 
-    void handleSend(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleSend(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
-        SendOp op = (SendOp) operators.send.clone();
+        SendOp op = new SendOp();
 
   	op.setSelectedAlgoIndex(0);
 
@@ -815,11 +795,10 @@ public class XMLQueryPlanParser {
   	ids2nodes.put(id, node);	    
     }
 
-    void handleDisplay(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleDisplay(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
-        DisplayOp op = (DisplayOp) operators.display.clone();
+        DisplayOp op = new DisplayOp();
 
   	op.setSelectedAlgoIndex(0);
         op.setQueryId(e.getAttribute("query_id"));
@@ -832,8 +811,7 @@ public class XMLQueryPlanParser {
   	ids2nodes.put(id, node);	    
     }
 
-    void handleFirehoseScan(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleFirehoseScan(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
 	String host = e.getAttribute("host");
@@ -853,16 +831,14 @@ public class XMLQueryPlanParser {
 	    new FirehoseSpec(port, host, rate, type, desc, 
 	                     iters, docCount);
 	
-	FirehoseScanOp op = 
-	    (FirehoseScanOp) operators.FirehoseScan.clone();
+	FirehoseScanOp op = new FirehoseScanOp();
 	op.setSelectedAlgoIndex(0);
 	op.setFirehoseScan(fhspec);
 	logNode node = new logNode(op);
 	ids2nodes.put(id, node);	    
     }
 
-    void handleStreamScan(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleStreamScan(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
 	String typeStr = e.getAttribute("type");
@@ -880,19 +856,17 @@ public class XMLQueryPlanParser {
 	    throw new InvalidPlanException("Invalid type - typeStr: " + typeStr);
 	}
 
-	StreamScanOp op = 
-	    (StreamScanOp) operators.StreamScan.clone();
+	StreamScanOp op = new StreamScanOp();
 	op.setSelectedAlgoIndex(0);
 	op.setStreamScan(sSpec);
 	logNode node = new logNode(op);
 	ids2nodes.put(id, node);	    
     }
 
-    void handleConstruct(Element e) 
-	throws CloneNotSupportedException, InvalidPlanException {
+    void handleConstruct(Element e) throws InvalidPlanException {
 	String id = e.getAttribute("id");
 
-	constructOp op = (constructOp) operators.Construct.clone();
+	constructOp op = new constructOp();
 	op.setSelectedAlgoIndex(0);
 	NodeList children = e.getChildNodes();
 	String content = "";
@@ -964,8 +938,7 @@ public class XMLQueryPlanParser {
 	node.setVarTbl(qpVarTbl);
     }
 
-    private void handleAccumulate(Element e) 
-	throws InvalidPlanException {
+    private void handleAccumulate(Element e) throws InvalidPlanException {
 	try {
 	    /* Need to create an AccumulateOp
 	     * 1) The MergeTemplate
@@ -988,7 +961,7 @@ public class XMLQueryPlanParser {
 	    /* file containing the initial input to the accumulate */
 	    String initialAccumFile = e.getAttribute("initialAccumFile");
 
-	    AccumulateOp op = (AccumulateOp) operators.Accumulate.clone();
+	    AccumulateOp op = new AccumulateOp();
 	    op.setSelectedAlgoIndex(0);
 	    
 	    String clear = e.getAttribute("clear");
@@ -1038,8 +1011,6 @@ public class XMLQueryPlanParser {
 	} catch (MTException mte) {
 	    throw new InvalidPlanException("Invalid Merge Template" + 
 					   mte.getMessage());
-	} catch (java.lang.CloneNotSupportedException cnse) {
-	    throw new PEException("Clone of Accumulate failed");
 	}
     }
 

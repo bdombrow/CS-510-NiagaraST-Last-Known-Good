@@ -1,5 +1,5 @@
 /*
- * $Id: CommunicationServlet.java,v 1.2 2002/05/07 03:10:34 tufte Exp $
+ * $Id: CommunicationServlet.java,v 1.3 2002/05/23 06:30:47 vpapad Exp $
  *
  */
 
@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.*;
 
 import niagara.query_engine.*;
+import niagara.optimizer.Optimizer;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.utils.*;
 
@@ -100,8 +101,8 @@ public class CommunicationServlet extends HttpServlet {
                 return;
             }
 
+            top = Optimizer.optimize(top);
 
-            
             if (type.equals("submit_subplan")) {
                 // The top operator better be a send...
                 SendOp send = (SendOp) top.getOperator();
@@ -115,10 +116,24 @@ public class CommunicationServlet extends HttpServlet {
                 
                 out.println(query_id);
                 out.close();
-            }
-            else if (type.equals("submit_plan")) {
+            } else if (type.equals("submit_plan")) {
                 out.println("Query received");
                 out.close();
+            } else if (type.equals("optimize_plan")) {
+                debug("plan optimization requested");
+                out.println("Query received");
+                out.close();
+
+                // We don't want to actually *run* the plan!
+                // Replace the plan with a constant operator 
+                // having the optimized plan as its content
+                ConstantOp op = new ConstantOp();
+                op.setContent(top.input().planToXML());
+                op.setSelectedAlgoIndex(0);
+                top.setInput(new logNode(op), 0);
+            } else { 
+                throw new PEException("Client request with unknown type: " 
+                                      + type);
             }
 
             debug("Sending to ES");
@@ -129,7 +144,7 @@ public class CommunicationServlet extends HttpServlet {
             debug("request handled");
 	}
 	catch (ShutdownException e) {
-	    cerr("ShutdownException occurred durong doPost:");
+	    cerr("ShutdownException occurred during doPost:");
 	    e.printStackTrace();
 	}
     }
@@ -150,7 +165,7 @@ public class CommunicationServlet extends HttpServlet {
         System.err.println("CS: " + msg);
     }
 
-    public static void debug(String msg) {
+    public static final void debug(String msg) {
         if (doDebug) 
             System.err.println("CS: " + msg);
     }

@@ -1,5 +1,5 @@
 /**
- * $Id: MQPHandler.java,v 1.3 2002/05/07 03:10:34 tufte Exp $
+ * $Id: MQPHandler.java,v 1.4 2002/05/23 06:30:47 vpapad Exp $
  *
  */
 
@@ -62,13 +62,7 @@ public class MQPHandler extends Thread {
 		ResourceOp rop = (ResourceOp) node.getOperator();
 		String urn = rop.getURN();
 		if (catalog.isLocallyResolvable(urn)) {
-		    dtdScanOp op = null;
-		    try {
-			op = (dtdScanOp) operators.DtdScan.clone();
-		    } catch (CloneNotSupportedException e) {
-			throw new PEException("Unable to clone DTDScan " +
-					      e.getMessage()); 
-		    }
+		    dtdScanOp op = new dtdScanOp();
 		    op.setDocs(catalog.getURL(urn));
 		    node.setOperator(op);
 		    resources.remove(node);
@@ -132,12 +126,7 @@ public class MQPHandler extends Thread {
         // Build new MQP
         for (int k = 0; k < schedulableRoots.size(); k++) {
             logNode n = (logNode) schedulableRoots.get(k);
-            ConstantOp cop = null;
-            try {
-                cop = (ConstantOp) operators.constantOp.clone();
-	    } catch (CloneNotSupportedException ex) { 
-		throw new PEException("cant clone constant op " + ex.getMessage());
-	    }
+            ConstantOp cop = new ConstantOp();
             cop.setContent(results[number]);
             cop.setVars(n.getVarTbl().getVars());
             n.setOperator(cop);

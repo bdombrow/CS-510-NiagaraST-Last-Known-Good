@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.4 2002/05/07 03:10:34 tufte Exp $
+ * $Id: Catalog.java,v 1.5 2002/05/23 06:30:47 vpapad Exp $
  *
  */
 
@@ -23,9 +23,22 @@ public class Catalog {
     Hashtable urn2urls; // locally resolvable
     Hashtable urn2resolvers;
 
+    HashMap costmodel; // Columbia cost model parameters
+
+    // Logical operator name <-> class mapping
+    HashMap name2class; 
+    HashMap class2name;
+
+    // Logical operator -> Array of Physical operator classes
+    HashMap logical2physical;
+
     public Catalog() {
         urn2urls = new Hashtable();
         urn2resolvers = new Hashtable();
+        costmodel = new HashMap();
+        name2class = new HashMap();
+        class2name = new HashMap();
+        logical2physical = new HashMap();
     }
 
     public void addResolver(String urn, String resolver) {
@@ -90,47 +103,141 @@ public class Catalog {
             
             // Get root element
             Element root = d.getDocumentElement();
-        
-            NodeList resources = root.getElementsByTagName("resource");
-            for (int i = 0; i < resources.getLength(); i++) {
-                Element resource = (Element) resources.item(i);
-                String urn = resource.getAttribute("name");
 
-                NodeList urls = resource.getElementsByTagName("url");
-                for (int j = 0; j < urls.getLength(); j++) {
-                    Element url = (Element) urls.item(j);
-                    String location = url.getAttribute("location");
-                    if (!urn2urls.containsKey(urn)) { 
-                        urn2urls.put(urn, new Vector());
-                    }
-                    Vector v = (Vector) urn2urls.get(urn);
-                    v.add(location);
-                }
-
-                NodeList resolvers = resource.getElementsByTagName("resolver");
-                for (int j = 0; j < resolvers.getLength(); j++) {
-                    Element resolver = (Element) resolvers.item(j);
-                    String location = resolver.getAttribute("location");
-                    if (!urn2resolvers.containsKey(urn)) {
-                        urn2resolvers.put(urn, new Vector());
-                    }
-                    Vector v = (Vector) urn2resolvers.get(urn);
-                    v.add(location);
-                }
-            }
+            loadOperators(root);
+            loadResources(root);
+            loadCostModel(root);
         }
         catch (FileNotFoundException e) {
-            cerr("Catalog: FileNotFound " + e.getMessage());
-            e.printStackTrace();
-            System.exit(-1);
+            throw new PEException("Catalog file not found: " + e.getMessage());
 	} catch(org.xml.sax.SAXException se) {
-	    throw new PEException("Error parsing catalog file " + se.getMessage());
+	    throw new PEException("Error parsing catalog file " 
+                                  + se.getMessage());
 	} catch(IOException ioe) {
-	    throw new PEException("Error getting catalog file " +
+	    throw new PEException("Error reading catalog file " +
 				  ioe.getMessage());
 	}
     }
     
+    void loadOperators(Element root) {
+        costmodel = new HashMap();
+        NodeList nl = root.getElementsByTagName("operators");
+        if (nl.getLength() != 1) {
+            throw new PEException(
+                 "The catalog must contain exactly one <operators> element");
+        }
+        Node cm = nl.item(0);
+
+        nl = cm.getChildNodes(); 
+
+        // Populate the operator hashmaps
+        for (int i = 0; i < nl.getLength(); i++) {
+            Node n = nl.item(i);
+            if (n.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            Element e = (Element) n;
+            String name = e.getAttribute("name");
+            String className = e.getAttribute("class");
+            name2class.put(name, className);
+            name2class.put(className, name);
+
+            ArrayList al = new ArrayList();
+            NodeList physical = e.getChildNodes();
+            for (int j = 0; j < physical.getLength(); j++) {
+                Node m = physical.item(j);
+                if (m.getNodeType() != Node.ELEMENT_NODE)
+                    continue;
+                 Element elt = (Element) m;
+                 String physicalClassName = elt.getAttribute("class");
+                 try {
+                     al.add(Class.forName(physicalClassName));
+                 }
+                 catch (ClassNotFoundException exc) {
+                     throw new PEException("Could not find class: " 
+                                           + physicalClassName);
+                 }
+            }
+            Class[] implementations = new Class[al.size()];
+            for (int k = 0; k < al.size(); k++)
+                implementations[k] = (Class) al.get(k);
+            logical2physical.put(className, implementations);
+        }
+    }
+
+    void loadResources(Element root) {
+        NodeList resources = root.getElementsByTagName("resource");
+        for (int i = 0; i < resources.getLength(); i++) {
+            Element resource = (Element) resources.item(i);
+            String urn = resource.getAttribute("name");
+            
+            NodeList urls = resource.getElementsByTagName("url");
+            for (int j = 0; j < urls.getLength(); j++) {
+                Element url = (Element) urls.item(j);
+                String location = url.getAttribute("location");
+                if (!urn2urls.containsKey(urn)) { 
+                    urn2urls.put(urn, new Vector());
+                }
+                Vector v = (Vector) urn2urls.get(urn);
+                v.add(location);
+            }
+
+            NodeList resolvers = resource.getElementsByTagName("resolver");
+            for (int j = 0; j < resolvers.getLength(); j++) {
+                Element resolver = (Element) resolvers.item(j);
+                String location = resolver.getAttribute("location");
+                if (!urn2resolvers.containsKey(urn)) {
+                    urn2resolvers.put(urn, new Vector());
+                }
+                Vector v = (Vector) urn2resolvers.get(urn);
+                v.add(location);
+            }
+        }
+    }
+
+    void loadCostModel(Element root) {
+        costmodel = new HashMap();
+        NodeList nl = root.getElementsByTagName("costmodel");
+        if (nl.getLength() != 1) {
+            throw new PEException(
+                 "The catalog must contain exactly one <costmodel> element");
+        }
+        Node cm = nl.item(0);
+
+        nl = cm.getChildNodes(); 
+
+        // Populate the cost model HashMap
+        for (int i = 0; i < nl.getLength(); i++) {
+            Node n = nl.item(i);
+            if (n.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            Element e = (Element) n;
+            costmodel.put(e.getTagName(), e.getAttribute("value"));
+        }
+    }
+
+    
+    public String getOperatorName(String operatorClass) {
+        return (String) class2name.get(operatorClass);
+    }
+
+    public Class[] getPhysical(String logicalClass) { 
+        return (Class[]) logical2physical.get(logicalClass);
+    }
+
+    public String getCostModelParameter(String param) {
+        return (String) costmodel.get(param);
+    }
+
+    public int getIntegerCostModelParameter(String param) {
+        String s = (String) costmodel.get(param);
+        return Integer.parseInt(s);
+    }
+
+    public double getDoubleCostModelParameter(String param) {
+        String s = (String) costmodel.get(param);
+        return Double.parseDouble(s);
+    }
+
     public static void cerr(String msg) {
         System.err.println(msg);
     }
@@ -165,6 +272,15 @@ public class Catalog {
             for (int i = 0; i < resolvables.size(); i++) {
                 cerr("\t" + resolvables.get(i));
             }
+        }
+    }
+
+    public void dumpCostModel() {
+        cerr("Cost model parameters: ");
+        Iterator keys = costmodel.keySet().iterator();
+        while (keys.hasNext()) {
+            String k = (String) keys.next();
+            cerr(k + " = " + costmodel.get(k));
         }
     }
 }

@@ -1,3 +1,7 @@
+/**
+ * $Id: Console.java,v 1.4 2002/05/23 06:30:47 vpapad Exp $
+ */
+
 package niagara.connection_server;
 
 import java.io.*;
@@ -6,8 +10,6 @@ import java.io.*;
  * <code>Console</code> uses the standard input to provide
  * rudimentary control over the server.
  *
- * @author <a href="mailto:vpapad@cse.ogi.edu">Vassilis Papadimos</a>
- * @version 1.0
  */
 public class Console extends Thread {
     
