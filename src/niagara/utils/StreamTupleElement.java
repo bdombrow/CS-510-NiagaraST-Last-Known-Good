@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.7 2002/12/10 00:59:43 vpapad Exp $
+  $Id: StreamTupleElement.java,v 1.8 2003/02/23 05:03:14 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,6 +39,7 @@ package niagara.utils;
 
 import java.util.Vector;
 import org.w3c.dom.*;
+import java.lang.reflect.Array;
 
 public class StreamTupleElement {
 
@@ -78,13 +79,13 @@ public class StreamTupleElement {
      */
     public StreamTupleElement (boolean partial, int capacity) {
 	// Initialize the tuple vector with the capacity
-	createTuple(capacity);
+	if(capacity <= 0) {
+	    createTuple(8);
+	} else {
+	    createTuple(capacity);
+	}
         timeStamp = 0;
 	this.partial = partial;
-
-	// Initialize the old version of the tuple to null
-	//
-	//this.oldVersion = null;
     }
 
     private void createTuple(int capacity) {
@@ -93,41 +94,6 @@ public class StreamTupleElement {
 	tupleSize = 0;
     }
      
-    /**
-     * The constructor that initializes the tuple and stores the old version
-     * of the tuple
-     *
-     * @param partial If this is true, the tuple represents a partial result;
-     *                else it represents a final result
-     * @param oldVersion The old version of the current tuple
-     */
-    /*
-    public StreamTupleElement (boolean partial, StreamTupleElement oldVersion) {
-
-	// Initialize the tuple vector with capacity equal to size of old
-	// version, if it exists
-	//
-	if (oldVersion != null) {
-	    tuple = new Vector(oldVersion.size());
-	}
-	else {
-
-	    // Initialize it with default size
-	    //
-	    tuple = new Vector();
-	}
-
-	// Initialize whether the tuple is a partial result
-	//
-	this.partial = partial;
-
-	// Initialize the old version of the tuple
-	//
-	this.oldVersion = oldVersion;
-        this.timeStamp = 0;
-    }
-    */
-
     /**
      * This function return the number of attributes in the tuple element
      *
@@ -168,8 +134,8 @@ public class StreamTupleElement {
      */
 
     public void appendAttribute (Node attribute) {
-	if(tupleSize == allocSize) {
-	    expandTuple();
+	if(tupleSize >= allocSize) {
+	    expandTuple(tupleSize);
 	}
 	tuple[tupleSize] = attribute;
 	tupleSize++;
@@ -187,7 +153,7 @@ public class StreamTupleElement {
     public void appendTuple(StreamTupleElement otherTuple) {
 	// Loop over all the attributes of the other tuple and append them
 	while(tupleSize+otherTuple.tupleSize > allocSize) {
-	    expandTuple();
+	    expandTuple(tupleSize+otherTuple.tupleSize);
 	}
 
 	for (int i = 0; i< otherTuple.tupleSize; i++) {
@@ -212,7 +178,7 @@ public class StreamTupleElement {
 
     public void setAttribute(int position, Node value) {
 	while(position >= allocSize)
-	    expandTuple();
+	    expandTuple(position);
         if (tupleSize <= position)
             tupleSize = position+1;
             
@@ -359,13 +325,19 @@ public class StreamTupleElement {
         }
     }
 
-    private void expandTuple() {
-	Node[] newTuple = new Node[allocSize*2];
+    private void expandTuple(int newSize) {
+	if(newSize < allocSize)
+	    return;
+	int newAllocSize = allocSize*2;
+	while(newSize >= newAllocSize)
+	    newAllocSize*=2;
+
+	Node[] newTuple = new Node[newAllocSize];
 	for(int i=0; i<tupleSize; i++) {
 	    newTuple[i] = tuple[i];
 	}
 	tuple = newTuple;
-	allocSize = allocSize*2;
+	allocSize = newAllocSize;
     }
 
 }
