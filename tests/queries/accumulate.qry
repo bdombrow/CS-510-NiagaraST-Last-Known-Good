@@ -10,6 +10,12 @@
 
 </dtdscan>
 
-<accumulate clear="true" accumFileName="AvgGrade.xml" mergeAttr="$docroot" mergeTemplate="/disk/hopper/projects/disc/niagara/mergeTemplates/AvgGradeMT.xml" id="accum" input="docroot">
+<accumulate 
+	id="accum"
+	clear="true" 
+       	accumFileName="AvgGrade.xml" 
+	mergeAttr="$docroot" 
+	mergeTemplate="/disk/hopper/projects/disc/niagara/mergeTemplates/AvgGradeMT.xml" 
+	input="docroot">
 </accumulate>
 </plan>

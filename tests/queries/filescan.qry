@@ -9,9 +9,10 @@
         input="inputA"/>
 
 <construct id="cons" input="AA">
+<![CDATA[
 <result>
   <A> $AA </A>
 </result>
-
+]]>
 </construct>
 </plan>

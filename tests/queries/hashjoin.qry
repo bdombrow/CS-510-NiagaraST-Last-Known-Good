@@ -14,20 +14,18 @@
 <unnest root="" type="content" 
         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 
 	  id="acscan" 
-          input="acdtdscan">
-</unnest>
+          input="acdtdscan"/>
 
 <unnest root="" type="content" 
         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 
           id="jcscan" 
-          input="jcdtdscan">
-</unnest>
+          input="jcdtdscan"/>
 
 <join id="join" left="$acscan" right="$jcscan" 
           input="acscan jcscan">
 </join>
 
-<construct clear="no" id="cons" input="join">
-<PERSONA>$acscan</PERSONA>
+<construct id="cons" input="join">
+<![CDATA[ <PERSONA>$acscan</PERSONA> ]]>
 </construct>
 </plan>

@@ -4,9 +4,16 @@
 
 <plan top="fh">
 
-<firehosescan id="fh" host="localhost" port="5000" rate="0" datatype="xmlb" num_gen_calls="5" streaming="yes" desc="garbage" num_tl_elts="3" prettyprint = "no" >
-</firehosescan>
-
+<firehosescan 
+	id="fh" 
+	host="localhost" 
+	port="5000" 
+	rate="0" 
+	datatype="xmlb" 
+	num_gen_calls="5" 
+	desc="garbage" 
+	num_tl_elts="3" 
+	prettyprint = "no"/>
 </plan>
 
 

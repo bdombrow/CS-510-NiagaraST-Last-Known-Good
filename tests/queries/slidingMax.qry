@@ -10,6 +10,8 @@
 <unnest id="scan2" root="$scan" regexp="NUM2" input="scan1"/>
 <slidingMax id="slidingMax"  groupby="$scan1" maxattr="$scan2" input="scan2" range="6" every="4"/>
 <construct id="cons" input="slidingMax">
+<![CDATA[
 <max><index>$index</index><groupby>$scan1</groupby> $slidingMax</max>
+]]>
 </construct>
 </plan>

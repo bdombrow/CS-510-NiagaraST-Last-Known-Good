@@ -1,9 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 
-<!-- This query tests having a construct operator in the middle
-of the operator tree -->
-
 <plan top="nest">
 
 <filescan id="data" filename = "../../tests/data/nestdata.xml"/>

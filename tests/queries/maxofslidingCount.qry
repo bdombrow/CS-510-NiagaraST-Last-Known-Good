@@ -10,6 +10,6 @@
 <slidingCount id="slidingCount"  groupby="$auction" countattr="$auction" input="auction" range="5" every="3"/>
 <max id="max" groupby="$index" maxattr="$slidingCount" input="slidingCount"/>
 <construct id="cons" input="max">
-<max><index>$index</index>$max</max>
+<![CDATA[ <max><index>$index</index>$max</max> ]]>
 </construct>
 </plan>

@@ -9,6 +9,8 @@
 <unnest id="scan1" regexp="NUM" input="scan"/>
 <avg id="avg" groupby="$scan" avgattr="$scan1" input="scan1"/> 
 <construct id="cons" input="avg">
+<![CDATA[
 <Average>$avg</Average>
+]]>
 </construct>
 </plan>

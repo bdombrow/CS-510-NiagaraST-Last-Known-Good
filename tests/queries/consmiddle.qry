@@ -13,7 +13,9 @@ of the operator tree -->
 <unnest id="scan" regexp="PLAY.NUM" type="content" input="dtd"/>
 
 <construct id="cons" input="scan">
+<![CDATA[
 <num>$scan</num>
+]]>
 </construct> 
 
 <select id="select" input="cons">

@@ -20,10 +20,16 @@
 <unnest id="item" regexp="list.item" input="const"/>
 <unnest id="a" type="element" regexp="a" input="item"/>
 <unnest id="b" type="element" root="item" regexp="b" input="a"/>
-<expression id="expr" variables="a b" expression="result = a + 2*b" input="b"/>
+<expression 
+	id="expr" 
+	variables="a b" 
+	expression="result = a + 2*b" 
+	input="b"/>
 <construct id="cons" input="expr">
+<![CDATA[
 <result>
 $a $b $expr
 </result>
+]]>
 </construct>
 </plan>

@@ -10,6 +10,8 @@
 <unnest id="scan2" root="$scan" regexp="NUM2" input="scan1"/>
 <slidingCount id="slidingCount" groupby="$scan1" countattr="$scan2" input="scan2" range = "5" every = "5"/>
 <construct id="cons" input="slidingCount">
+<![CDATA[ 
 <Count><index>$index</index><groupby>$scan1</groupby>$slidingCount</Count>
+]]>
 </construct>
 </plan>

@@ -9,6 +9,6 @@
 <unnest id="scan1" regexp="NUM" input="scan"/>
 <max id="max" groupby="$scan" maxattr="$scan1" input="scan1"/>
 <construct id="cons" input="max">
-<max>$max</max>
+<![CDATA[ <max>$max</max> ]]>
 </construct>
 </plan>

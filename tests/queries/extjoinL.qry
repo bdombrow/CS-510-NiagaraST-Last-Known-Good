@@ -25,11 +25,12 @@
 </join>
 
 <construct id="cons" input="join">
+<![CDATA[
 <result>
   <A> $AA </A>
   <AB> $AB </AB>
   <BB> $BB </BB>
 </result>
-
+]]>
 </construct>
 </plan>

@@ -17,8 +17,10 @@
 
 <unnest id="name" type="content" regexp="list.person.name" input="const"/>
 <construct id="cons" input="name">
+<![CDATA[
 <name>
 $name
 </name>
+]]>
 </construct>
 </plan>

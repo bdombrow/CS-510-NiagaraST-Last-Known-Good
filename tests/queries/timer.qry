@@ -8,6 +8,6 @@
 
 <prefix id="prefix" length="50" input="timer"/>
 <construct id="cons" input="prefix">
-<time> $timer </time>
+<![CDATA[ <time> $timer </time> ]]>
 </construct>
 </plan>

@@ -21,9 +21,11 @@
 <incravg id="avg" groupby="$group" avgattr="$value" input="value"/>
 
 <construct id="cons" input="avg">
+<![CDATA[
 <group>
 <name>$group</name>
 <avg>$avg</avg>
 </group>
+]]>
 </construct>
 </plan>

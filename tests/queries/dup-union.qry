@@ -8,6 +8,6 @@
 <dup id="dup" branch="3" input="scan1"/>
 <union id="union" input="dup dup dup"/>
 <construct id="cons" input="union">
-<num>$scan1</num>
+<![CDATA[<num>$scan1</num>]]>
 </construct>
 </plan>

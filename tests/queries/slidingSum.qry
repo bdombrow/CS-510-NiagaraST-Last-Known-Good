@@ -8,8 +8,10 @@
 <unnest id="scan" regexp="PLAY.NUM" input="dtd"/>
 <unnest id="scan1" regexp="NUM1" input="scan"/>
 <unnest id="scan2" root="$scan" regexp="NUM2" input="scan1"/>
-<slidingSum id="slidingSum" groupby="$scan1" sumattr="$scan2" input="scan2" range = "5" every = "3"/>
-<construct id="cons" input="slidingSum">
-<sum><index>$index</index><groupby>$scan1</groupby>$slidingSum</sum>
+<slidingSum id="slSum" groupby="$scan1" sumattr="$scan2" input="scan2" range = "5" every = "3"/>
+<construct id="cons" input="slSum">
+<![CDATA[
+<sum><index>$index</index><groupby>$scan1</groupby>$slSum</sum>
+]]>
 </construct>
 </plan>

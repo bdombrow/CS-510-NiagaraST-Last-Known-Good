@@ -9,6 +9,6 @@
 <unnest id="scan1" regexp="NUM" input="scan"/>
 <sum id="sum" groupby="$scan" sumattr="$scan1" input="scan1"/>
 <construct id="cons" input="sum">
-<sum>$sum</sum>
+<![CDATA[ <sum>$sum</sum> ]]>
 </construct>
 </plan>

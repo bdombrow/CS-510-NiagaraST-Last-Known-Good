@@ -25,10 +25,12 @@
 <incrmax id="max" groupby="$group" emptygroupvalue="0" maxattr="$value" input="value"/>
 
 <construct id="cons" input="max">
+<![CDATA[
 <maximum> 
 <group> $group </group>
 <prev> $oldmax </prev>
 <new> $max </new>
 </maximum>
+]]>
 </construct>
 </plan>
