@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.22 2003/03/05 19:25:10 tufte Exp $
+  $Id: NiagraServer.java,v 1.23 2003/03/07 23:41:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -160,7 +160,6 @@ public class NiagraServer {
         if (args.length == 1 && args[0].equals("-init")) {
 
             byte[] input = new byte[512];
-            String inputString = null;
             int inputLen = 0;
             boolean validInput = false;
 

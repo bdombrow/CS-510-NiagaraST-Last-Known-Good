@@ -1,5 +1,5 @@
 /**
- * $Id: MQPHandler.java,v 1.6 2003/02/25 06:16:28 vpapad Exp $
+ * $Id: MQPHandler.java,v 1.7 2003/03/07 23:41:11 vpapad Exp $
  *
  */
 
@@ -7,6 +7,7 @@ package niagara.connection_server;
 
 import niagara.optimizer.Optimizer;
 import niagara.optimizer.Plan;
+import niagara.optimizer.colombia.Attrs;
 import niagara.query_engine.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.utils.*;
@@ -14,7 +15,6 @@ import niagara.utils.*;
 import niagara.client.LightMQPClient;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.net.*;
 
@@ -92,9 +92,7 @@ public class MQPHandler {
         // Build new MQP
         for (int k = 0; k < schedulableRoots.size(); k++) {
             Plan p = (Plan) schedulableRoots.get(k);
-            ConstantOp cop = new ConstantOp();
-            cop.setContent(results[number]);
-            cop.setVars(p.getTupleSchema().getVariables());
+            ConstantOp cop = new ConstantOp(results[number], new Attrs(p.getTupleSchema().getVariables()));
             p.setOperator(cop);
             p.setInputs(new Plan[] {});
         }

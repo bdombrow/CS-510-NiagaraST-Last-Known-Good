@@ -1,13 +1,11 @@
 /*
- * $Id: Catalog.java,v 1.8 2002/12/10 00:56:21 vpapad Exp $
+ * $Id: Catalog.java,v 1.9 2003/03/07 23:41:11 vpapad Exp $
  *
  */
 
 package niagara.connection_server;
 import java.util.*;
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
@@ -17,11 +15,9 @@ import niagara.logical.Variable;
 import niagara.ndom.*;
 import niagara.utils.*;
 
-import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
-import niagara.optimizer.colombia.Rule;
 import niagara.optimizer.rules.ConstructedRule;
 import niagara.optimizer.rules.CustomRule;
 import niagara.optimizer.rules.SimpleRule;
