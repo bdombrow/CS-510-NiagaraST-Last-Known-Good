@@ -35,6 +35,7 @@ class XMLFirehoseThread extends Thread {
 	    try {
 		// get a message from the queue
 		msg = msg_queue.get();
+		totalBytes = 0;
 
 		fhSpec = msg.getSpec();
 		boolean useStreamingFormat = fhSpec.isStreaming();
