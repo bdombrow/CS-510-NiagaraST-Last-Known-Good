@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SlidingWindowOp.java,v 1.1 2003/02/05 21:26:23 jinli Exp $
+  $Id: SlidingWindowOp.java,v 1.2 2003/02/05 21:46:03 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,7 +39,7 @@ import niagara.xmlql_parser.syntax_tree.*;
  * used for grouping and are common to all the sub-classes
  *
  */
-public abstract class slidingWindowOp extends groupOp {
+public abstract class SlidingWindowOp extends groupOp {
     /**
      * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, LogicalProperty[])
      */

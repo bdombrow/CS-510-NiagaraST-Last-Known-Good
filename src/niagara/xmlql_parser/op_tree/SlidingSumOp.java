@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SlidingSumOp.java,v 1.1 2003/02/05 21:26:23 jinli Exp $
+  $Id: SlidingSumOp.java,v 1.2 2003/02/05 21:46:03 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,7 +41,7 @@ import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.syntax_tree.*;
 
-public class SlidingSumOp extends slidingWindowOp {
+public class SlidingSumOp extends SlidingWindowOp {
 
     /////////////////////////////////////////////////////////////////
     // These are the private members of the summing operator       //
