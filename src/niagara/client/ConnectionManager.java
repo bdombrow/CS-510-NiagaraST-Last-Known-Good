@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.10 2002/04/21 04:11:01 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.11 2002/04/29 19:46:35 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -384,7 +384,6 @@ public class ConnectionManager implements QueryExecutionIF
 		reg.registerQuery(id, "shutdown", QueryType.NOTYPE);
 	      // Set the query type
 	      e.type = QueryType.NOTYPE;
-
               writeMessage(id, SHUTDOWN); 
 	  }
 
@@ -526,9 +525,9 @@ public class ConnectionManager implements QueryExecutionIF
      */
     private void writeMessage(int id, String msg) {
 	QueryRegistry.Entry e =	reg.getQueryInfo(id);
-
-	int sid = e.getServerId();
-			
+	// was hanging on server id, try a random one KT
+	int sid = -1;
+	//int sid = e.getServerId();
 	synchronized(writer){
 	    // Send the request to the server
 	    writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" 
