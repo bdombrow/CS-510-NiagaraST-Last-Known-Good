@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.4 2002/04/19 20:49:54 tufte Exp $
+  $Id: StreamTupleElement.java,v 1.5 2002/04/29 19:54:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,7 +40,7 @@ package niagara.utils;
 import java.util.Vector;
 import org.w3c.dom.*;
 
-public final class StreamTupleElement extends StreamElement {
+public final class StreamTupleElement {
 
     // Members to create an expandable array of nodes
     private Node tuple[];

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamPreviouslyClosedException.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: ShutdownException.java,v 1.1 2002/04/29 19:54:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,15 +29,14 @@
 package niagara.utils;
 
 /**
- * This is the <code>StreamPreviouslyClosedException</code> class that is
- * thrown when an invalid operation is performed on a previously closed
- * stream.
+ * ShutdownException is thrown when a SHUTDOWN message is received
+ * on a stream - should propagate all the way up to PhysicalOperator.
+ * execute, where it is handled
  *
  * @version 1.0
  *
- * @see Stream
  */
 
-public class StreamPreviouslyClosedException extends Exception {
+public class ShutdownException extends Exception {
 
 }
