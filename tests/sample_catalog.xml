@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.6 2002/10/31 04:26:22 vpapad Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.7 2002/12/10 01:05:47 vpapad Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -89,6 +89,11 @@
       class="niagara.logical.IncrementalAverage">
       <physical name="PhysicalIncrementalAverage" class="niagara.query_engine.PhysicalIncrementalAverage"/>
     </logical>
+    <logical name="project" class="niagara.logical.Project"/>
+    <logical name="noop"
+      class="niagara.optimizer.NoOp">
+      <physical name="PhysicalNoOp" class="niagara.optimizer.PhysicalNoOp"/>
+    </logical>
     <!-- The following operators are not accessible from XML query plans -->
     <logical name="nest"
       class="niagara.xmlql_parser.op_tree.nestOp">
@@ -106,18 +111,10 @@
       class="niagara.xmlql_parser.op_tree.scanOp">
       <physical name="PhysicalScan" class="niagara.query_engine.PhysicalScanOperator"/>
     </logical>
+    <physical name="PhysicalPredicatedUnnest"
+    	class ="niagara.query_engine.PhysicalPredicatedUnnest"/>
   </operators>
 
-  <ruleset name="consolidation ruleset">
-  	<rule type="custom" name="commuteRL" class="niagara.optimizer.rules.CommuteRL"/>
-  	<rule type="custom" name="associateRL" class="niagara.optimizer.rules.ConsolidatingAssociateJoinRtoL"/>
-  	<rule type="custom" name="ConsolidateMeRule" class="niagara.optimizer.rules.ConsolidateMeRule"/>
-  	<rule type="simple" name="resource to dtdscan">
-  		<before><logical name="resource" condition="isLocallyResolvable"/></before>
- 		<after><op name="dtdscan"/></after>
-  	</rule>
-  </ruleset>
-  
   <ruleset name="normal ruleset">
   	<rule type="simple" name="unnest to PhysicalUnnest">
   		<before><logical name="unnest"/></before>
@@ -135,7 +132,7 @@
   		<before><logical name="select"/></before>
  		<after><op name="PhysicalSelect"/></after>
   	</rule> 
-  	<rule type="simple" name="join to HashJoin">
+  	<rule type="simple" name="join to HashJoin" promise="5">
   		<before><logical name="join" condition="isEquiJoin"/></before>
  		<after><op name="HashJoin"/></after>
   	</rule> 
@@ -195,10 +192,58 @@
   		<before><logical name="dup"/></before>
  		<after><op name="PhysicalDup"/></after>
   	</rule>
-  	<!-- Custom rules -->
-  	<rule type="custom" name="commuteJoin" class="niagara.optimizer.rules.CommuteJoin"/>
-  	<rule type="custom" name="associateJoin" class="niagara.optimizer.rules.AssociateJoinRtoL"/>
-  	<rule type="custom" name="unionToPhysicalUnion" class="niagara.optimizer.rules.UnionToPhysicalUnion"/>
+  	<rule type="simple" name="accumulate to PhysicalAccumulate">
+  		<before><logical name="accumulate"/></before>
+ 		<after><op name="PhysicalAccumulate"/></after>
+  	</rule>
+  	<rule type="simple" name="noop to PhysicalNoOp">
+  		<before><logical name="noop"/></before>
+ 		<after><op name="PhysicalNoOp"/></after>
+  	</rule>
+  	<rule type="constructed" name="select-unnest to PhysicalPredicatedUnnest"
+  		condition="isPushableInto" argument="unn">
+  		<before>
+  			<op name="sel" op="select">
+  				<op name="unn" op="unnest">
+	  				<leaf name="0"/>
+  				</op>
+  			</op>
+  		</before>
+  		<after>
+  			<op op="PhysicalPredicatedUnnest" init="unn,sel">
+	  				<leaf name="0"/>
+	  		</op>
+  		</after>
+  	</rule>
+  	<rule type="custom" name="CommuteJoin" class="niagara.optimizer.rules.CommuteJoin" mask="CommuteJoin"/>
+  	<rule type="custom" name="AssociateJoin" class="niagara.optimizer.rules.AssociateJoinRtoL"/>
+  	<rule type="custom" name="SelectIntoJoin" class="niagara.optimizer.rules.SelectIntoJoin"/>
+  	<rule type="custom" name="PushJoinPredicates" class="niagara.optimizer.rules.PushJoinPredicates"/>
+  	<rule type="custom" name="SelectThruUnnest" class="niagara.optimizer.rules.SelectThruUnnest"/>
+  	<rule type="simple" name="EmptySelectToNoOp">
+  		<before><logical name="select" condition="isEmpty"/></before>
+  		<after><op name="noop"/></after>
+  	</rule>
+  	<rule type="custom" name="UnionToPhysicalUnion" class="niagara.optimizer.rules.UnionToPhysicalUnion"/>
+	
+	<!-- To disable projection pushing, comment out this rule (and uncomment the next one) -->  	
+  	<rule type="custom" name="PushProjection" class="niagara.optimizer.rules.PushProjection"/>
+  	<!--
+  	<rule type="simple" name="project to noop">
+  		<before><logical name="project"/></before>
+ 		<after><op name="noop"/></after> 
+  	</rule>
+  	-->
+  </ruleset>
+
+  <ruleset name="consolidation ruleset">
+  	<rule type="custom" name="commuteRL" class="niagara.optimizer.rules.CommuteRL"/>
+  	<rule type="custom" name="associateRL" class="niagara.optimizer.rules.ConsolidatingAssociateJoinRtoL"/>
+  	<rule type="custom" name="ConsolidateMeRule" class="niagara.optimizer.rules.ConsolidateMeRule"/>
+  	<rule type="simple" name="resource to dtdscan">
+  		<before><logical name="resource" condition="isLocallyResolvable"/></before>
+ 		<after><op name="dtdscan"/></after>
+  	</rule>
   </ruleset>
   
   	<!-- Cost Model -->
@@ -221,6 +266,8 @@
       <expression_cost value="0.2"/>
       <!-- Cost of "constructing" one output tuple -->
       <tuple_construction_cost value="0.5"/>
+      <!-- Cost of adding a field to a tuple -->
+      <field_overhead value="0.05"/>
       <!-- Cost of opening an HTTP connection -->
       <open_connection_cost value="0.5"/>
       <!-- Cost of transmitting one tuple -->
