@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: attr.java,v 1.3 2002/10/26 21:57:11 vpapad Exp $
+  $Id: attr.java,v 1.4 2003/02/20 05:43:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -83,6 +83,11 @@ public class attr {
 	if(type == dataType.VAR) {
 		String var = (String)value.getValue();
 		sa = vt.lookUp(var);
+		// XXX vpapad: Ugh.. try to search for the variable
+		// without the leading dollar sign
+		if (sa == null && var.charAt(0) == '$') {
+		    sa = vt.lookUp(var.substring(1));
+		}
 		value = new data(dataType.ATTR,sa);
 	}
     }
