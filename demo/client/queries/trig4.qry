@@ -1,0 +1,18 @@
+WHERE
+<Quotes>
+    <Quote>
+      <Symbol>$s</>
+      <Change>$c</>
+    </> element_as $q
+</> in "http://www.cs.wisc.edu/niagra/cq/quotes.xml",
+<Companies>
+    <Company>
+      <Symbol>$s</>
+    </> element_as $p
+</> in "http://www.cs.wisc.edu/niagra/data/cq/profiles.xml",
+$c > 1.0
+CONSTRUCT
+    <Result>
+      <Profile>$p</>
+      <Change>$c</>
+    </>

@@ -1,0 +1,18 @@
+# Use automake to make the makefile in.
+#
+#
+##########################################
+# Subdirectories for Automake to process #
+##########################################
+SUBDIRS = niagara
+
+#
+# The classpath. If not defined during configuration the default
+# environment variable (if any is used)
+CLASSPATH = @CLASSPATH@
+
+classpath:
+	@ echo $(CLASSPATH)
+
+jarfile:
+	jar cmf niagara/client/mnf client.jar `find niagara/client/ -name \*.class` *.gif

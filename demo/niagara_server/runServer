@@ -1,0 +1,4 @@
+rm -r CACHE/*
+rm -r SYS/*
+cp -r /p/niagara/public/html/data/cq/*.dtd CACHE
+java -Xmx500m -classpath `cat ../classpath` niagara.connection_server.NiagraServer $1 $2

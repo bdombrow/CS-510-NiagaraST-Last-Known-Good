@@ -1,0 +1,85 @@
+
+  Information regarding the Crawler component of the search-engine.
+  ---------------------------------------------------------------- 
+
+ This directory contains an initial version of the Crawler.
+ This new version of the Crawler has been cleaned up to remove
+ all its previous ties with the YP family.
+
+ The Crawler operates either from a single start Url or from a list
+ of start Urls. In the latter case, the list of urls must be specified
+ in the file UrlList.
+
+ The Crawler can be used on a standalone basis to find any XML documents
+ on say a given server or can be used in conjunction with the search-engine
+ server to index the documents as and when they are found.	
+
+ The Crawler has a few options which can be set to configure it for
+ a particular purpose. 
+
+ To create the executable, use
+
+ > make
+ 
+ which would create all executables.
+
+ To see the various options available use
+ 
+ > Javarun niagara.search_engine.crawler.SECrawler help
+
+ The various options are as follows
+
+  -s <url> : Specify the start url to direct the crawl from a specific point.
+
+  -m <domain> : The search domain for the current crawl, this can be one of
+		the 3 values (server|subtree|web).
+		a) The web option would crawl all links from a page.
+		b) The server option would crawl only those links that still
+		belong to the original server which directed the crawl.
+		eg. If you start with "http://www.cs.wisc.edu", then only
+		those documents that belong to the wisconsin cs department
+		will be crawled.
+		c) The subtree is even more restrictive than the previous
+		option, it would crawl documents that maintain the original
+		directory structure. eg. "http://www.cs.wisc.edu/rsch-info/
+		would only crawl this directory and it's associated 
+		sub-directories and not other documents of the cs dept server.
+
+  -t <thread> : # of threads that would be running concurrently, the default
+		is 5.
+
+	
+  -ip <serverName> : If running in conjunction with the search-engine and if
+		    you wish to index documents as and when they are found
+		    use this option to indicate to the crawler where the 
+		    search-engine server is running. (machine name/IP address)
+		    Pushing execessive urls to index to the search-engine 
+		    might swamp the server in the current prototype, it would
+		    be more advisable to obtain a list of documents from the
+		    crawler using the -o option and then index them on a batch
+		    mode.								
+
+  -o <fileName> : If you need a list of the documents found during the crawl,
+		  you can use this option to output the urls to a file.
+		  The file can possibly used to batch index the urls at the
+		  search-engine.
+
+  -ttl <seconds> : You can control the duration of the crawl by specifying the
+		   the time (in seconds) after which the crawler should stop.
+		   The default value is -1, ie the crawler would continue till
+		   there are urls left in the queue, which could go on for
+		   days.	
+
+
+
+  NOTE:  The current prototype of the crawler maintains all its data structures
+	 in memory, due to this reason, the crawler may run out of memory
+	 quite often depending on the duration of the crawl. At present, this
+	 problem can be offset by increasing the virtual memory limit of the
+	 JVM by adding the -ms option for the java interpreter in the file
+	 Javarun. This method is, of course limited by the actual virtual
+	 memory available on the machine.
+  
+  Ravishankar.R
+
+  ----------------------------------------------------------------------------

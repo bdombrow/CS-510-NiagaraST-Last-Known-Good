@@ -1,0 +1,15 @@
+WHERE
+<Quotes>
+    <Quote>
+        <Symbol>$s</>
+        <Change>$c</>
+    </>
+</> in "http://www.cs.wisc.edu/niagra/data/cq/quotes.xml"
+, $s="MSFT"
+CONSTRUCT
+<Result>
+    <Symbol>$s</>
+    <Change>$c</>
+</>
+
+

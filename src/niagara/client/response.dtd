@@ -1,0 +1,8 @@
+<?xml encoding="ISO-8859-1"?>
+<!ELEMENT response (responseMessage*)>
+<!ELEMENT responseMessage (responseData?)>
+<!ATTLIST responseMessage
+          localID CDATA #REQUIRED
+          serverID CDATA #REQUIRED
+		  responseType (server_query_id|query_result|se_query_result|end_result|dtd_list|dtd|parse_error|error) #REQUIRED>
+<!ELEMENT responseData (#PCDATA)>

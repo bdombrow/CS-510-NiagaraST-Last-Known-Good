@@ -1,0 +1,44 @@
+//////////////////////////////////////////////////////////////////////
+//
+//  The lib directory should always contain these files which
+//  are stored in the CVS repository
+//
+//////////////////////////////////////////////////////////////////////
+JFlex.zip           // JFlex scanner generator library.  Used to
+                    // build the xmlql scanner
+
+cup_all.jar         // Java cup parser generator.  Used to 
+				    // build the xmlql parser
+
+cup_runtime.jar     // The Java cup generated xmlql parser
+				    // must have access to the Jav Cup runntime stuff
+
+xml4j.jar           // The IBM XML Parser
+
+
+
+//////////////////////////////////////////////////////////////////////
+//
+//  Other lib files may be created here by doing a 'make install' in
+//  some directory.  For instance, doing a make install in the 
+//  xmlql_parser directory should build a xmlql_parser.jar lib and 
+//  copy it here.  These libs are not stored in the repository.
+//  If you add a 'make install' to your src dir to create a .jar
+//  file here, please update this file.
+//
+//////////////////////////////////////////////////////////////////////
+xmlql_parser.jar    // Include this in your class path to use 
+                    // Naveen's xmlql parser
+
+qe.jar	            // Include this in your classpath to use the
+                    // query engine
+
+
+
+
+
+
+
+
+
+

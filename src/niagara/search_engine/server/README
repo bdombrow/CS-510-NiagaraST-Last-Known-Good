@@ -1,0 +1,53 @@
+The search engine server can handle requests from heterogeneous clients such as web cgi scripts, the stand-alone search engine GUI, and the Niagara Query Engine.
+
+You can set up the search engine in two steps: building indexes & running server.
+
+1. Index building
+
+Before you construct indexes in the directory of your choice (say, idx),
+make sure about two things:
+
+1. Copy the indexMgr configuration file 'seindex.config' from 
+   search_engine/indexmgr to the dir where you run the indexer.
+   Alternatively, you can create a link to 'seindex.config' in the
+   indexMgr directory.
+
+2. Modify the options in seindex.config to specify where you want the
+   *.IDX and inverted lists to be placed.
+
+Now you can construct indexes by typing
+  Javarun niagara.search_engine.server.ConstructIndex <url-list file>
+
+<url-list file> is the file containing the urls that you want to index on.
+Two examples of them are in this directory for your convenience, 'url_list'
+and 'url_list.books'.  You can try to construct index using them.
+
+If you are in a directory other than search_engine/server,please make sure your CLASSPATH is valid, then try 'java' instead of 'Javarun'. It applies to all following Javarun commands in this README.
+
+Assume that you specified directory $SEIVL in which to put all the
+indices, when the indexer is done, you will find some *IDX files together
+with a few index directories under $SEIVL. They are used by the
+indexmgr for managing its indexes.  If you want to index more urls
+or files, you can do the above step on your own file of urls.  
+
+2. Running SE server
+
+After building indexes, you can run the search_engine server. Just make sure you are in the directory where you build the indexes (in our example, idx directory). Then run the following command:
+  Javarun niagara.search_engine.server.SEServer
+
+The communication port is set to 1710 by default.
+
+After this, you can test it using the command-line client -- SEClient:
+  Javarun niagara.search_engine.server.SEClient <host-name>
+
+For more information about how to use the SEClient, try 'help' at the prompt.
+
+Happy Searching!!!
+
+
+
+
+
+
+
+

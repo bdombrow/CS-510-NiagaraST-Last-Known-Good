@@ -1,0 +1,13 @@
+WHERE <W4F_DOC>
+      <Movie>
+         <Year> $v7 </>
+         <Cast>
+            <Actor>
+               <FirstName> $v8 </>
+            </>
+         </></> content_as $v6
+   </> IN  "*" conform_to "http://www.cs.wisc.edu/~lgalanis/xml-movies/movies.dtd",
+   $v7 =1998,
+   $v8 ="Steven"
+CONSTRUCT 
+         <Movie> $v6 </>

@@ -1,0 +1,168 @@
+
+/**********************************************************************
+  $Id: operators.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+
+
+  NIAGARA -- Net Data Management System                                 
+                                                                        
+  Copyright (c)    Computer Sciences Department, University of          
+                       Wisconsin -- Madison                             
+  All Rights Reserved.                                                  
+                                                                        
+  Permission to use, copy, modify and distribute this software and      
+  its documentation is hereby granted, provided that both the           
+  copyright notice and this permission notice appear in all copies      
+  of the software, derivative works or modified versions, and any       
+  portions thereof, and that both notices appear in supporting          
+  documentation.                                                        
+                                                                        
+  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
+  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
+  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
+  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
+                                                                        
+  This software was developed with support by DARPA through             
+   Rome Research Laboratory Contract No. F30602-97-2-0247.  
+**********************************************************************/
+
+
+/**
+*
+* This class stores an object of all the different logical operators which
+* can be cloned to build a logical operator tree. An object of each operator
+* is initialised with the list of class names that represent the algorithms to
+* implement them.
+*
+*
+*/
+
+package niagara.xmlql_parser.op_tree;
+
+import java.util.*;
+import java.lang.*;
+
+public class operators {
+	public static dbScanOp DbScan;     // to read a database (not used)
+	public static dtdScanOp DtdScan;   // to read the XML data sources
+        public static tupleScanOp TupleScan; //Trigger
+	public static scanOp Scan;         // to read the elements
+	public static selectOp Select;     // Selection
+	public static joinOp Join;         // Join two stream
+	public static constructOp Construct; // constructing XML results
+    	public static nestOp Nest;
+        public static averageOp Average;
+        public static dupOp Duplicate; //Trigger
+        public static splitOp Split; //Trigger
+        public static trigActionOp TrigAct; //Trigger
+
+// Names of the classes that implement the algorithms for different operators
+
+	private static String[] dbScanAlgo = {"niagara.query_engine.PhysicalScanOperator"};
+	private static String[] dtdScanAlgo = {};
+        private static String[] tupleScanAlgo = {};
+	private static String[] scanAlgo = {"niagara.query_engine.PhysicalScanOperator"};
+	private static String[] selectAlgo = {"niagara.query_engine.PhysicalSelectOperator"};
+	private static String[] joinAlgo = {"niagara.query_engine.PhysicalNLJoinOperator", "niagara.query_engine.PhysicalHashJoinOperator"};
+	private static String[] constructAlgo = {"niagara.query_engine.PhysicalConstructOperator"};
+	private static String[] nestAlgo = {"niagara.query_engine.PhysicalNestOperator"};
+        private static String[] averageAlgo = {"niagara.query_engine.PhysicalAverageOperator"};
+        private static String[] duplicateAlgo = {"niagara.query_engine.PhysicalDuplicateOperator"};
+        private static String[] splitAlgo = {"niagara.query_engine.PhysicalSplitOperator"};
+        private static String[] trigActAlgo =
+        {"niagara.query_engine.PhysicalTrigActionOperator"};
+
+// each static operator is initialised
+	static {
+	    try{		
+		int numOfAlgo;
+		Class[] algoClasses;
+		
+		// DbScan
+		numOfAlgo = dbScanAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(dbScanAlgo[i]);
+		DbScan = new dbScanOp(algoClasses);
+
+		// dtdScan
+		numOfAlgo = dtdScanAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(dtdScanAlgo[i]);
+		DtdScan = new dtdScanOp(algoClasses);
+
+		// TupleScan
+		numOfAlgo = tupleScanAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(tupleScanAlgo[i]);
+		TupleScan = new tupleScanOp(algoClasses);
+
+		// Scan
+		numOfAlgo = scanAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(scanAlgo[i]);
+		Scan = new scanOp(algoClasses);
+
+		// Select
+		numOfAlgo = selectAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(selectAlgo[i]);
+		Select = new selectOp(algoClasses);
+	
+		// Join
+		numOfAlgo = joinAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(joinAlgo[i]);
+		Join = new joinOp(algoClasses);
+
+		// Construct
+		numOfAlgo = constructAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(constructAlgo[i]);
+		Construct = new constructOp(algoClasses);
+	
+		// Nest
+		numOfAlgo = nestAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(nestAlgo[i]);
+		Nest = new nestOp(algoClasses);
+
+		// Average
+		numOfAlgo = averageAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(averageAlgo[i]);
+		Average = new averageOp(algoClasses);
+
+		// Duplicate
+                numOfAlgo = duplicateAlgo.length;
+                algoClasses = new Class[numOfAlgo];
+                for(int i=0;i<numOfAlgo;i++)
+                        algoClasses[i] = Class.forName(duplicateAlgo[i]);
+                Duplicate = new dupOp(algoClasses);
+
+		// Split
+                numOfAlgo = splitAlgo.length;
+                algoClasses = new Class[numOfAlgo];
+                for(int i=0;i<numOfAlgo;i++)
+                        algoClasses[i] = Class.forName(splitAlgo[i]);
+                Split = new splitOp(algoClasses);
+
+		// TrigAct
+                numOfAlgo = trigActAlgo.length;
+                algoClasses = new Class[numOfAlgo];
+                for(int i=0;i<numOfAlgo;i++)
+                        algoClasses[i] = Class.forName(trigActAlgo[i]);
+                TrigAct = new trigActionOp(algoClasses);
+                
+	      } catch (ClassNotFoundException e) {
+			System.err.println(e);	
+	      }	
+	}
+}

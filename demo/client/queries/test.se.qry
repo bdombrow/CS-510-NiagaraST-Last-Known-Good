@@ -1,0 +1,6 @@
+(W4F_DOC CONTAINS
+ (Movie CONTAINS 
+  ((Directed_By IS "Steven Spielberg")
+  AND 
+  ((Year AND (Cast CONTAINS (Actor CONTAINS FirstName))) 
+   AND (Cast CONTAINS (Actor CONTAINS LastName))))))

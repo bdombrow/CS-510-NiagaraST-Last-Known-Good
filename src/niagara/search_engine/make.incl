@@ -1,0 +1,25 @@
+
+#-------------------------------------
+# Specify all relative path info here
+#-------------------------------------
+NIAGARA_ROOT  = ../../../../
+JAVAC       = javac
+JAVA        = java
+JAR         = jar
+JAVADOC     = javadoc
+LIBDIR      = $(NIAGARA_ROOT)/lib
+
+#----------------
+#  Niagara libs
+#----------------
+SAX       = $(LIBDIR)/aelfred.jar
+
+CLASSPATH   = .:../../..:$(SAX):$(LIBDIR)/java_cup.jar:$(LIBDIR)/cup_runtime.jar:$(LIBDIR)/cup_all.jar:$(LIBDIR)/JLex.jar:$(LIBDIR)/xml4j.jar
+
+JAVAFLAGS   = -classpath $(CLASSPATH) 
+
+.SUFFIXES: .java .class
+
+.java.class:
+	$(JAVAC) -g $(JAVAFLAGS) $*.java
+

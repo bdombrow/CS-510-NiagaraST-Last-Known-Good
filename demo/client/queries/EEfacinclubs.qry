@@ -1,0 +1,23 @@
+WHERE <department>
+      <deptname> $v1 </>
+      <faculty>
+         <name>
+            <lastname> $v3 </>
+            <firstname> $v4 </>
+         </></> content_as $v2
+   </> IN  "*" conform_to "http://www.cs.wisc.edu/~lgalanis/department/department.dtd",
+
+   <club>
+      <clubname> $v5 </>
+      <member>
+         <name>
+            <lastname> $v3 </>
+            <firstname> $v4 </>
+         </>
+      </>
+   </> IN  "*" conform_to "http://www.cs.wisc.edu/~lgalanis/club/club.dtd",
+   $v1 ="Electrical Engineering" 
+CONSTRUCT <result>
+         <faculty> $v2 </>
+         <clubname> $v5 </>
+   </>

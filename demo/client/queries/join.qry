@@ -1,0 +1,33 @@
+WHERE <W4F_DOC>
+      <Movie>
+         <Year> $v10 </>
+         <Directed_By>
+            <Director> $v11 </>
+         </>
+         <Cast>
+            <Actor>
+               <FirstName> $v5 </>
+               <LastName> $v6 </>
+            </>
+         </>
+      </>
+   </> IN  "*" conform_to "http://www.cs.wisc.edu/~lgalanis/xml-movies/movies.dtd",
+
+   <W4F_DOC>
+      <Actor>
+         <Name>
+            <FirstName> $v5 </>
+            <LastName> $v6 </></> content_as $v12
+         <Filmography>
+            <Movie>
+               <Year> $v14 </></> content_as $v13
+         </>
+      </>
+   </> IN  "*" conform_to "http://www.cs.wisc.edu/~lgalanis/xml-actors/actors.dtd",
+   $v10 >1995 ,
+   $v11 ="Steven Spielberg" ,
+   $v14 =1995 
+CONSTRUCT <result>
+         <Name> $v12 </>
+         <Movie> $v13 </>
+   </>

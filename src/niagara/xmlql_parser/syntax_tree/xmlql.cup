@@ -1,0 +1,502 @@
+////////////////////////////////////////////////////////////////////////
+//
+//  xmlql.cup
+//  NIAGRA Project
+//
+//  Naveen Prakash
+//
+//  This is a cup specification for the xml-ql. For time being nested queries
+//  have been omitted.
+//
+/////////////////////////////////////////////////////////////////////////
+
+package niagara.xmlql_parser.syntax_tree;
+
+import java.lang.*;
+import java.util.*;
+import java_cup.runtime.*;
+
+parser code {:
+
+  Lexer lexer;
+  
+  public QueryParser(Lexer lexer) {
+	this.lexer = lexer;
+  }
+
+  public void report_error(String message, Object info) 
+  {
+ 	StringBuffer m = new StringBuffer("Error");
+
+   	 if ( info instanceof java_cup.runtime.Symbol ) {
+        	java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol)info);
+       		if (s.left >= 0) {
+        	 m.append(" in line "+(s.left+1));
+         
+        	 if (s.right >= 0)
+          	 m.append(", column "+(s.right+1));
+		 m.append(", value "+s.value.toString());
+		 m.append(", sym "+s.sym);
+     	  }
+     	}
+     
+   	m.append(" : "+message);
+     	System.err.println(m);
+   }
+   
+   public void report_fatal_error(String message, Object info) 
+   {
+     report_error(message, info);
+     System.out.println("Irrecoverable Parse Error. Check query syntax");
+     //System.exit(1);
+   }
+
+:};
+
+scan with {: return lexer.yylex(); :};
+
+terminal LT;
+terminal GT;
+terminal EQ;
+terminal LEQ;
+terminal GEQ;
+terminal NEQ;
+
+terminal LPAREN;
+terminal RPAREN;
+terminal LBRACE;
+terminal RBRACE;
+terminal SLASH;
+terminal COMMA;
+terminal DOT;
+terminal QMARK;
+terminal PLUS;
+terminal STAR;
+terminal COLON;
+terminal BAR;
+terminal DOLLAR;
+
+terminal OR;
+terminal AND;
+terminal NOT;
+
+terminal IN;
+terminal WHERE;
+terminal CONSTRUCT;
+terminal ELEMENT_AS;
+terminal CONTENT_AS;
+terminal ORDERED_BY;
+terminal CONFORM_TO;
+
+terminal FUNCTION;
+terminal END;
+
+terminal CREATE;
+terminal DELETE;
+terminal TRIGGER;
+terminal ONCE;
+terminal MULTIPLE;
+terminal START;
+terminal EVERY;
+terminal EXPIRE;
+terminal DO;
+
+terminal ID;
+terminal String SKOLEMID;
+
+terminal String IDEN;
+terminal String VAR;
+terminal String NUMBER;
+
+terminal String STRING;
+
+
+non terminal xqlExt XmlqlExt;
+non terminal query  Xmlql;
+
+non terminal Integer  OptTimes;
+non terminal String  OptStart;
+non terminal String  OptInterval;
+non terminal String   OptExpire;
+non terminal Vector   ActionList;
+non terminal String   Action;
+
+non terminal        FuncList;
+non terminal        Func;
+non terminal String ReturnType;
+non terminal Vector ArgList;
+non terminal arg    Arg;
+
+non terminal query     QueryBlock;
+non terminal           SubBlockList;
+non terminal           SubBlock;
+non terminal query     Query;
+
+non terminal Vector    WherePart;
+non terminal constructBaseNode       ConstructPart;
+non terminal constructBaseNode       QueryInConstruct;
+non terminal constructBaseNode       Element;
+
+non terminal Vector    QueryInConstructList;
+non terminal Vector    ConditionList;
+non terminal condition Condition;
+non terminal Vector    InClause;
+non terminal String    ConfirmToClause;
+non terminal pattern   Pattern;
+non terminal Vector    PatternList;
+non terminal predicate Predicate;
+non terminal Vector    Sets;
+non terminal Vector    SetElemList;
+
+non terminal data      Expression;
+non terminal predicate BoolExp;
+non terminal Integer   OpRel;
+non terminal data      BindingAs;
+non terminal stp       StartTagPattern;
+non terminal Vector    AttributeList;
+non terminal attr      Attribute;
+non terminal attr      Ids;
+non terminal regExp    RegularExpression;
+non terminal 	       EndTag;
+non terminal           OrderedBy;
+non terminal Vector    VarList;
+non terminal data      DataSource;
+non terminal Vector    DataSourceSet;
+non terminal Vector    DataSourceList;
+non terminal startTag  StartTag;
+non terminal skolem    SkolemId;
+
+precedence left OR;
+precedence left AND;
+precedence right NOT;
+
+precedence left BAR;
+precedence left DOT;
+precedence left QMARK, STAR, PLUS;
+
+start with XmlqlExt;
+
+XmlqlExt ::= CREATE TRIGGER IDEN:i Xmlql:q OptTimes:t OptStart:s OptInterval:v OptExpire:e DO ActionList:al
+		{: RESULT = new xqlExt(i, q, t.intValue(), s, v, e, al); :}
+	   | DELETE TRIGGER IDEN:i
+		{: RESULT = new xqlExt(i); :}
+	   | Xmlql:q
+		{: RESULT = new xqlExt(q); :}
+	   ;
+
+OptTimes ::= ONCE
+		{: RESULT = new Integer(opType.ONCE); :}
+	   | MULTIPLE
+		{: RESULT = new Integer(opType.MULTIPLE); :}
+	   |
+		{: RESULT = new Integer(opType.UNDEF); :}
+	   ;
+
+OptStart ::= START STRING:s
+		{: RESULT = s; :}
+	    |
+		{: RESULT = null; :}
+	    ;
+
+OptInterval ::= EVERY STRING:s
+		{: RESULT = s; :}
+	    |
+		{: RESULT = null; :}
+	    ;
+
+OptExpire ::= EXPIRE STRING:s
+		{: RESULT = s; :}
+	    |
+		{: RESULT = null; :}
+	    ;
+
+ActionList ::= ActionList:al COMMA Action:a
+		   {: al.addElement(a); RESULT=al; :}
+	     | Action:a
+		   {: RESULT = new Vector(); RESULT.addElement(a); :}
+	     ;
+
+Action ::= STRING:s
+		{: RESULT = s; :}
+	 ;
+
+Xmlql ::= FuncList QueryBlock:q
+		{: RESULT = q; :}
+	;
+
+FuncList ::= FuncList Func
+	   | 
+	   ;
+
+Func ::= FUNCTION IDEN LPAREN ArgList RPAREN ReturnType QueryBlock END
+       | FUNCTION IDEN LPAREN RPAREN ReturnType QueryBlock END
+       ;
+
+ReturnType ::= COLON STRING:s
+		    {: RESULT = s; :}
+	     |
+		    {: RESULT = null; :}
+	     ;
+
+ArgList ::= ArgList:al COMMA Arg:a
+		{: if(al.contains(a)) 
+			System.out.println("error");
+		   else {
+			al.addElement(a);
+			RESULT=al;
+		   }
+		:}
+	  | Arg:a
+		{: RESULT = new Vector(); RESULT.addElement(a); :}
+	  ;
+
+Arg ::= VAR:v COLON STRING:s
+	    {: RESULT = new arg(v,s); :}
+      ;
+
+QueryBlock ::= Query SubBlockList
+	     | SubBlockList
+	     | Query:q
+		{: RESULT = q; :}
+	     ;
+
+SubBlockList ::= SubBlockList SubBlock
+	       | SubBlock
+	       ;
+
+SubBlock ::= LBRACE QueryBlock RBRACE
+	   ;
+
+Query ::= WherePart:w ConstructPart:c 
+		{: RESULT = new query(w, c); :}
+	;
+
+WherePart ::= WHERE ConditionList:c
+		{: RESULT = c; :}
+	    ;
+
+ConstructPart ::= OrderedBy CONSTRUCT QueryInConstruct
+		| CONSTRUCT QueryInConstruct:q
+			{: RESULT = q; :}
+		;
+
+QueryInConstruct ::= Element:e 
+			{: RESULT = e; :}
+		   | VAR:v
+			{: RESULT = new constructLeafNode(new data(dataType.VAR,v)); :}
+		   | QueryBlock
+		   ;
+
+Element ::= StartTag:s QueryInConstructList:ql EndTag 
+		{: RESULT = new constructInternalNode(s, ql); :}
+	  | StartTag:s IDEN:i EndTag
+		{:
+			Vector v1 = new Vector();
+			v1.addElement(new constructLeafNode(new data(dataType.IDEN,i)));
+			RESULT = new constructInternalNode(s,v1);
+		:}
+	  | StartTag:s VAR:v EndTag
+		{: 
+			Vector v2 = new Vector();	
+			v2.addElement(new constructLeafNode(new data(dataType.VAR,v)));
+			RESULT = new constructInternalNode(s,v2);	
+		:}
+	  ;
+
+QueryInConstructList ::= QueryInConstructList:ql QueryInConstruct:q
+				{: ql.addElement(q); RESULT = ql; :}
+		       | QueryInConstruct:q
+				{: RESULT = new Vector(); RESULT.addElement(q); :}
+		       ;
+
+ConditionList ::= ConditionList:cl COMMA Condition:c
+		       {: cl.addElement(c); RESULT = cl; :}
+		| Condition:c
+		       {: RESULT = new Vector(); RESULT.addElement(c); :}
+		;
+
+Condition ::= Pattern:p InClause:i ConfirmToClause:c
+		{: RESULT = new inClause(p, i, c); :}
+	    | Predicate:p
+		{: RESULT = p; :}
+	    | VAR:v IN Sets:s
+		{: RESULT = new set(v,s); :}
+	    ;
+
+InClause ::= IN DataSourceSet:d
+		{: RESULT = d; :}
+	   ;
+
+ConfirmToClause ::= CONFORM_TO STRING:s
+			{: RESULT = s; :}
+		  |
+			{: RESULT = null; :}
+		  ;
+
+Pattern ::= StartTagPattern:s PatternList:pl EndTag BindingAs:b
+		{: RESULT = new patternInternalNode(s.getRegExp(), s.getAttrList(), pl, b); :}
+	  | StartTagPattern:s Expression:e EndTag BindingAs:b
+		{: RESULT = new patternLeafNode(s.getRegExp(), s.getAttrList(), e, b); :}
+	  | StartTagPattern:s EndTag BindingAs:b
+		{: RESULT = new patternLeafNode(s.getRegExp(), s.getAttrList(), b); :}
+	  ;
+
+PatternList ::= PatternList:pl Pattern:p
+		   {: pl.addElement(p); RESULT = pl; :}
+	      | Pattern:p
+		   {: RESULT = new Vector(); RESULT.addElement(p); :}
+	      ;
+
+Sets ::= LBRACE SetElemList:sl RBRACE
+		{: RESULT = sl; :}
+       ;
+
+SetElemList ::= SetElemList:sl COMMA IDEN:i
+		   {: sl.addElement(new data(dataType.IDEN,i)); RESULT = sl; :}
+              | IDEN:i
+		   {: RESULT = new Vector(); RESULT.addElement(new data(dataType.IDEN,i)); :}
+	      ;
+
+Predicate ::= Predicate:p1 AND Predicate:p2
+		{: RESULT = new predLogOpNode(opType.AND, p1, p2); :}
+	    | Predicate:p1 OR Predicate:p2
+		{: RESULT = new predLogOpNode(opType.OR, p1, p2); :}
+	    | NOT Predicate:p
+		{: RESULT = new predLogOpNode(opType.NOT, p); :}
+	    | LPAREN Predicate:p RPAREN
+		{: RESULT = p; :}
+	    | BoolExp:b
+		{: RESULT = b; :}
+	    ;
+
+BoolExp ::= Expression:e1 OpRel:o Expression:e2
+		{: RESULT = new predArithOpNode(o.intValue(),e1,e2); :}
+          ;
+
+Expression ::= NUMBER:n 
+		  {: RESULT = new data(dataType.NUMBER, n); :}
+	     | IDEN:i
+		  {: RESULT = new data(dataType.IDEN, i); :}
+	     | VAR:v
+		  {: RESULT = new data(dataType.VAR, v); :}
+	     | STRING:s
+		  {: RESULT = new data(dataType.STRING, s); :}
+	     ;
+
+OpRel ::= LT
+	   {: RESULT = new Integer(opType.LT); :}
+	| GT
+	   {: RESULT = new Integer(opType.GT); :}
+	| LEQ
+	   {: RESULT = new Integer(opType.LEQ); :}
+	| GEQ
+	   {: RESULT = new Integer(opType.GEQ); :}
+	| NEQ
+	   {: RESULT = new Integer(opType.NEQ); :}
+	| EQ
+	   {: RESULT = new Integer(opType.EQ); :}
+	;
+
+BindingAs ::= ELEMENT_AS VAR:v
+		{: RESULT = new data(dataType.ELEMENT_AS, v); :}
+	    | CONTENT_AS VAR:v
+		{: RESULT = new data(dataType.CONTENT_AS, v); :}
+	    |
+		{: RESULT = null; :}
+	    ;
+
+StartTagPattern ::= LT RegularExpression:r Ids:i AttributeList:al GT
+			{: if(i != null)
+		              al.addElement(i);	
+			   RESULT = new stp(r, al); :}
+		  | LT VAR:v Ids:i AttributeList:al GT
+			{: if(i != null)
+		              al.addElement(i);	
+			   RESULT = new stp(new regExpDataNode(new data(dataType.VAR, v)), al); :}
+		  ;
+
+Ids ::= ID EQ STRING:s
+	  {: RESULT = new attr(new String("ID"),new data(dataType.STRING,s)); :}
+      | ID EQ VAR:v
+	  {: RESULT = new attr(new String("ID"),new data(dataType.VAR,v)); :}
+      |
+	  {: RESULT = null; :}
+      ;
+
+AttributeList ::= AttributeList:al Attribute:a
+		      {: al.addElement(a); RESULT=al; :} 
+		| 
+		      {: RESULT = new Vector(); :}
+		;
+
+Attribute ::= IDEN:i EQ STRING:s
+		  {: RESULT = new attr(i,new data(dataType.STRING,s)); :}
+	    | IDEN:i EQ VAR:v
+		  {: RESULT = new attr(i,new data(dataType.VAR,v)); :}
+	    ;
+
+RegularExpression ::= RegularExpression:r STAR
+			  {: RESULT = new regExpOpNode(opType.STAR, r); :}
+		    | RegularExpression:r PLUS
+			  {: RESULT = new regExpOpNode(opType.PLUS, r); :}
+		    | RegularExpression:r QMARK
+			  {: RESULT = new regExpOpNode(opType.QMARK, r); :}
+		    | RegularExpression:r1 DOT RegularExpression:r2
+			  {: RESULT = new regExpOpNode(opType.DOT, r1, r2); :}
+		    | RegularExpression:r1 BAR RegularExpression:r2
+			  {: RESULT = new regExpOpNode(opType.BAR, r1, r2); :}
+		    | LPAREN RegularExpression:r RPAREN
+			  {: RESULT = r; :}
+		    | IDEN:i   
+			  {: RESULT = new regExpDataNode(new data(dataType.IDEN,i)); :}
+		    | DOLLAR 
+			  {: RESULT = new regExpOpNode(opType.DOLLAR); :}
+		    ;
+
+EndTag ::= LT SLASH GT 
+	 | LT SLASH IDEN GT
+	 ;
+
+OrderedBy ::= ORDERED_BY VarList
+	    ;
+
+VarList ::= VarList:vl COMMA VAR:v
+	      {: vl.addElement(v); RESULT = vl; :}
+	  | VAR:v
+	      {: RESULT = new Vector(); RESULT.addElement(v); :}
+	  ;
+
+DataSourceSet ::= LBRACE DataSourceList:dl RBRACE
+			{: RESULT = dl; :}
+		| DataSource:d
+			{: RESULT = new Vector(); RESULT.addElement(d); :}
+		;
+
+DataSourceList ::= DataSourceList:dl COMMA DataSource:d
+			{: dl.addElement(d); RESULT = dl; :}
+		 | DataSource:d
+			{: RESULT = new Vector(); RESULT.addElement(d); :}
+		 ;
+
+DataSource ::= VAR:v
+		   {: RESULT = new data(dataType.VAR, v); :}
+	     | STRING:s
+		   {: RESULT = new data(dataType.STRING, s); :}
+	     | IDEN LPAREN DataSourceList RPAREN
+	     | IDEN LPAREN RPAREN
+	     ;
+
+StartTag ::= LT IDEN:i SkolemId:s AttributeList:al GT 
+		{: RESULT = new startTag(new data(dataType.IDEN, i), s, al); :}
+	   | LT VAR:v SkolemId:s AttributeList:al GT
+		{: RESULT = new startTag(new data(dataType.VAR, v), s, al); :}
+	   ;
+
+SkolemId ::= ID EQ SKOLEMID:s LPAREN VarList:vl RPAREN
+		{: RESULT = new skolem(s, vl); :}
+	   | ID EQ SKOLEMID:s LPAREN RPAREN
+		{: RESULT = new skolem(s, new Vector()); :}
+	   |
+		{: RESULT = null; :}
+	   ;
+

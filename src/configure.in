@@ -1,0 +1,36 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(niagara)
+AM_INIT_AUTOMAKE(NIAGARA,0.1)
+
+
+dnl Checks for programs.
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+
+dnl Specify Java compiler
+AC_ARG_WITH(
+	javac,
+	--with-javac=<java compiler> Specify the java compiler command line,
+	JAVAC=${withval},
+	JAVAC="javac -g"
+)
+AC_SUBST(JAVAC)
+
+dnl Checks for fix classpath.
+AC_ARG_WITH(
+	classpath,
+	--with-classpath=<class path> Specify the classpath for the compiler,
+	CLASSPATH=${withval},
+	CLASSPATH=${CLASSPATH}
+)
+AC_SUBST(CLASSPATH)
+
+
+	
+
+AC_OUTPUT(makefile 
+	niagara/makefile
+	niagara/client/makefile 
+	niagara/client/dtdTree/makefile 
+	niagara/client/xmlqbe/makefile)
+

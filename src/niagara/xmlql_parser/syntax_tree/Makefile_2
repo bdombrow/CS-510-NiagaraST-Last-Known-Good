@@ -1,0 +1,36 @@
+JAVAHOME = /s/jdk1.2
+
+SEHOME = ../..
+NIAGRALIB = ../../../lib
+
+JAVAC = $(JAVAHOME)/bin/javac
+JAVA = $(JAVAHOME)/bin/java
+JAR = $(JAVAHOME)/bin/jar
+
+CLASSPATH   = .:$(SEHOME):$(NIAGRALIB)/java_cup.jar:$(NIAGRALIB)/xml4j.jar:$(NIAGRALIB)/aelfred.jar:$(NIAGRALIB)/JLex.jar
+JAVAFLAGS   = -classpath $(CLASSPATH)
+
+
+
+OBJ = 	Client.class			\
+        QueryHandler.class  		\
+	Server.class			\
+	SEServer.class			\
+	SEQueryHandler.class		\
+	SEClient.class			\
+	ConstructIndex.class		\
+
+
+all:  $(OBJ) 
+
+.SUFFIXES: .java .class
+
+.java.class:
+	$(JAVAC) $(JAVAFLAGS) $*.java
+
+classpath:
+	@echo $(CLASSPATH)
+
+clean:
+	rm -f *.class *~
+

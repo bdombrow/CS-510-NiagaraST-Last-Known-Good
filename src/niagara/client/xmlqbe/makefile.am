@@ -1,0 +1,39 @@
+# Use automake to make the makefile in.
+#
+#
+##########################################
+# Subdirectories for Automake to process #
+##########################################
+SUBDIRS = 
+
+# Configuration variables
+#
+# javac executable with options (e.g javac, jikes, "javac -g")
+JAVAC = @JAVAC@
+#
+# The classpath. If not defined during configuration the default
+# environment variable (if any is used)
+CLASSPATH = @CLASSPATH@
+
+# files to clean with a make clean command
+CLEANFILES = *.class 
+
+# Source files
+SOURCES = XmlInterface.java\
+DNDTree.java\
+XMLQLGenerator.java\
+XMLQLGenerationData.java\
+PredicateUI.java\
+PredicateGUI.java\
+JoinColor.java
+
+# Automake specific
+noinst_SCRIPTS = $(SOURCES:.java=.class)
+
+
+%.class : %.java
+	$(JAVAC)  -classpath $(CLASSPATH) $<
+
+
+classpath:
+	@ echo $(CLASSPATH)

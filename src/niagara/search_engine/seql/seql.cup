@@ -1,0 +1,174 @@
+package niagara.search_engine.seql;
+
+import niagara.search_engine.indexmgr.*;
+import niagara.search_engine.operators.*;
+
+import java_cup.runtime.*;
+
+parser code {:
+	private Yylex lex=null;
+	public parser(Yylex lex) {
+	  super();	
+	  this.lex=lex;
+	}
+
+	public QueryPlan getPlan() throws Exception {
+	  Symbol root = parse(); // do the parse
+ 	  QueryPlan plan = ((queryNode)root.value).genPlan();
+  	  return plan;
+	}
+
+ 	public void syntax_error(Symbol cur_token) {
+ 	  report_error("SEQL syntax error at line "+
+			String.valueOf(((SEQLToken)cur_token.value).linenum),
+			null);
+     	}
+     	public void report_fatal_error( String   message, Object   info)
+	 	throws java.lang.Exception {
+	   done_parsing();
+ 	   report_error(message, info);
+	   throw new SyntaxErrorException();
+     	}
+
+:};
+init with {:                              :};
+scan with {: return lex.yylex(); 	:};
+
+/* Terminals (tokens returned by the scanner). */
+terminal SEQLIdentifierToken   IDENTIFIER;
+terminal SEQLNumLitToken	NUMLIT;
+terminal SEQLStringLitToken 	STRLIT;
+terminal SEQLStringLitToken 	URI;
+terminal SEQLToken     	LPAREN, RPAREN;
+terminal SEQLToken     	EQ, LT, GT, LEQ, GEQ;
+terminal SEQLToken     	COMMA;
+
+terminal SEQLToken		rw_EXCEPT;
+terminal SEQLToken		rw_AND, rw_OR;
+terminal SEQLToken		rw_IS;
+terminal SEQLToken		rw_CONTAINS;
+terminal SEQLToken		rw_DISTANCE, rw_CONTAINEDIN;
+terminal SEQLToken		rw_CONFORMSTO;
+
+/* Non terminals */
+non terminal exprNode	     	query;
+non terminal containsNode	contains;
+non terminal containedinNode	containedin;
+non terminal isexprNode	     	isexpr;
+non terminal orderNode	     	order;
+non terminal distanceofNode	distanceof;
+non terminal exprNode	     	unary;
+non terminal exprNode		unit	;
+non terminal exprNode		prime	;
+non terminal exprNode	     	attr;
+non terminal identNode	     	ident;
+non terminal strlitNode	     	strlit;
+non terminal numlitNode	     	numlit;
+non terminal strlitNode	     	uri;
+non terminal Integer		orderop;
+
+
+/* Precedences */
+precedence left rw_CONFORMSTO;
+precedence left rw_OR;
+precedence left rw_AND, rw_EXCEPT;
+precedence right rw_CONTAINEDIN, rw_CONTAINS;
+
+
+start with query;
+
+query		::= query:q rw_CONFORMSTO strlit:d
+		{: RESULT = new conformstoNode(q,d,q.linenum,q.colnum); :}
+		|  rw_CONFORMSTO:c strlit:d
+		{: RESULT = new conformstoNode(exprNode.NULL,d,c.linenum,c.colnum); :}
+		|  query:e rw_OR:o query:u
+		{: RESULT = new orNode(e,u,e.linenum,e.colnum); :}
+		|  query:e rw_AND query:u
+		{: RESULT = new andNode(e,u,e.linenum,e.colnum); :}
+		|  query:e rw_EXCEPT query:u
+		{: RESULT = new exceptNode(e,u,e.linenum,e.colnum); :}
+		|  unary:q
+		{: RESULT = q; :}
+		;
+
+unary 		::= distanceof:d
+		{: RESULT = d; :}
+ 		|  contains:e
+		{: RESULT = e; :}
+		|  containedin:e
+		{: RESULT = e; :}
+		|  isexpr:e
+		{: RESULT = e; :}
+		|  order:e
+		{: RESULT = e; :}
+		|  unit:u
+		{: RESULT = u; :}
+		;
+
+contains 	::= query:a rw_CONTAINS query:e 
+		{: RESULT = new containsNode(a,e,a.linenum,a.colnum); :}
+		;
+
+containedin 	::= query:e rw_CONTAINEDIN query:a 
+		{: RESULT = new containedinNode(e,a,e.linenum,e.colnum); :}
+		;
+
+isexpr		::= attr:a rw_IS strlit:e 
+		{: RESULT = new isexprNode(a,e,a.linenum,a.colnum); :}
+		;
+
+order		::= attr:a orderop:o numlit:e
+		{: RESULT = new orderNode(a,e,o,a.linenum,a.colnum); :}
+		;
+
+distanceof 	::= rw_DISTANCE:a LPAREN prime:s1 COMMA prime:s2 RPAREN orderop:o numlit:n
+		{: RESULT = new distanceofNode(s1,s2,o,n,a.linenum,a.colnum); :}
+		;
+
+unit		::= prime:l
+		{: RESULT = l; :}
+		|  LPAREN query:e RPAREN
+		{: RESULT = e; :}
+		;
+
+prime		::= strlit:l
+		{: RESULT = l; :}
+		|  attr:a
+		{: RESULT = a; :}
+		;
+
+attr		::= ident:i
+		{: RESULT = i; :}
+		|  uri:l
+		{: RESULT = l; :}
+		;
+
+strlit		::= STRLIT:l
+		{: RESULT = new strlitNode(l.stringValue,l.linenum,l.colnum); :}
+		;
+
+numlit		::= NUMLIT:l
+		{: RESULT = new numlitNode(l.numValue.doubleValue(),l.linenum,l.colnum); :}
+		;
+
+ident		::= IDENTIFIER:i
+		{: RESULT = new identNode(i.idval,i.linenum,i.colnum); :}
+		;
+
+uri		::= URI:l
+		{: RESULT = new strlitNode(l.stringValue,l.linenum,l.colnum); :}
+		;
+
+orderop		::= GT 
+		{: RESULT = new Integer(sym.GT); :}
+		| LT 
+		{: RESULT = new Integer(sym.LT); :}
+		| LEQ 
+		{: RESULT = new Integer(sym.LEQ); :}
+		| GEQ
+		{: RESULT = new Integer(sym.GEQ); :}
+		| EQ
+		{: RESULT = new Integer(sym.EQ); :}
+		;
+
+

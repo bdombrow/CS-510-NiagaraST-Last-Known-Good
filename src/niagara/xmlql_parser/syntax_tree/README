@@ -1,0 +1,65 @@
+
+This directory contains specification for XML-QL parser and classes required
+to represent them in memory. 
+
+Parser for XML-Ql
+
+  The parser for XML-QL takes the query and generates an in memory representation of it, also called parsed tree. This parsed tree can be traversed to generate query plan using the allowed operators. 
+
+Generation of Parsed Tree
+
+	XqlExt
+        |
+	|-- triggerName
+        |
+        |-- times (ONCE/MULTIPLE)
+	|
+	|-- expire 
+        |
+        |-- List of Actions
+        |
+        |-- query
+              |
+              |-- List of Conditions (WHERE part)
+	      |
+              |-- result (CONSTRUCT Part)
+
+                     Conditions
+			  |
+			  |-- type (InClause, IN or Predicate)
+			  |
+			  |-- pattern (for InClause)
+			  |
+			  |-- set (for list of urls in InClause or 
+				of identifiers for IN)
+			  |
+			  |-- predicate (binary tree)
+			  |
+			  |-- data (for variable if IN, or dtd type if InClause)                          
+    	                    
+		     result (n-ary tree)
+			  |
+  			  |-- element ( either identifier or list of
+                			result)
+  			  |
+  			  |-- var    
+
+			pattern (n-ary tree)
+			   |
+			   |-- regular expression for start tag (binary tree)
+			   |
+			   |-- List of attribute (name-value pair)
+			   |
+			   |-- List of pattern
+			   |
+			   |-- data (if leaf)
+			   |
+			   |-- binding data (ELEMENT_AS/CONTENT_AS)
+
+
+
+dump() method in all these classes helps in understanding (to some extent)
+their structure. For more detail you can contact me (for a pizza ofcourse !!!)
+
+--
+Naveen Prakash

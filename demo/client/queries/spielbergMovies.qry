@@ -1,0 +1,9 @@
+WHERE <W4F_DOC>
+      <Movie>
+         <Directed_By>
+            <Director> $v2 </>
+         </></> content_as $v1
+   </> IN  "*" conform_to "http://www.cs.wisc.edu/~lgalanis/xml-movies/movies.dtd",
+   $v2 ="Steven Spielberg" 
+CONSTRUCT 
+         <Movie> $v1 </>

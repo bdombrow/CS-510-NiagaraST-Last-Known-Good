@@ -1,0 +1,23 @@
+WHERE <department>
+      <undergradstudent>
+         <name>
+            <lastname> $v10 </>
+            <firstname> $v11 </>
+         </>
+         <gpa> $v15 </></> content_as $v14
+   </> IN  "*" conform_to "http://www.cs.wisc.edu/~lgalanis/department/department.dtd",
+
+   <club>
+      <clubname> $v16 </>
+      <member>
+         <name>
+            <lastname> $v10 </>
+            <firstname> $v11 </>
+         </>
+      </>
+   </> IN  "*" conform_to "http://www.cs.wisc.edu/~lgalanis/club/club.dtd",
+   $v15 >3.0
+CONSTRUCT <result>
+         <undergradstudent> $v14 </>
+         <clubname> $v16 </>
+   </>
