@@ -1,5 +1,5 @@
 /**
- * $Id: Console.java,v 1.4 2002/05/23 06:30:47 vpapad Exp $
+ * $Id: Console.java,v 1.5 2002/10/31 04:20:30 vpapad Exp $
  */
 
 package niagara.connection_server;
@@ -17,6 +17,7 @@ public class Console extends Thread {
     BufferedReader br;
 
     public Console(NiagraServer server, InputStream in) {
+        super("Console");
         this.server = server;
 	br = new BufferedReader(new InputStreamReader(in));
     }

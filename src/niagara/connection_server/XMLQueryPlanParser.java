@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.29 2002/10/12 20:11:06 tufte Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.30 2002/10/31 04:20:30 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -17,77 +17,83 @@ import niagara.xmlql_parser.syntax_tree.*;
 import niagara.query_engine.MTException;
 import niagara.utils.*;
 
+import niagara.logical.*;
 import niagara.ndom.*;
+import niagara.optimizer.Plan;
+import niagara.optimizer.colombia.*;
 import niagara.firehose.*;
 
 public class XMLQueryPlanParser {
-
     // Maps IDs to elements
     Hashtable ids2els;
 
-    // Maps IDs to logical plan nodes
-    Hashtable ids2nodes;
+    // Maps IDs to logical expressions
+    Hashtable ids2plans;
+
+    // Maps IDs to logical properties
+    Hashtable ids2logprops;
+
+    // Roots of remote plans
+    ArrayList remotePlans;
+
+    Catalog catalog;
 
     public void initialize() {
-	ids2els = new Hashtable();
-	ids2nodes = new Hashtable();
+        ids2els = new Hashtable();
+        ids2plans = new Hashtable();
+        ids2logprops = new Hashtable();
+        catalog = NiagraServer.getCatalog();
     }
 
     public XMLQueryPlanParser() {
-	initialize();
+        initialize();
     }
 
-    public logNode parse(String description) throws InvalidPlanException {
+    public Plan parse(String description) throws InvalidPlanException {
         description = description.trim();
+        this.remotePlans = new ArrayList();
 
-	niagara.ndom.DOMParser p;
-	Document document = null;
-	try {
-	    p = DOMFactory.newParser();
-	    p.parse(new InputSource(new ByteArrayInputStream(description.getBytes())));
-	    document = p.getDocument();
-	    Element root = (Element) document.getDocumentElement();
-	    return parsePlan(root);
-	} catch (org.xml.sax.SAXException se) {
-	    throw new InvalidPlanException("Error parsing plan string " 
-                                           + se.getMessage());
-	} catch (java.io.IOException ioe) {
-	    throw new InvalidPlanException("IO Exception reading plan string " 
-                                           + ioe.getMessage());
+        niagara.ndom.DOMParser p;
+        Document document = null;
+        try {
+            p = DOMFactory.newParser();
+            p.parse(
+                new InputSource(
+                    new ByteArrayInputStream(description.getBytes())));
+            document = p.getDocument();
+            Element root = (Element) document.getDocumentElement();
+            return parsePlan(root);
+        } catch (org.xml.sax.SAXException se) {
+            throw new InvalidPlanException(
+                "Error parsing plan string " + se.getMessage());
+        } catch (java.io.IOException ioe) {
+            throw new InvalidPlanException(
+                "IO Exception reading plan string " + ioe.getMessage());
         }
     }
 
-    logNode parsePlan(Element root) throws InvalidPlanException {
-	NodeList children = root.getChildNodes();
-	for (int i=0; i < children.getLength(); i++) {
-	    if (children.item(i).getNodeType() != Node.ELEMENT_NODE)
-		continue;
-	    Element e = (Element) children.item(i);
-	    ids2els.put(e.getAttribute("id"), e);
-	}
-
-	String top = root.getAttribute("top");
-	Element e = (Element) ids2els.get(top);
-	if(e == null) {
-	    throw new InvalidPlanException("Invalid top node");
-	}
-	parseOperator(e);
-
-        // Assign unique names to all nodes
-        // Transfer location attributes
-        Enumeration ids = ids2nodes.keys();
-        while (ids.hasMoreElements()) {
-            String id = (String) ids.nextElement();
-            logNode node = (logNode) ids2nodes.get(id);
-            node.setName(id);
-
-            Element n = (Element) ids2els.get(id);
-            String location = n.getAttribute("location");
-            if (location != null && location.length() > 0)
-                node.setLocation(location);
+    Plan parsePlan(Element root) throws InvalidPlanException {
+        NodeList children = root.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i).getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            Element e = (Element) children.item(i);
+            String id = e.getAttribute("id");
+            if (id.length() == 0)
+                throw new InvalidPlanException("Each operator must have an id attribute");
+            if (ids2els.get(id) != null)
+                throw new InvalidPlanException(
+                    "Duplicate operator id found: " + id);
+            ids2els.put(e.getAttribute("id"), e);
         }
+        String top = root.getAttribute("top");
+        Element e = (Element) ids2els.get(top);
+        if (e == null) {
+            throw new InvalidPlanException("Invalid top node");
+        }
+        parseOperator(e);
 
-	return (logNode) ids2nodes.get(top);
+        return (Plan) ids2plans.get(top);
     }
 
     /**
@@ -95,944 +101,810 @@ public class XMLQueryPlanParser {
      * @exception InvalidPlanException the description of the plan was invalid
      */
     void parseOperator(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id"); 
+        String id = e.getAttribute("id");
 
-	// If we already visited this node, just return 
-	if (ids2nodes.containsKey(id)) 
-	    return;
-	String nodeName = e.getNodeName();
+        // If we already visited this node, just return 
+        if (ids2plans.containsKey(id))
+            return;
 
-	// visit all the node's inputs
-	String inputsAttr = e.getAttribute("input");
-	Vector inputs = new Vector();
-	StringTokenizer st = new StringTokenizer(inputsAttr);
-	while (st.hasMoreTokens()) 
-	    inputs.addElement(st.nextToken());
+        String nodeName = e.getNodeName();
 
-	for (int i=0; i < inputs.size(); i++) {
-	    Element el = (Element) ids2els.get(inputs.get(i));
-	    if(el == null) {
-	    	throw new InvalidPlanException("Operator " + id + " has invalid input");
-	    }
-	    parseOperator(el);
-	}
+        // visit all the node's inputs
+        String inputsAttr = e.getAttribute("input");
+        Vector inputs = new Vector();
+        StringTokenizer st = new StringTokenizer(inputsAttr);
+        while (st.hasMoreTokens())
+            inputs.addElement(st.nextToken());
 
-	// Now that all inputs are handled 
-	// create a logNode for this operator
-	if (nodeName.equals("scan")) {
-	    handleScan(e);
-	}
-	else if (nodeName.equals("select")) {
-	    handleSelect(e);
-	}
-	else if (nodeName.equals("sort")) {
-	    handleSort(e);
-	}
-	else if (nodeName.equals("join")) {
-	    handleJoin(e, inputs);
-	}
-	else if (nodeName.equals("avg")) {
-	    handleAvg(e);
-	}
-	else if (nodeName.equals("sum")) {
-	    handleSum(e);
-	}
-	else if (nodeName.equals("count")) {
-	    handleCount(e);
-	}
-	else if (nodeName.equals("dtdscan")) {
-	    handleDtdScan(e);
-	}
-	else if (nodeName.equals("constant")) {
-	    handleConstant(e);
-	}
-	else if (nodeName.equals("construct")) {
-	    handleConstruct(e);
-	} 
-	else if (nodeName.equals("firehosescan")) {
-	    handleFirehoseScan(e);
-	} 
-	else if (nodeName.equals("filescan")) {
-	    handleFileScan(e);
-	} 
-	else if (e.getNodeName().equals("accumulate")) {
-	    handleAccumulate(e);
-	}
-	else if (e.getNodeName().equals("expression")) {
-	    handleExpression(e);
-	}
-	else if (e.getNodeName().equals("dup")) {
-	    handleDup(e);
-	}
-	else if (e.getNodeName().equals("union")) {
-	    handleUnion(e, inputs);
-	}
-	else if (e.getNodeName().equals("send")) {
-	    handleSend(e);
-	}
-	else if (e.getNodeName().equals("display")) {
-	    handleDisplay(e);
-	}
-	else if (e.getNodeName().equals("resource")) {
-	    handleResource(e);
-	}
-	else if (e.getNodeName().equals("incrmax")) {
-	    handleIncrMax(e);
-	}
-	else if (e.getNodeName().equals("incravg")) {
-	    handleIncrAvg(e);
-	}
-        else {
+        // XXX vpapad: Check that the operator only uses variables
+        // defined in its inputs 
+        for (int i = 0; i < inputs.size(); i++) {
+            Element el = (Element) ids2els.get(inputs.get(i));
+            if (el == null)
+                throw new InvalidPlanException(
+                    "Could not find input "
+                        + inputs.get(i)
+                        + " of operator "
+                        + id);
+            parseOperator(el);
+        }
+
+        // Now that all inputs are handled 
+        // create a Plan for this operator
+        if (nodeName.equals("unnest")) {
+            handleUnnest(e);
+        } else if (nodeName.equals("select")) {
+            handleSelect(e);
+        } else if (nodeName.equals("sort")) {
+            handleSort(e);
+        } else if (nodeName.equals("join")) {
+            handleJoin(e, inputs);
+        } else if (nodeName.equals("avg")) {
+            handleAvg(e);
+        } else if (nodeName.equals("sum")) {
+            handleSum(e);
+        } else if (nodeName.equals("count")) {
+            handleCount(e);
+        } else if (nodeName.equals("dtdscan")) {
+            handleDtdScan(e);
+        } else if (nodeName.equals("constant")) {
+            handleConstant(e);
+        } else if (nodeName.equals("construct")) {
+            handleConstruct(e);
+        } else if (nodeName.equals("firehosescan")) {
+            handleFirehoseScan(e);
+        } else if (nodeName.equals("filescan")) {
+            handleFileScan(e);
+        } else if (e.getNodeName().equals("accumulate")) {
+            handleAccumulate(e);
+        } else if (e.getNodeName().equals("expression")) {
+            handleExpression(e);
+        } else if (e.getNodeName().equals("dup")) {
+            handleDup(e);
+        } else if (e.getNodeName().equals("union")) {
+            handleUnion(e, inputs);
+        } else if (e.getNodeName().equals("send")) {
+            handleSend(e);
+        } else if (e.getNodeName().equals("display")) {
+            handleDisplay(e);
+        } else if (e.getNodeName().equals("resource")) {
+            handleResource(e);
+        } else if (e.getNodeName().equals("incrmax")) {
+            handleIncrMax(e);
+        } else if (e.getNodeName().equals("incravg")) {
+            handleIncrAvg(e);
+        } else {
             throw new InvalidPlanException("Unknown operator: " + nodeName);
+        }
+
+        String location = e.getAttribute("location");
+        // Is this operator supposed to run at a remote site
+        if (location.length() > 0) {
+            // XXX vpapad: This code will break unless:
+            //  1. Specified locations are never our own
+            //  2. Remote subplans are never nested 
+            Plan remoteExpr = (Plan) ids2plans.get(id);
+            SendOp sop = new SendOp(location);
+            remotePlans.add(new Plan(sop, remoteExpr));
+
+            // Put a receive operator in the place of the remote plan
+            ReceiveOp rop = new ReceiveOp(sop);
+            rop.setLogProp((LogicalProperty) ids2logprops.get(id));
+            ids2plans.put(id, new Plan(rop));
         }
     }
 
-    void handleScan(Element e) throws InvalidPlanException {
-	scanOp op = new scanOp();
-	op.setSelectedAlgoIndex(0);
+    void handleUnnest(Element e) throws InvalidPlanException {
+        String id = e.getAttribute("id");
 
-	String id = e.getAttribute("id");
+        String inputAttr = e.getAttribute("input");
+        String typeAttr = e.getAttribute("type");
+        String rootAttr = e.getAttribute("root");
+        String regexpAttr = e.getAttribute("regexp");
 
-	String inputAttr = e.getAttribute("input");
-	String typeAttr = e.getAttribute("type");
-	String rootAttr = e.getAttribute("root");
-	String regexpAttr = e.getAttribute("regexp");
+        int type;
+        if (typeAttr.equals("tag")) {
+            type = varType.TAG_VAR;
+        } else if (typeAttr.equals("element")) {
+            type = varType.ELEMENT_VAR;
+        } else { // (typeAttr.equals("content"))
+            type = varType.CONTENT_VAR;
+        }
 
-        op.setDumpAttributes(typeAttr, rootAttr);
+        Attribute unnestedVariable = new Variable(id, type);
 
-	
-	int type;
-	if (typeAttr.equals("tag")) {
-	    type = varType.TAG_VAR;
-	}
-	else if (typeAttr.equals("element")) {
-	    type = varType.ELEMENT_VAR;
-	}
-	else { // (typeAttr.equals("content"))
-	    type = varType.CONTENT_VAR;
-	}
-	
-	logNode input = (logNode) ids2nodes.get(inputAttr);
-	
-	// Copy the varTbl and schema from the node downstream, or create 
-	// empty ones if they don't exist
-	
-	varTbl qpVarTbl; Schema sc;
-	
-	if (input.getVarTbl() != null) {
-	    qpVarTbl = new varTbl(input.getVarTbl());
-	    sc = new Schema(input.getSchema()); 
-	}
-	else {
-	    qpVarTbl = new varTbl();
-	    sc = new Schema();
-	    sc.addSchemaUnit(new SchemaUnit(null, -1));
-	}
-	
-	
-	Scanner scanner;
-	regExp redn = null;
-	try {
-	    scanner = new Scanner(new StringReader(regexpAttr));
-	    REParser rep = new REParser(scanner);
-	    redn = (regExp) rep.parse().value;
-	    rep.done_parsing();
-	} catch (Exception ex) { // ugh cup throws "Exception!!!"
-	    ex.printStackTrace();
-	    throw new InvalidPlanException("Error while parsing: " 
-					   + regexpAttr + " in " + id);
-	}
-	
-	schemaAttribute resultSA = 
-	    new schemaAttribute(sc.numAttr(), type);
-	
-	// Register variable -> resultSA
-	qpVarTbl.addVar("$" + id, resultSA);
+        Scanner scanner;
+        regExp redn = null;
+        try {
+            scanner = new Scanner(new StringReader(regexpAttr));
+            REParser rep = new REParser(scanner);
+            redn = (regExp) rep.parse().value;
+            rep.done_parsing();
+        } catch (Exception ex) { // ugh cup throws "Exception!!!"
+            ex.printStackTrace();
+            throw new InvalidPlanException(
+                "Error while parsing: " + regexpAttr + " in " + id);
+        }
 
-	// The attribute the regexp starts from
-	// If left blank, we start the regexp from the last
-	// attribute added to the input tuple
-	schemaAttribute sa;
-    //try {
-	    if (rootAttr.equals(""))
-		sa = new schemaAttribute(sc.numAttr() - 1);
-	    else
-		sa = new schemaAttribute(qpVarTbl.lookUp(rootAttr));
-    //}
-    //catch (Exception exc) {
-    //    throw new InvalidPlanException("Parse error: Unknown variable " + rootAttr + " in " + id);
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-    //	}
+        Attribute root;
+        if (rootAttr.length() > 0) {
+            root = findVariable(inputLogProp, rootAttr);
+        } else {
+            // If root attr is left blank, we start the regexp from the last
+            // attribute added to the input tuple
+            Attrs attrs = inputLogProp.getAttrs();
+            root = attrs.get(attrs.size() - 1);
+        }
 
-	op.setScan(sa, redn);
+        Unnest op = new Unnest(unnestedVariable, root, redn);
 
-	sc.addSchemaUnit(new SchemaUnit(redn, sc.numAttr()));
+        Plan scanNode = new Plan(op, input);
 
-	
-	logNode scanNode = new logNode(op, input);
-	
-	ids2nodes.put(id, scanNode);
-	
-	scanNode.setSchema(sc);
-	scanNode.setVarTbl(qpVarTbl);
+        ids2plans.put(id, scanNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     void handleExpression(Element e) throws InvalidPlanException {
-	ExpressionOp op = new ExpressionOp();
-	op.setSelectedAlgoIndex(0);
+        String id = e.getAttribute("id");
 
-	String id = e.getAttribute("id");
+        String inputAttr = e.getAttribute("input");
+        String classAttr = e.getAttribute("class");
+        String expressionAttr = e.getAttribute("expression");
+        String variablesAttr = e.getAttribute("variables");
 
-	String inputAttr = e.getAttribute("input");
-	String classAttr = e.getAttribute("class");
-	String expressionAttr = e.getAttribute("expression");
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-	logNode input = (logNode) ids2nodes.get(inputAttr);
-	
-	// Copy the varTbl and schema from the node downstream, or create 
-	// empty ones if they don't exist
-	
-	varTbl qpVarTbl; Schema sc;
-	
-	if (input.getVarTbl() != null) {
-	    qpVarTbl = new varTbl(input.getVarTbl());
-	    sc = new Schema(input.getSchema()); 
-	}
-	else {
-	    qpVarTbl = new varTbl();
-	    sc = new Schema();
-	    sc.addSchemaUnit(new SchemaUnit(null, -1));
-	}
-	
-		
-	schemaAttribute resultSA = 
-	    new schemaAttribute(sc.numAttr(), varType.ELEMENT_VAR);
-	
-	// Register variable -> resultSA
-	qpVarTbl.addVar("$" + id, resultSA);
+        Class expressionClass = null;
+        String expression = null;
 
-	op.setVarTable(qpVarTbl.getMapping());
+        if (!classAttr.equals("")) {
+            try {
+                expressionClass = Class.forName(classAttr);
+            } catch (ClassNotFoundException cnfe) {
+                throw new InvalidPlanException(
+                    "Class " + classAttr + " could not be found");
+            }
+        } else if (!expressionAttr.equals("")) {
+            expression = expressionAttr;
+        } else
+            throw new InvalidPlanException("Either a class, or an expression to be interpreted must be defined for an expression operator");
 
-	if (!classAttr.equals("")) {
-	    try {
-		op.setExpressionClass(Class.forName(classAttr));
-	    }
-	    catch (ClassNotFoundException cnfe) {
-		throw new InvalidPlanException("Class " + classAttr + " could not be found");
-	    }
-	}
-	else if (!expressionAttr.equals("")) {
-	    op.setExpression(expressionAttr);
-	}
-	else 
-	    throw new InvalidPlanException("Either a class, or an expression to be interpreted must be defined for an expression operator");
+        Attrs variablesUsed = new Attrs();
+        if (variablesAttr.equals("*")) {
+            variablesUsed = inputLogProp.getAttrs().copy();
+        } else {
+            StringTokenizer st = new StringTokenizer(variablesAttr);
+            while (st.hasMoreTokens()) {
+                String varName = st.nextToken();
+                Attribute attr = inputLogProp.getAttr(getVarName(varName));
+                if (attr == null)
+                    throw new InvalidPlanException(
+                        "Unknown variable: " + varName);
+                variablesUsed.add(attr);
+            }
+        }
 
-	sc.addSchemaUnit(new SchemaUnit(null, sc.numAttr()));
-	logNode expressionNode = new logNode(op, input);
-	
-	ids2nodes.put(id, expressionNode);
-	
-	expressionNode.setSchema(sc);
-	expressionNode.setVarTbl(qpVarTbl);
+        ExpressionOp op =
+            new ExpressionOp(id, variablesUsed, expressionClass, expression);
+
+        Plan expressionNode = new Plan(op, input);
+
+        ids2plans.put(id, expressionNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     void handleSelect(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
+        String inputAttr = e.getAttribute("input");
 
-	selectOp op = new selectOp();
-	op.setSelectedAlgoIndex(0);
-	
-	String inputAttr = e.getAttribute("input");
-	NodeList children = e.getChildNodes();
-	
-	Element predElt = null;
-	
-	for (int i=0; i < children.getLength(); i++) {
-	    if (children.item(i) instanceof Element) {
-		predElt = (Element) children.item(i);
-		break;
-	    }
-	}
-	
-	logNode input =  (logNode) ids2nodes.get(inputAttr);
-	
+        NodeList children = e.getChildNodes();
+        Element predElt = null;
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i) instanceof Element) {
+                predElt = (Element) children.item(i);
+                break;
+            }
+        }
 
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-	varTbl qpVarTbl = input.getVarTbl();
-	predicate pred = parsePreds(predElt, qpVarTbl, null);
-	
-	Vector v = new Vector(); v.addElement(pred);
-	op.setSelect(v);
-	
-	logNode selectNode = new logNode(op, input);
-	ids2nodes.put(id, selectNode);
+        selectOp op = new selectOp(parsePreds(predElt, inputLogProp, null));
 
-        // XXX Hack to null out variables 
-        // XXX that we know won't be used downstream
-        // XXX This process should be automated
-        String clearAttr = e.getAttribute("clear");
-	boolean[] clear = new boolean[qpVarTbl.size()];
-	StringTokenizer st = new StringTokenizer(clearAttr);
-	while (st.hasMoreTokens()) {
-	    String varName = st.nextToken();
-
-	    int varPos = qpVarTbl.lookUp(varName).getPos();
-	    clear[varPos] = true;
-	}
-        op.setClear(clear);
-        op.setClearAttr(clearAttr);
-	
-	// Nothing changes for the variables
-	// Just use whatever variable table the node downstream has
-	selectNode.setSchema(input.getSchema());
-	selectNode.setVarTbl(qpVarTbl);
+        Plan selectNode = new Plan(op, input);
+        ids2plans.put(id, selectNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     void handleUnion(Element e, Vector inputs) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
 
-	UnionOp op = new UnionOp();
-	op.setSelectedAlgoIndex(0);
-	
-	String inputAttr = e.getAttribute("input");
-	
-	logNode[] input_arr = new logNode[inputs.size()];
-	for (int i=0; i < input_arr.length; i++) {
-	    input_arr[i] = (logNode) ids2nodes.get(inputs.get(i));
-	}
+        UnionOp op = new UnionOp();
+        op.setArity(inputs.size());
 
-	logNode node = new logNode(op, input_arr);
-	ids2nodes.put(id, node);
+        Plan[] input_arr = new Plan[inputs.size()];
+        LogicalProperty[] inputLogProps = new LogicalProperty[inputs.size()];
+        for (int i = 0; i < input_arr.length; i++) {
+            input_arr[i] = (Plan) ids2plans.get(inputs.get(i));
+            inputLogProps[i] =
+                (LogicalProperty) ids2logprops.get(inputs.get(i));
+            if (inputLogProps[i].getDegree() != inputLogProps[0].getDegree())
+                throw new InvalidPlanException("Union inputs are not union-compatible");
+        }
 
-	// Just keep the schema and variable table of the first input
-	logNode first_input =  (logNode) input_arr[0];
-	
-	node.setSchema(first_input.getSchema());
-	node.setVarTbl(first_input.getVarTbl());
+        Plan node = new Plan(op, input_arr);
+        ids2plans.put(id, node);
+
+        ids2plans.put(id, node);
+        ids2logprops.put(id, op.findLogProp(catalog, inputLogProps));
     }
 
     void handleDup(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
 
-	dupOp op = new dupOp();
-	op.setSelectedAlgoIndex(0);
-	
-	String inputAttr = e.getAttribute("input");
-	logNode input = (logNode) ids2nodes.get(inputAttr);
+        dupOp op = new dupOp();
 
-	String branchAttr = e.getAttribute("branch");
-	int branch = Integer.parseInt(branchAttr);
-	op.setDup(branch);
+        String inputAttr = e.getAttribute("input");
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-	logNode node = new logNode(op, input);
-	ids2nodes.put(id, node);
+        String branchAttr = e.getAttribute("branch");
+        // XXX vpapad: catch format exception, check that we really have
+        // that many output streams - why do we have to specify this here?
+        int branch = Integer.parseInt(branchAttr);
+        op.setDup(branch);
 
-	// Nothing changes for the variables
-	// Just use whatever variable table the node downstream has
-	node.setSchema(input.getSchema());
-	node.setVarTbl(input.getVarTbl());
+        Plan node = new Plan(op, input);
+        ids2plans.put(id, node);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     void handleSort(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
 
-	SortOp op = new SortOp();
-	op.setSelectedAlgoIndex(0);
-	
-	String inputAttr = e.getAttribute("input");
-	NodeList children = e.getChildNodes();
-	
-	logNode input =  (logNode) ids2nodes.get(inputAttr);
-	varTbl qpVarTbl = input.getVarTbl();
+        SortOp op = new SortOp();
 
-	String sortbyAttr = e.getAttribute("sort_by");
-	schemaAttribute sa = new schemaAttribute(qpVarTbl.lookUp(sortbyAttr));
+        String inputAttr = e.getAttribute("input");
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-	short comparisonMethod;
-	String comparisonAttr = e.getAttribute("comparison");
-	if (comparisonAttr.equals("alphabetic"))
-	    comparisonMethod = SortOp.ALPHABETIC_COMPARISON;
-	else
-	    comparisonMethod = SortOp.NUMERIC_COMPARISON;
+        String sortbyAttr = e.getAttribute("sort_by");
+        Attribute sortBy = findVariable(inputLogProp, sortbyAttr);
 
-	boolean ascending;
-	String orderAttr = e.getAttribute("order");
-	if (orderAttr.equals("descending"))
-	    ascending = false;
-	else
-	    ascending = true;
-	op.setSort(sa, comparisonMethod, ascending);
-	
-	logNode sortNode = new logNode(op, input);
-	ids2nodes.put(id, sortNode);
-	
-	// Nothing changes for the variables
-	// Just use whatever variable table the node downstream has
-	sortNode.setSchema(input.getSchema());
-	sortNode.setVarTbl(qpVarTbl);
+        short comparisonMethod;
+        String comparisonAttr = e.getAttribute("comparison");
+        if (comparisonAttr.equals("alphabetic"))
+            comparisonMethod = SortOp.ALPHABETIC_COMPARISON;
+        else
+            comparisonMethod = SortOp.NUMERIC_COMPARISON;
+
+        boolean ascending;
+        String orderAttr = e.getAttribute("order");
+        ascending = !orderAttr.equals("descending");
+        op.setSort(sortBy, comparisonMethod, ascending);
+
+        Plan sortNode = new Plan(op, input);
+        ids2plans.put(id, sortNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     void handleJoin(Element e, Vector inputs) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
 
-	joinOp op = new joinOp();
-	String className = e.getAttributeNode("physical").getValue();
-	try {
-	    op.setSelectedAlgorithm(className);
-	} catch (ClassNotFoundException ex) {
-	    throw new InvalidPlanException("Invalid algorithm: " + className
-					   + "  " + ex.getMessage());
-	} catch (niagara.xmlql_parser.op_tree.op.InvalidAlgorithmException x) {
-	    throw new InvalidPlanException("Invalid algorithm: " + className
-					   + "  " + x.getMessage());
-	}
-	
-	logNode left = (logNode) ids2nodes.get(inputs.get(0));
-	logNode right = (logNode) ids2nodes.get(inputs.get(1));
-	
-	NodeList children = e.getChildNodes();
-	Element predElt = null;
-	
-	for (int i=0; i < children.getLength(); i++) {
-	    if (children.item(i) instanceof Element) {
-		predElt = (Element) children.item(i);
-		break;
-	    }
-	}
-	
-	varTbl leftv = left.getVarTbl();
-	varTbl rightv = right.getVarTbl();
-	
-	predicate pred = parsePreds(predElt, leftv, rightv);
+        joinOp op = new joinOp();
+        Plan left = (Plan) ids2plans.get(inputs.get(0));
+        LogicalProperty leftLogProp =
+            (LogicalProperty) ids2logprops.get(inputs.get(0));
 
-	// In case of an equijoin we may have to parse "left" 
-	// and "right" to get additional equality predicates
-	String leftattrs = e.getAttribute("left");
-	String rightattrs = e.getAttribute("right");
+        Plan right = (Plan) ids2plans.get(inputs.get(1));
+        LogicalProperty rightLogProp =
+            (LogicalProperty) ids2logprops.get(inputs.get(1));
 
-	if (!leftattrs.equals("")) {
-	    Vector leftvect = new Vector();
-	    Vector rightvect = new Vector();
-	    try {
-		RE re = new RE("\\$[a-zA-Z0-9]*");
-		REMatch[] all_left = re.getAllMatches(leftattrs);
-		REMatch[] all_right = re.getAllMatches(rightattrs);
-		for (int i = 0; i < all_left.length; i++) {
-		    leftvect.addElement(leftv.lookUp(all_left[i].toString()));
-		    rightvect.addElement(rightv.lookUp(all_right[i].toString()));
+        NodeList children = e.getChildNodes();
+        Element predElt = null;
 
-		    schemaAttribute sa = (schemaAttribute)leftvect.get(0);
-		    if(sa == null) {
-                       System.out.println("null sa");
-		    }
-		}
-		op.setJoin(pred, leftvect, rightvect);
-	    }
-	    catch (REException rx) {
-		System.out.println("Syntax error in regular expression.");
-		rx.printStackTrace();
-	    }
-	}
-	else 
-	    op.setJoin(pred);
-	
-	logNode joinNode = new logNode(op, left, right);
-	ids2nodes.put(id, joinNode);
-	
-	//Merge the two schemas 
-	Schema sc = Util.mergeSchemas(left.getSchema(), right.getSchema());
-	joinNode.setSchema(sc);
-	
-	//Merge the two varTbls 
-	joinNode.setVarTbl(Util.mergeVarTbl(leftv, rightv, left.getSchema().numAttr()));
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i) instanceof Element) {
+                predElt = (Element) children.item(i);
+                break;
+            }
+        }
+
+        Predicate pred = parsePreds(predElt, leftLogProp, rightLogProp);
+
+        // In case of an equijoin we have to parse "left" 
+        // and "right" to get additional equality predicates
+        String leftattrs = e.getAttribute("left");
+        String rightattrs = e.getAttribute("right");
+
+        ArrayList leftVars = new ArrayList();
+        ArrayList rightVars = new ArrayList();
+
+        if (leftattrs.length() > 0) {
+            try {
+                RE re = new RE("(\\$)?[a-zA-Z0-9]+");
+                REMatch[] all_left = re.getAllMatches(leftattrs);
+                REMatch[] all_right = re.getAllMatches(rightattrs);
+                for (int i = 0; i < all_left.length; i++) {
+                    Attribute leftAttr = findVariable(leftLogProp, all_left[i].toString());
+                    Attribute rightAttr = findVariable(rightLogProp, all_right[i].toString());
+                    leftVars.add(leftAttr);
+                    rightVars.add(rightAttr);
+                }
+            } catch (REException rx) {
+                throw new InvalidPlanException(
+                    "Syntax error in equijoin predicate specification for "
+                        + id);
+            }
+        }
+        op.setJoin(pred, leftVars, rightVars);
+
+        Plan joinNode = new Plan(op, left, right);
+        ids2plans.put(id, joinNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(
+                catalog,
+                new LogicalProperty[] { leftLogProp, rightLogProp }));
     }
 
     void handleAvg(Element e) throws InvalidPlanException {
-	averageOp op = new averageOp();
-	op.setSelectedAlgoIndex(0);
+        averageOp op = new averageOp();
+        op.setSelectedAlgoIndex(0);
 
-	String id = e.getAttribute("id");
-	String groupby = e.getAttribute("groupby");
-	String avgattr = e.getAttribute("avgattr");
-	String inputAttr = e.getAttribute("input");
-	
-	logNode input = (logNode) ids2nodes.get(inputAttr);
-	varTbl oldVarTbl = input.getVarTbl();
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String avgattr = e.getAttribute("avgattr");
+        String inputAttr = e.getAttribute("input");
 
-	varTbl qpVarTbl = new varTbl();
-	Schema sc = new Schema();
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-	// Parse the groupby attribute to see what to group on
-	Vector groupbySAs = new Vector();
-	StringTokenizer st = new StringTokenizer(groupby);
-	while (st.hasMoreTokens()) {
-	    String varName = st.nextToken();
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
 
-	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
-	    
-	    groupbySAs.addElement(oldAttr);
-	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
-	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
-	}
+        Attribute averagingAttribute = findVariable(inputLogProp, avgattr);
+        op.setAverageInfo(new skolem(id, groupbyAttrs), averagingAttribute);
 
-	schemaAttribute averagingAttribute = oldVarTbl.lookUp(avgattr);
-
-	op.setAverageInfo(new skolem("avg", groupbySAs), averagingAttribute);
-	
-	//The attribute we're going to add to the result
-	schemaAttribute resultSA = new schemaAttribute(groupbySAs.size());
-	
-	// Register variable -> resultSA
-	qpVarTbl.addVar("$" + id, resultSA);
-	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
-	
-	logNode avgNode = new logNode(op, input);
-	
-	ids2nodes.put(id, avgNode);
-	
-	avgNode.setSchema(sc);
-	avgNode.setVarTbl(qpVarTbl);
+        Plan avgNode = new Plan(op, input);
+        ids2plans.put(id, avgNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     void handleSum(Element e) throws InvalidPlanException {
-	SumOp op = new SumOp();
-	op.setSelectedAlgoIndex(0);
+        SumOp op = new SumOp();
 
-	String id = e.getAttribute("id");
-	String groupby = e.getAttribute("groupby");
-	String sumattr = e.getAttribute("sumattr");
-	String inputAttr = e.getAttribute("input");
-	
-	logNode input = (logNode) ids2nodes.get(inputAttr);
-	varTbl oldVarTbl = input.getVarTbl();
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String sumattr = e.getAttribute("sumattr");
+        String inputAttr = e.getAttribute("input");
 
-	varTbl qpVarTbl = new varTbl();
-	Schema sc = new Schema();
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-	// Parse the groupby attribute to see what to group on
-	Vector groupbySAs = new Vector();
-	StringTokenizer st = new StringTokenizer(groupby);
-	while (st.hasMoreTokens()) {
-	    String varName = st.nextToken();
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
 
-	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
-	    groupbySAs.addElement(oldAttr);
-	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
-	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
-	}
+        Attribute summingAttribute = findVariable(inputLogProp, sumattr);
+        op.setSummingInfo(new skolem(id, groupbyAttrs), summingAttribute);
 
-	schemaAttribute summingAttribute = oldVarTbl.lookUp(sumattr);
-
-	op.setSummingInfo(new skolem("sum", groupbySAs), summingAttribute);
-	
-	//The attribute we're going to add to the result
-	schemaAttribute resultSA = new schemaAttribute(groupbySAs.size());
-	
-	// Register variable -> resultSA
-	qpVarTbl.addVar("$" + id, resultSA);
-	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
-
-	logNode sumNode = new logNode(op, input);
-	
-	ids2nodes.put(id, sumNode);
-	
-	sumNode.setSchema(sc);
-	sumNode.setVarTbl(qpVarTbl);
+        Plan sumNode = new Plan(op, input);
+        ids2plans.put(id, sumNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     void handleCount(Element e) throws InvalidPlanException {
-	CountOp op = new CountOp();
-	op.setSelectedAlgoIndex(0);
+        CountOp op = new CountOp();
 
-	String id = e.getAttribute("id");
-	String groupby = e.getAttribute("groupby");
-	String countattr = e.getAttribute("countattr");
-	String inputAttr = e.getAttribute("input");
-	
-	logNode input = (logNode) ids2nodes.get(inputAttr);
-	varTbl oldVarTbl = input.getVarTbl();
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String countattr = e.getAttribute("countattr");
+        String inputAttr = e.getAttribute("input");
 
-	varTbl qpVarTbl = new varTbl();
-	Schema sc = new Schema();
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-	// Parse the groupby attribute to see what to group on
-	Vector groupbySAs = new Vector();
-	StringTokenizer st = new StringTokenizer(groupby);
-	while (st.hasMoreTokens()) {
-	    String varName = st.nextToken();
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
 
-	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
-	    groupbySAs.addElement(oldAttr);
-	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
-	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
-	}
+        Attribute countingAttribute = findVariable(inputLogProp, countattr);
+        op.setCountingInfo(new skolem(id, groupbyAttrs), countingAttribute);
 
-	schemaAttribute countingAttribute = oldVarTbl.lookUp(countattr);
-
-	op.setCountingInfo(new skolem("count", groupbySAs), countingAttribute);
-	
-	//The attribute we're going to add to the result
-	schemaAttribute resultSA = new schemaAttribute(groupbySAs.size());
-	
-	// Register variable -> resultSA
-	qpVarTbl.addVar("$" + id, resultSA);
-	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
-	
-	logNode countNode = new logNode(op, input);
-	
-	ids2nodes.put(id, countNode);
-	
-	countNode.setSchema(sc);
-	countNode.setVarTbl(qpVarTbl);
+        Plan countNode = new Plan(op, input);
+        ids2plans.put(id, countNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     void handleDtdScan(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
 
-	// The node's children contain URLs
-	Vector urls = new Vector();
-	NodeList children = ((Element) e).getChildNodes();
-	for (int i=0; i < children.getLength(); i++) {
-	    Node child = children.item(i);
-	    if (child.getNodeType() != Node.ELEMENT_NODE)
-		continue;
-	    urls.addElement(((Element) child).getAttribute("value"));
-	}
-	
-	dtdScanOp op = new dtdScanOp();
-	op.setDocs(urls);
-	logNode node = new logNode(op);
-	ids2nodes.put(id, node);
+        // The node's children contain URLs
+        Vector urls = new Vector();
+        NodeList children = ((Element) e).getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            urls.addElement(((Element) child).getAttribute("value"));
+        }
 
-	// Create new varTbl and schema
-	varTbl qpVarTbl = new varTbl();
-	
-	schemaAttribute resultSA = 
-	    new schemaAttribute(0, varType.ELEMENT_VAR);
-	
-	// Register variable -> resultSA
-	qpVarTbl.addVar("$" + id, resultSA);
+        dtdScanOp op = new dtdScanOp();
+        op.setDocs(urls);
 
-	// Create a new, empty, schema
-	Schema sc = new Schema();
-	sc.addSchemaUnit(new SchemaUnit(null, 0));
+        op.setVariable(new Variable(id, NodeDomain.getDOMNode()));
 
-	// Register schema and variable table for the
-	// nodes above
-	node.setSchema(sc);
-	node.setVarTbl(qpVarTbl);
+        Plan node = new Plan(op);
+        ids2plans.put(id, node);
+        ids2logprops.put(id, op.findLogProp(catalog, new LogicalProperty[] {
+        }));
     }
 
     void handleResource(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
         String urn = e.getAttribute("urn");
-	
-	ResourceOp op = new ResourceOp();
-	op.setURN(urn);
-	logNode node = new logNode(op);
-	ids2nodes.put(id, node);
 
-	// Create new varTbl and schema
-	varTbl qpVarTbl = new varTbl();
-	
-	schemaAttribute resultSA = 
-	    new schemaAttribute(0, varType.ELEMENT_VAR);
-	
-	// Register variable -> resultSA
-	qpVarTbl.addVar("$" + id, resultSA);
+        ResourceOp op =
+            new ResourceOp(
+                new Variable(id, NodeDomain.getDOMNode()),
+                urn,
+                catalog);
 
-	// Create a new, empty, schema
-	Schema sc = new Schema();
-	sc.addSchemaUnit(new SchemaUnit(null, 0));
-
-	// Register schema and variable table for the
-	// nodes above
-	node.setSchema(sc);
-	node.setVarTbl(qpVarTbl);
+        Plan node = new Plan(op, false);
+        ids2plans.put(id, node);
+        ids2logprops.put(id, op.findLogProp(catalog, new LogicalProperty[] {
+        }));
     }
 
     void handleConstant(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
         String content = "";
         NodeList children = e.getChildNodes();
-	for (int i=0; i < children.getLength(); i++) {
-	    content = content + XMLUtils.flatten(children.item(i));
-	}
-
-	// Create new varTbl and schema
-	varTbl qpVarTbl = new varTbl();
-	
-	Schema sc = new Schema();
-	sc.addSchemaUnit(new SchemaUnit(null, 0));
+        for (int i = 0; i < children.getLength(); i++) {
+            content = content + XMLUtils.flatten(children.item(i));
+        }
 
         String vars = e.getAttribute("vars");
-	// Parse the vars attribute 
-	Vector varsAs = new Vector();
-	StringTokenizer st = new StringTokenizer(vars);
-        int pos = 0;
-	while (st.hasMoreTokens()) {
-	    String varName = st.nextToken();
+        // Parse the vars attribute 
+        StringTokenizer st = new StringTokenizer(vars);
+        ArrayList variables = new ArrayList();
+        while (st.hasMoreTokens()) {
+            variables.add(new Variable(st.nextToken()));
+        }
 
-	    qpVarTbl.addVar(varName, new schemaAttribute(pos));
-	    sc.addSchemaUnit(new SchemaUnit(null, pos));
-            pos++;
-	}
+        if (variables.size() == 0) {
+            variables.add(new Variable(id));
+        }
 
         ConstantOp op = new ConstantOp();
         op.setContent(content);
+        op.setVars(variables);
 
-  	op.setSelectedAlgoIndex(0);
-  	logNode node = new logNode(op);
-  	ids2nodes.put(id, node);	    
-
-
-	// Register schema and variable table for the
-	// nodes above
-	node.setSchema(sc);
-	node.setVarTbl(qpVarTbl);
-
+        Plan node = new Plan(op);
+        ids2plans.put(id, node);
+        ids2logprops.put(id, op.findLogProp(catalog, new LogicalProperty[] {
+        }));
     }
 
     void handleSend(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
 
         SendOp op = new SendOp();
 
-  	op.setSelectedAlgoIndex(0);
+        String inputAttr = e.getAttribute("input");
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-	String inputAttr = e.getAttribute("input");
-	logNode input =  (logNode) ids2nodes.get(inputAttr);
-
-  	logNode node = new logNode(op, input);
-  	ids2nodes.put(id, node);	    
+        Plan node = new Plan(op, input);
+        ids2plans.put(id, node);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     void handleDisplay(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
 
         DisplayOp op = new DisplayOp();
 
-  	op.setSelectedAlgoIndex(0);
         op.setQueryId(e.getAttribute("query_id"));
         op.setClientLocation(e.getAttribute("client_location"));
 
-	String inputAttr = e.getAttribute("input");
-	logNode input =  (logNode) ids2nodes.get(inputAttr);
+        String inputAttr = e.getAttribute("input");
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-  	logNode node = new logNode(op, input);
-  	ids2nodes.put(id, node);	    
+        Plan node = new Plan(op, input);
+        ids2plans.put(id, node);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     void handleFirehoseScan(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
-	String host = e.getAttribute("host");
-	int port = Integer.parseInt(e.getAttribute("port"));
-	int rate = Integer.parseInt(e.getAttribute("rate"));
-	String dataTypeStr = e.getAttribute("datatype");
-	String descriptor = e.getAttribute("desc");
-	String descriptor2 = e.getAttribute("desc2");
-	int numGenCalls = Integer.parseInt(e.getAttribute("num_gen_calls"));
-	int numTLElts = Integer.parseInt(e.getAttribute("num_tl_elts"));
+        String id = e.getAttribute("id");
+        String host = e.getAttribute("host");
+        int port = Integer.parseInt(e.getAttribute("port"));
+        int rate = Integer.parseInt(e.getAttribute("rate"));
+        String dataTypeStr = e.getAttribute("datatype");
+        String descriptor = e.getAttribute("desc");
+        String descriptor2 = e.getAttribute("desc2");
+
+        int numGenCalls = Integer.parseInt(e.getAttribute("num_gen_calls"));
+        int numTLElts = Integer.parseInt(e.getAttribute("num_tl_elts"));
         boolean streaming = e.getAttribute("streaming").equalsIgnoreCase("yes");
-        boolean prettyPrint = e.getAttribute("prettyprint").equalsIgnoreCase("yes");
+        boolean prettyPrint =
+            e.getAttribute("prettyprint").equalsIgnoreCase("yes");
         String trace = e.getAttribute("trace");
 
-	int dataType = -1;
-	boolean found = false;
-	for(int i = 0; i< FirehoseConstants.numDataTypes; i++) {
-	    if(dataTypeStr.equalsIgnoreCase(FirehoseConstants.typeNames[i])) {
-		dataType = i;
-		found = true;
-		break;
-	    }
-	}
-	if(found == false)
-	    throw new InvalidPlanException("Invalid type - typeStr: " + 
-					   dataTypeStr);
-		 
-	FirehoseSpec fhspec = 
-	    new FirehoseSpec(port, host, dataType, descriptor, descriptor2,
-	                     numGenCalls, numTLElts, rate, streaming,
-			     prettyPrint, trace);
-	
-	FirehoseScanOp op = new FirehoseScanOp();
-	op.setSelectedAlgoIndex(0);
-	op.setFirehoseScan(fhspec);
-	logNode node = new logNode(op);
-	ids2nodes.put(id, node);	    
+        int dataType = -1;
+        boolean found = false;
+        for (int i = 0; i < FirehoseConstants.numDataTypes; i++) {
+            if (dataTypeStr.equalsIgnoreCase(FirehoseConstants.typeNames[i])) {
+                dataType = i;
+                found = true;
+                break;
+            }
+        }
+        if (found == false)
+            throw new InvalidPlanException(
+                "Invalid type - typeStr: " + dataTypeStr);
+
+        FirehoseSpec fhSpec =
+            new FirehoseSpec(
+                port,
+                host,
+                dataType,
+                descriptor,
+                descriptor2,
+                numGenCalls,
+                numTLElts,
+                rate,
+                streaming,
+                prettyPrint,
+                trace);
+
+        FirehoseScanOp op = new FirehoseScanOp();
+        op.setFirehoseScan(fhSpec, new Variable(id));
+
+        Plan node = new Plan(op);
+        ids2plans.put(id, node);
+        ids2logprops.put(id, op.findLogProp(catalog, new LogicalProperty[] {
+        }));
     }
 
     void handleFileScan(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
-	boolean isStreaming = e.getAttribute("streaming").equals("yes");
-	FileScanSpec fsSpec = new FileScanSpec(e.getAttribute("fileName"), isStreaming); 
+        String id = e.getAttribute("id");
+        boolean isStreaming = e.getAttribute("streaming").equals("yes");
+        FileScanSpec fsSpec =
+            new FileScanSpec(e.getAttribute("fileName"), isStreaming);
 
-	FileScanOp op = new FileScanOp();
-	op.setSelectedAlgoIndex(0);
-	op.setFileScan(fsSpec);
-	logNode node = new logNode(op);
-	ids2nodes.put(id, node);	    
+        FileScanOp op = new FileScanOp();
+        op.setFileScan(fsSpec, new Variable(id));
+
+        Plan node = new Plan(op);
+        ids2plans.put(id, node);
+        ids2logprops.put(id, op.findLogProp(catalog, new LogicalProperty[] {
+        }));
     }
 
     void handleConstruct(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id");
+        String id = e.getAttribute("id");
 
-	constructOp op = new constructOp();
-	op.setSelectedAlgoIndex(0);
-	NodeList children = e.getChildNodes();
-	String content = "";
-	for (int i=0; i < children.getLength(); i++) {
-	    if (children.item(i).getNodeType() != Node.ELEMENT_NODE)
-		continue;
-	    content = content + XMLUtils.explosiveFlatten(children.item(i));
-	}
-	String inputAttr = e.getAttribute("input");
-	
-	logNode input = (logNode) ids2nodes.get(inputAttr);
-	Scanner scanner;
-	constructBaseNode cn = null;
-	
-	try {
-	    scanner = new Scanner(new StringReader(content));
-	    ConstructParser cep = new ConstructParser(scanner);
-	    cn = (constructBaseNode) cep.parse().value;
-	    cep.done_parsing();
-	}
-	catch (Exception ex) {
-	    throw new InvalidPlanException("Error while parsing: "+ content);
-	}
+        constructOp op = new constructOp();
+        NodeList children = e.getChildNodes();
+        String content = "";
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i).getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            content = content + XMLUtils.explosiveFlatten(children.item(i));
+        }
+        String inputAttr = e.getAttribute("input");
 
-	varTbl qpVarTbl = null; 
-	Schema sc = null;
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
 
-	boolean clear = false;
-	if (e.getAttribute("clear").equals("yes"))
-	    clear = true;
-	
-	if (input.getVarTbl() != null) {
-	    qpVarTbl = new varTbl(input.getVarTbl());
-	    sc = new Schema(input.getSchema()); 
-	    cn.replaceVar(qpVarTbl);
-	}
+        Scanner scanner;
+        constructBaseNode cn = null;
 
-	if (input.getVarTbl() == null || clear) {
-	    qpVarTbl = new varTbl();
-	    sc = new Schema();
-	}
+        try {
+            scanner = new Scanner(new StringReader(content));
+            ConstructParser cep = new ConstructParser(scanner);
+            cn = (constructBaseNode) cep.parse().value;
+            cep.done_parsing();
+        } catch (Exception ex) {
+            throw new InvalidPlanException("Error while parsing: " + content);
+        }
 
-	op.setConstruct(cn, clear);
-	
-	logNode node = new logNode(op, (logNode) ids2nodes.get(inputAttr));
-
-	int nextVar;
-	if (input.getVarTbl() == null || clear) {
-	    nextVar = 0;
-	}
-	else {
-	    nextVar = sc.numAttr();
-	}
-
-	schemaAttribute resultSA = 
-	    new schemaAttribute(nextVar, varType.ELEMENT_VAR);
-	
-	// Register variable -> resultSA
-	qpVarTbl.addVar("$" + id, resultSA);
-
-	// Update the schema
-	sc.addSchemaUnit(new SchemaUnit(null, nextVar));
-	
-	ids2nodes.put(id, node);
-
-	// Register schema and variable table for the
-	// nodes above
-	node.setSchema(sc);
-	node.setVarTbl(qpVarTbl);
+        op.setVariable(new Variable(id));
+        op.setConstruct(cn);
+        Plan node = new Plan(op, (Plan) ids2plans.get(inputAttr));
+        ids2plans.put(id, node);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
     private void handleAccumulate(Element e) throws InvalidPlanException {
-	try {
-	    /* Need to create an AccumulateOp
-	     * 1) The MergeTemplate
-	     * 2) The MergeIndex - index of attribute to work on
-	     */
-	    String id = e.getAttribute("id");
-	    
-	    /* Either a file name, URI or Merge template string */
-	    String mergeTemplate = e.getAttribute("mergeTemplate");
-	    
-	    /* input specifies input operator, index specifies index
-	     * of attribute to work on 
-	     */
-	    String inputAttr = e.getAttribute("input");
-	    String mergeAttr = e.getAttribute("mergeAttr");
-	    
-	    /* name by which the accumulated file should be referred to */
-	    String accumFileName = e.getAttribute("accumFileName");
+        try {
+            /* Need to create an AccumulateOp
+             * 1) The MergeTemplate
+             * 2) The MergeIndex - index of attribute to work on
+             */
+            String id = e.getAttribute("id");
 
-	    /* file containing the initial input to the accumulate */
-	    String initialAccumFile = e.getAttribute("initialAccumFile");
+            /* Either a file name, URI or Merge template string */
+            String mergeTemplate = e.getAttribute("mergeTemplate");
 
-	    AccumulateOp op = new AccumulateOp();
-	    op.setSelectedAlgoIndex(0);
-	    
-	    String clear = e.getAttribute("clear");
-	    boolean cl;
-	    if(clear.equals("false")) {
-		cl = false;
-	    } else {
-		cl = true;
-	    }
+            /* input specifies input operator, index specifies index
+             * of attribute to work on 
+             */
+            String inputAttr = e.getAttribute("input");
+            String mergeAttr = e.getAttribute("mergeAttr");
 
-	    varTbl qpVarTbl = null; 
-	    logNode inputNode = (logNode) ids2nodes.get(inputAttr);
-	    
-	    if (inputNode.getVarTbl() != null) {
-		qpVarTbl = new varTbl(inputNode.getVarTbl());
-	    } else {
-		throw new InvalidPlanException("Accumulate needs variable " + mergeAttr 
-					       + "but input variable table is null");
-	    }
-	    
-	    schemaAttribute mergeSA;
-	    mergeSA = new schemaAttribute(qpVarTbl.lookUp(mergeAttr));
-	    op.setAccumulate(mergeTemplate, mergeSA, accumFileName,
-			     initialAccumFile, cl);
+            /* name by which the accumulated file should be referred to */
+            String accumFileName = e.getAttribute("accumFileName");
 
-	    logNode accumNode = new logNode(op, inputNode);
-	    ids2nodes.put(id, accumNode);	   
+            /* file containing the initial input to the accumulate */
+            String initialAccumFile = e.getAttribute("initialAccumFile");
 
-	    // PhysicalAccumulateOperator outputs single-element StreamTuplElements
-	    // Create a new varTbl, containing a single variable for this element
-	    qpVarTbl = new varTbl();
+            AccumulateOp op = new AccumulateOp();
 
-	    schemaAttribute resultSA = 
-		new schemaAttribute(0, varType.ELEMENT_VAR);
-	
-	    // Register variable -> resultSA
-	    qpVarTbl.addVar("$" + id, resultSA);
+            String clear = e.getAttribute("clear");
+            boolean cl = (!clear.equals("false"));
 
-	    // Create a new, empty, schema
-	    Schema sc = new Schema();
-	    sc.addSchemaUnit(new SchemaUnit(null, 0));
+            Plan inputNode = (Plan) ids2plans.get(inputAttr);
+            LogicalProperty inputLogProp =
+                (LogicalProperty) ids2logprops.get(inputAttr);
 
-	    // Register schema and variable table for the
-	    // nodes above
-	    accumNode.setSchema(sc);
-	    accumNode.setVarTbl(qpVarTbl);
-	} catch (MTException mte) {
-	    throw new InvalidPlanException("Invalid Merge Template" + 
-					   mte.getMessage());
-	}
+            Attribute mergeAttribute = findVariable(inputLogProp, mergeAttr);
+
+            op.setAccumulate(
+                mergeTemplate,
+                mergeAttribute,
+                accumFileName,
+                initialAccumFile,
+                cl);
+
+            Plan accumNode = new Plan(op, inputNode);
+            ids2plans.put(id, accumNode);
+            ids2logprops.put(
+                id,
+                op.findLogProp(
+                    catalog,
+                    new LogicalProperty[] { inputLogProp }));
+        } catch (MTException mte) {
+            throw new InvalidPlanException(
+                "Invalid Merge Template" + mte.getMessage());
+        }
     }
 
+    void handleIncrMax(Element e) throws InvalidPlanException {
+        IncrementalMax op = new IncrementalMax();
+        op.setSelectedAlgoIndex(0);
+
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String maxattr = e.getAttribute("maxattr");
+        String inputAttr = e.getAttribute("input");
+        String emptyGroupValueAttr = e.getAttribute("emptygroupvalue");
+
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        Attribute maxAttribute = findVariable(inputLogProp, maxattr);
+
+        op.setSkolemAttributes(new skolem(id, groupbyAttrs));
+        op.setMaxAttribute(maxAttribute);
+        op.setEmptyGroupValue(Double.valueOf(emptyGroupValueAttr));
+
+        Plan maxNode = new Plan(op, input);
+        ids2plans.put(id, maxNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
+    }
+
+    void handleIncrAvg(Element e) throws InvalidPlanException {
+        IncrementalAverage op = new IncrementalAverage();
+        op.setSelectedAlgoIndex(0);
+
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String avgattr = e.getAttribute("avgattr");
+        String inputAttr = e.getAttribute("input");
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        Attribute avgAttribute = findVariable(inputLogProp, avgattr);
+
+        op.setSkolemAttributes(new skolem(id, groupbyAttrs));
+        op.setAvgAttribute(avgAttribute);
+
+        Plan maxNode = new Plan(op, input);
+        ids2plans.put(id, maxNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
+    }
 
     // XXX This code should be rewritten to take advantage of 
     // XXX getName and getCode in opType
-    predicate parsePreds(Element e, varTbl leftv, varTbl rightv) {
-	predicate p;
-
-	if (e == null)
-	    return null;
+    Predicate parsePreds(
+        Element e,
+        LogicalProperty leftv,
+        LogicalProperty rightv)
+        throws InvalidPlanException {
+        if (e == null)
+            return True.getTrue();
 
         Element l, r;
         l = r = null;
@@ -1040,194 +912,104 @@ public class XMLQueryPlanParser {
         Node c = e.getFirstChild();
         do {
             if (c.getNodeType() == Node.ELEMENT_NODE) {
-                if (l == null) l = (Element) c;
-                else if (r == null) r = (Element) c;
+                if (l == null)
+                    l = (Element) c;
+                else if (r == null)
+                    r = (Element) c;
             }
             c = c.getNextSibling();
         } while (c != null);
 
-	if (e.getNodeName().equals("and")) {
-	    predicate left = parsePreds(l, leftv, rightv);
-	    predicate right = parsePreds(r, leftv, rightv);
+        if (e.getNodeName().equals("and")) {
+            Predicate left = parsePreds(l, leftv, rightv);
+            Predicate right = parsePreds(r, leftv, rightv);
 
-	    return new predLogOpNode(opType.AND, left, right);
-	}
-	else if (e.getNodeName().equals("or")) {
-	    predicate left = parsePreds(l, leftv, rightv);
-	    predicate right = parsePreds(r, leftv, rightv);
+            return new And(left, right);
+        } else if (e.getNodeName().equals("or")) {
+            Predicate left = parsePreds(l, leftv, rightv);
+            Predicate right = parsePreds(r, leftv, rightv);
 
-	    return new predLogOpNode(opType.OR, left, right);
-	}
-	else if (e.getNodeName().equals("not")) {
-	    predicate child = parsePreds(l, leftv, rightv);
+            return new Or(left, right);
+        } else if (e.getNodeName().equals("not")) {
+            Predicate child = parsePreds(l, leftv, rightv);
 
-	    return new predLogOpNode(opType.NOT, child);
-	}
-	else { // Relational operator
-	    data left = parseAtom(l, leftv, rightv);
-	    data right = parseAtom(r, leftv, rightv);
+            return new Not(child);
+        } else { // Relational operator
+            Atom left = parseAtom(l, leftv, rightv);
+            Atom right = parseAtom(r, leftv, rightv);
 
-	    int type;
-	    String op = e.getAttribute("op");
+            int type;
+            String op = e.getAttribute("op");
 
-	    if (op.equals("lt"))
-		type = opType.LT;
-	    else if (op.equals("gt"))
-		type = opType.GT;
-	    else if (op.equals("le"))
-		type = opType.LEQ;
-	    else if (op.equals("ge"))
-		type = opType.GEQ;
-	    else if (op.equals("ne"))
-		type = opType.NEQ;
-	    else if (op.equals("contain"))
-		type = opType.CONTAIN;
-	    else // eq
-		type = opType.EQ;
+            if (op.equals("lt"))
+                type = opType.LT;
+            else if (op.equals("gt"))
+                type = opType.GT;
+            else if (op.equals("le"))
+                type = opType.LEQ;
+            else if (op.equals("ge"))
+                type = opType.GEQ;
+            else if (op.equals("ne"))
+                type = opType.NEQ;
+            else if (op.equals("eq"))
+                type = opType.EQ;
+            else if (op.equals("contain"))
+                type = opType.CONTAIN;
+            else
+                throw new InvalidPlanException(
+                    "Unrecognized predicate op: " + op);
 
-            // XXX horrible hack for toXML()
-            predArithOpNode toReturn = new predArithOpNode(type, left, right);
-            Vector varlist = new Vector();
-            if (left.getType() == dataType.ATTR) {
-                varlist.add(l.getAttribute("value"));
-            }
-            if (right.getType() == dataType.ATTR) {
-                varlist.add(r.getAttribute("value"));
-            }
-            toReturn.setVarList(varlist);
-	    return toReturn;
-	}
+            return Comparison.newComparison(type, left, right);
+            // XXX vpapad: removed various toVarList @#$@#,
+            // supposed to help in toXML. Test it!
+        }
     }
 
-    data parseAtom(Element e, varTbl left, varTbl right) {
-	if (e.getNodeName().equals("number"))
-	    return new data(dataType.NUMBER, e.getAttribute("value"));
-	else if (e.getNodeName().equals("string"))
-	    return new data(dataType.STRING, e.getAttribute("value"));
-	else { //var 
-	    String varname = e.getAttribute("value");
-	    if (left.lookUp(varname) != null)
-		return new data(dataType.ATTR, left.lookUp(varname));	    
-	    else {
-		schemaAttribute sa = new schemaAttribute(right.lookUp(varname));
-		sa.setStreamId(1);
-		return new data(dataType.ATTR, sa);
-	    }
-	}
-
+    Atom parseAtom(Element e, LogicalProperty left, LogicalProperty right)
+        throws InvalidPlanException {
+        if (e.getNodeName().equals("number"))
+            return new NumericConstant(e.getAttribute("value"));
+        else if (e.getNodeName().equals("string"))
+            return new StringConstant(e.getAttribute("value"));
+        else { //var 
+            String varname = e.getAttribute("value");
+            // chop initial $ sign off
+            if (varname.charAt(0) == '$')
+                varname = varname.substring(1);
+            if (left.getAttr(varname) != null
+                || right.getAttr(varname) != null)
+                return new Variable(varname);
+            else
+                throw new InvalidPlanException(
+                    "Unknown variable name: " + varname);
+        }
     }
-
 
     public class InvalidPlanException extends Exception {
-	public InvalidPlanException() {
-	    super("Invalid Plan Exception: ");
-	}
-	public InvalidPlanException(String msg) {
-	    super("Invalid Plan Exception: " + msg + " ");
-	}
+        public InvalidPlanException() {
+            super("Invalid Plan Exception: ");
+        }
+        public InvalidPlanException(String msg) {
+            super("Invalid Plan Exception: " + msg + " ");
+        }
     }
 
-    void handleIncrMax(Element e) throws InvalidPlanException {
-	IncrementalMax op = new IncrementalMax();
-	op.setSelectedAlgoIndex(0);
-
-	String id = e.getAttribute("id");
-	String groupby = e.getAttribute("groupby");
-	String maxattr = e.getAttribute("maxattr");
-	String inputAttr = e.getAttribute("input");
-	String emptyGroupValueAttr = e.getAttribute("emptygroupvalue");
-
-	logNode input = (logNode) ids2nodes.get(inputAttr);
-	varTbl oldVarTbl = input.getVarTbl();
-
-	varTbl qpVarTbl = new varTbl();
-	Schema sc = new Schema();
-
-	// Parse the groupby attribute to see what to group on
-	Vector groupbySAs = new Vector();
-	StringTokenizer st = new StringTokenizer(groupby);
-	while (st.hasMoreTokens()) {
-	    String varName = st.nextToken();
-
-	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
-	    
-	    groupbySAs.addElement(oldAttr);
-	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
-	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
-	}
-
-	schemaAttribute maxAttribute = oldVarTbl.lookUp(maxattr);
-
-	op.setSkolemAttributes(new skolem("incrmax", groupbySAs));
-	op.setMaxAttribute(maxAttribute);
-	op.setEmptyGroupValue(Double.valueOf(emptyGroupValueAttr));
-
-	// Old/New result attributes
-	schemaAttribute oldSA = new schemaAttribute(groupbySAs.size(), 
-						    varType.ELEMENT_VAR);
-	schemaAttribute newSA = new schemaAttribute(groupbySAs.size()+1,
-						    varType.ELEMENT_VAR);
-	
-	// Register variables
-	qpVarTbl.addVar("$old" + id, oldSA);
-	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
-	qpVarTbl.addVar("$" + id, newSA);
-	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size() + 1));
-	
-	logNode maxNode = new logNode(op, input);
-	
-	ids2nodes.put(id, maxNode);
-	
-	maxNode.setSchema(sc);
-	maxNode.setVarTbl(qpVarTbl);
+    public ArrayList getRemotePlans() {
+        return remotePlans;
     }
 
-    void handleIncrAvg(Element e) throws InvalidPlanException {
-	IncrementalAverage op = new IncrementalAverage();
-	op.setSelectedAlgoIndex(0);
+    public Attribute findVariable(LogicalProperty logProp, String varName) 
+        throws InvalidPlanException {
+        Attribute attr = logProp.getAttr(getVarName(varName));
+        if (attr == null)
+            throw new InvalidPlanException("Unknown variable: " + varName);
+        return attr;
+    }
 
-	String id = e.getAttribute("id");
-	String groupby = e.getAttribute("groupby");
-	String avgattr = e.getAttribute("avgattr");
-	String inputAttr = e.getAttribute("input");
-
-	logNode input = (logNode) ids2nodes.get(inputAttr);
-	varTbl oldVarTbl = input.getVarTbl();
-
-	varTbl qpVarTbl = new varTbl();
-	Schema sc = new Schema();
-
-	// Parse the groupby attribute to see what to group on
-	Vector groupbySAs = new Vector();
-	StringTokenizer st = new StringTokenizer(groupby);
-	while (st.hasMoreTokens()) {
-	    String varName = st.nextToken();
-
-	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
-	    
-	    groupbySAs.addElement(oldAttr);
-	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
-	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
-	}
-
-	schemaAttribute avgAttribute = oldVarTbl.lookUp(avgattr);
-
-	op.setSkolemAttributes(new skolem("incravg", groupbySAs));
-	op.setAvgAttribute(avgAttribute);
-
-	// New result attribute
-	schemaAttribute newSA = new schemaAttribute(groupbySAs.size(),
-						    varType.ELEMENT_VAR);
-	
-	// Register variables
-	qpVarTbl.addVar("$" + id, newSA);
-	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
-	
-	logNode avgNode = new logNode(op, input);
-	
-	ids2nodes.put(id, avgNode);
-	
-	avgNode.setSchema(sc);
-	avgNode.setVarTbl(qpVarTbl);
+    /** Strip dollar signs from varName */
+    public String getVarName(String varName) {
+        if (varName.charAt(0) == '$')
+            return varName.substring(1);
+        return varName;
     }
 }

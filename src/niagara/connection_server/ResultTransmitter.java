@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.13 2002/10/12 20:11:06 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.14 2002/10/31 04:20:30 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -121,7 +121,7 @@ public class ResultTransmitter implements Runnable {
 	try {
 	    URL url = new URL(request.requestData);
 	    BufferedReader rd = new BufferedReader(new InputStreamReader(url.openStream()));
-	    response.appendData("<![CDATA[");
+	    response.setData("<![CDATA[");
 	    response.appendData(assembleDTD(rd) + "]]>");
 	}
 	catch (MalformedURLException e1) {

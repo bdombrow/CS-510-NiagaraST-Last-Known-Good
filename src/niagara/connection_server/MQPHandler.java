@@ -1,120 +1,86 @@
 /**
- * $Id: MQPHandler.java,v 1.4 2002/05/23 06:30:47 vpapad Exp $
+ * $Id: MQPHandler.java,v 1.5 2002/10/31 04:20:30 vpapad Exp $
  *
  */
 
 package niagara.connection_server;
 
+import niagara.optimizer.Optimizer;
+import niagara.optimizer.Plan;
 import niagara.query_engine.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.utils.*;
 
+import niagara.client.LightMQPClient;
+
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.net.*;
 
-public class MQPHandler extends Thread {
+public class MQPHandler {
     ExecutionScheduler es;
-    logNode root;
-    Vector resources;
-    Vector schedulableRoots;
+    Plan root;
+
+    ArrayList schedulableRoots;
+    ArrayList resources;
+
     StreamMaterializer[] subplans;
     String[] results;
     Catalog catalog;
     int subPlansDone;
 
-    public MQPHandler(ExecutionScheduler es, logNode root) {
+    public MQPHandler(ExecutionScheduler es, Optimizer optimizer, Plan p) {
         this.es = es;
-        this.root = root;
-        subPlansDone = 0;
-    }
+        this.root = p;
+        this.catalog = NiagraServer.getCatalog();
 
-    public void run() {
-	try {
-	    catalog = NiagraServer.getCatalog();
-	    
-	    // Replace all resource nodes we know about with
-	    // dtdscans
-	    resources = new Vector();
-	    Vector allNodes = new Vector();
-	    Vector traverse = new Vector();
-	    
-	    traverse.add(root);
-	    
-	    while (!traverse.isEmpty()) {
-		logNode n = (logNode) traverse.remove(0);
-		if (allNodes.contains(n))
-		    continue;
-		if (n.getOperator() instanceof ResourceOp) {
-		    resources.add(n);
-		}
-		else {
-		    logNode[] inputs = n.getInputs();
-		    for (int i = 0; i < inputs.length; i++) {
-			traverse.add(inputs[i]);
-		    }
-		}
-		allNodes.add(n);
-	    }
-	    
-	    for (int i = 0; i < resources.size(); i++) {
-		logNode node = (logNode) resources.get(i);
-		ResourceOp rop = (ResourceOp) node.getOperator();
-		String urn = rop.getURN();
-		if (catalog.isLocallyResolvable(urn)) {
-		    dtdScanOp op = new dtdScanOp();
-		    op.setDocs(catalog.getURL(urn));
-		    node.setOperator(op);
-		    resources.remove(node);
-		}
-	    }
-	    
-	    // Maybe now the root is schedulable?
-	    if (root.isSchedulable()) {
-		es.scheduleSubPlan(root);
-		return;
-	    }
+        subPlansDone = 0;
+        schedulableRoots = new ArrayList();
+        resources = new ArrayList();
+
+        root = optimizer.consolidate(root.toEXPR());
+
+        try {
+            root.getRootsAndResources(
+                new HashSet(),
+                schedulableRoots,
+                resources,
+                true);
+
+            // If the root is schedulable, just schedule it and we're done
+            if (schedulableRoots.size() == 1
+                && root == schedulableRoots.get(0)) {
+                Plan optimizedPlan =
+                    optimizer.optimize(root.toEXPR());
+                es.scheduleSubPlan(optimizedPlan);
+                return;
+            }
+
+            // If there is nothing we can schedule, route the plan
+            if (schedulableRoots.size() == 0)
+                route();
+
+            subplans = new StreamMaterializer[schedulableRoots.size()];
+            results = new String[schedulableRoots.size()];
             
-	    // Find roots of subgraphs that are schedulable
-	    schedulableRoots = new Vector(); 
-	    
-	    // non-schedulable nodes to check
-	    Vector toCheck = new Vector(); 
-	    
-	    toCheck.add(root);
-	    
-	    // Do a depth first traversal of the query graph
-	    // trying to find the roots of schedulable subgraphs
-	    while (!toCheck.isEmpty()) {
-		logNode n = (logNode) toCheck.remove(0);
-		logNode[] inputs = n.getInputs();
-		for (int i = 0; i < inputs.length; i++) {
-		    logNode m = inputs[i];
-		    if (m.isSchedulable())
-			schedulableRoots.add(m);
-		    else
-			toCheck.add(m);
-		}
-	    }
-	    
-	    subplans =  new StreamMaterializer[schedulableRoots.size()];
-	    results = new String[schedulableRoots.size()];
-	    
-	    for (int i = 0; i < subplans.length; i++) {
-		PageStream is = 
-		    es.scheduleSubPlan((logNode) schedulableRoots.get(i));
-		subplans[i] = new StreamMaterializer(i, this, 
-						     new SourceTupleStream(is));
-		subplans[i].start();
-	    }
-	    
-	    if (subplans.length == 0)
-		route();
-	} catch (ShutdownException se) {
-	    // nothing to do but print a warning and return
-	    System.err.println("MQPHandler got shutdown "+se.getMessage());
-	    return;
-	}
+            for (int i = 0; i < subplans.length; i++) {
+                Plan optimizedPlan =
+                    optimizer.optimize(
+                        ((Plan) schedulableRoots.get(i)).toEXPR());
+
+                ((Plan) schedulableRoots.get(i)).replaceWith(optimizedPlan);
+                PageStream is = es.scheduleSubPlan(optimizedPlan);
+                subplans[i] =
+                    new StreamMaterializer(i, this, new SourceTupleStream(is));
+                subplans[i].start();
+            }
+
+        } catch (ShutdownException se) {
+            // nothing to do but print a warning and return
+            System.err.println("MQPHandler got shutdown " + se.getMessage());
+            return;
+        }
     }
 
     public synchronized void subPlanDone(int number, String result) {
@@ -125,23 +91,23 @@ public class MQPHandler extends Thread {
 
         // Build new MQP
         for (int k = 0; k < schedulableRoots.size(); k++) {
-            logNode n = (logNode) schedulableRoots.get(k);
+            Plan p = (Plan) schedulableRoots.get(k);
             ConstantOp cop = new ConstantOp();
             cop.setContent(results[number]);
-            cop.setVars(n.getVarTbl().getVars());
-            n.setOperator(cop);
-            n.setInputs(new logNode[] {});
+            cop.setVars(p.getTupleSchema().getVariables());
+            p.setOperator(cop);
+            p.setInputs(new Plan[] {});
         }
 
         route();
     }
-    
+
     public void route() {
         // Decide on the next node to send the MQP to
-        Hashtable votes = new Hashtable();
+        HashMap votes = new HashMap();
         for (int i = 0; i < resources.size(); i++) {
-            logNode node = (logNode) resources.get(i);
-            ResourceOp rop = (ResourceOp) node.getOperator();
+            Plan node = (Plan) resources.get(i);
+            ResourceOp rop = node.getResource();
             String urn = rop.getURN();
             Vector resolvers = catalog.getResolvers(urn);
             if (resolvers == null)
@@ -150,60 +116,76 @@ public class MQPHandler extends Thread {
                 String location = (String) resolvers.get(j);
                 if (!votes.containsKey(location)) {
                     votes.put(location, new Integer(1));
-                }
-                else {
-                    int currentVotes = ((Integer)
-                                        votes.get(location)).intValue();
+                } else {
+                    int currentVotes =
+                        ((Integer) votes.get(location)).intValue();
                     currentVotes++;
-                    votes.put(location,new Integer(currentVotes));
+                    votes.put(location, new Integer(currentVotes));
                 }
             }
         }
         int maxVotes = 0;
         String location = "";
-        Enumeration e = votes.keys();
-        while (e.hasMoreElements()) {
-            String newLocation = (String) e.nextElement();
-            int currentVotes = ((Integer)
-                                votes.get(newLocation)).intValue();
+        Iterator i = votes.keySet().iterator();
+        while (i.hasNext()) {
+            String newLocation = (String) i.next();
+            int currentVotes = ((Integer) votes.get(newLocation)).intValue();
             if (currentVotes > maxVotes) {
                 maxVotes = currentVotes;
                 location = newLocation;
             }
         }
-            
-        if (location.equals("")) {
+
+        // Try to send the MQP to the next server
+        String plan = root.planToXML();
+
+        if (location.length() == 0) {
             System.err.println("Could not find next hop for MQP!");
-        }
-        else {
-            // Send MQP to next hop
-            String url_location = "http://" + location 
-                + "/servlet/communication";
-            try {
-                String encodedQuery = URLEncoder.encode(root.planToXML());
+        } else if (sendTCP(plan, location)) {
+            // We're done
+            return;
+        } else
+            System.err.println(
+                "Unable to route MQP to server: " + location);
                 
-                URL url = new URL(url_location);
-                URLConnection connection = url.openConnection();
-                connection.setDoOutput(true);
-                PrintWriter out = new PrintWriter(connection.getOutputStream());
-                out.println("type=submit_plan&query=" + encodedQuery);
-                out.close();
-                
-                connection.getInputStream().close();
-                Date d = new Date();
-                System.out.println("Mutant Query routed: " + d.getTime() % (60 * 60 * 1000));
-            }
-            catch (Exception ex) {
-                System.out.println("Exception while sending MQP to server:" + location);
-                ex.printStackTrace();
-                System.exit(-1);
-            }
+        // Delivery failed, route back to client
+        DisplayOp d = (DisplayOp) root.getOperator();
+        // If that fails too, give up
+        if (!sendHTTP(plan, d.getClientLocation()))
+            System.err.println("Could not return undeliverable MQP to client");
+    }
+
+    private boolean sendTCP(String plan, String location) {
+        int colonPos = location.indexOf(':');
+        String host = location.substring(0, colonPos);
+        String port = location.substring(colonPos+1, location.length());
+        LightMQPClient mc = new LightMQPClient(host, Integer.parseInt(port));
+        if (mc.getErrorMessage() != null)
+            return false;
+        mc.sendQuery(plan, 500);
+        return (mc.getErrorMessage() == null);
+    }
+    
+    private boolean sendHTTP(String plan, String location) {
+        try {
+            String result = root.planToXML();
+            String query_id = String.valueOf(((DisplayOp) root.getOperator()).getQueryId());
+            URL url = new URL(location);
+            URLConnection connection = url.openConnection();
+            connection.setDoOutput(true);
+            PrintWriter out = new PrintWriter(connection.getOutputStream());
+            out.println(query_id);
+            out.println("<!-- The server could not completely evaluate this query -->");
+            out.println(result);
+            out.close();
+
+            connection.getInputStream().close();
+            // XXX vpapad: log that plan was routed
+        } catch (MalformedURLException mue) {
+            return false;
+        } catch (IOException ioe) {
+            return false;
         }
+        return true;
     }
 }
-
-
-
-
-
-

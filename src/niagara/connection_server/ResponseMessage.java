@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.4 2002/10/12 20:11:06 tufte Exp $
+  $Id: ResponseMessage.java,v 1.5 2002/10/31 04:20:30 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,6 +31,10 @@ package niagara.connection_server;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.w3c.dom.Node;
+
+import niagara.ndom.saxdom.BufferManager;
+import niagara.ndom.saxdom.NodeImpl;
 import niagara.query_engine.QueryResult;
 import niagara.utils.XMLUtils;
 
@@ -83,7 +87,12 @@ class ResponseMessage
     }
     
     public void appendResultData(QueryResult.ResultObject ro) {
-        XMLUtils.flatten(ro.result, responseData, false);
+        // XXX vpapad: really, really ugly
+        Node node = (Node) ro.result;
+        if (node instanceof NodeImpl) {
+            ((NodeImpl) node).flatten(responseData);
+        } else
+            XMLUtils.flatten(ro.result, responseData, false);
     }
     
     public void setData(String data) {

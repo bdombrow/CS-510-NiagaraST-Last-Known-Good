@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: RequestParser.java,v 1.6 2002/10/12 20:11:06 tufte Exp $
+  $Id: RequestParser.java,v 1.7 2002/10/31 04:20:30 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -198,7 +197,6 @@ public class RequestParser extends HandlerBase implements Runnable {
 
     //some text data coming in
     public void characters(char[] data,int start, int length) throws SAXException {
-	
 	if (!currentElement.equals(REQUEST_DATA)) 
 	    return;
 

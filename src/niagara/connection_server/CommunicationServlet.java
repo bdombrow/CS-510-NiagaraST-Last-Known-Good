@@ -1,6 +1,5 @@
 /*
- * $Id: CommunicationServlet.java,v 1.4 2002/10/12 20:11:06 tufte Exp $
- *
+ * $Id: CommunicationServlet.java,v 1.5 2002/10/31 04:20:30 vpapad Exp $
  */
 
 package niagara.connection_server;
@@ -8,16 +7,24 @@ package niagara.connection_server;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.*;
 
 import niagara.query_engine.*;
+import niagara.data_manager.ConstantOpThread;
 import niagara.optimizer.Optimizer;
+import niagara.optimizer.Plan;
+import niagara.optimizer.colombia.Attrs;
+import niagara.optimizer.colombia.Expr;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.utils.*;
 
 public class CommunicationServlet extends HttpServlet {
     private NiagraServer server;
-
+    private Optimizer optimizer;
     private int id;
 
     // maps subquery id -> Send operator
@@ -28,7 +35,7 @@ public class CommunicationServlet extends HttpServlet {
     private XMLQueryPlanParser xqpp;
 
     private synchronized String nextId() {
-        return "" + id++;
+        return String.valueOf(id++);
     }
 
     public void init(ServletConfig sc) throws ServletException {
@@ -37,6 +44,7 @@ public class CommunicationServlet extends HttpServlet {
         id = 0;
         queries = new Hashtable();
         xqpp = new XMLQueryPlanParser();
+        optimizer = new Optimizer();
     }
 
     public void doGet(HttpServletRequest req, HttpServletResponse res) 
@@ -70,87 +78,62 @@ public class CommunicationServlet extends HttpServlet {
         }
     }
 
-    public void doPost(HttpServletRequest req, HttpServletResponse res) 
-        throws IOException {
-        try {
-            Date d = new Date();
-            System.out.println("Query Received: " + d.getTime() % (60 * 60 * 1000));
-
-            debug("handling POST request");
-            InputStream is = req.getInputStream();
-            String type = req.getParameter("type");
-            String query = req.getParameter("query");
-            is.close();
-
-
-
-            ServletOutputStream out = res.getOutputStream(); 
-            logNode top;
-            
-            xqpp.initialize();
-            
-            // Try to parse the query plan
-            try {
-                top = xqpp.parse(query);
-            }
-            catch (XMLQueryPlanParser.InvalidPlanException ipe) {
-                cerr("error while parsing plan");                    
-                ipe.printStackTrace();
-                out.println("-1");
-                out.close();
-                return;
-            } 
-
-            top = Optimizer.optimize(top);
-
-            if (type.equals("submit_subplan")) {
-                // The top operator better be a send...
-                SendOp send = (SendOp) top.getOperator();
-
-                String query_id = nextId();
-                send.setQueryId(query_id);
-                send.setCS(this);
-                send.setSelectedAlgoIndex(0);
-
-                queries.put(query_id, send);
-                
-                out.println(query_id);
-                out.close();
-            } else if (type.equals("submit_plan")) {
-                out.println("Query received");
-                out.close();
-            } else if (type.equals("optimize_plan")) {
-                debug("plan optimization requested");
-                out.println("Query received");
-                out.close();
-
-                // We don't want to actually *run* the plan!
-                // Replace the plan with a constant operator 
-                // having the optimized plan as its content
-                ConstantOp op = new ConstantOp();
-                op.setContent(top.input().planToXML());
-                op.setSelectedAlgoIndex(0);
-                top.setInput(new logNode(op), 0);
-            } else { 
-                throw new PEException("Client request with unknown type: " 
-                                      + type);
-            }
-
-            debug("Sending to ES");
-
-            ExecutionScheduler es = server.getQueryEngine().getScheduler();
-            es.scheduleSubPlan(top);
-
-            debug("request handled");
-	}
-	catch (ShutdownException e) {
-	    cerr("ShutdownException occurred during doPost:");
-	    e.printStackTrace();
-	}
-    }
-
     public void setSend(String query_string, PhysicalSendOperator send) {
         queries.put(query_string, send);
+    }
+
+   private void handleDistributedPlans(ArrayList remotePlans) {
+    //XXX vpapad: commenting out code is a horrible sin
+//        for (int i = 0; i < remotePlans.size(); i++) {
+//            // The top operator of every remote plan should be a SendOp
+//            SendOp send = (SendOp) ((Expr) remotePlans.get(i)).getOp();
+//            send.setToLocation(NiagraServer.getLocation());
+//            String url_location =
+//                "http://" + send.getFromLocation() + "/servlet/communication";
+//
+//            String query_id = "";
+//
+//            try {
+//                String encodedQuery = URLEncoder.encode(node.subplanToXML());
+//
+//                //System.err.println("ES: Getting subplan id...");
+//                URL url = new URL(url_location);
+//                URLConnection connection = url.openConnection();
+//                connection.setDoOutput(true);
+//                PrintWriter out = new PrintWriter(connection.getOutputStream());
+//                out.println("type=submit_subplan&query=" + encodedQuery);
+//                out.flush();
+//                out.close();
+//
+//                BufferedReader in =
+//                    new BufferedReader(
+//                        new InputStreamReader(connection.getInputStream()));
+//                query_id = in.readLine();
+//                in.close();
+//
+//                // Replace the subplan with a ReceiveOp
+//                ReceiveOp recv = new ReceiveOp();
+//                recv.setReceive(location, query_id);
+//                logNode rn = new logNode(recv);
+//                scheduleForExecution(
+//                    rn,
+//                    outputStream,
+//                    nodesScheduled,
+//                    doc,
+//                    null);
+//                return;
+//            } catch (MalformedURLException mue) {
+//                System.err.println(
+//                    "Malformed URL "
+//                        + mue.getMessage()
+//                        + " url "
+//                        + url_location);
+//                mue.printStackTrace();
+//            } catch (IOException ioe) {
+//                System.err.println(
+//                    "Execution scheduler: io exception " + ioe.getMessage());
+//                ioe.printStackTrace();
+//            }
     }
 
     public void queryDone(String query_id) {

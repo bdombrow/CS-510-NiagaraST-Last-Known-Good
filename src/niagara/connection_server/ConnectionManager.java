@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.5 2002/03/31 15:53:57 tufte Exp $
+  $Id: ConnectionManager.java,v 1.6 2002/10/31 04:20:30 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,9 +28,8 @@
 
 package niagara.connection_server;
 
-import java.util.Vector;
-import java.util.Hashtable;
 import java.net.*;
+import java.util.Date;
 import java.io.IOException;
 import java.io.*;
 
@@ -142,7 +141,7 @@ public class ConnectionManager implements Runnable
                     }
                 }
 
-		System.out.println("KT: Accepted: client socket = "+clientSocket);
+		System.err.println("Query received: " + new Date() + ", client socket = "+clientSocket);
 		
 		// Process the request
 		// Hand over this socket to the Request handler 
