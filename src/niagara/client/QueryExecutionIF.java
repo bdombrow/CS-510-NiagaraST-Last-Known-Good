@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryExecutionIF.java,v 1.3 2000/07/09 05:41:08 vpapad Exp $
+  $Id: QueryExecutionIF.java,v 1.4 2001/08/08 21:21:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -127,4 +127,9 @@ public interface QueryExecutionIF
 	 * @param url the dtd url
 	 */
 	public DefaultMutableTreeNode generateXMLQLTree(URL dtdURL);
+
+	/**
+	 * Run the garbage collector
+	 */
+        public void runGarbageCollector();
 }

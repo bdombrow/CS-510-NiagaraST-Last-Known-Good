@@ -43,6 +43,8 @@ public class MQPClient {
 
     public void run() {
         // parse the query file
+	// ??? still requires xerces parser - do we want
+	// to convert this to niagara.ndom.DOMParser??
         DOMParser parser = new DOMParser();
         try {
             parser.setFeature("http://xml.org/sax/features/validation", false);

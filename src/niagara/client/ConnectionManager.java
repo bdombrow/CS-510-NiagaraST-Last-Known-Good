@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.7 2001/07/17 06:37:48 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.8 2001/08/08 21:21:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -61,6 +61,8 @@ public class ConnectionManager implements QueryExecutionIF
 	public static final String GET_PARTIAL = "get_partial";
 	public static final String SUSPEND_QUERY = "suspend_query";
 	public static final String RESUME_QUERY = "resume_query";
+	public static final String RUN_GC = "gc";
+	public static final String SHUTDOWN = "shutdown";
 	
 	
 	// private variables
@@ -376,7 +378,37 @@ public class ConnectionManager implements QueryExecutionIF
 			writeMessage(id, GET_PARTIAL);
 		}
 
-	/**
+         /**
+	  * run the garbage collector
+	  */
+
+         public void runGarbageCollector() {
+	      System.out.println("Requesting garbage collection");
+	      int id = getID();
+	      // Register the query
+	      // args are id, query text, query type
+	      final QueryRegistry.Entry e = 
+		reg.registerQuery(id, "gc", QueryType.NOTYPE);
+	      // Set the query type
+	      e.type = QueryType.NOTYPE;
+
+              writeMessage(id, RUN_GC); 
+	  }
+
+         public void shutdownServer() {
+	      System.out.println("Shutting down server");
+	      int id = getID();
+	      // Register the query
+	      // args are id, query text, query type
+	      final QueryRegistry.Entry e = 
+		reg.registerQuery(id, "shutdown", QueryType.NOTYPE);
+	      // Set the query type
+	      e.type = QueryType.NOTYPE;
+
+              writeMessage(id, SHUTDOWN); 
+	  }
+
+          /**
 	 * Get next resultCount results
 	 * @param id the query id to kill
 	 * @param resultCount then # of result

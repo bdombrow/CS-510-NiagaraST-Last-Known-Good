@@ -62,54 +62,48 @@ public class SimpleClient implements UIDriverIF {
 	    }
 	}
     }
+    
+    private static void usage() {
+	System.err.println("Usage: SimpleClient [-h host] [-p port] [-qf QueryFileName]");
+	System.exit(-1);
+    }
 
     public static void main(String args[]) {
-	if (args.length > 3) {
-	    System.err.println("Usage: SimpleClient [-qf QueryFile.name | -sh] <host> <port>)");
-	    System.exit(-1);
-	}
-	
-	int i = 0;
 
-	boolean shell = false;
 	boolean queryfile = false;
 	String qfName = null;
 
-	if(args.length > i) {
-	    if(args[i].equals("-qf")) {
-		i++;
+	// get the arguments
+	String host = "localhost"; // the defaults
+	int port = ConnectionManager.SERVER_PORT;
+
+	int i = 0;
+	while(i < args.length) {
+	    int starti = i;
+	    if(args[i].equals("-h")) {
+		host = args[i+1];
+		i+=2;
+	    } else if (args[i].equals("-p")) {
+		port = Integer.parseInt(args[i+1]);
+		i+=2;
+	    } else if (args[i].equals("--help")) {
+		usage();
+	    } else if (args[i].equals("-qf")) {
 		queryfile = true;
-		qfName = args[i];
-		i++;
+		qfName = args[i+1];
+		i+=2;
 	    }
-	}
-
-	if(args.length > i) {
-	    if(args[i].equals("-sh")) {
-		i++;
-		shell = true;
+	    if(starti == i) {
+		usage();
 	    }
-	}
-
-	String host;
-	if (args.length > i) 
-	    host = args[i];
-	else 
-	    host = "localhost";
-
-	int port;
-	if (args.length > i+1)
-	    port = Integer.parseInt(args[i+1]);
-	else
-	    port = ConnectionManager.SERVER_PORT;
-	
+	}	
 	
 	SimpleClient sc = new SimpleClient(host, port);
 	
 	String query;
 
 	try {
-	    if(!shell && !queryfile) {
+	    if(!queryfile) {
 		query = "";
 		String line = "";
 		
@@ -122,43 +116,46 @@ public class SimpleClient implements UIDriverIF {
 		sc.processQuery(query);
 		return;
 
-	    } else if (!shell) {
+	    } else {
 		char cbuf[] = new char[MAX_QUERY_LEN];
 		query = getQueryFromFile(qfName, cbuf);
 		sc.processQuery(query);
 		return;
-	    } else {
-		char cbuf[] = new char[MAX_QUERY_LEN];
-		boolean stop = false;
-		StreamTokenizer stdIn =
-		    new StreamTokenizer(new 
-			BufferedReader(new InputStreamReader(System.in)));
-		stdIn.eolIsSignificant(true);
-		int tt; /* token type */
-		while(!stop) {
-		    System.out.println("Query file: ");
-		    tt = stdIn.nextToken();
-		    if(tt == StreamTokenizer.TT_WORD) {
-			if(stdIn.sval.equalsIgnoreCase("quit")) {
-			    stop = true;
-			} else {
-			    stdIn.pushBack();
-			    String fn = getQueryFileName(stdIn);
-			    /* read a file name from std in */
-			    query = getQueryFromFile(fn, cbuf);
-			    sc.processQuery(query);
-			}
-		    } else if (tt == StreamTokenizer.TT_EOL) {
-			/* ignore eols */
-		    } else if (tt == StreamTokenizer.TT_NUMBER ||
-			       tt == StreamTokenizer.TT_EOF) {
-			System.out.println("Invalid input");
-		    } else {
-			System.out.println("Bad token type");
-		    }
-		}
-		return;
-	    }
+	    } 
+	    /* OLD Shell stuff - leave please, someday I will make this work - KT
+	     * else {
+	     *	char cbuf[] = new char[MAX_QUERY_LEN];
+	     *	boolean stop = false;
+	     *	StreamTokenizer stdIn =
+	     *	    new StreamTokenizer(new 
+	     *		BufferedReader(new InputStreamReader(System.in)));
+	     *	stdIn.eolIsSignificant(true);
+	     *	int tt; * token type *
+	     *	while(!stop) {
+	     *    System.out.println("Query file: ");
+	     *    tt = stdIn.nextToken();
+	     *    if(tt == StreamTokenizer.TT_WORD) {
+	     *	if(stdIn.sval.equalsIgnoreCase("quit")) {
+	     *		    stop = true;
+	     *	} else {
+	     *	    stdIn.pushBack();
+	     *	    String fn = getQueryFileName(stdIn);
+	     *	    * read a file name from std in *
+	     *	    query = getQueryFromFile(fn, cbuf);
+	     *	    sc.processQuery(query);
+	     *	}
+	     *    } else if (tt == StreamTokenizer.TT_EOL) {
+	     *	* ignore eols *
+	     *  } else if (tt == StreamTokenizer.TT_NUMBER ||
+	     *	       tt == StreamTokenizer.TT_EOF) {
+	     *	System.out.println("Invalid input");
+	     *    } else {
+	     *	System.out.println("Bad token type");
+	     *    }
+	     * }
+	     *	return;
+	     * }
+	     */
 	} catch (IOException e) {
 	    System.err.println("SimpleClient: IO error while reading query or query file");
 	    e.printStackTrace();
@@ -190,6 +187,15 @@ public class SimpleClient implements UIDriverIF {
 
     public void processQuery(String queryText) {
 	System.out.println("Executing query " + queryText);
+	if(queryText.equalsIgnoreCase("gc")) {
+            cm.runGarbageCollector();
+	    return;
+	} else if (queryText.equalsIgnoreCase("shutdown")) {
+            cm.shutdownServer();
+	    return;
+	}
+
+
 	int id = cm.executeQuery(QueryFactory.makeQuery(queryText), 
 				    Integer.MAX_VALUE);
         System.out.println("Query executing...");
