@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalDisplayOperator.java,v 1.3 2002/05/07 03:10:55 tufte Exp $
+ * $Id: PhysicalDisplayOperator.java,v 1.4 2002/05/23 06:31:41 vpapad Exp $
  *
  */
 
@@ -22,8 +22,6 @@ import java.util.*;
  * This is the <code>PhysicalDisplayOperator</code> that extends
  * the basic PhysicalOperator with the implementation of the Display
  * operator.
- *
- * @version 1.0
  *
  */
 
@@ -128,7 +126,8 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
     }
 
     protected void serialize(Object o, StringBuffer sb) {
-        // XXX we don't handle attributes
+        // XXX we don't handle attributes at the top level
+
         if (o == null)
             return;
 
@@ -137,7 +136,17 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
         }
 
         else if (o instanceof Element) {
-            sb.append("<" + ((Element) o).getTagName() + ">");
+            Element e = (Element) o;
+            sb.append("<" + e.getTagName());
+            if (e.hasAttributes()) {
+                NamedNodeMap attrs = e.getAttributes();
+                sb.append(" ");
+                for (int i = 0; i < attrs.getLength(); i++) {
+                    Attr a = (Attr) attrs.item(i);
+                    sb.append(a.getName() + "='" + a.getValue() + "' ");
+                }
+            }
+            sb.append(">");
             NodeList nl = ((Element) o).getChildNodes();
             for (int i = 0; i < nl.getLength(); i++) {
                 serialize(nl.item(i), sb);
@@ -145,18 +154,21 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
             sb.append("</" + ((Element) o).getTagName() + ">");
         }
         else {
-            System.out.println("XXX ignoring attribute of type: " + o.getClass());
+            System.out.println("XXX ignoring attribute of type: " 
+                               + o.getClass());
         }
     }
 
     protected void cleanUp () {
 	try {
-              System.out.println("XXX display transmitted " + counter  + " tuples");
+              System.out.println("XXX display transmitted " 
+                                 + counter + " tuples");
               pw.flush();
               out.close();
               connection.getInputStream().close();
               Date d = new Date();
-              System.out.println("Query done: " + d.getTime() % (60 * 60 * 1000));
+              System.out.println("Query done: " 
+                                 + d.getTime() % (60 * 60 * 1000));
 	} catch (java.io.IOException e) {
 	    System.out.println("Display: error while sending results to client:" + url_location);
 	    e.printStackTrace();
@@ -165,6 +177,8 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
     }
 
     public boolean isStateful() {
+        // XXX vpapad: Display *is* stateful, but does not know how to 
+        // handle partial results...
 	return false;
     }
 }

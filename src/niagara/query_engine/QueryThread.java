@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryThread.java,v 1.3 2002/05/07 03:10:55 tufte Exp $
+  $Id: QueryThread.java,v 1.4 2002/05/23 06:31:41 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -223,14 +223,7 @@ public class QueryThread implements Runnable {
 
 		// Get the logical plan
 		//
-		logNode logicalPlan;
-
-		try {
-			logicalPlan = logicalPlanGenerator.getLogPlan();
-		} catch (java.lang.CloneNotSupportedException e) {
-		    queryInfo.killQueryWithoutOperators();
-		    throw new PEException("error cloning in logical plan generation " + e.getMessage());
-		}
+		logNode logicalPlan = logicalPlanGenerator.getLogPlan();
 
 		// Perform optimization on the logical plan and get optimized plan
 		//

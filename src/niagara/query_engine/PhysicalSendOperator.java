@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalSendOperator.java,v 1.2 2002/04/29 19:51:24 tufte Exp $
+ * $Id: PhysicalSendOperator.java,v 1.3 2002/05/23 06:31:41 vpapad Exp $
  *
  */
 
@@ -177,6 +177,7 @@ public class PhysicalSendOperator extends PhysicalOperator {
 
         cs.queryDone(query_id);
     }
+
     public void setOutputStream(OutputStream outputStream) {
         this.outputStream = outputStream;
         pw = new PrintWriter(outputStream);

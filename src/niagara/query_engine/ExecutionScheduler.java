@@ -1,6 +1,5 @@
- 
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.13 2002/05/07 03:10:54 tufte Exp $
+  $Id: ExecutionScheduler.java,v 1.14 2002/05/23 06:31:41 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -24,13 +23,6 @@
   This software was developed with support by DARPA through             
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
-
-/*
- * $RCSfile:
- * $Revision:
- * $Date:
- * $Author:
- */
 
 package niagara.query_engine;
 
@@ -231,8 +223,7 @@ public class ExecutionScheduler {
                 in.close();
             
 		// Replace the subplan with a ReceiveOp
-		ReceiveOp recv = null;
-		recv = (ReceiveOp) operators.receive.clone();
+		ReceiveOp recv = new ReceiveOp();
 		recv.setReceive(location, query_id);
 		logNode rn = new logNode(recv);
 		scheduleForExecution(rn, outputStream, nodesScheduled, doc, null);
@@ -243,8 +234,6 @@ public class ExecutionScheduler {
 	    } catch(IOException ioe) {
 		System.err.println("Execution scheduler: io exception " + ioe.getMessage());
 		ioe.printStackTrace();
-	    } catch(CloneNotSupportedException cnse) {
-		throw new PEException("unable to clone ReceiveOp " + cnse.getMessage());
 	    }
 	}
 
@@ -320,7 +309,6 @@ public class ExecutionScheduler {
 	    // Instantiate operator with input and output streams.
 	    // The selected algorithm is instantiated
 	    Class physicalOperatorClass = operator.getSelectedAlgo();
-	    
 	    // If there is no selected algo, error
 	    //
 	    if (physicalOperatorClass == null) {

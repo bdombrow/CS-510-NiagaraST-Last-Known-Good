@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.11 2002/05/07 03:10:55 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.12 2002/05/23 06:31:41 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -190,25 +190,25 @@ public abstract class PhysicalOperator {
 	    } // end of while loop
 	} catch (java.lang.InterruptedException e) {
 	    shutDownOperator();
-	    cleanUp();
+	    internalCleanUp();
 	    return;
 	} catch (ShutdownException see) {
 	    shutDownOperator();
-	    cleanUp();
+	    internalCleanUp();
 	    return;
 	} catch (UserErrorException uee) {
 	    // KT - really should propagate this error back to client,
 	    // however, for now will just print error message
 	    System.err.println("USER ERROR: " + uee.getMessage());
 	    shutDownOperator();
-	    cleanUp();
+	    internalCleanUp();
 	    return;	    
 	}
 
 	// shut down normally by closing sink streams and do
 	// any necessary clean up
 	closeSinkStreams();
-	cleanUp();
+	internalCleanUp();
     }
 
     /** 
@@ -855,10 +855,13 @@ public abstract class PhysicalOperator {
     }
 
     /**
-     * This function cleans up after the operator.
+     * Operators override this method to perform any clean up actions.
      */
-    private void cleanUp () {
-	if(isHeadOperator) {
+    protected void cleanUp() {
+    }
+
+    private void internalCleanUp() {
+        if(isHeadOperator) {
 	    // Remove the query info object from the active query list
 	    // Hack added so client server queries are not removed
 	    // from their respective connections activeQuery list
@@ -866,8 +869,8 @@ public abstract class PhysicalOperator {
 		queryInfo.removeFromActiveQueryList();
 	    }
 	}   
+        cleanUp();
     }
-
     public void setAsHead(QueryInfo queryInfo) {
 	this.queryInfo = queryInfo;
 	if(queryInfo == null) {
