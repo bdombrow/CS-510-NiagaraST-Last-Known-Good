@@ -1,5 +1,5 @@
 /**
- * $Id: Optimizer.java,v 1.11 2003/03/19 00:36:33 tufte Exp $
+ * $Id: Optimizer.java,v 1.12 2003/03/19 22:42:53 tufte Exp $
  */
 package niagara.optimizer;
 
@@ -41,10 +41,7 @@ public class Optimizer implements Tracer {
     }
 
     public Plan optimize(Expr expr) {
-	assert expr != null;
         ssp.optimize(expr);
-	Expr e = ssp.copyOut(ssp.getGroup(0), PhysicalProperty.ANY, new HashMap());
-	assert e != null;
         Plan optPlan =
             Plan.getPlan(
                 ssp.copyOut(ssp.getGroup(0), PhysicalProperty.ANY, new HashMap()),
