@@ -1,5 +1,5 @@
 /**
- * $Id: NamedNodeMapImpl.java,v 1.5 2003/07/03 19:40:39 tufte Exp $
+ * $Id: NamedNodeMapImpl.java,v 1.6 2003/07/03 19:41:25 tufte Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -9,7 +9,6 @@
 package niagara.ndom.saxdom;
 
 import org.w3c.dom.*;
-import org.xml.sax.Attributes;
 
 public class NamedNodeMapImpl implements NamedNodeMap {
 
