@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.8 2002/05/07 03:10:13 tufte Exp $
+  $Id: SimpleConnectionReader.java,v 1.9 2002/09/09 16:34:49 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -73,8 +73,8 @@ class SimpleConnectionReader extends AbstractConnectionReader
 	    String line;
 	    RE re = new RE("<responseMessage localID\\s*=\\s*\"([0-9]*)\"\\s*serverID\\s*=\\s*\"([0-9]*)\"\\s*responseType\\s*=\\s*\"server_query_id\"");
 	    boolean registered = false;
-	    do {
-		line = br.readLine();
+	    line = br.readLine();
+	    while (line != null) {
 		if (line.indexOf("<response") == 0  || 
 		    line.indexOf("</response") == 0) {
 		    if (line.indexOf("\"parse_error\"") != -1) {
@@ -93,7 +93,10 @@ class SimpleConnectionReader extends AbstractConnectionReader
 		    addResult(line);
                     ui.notifyNew(local_id);
 		}
-	    } while (line != null);
+
+		line = br.readLine();
+	    }
+
 	}
 	catch(gnu.regexp.REException e){
 	    throw new PEException("Invalid response message reg exception " +

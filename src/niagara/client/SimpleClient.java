@@ -12,6 +12,9 @@ public class SimpleClient implements UIDriverIF {
     static int timeout;
     static Timer timer;
 
+    //To get times
+    long m_start, m_stop;
+
     public SimpleClient(String host, int port) {
 	cm = new ConnectionManager(host, port, this, true);
     }
@@ -39,9 +42,9 @@ public class SimpleClient implements UIDriverIF {
     public void notifyNew(int id) {
 	String results = 
 	    ((SimpleConnectionReader) cm.getConnectionReader()).getResults();
-	if (resultListeners.size() == 0) 
+	if (resultListeners.size() == 0) {
 	    System.out.println(results);
-	else {
+	} else {
 	    for (int i=0; i < resultListeners.size(); i++) {
 		((ResultsListener) resultListeners.get(i)).notifyNewResults(results);
 	    }
@@ -49,6 +52,8 @@ public class SimpleClient implements UIDriverIF {
     }
 
     public void notifyFinalResult(int id) {
+	m_stop = System.currentTimeMillis();
+	System.out.println("Total time: " + (m_stop - m_start) + "ms.");
 	if (resultListeners.size() == 0) 
 	    System.exit(0);
 	else {
@@ -203,7 +208,7 @@ public class SimpleClient implements UIDriverIF {
 	    return;
 	}
 
-
+	m_start = System.currentTimeMillis();
 	final int id = cm.executeQuery(QueryFactory.makeQuery(queryText), 
 				 Integer.MAX_VALUE);
 	if (timeout > 0) {
