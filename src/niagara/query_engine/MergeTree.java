@@ -338,8 +338,12 @@ public class MergeTree {
 			 * same as nextFragTagName, but
 			 * that doesn't cause a set result from findMatch
 			 */
+			 /* BIG DEMO HACK - changed last parameter
+			 * to false - this is wrong, but will
+			 * work for the demo
+			 */
 			nextAccumElt = nextMergeTreeNode.
-			    findUniqueMatch(accumElt, nextFragElt, true);
+			    findUniqueMatch(accumElt, nextFragElt, false);
 		    } else {
 			/* matching is based on tag name - by
 			 * definition of accumulate - there can only
