@@ -87,12 +87,11 @@ public class StreamThread implements Runnable {
 		InputSource inputSource = new InputSource(inputStream);
 		sourcecreated=true;
 		while(keepgoing) {
-		    System.out.println();
-		    System.out.println("KT Stream Thread calling parse");
+		    //System.out.println();
+		    //System.out.println("KT StreamThread calling Parse");
 		    parser.parse(inputSource);
 		    keepgoing = outputStream.put(parser.getDocument());
-		    System.out.println("KT put doc in outputstream " + keepgoing);
-		}	
+		}
 	    } else {
 		try {
 		    bufferedInput = 
@@ -193,9 +192,9 @@ public class StreamThread implements Runnable {
 	} catch(java.io.IOException ioe) {
 	    if(!sourcecreated) {
 	       System.err.println("StreamThread::IOException. Message: " + ioe.getMessage());
-	     }
-	     // if source was created IOException tends to mean end
-	     // of stream and should be ignored
+	    }
+	    // if source was created IOException tends to mean end
+	    // of stream and should be ignored
 	} catch(niagara.utils.NullElementException neE) {
 	    System.err.println("StreamThread::Null element exception. Message " +
 			       neE.getMessage());
@@ -325,7 +324,6 @@ public class StreamThread implements Runnable {
 	InputSource inputSource = 
 	    new InputSource(new CharArrayReader(buffer.getBuf(), 0, idx));
 	parser.parse(inputSource);
-	//return true;
 	return outputStream.put(parser.getDocument());
     }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DataManager.java,v 1.4 2002/03/26 23:51:56 tufte Exp $
+  $Id: DataManager.java,v 1.5 2002/04/19 20:47:44 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -326,18 +326,10 @@ public class DataManager {
 
     public static Document parseXML(String str) {
         niagara.ndom.DOMParser p = DOMFactory.newParser(); 
-        // ??? what are these - KT, just comment them out
-	// and see what happens - uugh
-	//p.setWarningNoDoctypeDecl(false);
-        //p.setWarningNoXMLDecl(false);
-        //p.setKeepComment(false);
         Document doc = DOMFactory.newDocument();
-        //p.setElementFactory(doc);
 
         try {
 	    p.parse(new InputSource(new StringReader(str)));
-	    // KT - removed - del when new stuff works
-	    //p.readStream(new StringReader(str));
         }   catch (Exception e) {
             e.printStackTrace();
             return null;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: FetchThread.java,v 1.5 2002/03/26 23:51:56 tufte Exp $
+  $Id: FetchThread.java,v 1.6 2002/04/19 20:47:44 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -83,7 +83,8 @@ class FetchThread implements Runnable {
                         // CUtil.printTree(tmpele, "");
                         // System.err.println(" ****************** ");
                     }
-                    req.s.put(ret);
+		    // KT REMOVE CAST
+                    req.s.put((Node)ret);
                 } catch (Exception se) {
                     System.err.println("Closed Stream in Fetch");
                 }
@@ -110,7 +111,7 @@ inner:      for(int i=0; i<tmpUrl.size(); i++) {
 			// System.err.println("A blocked result " + obj);
 			Object val = ((MemCacheEntry)ret).val;
 			if(val!=null)
-			    req.s.put(val);
+			    req.s.put((Node)val);
 			else {
 			    // System.out.println("HOW DO YOU GET HERE?" + obj);
 			    continue inner;
