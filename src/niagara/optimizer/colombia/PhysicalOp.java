@@ -1,4 +1,4 @@
-/* $Id: PhysicalOp.java,v 1.8 2003/03/03 08:25:27 tufte Exp $
+/* $Id: PhysicalOp.java,v 1.9 2003/06/03 07:56:51 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -77,26 +77,27 @@ public abstract class PhysicalOp extends Op {
        one ordering, but later we may need:
     	 int opt_combs() */
 
-    //If we require the physical property Prop of this operator, what
-    //property from input number InputNo will guarantee it?
-    //Should never be called for arity 0 operators
-
-    // XXX vpapad Original definition used a by-ref parameter called 
-    // possible. The semantics was: 
-    // possible = true && return null -> any input property will do
-    // possible = true && return non-null -> we require a specific property
-    // possible = false => impossible to satisfy this property
-    // Now, we return an array of physical properties. 
-    // The semantics now:
-    // return value null -> impossible to satisfy
-    // return value empty -> any property will do
-    // return value non-empty -> any of the listed properties will do
+    /**
+    If we require the physical property Prop of this operator, what
+    property from input number InputNo will guarantee it?
+    Should never be called for arity 0 operators
+    
+    XXX vpapad Original definition used a by-ref parameter called 
+    possible. The semantics was: 
+    possible = true && return null -> any input property will do
+    possible = true && return non-null -> we require a specific property
+    possible = false => impossible to satisfy this property
+    Now, we return an array of physical properties. 
+    The semantics now:
+    return value null -> impossible to satisfy
+    return value empty -> any property will do
+    return value non-empty -> any of the listed properties will do */
     public PhysicalProperty[] inputReqdProp(
-        PhysicalProperty PhysProp,
-        LogicalProperty InputLogProp,
-        int InputNo) {
+        PhysicalProperty requiredOutputProp,
+        LogicalProperty inputLogProp,
+        int inputNo) {
             // Default definition: we can only satisfy the "ANY" property
-            if (PhysProp.equals(PhysicalProperty.ANY))  
+            if (requiredOutputProp.equals(PhysicalProperty.ANY))  
                 return ANY_PROPERTY_WILL_DO;    
             return null;
         }

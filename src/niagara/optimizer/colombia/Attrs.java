@@ -1,4 +1,4 @@
-/* $Id: Attrs.java,v 1.6 2003/02/25 06:19:08 vpapad Exp $    
+/* $Id: Attrs.java,v 1.7 2003/06/03 07:56:51 vpapad Exp $    
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -153,14 +153,14 @@ public class Attrs {
     boolean IsOverlapped(Attrs other) {
         for (int i = 0; i < size(); i++)
             for (int j = 0; j < other.size(); j++)
-                if (get(i).getName() == other.get(j).getName())
+                if (get(i).getName().equals(other.get(j).getName()))
                     return true;
         return false;
     }
     boolean IsOverlapped(Strings other) {
         for (int i = 0; i < size(); i++)
             for (int j = 0; j < other.size(); j++)
-                if (get(i).getName() == other.get(j))
+                if (get(i).getName().equals(other.get(j)))
                     return true;
         return false;
     }

@@ -1,4 +1,4 @@
-/* $Id: O_GROUP.java,v 1.4 2003/02/25 06:19:08 vpapad Exp $
+/* $Id: O_GROUP.java,v 1.5 2003/06/03 07:56:51 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -69,10 +69,10 @@ public class O_GROUP extends Task {
     public O_GROUP(
         SSP ssp,
         Group group,
-        int ContextID,
+        Context context,
         boolean last,
         Cost bound) {
-        super(ssp, ContextID);
+        super(ssp, context);
         this.group = group;
         this.Last = last;
         this.epsBound = bound;
@@ -80,12 +80,12 @@ public class O_GROUP extends Task {
         // if INFBOUND flag is on, set the bound to be INF
         if (ssp.INFBOUND) {
             Cost INFCost = new Cost(-1);
-            ssp.getVc(ContextID).setUpperBound(INFCost);
+            context.setUpperBound(INFCost);
         }
     }
 
-    public O_GROUP(SSP ssp, Group group, int ContextID) {
-        this(ssp, group, ContextID, true, null);
+    public O_GROUP(SSP ssp, Group group, Context context) {
+        this(ssp, group, context, true, null);
     }
 
     /*
@@ -125,16 +125,12 @@ public class O_GROUP extends Task {
     public void perform() {
         //   PTRACE ("O_GROUP %d performing", GrpID);
 
-        if (ssp.IRPROP) {
-            //    PTRACE2 ("Context ID: %d , %s", ContextID, 
-            //                 (const char *) Context::vc.get(ContextID).Dump());
-        }
         //   PTRACE ("Last flag is %d", Last);
 
         Group Group = group;
         MExpr FirstLogMExpr = Group.getFirstLogMExpr();
 
-        Context LocalCont = ssp.getVc(ContextID);
+        Context LocalCont = context;
         PhysicalProperty LocalReqdProp = LocalCont.getPhysProp();
 
         Group.SearchResults sr = Group.search_circle(LocalCont);
@@ -159,7 +155,7 @@ public class O_GROUP extends Task {
                             ssp,
                             FirstLogMExpr,
                             false,
-                            ContextID,
+                            context,
                             true,
                             eps_bound));
                 } else
@@ -168,7 +164,7 @@ public class O_GROUP extends Task {
                             ssp,
                             FirstLogMExpr,
                             false,
-                            ContextID,
+                            context,
                             true));
             } else {
                 //                // XXX vpapad: if it's not any, must be sorted?
@@ -241,14 +237,14 @@ public class O_GROUP extends Task {
                         ssp.addTask(
                             new O_INPUTS(
                                 (MExpr) PhysMExprs.get(count),
-                                ContextID,
+                                context,
                                 true,
                                 eps_bound));
                     } else
                         ssp.addTask(
                             new O_INPUTS(
                                 (MExpr) PhysMExprs.get(count),
-                                ContextID,
+                                context,
                                 true));
                 }
                 //push other PhysMExpr
@@ -259,14 +255,14 @@ public class O_GROUP extends Task {
                         ssp.addTask(
                             new O_INPUTS(
                                 (MExpr) PhysMExprs.get(count),
-                                ContextID,
+                                context,
                                 false,
                                 eps_bound));
                     } else
                         ssp.addTask(
                             new O_INPUTS(
                                 (MExpr) PhysMExprs.get(count),
-                                ContextID,
+                                context,
                                 false));
                 }
             } else { // (property is not ANY)

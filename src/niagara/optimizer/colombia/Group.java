@@ -1,4 +1,4 @@
-/* $Id: Group.java,v 1.6 2003/02/25 06:19:07 vpapad Exp $ 
+/* $Id: Group.java,v 1.7 2003/06/03 07:56:51 vpapad Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -264,33 +264,6 @@ public class Group {
                Case (4)
     */
 
-    // return whether the group is completely optimized or not.
-    // GrpNo and moreSearch are irrelevant
-    SearchResults search_circle(int grpNo, PhysicalProperty physProp) {
-        // check if there is a winner for property "any"
-        MExpr winner = ssp.getMc(grpNo).getBPlan(0);
-
-        if (winner != null) { // group is optimized
-            Cost cCost = new Cost(-1);
-
-            MExpr mWin = ssp.getMc(grpNo).getBPlan(physProp);
-            Cost winCost = ssp.getMc(grpNo).getUpperBd(physProp);
-            if (mWin != null) {
-                // winner's cost is within the context's bound
-                if (cCost.greaterThanEqual(winCost))
-                    return SearchResults.HAVE_WINNER;
-                else
-                    return SearchResults.IMPOSSIBLE;
-            } else
-                // since the group is optimized, null plan means
-                // winner not possible
-
-                // XXX vpapad: code and comments don't match up!
-                return SearchResults.IMPOSSIBLE;
-        } else // group not optimized 
-            return SearchResults.STARTING_SEARCH;
-    }
-
     /*search_circle returns the state of the winner's circle for this
       context and group - it does no rule firing.  Thus it is cheap to execute.
       search_circle returns in four possible states:
@@ -383,7 +356,6 @@ public class Group {
         MExpr mexpr,
         Cost totalCost,
         boolean done) {
-        // PTRACE new winner here
         changed = true;
 
         //construct a new winner
@@ -486,10 +458,8 @@ public class Group {
     // 		mexpr = next;
     // 	}
 
-    // #ifndef IRPROP
     // 	for(int i = 0; i < Winners.size(); i++)
     // 		delete Winners[i];
-    // #endif
 
     // }
 
@@ -619,11 +589,6 @@ public class Group {
 
     //     //Print Winner's circle
     //     os += "Winners:" ;
-
-    // #ifdef IRPROP
-    //     os += MultiWinner::mc[GroupID].Dump();
-    //     os += "\r\n";
-    // #else
 
     //     Size = Winners.size();
     //     PhysicalProperty * PhysProp;

@@ -1,4 +1,4 @@
-/* $Id: SSP.java,v 1.6 2003/02/25 06:19:08 vpapad Exp $
+/* $Id: SSP.java,v 1.7 2003/06/03 07:56:51 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -77,10 +77,6 @@ public class SSP {
     // **************  include physcial mexpr in group or not *****************
     public boolean NO_PHYS_IN_GROUP = false;
 
-    // IRPROP: off == Optimize each group for one property only
-    // on == Optimize each group for all Interesting Relevant Properties
-    public boolean IRPROP = false;
-
     // global epsilon pruning flag
     public boolean GlobepsPruning = false;
 
@@ -104,20 +100,13 @@ public class SSP {
     // XXX vpapad: turning global TaskNo into SSP member
     //Number of the current task.
     public int TaskNo = 0;
+    
+    private Context InitCont;
 
     /** pending tasks */
     private PendingTasks ptasks;
 
     private RuleSet ruleSet;
-
-    // XXX vpapad moved from MultiWinner
-    // XXX vpapad was: public  static std::vector< MultiWinner *> mc;
-    private ArrayList mc;
-
-    // XXX vpapad moved from Context
-    //The vector of contexts, vc, implements sharing.  Each task which
-    //creates a context  adds an entry to this vector.  
-    private ArrayList vc;
 
     // Hash table used to detect duplicate multiexpressions
     public HashMap mexprs;
@@ -134,8 +123,6 @@ public class SSP {
         ruleSet.setSSP(this);
         this.catalog = catalog;
         Groups = new ArrayList();
-        mc = new ArrayList();
-        vc = new ArrayList();
         mexprs = new HashMap();
         ptasks = new PendingTasks();
 
@@ -156,8 +143,6 @@ public class SSP {
         newGrpID = -1;
         Groups.clear();
         mexprs.clear();
-        mc.clear();
-        vc.clear();
         ptasks.clear();
     }
 
@@ -355,8 +340,7 @@ public class SSP {
 
         // create the M_Expr which will reside in the group
         MExpr MExpr = new MExpr(Expr, GrpID, this);
-        int PrevGID;
-
+        
         // find duplicate.  Done only for logical, not physical, expressions.
         if (MExpr.getOp().is_logical()) {
             MExpr DupMExpr = findDup(MExpr);
@@ -414,39 +398,8 @@ public class SSP {
                 Groups.set(GrpID, group);
             }
 
-            PrevGID = GrpID;
-
-            if (IRPROP) {
-                // For the topmost group and for the groups containing the item operator and constant
-                // operator, set the only physical property as any and bound INF
-                if (GrpID == 0 || ((MExpr.getOp()).is_item())) {
-                    MultiWinner MWin = new MultiWinner(1);
-                    mc.ensureCapacity(GrpID + 1);
-                    mc.add(GrpID, MWin);
-                } else {
-                    // XXX vpapad: seriously messed up
-                    // get the relevant attributes from the schema for this group
-                    Strings tmpKeySet = group.getLogProp().GetAttrNames();
-                    int ksize = tmpKeySet.size();
-
-                    MultiWinner MWin = new MultiWinner(ksize + 1);
-
-                    for (int i = 1; i < ksize + 1; i++) {
-                        Strings MKEYS = new Strings();
-                        MKEYS.add(tmpKeySet.get(i - 1));
-                        PhysicalProperty Prop =
-                            new PhysicalProperty(
-                                new Order(Order.Kind.SORTED, MKEYS));
-                        //Prop.KeyOrder.Add(new Order(ascending));
-                        MWin.SetPhysProp(i, Prop);
-                    }
-                    mc.ensureCapacity(GrpID + 1);
-                    mc.add(GrpID, MWin);
-                }
-            }
         } else {
             group = getGroup(GrpID);
-
             // include the new MEXPR
             group.newMExpr(MExpr);
         }
@@ -466,20 +419,13 @@ public class SSP {
 
         //special case for item groups
         if (group.getFirstLogMExpr().getOp().is_item()) {
-            if (IRPROP) {
-                winnerMExpr = getMc(group.getGroupID()).getBPlan(physProp);
-                if (winnerMExpr == null) {
-                    return null;
-                }
-            } else {
-                thisWinner = group.getWinner(physProp);
-                if (thisWinner == null) {
-                    return null;
-                }
-
-                assert(thisWinner.getDone());
-                winnerMExpr = thisWinner.getMPlan();
+            thisWinner = group.getWinner(physProp);
+            if (thisWinner == null) {
+                return null;
             }
+
+            assert(thisWinner.getDone());
+            winnerMExpr = thisWinner.getMPlan();
             winnerOp = winnerMExpr.getOp();
 
             Expr[] inputs = new Expr[winnerMExpr.getArity()];
@@ -498,21 +444,16 @@ public class SSP {
             seen.put(group, e);
             return e;
         } else { // normal case
-            if (!IRPROP) {
-                thisWinner = group.getWinner(physProp);
+            thisWinner = group.getWinner(physProp);
 
-                if (thisWinner == null) {
-                    return null;
-                }
+            if (thisWinner == null) {
+                return null;
+            }
 
-                assert(thisWinner.getDone());
-                winnerMExpr = thisWinner.getMPlan();
-                if (winnerMExpr == null) {
-                    return null;
-                }
-
-            } else {
-                winnerMExpr = getMc(group.getGroupID()).getBPlan(physProp);
+            assert(thisWinner.getDone());
+            winnerMExpr = thisWinner.getMPlan();
+            if (winnerMExpr == null) {
+                return null;
             }
 
             winnerOp = winnerMExpr.getOp();
@@ -676,13 +617,11 @@ public class SSP {
 
         //Create initial context, with no requested properties, infinite upper bound,
         // zero lower bound, not yet done.  Later this may be specified by user.
-        Context InitCont =
+        InitCont =
             new Context(
                 new PhysicalProperty(Order.newAny()),
                 new Cost(-1),
                 false);
-        //Make this the first context
-        vc.add(InitCont);
 
         // XXX vpapad: RootGID was passed by ref. into CopyIn
         // For now we'll just assume it's 0
@@ -695,11 +634,11 @@ public class SSP {
                 new O_GROUP(
                     this,
                     (Group) Groups.get(RootGID),
-                    0,
+                    InitCont,
                     true,
                     eps_bound));
         } else
-            ptasks.push(new O_GROUP(this, (Group) Groups.get(RootGID), 0));
+            ptasks.push(new O_GROUP(this, (Group) Groups.get(RootGID), InitCont));
         // main loop of optimization
         // while there are tasks undone, do one
         while (!ptasks.empty()) {
@@ -719,26 +658,6 @@ public class SSP {
     public void addTask(Task t) {
         getTracer().addingTask(t);
         ptasks.push(t);
-    }
-
-    /**
-     * Returns the multiwinners list.
-     * @return ArrayList
-     */
-    public MultiWinner getMc(int i) {
-        return (MultiWinner) mc.get(i);
-    }
-
-    public Context getVc(int contextID) {
-        return (Context) vc.get(contextID);
-    }
-
-    public void addVc(Context c) {
-        vc.add(c);
-    }
-
-    public int getVcSize() {
-        return vc.size();
     }
 
     /**
@@ -766,7 +685,7 @@ public class SSP {
             GlobepsPruning = false;
 
             optimize(expr);
-            PhysProp = getVc(0).getPhysProp();
+            PhysProp = getInitCont().getPhysProp();
             Cost HeuristicCost = new Cost(0);
             HeuristicCost = (getGroup(0).getWinner(PhysProp).getCost());
             assert(getGroup(0).getWinner(PhysProp).getDone());
@@ -774,5 +693,9 @@ public class SSP {
             clear();
             GlobepsPruning = true;
         }
+    }
+
+    public Context getInitCont() {
+        return InitCont;
     }
 }

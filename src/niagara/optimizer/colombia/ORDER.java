@@ -1,4 +1,4 @@
-/* $Id: ORDER.java,v 1.3 2003/02/25 06:19:08 vpapad Exp $
+/* $Id: ORDER.java,v 1.4 2003/06/03 07:56:51 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -131,10 +131,6 @@ public class Order {
     // For frequent cases -- one order attribute 
     String getAttrName() {
         return attrNames.get(0);
-    }
-
-    String getAttrName(int i) {
-        return attrNames.get(i);
     }
 
     Strings getAttrNames() {

@@ -1,4 +1,4 @@
-/* $Id: RuleSet.java,v 1.4 2003/02/25 06:19:08 vpapad Exp $
+/* $Id: RuleSet.java,v 1.5 2003/06/03 07:56:51 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -55,7 +55,7 @@ public class RuleSet {
             Rule r = (Rule) rules.get(i);
             r.setRuleSet(this);
             r.setIndex(i);
-            name2index.put(r.GetName(), new Integer(i));
+            name2index.put(r.getName(), new Integer(i));
         }
         
         // Now initialize the rules

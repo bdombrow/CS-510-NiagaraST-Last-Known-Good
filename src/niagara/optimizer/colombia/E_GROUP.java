@@ -1,4 +1,4 @@
-/* $Id: E_GROUP.java,v 1.4 2003/02/25 06:19:08 vpapad Exp $ 
+/* $Id: E_GROUP.java,v 1.5 2003/06/03 07:56:51 vpapad Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -62,15 +62,15 @@ public class E_GROUP extends Task {
     // else it is zero
 
     //    Task to explore a group
-    E_GROUP(SSP ssp, Group group, int ContextID, boolean last, Cost bound) {
-        super(ssp, ContextID);
+    E_GROUP(SSP ssp, Group group, Context context, boolean last, Cost bound) {
+        super(ssp, context);
         this.group = group;
         this.last = last;
         this.epsBound = bound;
     }
 
-    E_GROUP(SSP ssp, Group group, int ContextID) {
-        this(ssp, group, ContextID, false, null);
+    E_GROUP(SSP ssp, Group group, Context context) {
+        this(ssp, group, context, false, null);
     }
 
     public void perform() {
@@ -97,9 +97,9 @@ public class E_GROUP extends Task {
         if (ssp.GlobepsPruning) {
             Cost eps_bound = new Cost(epsBound);
             ssp.addTask(
-                new O_EXPR(ssp, LogMExpr, true, ContextID, true, eps_bound));
+                new O_EXPR(ssp, LogMExpr, true, context, true, eps_bound));
         } else
-            ssp.addTask(new O_EXPR(ssp, LogMExpr, true, ContextID, true));
+            ssp.addTask(new O_EXPR(ssp, LogMExpr, true, context, true));
     } 
 
     public String toString() {

@@ -1,4 +1,4 @@
-/* $Id: PhysicalProperty.java,v 1.4 2003/02/25 06:19:07 vpapad Exp $
+/* $Id: PhysicalProperty.java,v 1.5 2003/06/03 07:56:51 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -62,16 +62,8 @@ public class PhysicalProperty {
         return (other.getOrder().equals(order));
     }
 
-    Order.Kind getOrderKind() {
-        return order.getKind();
-    }
-
     public Strings getOrderAttrNames() {
         return order.getAttrNames();
-    }
-
-    String getOrderAttrName() {
-        return order.getAttrName();
     }
 
     public String toString() {

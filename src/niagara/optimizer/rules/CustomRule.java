@@ -1,4 +1,4 @@
-/* $Id: CustomRule.java,v 1.1 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: CustomRule.java,v 1.2 2003/06/03 07:56:53 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.Constructor;
@@ -105,7 +105,7 @@ abstract public class CustomRule extends Rule {
         this.maskRuleNames = maskRuleNames;
     }
 
-    public final double promise(Op op_arg, int ContextID) {
+    public final double promise(Op op_arg, Context ContextID) {
         if (specifiedPromise)
             return promise;
         return super.promise(op_arg, ContextID);

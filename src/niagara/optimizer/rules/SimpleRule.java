@@ -1,4 +1,4 @@
-/* $Id: SimpleRule.java,v 1.3 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: SimpleRule.java,v 1.4 2003/06/03 07:56:53 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.Constructor;
@@ -142,7 +142,7 @@ public class SimpleRule extends ParsedRule {
                 afterExpr,
                 maskBefore,
                 mask) {
-            public double promise(Op op_arg, int ContextID) {
+            public double promise(Op op_arg, Context ContextID) {
                 return promise;
             }
         };

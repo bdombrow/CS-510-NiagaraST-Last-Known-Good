@@ -1,4 +1,4 @@
-/* $Id: ApplyRule.java,v 1.6 2003/02/25 06:19:08 vpapad Exp $
+/* $Id: ApplyRule.java,v 1.7 2003/06/03 07:56:51 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -48,10 +48,10 @@ public class ApplyRule extends Task {
         Rule rule,
         MExpr mexpr,
         boolean explore,
-        int ContextID,
+        Context context,
         boolean last,
         Cost bound) {
-        super(ssp, ContextID);
+        super(ssp, context);
         this.ssp = ssp;
         this.rule = rule;
         this.mexpr = mexpr;
@@ -65,9 +65,9 @@ public class ApplyRule extends Task {
         Rule rule,
         MExpr mexpr,
         boolean explore,
-        int ContextID,
+        Context context,
         boolean last) {
-        this(ssp, rule, mexpr, explore, ContextID, last, null);
+        this(ssp, rule, mexpr, explore, context, last, null);
     }
 
     // XXX vpapad: was destructor
@@ -75,18 +75,16 @@ public class ApplyRule extends Task {
         if (last) {
             Group Group = mexpr.getGroup();
             if (!explore) {
-                if (!ssp.IRPROP) {
-                    Context LocalCont = ssp.getVc(ContextID);
-                    //What prop is required of
-                    PhysicalProperty LocalReqdProp = LocalCont.getPhysProp();
-                    Winner Winner = Group.getWinner(LocalReqdProp);
+                Context LocalCont = context;
+                //What prop is required of
+                PhysicalProperty LocalReqdProp = LocalCont.getPhysProp();
+                Winner Winner = Group.getWinner(LocalReqdProp);
 
-                    if (Winner != null)
-                        assert !Winner.getDone();
+                if (Winner != null)
+                    assert !Winner.getDone();
 
-                    // mark the winner as done
-                    Winner.setDone();
-                }
+                // mark the winner as done
+                Winner.setDone();
                 // this's still the last applied rule in the group, 
                 // so mark the group with completed optimization or exploration
                 Group.setOptimized(true);
@@ -96,19 +94,11 @@ public class ApplyRule extends Task {
     }
 
     public void perform() {
-        Context Context = ssp.getVc(ContextID);
-        //        PTRACE2 ("ApplyRule performing, rule: %s expression: %s", 
-        //            (const char *) rule.GetName(), 
-        //                         (const char *) mexpr.Dump());
-        //        PTRACE2 ("Context ID: %d , %s", ContextID, 
-        //                         (const char *) Context::vc[ContextID].Dump());
-        //        PTRACE ("Last flag is %d", Last);
-
         //if stop generating logical expression when epsilon prune is applied
         //if this context is done, stop
         if (!ssp.GEN_LOG) {
             //Check that this context is not done
-            if (Context.isFinished()) {
+            if (context.isFinished()) {
                 delete();
                 return;
             }
@@ -116,7 +106,7 @@ public class ApplyRule extends Task {
             //if not stop generating logical expression when epsilon prune is applied
             //if this context is done and the substitute is physical, if the substitute
             //is logical continue
-            if (Context.isFinished() && rule.is_log_to_phys()) {
+            if (context.isFinished() && rule.is_log_to_phys()) {
                 delete();
                 return;
             }
@@ -157,7 +147,7 @@ public class ApplyRule extends Task {
         //     search space.
 
         // Loop over all Bindinges of expr to pattern of rule
-        bindery = new Bindery(mexpr, rule.GetPattern(), ssp);
+        bindery = new Bindery(mexpr, rule.getPattern(), ssp);
         int rule_matched = 0;
         int rule_fired = 0;
         if (!ssp.SORT_AFTERS) {
@@ -171,7 +161,7 @@ public class ApplyRule extends Task {
                 //            Bindings[rule.get_index()]++;
                 //#endif
                 // check the rule's condition function
-                Context Cont = ssp.getVc(ContextID);
+                Context Cont = context;
                 PhysicalProperty ReqdProp = Cont.getPhysProp();
                 //What prop is required of
 
@@ -208,15 +198,9 @@ public class ApplyRule extends Task {
 
                 // If substitute was already known 
                 if (NewMExpr == null) {
-                    // PTRACE0("duplicate substitute " + after.Dump());
-
                     after = null; // "after" no longer used
-
                     continue; // try to find another substitute
                 }
-
-                //            PTRACE0("New Mexpr is : " + NewMExpr.Dump());
-
                 after = null; // "after" no longer used
 
                 //Give this expression the rule's mask
@@ -248,12 +232,12 @@ public class ApplyRule extends Task {
                                 ssp,
                                 NewMExpr,
                                 true,
-                                ContextID,
+                                context,
                                 Flag,
                                 eps_bound));
                     } else
                         ssp.addTask(
-                            new O_EXPR(ssp, NewMExpr, true, ContextID, Flag));
+                            new O_EXPR(ssp, NewMExpr, true, context, Flag));
                 } // optimizer is exploring
                 else { // optimizer is optimizing
                     // for a logical op, try further transformations
@@ -266,7 +250,7 @@ public class ApplyRule extends Task {
                                     ssp,
                                     NewMExpr,
                                     false,
-                                    ContextID,
+                                    context,
                                     Flag,
                                     eps_bound));
                         } else
@@ -275,7 +259,7 @@ public class ApplyRule extends Task {
                                     ssp,
                                     NewMExpr,
                                     false,
-                                    ContextID,
+                                    context,
                                     Flag));
                     } // further transformations to optimize new expr
                     else {
@@ -288,49 +272,18 @@ public class ApplyRule extends Task {
                             ssp.addTask(
                                 new O_INPUTS(
                                     NewMExpr,
-                                    ContextID,
+                                    context,
                                     Flag,
                                     eps_bound));
                         } else {
                             int contextNo = 0;
                             int j = 0;
-                            if (ssp.IRPROP) {
-                                if (last)
-                                    last = false;
-
-                                int GrpNo = NewMExpr.getGrpID();
-                                // XXX vpapad: what is this?
-                                if ((NewMExpr.getOp()).getName() == "QSORT")
-                                    j = 1;
-                                for (int i = j;
-                                    i < ssp.getMc(GrpNo).GetWide();
-                                    i++) {
-                                    if (i != ContextID) {
-                                        ssp.addTask(
-                                            new O_INPUTS(
-                                                NewMExpr,
-                                                i,
-                                                Flag,
-                                                null,
-                                                contextNo++));
-                                    }
-                                }
-                                if (!(j == 1 && ContextID == 0))
-                                    ssp.addTask(
-                                        new O_INPUTS(
-                                            NewMExpr,
-                                            ContextID,
-                                            Flag,
-                                            null,
-                                            contextNo++));
-                            } else {
                                 ssp.addTask(
                                     new O_INPUTS(
                                         NewMExpr,
-                                        ContextID,
+                                        context,
                                         Flag,
                                         null));
-                            }
                         }
 
                     } // for a physical operator, optimize the inputs
@@ -352,7 +305,7 @@ public class ApplyRule extends Task {
                 // PTRACE ("new Binding is: %s", before.Dump());
 
                 // check the rule's context function
-                Context Cont = ssp.getVc(ContextID);
+                Context Cont = context;
                 PhysicalProperty ReqdProp = Cont.getPhysProp();
                 //What prop is required of
                 if (!rule.condition(before, mexpr, ReqdProp)) {
@@ -492,7 +445,7 @@ public class ApplyRule extends Task {
                             ssp,
                             Afters[num_afters].m_expr,
                             true,
-                            ContextID,
+                            context,
                             Flag));
 
                 } // optimizer is exploring
@@ -506,7 +459,7 @@ public class ApplyRule extends Task {
                                 ssp,
                                 Afters[num_afters].m_expr,
                                 false,
-                                ContextID,
+                                context,
                                 Flag));
                     } // further transformations to optimize new expr
                     else {
@@ -519,7 +472,7 @@ public class ApplyRule extends Task {
                         ssp.addTask(
                             new O_INPUTS(
                                 Afters[num_afters].m_expr,
-                                ContextID,
+                                context,
                                 Flag));
                     } // for a physical operator, optimize the inputs
 

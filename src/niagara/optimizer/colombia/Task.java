@@ -1,4 +1,4 @@
-/* $Id: Task.java,v 1.3 2003/02/25 06:19:08 vpapad Exp $
+/* $Id: Task.java,v 1.4 2003/06/03 07:56:51 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -41,7 +41,7 @@ other; when no pending tasks remain, optimization terminates.
 abstract public class Task {
     Task next; // Used by class PTASK
 
-    protected int ContextID; // Index to Context::vc, the shared set of contexts
+    protected Context context; 
     
     protected SSP ssp;
     
@@ -49,9 +49,9 @@ abstract public class Task {
     
     public void delete() {}
 
-    public Task(SSP ssp, int ContextID) {
+    public Task(SSP ssp, Context context) {
         this.ssp = ssp;
-        this.ContextID = ContextID;
+        this.context = context;
     }
     
     public abstract String toString();

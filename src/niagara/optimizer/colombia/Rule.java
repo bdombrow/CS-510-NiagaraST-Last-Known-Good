@@ -1,4 +1,4 @@
-/* $Id: Rule.java,v 1.5 2003/02/25 06:19:07 vpapad Exp $
+/* $Id: Rule.java,v 1.6 2003/06/03 07:56:51 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -138,15 +138,17 @@ public abstract class Rule {
         this.substitute = substitute;
     }
 
-    String GetName() {
-        return (name);
-    };
-    Expr GetPattern() {
-        return (pattern);
-    };
-    Expr GetSubstitute() {
-        return (substitute);
-    };
+    public String getName() {
+        return name;
+    }
+    
+    public Expr getPattern() {
+        return pattern;
+    }
+    
+    public Expr getSubstitute() {
+        return substitute;
+    }
 
     boolean canFire(MExpr mexpr) {
         if (ruleSet.isUnique()) return true;
@@ -167,7 +169,7 @@ public abstract class Rule {
     }
 
     // default value is 1.0, resulting in exhaustive search
-    public double promise(Op op_arg, int ContextID) {
+    public double promise(Op op_arg, Context context) {
         return (substitute.getOp().is_physical() ? PHYS_PROMISE : LOG_PROMISE);
     }
 
@@ -250,7 +252,7 @@ public abstract class Rule {
     }
     
     public String toString() {
-        return GetName();
+        return getName();
     }
 
     public void setRuleSet(RuleSet ruleSet) {
