@@ -596,7 +596,7 @@ public class Group {
     //     os += "Winners:" ;
 
     // #ifdef IRPROP
-    //     os += M_WINNER::mc[GroupID].Dump();
+    //     os += MultiWinner::mc[GroupID].Dump();
     //     os += "\r\n";
     // #else
 

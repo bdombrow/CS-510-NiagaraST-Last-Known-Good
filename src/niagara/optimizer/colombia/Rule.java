@@ -113,8 +113,6 @@ public abstract class Rule {
         this.substitute = substitute;
     }
 
-    abstract public Rule copy();
-
     String GetName() {
         return (name);
     };
@@ -144,7 +142,7 @@ public abstract class Rule {
     }
 
     // default value is 1.0, resulting in exhaustive search
-    int promise(Op op_arg, int ContextID) {
+    public double promise(Op op_arg, int ContextID) {
         return (substitute.getOp().is_physical() ? PHYS_PROMISE : LOG_PROMISE);
     }
 
@@ -171,7 +169,7 @@ public abstract class Rule {
         MExpr mexpr,
         PhysicalProperty ReqdProp);
 
-    int get_index() {
+    int getIndex() {
         return index;
         
     } // get the rule's index in the rule set

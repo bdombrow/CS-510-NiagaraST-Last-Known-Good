@@ -8,31 +8,20 @@ import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.op_tree.joinOp;
 
 /** Commute a remote subplan on the left ith a local subplan on the right */
-public class CommuteJoin extends Rule {
-    public CommuteJoin() {
-        this("CommuteJoin");
-    }
+public class CommuteJoin extends CustomRule {
 
-    protected CommuteJoin(String name) {
+    public CommuteJoin(String name) {
         super(
             name,
             2,
             new Expr(
                 new joinOp(),
-                new Expr(new LEAF_OP(0)),
-                new Expr(new LEAF_OP(1))),
+                new Expr(new LeafOp(0)),
+                new Expr(new LeafOp(1))),
             new Expr(
                 new joinOp(),
-                new Expr(new LEAF_OP(1)),
-                new Expr(new LEAF_OP(0))));
-    }
-    
-    public Rule copy() {
-        return new CommuteJoin();
-    }
-    
-    public void initialize() {
-        maskRule("CommuteJoin");
+                new Expr(new LeafOp(1)),
+                new Expr(new LeafOp(0))));
     }
     
     public Expr next_substitute(

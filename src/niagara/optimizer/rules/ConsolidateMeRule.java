@@ -2,35 +2,23 @@ package niagara.optimizer.rules;
 
 import niagara.optimizer.AnyLogicalOp;
 import niagara.optimizer.ConsolidateMe;
-import niagara.optimizer.colombia.Expr;
-import niagara.optimizer.colombia.LEAF_OP;
-import niagara.optimizer.colombia.MExpr;
-import niagara.optimizer.colombia.Op;
-import niagara.optimizer.colombia.PhysicalProperty;
-import niagara.optimizer.colombia.Rule;
+import niagara.optimizer.colombia.*;
 
 /** ConsolidateMeRule maps a non-consolidated operator to the
  * ConsolidateMe pseudo-physical operator, forcing Colombia to
  * consolidate its inputs */
-public class ConsolidateMeRule extends Rule {
-    public ConsolidateMeRule() {
+public class ConsolidateMeRule extends CustomRule {
+    public ConsolidateMeRule(String name) {
         super(
-            "ConsolidateMeRule",
+            name,
             0,
             new Expr(new AnyLogicalOp()) {
                 public Expr getInput(int i) {
-                    return new Expr(new LEAF_OP(i));
+                    return new Expr(new LeafOp(i));
                 }
             },
             new Expr(new ConsolidateMe(0)));
         }
-
-    /**
-     * @see niagara.optimizer.colombia.Rule#copy()
-     */
-    public Rule copy() {
-        return new ConsolidateMeRule();
-    }
 
     /**
      * @see niagara.optimizer.colombia.Rule#next_substitute(Expr, MExpr, PhysicalProperty)

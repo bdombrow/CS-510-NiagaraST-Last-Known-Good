@@ -1,4 +1,4 @@
-/* $Id: Attrs.java,v 1.3 2002/10/24 03:58:01 vpapad Exp $ */
+/* $Id: Attrs.java,v 1.4 2002/12/10 01:18:26 vpapad Exp $ */
 package niagara.optimizer.colombia;
 import java.util.ArrayList;
 
@@ -38,10 +38,7 @@ public class Attrs {
 
     public Attrs(ArrayList list) {
         this();
-        al.ensureCapacity(list.size());
-        for (int i = 0; i < list.size(); i++) {
-            al.add(list.get(i));
-        }
+        al.addAll(list);
     }
     
     Attrs(Attrs other) { // copy constructor
@@ -76,19 +73,19 @@ public class Attrs {
         al.add(attr);
     }
 
-    // merge keys, ignore duplicates
-    // should there be duplicate?
-    public void Merge(Attrs other) {
-        for (int i = 0; i < other.size(); i++)
-            add(other.get(i));
+    public void merge(Attrs other) {
+        for (int i = 0; i < other.size(); i++) {
+            if (!Contains(other.get(i)))
+                add(other.get(i));
+        }
     }
 
     // Check if the attribute is in the Attrs
     // Two attributes with the same name are considered the same
-    boolean Contains(String AttrName) {
+    boolean Contains(String attrName) {
         // check if the attid is in the vector
         for (int i = 0; i < size(); i++)
-            if (AttrName == get(i).getName())
+            if (attrName.equals(get(i).getName()))
                 return true;
 
         return false;
@@ -97,13 +94,11 @@ public class Attrs {
     // Check if the attribute is in the Attrs
     // Two attributes with the same name are considered the same
     boolean Contains(Strings AttrNames) {
-
         for (int i = 0; i < AttrNames.size(); i++)
             if (!Contains(AttrNames.get(i)))
                 return false;
 
         return true; // this Attrs is contained in array
-
     }
 
     public boolean Contains(Attribute Attr) {
@@ -119,7 +114,7 @@ public class Attrs {
         return true;
     }
     
-    public boolean Contains(Attrs other) {
+    public boolean contains(Attrs other) {
         for (int i = 0; i < other.size(); i++)
             if (!Contains(other.get(i)))
                 return false;
@@ -128,7 +123,7 @@ public class Attrs {
     }
 
     boolean IsSubset(Attrs other) {
-        return other.Contains(this);
+        return other.contains(this);
     }
 
     boolean IsOverlapped(Attrs other) {
@@ -146,17 +141,8 @@ public class Attrs {
         return false;
     }
 
-    //remove the attributes that are not in the "attrs" list. 
-    Attrs Projection(Strings AttrNames) {
-        Attrs attrs = new Attrs();
-        for (int i = size() - 1; i >= 0; i--)
-            if (AttrNames.contains(get(i).getName()))
-                attrs.add(get(i));
-        return attrs;
-    }
-
-    //remove the attributes that are not in the "attrs" list. 
-    Attrs Projection(Attrs attrs) {
+    // New Attrs with just the attributes in "attrs" 
+    public Attrs project(Attrs attrs) {
         Attrs result = new Attrs();
         for (int i = 0; i < size(); i++)
             if (attrs.Contains(get(i)))
@@ -164,8 +150,14 @@ public class Attrs {
         return result;
     }
 
-    // return int array of size one from the keys_set
-    //int * CopyOutOne(int i);
+    // New Attrs without the attributes in "attrs"
+    public Attrs minus(Attrs attrs) {
+        Attrs result = new Attrs();
+        for (int i = 0; i < size(); i++)
+            if (!attrs.Contains(get(i)))
+                result.add(get(i));
+        return result;
+    }
 
     // Remove an element from Attrs
     boolean RemoveAttr(Attribute Attr) {
@@ -198,9 +190,7 @@ public class Attrs {
             result.add(get(i).copy());
         return result;
     }
-    /**
-     * @see java.lang.Object#equals(Object)
-     */
+
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof Attrs))
             return false;
@@ -214,14 +204,21 @@ public class Attrs {
         return true;
     }
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
     public int hashCode() {
         int hash = 0;
         for (int i = 0; i < al.size(); i++) {
             hash ^= al.get(i).hashCode();
         }
         return hash;
+    }
+    
+    public String toString() {
+        if (al.size() == 0) return "";
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < al.size() - 1; i++)
+            sb.append(((Attribute) al.get(i)).getName()).append(",");
+            
+        sb.append(((Attribute) al.get(al.size() - 1)).getName());
+        return sb.toString();
     }
 }

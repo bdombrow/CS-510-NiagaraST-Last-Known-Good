@@ -1,9 +1,10 @@
-/* $Id: SimpleRule.java,v 1.2 2002/11/21 02:51:35 vpapad Exp $ */
+/* $Id: SimpleRule.java,v 1.3 2002/12/10 01:18:26 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
 
@@ -14,40 +15,33 @@ import niagara.utils.*;
 
 /** A simple rule which maps (exactly) one logical operator 
  * to one initializable operator. */
-public class SimpleRule extends Rule {
-
-    /** A boolean method of the logical operator class that takes no arguments 
-     * and checks that the rule is applicable */
-    private Method conditionMethod;
-    private static final Object[] conditionArgs = new Object[] {
-    };
-    private static final Class[] conditionArgTypes = new Class[] {
-    };
-
+public class SimpleRule extends ParsedRule {
     private SimpleRule(
         String name,
         int arity,
         Expr before,
         Expr after,
-        Method conditionMethod) {
-        super(name, arity, before, after);
-        this.conditionMethod = conditionMethod;
+        String[] maskBeforeRuleNames,
+        String[] maskRuleNames) {
+        super(name, arity, before, after, maskBeforeRuleNames, maskRuleNames);
     }
 
-    public Rule copy() {
-        return new SimpleRule(
-            name,
-            arity,
-            new Expr(pattern),
-            new Expr(substitute),
-            conditionMethod);
-    }
-
+    /* Create a SimpleRule from its description in XML */
     public static SimpleRule fromXML(Element e, Catalog catalog) {
         String name = e.getAttribute("name");
         if (name.length() == 0)
-            confError("Each rule must have a name attribute");
+            catalog.confError("Each rule must have a name attribute");
 
+        String promiseStr = e.getAttribute("promise");
+        boolean specifiedPromise = (promiseStr.length() != 0);
+        final double promise;
+        if (specifiedPromise)
+            promise = Double.parseDouble(promiseStr);
+        else
+            promise = 0;
+
+        String maskBefore[] = parseMask(e, "maskBefore");
+        String mask[] = parseMask(e, "mask");
         ConfigurationError checkPatterns =
             new ConfigurationError("Rules must contain one 'before' and one 'after' pattern");
 
@@ -66,12 +60,11 @@ public class SimpleRule extends Rule {
         String logicalOpName = beforeOp.getAttribute("name");
         Class logicalClass = catalog.getOperatorClass(logicalOpName);
         if (logicalClass == null)
-            confError(
+            catalog.confError(
                 "Could not find logical operator with name: " + logicalOpName);
 
         Expr beforeExpr = null;
         LogicalOp logicalOp = null;
-        Method conditionMethod = null;
         int arity = 0;
 
         try {
@@ -80,16 +73,6 @@ public class SimpleRule extends Rule {
                 logicalClass.getConstructor(new Class[] {
             });
 
-            String condition = beforeOp.getAttribute("condition");
-            if (condition.length() != 0) {
-                conditionMethod =
-                    logicalClass.getMethod(condition, conditionArgTypes);
-                if (conditionMethod == null)
-                    confError("Could not find condition method " + condition);
-                if (conditionMethod.getReturnType() != Boolean.TYPE)
-                    confError("Condition methods should return a boolean");
-            }
-
             logicalOp =
                 (LogicalOp) logicalConstructor.newInstance(new Object[] {
             });
@@ -97,7 +80,7 @@ public class SimpleRule extends Rule {
             arity = logicalOp.getArity();
             beforeExpr = new Expr(logicalOp, new Expr[arity]);
             for (int i = 0; i < arity; i++) {
-                beforeExpr.setInput(i, new Expr(new LEAF_OP(i)));
+                beforeExpr.setInput(i, new Expr(new LeafOp(i)));
             }
         } catch (NoSuchMethodException nsme) {
             throw new PEException(
@@ -118,9 +101,8 @@ public class SimpleRule extends Rule {
         String afterOpName = afterOp.getAttribute("name");
         Class afterClass = catalog.getOperatorClass(afterOpName);
         if (afterClass == null)
-            confError(
-                "Could not find operator with name: "
-                    + afterOpName);
+            catalog.confError(
+                "Could not find operator with name: " + afterOpName);
 
         Expr afterExpr = null;
         try {
@@ -128,12 +110,11 @@ public class SimpleRule extends Rule {
             Constructor afterConstructor =
                 afterClass.getConstructor(new Class[] {
             });
-            Op afterOperator =
-                (Op) afterConstructor.newInstance(new Object[] {
+            Op afterOperator = (Op) afterConstructor.newInstance(new Object[] {
             });
             afterExpr = new Expr(afterOperator, new Expr[arity]);
             for (int i = 0; i < arity; i++) {
-                afterExpr.setInput(i, new Expr(new LEAF_OP(i)));
+                afterExpr.setInput(i, new Expr(new LeafOp(i)));
             }
         } catch (NoSuchMethodException nsme) {
             throw new PEException(
@@ -151,16 +132,31 @@ public class SimpleRule extends Rule {
             throw new PEException("An instantiation exception occured: " + ie);
         }
 
-        return new SimpleRule(
-            name,
-            arity,
-            beforeExpr,
-            afterExpr,
-            conditionMethod);
-    }
+        SimpleRule simpleRule;
+        
+        if (specifiedPromise)
+            simpleRule = new SimpleRule(
+                name,
+                arity,
+                beforeExpr,
+                afterExpr,
+                maskBefore,
+                mask) {
+            public double promise(Op op_arg, int ContextID) {
+                return promise;
+            }
+        };
+        else
+            simpleRule = new SimpleRule(
+                name,
+                arity,
+                beforeExpr,
+                afterExpr,
+                maskBefore,
+                mask);
 
-    private static void confError(String msg) {
-        throw new ConfigurationError(msg);
+        simpleRule.parseCondition(beforeOp, logicalClass, catalog);
+        return simpleRule;
     }
 
     /**
@@ -178,27 +174,5 @@ public class SimpleRule extends Rule {
             result.setInput(i, before.getInput(i));
         }
         return result;
-    }
-
-    /**
-     * @see niagara.optimizer.colombia.Rule#condition(Expr, MExpr, PhysicalProperty)
-     */
-    public boolean condition(
-        Expr before,
-        MExpr mexpr,
-        PhysicalProperty ReqdProp) {
-        if (conditionMethod == null)
-            return true;
-        try {
-            return (
-                (Boolean) conditionMethod.invoke(
-                    before.getOp(),
-                    conditionArgs))
-                .booleanValue();
-        } catch (InvocationTargetException ite) {
-            throw new PEException("Could not invoke condition method");
-        } catch (IllegalAccessException iae) {
-            throw new PEException("Could not access condition method");
-        }
     }
 }

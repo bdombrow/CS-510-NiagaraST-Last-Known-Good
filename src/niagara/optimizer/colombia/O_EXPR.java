@@ -78,7 +78,7 @@ public class O_EXPR extends Task {
         //            (const char *) MExpr.Dump());
         if (ssp.IRPROP) {
             int GrpNo = MExpr.getGrpID();
-            //        PTRACE2 ("ContextID: %d, %s", ContextID, (M_WINNER::mc[GrpNo].GetPhysProp(ContextID)).Dump());
+            //        PTRACE2 ("ContextID: %d, %s", ContextID, (MultiWinner::mc[GrpNo].GetPhysProp(ContextID)).Dump());
         } else {
             //        PTRACE2 ("Context ID: %d , %s", ContextID, 
             //                         (const char *) Context::vc[ContextID].Dump());
@@ -125,13 +125,10 @@ public class O_EXPR extends Task {
                 continue; // only fire transformation rule when exploring
             }
 
-            int Promise =
-                Rule.top_match(MExpr.getOp())
-                    ? Rule.promise(MExpr.getOp(), ContextID)
-                    : 0;
+            double promise;
             // insert a valid and promising move into the array
-            if (Promise > 0) {
-                Move[moves] = new Move(Promise, Rule);
+            if (Rule.top_match(MExpr.getOp()) && (promise = Rule.promise(MExpr.getOp(), ContextID)) > 0) {
+                Move[moves] = new Move(promise, Rule);
                 moves++;
             }
         }
@@ -241,10 +238,10 @@ class Move implements Comparable {
     // An uninteresting move
     public static Move NO_PROMISE = new Move(0, null);
 
-    public int promise;
+    public double promise;
     Rule rule;
 
-    public Move(int promise, Rule rule) {
+    public Move(double promise, Rule rule) {
         this.promise = promise;
         this.rule = rule;
     }

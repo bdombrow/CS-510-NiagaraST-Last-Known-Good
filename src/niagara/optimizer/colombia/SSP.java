@@ -1,4 +1,4 @@
-/* $Id: SSP.java,v 1.4 2002/10/31 04:23:00 vpapad Exp $ */
+/* $Id: SSP.java,v 1.5 2002/12/10 01:18:26 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 import java.util.ArrayList;
@@ -86,8 +86,8 @@ public class SSP {
 
     private RuleSet ruleSet;
 
-    // XXX vpapad moved from M_WINNER
-    // XXX vpapad was: public  static std::vector< M_WINNER *> mc;
+    // XXX vpapad moved from MultiWinner
+    // XXX vpapad was: public  static std::vector< MultiWinner *> mc;
     private ArrayList mc;
 
     // XXX vpapad moved from Context
@@ -397,7 +397,7 @@ public class SSP {
                 // For the topmost group and for the groups containing the item operator and constant
                 // operator, set the only physical property as any and bound INF
                 if (GrpID == 0 || ((MExpr.getOp()).is_item())) {
-                    M_WINNER MWin = new M_WINNER(1);
+                    MultiWinner MWin = new MultiWinner(1);
                     mc.ensureCapacity(GrpID + 1);
                     mc.add(GrpID, MWin);
                 } else {
@@ -406,7 +406,7 @@ public class SSP {
                     Strings tmpKeySet = Group.getLogProp().GetAttrNames();
                     int ksize = tmpKeySet.size();
 
-                    M_WINNER MWin = new M_WINNER(ksize + 1);
+                    MultiWinner MWin = new MultiWinner(ksize + 1);
 
                     for (int i = 1; i < ksize + 1; i++) {
                         Strings MKEYS = new Strings();
@@ -702,8 +702,8 @@ public class SSP {
      * Returns the multiwinners list.
      * @return ArrayList
      */
-    public M_WINNER getMc(int i) {
-        return (M_WINNER) mc.get(i);
+    public MultiWinner getMc(int i) {
+        return (MultiWinner) mc.get(i);
     }
 
     public Context getVc(int contextID) {

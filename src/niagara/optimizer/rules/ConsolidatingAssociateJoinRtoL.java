@@ -4,12 +4,8 @@ package niagara.optimizer.rules;
 import niagara.optimizer.colombia.*;
 
 public class ConsolidatingAssociateJoinRtoL extends AssociateJoinRtoL {
-    public ConsolidatingAssociateJoinRtoL() {
-        super("ConsolidatingAssociateJoinRtoL");
-    }
-    
-    public Rule copy() {
-        return new ConsolidatingAssociateJoinRtoL();
+    public ConsolidatingAssociateJoinRtoL(String name) {
+        super(name);
     }
     
     public boolean condition(
@@ -20,19 +16,19 @@ public class ConsolidatingAssociateJoinRtoL extends AssociateJoinRtoL {
         if (!mexpr.getGroup().getLogProp().isMixed()) return false;
         
         boolean aLocal =
-            ((LEAF_OP) (before.getInput(0).getOp()))
+            ((LeafOp) (before.getInput(0).getOp()))
                 .getGroup()
                 .getLogProp()
                 .isLocal();
 
         boolean bLocal =
-            ((LEAF_OP) (before.getInput(1).getInput(0).getOp()))
+            ((LeafOp) (before.getInput(1).getInput(0).getOp()))
                 .getGroup()
                 .getLogProp()
                 .isLocal();
             
         boolean cLocal =
-            ((LEAF_OP) (before.getInput(1).getInput(1).getOp()))
+            ((LeafOp) (before.getInput(1).getInput(1).getOp()))
                 .getGroup()
                 .getLogProp()
                 .isLocal();

@@ -1,3 +1,4 @@
+/* $Id: MultiWinner.java,v 1.1 2002/12/10 01:18:26 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 import java.util.ArrayList;
@@ -6,18 +7,18 @@ import java.util.ArrayList;
   ============================================================
   MULTIWINNERS of a search
   ============================================================
-  A M_WINNER (multiwinner) data structure will, when the group is optimized, contain a 
+  A MultiWinner (multiwinner) data structure will, when the group is optimized, contain a 
   winner (best plan) for each interesting and relevant (i.e., in the schema) property of 
-  the group.  The M_WINNER elements are initialized with an infinite bound to indicate
+  the group.  The MultiWinner elements are initialized with an infinite bound to indicate
   that no qualifying plan has yet been found.
   
   The idea is then to optimize a group not only for the motivating context but also for 
-  all the contexts stored in a M_WINNER for that group. In this way, we do not have to 
+  all the contexts stored in a MultiWinner for that group. In this way, we do not have to 
   revisit that group, thus saving CPU time and memory.
 */
 
-public class M_WINNER { 
-    M_WINNER(int S)    {
+public class MultiWinner { 
+    MultiWinner(int S)    {
 
 		wide = S;
 		PhysProp = new PhysicalProperty[S];

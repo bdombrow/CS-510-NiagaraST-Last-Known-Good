@@ -1,3 +1,4 @@
+/* $Id: RuleSet.java,v 1.2 2002/12/10 01:18:26 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 import java.util.ArrayList;

@@ -8,14 +8,10 @@ import niagara.xmlql_parser.op_tree.joinOp;
 
 /** Commute a remote subplan on the left ith a local subplan on the right */
 public class CommuteRL extends CommuteJoin {
-    public CommuteRL() {
-        super("CommuteRL");
+    public CommuteRL(String name) {
+        super(name);
     }
 
-    public Rule copy() {
-        return new CommuteRL();
-    }
-    
     public boolean condition(Expr before, MExpr mexpr, PhysicalProperty ReqdProp) {
         if (!mexpr.getGroup().getLogProp().isMixed()) return false;
         

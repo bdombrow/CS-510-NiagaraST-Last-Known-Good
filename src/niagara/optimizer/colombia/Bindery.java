@@ -8,7 +8,7 @@ package niagara.optimizer.colombia;
    search space.
    For example, consider the LTOR join associative rule, which includes 
    two member data, Pattern and Substitute.  Here L(i) stands for the 
-   LEAF_OP with index i:
+   LeafOp with index i:
 		Pattern: (L(1) join L(2)) join L(3)
 		Substitute: L(1) join (L(2) join L(3))
    Each time the optimizer applies this rule, it must bind the pattern to an
@@ -143,8 +143,8 @@ public class Bindery {
         if (patt_op.is_leaf()) {
             result =
                 new Expr(
-                    new LEAF_OP(
-                        ((LEAF_OP) patt_op).getIndex(),
+                    new LeafOp(
+                        ((LeafOp) patt_op).getIndex(),
                         group));
         } // create leaf marked with group index
         else // general invocation of new Expr

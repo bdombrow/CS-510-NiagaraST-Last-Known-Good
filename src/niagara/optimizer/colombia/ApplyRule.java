@@ -524,7 +524,7 @@ public class ApplyRule extends Task {
         }
 
         //Mark rule vector to show that this rule has fired
-        mexpr.fire_rule(rule.get_index());
+        mexpr.fire_rule(rule.getIndex());
 
         delete();
     } // perform

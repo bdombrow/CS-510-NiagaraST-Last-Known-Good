@@ -10,10 +10,7 @@ import niagara.logical.*;
 import niagara.xmlql_parser.op_tree.joinOp;
 
 /** Join associativity, right to left: A x (B x C) -> (A x B) x C */
-public class AssociateJoinRtoL extends Rule {
-    public AssociateJoinRtoL() {
-        this("AssociateJoinRtoL");
-    }
+public class AssociateJoinRtoL extends CustomRule {
 
     public AssociateJoinRtoL(String name) {
         super(
@@ -21,27 +18,19 @@ public class AssociateJoinRtoL extends Rule {
             3,
             new Expr(
                 new joinOp(),
-                new Expr(new LEAF_OP(0)),
+                new Expr(new LeafOp(0)),
                 new Expr(
                     new joinOp(),
-                    new Expr(new LEAF_OP(1)),
-                    new Expr(new LEAF_OP(2)))),
+                    new Expr(new LeafOp(1)),
+                    new Expr(new LeafOp(2)))),
             new Expr(
                 new joinOp(),
                 new Expr(
                     new joinOp(),
-                    new Expr(new LEAF_OP(0)),
-                    new Expr(new LEAF_OP(1))),
-                new Expr(new LEAF_OP(2))));
+                    new Expr(new LeafOp(0)),
+                    new Expr(new LeafOp(1))),
+                new Expr(new LeafOp(2))));
     }
-
-    public Rule copy() {
-        return new AssociateJoinRtoL();
-    }
-    
-    public void initialize() {
-    }
-
 
     public Expr next_substitute(
         Expr before,
@@ -49,15 +38,15 @@ public class AssociateJoinRtoL extends Rule {
         PhysicalProperty ReqdProp) {
         // Get schema for B 
         Expr BC = before.getInput(1);
-        LEAF_OP B = (LEAF_OP) (BC.getInput(0).getOp());
+        LeafOp B = (LeafOp) (BC.getInput(0).getOp());
         Attrs bAttrs = B.getGroup().getLogProp().getAttrs();
 
         // Get C's schema
-        LEAF_OP C = (LEAF_OP) (BC.getInput(1).getOp());
+        LeafOp C = (LeafOp) (BC.getInput(1).getOp());
         Attrs cAttrs = C.getGroup().getLogProp().getAttrs();
 
         // Get A's schema
-        LEAF_OP A = (LEAF_OP) (before.getInput(0).getOp());
+        LeafOp A = (LeafOp) (before.getInput(0).getOp());
         Attrs aAttrs = A.getGroup().getLogProp().getAttrs();
 
          // Join numbering convention:
@@ -121,7 +110,7 @@ public class AssociateJoinRtoL extends Rule {
         // XXX vpapad: can we use equivalence classes to
         // push some of these to AB???
         Attrs ab = aAttrs.copy();
-        ab.Merge(bAttrs);
+        ab.merge(bAttrs);
         And split2 = (And) op2.getNonEquiJoinPredicate().split(ab);
         Predicate abPred = split2.getLeft();
         joinOp newOp1 = new joinOp(abPred, newPreds1);
@@ -154,15 +143,15 @@ public class AssociateJoinRtoL extends Rule {
                 return true;
             // Get schema for B 
             Expr BC = before.getInput(1);
-            LEAF_OP B = (LEAF_OP) (BC.getInput(0).getOp());
+            LeafOp B = (LeafOp) (BC.getInput(0).getOp());
             Attrs bAttrs = B.getGroup().getLogProp().getAttrs();
 
             // Get C's schema
-            LEAF_OP C = (LEAF_OP) (BC.getInput(1).getOp());
+            LeafOp C = (LeafOp) (BC.getInput(1).getOp());
             Attrs cAttrs = C.getGroup().getLogProp().getAttrs();
 
             // Get A's schema
-            LEAF_OP A = (LEAF_OP) (before.getInput(0).getOp());
+            LeafOp A = (LeafOp) (before.getInput(0).getOp());
             Attrs aAttrs = A.getGroup().getLogProp().getAttrs();
 
             EquiJoinPredicateList allPreds = op2.getEquiJoinPredicates().copy();

@@ -73,8 +73,8 @@ public class MExpr {
             input = expr.getInput(i);
 
             if (input.getOp().is_leaf())
-                // deal with LEAF_OP, sharing the existed group
-                inputs[i] = ((LEAF_OP) input.getOp()).getGroup();
+                // deal with LeafOp, sharing the existed group
+                inputs[i] = ((LeafOp) input.getOp()).getGroup();
             else {
                 // create a new sub group
                 MExpr MExpr = ssp.copyIn(input, ssp.NEW_GRPID, true);

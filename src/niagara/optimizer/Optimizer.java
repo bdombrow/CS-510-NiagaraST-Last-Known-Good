@@ -1,5 +1,5 @@
 /**
- * $Id: Optimizer.java,v 1.8 2002/10/31 04:45:32 vpapad Exp $
+ * $Id: Optimizer.java,v 1.9 2002/12/10 01:18:27 vpapad Exp $
  */
 package niagara.optimizer;
 
@@ -62,7 +62,17 @@ public class Optimizer implements Tracer {
                 ssp.CopyOut(ssp.getGroup(0), PhysicalProperty.ANY, new HashMap()),
                 catalog);
         ssp.clear();
-        return optPlan;
+        return removeNoOps(optPlan);
+    }
+
+    private Plan removeNoOps(Plan optPlan) {
+        Plan p = optPlan;
+        if (p.getOperator() instanceof PhysicalNoOp)
+            return removeNoOps((Plan) p.getInput(0));
+        for (int i = 0; i  < p.getArity(); i++)
+            p.setInput(i, removeNoOps((Plan) optPlan.getInput(i)));
+            
+        return p;
     }
     
     // Empty implementations of tracing methods 

@@ -1,4 +1,4 @@
-/* $Id: UnionToPhysicalUnion.java,v 1.1 2002/10/31 04:35:24 vpapad Exp $ */
+/* $Id: UnionToPhysicalUnion.java,v 1.2 2002/12/10 01:18:26 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.optimizer.colombia.*;
@@ -6,23 +6,19 @@ import niagara.query_engine.PhysicalUnionOperator;
 import niagara.xmlql_parser.op_tree.UnionOp;
 
 /** Union To PhysicalUnion implementation rule */
-public class UnionToPhysicalUnion extends Rule {
+public class UnionToPhysicalUnion extends CustomRule {
     // UnionToPhysicalUnion is a special case,
     // it must match union ops with any number of inputs
-    public UnionToPhysicalUnion() {
+    public UnionToPhysicalUnion(String name) {
         super(
-            "UnionToPhysicalUnion",
+            name,
             0,
             new Expr(new UnionOp()) {
                 public Expr getInput(int i) {
-                    return new Expr(new LEAF_OP(i));
+                    return new Expr(new LeafOp(i));
                 }
             },
             new Expr(new PhysicalUnionOperator()));
-    }
-    
-    public Rule copy() {
-        return new UnionToPhysicalUnion();
     }
     
     public Expr next_substitute(

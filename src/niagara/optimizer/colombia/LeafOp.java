@@ -3,14 +3,14 @@ package niagara.optimizer.colombia;
 /**
   *  Leaf operators, used in rules only.  Placeholder for a Group.
   */
-public class LEAF_OP extends Op {
+public class LeafOp extends Op {
 
     private Group group;
     //Identifies the group bound to this leaf, after binding.
     // == null until binding
     private int index; //Used to distinguish this leaf in a rule
 
-    public LEAF_OP(int index) {
+    public LeafOp(int index) {
         this(index, null);
     }
 
@@ -29,22 +29,22 @@ public class LEAF_OP extends Op {
         return true;
     }
 
-    public LEAF_OP(int index, Group group) {
+    public LeafOp(int index, Group group) {
         this.index = index;
         this.group = group;
     }
 
     public String getName() {
-        return "LEAF_OP";
+        return "LeafOp";
     }
 
-    public LEAF_OP(LEAF_OP Op) {
+    public LeafOp(LeafOp Op) {
         this.index = Op.index;
         this.group = Op.group;
     }
 
     public Op copy() {
-        return new LEAF_OP(this);
+        return new LeafOp(this);
     }
 
     public String toString() {
@@ -54,11 +54,11 @@ public class LEAF_OP extends Op {
      * @see java.lang.Object#equals(Object)
      */
     public boolean equals(Object other) {
-        if (other == null || !(other instanceof LEAF_OP))
+        if (other == null || !(other instanceof LeafOp))
             return false;
-        if (other.getClass() != LEAF_OP.class)
+        if (other.getClass() != LeafOp.class)
             return other.equals(this);
-        LEAF_OP o = (LEAF_OP) other;
+        LeafOp o = (LeafOp) other;
         return group.equals(o.group) && index == o.index;
     }
 

@@ -1,23 +1,9 @@
 /**
- * $Id: TracingOptimizer.java,v 1.1 2002/10/31 04:45:32 vpapad Exp $
+ * $Id: TracingOptimizer.java,v 1.2 2002/12/10 01:18:27 vpapad Exp $
  */
 package niagara.optimizer;
 
-import niagara.xmlql_parser.op_tree.logNode;
-import niagara.connection_server.ConfigurationError;
-import niagara.connection_server.NiagraServer;
-import niagara.connection_server.Catalog;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Stack;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import niagara.optimizer.colombia.*;
-import niagara.query_engine.PhysicalOperator;
-import niagara.query_engine.SchedulablePlan;
 
 public class TracingOptimizer extends Optimizer {
     // Implementation of the Tracer interface

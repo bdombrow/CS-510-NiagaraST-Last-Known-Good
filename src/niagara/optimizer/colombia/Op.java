@@ -1,4 +1,4 @@
-/* $Id: Op.java,v 1.8 2002/10/31 04:23:00 vpapad Exp $ */
+/* $Id: Op.java,v 1.9 2002/12/10 01:18:26 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 /** Abstract superclass for all operators, logical or physical */
@@ -34,6 +34,25 @@ public abstract class Op {
     public abstract boolean equals(Object other);
     public abstract int hashCode();
 
+    /** This is a utility method that subclasses can use
+     * to compute a hashcode for fields that are allowed to be null */
+    protected int hashCodeNullsAllowed(Object o) {
+        if (o == null) return 0;
+        else return o.hashCode();
+    }
+
+    /** This is a utility method that subclasses can use
+     * to compute equality for fields that are allowed to be null */
+    protected boolean equalsNullsAllowed(Object o1, Object o2) {
+        if (o1 != o2) {
+            if (o1 == null)
+                return o2.equals(o1);
+            else 
+                return o1.equals(o2);
+        }
+        return true;
+    }
+    
     public int getNumberOfOutputs() { return 1;}
     
     public boolean is_logical() {return false;}
