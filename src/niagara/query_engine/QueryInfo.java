@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryInfo.java,v 1.5 2003/02/26 06:35:12 tufte Exp $
+  $Id: QueryInfo.java,v 1.6 2003/07/18 00:58:50 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -319,8 +319,8 @@ public class QueryInfo {
 			   + " removed from QueryEngine.activeQueries");
 	
 	// Clear the interrupted flag of this thread in case it was interrupted
-	// for this query
-	Thread.currentThread().interrupted();
+	// for this query - the function used did not do that and it
+	// seems you can't reset interrupted fla
     }
 
 
