@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.5 2001/08/08 21:27:57 tufte Exp $
+  $Id: PathExprEvaluator.java,v 1.6 2002/03/28 03:06:24 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -112,32 +112,26 @@ public class PathExprEvaluator
 				// if this is not the doc root, get children with name val
 				//
 				if(inNode instanceof Element){
-					
-					// Get all child elements 
-					Element element = (Element)inNode;
+                                    // Get all child elements 
+                                    Element element = (Element)inNode;
+                                 
+                                    Node child = element.getFirstChild();
+                                    while (child != null) {
+                                        if (val.equals(child.getNodeName()))
+                                            nodesReached.add(child);
+                                        child = child.getNextSibling();
+                                    }
+                                    
+                                    // Get the attributes of the element
+                                    NamedNodeMap attrs = element.getAttributes();
 
-					NodeList nl = element.getChildNodes();
-					int size = nl.getLength();
-
-					// Get the attributes of the element
-					NamedNodeMap attrs = element.getAttributes();
-					
-					// Add each item from node list to the return vector
-					//		
-					for (i = 0; i < size; i++){
-                                            if (nl.item(i) == null)
-                                                System.out.println("XXX error, node has null child!");
-                                            
-						if( val.equals(nl.item(i).getNodeName()))
-							nodesReached.addElement(nl.item(i));
-					}
-					// Add the reachable attribute to the vector
-					Node attr_node = attrs.getNamedItem(val);
-					if(attr_node != null){
-						nodesReached.addElement(attrs.getNamedItem(val));
-					}
-
-					return nodesReached;		    
+                                    // Add the reachable attribute to the vector
+                                    Node attr_node = attrs.getNamedItem(val);
+                                    if(attr_node != null){
+                                        nodesReached.addElement(attrs.getNamedItem(val));
+                                    }
+                                    
+                                    return nodesReached;		    
 				}
 				
 				// Else if it is the root of the document, get the doc
