@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DiskCache.java,v 1.3 2001/07/17 06:57:55 vpapad Exp $
+  $Id: DiskCache.java,v 1.4 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,7 +36,6 @@ package niagara.data_manager;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import com.ibm.xml.parser.*;
 
 import niagara.trigger_engine.*;
 import niagara.query_engine.*;
@@ -98,7 +97,7 @@ class DiskCache implements DMCache {
         }
     }
 
-    /** Given File or URL name, fetch TXDocument 
+    /** Given File or URL name, fetch Document 
       * @param k, the key (filename, url) to fetch
       * @param me, MemCacheEntry to hold waitingThread
       */
@@ -133,19 +132,13 @@ class DiskCache implements DMCache {
 		if(doc==null && me!=null) // go to WEB.
 		    lowerCache.fetch(key, me);
 	    }
-	} catch (MalformedURLException mue) {
-	    throw new CacheFetchException("Bad URL found " + key);
-	} catch (FileNotFoundException fnfe) {
-	    throw new CacheFetchException("File not found " + key);
 	} catch (ParseException pe) {
 	    throw new CacheFetchException("Error parsing " + key);
-	} catch (IOException ioe) {
-	    throw new CacheFetchException("Error parsing " + key);
-	}
+	} 
         return doc;
     }
 
-    /** Given filename or URL, fetch TXDocuemnt.  This Method blocks
+    /** Given filename or URL, fetch Document.  This Method blocks
       * to get back a result.
       * @param k, key.
       * @param me, not used.
@@ -157,13 +150,7 @@ class DiskCache implements DMCache {
 		return null;
 	    // System.err.println("Parsing ... " + k);
 	    return CUtil.parseXML((String)k);
-	} catch (MalformedURLException mfe) {
-	    throw new CacheFetchException("Bad url " + k);
-	} catch (FileNotFoundException fnfe) {
-	    throw new CacheFetchException("File not found: " +k);
 	} catch (ParseException pe) {
-	    throw new CacheFetchException("Error parsing: " +k);
-	} catch (IOException ioe) {
 	    throw new CacheFetchException("Error parsing: " +k);
 	}
     }

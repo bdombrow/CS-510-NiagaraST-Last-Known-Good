@@ -1,5 +1,5 @@
 /**
- * $Id: ReceiveThread.java,v 1.1 2001/07/17 06:57:55 vpapad Exp $
+ * $Id: ReceiveThread.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
  *
  */
 
@@ -82,7 +82,7 @@ public class ReceiveThread implements Runnable {
     private boolean processReceive(String tuplestr) {
 	boolean succeed;
 	try {
-            DOMParser parser = DOMFactory.newParser();
+            niagara.ndom.DOMParser parser = DOMFactory.newParser();
 
 	    parser.parse(new InputSource(new ByteArrayInputStream(tuplestr.getBytes())));
 	    Document doc =parser.getDocument();

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCache.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: MemCache.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,9 +36,9 @@ package niagara.data_manager;
 
 import java.util.*;
 import java.io.*;
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 
+import niagara.ndom.*;
 import niagara.trigger_engine.*;
 import niagara.query_engine.*;
 import niagara.data_manager.XMLDiff.*;
@@ -167,7 +167,7 @@ abstract class MemCache implements DMCache {
       * returned.  Otherwise passed to WebCache.
       * @param key, file or URL to fetch
       * @param th,  the fetch thread.  
-      * @return TXDocument fetched.  NULL if fetch goes to web.
+      * @return Document fetched.  NULL if fetch goes to web.
       */
     public synchronized Object fetch(Object k, Object th) throws CacheFetchException {
         FetchThread fth = (FetchThread)th;
@@ -192,7 +192,7 @@ abstract class MemCache implements DMCache {
                     // Exception in DiskCache.  Use a dummy ...
                     // // System.err.println("Got a ONCE file.");
                     ret.setOnce(1);
-                    nret = new TXDocument();
+                    nret = DOMFactory.newDocument();
                 }
                 if(nret == null) { // Miss bad.  Goto web and return null
                     // System.err.println("MemCache Miss BAD.  Return NULL");
@@ -287,7 +287,7 @@ abstract class MemCache implements DMCache {
         Object v = lowerCache.fetch_reload(key, me);
         if(v==null) {
             // System.err.println("Fetch Reload: got NULL from lower" + key);
-            v = new TXDocument();
+            v = DOMFactory.newDocument();
         }
         else {
             Element root = ((Document)v).getDocumentElement();

@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOpThread.java,v 1.1 2001/07/17 06:57:55 vpapad Exp $
+ * $Id: ConstantOpThread.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
  *
  */
 
@@ -54,7 +54,7 @@ public class ConstantOpThread implements Runnable {
     private boolean processDocument() {
 	boolean succeed = true;
 	try {
-            DOMParser parser = DOMFactory.newParser();
+            niagara.ndom.DOMParser parser = DOMFactory.newParser();
 
 	    parser.parse(new InputSource(new ByteArrayInputStream(content.getBytes())));
 	    Document doc = parser.getDocument();

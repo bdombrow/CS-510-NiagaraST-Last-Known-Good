@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: FetchThread.java,v 1.3 2001/07/17 06:57:55 vpapad Exp $
+  $Id: FetchThread.java,v 1.4 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,7 +33,6 @@ package niagara.data_manager;
   */
 
 import java.util.*;
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 
 import niagara.trigger_engine.*;
@@ -59,7 +58,6 @@ class FetchThread implements Runnable {
     }
 
     public void run() {
-        // System.err.println("Fetch thread start running");
         Vector tmpUrl = new Vector();
         Object ret = null;
         blockCount = 0;
@@ -69,7 +67,6 @@ class FetchThread implements Runnable {
 
             } catch(CacheFetchException cfe) {
                 System.err.println(" !!! *** Fetch Failed");
-                // ret = new TXDocument();
             }
             if(ret == null) {
 		// System.out.println("FT:: One Bad Miss " + req.urls.elementAt(i));
@@ -92,12 +89,6 @@ class FetchThread implements Runnable {
                     System.err.println("Closed Stream in Fetch");
                 }
             }
-	    /*try {
-		System.out.println("Fetch thread sleeping for 5 seconds");
-				Thread.sleep(5000);
-	} catch (java.lang.InterruptedException ie) {
-		System.out.println("Fetch thread interrupted! What does this mean??");
-	    }*/
         }
 outer:  while(tmpUrl.size()!=0) {
 	    if(!notified) _wait();

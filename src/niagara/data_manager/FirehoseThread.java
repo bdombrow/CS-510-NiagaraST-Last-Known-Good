@@ -30,8 +30,7 @@ public class FirehoseThread implements Runnable {
     private FirehoseSpec spec;
     private SourceStream outputStream;
     private FirehoseClient fhClient;
-    private String messageBuffer;
-    private int messageLen;
+    private ByteArrayInputStream messageStream;
 
     public FirehoseThread(FirehoseSpec spec, SourceStream outStream) {
 	this.spec = spec;
@@ -49,20 +48,30 @@ public class FirehoseThread implements Runnable {
 	fhClient = new FirehoseClient(spec.getListenerPortNum(),
 				      spec.getListenerHostName());
 	int err = fhClient.open_stream(spec.getRate(), spec.getType(),
-			     spec.getDescriptor(), spec.getIters());
+				       spec.getDescriptor(), spec.getIters(),
+				       spec.getDocCount());
+
+        long mem = Runtime.getRuntime().totalMemory();
+	System.out.println("Firehose - starting mem size " + mem);
+
 	while(err == 0 && messageEOF == false && streamShutdown == false) {
-	    err = fhClient.get_data();
+	    //err = fhClient.get_data();
+	    err = fhClient.get_document(); // force client to return whole doc
 	    if(err == 0) {
 		messageEOF = fhClient.get_eof();
-		if(messageEOF == false) {
-		    messageBuffer = fhClient.get_buffer();
-		    messageLen = fhClient.get_len();
-		    /* processMessageBuffer returns false when
-		     * the stream gets a shutdown message (from
-		     * an operator above
-		     */
-		    streamShutdown = ! processMessageBuffer();
-		}
+
+		/* buffer assumed to contain exactly one document
+		 * certainly true if get_document used 
+		 * Note the last doc should be waiting when we get
+		 * the eof notification
+		 */
+		messageStream = fhClient.get_doc_stream();
+
+		/* processMessageBuffer returns false when
+		 * the stream gets a shutdown message (from
+		 * an operator above
+		 */
+		streamShutdown = ! processMessageBuffer();
 	    }
 	}
 
@@ -78,7 +87,7 @@ public class FirehoseThread implements Runnable {
 	spec = null;
 	outputStream = null;
 	fhClient = null;
-	messageBuffer = null;
+	messageStream = null;
 	
 	return;
     }
@@ -89,6 +98,11 @@ public class FirehoseThread implements Runnable {
      */
     private boolean processMessageBuffer() {
 	Document parsedDoc = parseMessageBuffer();
+
+	if(parsedDoc == null) {
+	    return false; /* shut down operator */
+	}
+
 	boolean succeed;
 	try {
 	    succeed = outputStream.put(parsedDoc);
@@ -114,7 +128,7 @@ public class FirehoseThread implements Runnable {
     }
 
     // We are trusting the firehose to return valid documents
-    DOMParser parser;
+    niagara.ndom.DOMParser parser;
 
     /**
      * parse the messageBuffer 
@@ -127,21 +141,23 @@ public class FirehoseThread implements Runnable {
 	 */
 
 	// Bug in IBM's XMLGenerator
-	int i1 = messageBuffer.indexOf("SYSTEM \"\"");
+	/*	int i1 = messageBuffer.indexOf("SYSTEM \"\"");
 	if (i1 !=  -1) {
 	    messageBuffer = messageBuffer.substring(0, i1) + 
 		"SYSTEM \"http://www.cse.ogi.edu/~vpapad/xml/play.dtd\"" +
 		messageBuffer.substring(i1 + "SYSTEM \"\"".length());
 	}
 
-	// Get rid of 0x0's
+	// Get rid of 0x0's - this is using too much time!!
   	if (messageBuffer.indexOf(0) != -1)
  	    messageBuffer = messageBuffer.substring(0, messageBuffer.indexOf(0));	
+	*/
+
 	try {
 	    if (parser == null) {
   		parser = DOMFactory.newParser();
 	    }
-	    parser.parse(new InputSource(new ByteArrayInputStream(messageBuffer.getBytes())));
+	    parser.parse(new InputSource(messageStream));
 	    Document doc = parser.getDocument();
 	    return doc;
 	}

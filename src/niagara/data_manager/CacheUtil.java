@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheUtil.java,v 1.2 2000/08/09 23:53:52 tufte Exp $
+  $Id: CacheUtil.java,v 1.3 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,8 +37,8 @@ import java.net.*;
 import java.util.*;
 import gnu.regexp.*;
 import org.w3c.dom.*;
-import com.ibm.xml.parser.*;
-import com.ibm.xml.xpointer.*;
+
+import niagara.ndom.*;
 import niagara.trigger_engine.*;
 import niagara.query_engine.*;
 import niagara.utils.*;
@@ -89,10 +89,8 @@ public class CacheUtil {
 
     public static boolean isAccumFile(String name) {
 	if(DataManager.AccumFileDir.containsKey(name)) {
-	    System.out.println("Accum file dir contains: " + name);
 	    return true;
 	} else {
-	    System.out.println("Accum file dir does not contain: " + name);
 	    return false;
 	}
     }
@@ -197,7 +195,7 @@ public class CacheUtil {
         return ret;
     }
 
-    public static void flushXML(String fname, TXDocument doc) {
+    public static void flushXML(String fname, Document doc) {
         // System.err.println(" @@@@@@@ Flushing " + fname);
         Element root = doc.getDocumentElement();
         String tsp = root.getAttribute("TIMESPAN");
@@ -209,7 +207,8 @@ public class CacheUtil {
         if(dirty!=null && !dirty.equals("")) root.setAttribute("DIRTY", "FALSE");
         try {
             PrintWriter pw = new PrintWriter(new FileOutputStream(fname));
-            doc.print(pw);
+	    System.err.println("Unable to print document - print method not supported by Document");
+            // KT doc.print(pw);
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -243,14 +242,14 @@ public class CacheUtil {
         return ret;
     }
     public static void flushVec(String fname, long timespan, Vector vec) {
-        TXDocument doc = new TXDocument();
+        Document doc = DOMFactory.newDocument();
         Element root = doc.createElement("ROOT");
         root.setAttribute("TIMESPAN", ""+timespan); 
         root.setAttribute("DIRTY", "FALSE");
         long threshold = System.currentTimeMillis() - timespan;
         for(int i=0; i<vec.size(); i++) {
             StreamTupleElement tmp = (StreamTupleElement)vec.elementAt(i);
-            root.appendChild(tmp.toEle());
+            root.appendChild(tmp.toEle(doc));
         }
         doc.appendChild(root);
         flushXML(fname, doc);
@@ -314,7 +313,7 @@ public class CacheUtil {
                     continue;
                 }
 
-                TXElement child = (TXElement)n;
+                Element child = (Element)n;
                 if(child.getTagName().compareTo("Insert")==0) {
                     Element toadd = (Element) child.getFirstChild();
                     nodelist.add(toadd);
@@ -326,7 +325,7 @@ public class CacheUtil {
         }
        
         String roottag = diff.getDocumentElement().getAttribute("ROOTTAG");
-        Document ret = new TXDocument();
+        Document ret = DOMFactory.newDocument();
 	if(roottag==null || roottag.equals("")) {
 	    System.out.println("Illegal roottag " + roottag);
 	    Node tmpret = ret.createElement("xxxxxx");

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DataManager.java,v 1.2 2000/08/09 23:53:52 tufte Exp $
+  $Id: DataManager.java,v 1.3 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,8 +27,9 @@
 
 
 package niagara.data_manager;
-import com.ibm.xml.parser.*;
+import niagara.ndom.*;
 import org.w3c.dom.*;
+import org.xml.sax.*;
 import java.util.*;
 import java.io.*;
 import java.net.*;
@@ -127,9 +128,9 @@ public class DataManager {
      *  @exception DMClosedException this function called while 
      *                             data manager is being closed 
      */
-    public synchronized DTD getDTD(String dtdURL) 
+    public synchronized DocumentType getDTD(String dtdURL) 
     throws ParseException, IOException, MalformedURLException {
-	DTD dtd = null;
+	DocumentType dtd = null;
         dtd = dtdDir.getDTD(dtdURL);
 	return dtd;
     }
@@ -151,7 +152,7 @@ public class DataManager {
 
     public synchronized DTDInfo getDTDInfo (Vector requestList) {
 	String query = (String)requestList.elementAt(0);
-	TXDocument responseDoc;
+	Document responseDoc;
 	try {
 	    if (!usePermanent) {
 		client =  new SEClient(SEhost);
@@ -175,7 +176,7 @@ public class DataManager {
     }
 
     public synchronized Vector getDTDList() {
-	TXDocument responseDoc = null;
+	Document responseDoc = null;
 
 	try {
 	    if (!usePermanent) {
@@ -323,16 +324,20 @@ public class DataManager {
         return cacheM.getDocuments(xmlURLList, pathExpr, stream);
     }
 
-    public static TXDocument parseXML(String str) {
-        Parser p   = new Parser("request.xml");
-        p.setWarningNoDoctypeDecl(false);
-        p.setWarningNoXMLDecl(false);
-        p.setKeepComment(false);
-        TXDocument doc = new TXDocument();
-        p.setElementFactory(doc);
+    public static Document parseXML(String str) {
+        niagara.ndom.DOMParser p = DOMFactory.newParser(); 
+        // ??? what are these - KT, just comment them out
+	// and see what happens - uugh
+	//p.setWarningNoDoctypeDecl(false);
+        //p.setWarningNoXMLDecl(false);
+        //p.setKeepComment(false);
+        Document doc = DOMFactory.newDocument();
+        //p.setElementFactory(doc);
 
         try {
-	    p.readStream(new StringReader(str));
+	    p.parse(new InputSource(new StringReader(str)));
+	    // KT - removed - del when new stuff works
+	    //p.readStream(new StringReader(str));
         }   catch (Exception e) {
             e.printStackTrace();
             return null;

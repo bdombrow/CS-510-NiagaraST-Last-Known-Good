@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DTDDirEntry.java,v 1.2 2000/08/09 23:53:52 tufte Exp $
+  $Id: DTDDirEntry.java,v 1.3 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,6 @@
 
 package niagara.data_manager;
 
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import java.io.*;
 import java.net.URL;
@@ -92,7 +91,7 @@ public class DTDDirEntry implements Serializable{
     
     // The parsed DTD
     //
-    private DTD dtd;
+    private DocumentType dtd;
     
 
     /**
@@ -161,21 +160,27 @@ public class DTDDirEntry implements Serializable{
      *
      * @return a the parsed DTD object for this DTD entry, null if error
      */
-    public DTD getDTD() 
+    public DocumentType getDTD() 
 	throws ParseException, java.net.MalformedURLException, 
 	       java.io.FileNotFoundException, java.io.IOException {
         // return a clone if the DTD is already parsed
         //
         if( dtd != null ) {
-            return (DTD)dtd.clone();
+            return (DocumentType)(dtd.cloneNode(true));
         }
         
         // If the dtd is local, parse and return
         //
         if ( local ) {
-            dtd = CUtil.parseDTD(URLName);
+	     // KT - ??? Need something to parse a DTD - don't 
+	     // have that with XML4J gone
+	     System.err.println("CANT PARSE DTD");
+	     dtd = null;
+	     /*
+              * dtd = CUtil.parseDTD(URLName);
+             */
 	    if (dtd != null) {
-               return (DTD)dtd.clone();
+               return (DocumentType)dtd.cloneNode(true);
             }
 	    return null;
         }
@@ -190,16 +195,23 @@ public class DTDDirEntry implements Serializable{
         // Should be cached after read if read succeeds
         // and then parse from local copy
         //
-        if (cached) {
-            dtd = CUtil.parseDTD(cachedFileName);
-	    if (dtd != null) {
-		return (DTD)dtd.clone();
-            }
-	    return null;
-        }
-        
-        System.err.println("readDTD() failed");
+	/* KT - ??? need something to parse a DTD - don't seem
+	* to have that now that XML4J is gone
+	*/
+	System.err.println("CANT PARSE DTD!!!");
         return null;
+        /*
+        * if (cached) {
+        *    dtd = CUtil.parseDTD(cachedFileName);
+	*    if (dtd != null) {
+        *	return (DocumentType)dtd.clone();
+        *   }
+	*    return null;
+        * }
+        *
+        * System.err.println("readDTD() failed");
+        * return null;
+	*/
     }
     
            

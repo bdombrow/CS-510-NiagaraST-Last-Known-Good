@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheManager.java,v 1.3 2001/07/17 06:57:55 vpapad Exp $
+  $Id: CacheManager.java,v 1.4 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,8 +27,8 @@
 
 
 package niagara.data_manager;
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
+import com.ibm.xml.parser.*;
 import java.util.*;
 import java.io.File;
 import java.io.PrintWriter;
@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.MalformedURLException;
+import niagara.ndom.*;
 import niagara.trigger_engine.*;
 import niagara.query_engine.*;
 import niagara.utils.*;
@@ -168,7 +169,7 @@ public class CacheManager {
             tmp = diskCache.urlToFile(s)+"_DIFF_.xml";
         else 
             tmp = diskCache.pathToFile(s)+"_DIFF_.xml";
-        TXDocument doc = null;
+        Document doc = null;
         try {
             if(span==0) {
                 File tmpF = new File(tmp);
@@ -176,7 +177,7 @@ public class CacheManager {
                 memCache.setOnce(s);
                 return;
             }
-            else doc = (TXDocument)memCache.fetch_reload(tmp, null);
+            else doc = (Document)memCache.fetch_reload(tmp, null);
         } catch(Exception fe) {
             memCache.setTimeSpan(s, span);
             inMemVec = true;
@@ -186,7 +187,7 @@ public class CacheManager {
         // System.err.println("**** Temp/Diff fetch done! *** " + tmp);
         if(doc.getDocumentElement()==null) {
             // System.err.println(" ########## Got a Dummy Doc ###### ");
-            TXElement root = new TXElement("ROOT");
+            Element root = doc.createElement("ROOT");
             doc.appendChild(root);
             root.setAttribute("DIRTY", "TRUE");
             root.setAttribute("LASTSTAMP", ""+getVClock());
@@ -266,7 +267,8 @@ public class CacheManager {
     }
             
     /** scan part of file inside an interval */
-    public Document getDiff(String file, long since, long to) {
+    public Document getDiff(String file, long since, long to) 
+	throws InvalidDOMRepException {
 
         Document resDoc = getDiff(file, to);
         Document ddoc = CacheUtil.getQEDiffDoc(resDoc, since, to);
@@ -275,21 +277,22 @@ public class CacheManager {
     }
 
     /** Generate new Diffs */
-    private Document getDiff(String s, long tsp) {
+    private Document getDiff(String s, long tsp) 
+	throws InvalidDOMRepException {
 
         String tmp = null;
         if(CacheUtil.isUrl(s)) tmp = diskCache.urlToFile(s);
         else tmp = diskCache.pathToFile(s);
-        TXDocument resDoc = null;
+        Document resDoc = null;
 
         try {
-            resDoc = (TXDocument)memCache.fetch(tmp+"_DIFF_.xml", null);
+            resDoc = (Document)(memCache.fetch(tmp+"_DIFF_.xml", null));
         } catch ( Exception fe) {
             // System.err.println("Fetch Error, in GetDiff resDoc");
         }
         if(resDoc.getDocumentElement()==null) {
             // System.err.println("====== %%%%%% Dummy resDoc");
-            TXElement tmpEle = new TXElement("ROOT");
+            Element tmpEle = resDoc.createElement("ROOT"); 
             tmpEle.setAttribute("TIMESPAN", "0");
             tmpEle.setAttribute("LASTSTAMP", "0");
             tmpEle.setAttribute("DIRTY", "FALSE");
@@ -301,7 +304,9 @@ public class CacheManager {
         return resDoc;
     }
 
-    private synchronized void Diff(String s1, String s2, TXDocument resDoc, long tsp) {
+    private synchronized void Diff(String s1, String s2, Document resDoc, 
+				   long tsp) 
+	throws InvalidDOMRepException {
 	
         long ts1 = CacheUtil.getTimeStamp(s1);
         long ts2 = CacheUtil.getTimeStamp(s2);
@@ -314,21 +319,18 @@ public class CacheManager {
 	    File tmpF = new File(s1);
 	    if(!tmpF.exists()) {
 		try {
-                    // XXX vpapad: parseXML may return something
-                    // XXX else than a TXDocument, but I'm not fixing
-                    // XXX XMLDiff to work with that...
-                    TXDocument tmpDoc = (TXDocument) CUtil.parseXML(s2); // XXX
-		Element resRoot = resDoc.getDocumentElement();
-		Element tmpRoot = tmpDoc.getDocumentElement();
-		NodeList nl = tmpRoot.getChildNodes();
-		for(int i=0; i<nl.getLength(); i++) {
-		    Node n = nl.item(i);
-		    if(n instanceof TXElement) {
+                    Document tmpDoc = (Document) CUtil.parseXML(s2); // XXX
+		    Element resRoot = resDoc.getDocumentElement();
+		    Element tmpRoot = tmpDoc.getDocumentElement();
+		    NodeList nl = tmpRoot.getChildNodes();
+		    for(int i=0; i<nl.getLength(); i++) {
+			Node n = nl.item(i);
+			if(n instanceof Element) {
 			Element eleins = resDoc.createElement("Insert");
 			eleins.setAttribute("TIMESTAMP", ""+getVClock());
 			// Xpointer = eleins.makeXPointer();
 			// eleins.setAttribute("POSITION", p.toString());
-			Child nchild = (Child)n.cloneNode(true);
+			Node nchild = n.cloneNode(true);
 			eleins.appendChild(nchild);
 			resRoot.appendChild(eleins);
 		    }
@@ -343,33 +345,33 @@ public class CacheManager {
 		    System.err.print("Illegal XML DOC!");
 		}
 	    }
-            TXDocument doc1 = null;
-            TXDocument doc2 = null;
+            Document doc1 = null;
+            Document doc2 = null;
             try {
-                doc1 = (TXDocument)memCache.fetch_reload(s1, null);
-                // doc2 = (TXDocument)memCache.fetch_reload(s2, null);
-                // doc1 = (TXDocument) CUtil.parseXML(s1);
-                    // XXX vpapad: parseXML may return something
-                    // XXX else than a TXDocument, but I'm not fixing
-                    // XXX XMLDiff to work with that...
-                doc2 = (TXDocument) CUtil.parseXML(s2); // XXX
-		/*if(doc2.getDocumentElement()==null)
-		  System.out.println("BAD DOCUMENT !!! "); */
+                doc1 = (Document)memCache.fetch_reload(s1, null);
+                doc2 = (Document) CUtil.parseXML(s2); // XXX
             } catch (Exception cfe) {
 		System.err.println("DIFF FAILED - should be an exception thrown here, but I don't have time to fix all this stuff!!!@!!");
-                // System.err.println("Error is getting Docs");
-                // System.err.println(s1 + " $$ " + s2);
                 return;
             }
 
-            try { 
-                XMLDiff.getDiffDoc((TXDocument)doc1.cloneNode(true), 
-                        (TXDocument)doc2.cloneNode(true), resDoc,
-                        tsp);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Diffing get exception: ");
-            }
+	    if(doc1 instanceof TXDocument) {
+		/*	
+		 * This code requires TXDocument and an old version
+		 * of ibm's xml4j parser
+		 */
+		try { 
+		    XMLDiff.getDiffDoc((TXDocument)doc1.cloneNode(true), 
+				       (TXDocument)doc2.cloneNode(true), 
+				       (TXDocument)resDoc,
+				       tsp);
+		} catch (Exception e) {
+		    e.printStackTrace();
+		    System.err.println("Diffing get exception: ");
+		}	     
+	    } else {
+		throw new InvalidDOMRepException("XMLDiff doesn't work unless you use old version of XML4J");
+	    }
                 
 	    try { 
 		Monitor(s2, false); // fetch new copy.

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCacheEntry.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: MemCacheEntry.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,15 +32,14 @@ package niagara.data_manager;
   */
 import java.util.*;
 import org.w3c.dom.*;
-import com.ibm.xml.parser.*;
 
 import niagara.trigger_engine.*;
 import niagara.query_engine.*;
 import niagara.data_manager.XMLDiff.*;
 
 class MemCacheEntry {
-    Object key; // usurally should be a string
-    Object val; // usurally a TXDocument
+    Object key; // usually should be a string
+    Object val; // usually a Document
 
     // stats
     long size;
@@ -97,8 +96,8 @@ class MemCacheEntry {
     public void flush() {
         if(dirty) {
             // System.err.println("Flushing a MemCacheEntry");
-            if(key instanceof String && val instanceof TXDocument)
-                CacheUtil.flushXML((String)key, (TXDocument)val);
+            if(key instanceof String && val instanceof Document)
+                CacheUtil.flushXML((String)key, (Document)val);
             else if(key instanceof String && val instanceof Vector) {
                 shrink();
                 CacheUtil.flushVec((String)key, timespan, (Vector)val);

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UrlFetchThread.java,v 1.3 2001/07/17 06:57:55 vpapad Exp $
+  $Id: UrlFetchThread.java,v 1.4 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,9 +32,9 @@ import java.io.*;
 import java.net.*;
 
 import java.util.Vector;
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 
+import niagara.ndom.*;
 import niagara.trigger_engine.*;
 import niagara.query_engine.*;
 import niagara.utils.*;
@@ -97,7 +97,7 @@ public class UrlFetchThread implements Runnable {
 
 	if(doc==null) {
 	    System.err.println("Fetch URL failed. Creating null document");
-	    doc = new TXDocument();
+	    doc = DOMFactory.newDocument();
 	}
         if(me!=null) {
             me.setval(doc);

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DMUtil.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: DMUtil.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,7 +32,6 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 import java.net.*;
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 
 import niagara.trigger_engine.*;
@@ -154,7 +153,7 @@ public class DMUtil
      * @see DTDInfo
      */
 
-    public static DTDInfo parseDTDInfo(TXDocument dtdInfoDoc) {
+    public static DTDInfo parseDTDInfo(Document dtdInfoDoc) {
 	if(dtdInfoDoc == null)
 	    return null;
 	
@@ -178,7 +177,7 @@ public class DMUtil
     }
 
 
-    public static Vector parseDTDList(TXDocument dtdListDoc) {
+    public static Vector parseDTDList(Document dtdListDoc) {
 	if(dtdListDoc == null)
 	    return null;
 	

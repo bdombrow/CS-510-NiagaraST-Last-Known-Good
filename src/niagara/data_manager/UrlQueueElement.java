@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UrlQueueElement.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: UrlQueueElement.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,7 +32,6 @@ import java.io.*;
 import java.net.*;
 
 import java.util.Vector;
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 
 import niagara.trigger_engine.*;
