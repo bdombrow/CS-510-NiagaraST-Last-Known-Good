@@ -1,5 +1,5 @@
 /**
- * $Id: DocumentImpl.java,v 1.4 2002/04/02 21:53:10 vpapad Exp $
+ * $Id: DocumentImpl.java,v 1.5 2002/04/06 02:15:08 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -19,6 +19,8 @@ public class DocumentImpl extends NodeImpl implements Document {
     public DocumentImpl(Page firstPage, int offset) {
         super(null, BufferManager.getIndex(firstPage, offset));
 
+        doc = this;
+
         pages = new Vector();
         addPage(firstPage);
     }
@@ -28,8 +30,7 @@ public class DocumentImpl extends NodeImpl implements Document {
     }
 
     public String getNodeName() {
-        // XXX vpapad: What are we supposed to return here?
-        return null;
+        return "#document";
     }
 
     public void addPage(Page page) {

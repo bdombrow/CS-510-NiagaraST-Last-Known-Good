@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.6 2002/04/02 21:53:10 vpapad Exp $
+ * $Id: BufferManager.java,v 1.7 2002/04/06 02:15:08 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -69,15 +69,15 @@ public class BufferManager {
         return index % page_size;
     }
 
-    // KT - is there a problem with making this public?
     public static int getIndex(Page page, int offset) {
         return page.getNumber()*page_size + offset;
     }
 
-    protected static byte getEventType(int index) {
+    public static byte getEventType(int index) {
         return getPage(index).getEventType(getOffset(index));
     }
-    protected static String getEventString(int index) {
+
+    public static String getEventString(int index) {
         return getPage(index).getEventString(getOffset(index));
     }
 
@@ -175,19 +175,16 @@ public class BufferManager {
         }
 
         EventIterator ei = new EventIterator(index);
-        ei.forwardChild();
-        if (ei.getIndex() == index) 
+        if (! ei.forwardChild()) 
             return new NodeListImpl(new Node[] {});
 
         Vector children = new Vector();
         int lastIndex = ei.getIndex();
         do {
             children.add(makeNode(doc, lastIndex));
-            ei.forwardSibling();
-            if (ei.getIndex() == lastIndex)
-                break;
-            else
+            if (ei.forwardSibling())
                 lastIndex = ei.getIndex();
+            else break;
         } while (true);
         
         Node[] nodes = new Node[children.size()];
@@ -207,7 +204,7 @@ public class BufferManager {
         case SAXEvent.TEXT:
             return new TextImpl(doc, index);
         default:
-            throw new PEException("makeNode() can't handle this event type:"
+            throw new PEException("makeNode() can't handle this event type: "
                 + et);
         }
         
@@ -219,15 +216,52 @@ public class BufferManager {
 
     public static Node getFirstChild(DocumentImpl doc, int index) {
         EventIterator ei = new EventIterator(index);
-        ei.forwardChild();
-        if (ei.getIndex() == index) 
+        if (! ei.forwardChild()) 
             return null;
-        else return makeNode(doc, ei.getIndex());
 
+        return makeNode(doc, ei.getIndex());
     }
 
-    public static Node getLastChild(int index) {
-        throw new PEException("Not Implemented Yet!");
+    public static Node getLastChild(DocumentImpl doc, int index) {
+        int lastChildIndex = getLastChildIndex(index);
+        if (lastChildIndex < 0)
+            return null;
+        return makeNode(doc, lastChildIndex);
+    }
+
+    public static int getLastChildIndex(int index) {
+        Page page = getPage(index);
+        int offset = getOffset(index);
+
+        int pageSize = page.getSize();
+
+        while (true) {
+            if (offset == pageSize - 1) {
+                page = page.getNext();
+                offset = 0;
+            }
+            else
+                offset++;
+        
+            switch (page.getEventType(offset)) {
+            case SAXEvent.ATTR_NAME:
+            case SAXEvent.ATTR_VALUE:
+                continue;
+            case SAXEvent.END_ELEMENT:
+                return -1;
+            case SAXEvent.START_ELEMENT:
+            case SAXEvent.TEXT:
+                int nextSiblingIndex = page.getNextSibling(offset);
+                while (nextSiblingIndex >= 0) {
+                    page = getPage(nextSiblingIndex);
+                    offset = getOffset(nextSiblingIndex);
+                    nextSiblingIndex = page.getNextSibling(offset);
+                } 
+                return getIndex(page, offset);
+            default:
+                throw new PEException("Unexpected event type");
+            }
+        }
     }
 
     public static Node getNextSibling(DocumentImpl doc, int index) {
@@ -257,10 +291,41 @@ public class BufferManager {
         throw new PEException("Not Implemented Yet!");
     }
 
-    public static Node getPreviousSibling(int index) {
-        throw new PEException("Not Implemented Yet!");
+    public static Node getPreviousSibling(DocumentImpl doc, int index) {
+        int previousSiblingIndex = getPreviousSiblingIndex(index);
+        if (previousSiblingIndex < 0)
+            return null;
+        
+        return makeNode(doc, previousSiblingIndex);
     }
     
+    public static int getPreviousSiblingIndex(int index) {
+        Page page = getPage(index);
+        int offset = getOffset(index);
+        
+        if (offset == 0) {
+            page = page.getPrevious();
+            offset = page.getSize() - 1;
+        }
+        else
+            offset--;
+        
+        switch (page.getEventType(offset)) {
+        case SAXEvent.START_DOCUMENT:
+        case SAXEvent.START_ELEMENT:
+        case SAXEvent.ATTR_NAME:
+        case SAXEvent.ATTR_VALUE:
+            return -1;
+        case SAXEvent.END_ELEMENT:
+            return page.getNextSibling(offset);
+        case SAXEvent.TEXT:
+            return getIndex(page, offset);
+        default:
+            throw 
+                new PEException("Unexpected event type in getPreviousSibling");
+        }
+    }
+
     public static String getData(int index) {
         return getEventString(index);
     }
@@ -335,9 +400,9 @@ class EventIterator {
     }
 
     /**
-     * Move to the first child of this event (do nothing if there is none)
+     * Move to the first child of this event (return false if there is none)
      */
-    public void forwardChild() {
+    public boolean forwardChild() {
         // Save current location, in case our search is unsuccessful
         Page orgPage = page; 
         int orgOffset = offset;
@@ -357,21 +422,25 @@ class EventIterator {
             // Search unsuccessful
             page = orgPage;
             offset = orgOffset;
+            return false;
         }
+        return true;
     }
 
     /**
      * Skip forward to the next event representing a sibling
-     * of the current event (do nothing if there is no such event)
+     * of the current event (return false if there is no such event)
      */
-    public void forwardSibling() {
+    public boolean forwardSibling() {
         byte et = page.getEventType(offset);
         if (et == SAXEvent.TEXT || et == SAXEvent.START_ELEMENT) {
             int next = page.getNextSibling(offset);
             if (next !=  -1) {
                 page = BufferManager.getPage(next);
                 offset = BufferManager.getOffset(next);
+                return true;
             }
+            return false;
         }
          else 
             throw new PEException("forwardSimpling can't handle this event.");

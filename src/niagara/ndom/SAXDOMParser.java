@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.6 2002/04/02 21:53:06 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.7 2002/04/06 02:14:55 vpapad Exp $
  *
  */
 
@@ -35,6 +35,9 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
     private DocumentImpl doc;
     private Page page;
 
+    // XXX vpapad: To test SAXDOM table building performance
+    private static final boolean producingOutput = true;
+
     // XXX vpapad: We could make this a container, but creating and
     // casting Integers back and forth is not a nice thing to do for
     // each DOM node in a document. A value of 1024 for the size of
@@ -45,6 +48,8 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 
     // We use this string buffer to normalize consecutive text nodes
     private StringBuffer sb = new StringBuffer();
+
+    private static final String newLine = "\n";
 
     // for streaming support - KT
     private SourceStream outputStream;
@@ -169,15 +174,16 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
     public void endElement(String namespaceURI, String localName, String qName)
         throws SAXException {
         // ignore stream header
-        if (NiagraServer.STREAM && qName.equals("niagara:stream")) {
-            System.out.println("XXX vpapad: got stream header");
+        if (NiagraServer.STREAM && qName.equals("niagara:stream")) 
             return;
-        }
 
         handleText();
         depth--; // This level is finished;
 
+        // The next_sibling pointer in END_ELEMENT points to the
+        // beginning of the element
         page.addEvent(doc, SAXEvent.END_ELEMENT, null);
+        page.setNextSibling(page.getLastOffset(), open_nodes[depth]);
 
         // if we're streaming, and this is a top-level element
         // pretend we just received an end document event
@@ -191,7 +197,8 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
                 // I don't want to do a lot of work until I know this
                 // actually works
                 try {
-                    outputStream.put(doc);
+                    if (producingOutput)
+                        outputStream.put(doc);
                 } catch (java.lang.InterruptedException ie) {
                 throw new PEException("KT - InterruptedException in SAXDOMParser");
                 } catch (niagara.utils.NullElementException ne) {
@@ -221,8 +228,13 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
         // do nothing
         if (NiagraServer.STREAM && depth <= 0) return;
 
-        if (sb.length() > 0) {
-            page.addEvent(doc, SAXEvent.TEXT, sb.toString());
+        int length = sb.length();
+        if (length > 0) {
+            // Special case for newlines
+            if (length == 1 && sb.charAt(0) == '\n')
+                page.addEvent(doc, SAXEvent.TEXT, newLine);
+            else
+                page.addEvent(doc, SAXEvent.TEXT, sb.toString());
             sb.setLength(0);
 
             int current = page.getLastIndex(); 

@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.6 2002/04/02 21:53:10 vpapad Exp $
+ * $Id: Page.java,v 1.7 2002/04/06 02:15:08 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -140,6 +140,10 @@ public class Page {
 
     public Page getNext() {
         return next;
+    }
+
+    public Page getPrevious() {
+        return previous;
     }
 
     public void setParser(SAXDOMParser parser) {
