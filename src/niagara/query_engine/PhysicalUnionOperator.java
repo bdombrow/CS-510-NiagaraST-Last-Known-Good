@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalUnionOperator.java,v 1.5 2002/09/24 23:18:46 ptucker Exp $
+  $Id: PhysicalUnionOperator.java,v 1.6 2002/10/24 01:06:35 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,8 +28,12 @@
 package niagara.query_engine;
 
 import org.w3c.dom.*;
-import java.util.Vector;
+
 import java.util.ArrayList;
+import java.util.Vector;
+
+import niagara.optimizer.*;
+import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -40,57 +43,34 @@ import niagara.xmlql_parser.syntax_tree.*;
  * <code>PhysicalUnionOperator</code> implements a union of a set 
  * of incoming streams;
  *
- * @author Vassilis Papadimos
  * @see PhysicalOperator
  */
 public class PhysicalUnionOperator extends PhysicalOperator {
+    private ArrayList[] rgPunct;
+    private int[] rgnRemove;
 
-    //////////////////////////////////////////////////////////////////////////
-    // These are the private data members of the PhysicalUnionOperator class //
-    //////////////////////////////////////////////////////////////////////////
-
-    //private int count;
-
-    /**
-     * This is the constructor for the PhysicalUnionOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param blocking True if the operator is blocking and false if it is
-     *                 non-blocking
-     * @param responsiveness The responsiveness, in milliseconds, to control
-     *                       messages
-     */
-
-    ArrayList[] rgPunct;
-    int[] rgnRemove;
-
-    public PhysicalUnionOperator (op logicalOperator,
-				  SourceTupleStream[] sourceStreams,
-				  SinkTupleStream[] sinkStreams,
-				  Integer responsiveness) {
-
-	// Call the constructor on the super class
-	//
-	super(sourceStreams,
-	      sinkStreams,
-	      new boolean[sourceStreams.length],
-	      responsiveness);
-
-	rgPunct = new ArrayList[sourceStreams.length];
-	for (int i=0; i<rgPunct.length; i++)
-	    rgPunct[i] = new ArrayList();
-
-	rgnRemove = new int[sourceStreams.length];
-	//count = 0;
+    public PhysicalUnionOperator() {
+        // XXX vpapad: here we have to initialize blockingSourceStreams
+        // but we don't know how many input streams we have yet. 
+        // We postpone it until initFrom - is that too late?
+    }
+    
+    public PhysicalUnionOperator(int arity) {
+        setBlockingSourceStreams(new boolean[arity]);
+    }
+    
+    public void initFrom(LogicalOp logicalOperator) {
+        setBlockingSourceStreams(new boolean[logicalOperator.getArity()]);
     }
 
-    int counter = 0;
+    public void opInitialize() {
+        rgPunct = new ArrayList[getArity()];
+        for (int i=0; i<rgPunct.length; i++)
+            rgPunct[i] = new ArrayList();
 
+        rgnRemove = new int[getArity()];
+    }
+    
     /**
      * This function processes a tuple element read from a source stream
      * when the operator is non-blocking. This over-rides the corresponding
@@ -101,12 +81,10 @@ public class PhysicalUnionOperator extends PhysicalOperator {
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-
     protected void nonblockingProcessSourceTupleElement (
 						 StreamTupleElement inputTuple,
 						 int streamId)
 	throws ShutdownException, InterruptedException {
-        counter++;
 	putTuple(inputTuple, 0);
     }
 
@@ -156,5 +134,71 @@ public class PhysicalUnionOperator extends PhysicalOperator {
 
     public boolean isStateful() {
 	return false;
+    }
+    
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(LogicalProperty, LogicalProperty[])
+     */
+    public Cost FindLocalCost(ICatalog catalog, LogicalProperty[] inputLogProp) {
+        double trc = catalog.getDouble("tuple_reading_cost");
+        double sumCards = 0;
+        for (int i = 0; i < inputLogProp.length; i++)
+            sumCards += inputLogProp[i].getCardinality();
+        return new Cost(trc * sumCards);
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+        return new PhysicalUnionOperator(getArity());
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#InputReqdProp(PhysicalProperty, LogicalProperty, int)
+     */
+    public PhysicalProperty[] InputReqdProp(
+        PhysicalProperty PhysProp,
+        LogicalProperty InputLogProp,
+        int InputNo) {
+        if (PhysProp.equals(PhysicalProperty.ANY)) {
+            // no requirement for input
+            return new PhysicalProperty[] {};
+        }
+        // otherwise require the same property for our input
+        return new PhysicalProperty[] {PhysProp};
+    }
+    
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
+     */
+    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+        // We cannot guarantee any physical property
+        return PhysicalProperty.ANY;
+    }
+
+    /**
+     * @see java.lang.Object#equals(Object)
+     */
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalUnionOperator))
+            return false;
+        if (o.getClass() != PhysicalUnionOperator.class)
+            return o.equals(this);
+        return getArity() == ((PhysicalUnionOperator) o).getArity();
+    }
+
+    public int hashCode() {
+        return getArity();
+    }
+    
+    /**
+     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
+     */
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        assert inputSchemas.length == getArity();
+        
+        inputTupleSchemas = inputSchemas;
+        outputTupleSchema = inputSchemas[0].copy();
     }
 }
