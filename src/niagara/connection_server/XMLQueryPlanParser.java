@@ -102,6 +102,9 @@ public class XMLQueryPlanParser {
 	else if (nodeName.equals("join")) {
 	    handleJoin(e, inputs);
 	}
+	else if (nodeName.equals("avg")) {
+	    handleAvg(e);
+	}
 	else if (nodeName.equals("dtdscan")) {
 	    handleDtdScan(e);
 	}
@@ -122,6 +125,7 @@ public class XMLQueryPlanParser {
 
 	String inputAttr = e.getAttribute("input");
 	String typeAttr = e.getAttribute("type");
+	String rootAttr = e.getAttribute("root");
 	String regexpAttr = e.getAttribute("regexp");
 	
 	int type;
@@ -172,12 +176,20 @@ public class XMLQueryPlanParser {
 	
 	// Register variable -> resultSA
 	qpVarTbl.addVar("$" + id, resultSA);
-	
-	schemaAttribute sa = 
-	    new schemaAttribute(sc.numAttr()-1);
-	
-	sc.addSchemaUnit(new SchemaUnit(redn, sc.numAttr()));
+
+	// The attribute the regexp starts from
+	// If left blank, we start the regexp from the last
+	// attribute added to the input tuple
+	schemaAttribute sa;
+	if (rootAttr.equals(""))
+	    sa = new schemaAttribute(sc.numAttr()-1);
+	else
+	    sa = new schemaAttribute(qpVarTbl.lookUp(rootAttr));
+
 	op.setScan(sa, redn);
+
+	sc.addSchemaUnit(new SchemaUnit(redn, sc.numAttr()));
+
 	
 	logNode scanNode = new logNode(op, input);
 	
@@ -267,6 +279,52 @@ public class XMLQueryPlanParser {
 	joinNode.setVarTbl(Util.mergeVarTbl(leftv, rightv, left.getSchema().numAttr()));
     }
 
+    void handleAvg(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	averageOp op = (averageOp) operators.Average.clone();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+	String groupby = e.getAttribute("groupby");
+	String avgattr = e.getAttribute("avgattr");
+	String inputAttr = e.getAttribute("input");
+	
+	logNode input = (logNode) ids2nodes.get(inputAttr);
+	varTbl oldVarTbl = input.getVarTbl();
+
+	varTbl qpVarTbl = new varTbl();
+	Schema sc = new Schema();
+
+	// Parse the groupby attribute to see what to group on
+	Vector groupbySAs = new Vector();
+	StringTokenizer st = new StringTokenizer(groupby);
+	while (st.hasMoreTokens()) {
+	    String varName = st.nextToken();
+
+	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
+	    groupbySAs.addElement(oldAttr);
+	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
+	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
+	}
+
+	schemaAttribute averagingAttribute = oldVarTbl.lookUp(avgattr);
+
+	op.setAverageInfo(new skolem("avg", groupbySAs), averagingAttribute);
+	
+	//The attribute we're going to add to the result
+	schemaAttribute resultSA = new schemaAttribute(groupbySAs.size());
+	
+	// Register variable -> resultSA
+	qpVarTbl.addVar("$" + id, resultSA);
+	
+	logNode avgNode = new logNode(op, input);
+	
+	ids2nodes.put(id, avgNode);
+	
+	avgNode.setSchema(sc);
+	avgNode.setVarTbl(qpVarTbl);
+    }
+
     void handleDtdScan(Element e) 
 	throws CloneNotSupportedException, InvalidPlanException {
 	String id = e.getAttribute("id");
@@ -345,8 +403,6 @@ public class XMLQueryPlanParser {
 	}
 	
 	varTbl qpVarTbl = input.getVarTbl();
-	System.out.println("Variable table in construct: ");
-	qpVarTbl.dump();
 	
 	cn.replaceVar(qpVarTbl);
 	op.setConstruct(cn);
