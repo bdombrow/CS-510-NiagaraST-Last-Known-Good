@@ -7,207 +7,225 @@
 #include <np_consts.h>
 #include <np_funcs.h>
 
-static Niag_Profiler profiler;
-void notifyEvent(JVMPI_Event *event);
+extern void notifyEvent(JVMPI_Event* event);
 
-// profiler agent entry point
-extern "C" { 
-  JNIEXPORT jint JNICALL JVM_OnLoad(JavaVM *jvm, char *options, void *reserved) {
-    //fprintf(stderr, "niag_profiler> initializing ..... \n");
-    
-    // get jvmpi interface pointer
-    if ((jvm->GetEnv((void **)&(profiler.jvmpi_interface), JVMPI_VERSION_1)) < 0) {
-      fprintf(stderr, "myprofiler> error in obtaining jvmpi interface pointer\n");
-      return JNI_ERR;
-    } 
-
-    if(profiler.processOptions(options) != JNI_OK) {
-      barf(NULL);
-    }
-
-    if(profiler.profiling_on) {
-      cout << "KT: PROFILING ON" << endl;
-      // initialize jvmpi interface
-      profiler.jvmpi_interface->NotifyEvent = notifyEvent;
-      
-      profiler.method_list = new Method_List();
-      profiler.thread_list = new Thread_List(profiler.jvmpi_interface, 
-					     profiler.method_list);
-      
-      // enabling class load event notification
-      int ok = profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_CLASS_LOAD, NULL);
-      ok = profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_CLASS_UNLOAD, NULL);
-      ok = profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_THREAD_START, NULL);
-      ok = profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_THREAD_END, NULL);
-      ok = profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_DUMP_DATA_REQUEST, 
-						 NULL);
-      ok = profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_RESET_DATA_REQUEST, 
-						 NULL);
-      ok = profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_JVM_INIT_DONE, NULL);
-      ok = profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_JVM_SHUT_DOWN, NULL);
-      
-      ok = profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_METHOD_ENTRY, NULL);
-      ok = profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_METHOD_EXIT, NULL);
-
-      ok =  profiler.jvmpi_interface->EnableEvent(
-					JVMPI_EVENT_RAW_MONITOR_CONTENDED_ENTER, 
-					NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(
-					JVMPI_EVENT_RAW_MONITOR_CONTENDED_ENTERED,
-					NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(
-					JVMPI_EVENT_RAW_MONITOR_CONTENDED_EXIT, 
-					NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(
-					JVMPI_EVENT_MONITOR_CONTENDED_ENTER, 
-					NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(
-                                        JVMPI_EVENT_MONITOR_CONTENDED_ENTERED, 
-				        NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(
-				        JVMPI_EVENT_MONITOR_CONTENDED_EXIT, 
-				        NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_MONITOR_WAIT, NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_MONITOR_WAITED, 
-						  NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_GC_START, NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_GC_FINISH, NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_OBJ_ALLOC, NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_OBJ_MOVE, NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_OBJ_FREE, NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_NEW_ARENA, NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_DELETE_ARENA, NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_JNI_GLOBALREF_ALLOC,
-						  NULL);
-      ok =  profiler.jvmpi_interface->EnableEvent(JVMPI_EVENT_JNI_GLOBALREF_FREE, 
-						  NULL);
-
-      if(ok != JVMPI_SUCCESS)
-	barf("BAD EVENT ENABLE");
-    }
-
-
-
-    return JNI_OK;
-  }
-
+jint Niag_Profiler::initialize(JavaVM* jvm, char* options) {
   
-
-  JNIEXPORT jlong JNICALL Java_niagara_utils_JProf_getCurrentThreadCpuTime
-          (JNIEnv*, jclass) {
-            return profiler.jvmpi_interface == 0 ? 0 : profiler.jvmpi_interface->GetCurrentThreadCpuTime();
+  // get jvmpi interface pointer
+  if ((jvm->GetEnv((void **)&(jvmpiInterface), JVMPI_VERSION_1)) < 0) {
+    fprintf(stderr, "myprofiler> error in obtaining jvmpi interface pointer\n");
+    return JNI_ERR;
+  } 
+  
+  if(processOptions(options) != JNI_OK) {
+    barf(NULL);
   }
+  
+  if(profilingOn) {
+    cout << "KT: PROFILING ON" << endl;
+    // initialize jvmpi interface
+    jvmpiInterface->NotifyEvent = notifyEvent;
+    
+    threadList = new Thread_List(jvmpiInterface, &methodList);
+    
+    // enabling class load event notification
+    int ok = jvmpiInterface->EnableEvent(JVMPI_EVENT_CLASS_LOAD, NULL);
+    ok = jvmpiInterface->EnableEvent(JVMPI_EVENT_CLASS_UNLOAD, NULL);
+    ok = jvmpiInterface->EnableEvent(JVMPI_EVENT_THREAD_START, NULL);
+    ok = jvmpiInterface->EnableEvent(JVMPI_EVENT_THREAD_END, NULL);
+    ok = jvmpiInterface->EnableEvent(JVMPI_EVENT_DUMP_DATA_REQUEST, NULL);
+    ok = jvmpiInterface->EnableEvent(JVMPI_EVENT_RESET_DATA_REQUEST, NULL);
+    ok = jvmpiInterface->EnableEvent(JVMPI_EVENT_JVM_INIT_DONE, NULL);
+    ok = jvmpiInterface->EnableEvent(JVMPI_EVENT_JVM_SHUT_DOWN, NULL);
+    ok = jvmpiInterface->EnableEvent(JVMPI_EVENT_METHOD_ENTRY, NULL);
+    ok = jvmpiInterface->EnableEvent(JVMPI_EVENT_METHOD_EXIT, NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_RAW_MONITOR_CONTENDED_ENTER, 
+				      NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_RAW_MONITOR_CONTENDED_ENTERED,
+				      NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_RAW_MONITOR_CONTENDED_EXIT, 
+				      NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_MONITOR_CONTENDED_ENTER, 
+				      NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_MONITOR_CONTENDED_ENTERED, 
+				      NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_MONITOR_CONTENDED_EXIT, 
+				      NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_MONITOR_WAIT, NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_MONITOR_WAITED, NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_GC_START, NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_GC_FINISH, NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_OBJ_ALLOC, NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_OBJ_MOVE, NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_OBJ_FREE, NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_NEW_ARENA, NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_DELETE_ARENA, NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_JNI_GLOBALREF_ALLOC,
+				      NULL);
+    ok =  jvmpiInterface->EnableEvent(JVMPI_EVENT_JNI_GLOBALREF_FREE, 
+				      NULL);
 
-  JNIEXPORT jint JNICALL Java_niagara_utils_JProf_registerThreadName(
-				                JNIEnv* env, jclass cls, 
-						jstring threadName) {
-    const char *name = env->GetStringUTFChars(threadName, 0);
-    profiler.thread_list->setName(env, name);
-    env->ReleaseStringUTFChars(threadName, name);
-    return JNI_OK;
+    if(ok != JVMPI_SUCCESS)
+      barf("BAD EVENT ENABLE");
   }
-
-  JNIEXPORT jint JNICALL Java_niagara_utils_JProf_requestDataDump(JNIEnv*, jclass) {
-    cout << "KT Dumping Data" << endl;
-    profiler.thread_list->dumpData();
-    profiler.thread_list->resetData();
-    return JNI_OK;
-  }
+  
+  freedLatch = 
+    jvmpiInterface->RawMonitorCreate("FreedObjListLatch");
+  allocLatch = 
+    jvmpiInterface->RawMonitorCreate("AllocObjListLatch");
+  
+  return JNI_OK;
 }
 
-// function for handling event notification
-void notifyEvent(JVMPI_Event *event) {
-  
-  Thread_Info* local_store;
+jint Niag_Profiler::registerThreadName(JNIEnv* env, jclass cls, jstring threadName) {
 
-  //switch(event->event_type & !JVMPI_REQUESTED_EVENT) {
-  switch(event->event_type) {
-    
-  case JVMPI_EVENT_OBJECT_ALLOC:
-    //cout << "Object Alloc received... ";
-    local_store = 
-      (Thread_Info*)profiler.jvmpi_interface->GetThreadLocalStorage(event->env_id);
-    if(local_store == NULL) {
-      local_store = profiler.thread_list->add(event->env_id, "unknown");
-    }
-    local_store->addAlloc(event);
-    //cout << "object alloc finished " << endl;
-    break;
-    
-  case JVMPI_EVENT_THREAD_START:
-    //cout << "Thread start received: " << event->u.thread_start.thread_name << "...";
-    local_store = (Thread_Info*)profiler.jvmpi_interface->GetThreadLocalStorage(event->env_id);
-    if(local_store == NULL) {
-      profiler.thread_list->add(event->u.thread_start.thread_env_id,
-				event->u.thread_start.thread_name);
-    }
-    //cout << "thread start finished " << endl;
-    break;
-
-  case JVMPI_EVENT_THREAD_END:
-    //cout << "Thread end received:...";
-    profiler.thread_list->remove(event->env_id);
-    //cout << "thread end finished" << endl;
-    break;
-    
-  case JVMPI_EVENT_CLASS_LOAD:
-  case JVMPI_EVENT_CLASS_LOAD | JVMPI_REQUESTED_EVENT:
-    //cout << "Class load received...";
-    profiler.method_list->addClassMethods(event);
-    //cout << "class load finished" << endl;
-    break;
-    /*
-  case JVMPI_EVENT_CLASS_UNLOAD:
-    cout << "Class unload received...";
-    profiler.method_list->removeClassMethods(event->u.class_unload.class_id);
-    cout << "class unload finished" << endl;
-    break;
-    */
-  case JVMPI_EVENT_DATA_DUMP_REQUEST:
-  case JVMPI_EVENT_DATA_DUMP_REQUEST | JVMPI_REQUESTED_EVENT:
-    cout << "Data dump received...";
-    profiler.thread_list->dumpData();
-    cout << "data dump finished" << endl;
-    break;
-    
-  case JVMPI_EVENT_DATA_RESET_REQUEST:
-    cout << "Data reset received...";
-    profiler.thread_list->resetData();
-    cout << "data reset finished" << endl;
-    break;
-  
-  case JVMPI_EVENT_JVM_SHUT_DOWN:
-    cout << "jvm shutdown received...";
-    profiler.thread_list->dumpData();
-    profiler.thread_list->resetData();
-    cout << "jvm shutdonw finished" << endl;
-    break;
-  }
-  return;
+  const char *name = env->GetStringUTFChars(threadName, 0);
+  threadList->setName(env, name);
+  env->ReleaseStringUTFChars(threadName, name);
+  return JNI_OK;
 }
 
-jint Niag_Profiler::processOptions(char* options) {
+void Niag_Profiler::addAlloc(JVMPI_Event* event) {
+  Thread_Info* localStore;
+  localStore = 
+    (Thread_Info*)jvmpiInterface->GetThreadLocalStorage(event->env_id);
+  if(localStore == NULL) {
+    localStore = threadList->add(event->env_id, "unknown");
+  }
+  localStore->addAlloc(event);
+  getAllocObjListLatch();
+  allocObjList.add(event->u.obj_alloc.obj_id, 
+		   event->u.obj_alloc.size,
+		   localStore->getThreadNum(),
+		   localStore->mostRecentTrace());
+  releaseAllocObjListLatch();
+}
+
+void Niag_Profiler::threadStart(JVMPI_Event* event) {
+  //cout << "Thread start received: " << event->u.thread_start.thread_name << "...";
+  Thread_Info* localStore;
+  localStore = (Thread_Info*)jvmpiInterface->GetThreadLocalStorage(event->env_id);
+  if(localStore == NULL) {
+    threadList->add(event->u.thread_start.thread_env_id,
+		    event->u.thread_start.thread_name);
+  }
+  //cout << "thread start finished " << endl;
+}
+
+void Niag_Profiler::threadEnd(JVMPI_Event* event) {
+  // cout << "Thread end received:..." 
+  threadList->remove(event->env_id);
+  //cout << "thread end finished" << endl;
+}
+
+void Niag_Profiler::addClassMethods(JVMPI_Event* event) {
+  methodList.addClassMethods(event);
+}
+
+void Niag_Profiler::dumpData() {
+  threadList->dumpData();
+}
+
+void Niag_Profiler::resetData() {
+  threadList->resetData();
+  freedObjList.reset();
+  allocObjList.reset(); 
+}
+
+jint Niag_Profiler::processOptions(char* _options) {
+  char* options = _options;
 
   if(options == NULL) {
-    profiling_on = true;
+    profilingOn = true;
     return JNI_OK;
   }
-    
-  if(strncmp(options, "profile", 3)==0) {
-    if(strncmp(options+8, "yes", 3)==0) {
-      profiling_on = true;
-      return JNI_OK;
-    } else if(strncmp(options+8, "no", 2)==0) {
-      profiling_on = false;
-      return JNI_OK;
+ 
+  bool endOfOptions = false;
+  bool found = true;
+
+  while(options != NULL && found) {
+    found = false;
+    if(strncmp(options, "profile", 6)==0) {
+      if(strncmp(options+8, "yes", 3)==0) {
+	profilingOn = true;
+	found = true;
+      } else if(strncmp(options+8, "no", 2)==0) {
+	profilingOn = false;
+	found = true;
+      }
+    } else if(strncmp(options, "depth", 4)==0) {
+      traceDepth = atoi(options+6);
+      cout << "KT: TRACE_DEPTH is " << traceDepth << endl;
+      found = true;
+    }
+    if(found) {
+      options = goToNextOption(options);
     }
   }
 
-  usage();
-  return JNI_ERR;
+  if(!found) {
+    usage();
+    return JNI_ERR;
+  }
+  return JNI_OK;
+}
+
+char* Niag_Profiler::goToNextOption(char* _options) {
+  char* options = _options;
+  while(*options != ',' && !isWhitespace(*options))
+    options++;
+  if(*options == ',')
+    return options+1;
+  else
+    return NULL;
+}
+
+bool Niag_Profiler::isWhitespace(char c) {
+  if(c == '\n' || c == ' ' || c == '\t')
+    return true;
+  return false;
 }
 
 void Niag_Profiler::usage() {
   cout << "Usage: -Xrunprofni:[profile:yes|no]" << endl;
 }
 
+void Niag_Profiler::getFreedObjListLatch() {
+  jvmpiInterface->RawMonitorEnter(freedLatch);
+}
+
+void Niag_Profiler::getAllocObjListLatch() {
+  jvmpiInterface->RawMonitorEnter(allocLatch);
+}
+
+void Niag_Profiler::releaseFreedObjListLatch() {
+  jvmpiInterface->RawMonitorExit(freedLatch);
+}
+
+void Niag_Profiler::releaseAllocObjListLatch() {
+  jvmpiInterface->RawMonitorExit(allocLatch);
+}
+
+jlong Niag_Profiler::getCurrentThreadCpuTime() {
+  return jvmpiInterface == NULL ? 0 : jvmpiInterface->GetCurrentThreadCpuTime();
+}
+
+void Niag_Profiler::getCallTrace(JVMPI_CallTrace* tracePtr) {
+  jvmpiInterface->GetCallTrace(tracePtr, traceDepth);
+}
+
+jobjectID Niag_Profiler::getFreedObjId(int idx){
+  return freedObjList.getId(idx);
+}
+
+Obj_Info* Niag_Profiler::getObjInfo(jobjectID objId) {
+  return allocObjList.getInfo(objId);
+}
+
+void Niag_Profiler::removeFreedObj(int idx) {
+  freedObjList.remove(idx);
+}
+
+void Niag_Profiler::removeAllocdObj(jobjectID objId) {
+  allocObjList.remove(objId);
+}

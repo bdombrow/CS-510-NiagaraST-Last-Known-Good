@@ -16,7 +16,7 @@ class Thread_List {
   void remove(JNIEnv* thread);
   void dumpData();
   void resetData();
-  int get_thread_num(JNIEnv* env_id);
+  int getThreadNum(JNIEnv* env_id);
   void setName(JNIEnv* thread, const char* threadName);
 
  private:
@@ -24,14 +24,14 @@ class Thread_List {
   int numThreads;
   JNIEnv** threads;
   ofstream os;
-  int output_count;
-  const JVMPI_Interface* jvmpi_interface;
-  const Method_List* method_list;
-  int thread_num;
-  int out_cnt;
+  int outputCount;
+  const JVMPI_Interface* jvmpiInterface;
+  const Method_List* methodList;
+  int threadNum;
+  int outCnt;
   void checkSpace();
   void openOutput();
-  int get_new_thread_num();
+  int getNextThreadNum();
 };
 
 #endif

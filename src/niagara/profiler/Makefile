@@ -2,31 +2,42 @@ JDK_HOME = /disk/hopper/projects/disc/niagara/install/j2sdk1.4.0_01
 
 INCLUDES = -I. -I$(JDK_HOME)/include -I$(JDK_HOME)/include/linux
 
+HFILES = alloc_obj_list.h freed_obj_list.h method_list.h \
+         niag_profiler.h np_consts.h np_funcs.h thread_info.h \
+	 thread_list.h trace_list.h
+
 CC = g++ -c $(INCLUDES)
 
 all: libprofni.so
 
-niag_profiler.o: niag_profiler.cc np_funcs.h np_consts.h \
-        thread_list.h  
+niag_profiler.o: niag_profiler.cc $(HFILES)
 	$(CC) niag_profiler.cc -o $@
 
-method_list.o: method_list.h method_list.cc
+alloc_obj_list.o: alloc_obj_list.cc $(HFILES)
+	$(CC) alloc_obj_list.cc -o $@
+
+freed_obj_list.o: freed_obj_list.cc $(HFILES)
+	$(CC) freed_obj_list.cc -o $@
+
+method_list.o: method_list.cc $(HFILES)
 	$(CC) method_list.cc -o $@
 
-thread_info.o: thread_info.h thread_info.cc trace_list.h \
-               np_consts.h 
+profiler_main.o: profiler_main.cc $(HFILES)
+	$(CC) profiler_main.cc -o $@
+
+thread_info.o: thread_info.cc $(HFILES)
 	$(CC) thread_info.cc -o $@
 
-thread_list.o: thread_list.h thread_list.cc thread_info.h \
-               np_funcs.h 
+thread_list.o: thread_list.cc $(HFILES)
 	$(CC) thread_list.cc -o $@
 
-trace_list.o: trace_list.h trace_list.cc np_consts.h 
+trace_list.o: trace_list.cc $(HFILES) 
 	$(CC) trace_list.cc -o $@
 
-libprofni.so: niag_profiler.o method_list.o thread_info.o \
-        thread_list.o trace_list.o
-	g++ -shared -o $@ niag_profiler.o method_list.o thread_info.o thread_list.o trace_list.o
+libprofni.so: niag_profiler.o alloc_obj_list.o freed_obj_list.o \
+        method_list.o thread_info.o \
+        thread_list.o trace_list.o profiler_main.o
+	g++ -shared -o $@ niag_profiler.o alloc_obj_list.o freed_obj_list.o method_list.o thread_info.o thread_list.o trace_list.o profiler_main.o
 
 install:
 	mv libprofni.so ../../../lib

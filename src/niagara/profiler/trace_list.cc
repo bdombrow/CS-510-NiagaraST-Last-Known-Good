@@ -1,6 +1,9 @@
 #include <trace_list.h>
 #include <np_consts.h>
 #include <np_funcs.h>
+#include <niag_profiler.h>
+
+extern Niag_Profiler profiler;
 
 Trace_List::Trace_List(const Method_List* const _methodList, int _threadId) {
   numTraces = 0;
@@ -8,6 +11,7 @@ Trace_List::Trace_List(const Method_List* const _methodList, int _threadId) {
   traceList = new List_Elem*[numAlloc];
   methodList = _methodList;
   threadId = _threadId;
+  mostRecentTrace = -1;
 }
 
 Trace_List::~Trace_List() {
@@ -23,6 +27,8 @@ void Trace_List::addAlloc(JVMPI_CallTrace* trace, int bytes, char* threadName) {
   for(int i = 0; i<numTraces; i++) {
     if(traceEquals(trace, traceList[i]->trace) == NP_TRUE) {
       traceList[i]->memAllocd += bytes;
+      traceList[i]->numAllocs++;
+      mostRecentTrace = i;
       return;
     }
   }
@@ -32,14 +38,21 @@ void Trace_List::addAlloc(JVMPI_CallTrace* trace, int bytes, char* threadName) {
   traceList[numTraces] = new List_Elem();
   traceList[numTraces]->trace = copyTrace(trace); 
   traceList[numTraces]->memAllocd = bytes;
+  traceList[numTraces]->freedMem = 0;
   traceList[numTraces]->traceNum = numTraces;
+  traceList[numTraces]->numAllocs = 1;
+  mostRecentTrace = numTraces;
   numTraces++;
 }
 
 void Trace_List::print(ostream& os, char* threadName) {
   sortTraces();
   for(int i = 0; i<numTraces; i++) {
-    os << "   TRACE:" << traceList[i]->traceNum << "  Mem: " << traceList[i]->memAllocd << " (bytes)" << endl;
+    os << "   TRACE:" << traceList[i]->traceNum 
+       << "  Allocd: " << traceList[i]->memAllocd << " (bytes)" 
+       << " Live: " << traceList[i]->memAllocd - traceList[i]->freedMem << " (bytes)"
+       << " Num Allocs: " << traceList[i]->numAllocs
+       << endl;
       printTrace(traceList[i]->trace, os);
     }
 }
@@ -52,6 +65,15 @@ int Trace_List::getTotalMem() {
   return totalMem;
 }
 
+int Trace_List::getLiveMem() {
+  int liveMem = 0;
+  for(int i = 0; i<numTraces; i++) {
+    liveMem += traceList[i]->memAllocd;
+    liveMem -= traceList[i]->freedMem;
+  }
+  return liveMem;
+}
+
 void Trace_List::resetData() {
   for(int i = 0; i<numTraces; i++) {
     delete traceList[i]->trace;
@@ -61,17 +83,50 @@ void Trace_List::resetData() {
   numTraces = 0;
 }
 
+void Trace_List::processFreedObjList() {
+  profiler.getFreedObjListLatch();
+  profiler.getAllocObjListLatch();
+
+  int freeListSize = profiler.getFreedListSize();
+  for(int i = 0; i<freeListSize; i++) {
+    Obj_Info* freedObjInfo = NULL;
+    jobjectID id = profiler.getFreedObjId(i);
+    freedObjInfo = profiler.getObjInfo(id);
+    if(freedObjInfo != NULL && freedObjInfo->threadNum == threadId) {
+      if(traceList[freedObjInfo->traceNum] == NULL)
+	cout << "HELP null trace num " << freedObjInfo->traceNum << 
+	  "num traces " << numTraces << " thread num " << threadId << endl;
+      traceList[freedObjInfo->traceNum]->freedMem +=
+	freedObjInfo->objSize;
+      profiler.removeFreedObj(i);
+      profiler.removeAllocdObj(id);
+    }
+  }
+
+  profiler.releaseAllocObjListLatch();
+  profiler.releaseFreedObjListLatch();
+}
+
+int Trace_List::getMostRecentTrace() {
+  if(mostRecentTrace >= numTraces) {
+    cout << "NUMTRACES " << numTraces << " most recent " << mostRecentTrace << endl;
+    barf("bad mostRecentTrace");
+  }
+    
+  return mostRecentTrace;
+}
+
 // --------------------- PRIVATE FUNCTIONS ----------------------------
 
 void Trace_List::printTrace(const JVMPI_CallTrace* const trace, ostream& os) {
   for(int i = 0; i<trace->num_frames; i++) {
     os << "      " << i+1 << ") ";
-    const Method_Info* m_info = methodList->getMethodInfo(trace->frames[i].method_id);
-    if(m_info == NULL) {
+    const Method_Info* mInfo = methodList->getMethodInfo(trace->frames[i].method_id);
+    if(mInfo == NULL) {
       os << "UNKNOWN M:" << trace->frames[i].method_id << " L:";
       os << trace->frames[i].lineno << endl;
     } else {
-      os << m_info->sourceFile << "::" << m_info->name;
+      os << mInfo->sourceFile << "::" << mInfo->name;
       os << " (line:" << trace->frames[i].lineno << ")" << endl;
     }
   }
@@ -197,4 +252,5 @@ void Trace_List::insertionsort(List_Elem** array, int startIdx, int endIdx) {
     array[emptySlot] = toInsert;
   }
 }
+
 

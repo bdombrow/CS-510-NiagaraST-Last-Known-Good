@@ -9,22 +9,24 @@ const int NLEN = 50;
 class Thread_Info {
  public:
   Thread_Info(int _thread_num, char* _thread_name, 
-	      const JVMPI_Interface* const _jvmpi_interface,
 	      const Method_List* const method_list);  
   ~Thread_Info();
   void addAlloc(JVMPI_Event *event);
   void print(ostream& os);
   void resetData();
   void setName(const char* newName);
+  int  getThreadNum();
+  int  mostRecentTrace();
+  int  numTraces();
 
  private:
-  int thread_num;
-  char thread_name[NLEN];
-  long memory_allocd;
-  Trace_List* trace_list;
+  int threadNum;
+  char threadName[NLEN];
+  long memoryAllocd;
+  Trace_List* traceList;
   JVMPI_CallTrace trace; // used as arg to GetCallTrace
-  const JVMPI_Interface *jvmpi_interface;
-  const Method_List* method_list;
+  const JVMPI_Interface *jvmpiInterface;
+  const Method_List* methodList;
 };
 
 #endif // THREAD_INFO_H

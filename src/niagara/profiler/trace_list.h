@@ -11,7 +11,9 @@ class Trace_List {
   public: 
     JVMPI_CallTrace* trace;
     long memAllocd;
+    long freedMem;
     int traceNum;
+    int numAllocs;
   };
 
  public:
@@ -20,14 +22,19 @@ class Trace_List {
   void addAlloc(JVMPI_CallTrace* trace, int bytes, char* threadName);
   void print(ostream& os, char* threadName);
   int  getTotalMem();
+  int  getLiveMem();
   void resetData();
+  void processFreedObjList();
+  int  getMostRecentTrace();
+  int getNumTraces() {return numTraces;}
+  int threadId;
 
  private:
   int numTraces;
   int numAlloc;
+  int mostRecentTrace;
   List_Elem** traceList;
   const Method_List* methodList;
-  int threadId;
 
   void printTrace(const JVMPI_CallTrace* const trace, ostream& os);
   int traceEquals(const JVMPI_CallTrace* const trace1,

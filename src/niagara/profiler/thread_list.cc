@@ -1,15 +1,17 @@
 #include <thread_list.h>
 #include <np_funcs.h>
+#include <niag_profiler.h>
 
-Thread_List::Thread_List(const JVMPI_Interface* const _jvmpi_interface,
-			 const Method_List* const _method_list) {
+extern Niag_Profiler profiler;
+
+Thread_List::Thread_List(const JVMPI_Interface* const _jvmpiInterface,
+			 const Method_List* const _methodList) {
   numAlloc = 40;
   numThreads = 0;
   threads = new JNIEnv*[numAlloc];
-  thread_num = 0;
-  out_cnt = 0;
-  jvmpi_interface = _jvmpi_interface;
-  method_list = _method_list;
+  outCnt = 0;
+  jvmpiInterface = _jvmpiInterface;
+  methodList = _methodList;
 }
 
 Thread_List::~Thread_List() {
@@ -18,19 +20,26 @@ Thread_List::~Thread_List() {
 
 Thread_Info* Thread_List::add(JNIEnv* thread, char* name){
   checkSpace();
-  Thread_Info* local_store = new Thread_Info(get_new_thread_num(), name,
-					     jvmpi_interface, method_list);
-  jvmpi_interface->SetThreadLocalStorage(thread, local_store);
-  threads[numThreads] = thread;
-  numThreads++;
-  return local_store;
+  int tnum = getNextThreadNum();
+  Thread_Info* localStore = new Thread_Info(tnum, name, methodList);
+  jvmpiInterface->SetThreadLocalStorage(thread, localStore);
+  threads[tnum] = thread;
+  return localStore;
 }
 
 void Thread_List::remove(JNIEnv* thread) {
+  if(!os.is_open()) {
+    openOutput();
+  }
+
+  Thread_Info* localStorage;
   for(int i = 0; i<numThreads; i++) {
     if(threads[i] == thread) {
+      localStorage = (Thread_Info*)jvmpiInterface->GetThreadLocalStorage(threads[i]);
+      if(localStorage == NULL)
+	barf("local storage is null in Thread_List::dumpData");
+      localStorage->print(os);
       threads[i] = NULL;
-      //cout << "Removing thread " << i;
       return;
     }
   }
@@ -38,27 +47,28 @@ void Thread_List::remove(JNIEnv* thread) {
 }
 
 void Thread_List::setName(JNIEnv* thread, const char* threadName) {
-  Thread_Info* local_storage;
-  local_storage = (Thread_Info*)jvmpi_interface->GetThreadLocalStorage(thread);
-  local_storage->setName(threadName);
+  Thread_Info* localStorage;
+  localStorage = (Thread_Info*)jvmpiInterface->GetThreadLocalStorage(thread);
+  localStorage->setName(threadName);
   return;
 }
 
 void Thread_List::dumpData() {
-  openOutput();
+  if(!os.is_open())
+    openOutput();
 
   if(!os.is_open())
     barf("KT: failed to open output");
 
-  Thread_Info* local_storage;
+  Thread_Info* localStorage;
   cout << "Dumping data (" << numThreads << ")" << endl;
   for(int i = 0; i<numThreads; i++) {
     //cout << "Thread " << i << endl;
     if(threads[i] != NULL) {
-      local_storage = (Thread_Info*)jvmpi_interface->GetThreadLocalStorage(threads[i]);
-      if(local_storage == NULL)
+      localStorage = (Thread_Info*)jvmpiInterface->GetThreadLocalStorage(threads[i]);
+      if(localStorage == NULL)
 	barf("local storage is null in Thread_List::dumpData");
-      local_storage->print(os);
+      localStorage->print(os);
     }
   }
   
@@ -66,11 +76,11 @@ void Thread_List::dumpData() {
 }
 
 void Thread_List::resetData() {
-  Thread_Info* local_storage;
+  Thread_Info* localStorage;
   for(int i = 0; i<numThreads; i++) {
     if(threads[i] != NULL) {
-      local_storage = (Thread_Info*)jvmpi_interface->GetThreadLocalStorage(threads[i]);
-      local_storage->resetData();
+      localStorage = (Thread_Info*)jvmpiInterface->GetThreadLocalStorage(threads[i]);
+      localStorage->resetData();
     }
   }
 }
@@ -101,33 +111,31 @@ void Thread_List::checkSpace() {
 
 void Thread_List::openOutput() {
   char* outfile = new char[20];
-  sprintf(outfile, "%s%d%s", "niag_prof", out_cnt, ".txt");
-  out_cnt++;
+  sprintf(outfile, "%s%d%s", "niag_prof", outCnt, ".txt");
+  outCnt++;
   os.open(outfile);  
 }
 
-// returns a number between 0 and num_threads identifying this thread
+// returns a number between 0 and numThreads identifying this thread
 // static function
-int Thread_List::get_thread_num(JNIEnv* env_id) {
+int Thread_List::getThreadNum(JNIEnv* envId) {
 
-  Thread_Info* local_storage 
-    = (Thread_Info*)jvmpi_interface->GetThreadLocalStorage(env_id);
-  if(!local_storage) {
-   int thread_num = get_new_thread_num();
-   local_storage = new Thread_Info(thread_num, "Unknown", jvmpi_interface,
-				   method_list);
-   return thread_num;
+  Thread_Info* localStorage 
+    = (Thread_Info*)jvmpiInterface->GetThreadLocalStorage(envId);
+  if(!localStorage) {
+   int tnum = getNextThreadNum();
+   localStorage = new Thread_Info(threadNum, "Unknown", methodList);
+   return tnum;
   }
 }
 
 // static function
-int Thread_List::get_new_thread_num() {
-  int new_thread_num;
+int Thread_List::getNextThreadNum() {
+  int newThreadNum;
   //get_mutex();
-  new_thread_num = thread_num;
-  //cout << "TNum " << new_thread_num << "...";
-  thread_num++;
+  newThreadNum = numThreads;
+  numThreads++;
   //release_mutex();
-  return new_thread_num;
+  return newThreadNum;
 }
 
