@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.7 2002/04/06 02:14:55 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.8 2002/04/18 23:13:14 vpapad Exp $
  *
  */
 
@@ -7,9 +7,11 @@ package niagara.ndom;
 
 import org.w3c.dom.Document;
 
-import java.io.IOException; 
+import java.io.IOException;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.SAXNotRecognizedException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.SAXException;
@@ -21,7 +23,6 @@ import org.xml.sax.SAXParseException;
 
 import niagara.ndom.saxdom.*;
 import niagara.utils.*;
-import niagara.connection_server.NiagraServer; // for STREAM variable
 import niagara.ndom.DOMParser;
 
 /**
@@ -34,6 +35,9 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 
     private DocumentImpl doc;
     private Page page;
+
+    private boolean streaming;
+    private boolean seenHeader;
 
     // XXX vpapad: To test SAXDOM table building performance
     private static final boolean producingOutput = true;
@@ -57,23 +61,34 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
     public SAXDOMParser() {
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
+	    factory.setFeature("http://xml.org/sax/features/string-interning",
+			       true);
             parser = factory.newSAXParser();
         } 
         catch (FactoryConfigurationError e) {
-            System.err.println("SAXDOMParser: Unable to get a factory.");
+            throw new PEException("SAXDOMParser: Unable to get a factory.");
         } 
         catch (ParserConfigurationException e) {
-            System.err.println("SAXDOMParser: Unable to configure parser.");
+            throw new PEException("SAXDOMParser: Unable to configure parser.");
         }
+	catch (SAXNotRecognizedException e) {
+	    throw new PEException(
+		"SAXDOMParser: Parser does not recognize a required feature");
+	}
+	catch (SAXNotSupportedException e) {
+	    throw new PEException(
+		"SAXDOMParser: Parser does not support a required feature");
+	}
         catch (SAXException e) {
             // parsing error
-            System.err.println("SAXDOMParser: Got SAX Exception.");
+            throw new PEException("Got unknown SAX Exception: " + e);
         } 
+	reset();
     }    
 
     public void parse(InputSource is) throws SAXException, IOException {
-        reset();
         parser.parse(is, this);
+        reset();
     }
 
     public void reset() {
@@ -81,6 +96,8 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
         hasErrors = hasWarnings = false;
         sb.setLength(0);
         depth = -1;
+	streaming = false;
+	seenHeader = false;
     }
 
     public Document getDocument() {
@@ -94,6 +111,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
     // for streaming, a place to put top-level elements
     public void setOutputStream(SourceStream outputStream) {
 	this.outputStream = outputStream;
+	streaming = true;
     }
 
     public void setPage(Page page) {
@@ -110,7 +128,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
         }
 
         // If we're streaming, ignore the enclosing document 
-        if (NiagraServer.STREAM) return;
+        if (streaming) return;
 
         page.addEvent(doc, SAXEvent.START_DOCUMENT, null);
         doc = new DocumentImpl(page, page.getLastOffset());
@@ -121,7 +139,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 
     public void endDocument() throws SAXException {
         // if we're streaming, ignore the enclosing document
-        if (NiagraServer.STREAM) return;
+        if (streaming) return;
 
         handleText();
         page.addEvent(doc, SAXEvent.END_DOCUMENT, null);
@@ -135,14 +153,16 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
         throws SAXException {
 
         // ignore stream header
-        if (NiagraServer.STREAM && qName.equals("niagara:stream"))
+        if (!seenHeader) {
+	    seenHeader = true;
             return;
+	}
 
         handleText();
 
         // If we're streaming, and this is a top-level element
         // pretend we just received a start document event
-	if(NiagraServer.STREAM && depth == -1) {
+	if(streaming && depth == -1) {
             page.addEvent(doc, SAXEvent.START_DOCUMENT, null);
             doc = new DocumentImpl(page, page.getLastOffset());
 
@@ -173,8 +193,8 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 
     public void endElement(String namespaceURI, String localName, String qName)
         throws SAXException {
-        // ignore stream header
-        if (NiagraServer.STREAM && qName.equals("niagara:stream")) 
+        // ignore stream footer
+        if (streaming && depth == -1)
             return;
 
         handleText();
@@ -187,38 +207,37 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 
         // if we're streaming, and this is a top-level element
         // pretend we just received an end document event
-        if(NiagraServer.STREAM && depth == 0) {
+        if(streaming && depth == 0) {
             page.addEvent(doc, SAXEvent.END_DOCUMENT, null);
 
-            if (outputStream !=  null) {
-                // for now throw fatal errors on these exceptions, if
-                // they happen, I'll have to figure out what the right
-                // thing is to do - KT
-                // I don't want to do a lot of work until I know this
-                // actually works
-                try {
-                    if (producingOutput)
-                        outputStream.put(doc);
-                } catch (java.lang.InterruptedException ie) {
+	    // for now throw fatal errors on these exceptions, if
+	    // they happen, I'll have to figure out what the right
+	    // thing is to do - KT
+	    // I don't want to do a lot of work until I know this
+	    // actually works
+	    try {
+		if (producingOutput)
+		    // if put returns false, downstream wants us to shutdown
+		    if (!outputStream.put(doc))
+			    return;
+	    } catch (java.lang.InterruptedException ie) {
                 throw new PEException("KT - InterruptedException in SAXDOMParser");
-                } catch (niagara.utils.NullElementException ne) {
-                    throw new PEException("KT - NullElementException in SAXDOMParser");
-                } catch (niagara.utils.StreamPreviouslyClosedException spce) {
-                    throw new PEException("KT - StreamPreviouslyClosedException in SAXDOMParser");
-                }
-
-                if (--depth != -1) 
-                    throw new PEException("Unbalanced open nodes list.");
-            }
-        }
-
+	    } catch (niagara.utils.NullElementException ne) {
+		throw new PEException("KT - NullElementException in SAXDOMParser");
+	    } catch (niagara.utils.StreamPreviouslyClosedException spce) {
+		throw new PEException("KT - StreamPreviouslyClosedException in SAXDOMParser");
+	    }
+	    
+	    if (--depth != -1) 
+		throw new PEException("Unbalanced open nodes list.");
+	}
     }
 
-    public void characters(char[] ch, int start,int length) 
+    public void characters(char[] ch, int start, int length) 
         throws SAXException {
         // if we're streaming and we're outside a top-level element
         // do nothing
-        if (NiagraServer.STREAM && depth <= 0) return;
+        if (streaming && depth <= 0) return;
 
         sb.append(ch, start, length);
     }
@@ -226,7 +245,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
     public void handleText() {
         // if we're streaming and we're outside a top-level element
         // do nothing
-        if (NiagraServer.STREAM && depth <= 0) return;
+        if (streaming && depth <= 0) return;
 
         int length = sb.length();
         if (length > 0) {
