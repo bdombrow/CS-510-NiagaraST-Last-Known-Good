@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+
+<!-- $Id: build.xml,v 1.1 2002/05/25 18:31:31 vpapad Exp $ -->
+
+<project name="Niagara" default="compile" basedir="..">
+  <property name="src" value="${basedir}/src"/>
+  <property name="firehosedir" value="${basedir}/../firehose_1_0"/>
+  <property name="build" value="${src}/build"/>
+  <property name="lib" value="${basedir}/lib"/>
+  
+  <target name="init">
+    <mkdir dir="${build}"/>
+
+    <!-- Check if the lexer/parser files are up to date -->
+    <dependset>
+      <srcfilelist dir="${src}/niagara/xmlql_parser/syntax_tree"
+        files="xmlql.cup,xmlql.flex"/>
+      <targetfilelist dir="${src}/niagara/xmlql_parser/syntax_tree"
+        files="sym.java,Scanner.java,QueryParser.java,re.cup,construct.cup"/>
+    </dependset>
+    <available property="cups.ok" file="${src}/niagara/xmlql_parser/syntax_tree/re.cup"/>
+
+    <!-- Check if the lexer/parser files for SEQL are up to date -->
+    <dependset>
+      <srcfilelist dir="${src}/niagara/search_engine/seql"
+        files="seql.cup,seql.jlex"/>
+      <targetfilelist dir="${src}/niagara/search_engine/seql"
+        files="sym.java,parser.java"/>
+    </dependset>
+    <available property="se.cup.ok" file="${src}/niagara/search_engine/seql/parser.java"/>
+  </target>
+
+  <!-- Run the lexer and parser generators -->
+  <target name="create.cups" unless="cups.ok">
+    <exec executable="/bin/sh" dir="${src}/niagara/xmlql_parser/syntax_tree">
+      <arg value="-c"/>
+      <arg value="sed -e 's!start with XmlqlExt!start with RegularExpression!' -e 's!QueryParser!REParser!g' &lt; xmlql.cup &gt; re.cup"/>
+    </exec>
+
+    <exec executable="/bin/sh" dir="${src}/niagara/xmlql_parser/syntax_tree">
+      <arg value="-c"/>
+      <arg value="sed -e 's!start with XmlqlExt!start with QueryInConstruct!' -e 's!QueryParser!ConstructParser!g' &lt; xmlql.cup &gt; construct.cup"/>
+    </exec>
+
+    <java fork="yes" dir="${src}/niagara/xmlql_parser/syntax_tree"
+      classpath="${lib}/JFlex.zip"
+      classname="JFlex.Main">
+      <arg value="xmlql.flex"/>
+    </java>
+
+    <exec executable="/bin/sh"
+    	dir="${src}/niagara/xmlql_parser/syntax_tree">
+	<arg value="-c"/>
+      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 5 -parser QueryParser -package niagara.xmlql_parser.syntax_tree &lt; xmlql.cup"/>
+    </exec>
+
+    <exec executable="/bin/sh"
+    	dir="${src}/niagara/xmlql_parser/syntax_tree">
+	<arg value="-c"/>
+      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 5 -parser REParser -symbols RESym -package niagara.xmlql_parser.syntax_tree &lt; re.cup"/>
+    </exec>
+
+    <exec executable="/bin/sh"
+    	dir="${src}/niagara/xmlql_parser/syntax_tree">
+	<arg value="-c"/>
+      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 5 -parser ConstructParser -symbols ConstructSym -package niagara.xmlql_parser.syntax_tree &lt; construct.cup"/>
+    </exec>
+  </target>
+
+  <!-- Run the lexer and parser generators for SEQL -->
+  <target name="create.se.cup" unless="se.cup.ok">
+    <java fork="yes" dir="${src}/niagara/search_engine/seql"
+      classpath="${lib}/JLex.jar"
+      classname="JLex.Main">
+      <arg value="seql.jlex"/>
+    </java>
+    <move file="${src}/niagara/search_engine/seql/seql.jlex.java" 
+      tofile="${src}/niagara/search_engine/seql/Yylex.java"/>
+
+    <exec executable="/bin/sh"
+    	dir="${src}/niagara/search_engine/seql">
+	<arg value="-c"/>
+      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -interface -package search_engine.seql &lt; seql.cup"/>
+    </exec>
+  </target>
+
+  <!-- Compile everything -->
+  <target name="compile" depends="init,create.cups,create.se.cup">
+    <javac srcdir="${src}" destdir="${build}"
+    	excludes="niagara/client/qbe/**,niagara/xmlql_parser/op_tree/TypeChk.java,niagara/utils/nitree/**,niagara/utils/*.java,niagara/search_engine/crawler/YPCrawler.java">
+      <classpath>
+        <pathelement location="/disk/hopper/projects/disc/niagara/install/xerces-2_0_1/xercesImpl.jar"/>
+        <pathelement location="/disk/hopper/projects/disc/niagara/install/xerces-2_0_1/xmlParserAPIs.jar"/>
+        <pathelement location="${lib}/xml4j.jar"/>
+        <pathelement location="${lib}/aelfred.jar"/>
+        <pathelement location="${lib}/gnu-regexp.jar"/>
+        <pathelement location="${lib}/cup_all.jar"/>
+        <pathelement location="${firehosedir}"/>
+        <pathelement location="${lib}/diva.jar"/>
+        <pathelement location="${lib}/junit.jar"/>
+        <pathelement location="${lib}/djava.jar"/>
+        <pathelement location="${lib}/htmllayout.jar"/>
+        <pathelement location="${lib}/com.mortbay.jetty.jar"/>
+        <pathelement location="${lib}/javax.servlet.jar"/>
+        <pathelement location="${lib}/JFlex.zip"/>
+        <pathelement location="${lib}/JLex.jar"/>
+        <pathelement location="${lib}/PerlTools.jar"/>
+        <pathelement location="${lib}/w4f.jar"/>
+      </classpath>
+    </javac>
+    <javah destdir="${src}/niagara/optimizer" classpath="${build}"
+           class="niagara.optimizer.Optimizer"/>
+  </target>    
+</project>
