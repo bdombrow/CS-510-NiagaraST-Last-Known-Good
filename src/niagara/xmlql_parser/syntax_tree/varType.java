@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: varType.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: varType.java,v 1.2 2003/07/27 02:46:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,8 +34,10 @@ package niagara.xmlql_parser.syntax_tree;
 
 public class varType {
 	
-	public static final int TAG_VAR = 100;     // for tag variable
-	public static final int ELEMENT_VAR = 101; // for element_as
-	public static final int CONTENT_VAR = 102; // for content_as
+	public static final int TAG_VAR = 0;     // for tag variable
+	public static final int ELEMENT_VAR = 1; // for element_as
+	public static final int CONTENT_VAR = 2; // for content_as
+	
+	public static String[] names = {"tag", "element", "content"};
 }
 
