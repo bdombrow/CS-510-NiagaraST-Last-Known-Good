@@ -1,4 +1,4 @@
-/* $Id: Initializable.java,v 1.1 2002/10/23 21:54:27 vpapad Exp $ */
+/* $Id: Initializable.java,v 1.2 2003/09/12 20:56:33 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.optimizer.colombia.LogicalOp;
