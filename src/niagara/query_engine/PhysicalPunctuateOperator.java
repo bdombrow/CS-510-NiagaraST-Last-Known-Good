@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalPunctuateOperator.java,v 1.3 2003/07/09 04:59:35 tufte Exp $
+  $Id: PhysicalPunctuateOperator.java,v 1.4 2003/07/10 22:13:38 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -51,39 +51,29 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
     private Attribute attrTimer;
 
     //Which data attribute correponds to the timer
-    private String stDataTimer;
-
-    //What is the data root name
-    private String stDataRoot;
-    private Attribute attrDataRoot;
-    private int iAttrDataRoot;
+    private Attribute attrDataTimer;
 
     //Store for input values
     private AtomicEvaluator aeTimer, aeData;
     private ArrayList vTimer, vData;
 
     //Data template for creating punctuation
-    private String rgstDataChild[] = null;
+    StreamTupleElement tupleDataSample = null;
     private short rgiDataType[];
     private Document doc;
     private double dblLastTimer = -1;
 
-    //Predicate for enforcing the punctuation
-    private Predicate pred = null;
-    private PredicateImpl predEval = null;
-    
     public PhysicalPunctuateOperator() {
         setBlockingSourceStreams(new boolean[cInput]);
     }
 
     public PhysicalPunctuateOperator(int iDI, Attribute aTimer,
-				     String stData, Attribute aRoot) {
+				     Attribute attrData) {
         setBlockingSourceStreams(new boolean[cInput]);
 
 	iDataInput = iDI;
 	attrTimer = aTimer;
-	stDataTimer = stData;
-	attrDataRoot = aRoot;
+	attrDataTimer = attrData;
     }
     
     public void opInitFrom(LogicalOp logicalOperator) {
@@ -93,8 +83,7 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 
 	iDataInput = pop.getDataInput();
 	attrTimer = pop.getTimerAttr();
-	stDataTimer = pop.getDataTimer();
-	attrDataRoot = pop.getDataRoot();
+	attrDataTimer = pop.getDataTimer();
     }
 
     public void opInitialize() {
@@ -105,8 +94,12 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
         aeTimer.resolveVariables(inputTupleSchemas[1-iDataInput],1-iDataInput);
 	vTimer = new ArrayList();
 
-	iAttrDataRoot =
-	    inputTupleSchemas[iDataInput].getPosition(attrDataRoot.getName());
+	if (attrDataTimer != null) {
+	    aeData = new AtomicEvaluator(attrDataTimer.getName());
+	    aeData.resolveVariables(inputTupleSchemas[iDataInput],
+	                            iDataInput);
+	    vData = new ArrayList();
+	}
     }
 
     /**
@@ -128,30 +121,29 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 	if (streamId == iDataInput) {
 	    //Make sure this tuple doesn't match previously output
 	    // punctuations
-	    if (dblLastTimer != -1) 
-		fOutput=enforcePunctuation(inputTuple);
+	    if (dblLastTimer != -1)
+	        fOutput=enforcePunctuation(inputTuple);
 
-	    if (fOutput) {
-	        // set the tuple's timestamp to the current time
+            if (fOutput) {
+    	        // set the tuple's timestamp to the current time
 	        // NOTE: might be wise to only call currentTimeMillis
 	        // occassionally, and let multiple tuples have the
 	        // same timestamp. Its not as accurate, but it will
 	        // speed this up.
-
-	        inputTuple.setTimeStamp(System.currentTimeMillis());
+                appendTimestamp(inputTuple);
 	        putTuple(inputTuple, 0);
 	    }
 
 	    //If we haven't already picked up a template tuple,
 	    // copy this one.
-	    if (rgstDataChild == null)
-		setupDataTemplate(inputTuple);
+	    if (tupleDataSample == null)
+	        tupleDataSample = inputTuple;
 	} else {
-	    if (rgstDataChild != null) {
+	    if (tupleDataSample != null) {
 		vTimer.clear();
 		aeTimer.getAtomicValues(inputTuple, vTimer);
 		if (vTimer.size() != 1)
-		    throw new PEException("Punctuate requires exactly one value");
+		    throw new PEException("Punctuate requires exactly one timer value");
 
 		dblLastTimer = Double.parseDouble((String) vTimer.get(0));
 
@@ -161,55 +153,42 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 	}
     }
 
-    private boolean enforcePunctuation(StreamTupleElement inputTuple) {
-	boolean fOutput = false;
-	String stEle;
+    private void appendTimestamp(StreamTupleElement inputTuple) {
+        Element eleTS = doc.createElement(punctuateOp.STTIMESTAMPATTR);
+        String stTS = String.valueOf(System.currentTimeMillis());
+        eleTS.appendChild(doc.createTextNode(stTS));
+	inputTuple.appendAttribute(eleTS);
+    }
 
-	//ptucker: This approach is simple. It would be more robust to
-	// create a Predicate object to handle this instead. I
-	// use this approach because I didn't want the overhead of
-	// creating a new Predicate object (and the associated
-	// NumericConstant) every time a punctuation arrived
-        Node ndRoot = inputTuple.getAttribute(iAttrDataRoot);
-        NodeList nl = ndRoot.getChildNodes();
-	//This is a little ugly. Since each XML node is not consistent
-	// (that is, one time a tuple may have four child elements,
-	// the next time 5, and the next 3), I need to walk through
-	// the node's children and find the element with the required
-	// timestamp field.
-        for (int i=0; i<nl.getLength(); i++) {
-            stEle = nl.item(i).getNodeName();
-	    if (stEle.compareTo(stDataTimer) == 0) {
-	        //Need to get the descendant text field, and its value
-		Node ndTime = nl.item(i).getFirstChild();
-	    	double dbl =
-		    Double.parseDouble((String) ndTime.getNodeValue());
+    private void appendTimestamp(StreamPunctuationElement spe,
+                                 boolean fTSWildcard) {
+        Element eleTS = doc.createElement(punctuateOp.STTIMESTAMPATTR);
+	String stTS;
+
+	if (fTSWildcard)
+	    stTS = new String("*");
+	else
+	    stTS = new String("(," + System.currentTimeMillis() + ")");
+        eleTS.appendChild(doc.createTextNode(stTS));
+        spe.appendAttribute(eleTS);
+    }
+
+    private boolean enforcePunctuation(StreamTupleElement tuple) {
+        boolean fOutput = true;
 	
-		//Note: This assumes the timer input is nondecreasing
-		if (dbl > dblLastTimer)
-		    fOutput=true;
-		break;
-	    }
+        if (attrDataTimer != null) {
+            vData.clear();
+            aeData.getAtomicValues(tuple, vData);
+	    if (vData.size() != 1)
+	        throw new PEException("Punctuate-more than one value");
+	    
+	    double dbl = Double.parseDouble((String) vData.get(0));
+	    fOutput = (dbl >= dblLastTimer);
+	    if (fOutput == false)
+	        System.out.println("PT - Tuple matches punctuation that has been output -- dropping it");
 	}
 
 	return fOutput;
-    }
-
-    /**
-     * This function take the first data tuple and uses it as a
-     * template for punctuations
-     */
-    private void setupDataTemplate(StreamTupleElement inputTuple) {
-	Node ndRoot = inputTuple.getAttribute(iAttrDataRoot);
-	stDataRoot = ndRoot.getNodeName();
-		
-	NodeList nl = ndRoot.getChildNodes();
-	rgstDataChild = new String[nl.getLength()];
-	rgiDataType = new short[nl.getLength()];
-	for (int i=0; i<rgstDataChild.length; i++) {
-	    rgstDataChild[i] = nl.item(i).getNodeName();
-	    rgiDataType[i] = nl.item(i).getNodeType();
-	}
     }
 
     /**
@@ -222,40 +201,29 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 	// based on the timer value, where the time value is
 	// (,last), indicating that all values from the beginning
 	// to `last' have been seen. Note this assumes the 
-	// attribute is strictly increasing.
+	// attribute is strictly non-decreasing.
 
 	//Create a new punctuation element
-	Element ePunct = doc.createElement(StreamPunctuationElement.STPUNCTNS
-					   + ":" + stDataRoot);
-
-	for (int iAttr=0; iAttr<rgstDataChild.length; iAttr++) {
-	    switch(rgiDataType[iAttr]) {
-	    case Node.ELEMENT_NODE:
-		Element eChild = doc.createElement(rgstDataChild[iAttr]);
-		Text tPattern;
-
-		if (rgstDataChild[iAttr].compareTo(stDataTimer) != 0)
-		    tPattern = doc.createTextNode("*");
-		else
-		    //Note this assume the timer input is non-decreasing
-		    tPattern = doc.createTextNode("(," + values.get(0) + ")");
-
-		eChild.appendChild(tPattern);
-		ePunct.appendChild(eChild);
-		break;
-
-	    case Node.TEXT_NODE:
-		Text tChild = doc.createTextNode("*");
-		ePunct.appendChild(tChild);
-		break;
-	    default:
-		System.out.println("Unhandled node type: " +
-				   rgiDataType[iAttr]);
-	    }
+	int iAttrTimer = -1;
+	
+	if (attrDataTimer != null)
+	    iAttrTimer = 
+	        inputTupleSchemas[iDataInput].getPosition(attrDataTimer.getName());
+	StreamPunctuationElement spe =
+	    new StreamPunctuationElement(false);
+	for (int iAttr=0; iAttr<tupleDataSample.size(); iAttr++) {
+	    Node ndSample = tupleDataSample.getAttribute(iAttr);
+	    String stName = ndSample.getNodeName();
+	    if (stName.compareTo("#document") == 0)
+		stName = new String("document");
+	    Element ePunct = doc.createElement(stName);
+	    if (iAttr != iAttrTimer)
+	    	ePunct.appendChild(doc.createTextNode("*"));
+            else
+	        ePunct.appendChild(doc.createTextNode("(," + values.get(0) + ")"));
+	    spe.appendAttribute(ePunct);
 	}
-
-	StreamPunctuationElement spe = new StreamPunctuationElement(false);
-	spe.appendAttribute(ePunct);
+	appendTimestamp(spe, (iAttrTimer != -1));
 
 	return spe;
     }
@@ -296,8 +264,7 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
      */
     public Op opCopy() {
         return new  PhysicalPunctuateOperator(iDataInput, attrTimer,
-					      stDataTimer,
-					      attrDataRoot);
+					      attrDataTimer);
     }
 
     /**
@@ -305,7 +272,9 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
      */
     public void constructTupleSchema(TupleSchema[] inputSchemas) {
         inputTupleSchemas = inputSchemas;
-        outputTupleSchema = inputTupleSchemas[iDataInput];
+	outputTupleSchema = inputSchemas[iDataInput];
+	Attribute attrTS = logProp.getAttr(punctuateOp.STTIMESTAMPATTR);
+	outputTupleSchema.addMapping(attrTS);
     }
 
     /**
