@@ -15,6 +15,10 @@ class SimpleCalendar {
     int getTimeInSecs() {
 	return time_sec;
     }
+
+    int getTimeInMS() {
+        return time_sec*1000;
+    }
     
     void incrementTime() {
 	time_sec += rnd.nextInt(MAXINCREMENT_SEC); // 1000 millesecons per second

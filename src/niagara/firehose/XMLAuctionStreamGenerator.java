@@ -31,7 +31,7 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
     private MyBuffer myBuf;
     private XMLFirehoseThread writer;
     private int numGenCalls;
-    
+
     public XMLAuctionStreamGenerator(int numTLElts,
 				     int numGenCalls, boolean streaming,
 				     boolean prettyPrint, BufferedWriter wrtTrace) {
