@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 
-<plan top="cons">
+<plan top="join">
 
 <!--First, get auctions in category #10 -->
 <firehosescan id="fhAuction" rate="0"
@@ -14,10 +14,10 @@
 <unnest id="auct" regexp="site.open_auctions.open_auction" input="dup"/>
 <unnest id="aseller" regexp="seller.person" input="auct"/>
 <unnest id="acat" regexp="category" root="$auct" input="aseller"/>
-<select id="sela" input="acat">
-  <pred op="le"><var value="$acat"/><string value="100"/></pred>
+<unnest id="aid" regexp="id" root="$auct" input="acat"/>
+<select id="sela" input="aid">
+  <pred op="ge"><var value="$acat"/><string value="100"/></pred>
 </select>
-<!--<unnest id="aseller" regexp="seller" input="sela" root="$auct"/>-->
 
 <!--Now, get persons from the right locations-->
 <unnest id="person" regexp="site.people.person" input="dup"/>
@@ -49,7 +49,7 @@
   <LOCALITEM>
     <NAME>$pname</NAME>
     <CITY>$pcity</CITY><STATE>$pstate</STATE>
-<!--    <AUCTION>$aid</AUCTION>-->
+    <AUCTION>$aid</AUCTION>
   </LOCALITEM>
 </construct>
 
