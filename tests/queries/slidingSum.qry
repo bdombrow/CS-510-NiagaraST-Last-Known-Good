@@ -8,8 +8,8 @@
 <unnest id="scan" regexp="PLAY.NUM" input="dtd"/>
 <unnest id="scan1" regexp="NUM1" input="scan"/>
 <unnest id="scan2" root="$scan" regexp="NUM2" input="scan1"/>
-<slidingMax id="slidingMax"  groupby="$scan1" maxattr="$scan2" input="scan2" range="6" every="4"/>
-<construct id="cons" input="slidingMax">
-<max><index>$index</index><groupby>$scan1</groupby> $slidingMax</max>
+<slidingSum id="slidingSum" groupby="$scan1" sumattr="$scan2" input="scan2" range = "5" every = "3"/>
+<construct id="cons" input="slidingSum">
+<sum><index>$index</index><groupby>$scan1</groupby>$slidingSum</sum>
 </construct>
 </plan>
