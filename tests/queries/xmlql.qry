@@ -1,0 +1,12 @@
+WHERE 
+<PLAY><NUM> $n </></> 
+    IN "http://www.cse.ogi.edu/~tufte/xml/numbers.xml" ,
+<PLAY><TITLE> $t </></> 
+    IN "http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml" ,
+$n >3
+CONSTRUCT 
+<result>
+<title> $t </>
+<number> $n </>
+</>
+
