@@ -104,7 +104,7 @@ Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
 <sum>15.0</sum>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><!-- "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd" --><plan top="fh"><firehosescan id="fh" host="localhost" port="5000" rate="0" datatype="xmlb" num_gen_calls="5" streaming="yes" desc="garbage" num_tl_elts="3" ></firehosescan></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><!-- "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd" --><plan top="fh"><firehosescan id="fh" host="localhost" port="5000" rate="0" datatype="xmlb" num_gen_calls="5" streaming="yes" desc="garbage" num_tl_elts="3" prettyprint = "yes" ></firehosescan></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
 <GAMEDATA>
