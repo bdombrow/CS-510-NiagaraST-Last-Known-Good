@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: NiagraServer.java,v 1.2 2000/06/12 01:14:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -52,6 +52,8 @@ public class NiagraServer
     private static int NUM_OP_THREADS;
     private static int CONNECTION_MANAGER_PORT = 9020;
 
+    private static boolean connectToSE = true;
+
 	// Defaults
 	private static int DEFAULT_QUERY_THREADS = 10;
 	private static int DEFAULT_OPERATOR_THREADS = 50;
@@ -79,7 +81,7 @@ public class NiagraServer
 								 SEHOST, 
 								 SEPORT,
 								 true,     // Connection Manager
-								 true);    // Search Engine
+								 connectToSE);    // Search Engine
 	    
 			// Create the trigger manager
 			triggerManager = new TriggerManager(qe);
@@ -90,7 +92,8 @@ public class NiagraServer
 				new ConnectionManager (CONNECTION_PORT,
 									   this);
 	    
-			seClient = new SEClient(SEHOST);
+			if (connectToSE)
+			    seClient = new SEClient(SEHOST);
         
 		}
 		catch (Exception ex) {
@@ -221,6 +224,12 @@ public class NiagraServer
 				usage(1);
 				return;
 			}
+			else if (args.length == 1 && args[0].equals("-without-se")) {
+			        connectToSE = false;
+				NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS; // hard wired defaults
+				NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
+				return;
+			}
 			// Bypass the config file and specify host directly
 			else if(args.length == 2 && args[0].equals("-se")){
 				// bypass config. Config cannot be read in NT
@@ -323,6 +332,8 @@ public class NiagraServer
 				System.out.println("Usage: java niagara.connection_server.NiagraServer [flags]");
 				System.out.println("\t-init   create (re-create) the .niagra_config file");
 				System.out.println("\t-se <host name> use the the search engine on <host name>");
+				System.out.println("\t-without-se Do not try to connect to a search engine");
+
 				System.out.println("\t-help   print detailed help screen");
 			}
 			if(detail == 1){
