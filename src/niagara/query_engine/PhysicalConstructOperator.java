@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.18 2003/02/23 05:02:51 tufte Exp $
+  $Id: PhysicalConstructOperator.java,v 1.19 2003/03/07 21:01:12 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -251,6 +251,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
             } else if (type == dataType.ATTR) {
                 // First get the schema attribute
                 schemaAttribute schema = (schemaAttribute) attrData.getValue();
+		assert schema != null : "Schema null for attribute " + name;
 
                 // Now construct result based on whether it is to be 
 		// interpreted as an element or a parent
