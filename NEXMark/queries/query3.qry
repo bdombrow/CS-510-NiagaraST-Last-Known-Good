@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<!--First, get auctions in category #10 -->
+<firehosescan id="fhAuction" rate="0"
+        host="localhost" port="5000" streaming="yes"
+        datatype="auction_stream" desc="" num_gen_calls="10"
+        num_tl_elts="10" trace="no"/>
+
+<dup id="dup" branch="2" input="fhAuction"/>
+
+<unnest id="auct" regexp="site.open_auctions.open_auction" input="dup"/>
+<unnest id="aseller" regexp="seller.person" input="auct"/>
+<unnest id="acat" regexp="category" root="$auct" input="aseller"/>
+<select id="sela" input="acat">
+  <pred op="le"><var value="$acat"/><string value="100"/></pred>
+</select>
+<!--<unnest id="aseller" regexp="seller" input="sela" root="$auct"/>-->
+
+<!--Now, get persons from the right locations-->
+<unnest id="person" regexp="site.people.person" input="dup"/>
+<unnest id="pstate" regexp="address.province" input="person"/>
+<unnest id="pname" regexp="name" input="pstate" root="$person"/>
+<unnest id="pcity" regexp="address.city" input="pname" root="$person"/>
+<unnest id="pid" regexp="id" input="pcity" root="$person"/>
+<select id="selperson" input="pid">
+  <or>
+    <pred op="eq">
+      <var value="$pstate"/><string value="Oregon"/>
+    </pred>
+    <or>
+      <pred op="eq">
+        <var value="$pstate"/><string value="Idaho"/>
+      </pred>
+      <pred op="eq">
+        <var value="$pstate"/><string value="Washington"/>
+      </pred>
+    </or>
+  </or>
+</select>
+
+<!-- Now, join on a.seller=p.id -->
+<join id="join" left="$pid" right="$aseller" input="selperson sela" physical="niagara.query_engine.PhysicalHashJoinOperator"/>
+
+<!--Finally, output the result-->
+<construct id="cons" input="join">
+  <LOCALITEM>
+    <NAME>$pname</NAME>
+    <CITY>$pcity</CITY><STATE>$pstate</STATE>
+<!--    <AUCTION>$aid</AUCTION>-->
+  </LOCALITEM>
+</construct>
+
+</plan>

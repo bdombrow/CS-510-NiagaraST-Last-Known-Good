@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<!--First, get bids and duplicate the stream -->
+<firehosescan id="fhBids" rate="0"
+        host="localhost" port="5000" streaming="yes"
+        datatype="auction_stream" desc="" num_gen_calls="10"
+        num_tl_elts="10" trace="no"/>
+
+<unnest id="bid" regexp="site.open_auctions.open_auction" input="fhBids"/>
+<dup id="dup" branch="2" input="bid"/>
+
+<!-- From one input, get desired fields -->
+<unnest id="bPrice" regexp="bid" input="$bid"/>
+<unnest id="bAuction" regexp="id" input="bPrice" root="$bid"/>
+<unnest id="bBidder" regexp="person_ref.person" root="$dup" input="bPrice"/>
+
+<!-- From the other input, find the max price-->
+<unnest id="bPriceII" regexp="bid" input="dup"/>
+<slidingMax id="bMax" groupby="$dup" maxattr="$bPriceII"
+            range="10" every="10" input="$bPriceII"/>
+
+<!-- Now, join on price -->
+<join id="join" left="$bPriceII" right="$bPrice" input="bPriceII bBidder" physical="niagara.query_engine.PhysicalHashJoinOperator"/>
+
+<!--Finally, output the result-->
+<construct id="cons" input="bid">
+  <HIGHBID>
+<!--    <AUCTION>$bAuction</AUCTION>-->
+    <PRICE>$bid</PRICE>
+<!--    <BIDDER>$bBidder</BIDDER>-->
+  </HIGHBID>
+</construct>
+
+<!--<construct id="cons" input="bid">
+  <res> $bid </res>
+</construct>
+-->
+
+</plan>
