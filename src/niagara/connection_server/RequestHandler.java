@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.9 2002/03/31 15:53:57 tufte Exp $
+  $Id: RequestHandler.java,v 1.10 2002/04/21 04:11:40 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,7 +34,6 @@ import niagara.query_engine.*;
 import niagara.trigger_engine.*;
 import niagara.xmlql_parser.op_tree.logNode;
 import niagara.data_manager.DataManager;
-
 
 /**There is one request handler per client and receives all the requests from that client
    Then that request is further dispatched to the appropriate module and results sent back
@@ -324,15 +322,7 @@ public class RequestHandler {
 		    throw new InvalidQueryIDException();
 
 		// Put a get partial message downstream
-		// try {
-		// 		    queryInfo.getOutputStream().
-		// 			putControlElementDownStream
-		// 			(new StreamControlElement
-		// 			 (StreamControlElement.GetPartialResult));
-		// 		}
-		// 		catch (NullElementException e) { /* OK */ } 
-		// 		catch (StreamPreviouslyClosedException e) { /* OK */ }
-		    
+		queryInfo.queryResult.returnPartialResults();
 		break;
             
             case RequestMessage.RUN_GC:
