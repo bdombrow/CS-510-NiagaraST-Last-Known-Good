@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<plan top="result" x="335" y="53">
+<dtdscan id="accum" x="344" y="465">
+<url value="LeagueStats.xml"></url>
+</dtdscan>
+<scan root="" type="element" regexp="LEAGUESYSTEM.LEAGUE.TEAM" id="team" input="accum" x="141" y="395">
+</scan>
+<scan root="" type="content" regexp="NAME" id="teamname" input="team" x="295" y="395">
+</scan>
+<scan root="$team" type="content" regexp="STATS.RUNSCORED" id="runsscored" input="teamname" x="446" y="396">
+</scan>
+<scan root="$team" type="content" regexp="STATS.BASES" id="bases" input="runsscored" x="573" y="396">
+</scan>
+<scan root="$team" type="content" regexp="STATS.STRIKEOUT" id="strikeouts" input="bases" x="573" y="319">
+</scan>
+<scan root="$team" type="content" regexp="STATS.RUNALLOWED" id="runsallowed" input="strikeouts" x="431" y="318">
+</scan>
+<scan root="$team" type="content" regexp="STATS.WIN" id="wins" input="runsallowed" x="294" y="319">
+</scan>
+<scan root="$team" type="content" regexp="STATS.STEAL" id="steals" input="wins" x="145" y="320">
+</scan>
+<expression class="" expression="result = runsscored + bases + strikeouts + wins * 10 + steals - runsallowed;" id="final_score" input="steals" x="336" y="249">
+</expression>
+<sort order="descending" sort_by="$final_score" comparison="numeric" id="sort" input="final_score" x="336" y="184">
+</sort>
+<construct clear="no" id="result" input="sort" x="336" y="113">
+<team>
+	$teamname
+	$final_score
+	</team>
+</construct>
+</plan>

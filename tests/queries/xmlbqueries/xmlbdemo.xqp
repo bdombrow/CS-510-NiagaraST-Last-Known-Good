@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<plan top="accum" x="301" y="31">
+<firehosescan iters="10000" port="5005" type="gen" rate="0" host="localhost" desc="http://king.cse.ogi.edu/xml/play.dtd" id="fh" input="" x="352" y="490">
+</firehosescan>
+<dup branch="2" id="dup1" input="fh" x="347" y="433">
+</dup>
+<scan root="" type="element" regexp="GAMEDATA.PLAY" id="play" input="dup1" x="184" y="433">
+</scan>
+<dup branch="5" id="dup2" input="play" x="230" y="375">
+</dup>
+<scan root="" type="content" regexp="$.RUNSCORED.RUNNER" id="rs_runner" input="dup2" x="376" y="311">
+</scan>
+<construct clear="yes" id="cons_rs_runner" input="rs_runner" x="376" y="240">
+<LEAGUESYSTEM><LEAGUE><TEAM>
+	<STATS><RUNSCORED>1</RUNSCORED><PLRID>$rs_runner</PLRID></STATS>
+	<ROSTER><PLAYER><PLRID>$rs_runner</PLRID></PLAYER></ROSTER>
+</TEAM></LEAGUE></LEAGUESYSTEM>
+</construct>
+<scan root="" type="content" regexp="HIT.BATTER" id="batter" input="dup2" x="384" y="374">
+</scan>
+<scan root="$play" type="content" regexp="HIT.BASES" id="bases" input="batter" x="475" y="311">
+</scan>
+<construct clear="yes" id="cons_base_hit" input="bases" x="476" y="239">
+<LEAGUESYSTEM><LEAGUE><TEAM>
+	<STATS><BASES>$bases</BASES><PLRID>$batter</PLRID></STATS>
+	<ROSTER><PLAYER><PLRID>$batter</PLRID></PLAYER></ROSTER>
+</TEAM></LEAGUE></LEAGUESYSTEM>
+</construct>
+<scan root="" type="content" regexp="STEAL.RUNNER" id="steal" input="dup2" x="172" y="311">
+</scan>
+<construct clear="yes" id="cons_steal" input="steal" x="172" y="238">
+<LEAGUESYSTEM><LEAGUE><TEAM>
+	<STATS><STEAL>1</STEAL></STATS>
+	<ROSTER><PLAYER><PLRID>$steal</PLRID></PLAYER></ROSTER>
+</TEAM></LEAGUE></LEAGUESYSTEM>
+</construct>
+<scan root="" type="content" regexp="STRIKEOUT.PITCHER" id="strikeout" input="dup2" x="269" y="312">
+</scan>
+<construct clear="yes" id="cons_strikeout" input="strikeout" x="267" y="240">
+<LEAGUESYSTEM><LEAGUE><TEAM>
+	<STATS><STRIKEOUT>1</STRIKEOUT></STATS>
+	<ROSTER><PLAYER><PLRID>$strikeout</PLRID></PLAYER></ROSTER>
+</TEAM></LEAGUE></LEAGUESYSTEM>
+</construct>
+<scan root="$play" type="content" regexp="$.RUNSCORED.CHARGED_TO" id="chargedto" input="dup2" x="70" y="311">
+</scan>
+<construct clear="yes" id="cons_chargedto" input="chargedto" x="71" y="238">
+<LEAGUESYSTEM><LEAGUE><TEAM>
+	<STATS><RUNALLOWED>1</RUNALLOWED></STATS>
+	<ROSTER><PLAYER><PLRID>$chargedto</PLRID></PLAYER></ROSTER>
+</TEAM></LEAGUE></LEAGUESYSTEM>
+</construct>
+<scan root="" type="content" regexp="GAMEDATA.GAME_END.WINNING_PITCHER" id="winning_pitcher" input="dup1" x="575" y="427">
+</scan>
+<construct clear="yes" id="cons_wp" input="winning_pitcher" x="574" y="225">
+<LEAGUESYSTEM><LEAGUE><TEAM>
+	<STATS><WIN>1</WIN></STATS>
+	<ROSTER><PLAYER><PLRID>$winning_pitcher</PLRID></PLAYER></ROSTER>
+</TEAM></LEAGUE></LEAGUESYSTEM>
+</construct>
+<union id="union" input="cons_rs_runner cons_base_hit cons_steal cons_strikeout cons_chargedto cons_wp" x="301" y="165">
+</union>
+<accumulate clear="true" initialAccumFile="../data/PetesLeague.xml" accumFileName="LeagueStats.xml" mergeAttr="$cons_rs_runner" mergeTemplate="../data/LeagueSystemMergeTemplate.xml" id="accum" input="union" x="301" y="103">
+</accumulate>
+</plan>
