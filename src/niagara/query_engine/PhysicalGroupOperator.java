@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.25 2003/07/24 19:18:34 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.26 2003/07/24 19:56:12 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -284,6 +284,8 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	    // Add the entry to hash table
 	    if(numGroupingAttributes > 0)
 		hashtable.put(hashKey, prevResult);
+	    else
+		singleGroupResult = prevResult;
 	} else {
 	    // It did have the result - update partial results
 	    prevResult.updatePartialResult(currPartialResultId);
