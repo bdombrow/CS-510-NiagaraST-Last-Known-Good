@@ -1,4 +1,4 @@
-/* $Id: SSP.java,v 1.8 2003/09/13 03:33:19 vpapad Exp $
+/* $Id: SSP.java,v 1.9 2003/09/16 04:45:29 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -342,7 +342,7 @@ public class SSP {
         MExpr MExpr = new MExpr(Expr, GrpID, this);
         
         // find duplicate.  Done only for logical, not physical, expressions.
-        if (MExpr.getOp().is_logical()) {
+        if (MExpr.getOp().isLogical()) {
             MExpr DupMExpr = findDup(MExpr);
             if (DupMExpr != null) { // not null ,there is a duplicate
                 //PTRACE0("duplicate mexpr : " + MExpr.LightDump());
@@ -644,9 +644,9 @@ public class SSP {
         while (!ptasks.empty()) {
             TaskNo++;
 
-            Task NextTask = ptasks.pop();
-            tracer.performingTask(NextTask);
-            NextTask.perform();
+            Task nextTask = ptasks.pop();
+            tracer.performingTask(nextTask);
+            nextTask.perform();
         }
         tracer.endingOptimization();
     }
@@ -697,5 +697,9 @@ public class SSP {
 
     public Context getInitCont() {
         return InitCont;
+    }
+
+    public RuleSet getRuleSet() {
+        return ruleSet;
     }
 }

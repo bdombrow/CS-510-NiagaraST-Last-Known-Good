@@ -1,4 +1,4 @@
-/* $Id: ApplyRule.java,v 1.8 2003/09/13 03:33:19 vpapad Exp $
+/* $Id: ApplyRule.java,v 1.9 2003/09/16 04:45:29 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -106,7 +106,7 @@ public class ApplyRule extends Task {
             //if not stop generating logical expression when epsilon prune is applied
             //if this context is done and the substitute is physical, if the substitute
             //is logical continue
-            if (context.isFinished() && rule.is_log_to_phys()) {
+            if (context.isFinished() && rule.isLogicalToPhysical()) {
                 delete();
                 return;
             }
@@ -188,7 +188,7 @@ public class ApplyRule extends Task {
 
                 if (ssp.NO_PHYS_IN_GROUP) {
                     // don't include physical mexprs into group
-                    if (after.getOp().is_logical())
+                    if (after.getOp().isLogical())
                         NewMExpr = ssp.copyIn(after, group_no);
                     else
                         NewMExpr = new MExpr(after, group_no, ssp);
@@ -221,7 +221,7 @@ public class ApplyRule extends Task {
                 // follow-on tasks
                 if (explore) // optimizer is exploring, the new mexpr must be logical expr
                     {
-                    assert NewMExpr.getOp().is_logical();
+                    assert NewMExpr.getOp().isLogical();
                     //                            PTRACE0("new task to explore new expression," 
                     //                "pushing O_EXPR exploring expr: " + NewMExpr.Dump());
                     if (ssp.GlobepsPruning) {
@@ -240,7 +240,7 @@ public class ApplyRule extends Task {
                 } // optimizer is exploring
                 else { // optimizer is optimizing
                     // for a logical op, try further transformations
-                    if (NewMExpr.getOp().is_logical()) {
+                    if (NewMExpr.getOp().isLogical()) {
                         //                    PTRACE0("new task to optimize new expression,pushing O_EXPR, expr: " + NewMExpr.Dump());
                         if (ssp.GlobepsPruning) {
                             Cost eps_bound = new Cost(epsBound);
@@ -264,7 +264,7 @@ public class ApplyRule extends Task {
                     else {
                         // for a physical operator, optimize the inputs
                         /* must be done even if op_arg.arity == 0 in order to calculate costs */
-                        assert NewMExpr.getOp().is_physical();
+                        assert NewMExpr.getOp().isPhysical();
                         //                    PTRACE0("new task to optimize inputs,pushing O_INPUT, epxr: " + NewMExpr.Dump());
                         if (ssp.GlobepsPruning) {
                             Cost eps_bound = new Cost(epsBound);
@@ -328,7 +328,7 @@ public class ApplyRule extends Task {
 
                 if (ssp.NO_PHYS_IN_GROUP) {
                     // don't include physical mexprs into group
-                    if (after.getOp().is_logical())
+                    if (after.getOp().isLogical())
                         NewMExpr = ssp.copyIn(after, group_no);
                     else
                         NewMExpr = new MExpr(after, group_no, ssp);
@@ -371,7 +371,7 @@ public class ApplyRule extends Task {
                 }
 
                 // if it is physical operator, plus the local cost
-                if (NewMExpr.getOp().is_physical())
+                if (NewMExpr.getOp().isPhysical())
                     LocalCost =
                         ((PhysicalOp) NewMExpr.getOp()).findLocalCost(
                             ssp.getCatalog(),
@@ -435,9 +435,7 @@ public class ApplyRule extends Task {
                         ((AFTERS) AfterArray.get(num_afters))
                             .m_expr
                             .getOp()
-                            .is_logical());
-                    //PTRACE ("new task to explore new expression, \
-                    //  pushing O_EXPR exploring expr: %s", Afters[num_afters].m_expr.Dump());
+                            .isLogical());
                     ssp.addTask(
                         new O_EXPR(
                             ssp,
@@ -449,9 +447,7 @@ public class ApplyRule extends Task {
                 } // optimizer is exploring
                 else { // optimizer is optimizing
                     // for a logical op, try further transformations
-                    if (Afters[num_afters].m_expr.getOp().is_logical()) {
-                        //PTRACE("new task to optimize new expression,pushing O_EXPR, expr: %s", 
-                        //     Afters[num_afters].m_expr.Dump());
+                    if (Afters[num_afters].m_expr.getOp().isLogical()) {
                         ssp.addTask(
                             new O_EXPR(
                                 ssp,
@@ -463,10 +459,8 @@ public class ApplyRule extends Task {
                     else {
                         // for a physical operator, optimize the inputs
                         /* must be done even if op_arg.arity == 0 in order to calculate costs */
-                        assert(Afters[num_afters].m_expr.getOp().is_physical());
+                        assert(Afters[num_afters].m_expr.getOp().isPhysical());
 
-                        //PTRACE("new task to optimize inputs,pushing O_INPUT, epxr: %s", 
-                        //        Afters[num_afters].m_expr.Dump());
                         ssp.addTask(
                             new O_INPUTS(
                                 Afters[num_afters].m_expr,

@@ -1,4 +1,4 @@
-/* $Id: Group.java,v 1.9 2003/09/12 23:52:50 vpapad Exp $ 
+/* $Id: Group.java,v 1.10 2003/09/16 04:45:29 vpapad Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -86,7 +86,7 @@ public class Group {
 
         assert mexpr
             .getOp()
-            .is_logical() : "Group initialized by physical multiexpression";
+            .isLogical() : "Group initialized by physical multiexpression";
 
         LogicalOp op = (LogicalOp) mexpr.getOp();
 
@@ -112,7 +112,7 @@ public class Group {
            fetchbound() * sum(cucard(Ai) i = 1, ..., n) // from leaf fetches
         */
         double cost = 0;
-        if (mexpr.getOp().is_logical()) {
+        if (mexpr.getOp().isLogical()) {
             // XXX vpapad: what is this doing here? 
             if (mexpr.getOp().getName().equals("GET"))
                 cost = 0; // GET operator does not have a CopyOut cost
@@ -469,7 +469,7 @@ public class Group {
         mexpr.setGroup(this);
 
         // link to last mexpr
-        if (mexpr.getOp().is_logical()) {
+        if (mexpr.getOp().isLogical()) {
             // No need to check that (first/last)LogMEXpr != null 
             // -- groups are created with at least one logical expression 
             lastLogMExpr.setNextMExpr(mexpr);

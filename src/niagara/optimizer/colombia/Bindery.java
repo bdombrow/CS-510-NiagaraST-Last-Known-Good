@@ -1,4 +1,4 @@
-/* $Id: Bindery.java,v 1.6 2003/02/25 06:19:07 vpapad Exp $
+/* $Id: Bindery.java,v 1.7 2003/09/16 04:45:29 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -23,7 +23,6 @@
    and DARPA (ARPA order #8230, CECOM contract DAAB07-91-C-Q518).
  */
 package niagara.optimizer.colombia;
-
 
 /*
     Bindery
@@ -106,13 +105,13 @@ public class Bindery {
         // Finished with this expression
     }
 
-    BINDERY_STATE state;
+    private BINDERY_STATE state;
 
     private SSP ssp;
 
-    Bindery[] input; // binderys for input expr's
+    private Bindery[] input; // binderys for input expr's
     // XXX These 3 vars were # ifdef _REUSE_SIB 
-    Node list, last, currentBind;
+    private Node list, last, currentBind;
 
     //Get the current MExpr
     MExpr getMExpr() {
@@ -127,7 +126,6 @@ public class Bindery {
     Bindery(Group group, Expr pattern, SSP ssp) {
         state = BINDERY_STATE.START;
         this.group = group;
-        cur_expr = null;
         this.pattern = pattern;
         input = null;
         one_expr = false; // try all expressions within this group
@@ -161,15 +159,11 @@ public class Bindery {
         // expression to extract.
         assert state == BINDERY_STATE.VALID_BINDING
             || state == BINDERY_STATE.FINISHED
-            || (patt_op.is_leaf() && state == BINDERY_STATE.START);
+            || (patt_op.isLeaf() && state == BINDERY_STATE.START);
 
         // create leaf marked with group index
-        if (patt_op.is_leaf()) {
-            result =
-                new Expr(
-                    new LeafOp(
-                        ((LeafOp) patt_op).getIndex(),
-                        group));
+        if (patt_op.isLeaf()) {
+            result = new Expr(new LeafOp(((LeafOp) patt_op).getIndex(), group));
         } // create leaf marked with group index
         else // general invocation of new Expr
             {
@@ -252,7 +246,7 @@ public class Bindery {
             Op patt_op = pattern.getOp();
             // If the pattern is a leaf, we will get one binding, 
             //   to the entire group, then we will be done
-            if (patt_op.is_leaf()) {
+            if (patt_op.isLeaf()) {
                 if (state == BINDERY_STATE.START) {
                     state = BINDERY_STATE.FINISHED; //failure next time, but 
                     return true; // success now
@@ -261,7 +255,7 @@ public class Bindery {
                 } else {
                     assert false;
                 }
-            } 
+            }
 
             if (!one_expr
                 && state == BINDERY_STATE.START) // begin the group binding
@@ -279,7 +273,7 @@ public class Bindery {
                 int arity = op_arg.getArity();
                 int input_no;
 
-                assert op_arg.is_logical();
+                assert op_arg.isLogical();
 
                 // state analysis and transitions
                 if (state == BINDERY_STATE.START) {
@@ -422,7 +416,7 @@ public class Bindery {
             Op patt_op = pattern.getOp();
             // If the pattern is a leaf, we will get one binding, 
             //   to the entire group, then we will be done
-            if (patt_op.is_leaf()) {
+            if (patt_op.isLeaf()) {
                 if (state == BINDERY_STATE.START) {
                     state = BINDERY_STATE.FINISHED; //failure next time, but 
                     return true; // success now
@@ -448,7 +442,7 @@ public class Bindery {
                 int arity = op_arg.getArity();
                 int input_no;
 
-                assert op_arg.is_logical();
+                assert op_arg.isLogical();
 
                 if (state == BINDERY_STATE.START) {
                     // is this expression unusable?

@@ -1,4 +1,4 @@
-/* $Id: LogicalProperty.java,v 1.8 2003/09/13 03:33:19 vpapad Exp $ 
+/* $Id: LogicalProperty.java,v 1.9 2003/09/16 04:45:29 vpapad Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -154,7 +154,7 @@ public class LogicalProperty {
     }
 
     boolean Contains(Attribute attr) {
-        return attrs.Contains(attr);
+        return attrs.contains(attr);
     }
 
     public boolean contains(Attrs attrs) {

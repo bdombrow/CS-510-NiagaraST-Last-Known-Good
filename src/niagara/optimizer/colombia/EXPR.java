@@ -1,4 +1,4 @@
-/* $Id: EXPR.java,v 1.5 2003/02/25 06:19:08 vpapad Exp $
+/* $Id: EXPR.java,v 1.6 2003/09/16 04:45:29 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -93,7 +93,7 @@ public class Expr {
     /** Return the number of Leaf operators in this
      * expression, viewed as a pattern */
     public int numLeafOps() {
-        if (op.is_leaf())
+        if (op.isLeaf())
             return 1;
 
         int count = 0;

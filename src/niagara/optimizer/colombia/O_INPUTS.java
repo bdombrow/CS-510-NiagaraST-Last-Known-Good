@@ -1,4 +1,4 @@
-/* $Id: O_INPUTS.java,v 1.7 2003/09/13 03:33:19 vpapad Exp $
+/* $Id: O_INPUTS.java,v 1.8 2003/09/16 04:45:29 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -76,7 +76,7 @@ public class O_INPUTS extends Task {
         prevInputNo = -1;
         epsBound = bound;
 
-        assert(MExpr.getOp().is_physical() || MExpr.getOp().is_item());
+        assert(MExpr.getOp().isPhysical() || MExpr.getOp().is_item());
         //We can only calculate cost for physical operators
 
         //Cache local properties
@@ -196,7 +196,7 @@ public class O_INPUTS extends Task {
     public void perform() {
         //Cache local properties of G and the expression being optimized
 
-        assert mexpr.getOp().is_physical() 
+        assert mexpr.getOp().isPhysical() 
             : "We can only optimize the inputs of physical expressions";
         PhysicalOp Op = (PhysicalOp) mexpr.getOp(); //the op of the expr
 
@@ -256,7 +256,7 @@ public class O_INPUTS extends Task {
 
                 PhysicalProperty[] properties;
                 PhysicalProperty ReqProp = null;
-                if (Op.is_physical()) {
+                if (Op.isPhysical()) {
                     // Determine property required of that input
                     properties =
                         ((PhysicalOp) Op).inputReqdProp(
@@ -339,7 +339,7 @@ public class O_INPUTS extends Task {
             //generate appropriate property for search of IG
             PhysicalProperty[] properties = null;
             PhysicalProperty ReqProp = null;
-            if (Op.is_physical()) {
+            if (Op.isPhysical()) {
                 // Determine property required of that input
                 properties =
                     ((PhysicalOp) Op).inputReqdProp(
@@ -466,7 +466,7 @@ public class O_INPUTS extends Task {
         // satisfy this required property.
         if (arity == 0
             && !LocalReqdProp.getOrder().isAny()
-            && Op.is_physical()) {
+            && Op.isPhysical()) {
             PhysicalProperty OutputPhysProp = ((PhysicalOp) Op).findPhysProp(PhysicalOp.NO_INPUTS);
             if (!(LocalReqdProp == OutputPhysProp)) {
                 //                PTRACE2(

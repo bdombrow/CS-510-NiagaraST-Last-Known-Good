@@ -1,4 +1,4 @@
-/* $Id: ORDER.java,v 1.4 2003/06/03 07:56:51 vpapad Exp $
+/* $Id: ORDER.java,v 1.5 2003/09/16 04:45:29 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -77,11 +77,7 @@ public class Order {
         attrNames.distinct();
     }
 
-    public Order() {
-        this(new Strings());
-    }
-
-    Order(Kind kind, Strings attrNames) {
+    private Order(Kind kind, Strings attrNames) {
         this.attrNames = attrNames; //XXX vpapad maybe copy()?
         this.kind = kind;
 
@@ -90,19 +86,8 @@ public class Order {
         attrNames.distinct();
     }
 
-    Order(Kind kind, String attrname) {
-        this.kind = kind;
-        attrNames = new Strings();
-        attrNames.add(attrname);
-    }
-    
     Order(Kind kind) {
         this(kind, new Strings());
-    }
-
-    Order(String attrname) {
-        attrNames = new Strings();
-        attrNames.add(attrname);
     }
 
     public Order(Order other) {
@@ -158,20 +143,7 @@ public class Order {
         return (getAttrName() == attrNames.get(0));
     }
 
-    String dump() {
-        return kind.toString() + attrNames.toString();
-        //  if (Order == sorted)
-        //  {
-        //      String temp;
-        //      os += "  KeyOrder: (";
-        //      int i;
-        //      for (i=0; i<KeyOrder.size()-1; i++)
-        //      {
-        //          temp.Format("%s, ", KeyOrder[i]==ascending? "ascending" : "descending");
-        //          os += temp;
-        //      }
-        //      temp.Format("%s)", KeyOrder[i]==ascending? "ascending" : "descending");
-        //      os +=temp;
-        //  }
+    public String toString() {
+        return kind.toString() + " " + attrNames.toString();
     }
 }

@@ -1,4 +1,4 @@
-/* $Id: Op.java,v 1.12 2003/07/03 19:43:39 tufte Exp $
+/* $Id: Op.java,v 1.13 2003/09/16 04:45:29 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -88,9 +88,9 @@ public abstract class Op {
     
     public int getNumberOfOutputs() { return 1;}
     
-    public boolean is_logical() {return false;}
-    public boolean is_physical() {return false;}
-    public boolean is_leaf() {return false;}
+    public boolean isLogical() {return false;}
+    public boolean isPhysical() {return false;}
+    public boolean isLeaf() {return false;}
 
     // XXX vpapad: Is anybody actually using this?
     public boolean is_item() { return false; }

@@ -1,4 +1,4 @@
-/* $Id: Rule.java,v 1.7 2003/09/13 03:33:18 vpapad Exp $
+/* $Id: Rule.java,v 1.8 2003/09/16 04:45:29 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -128,7 +128,7 @@ public abstract class Rule {
     // espcially useful for unnesting.
     // It seems like the only place needed to be modified to enable and disable 
     // before-mask is a piece of code in APPLY_Perform()
-    protected BitSet before_mask;
+    protected BitSet beforeMask;
     protected int index; // index in the rule set
 
     public Rule(String name, int arity, Expr pattern, Expr substitute) {
@@ -155,22 +155,21 @@ public abstract class Rule {
         return mexpr.canFire(index);
     }
     
-    boolean top_match(Op op_arg) {
-        assert op_arg.is_logical();
-        // to make sure never O_EXPR a physcial mexpr
+    boolean topMatch(Class c) {
+        // The results of this check are cached in RuleSet
+        // We should never apply rules to physical expressions
+        assert c.isInstance(LogicalOp.class);
 
+        Op op = pattern.getOp();
+        
         // if pattern is a leaf, means it represents a group, always matches
-        if (pattern.getOp().is_leaf())
-            return true;
-
         // otherwise, the pattern should be logical op
-        return (((LogicalOp) (pattern.getOp())).opMatch((LogicalOp) op_arg));
-
+        return (op.isLeaf() || ((LogicalOp) op).opMatch(c));
     }
 
     // default value is 1.0, resulting in exhaustive search
     public double promise(Op op_arg, Context context) {
-        return (substitute.getOp().is_physical() ? PHYS_PROMISE : LOG_PROMISE);
+        return (substitute.getOp().isPhysical() ? PHYS_PROMISE : LOG_PROMISE);
     }
 
     // Does before satisfy this rule's condition, if we are using
@@ -214,7 +213,7 @@ public abstract class Rule {
     /** Initialize masks */
     public void initMasks(int length) {
         mask = new BitSet(length);
-        before_mask = new BitSet(length);
+        beforeMask = new BitSet(length);
     }
     
     // get the rule's mask
@@ -224,11 +223,7 @@ public abstract class Rule {
 
     // get the rule's before_mask
     BitSet getBeforeMask() {
-        return before_mask;
-    }
-
-    String Dump() {
-        return "Rule " + name + " ";
+        return beforeMask;
     }
 
     /** initialize the rule after it has been added to a ruleset */
@@ -245,17 +240,17 @@ public abstract class Rule {
     protected void maskRuleBefore(String ruleName) {
         int idx = ruleSet.getIndex(ruleName);
         if (idx < 0) return;
-        before_mask.set(idx);
+        beforeMask.set(idx);
     }
     
     // if not stop generating logical expression when epsilon pruning is applied
     // need these to identify the substitue
 
-    boolean is_log_to_phys() {
-        return (substitute.getOp().is_physical());
+    boolean isLogicalToPhysical() {
+        return (substitute.getOp().isPhysical());
     }
-    boolean is_log_to_log() {
-        return (substitute.getOp().is_logical());
+    boolean isLogicalToLogical() {
+        return (substitute.getOp().isLogical());
     }
     
     public String toString() {

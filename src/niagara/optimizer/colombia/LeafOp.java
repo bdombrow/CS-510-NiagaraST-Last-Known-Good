@@ -1,4 +1,4 @@
-/* $Id: LeafOp.java,v 1.3 2003/07/03 19:43:39 tufte Exp $ 
+/* $Id: LeafOp.java,v 1.4 2003/09/16 04:45:29 vpapad Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -24,9 +24,7 @@
 */
 package niagara.optimizer.colombia;
 
-/**
-  *  Leaf operators, used in rules only.  Placeholder for a Group.
-  */
+/**  A placeholder for a group within rule patterns.  */
 public class LeafOp extends Op {
 
     private Group group;
@@ -49,7 +47,7 @@ public class LeafOp extends Op {
         return index;
     }
 
-    public boolean is_leaf() {
+    public boolean isLeaf() {
         return true;
     }
 

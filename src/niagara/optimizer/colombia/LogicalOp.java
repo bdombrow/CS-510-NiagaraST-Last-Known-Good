@@ -1,4 +1,4 @@
-/* $Id: LogicalOp.java,v 1.8 2003/02/25 06:19:08 vpapad Exp $ 
+/* $Id: LogicalOp.java,v 1.9 2003/09/16 04:45:29 vpapad Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -33,10 +33,8 @@ public abstract class LogicalOp extends Op {
      * This should be moved to the Op class if we ever apply rules to
      * other than logical operators.
      */
-    public boolean opMatch(LogicalOp other) {
-        // XXX vpapad: changed this to use Java's getClass()
-        // may be too expensive
-        return (getClass() == other.getClass());
+    public boolean opMatch(Class other) {
+        return getClass() == other;
     }
 
     /**
@@ -45,7 +43,7 @@ public abstract class LogicalOp extends Op {
      */
     public abstract LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input);
         
-    public boolean is_logical() {
+    public boolean isLogical() {
         return true;
     }
 }

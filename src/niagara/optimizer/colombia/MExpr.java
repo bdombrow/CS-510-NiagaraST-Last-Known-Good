@@ -1,4 +1,4 @@
-/* $Id: MExpr.java,v 1.6 2003/07/27 02:32:28 tufte Exp $ 
+/* $Id: MExpr.java,v 1.7 2003/09/16 04:45:29 vpapad Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -96,7 +96,7 @@ public class MExpr {
         for (int i = 0; i < arity; i++) {
             input = expr.getInput(i);
 
-            if (input.getOp().is_leaf())
+            if (input.getOp().isLeaf())
                 // deal with LeafOp, sharing the existed group
                 inputs[i] = ((LeafOp) input.getOp()).getGroup();
             else {
@@ -115,7 +115,7 @@ public class MExpr {
         op = other.getOp().copy();
         ((PhysicalOp) op).setLogProp(((PhysicalOp) other.getOp()).getLogProp());
         grpID = other.getGrpID();
-        assert op.is_physical() || op.is_item();
+        assert op.isPhysical() || op.is_item();
 
         int arity = op.getArity();
         if (arity > 0) {
@@ -199,7 +199,7 @@ public class MExpr {
      */
     public void setGroup(Group group) {
         this.group = group;
-        if (op.is_physical())
+        if (op.isPhysical())
             ((PhysicalOp) op).setLogProp(group.getLogProp());
     }
 

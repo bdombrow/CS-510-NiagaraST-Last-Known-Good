@@ -1,4 +1,4 @@
-/* $Id: PhysicalOp.java,v 1.9 2003/06/03 07:56:51 vpapad Exp $
+/* $Id: PhysicalOp.java,v 1.10 2003/09/16 04:45:29 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -102,7 +102,7 @@ public abstract class PhysicalOp extends Op {
             return null;
         }
 
-    public final boolean is_physical() {
+    public final boolean isPhysical() {
         return true;
     }
 
