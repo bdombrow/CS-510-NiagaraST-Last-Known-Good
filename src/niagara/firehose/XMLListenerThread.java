@@ -1,3 +1,4 @@
+/** $Id: XMLListenerThread.java,v 1.3 2002/12/10 01:22:22 vpapad Exp $ */
 package niagara.firehose;
 
 import java.lang.*;
@@ -37,7 +38,6 @@ class XMLListenerThread extends Thread {
 	while(true) {
 	    // get a message from the socket
 	    try {
-		client_socket = null;
 		client_socket = listener_socket.accept();
 		
 		// parse
