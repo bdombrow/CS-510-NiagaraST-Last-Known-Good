@@ -1,6 +1,7 @@
 package niagara.utils;
 
 import org.w3c.dom.*;
+import niagara.ndom.DOMFactory;
 
 public class XMLUtils {
     static final String tb = "   ";
@@ -8,6 +9,8 @@ public class XMLUtils {
                      tb+tb+tb+tb+tb, tb+tb+tb+tb+tb+tb,
 		     tb+tb+tb+tb+tb+tb+tb,
 		     tb+tb+tb+tb+tb+tb+tb+tb};
+
+    static Element nullElement = DOMFactory.newDocument().createElement("niagara:null");
 
     public static int getInt(StreamTupleElement ste, int attrpos) {
         String sval =
@@ -35,9 +38,14 @@ public class XMLUtils {
         flatten(n, sb, explode, prettyprint, 0, true, true);
     }
 
-    public static void flatten(Node n, StringBuffer sb, boolean explode,
+    public static void flatten(Node _n, 
+    			       StringBuffer sb, boolean explode,
 			       boolean prettyprint, int level, boolean onlychild,
 			       boolean firstchild) {
+        Node n = _n;
+        if(n == null) {
+           n = nullElement;
+	}
 	short type = n.getNodeType();
         if (type == Node.ELEMENT_NODE) {
 	    if(prettyprint) {
