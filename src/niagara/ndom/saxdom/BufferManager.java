@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.11 2002/05/02 22:04:56 vpapad Exp $
+ * $Id: BufferManager.java,v 1.12 2002/05/23 06:31:09 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -72,7 +72,7 @@ public class BufferManager {
 
         this.page_size = page_size;
 
-        (new PageReclaimer()).run();
+        (new PageReclaimer()).start();
     }
 
     public static void createBufferManager(int size, int page_size) {
@@ -566,7 +566,30 @@ public class BufferManager {
     }
 
     public static boolean hasAttributes(int index) {
-        throw new PEException("Not Implemented Yet!");
+        Page page = getPage(index);
+        int offset = getOffset(index);
+
+        int pageSize = page.getSize();
+
+        while (true) {
+            if (offset == pageSize - 1) {
+                page = page.getNext();
+                offset = 0;
+            }
+            else
+                offset++;
+        
+            switch (page.getEventType(offset)) {
+            case SAXEvent.ATTR_NAME:
+                return true;
+            case SAXEvent.START_ELEMENT:
+            case SAXEvent.END_ELEMENT:
+            case SAXEvent.TEXT:
+                return false;
+	    default:
+		throw new PEException("Unexpected event type");
+            }
+        }
     }
 
     public static Node getPreviousSibling(DocumentImpl doc, int index) {
