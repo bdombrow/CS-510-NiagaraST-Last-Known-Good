@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.12 2002/05/23 06:31:41 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.13 2002/09/24 23:18:46 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -172,16 +172,25 @@ public abstract class PhysicalOperator {
 		getFromSourceStreams(sourceObject);
 
 		if (!(sourceObject.tuple == null)) {
-		    // There was some tuple element read, so process it
-		    // using the appropriate method 
-		    if (isBlocking()) {
-			blockingProcessSourceTupleElement(sourceObject.tuple,
-						      sourceObject.streamId);
-		    } else {
-			nonblockingProcessSourceTupleElement(
-				        sourceObject.tuple,
-					sourceObject.streamId);
-		    } 
+		    //If this is a punctuation, then handle it specially
+		    if (sourceObject.tuple.isPunctuation())
+			processPunctuation
+			    ((StreamPunctuationElement) sourceObject.tuple,
+			     sourceObject.streamId);
+
+		    else {
+			// There was some tuple element read, so process it
+			// using the appropriate method 
+  			if (isBlocking()) {
+	 		    blockingProcessSourceTupleElement
+		 		(sourceObject.tuple,
+				 sourceObject.streamId);
+			} else {
+			    nonblockingProcessSourceTupleElement
+				(sourceObject.tuple,
+				 sourceObject.streamId);
+			}
+		    }
 		}
 
 		// Now check to see whether there are any control elements from
@@ -855,6 +864,24 @@ public abstract class PhysicalOperator {
     }
 
     /**
+     * This function handles punctuations for the given operator. The
+     * default behavior is to ignore the punctuation and continue
+     *
+     * @param tuple The current input tuple to examine.
+     * @param streamId The id of the source streams the partial result of
+     *                 which are to be removed.
+     *
+     */
+
+    protected void processPunctuation(StreamPunctuationElement tuple,
+				      int streamId)
+	throws ShutdownException, InterruptedException {
+	//Default operator behavior is to ignore punctuation
+
+	return;
+    }
+
+    /**
      * Operators override this method to perform any clean up actions.
      */
     protected void cleanUp() {
@@ -937,8 +964,7 @@ public abstract class PhysicalOperator {
 
 	public int get(int idx) {
 	    if(idx >= currSize)
-		throw new PEException("KT in ReadSourceStreams bad get");
-	    return streamIds[idx];
+		throw new PEException("KT in ReadSourceStreams bad get:");	    return streamIds[idx];
 	}
 
 	public void remove(int streamId) {

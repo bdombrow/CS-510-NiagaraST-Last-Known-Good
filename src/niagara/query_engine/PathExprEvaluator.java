@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.11 2002/04/19 20:49:15 tufte Exp $
+  $Id: PathExprEvaluator.java,v 1.12 2002/09/24 23:18:45 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -128,10 +128,11 @@ public class PathExprEvaluator {
                 DFAState onWildcard = ps.onWildcard;
 
                 boolean foundOne = false;                
-                while (sibling != null) {
+                while (sibling != null) {		    
                     // Ignore text nodes for path following
                     if (sibling.getNodeType() != Node.TEXT_NODE) {
-                        String label = sibling.getNodeName();
+                        //String label = sibling.getNodeName();
+			String label = sibling.getLocalName();
                         DFAState next = (DFAState) transitions.get(label);
                         if (onWildcard != null && onWildcard != next) {
                             foundOne = true;
@@ -168,7 +169,8 @@ public class PathExprEvaluator {
             while (c != null) {
                 // Ignore text nodes for path following
                 if (c.getNodeType() != Node.TEXT_NODE) {
-                    String label = c.getNodeName();
+                    //String label = c.getNodeName();
+		    String label = c.getLocalName();
                     DFAState next = (DFAState) transitions.get(label);
                     if (onWildcard != null && onWildcard != next) {
                         foundOne = true;

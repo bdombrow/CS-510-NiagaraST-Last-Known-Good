@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.12 2002/08/18 17:38:52 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.13 2002/09/24 23:18:45 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,6 +32,7 @@ import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Enumeration;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -225,6 +226,10 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     //
     private Hashtable hashtable;
 
+    // Store the values that make up a hash key
+    private String[] rgstPValues;
+    private String[] rgstTValues;
+
     // This is the current partial id of the operator used to discard previous
     // partial results
     //
@@ -284,6 +289,9 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	groupAttributeList = grouping.getVarList();
 
         hasher = new Hasher(groupAttributeList);
+
+	rgstPValues = new String[groupAttributeList.size()];
+	rgstTValues = new String[groupAttributeList.size()];
 
 	// Initialize the hash table
 	//
@@ -461,6 +469,74 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	return;
     }
 
+    /**
+     * This function handles punctuations for the given operator. The
+     * group-by operator can unblock itself when a punctuation arrives that
+     * matches a group (or groups). Groups that match can be output, and
+     * their state can be purged.
+     *
+     * @param tuple The current input tuple to examine.
+     * @param streamId The id of the source streams the partial result of
+     *                 which are to be removed.
+     *
+     */
+
+    protected void processPunctuation(StreamPunctuationElement inputTuple,
+				      int streamId)
+	throws ShutdownException, InterruptedException {
+	String stPunctGroupKey;
+	try {
+	    stPunctGroupKey = hasher.hashKey(inputTuple);
+	} catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+	    //Not a punctuation for the group attribute. Ignore it.
+	    return;
+	}
+
+	Enumeration en = hashtable.keys();
+
+	//see if the tuples we have match the incoming punctuation
+	hasher.getValuesFromKey(stPunctGroupKey, rgstPValues);
+	while (en.hasMoreElements()) {
+
+	    boolean fMatch = true;
+	    // Get the next element in the hash table
+	    //
+	    String key = (String) en.nextElement();
+
+	    hasher.getValuesFromKey(key, rgstTValues);
+	    for (int i=0; i < rgstPValues.length && fMatch; i++) {
+		fMatch = StreamPunctuationElement.matchValue(rgstPValues[i],
+							     rgstTValues[i]);
+	    }
+
+	    if (fMatch) {
+		// We found a group to output. Send its result on its way,
+		// and remove it from the hashtable.
+
+		// Get the result object if at least partial or final
+		HashEntry hashEntry = (HashEntry) hashtable.get(key);
+		Object finalResult = hashEntry.getFinalResult();
+		Node resultNode = null;
+		if (finalResult != null)
+		    resultNode = this.constructResult(null, finalResult);
+
+		// If there is a non- empty result, then create tuple and add
+		// to result
+		if (resultNode != null) {
+		    StreamTupleElement tupleElement = 
+			createTuple(resultNode,
+				    hashEntry.getRepresentativeTuple(),
+				    false);
+
+		    // Add the tuple to the result
+		    putTuple(tupleElement, 0);
+		}
+
+		//Finally, remove this key from the hash table
+		hashtable.remove(key);
+	    }
+	}
+    }
 
     /**
      * This function removes the effects of the partial results in a given

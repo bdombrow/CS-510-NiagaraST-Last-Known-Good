@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalUnionOperator.java,v 1.4 2002/04/29 19:51:24 tufte Exp $
+  $Id: PhysicalUnionOperator.java,v 1.5 2002/09/24 23:18:46 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,6 +30,7 @@ package niagara.query_engine;
 
 import org.w3c.dom.*;
 import java.util.Vector;
+import java.util.ArrayList;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -65,6 +66,9 @@ public class PhysicalUnionOperator extends PhysicalOperator {
      *                       messages
      */
 
+    ArrayList[] rgPunct;
+    int[] rgnRemove;
+
     public PhysicalUnionOperator (op logicalOperator,
 				  SourceTupleStream[] sourceStreams,
 				  SinkTupleStream[] sinkStreams,
@@ -77,6 +81,11 @@ public class PhysicalUnionOperator extends PhysicalOperator {
 	      new boolean[sourceStreams.length],
 	      responsiveness);
 
+	rgPunct = new ArrayList[sourceStreams.length];
+	for (int i=0; i<rgPunct.length; i++)
+	    rgPunct[i] = new ArrayList();
+
+	rgnRemove = new int[sourceStreams.length];
 	//count = 0;
     }
 
@@ -99,7 +108,51 @@ public class PhysicalUnionOperator extends PhysicalOperator {
 	throws ShutdownException, InterruptedException {
         counter++;
 	putTuple(inputTuple, 0);
+    }
+
+    /**
+     * This function handles punctuations for the given operator. For
+     * Union, we have to make sure all inputs have reported equal
+     * punctuation before outputting a punctuation.
+     *
+     * @param tuple The current input tuple to examine.
+     * @param streamId The id of the source streams the partial result of
+     *                 which are to be removed.
+     *
+     */
+
+    protected void processPunctuation(StreamPunctuationElement tuple,
+				      int streamId)
+	throws ShutdownException, InterruptedException {
+	
+	boolean fAllMatch = true, fFound;
+
+	//First, check to see if this punctuation matches a punctuation
+	// from all other inputs
+	for (int i=0; i < rgPunct.length && fAllMatch == true; i++) {
+	    if (i != streamId) {
+		fFound = false;
+		for (int j=0; j < rgPunct[i].size() && fFound == false; j++) {
+		    fFound =
+			tuple.equals((StreamPunctuationElement) rgPunct[i].get(j));
+		    if (fFound) rgnRemove[i] = j;
+		}
+		fAllMatch = fFound;
+	    }
 	}
+
+	if (fAllMatch) {
+	    //Output the punctuation
+	    putTuple(tuple, 0);
+	    //Remove the other punctuations, since they are no longer needed
+	    for (int i=0; i < rgPunct.length; i++) {
+		if (i != streamId)
+		    rgPunct[i].remove(rgnRemove[i]);
+	    }
+	} else {
+	    rgPunct[streamId].add(tuple);
+	}
+    }
 
     public boolean isStateful() {
 	return false;

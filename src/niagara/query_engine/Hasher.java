@@ -7,6 +7,7 @@ import org.w3c.dom.*;
 
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.StringTokenizer;
 
 public class Hasher {
     
@@ -79,4 +80,16 @@ public class Hasher {
 	//
 	return hashResult.toString();
     }
+
+    public void getValuesFromKey(String hashKey, String[] rgstRet) {
+	StringTokenizer stok = new StringTokenizer(hashKey, "<");
+	int i=0;
+
+	while (stok.hasMoreTokens()) {
+	    rgstRet[i] = stok.nextToken();
+	    i++;
+	}
+    }
 }
+
+

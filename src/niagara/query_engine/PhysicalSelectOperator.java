@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.6 2002/04/29 19:51:24 tufte Exp $
+  $Id: PhysicalSelectOperator.java,v 1.7 2002/09/24 23:18:46 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -112,20 +112,46 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 	throws ShutdownException, InterruptedException {
 	// Evaluate the predicate on the desired attribute of the tuple
 	if (predEval.eval(inputTuple)) {
+	    /*
 	    // If the predicate is satisfied, add the tuple to the result
 	    // XXX hack
 	    StreamTupleElement newTuple = 
 		new StreamTupleElement(inputTuple.isPartial());
+	    System.out.println("clear.length: " + clear.length);
 	    for (int i = 0; i < clear.length; i++) {
 		if (clear[i] || i == 0) { // XXX hack on hack. doc is not variable
+		    System.out.println("\tappending null");
 		    newTuple.appendAttribute(null);
 		} else {
+		    System.out.println("\tappending attribute " + i);
 		    newTuple.appendAttribute(inputTuple.getAttribute(i));
 		}
 	    }
 	    putTuple(newTuple, 0);
+	    */
+	    putTuple(inputTuple, 0);
 	} else {
 	    return;
+	}
+    }
+    
+    /**
+     * This function processes a punctuation element read from a source stream
+     * when the operator is non-blocking. This over-rides the corresponding
+     * function in the base class.
+     *
+     * Punctuations can simply be sent to the next operator from Select
+     *
+     * @param inputTuple The tuple element read from a source stream
+     * @param streamId The source stream from which the tuple was read
+     *
+     * @exception ShutdownException query shutdown by user or execution error
+     */
+    protected void processPunctuation(StreamPunctuationElement inputTuple,
+				      int streamId)
+	throws ShutdownException, InterruptedException {
+	if (inputTuple.isPunctuation()) {
+	    putTuple(inputTuple, streamId);
 	}
     }
 

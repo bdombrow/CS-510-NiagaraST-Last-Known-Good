@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.5 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.6 2002/09/24 23:18:45 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,6 +29,8 @@
 package niagara.query_engine;
 
 import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -55,6 +57,10 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 
     private PredicateEvaluator predEval;
     private Hasher[] hashers;
+    private String[] rgstPValues;
+    private String[] rgstTValues;
+    private ArrayList[] rgPunct = new ArrayList[2];
+    private Vector[] rgvAttr = new Vector[2];
 
     // The array of hash tables of partial tuple elements that are read from the
     // source streams. The index of the array corresponds to the index of the
@@ -103,9 +109,15 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 
 	predEval = new PredicateEvaluator(logicalJoinOperator.getPredicate());
 
+	rgvAttr[0] = logicalJoinOperator.getLeftEqJoinAttr();
+	rgvAttr[1] = logicalJoinOperator.getRightEqJoinAttr();
+
         hashers = new Hasher[2];
-        hashers[0] = new Hasher(logicalJoinOperator.getLeftEqJoinAttr());
-        hashers[1] = new Hasher(logicalJoinOperator.getRightEqJoinAttr());
+        hashers[0] = new Hasher(rgvAttr[0]);
+        hashers[1] = new Hasher(rgvAttr[1]);
+
+	rgstPValues = new String[rgvAttr[0].size()];
+	rgstTValues = new String[rgvAttr[0].size()];
 
 	// Initialize the array of hash tables of partial source tuples - there are
 	// two input stream, so the array is of size 2
@@ -123,6 +135,9 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 	finalSourceTuples[0] = new DuplicateHashtable();
 	finalSourceTuples[1] = new DuplicateHashtable();
 
+	//Initialize the punctuation lists
+	rgPunct[0] = new ArrayList();
+	rgPunct[1] = new ArrayList();
     }
 		     
 
@@ -144,19 +159,42 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 	// Get the hash code corresponding to the tuple element
 	//
 	String hashKey = hashers[streamId].hashKey(tupleElement);
+	String stPunctJoinKey = null;
 
-	// First add the tuple element to the appropriate hash table
-	//
-	if (tupleElement.isPartial()) {
-	    partialSourceTuples[streamId].put(hashKey, tupleElement);
-	}
-	else {
-	    finalSourceTuples[streamId].put(hashKey, tupleElement);
-	}
-	
 	// Determine the id of the other stream
-	//
 	int otherStreamId = 1 - streamId;
+	boolean fMatch=false;
+	
+	// First add the tuple element to the appropriate hash table,
+	//  but only if we haven't yet seen a punctuation from the
+	//  other input that matches it
+	for (int i=0; i<rgPunct[otherStreamId].size() && fMatch==false; i++) {
+	    stPunctJoinKey =
+		hashers[otherStreamId].hashKey
+		((StreamPunctuationElement) rgPunct[otherStreamId].get(i));
+
+	    if (stPunctJoinKey != null) {
+		hashers[otherStreamId].getValuesFromKey(stPunctJoinKey,
+							rgstPValues);
+		hashers[streamId].getValuesFromKey(hashKey,
+						   rgstTValues);
+		boolean fMatchValue=true;
+
+		for (int j=0; j<rgstPValues.length && fMatchValue; j++) {
+		    fMatchValue =
+			StreamPunctuationElement.matchValue(rgstPValues[j],
+							    rgstTValues[j]);
+		}
+	    }
+	}
+
+	if (fMatch == false) {
+	    if (tupleElement.isPartial()) {
+		partialSourceTuples[streamId].put(hashKey, tupleElement);
+	    } else {
+		finalSourceTuples[streamId].put(hashKey, tupleElement);
+	    }
+	}
 	
 	// Now loop over all the partial elements of the other source 
 	// and evaluate the predicate and construct a result tuple if 
@@ -262,6 +300,60 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 		// Add the result to the output
 		putTuple(resultTuple, 0);
 	    }
+	}
+    }
+
+    /**
+     * This function handles punctuations for the given operator. The
+     * join operator can use punctuations to purge some state.
+     *
+     * @param tuple The current input tuple to examine.
+     * @param streamId The id of the source streams the partial result of
+     *                 which are to be removed.
+     *
+     */
+
+    protected void processPunctuation(StreamPunctuationElement tuple,
+				      int streamId)
+	throws ShutdownException, InterruptedException {
+
+	try {
+	    //first, add this to the appropriate list of punctuations
+	    String stPunctKey = hashers[streamId].hashKey(tuple);
+	    rgPunct[streamId].add(tuple);
+
+	    //now, see if there are tuples to remove from the other hash table.
+	    // check both the partial list and the final list
+	    hashers[streamId].getValuesFromKey(stPunctKey, rgstPValues);
+	    int otherStreamId = 1-streamId;
+
+	    purgeHashTable(partialSourceTuples[otherStreamId],
+			   otherStreamId, rgstPValues);
+	    purgeHashTable(finalSourceTuples[otherStreamId],
+			   otherStreamId, rgstPValues);
+	} catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+	    //Not a punctuation for the join attribute. Ignore it.
+	    ;
+	}
+
+	return;
+    }
+
+    private void purgeHashTable(DuplicateHashtable ht, int streamId,
+				String[] rgstPunct) {
+	Enumeration enKeys = ht.keys();
+	while (enKeys.hasMoreElements()) {
+	    String hashKey = (String) enKeys.nextElement();
+	    hashers[streamId].getValuesFromKey(hashKey, rgstTValues);
+
+	    boolean fMatch=true;
+	    for (int i=0; i<rgstPunct.length && fMatch==true; i++) {
+		fMatch = StreamPunctuationElement.matchValue(rgstPunct[i],
+							     rgstTValues[i]);
+	    }
+
+	    if (fMatch)
+		ht.remove(hashKey);
 	}
     }
 
