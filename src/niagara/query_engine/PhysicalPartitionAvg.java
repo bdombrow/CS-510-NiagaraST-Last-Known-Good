@@ -1,4 +1,4 @@
-/* $Id: PhysicalPartitionAvg.java,v 1.1 2003/07/23 21:06:41 jinli Exp $ */
+/* $Id: PhysicalPartitionAvg.java,v 1.2 2003/09/17 00:00:42 jinli Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class PhysicalPartitionAvg extends PhysicalPartitionGroup {
 	private Attribute avgAttribute;
 	private AtomicEvaluator ae;
 	private ArrayList values;
-	private static Double emptyGroupValue;
+//	private static Double emptyGroupValue;
 
 	public void opInitFrom(LogicalOp logicalOperator) {
 		super.opInitFrom(logicalOperator);
@@ -76,18 +76,23 @@ public class PhysicalPartitionAvg extends PhysicalPartitionGroup {
 			
 			Double newValue = Double.valueOf((String) values.get(0));
 			values.clear();
+			
 			int index = ((Double)newGroup.firstElement()).intValue();
 			Double expiredValue = (Double)newGroup.elementAt(index);
+			//if (expiredValue == null)
+			//	expiredValue = Double.valueOf("0");
 			newGroup.set(index, newValue);
 			index = index + 1;
+			
 			if (index > range)
 				index = 1;
+				
 			newGroup.set(0, new Double(index));
 			//Double max = findMax(newGroup);
 			double sum = ((Double)newGroup.elementAt(range+1)).doubleValue();
 			int count = ((Double)newGroup.elementAt(range+2)).intValue();
 			
-			if (count < range)
+			if (count < range) //for the initial several windows;
 				count += 1;
 				
 			sum = sum - expiredValue.doubleValue() + newValue.doubleValue();
@@ -107,7 +112,8 @@ public class PhysicalPartitionAvg extends PhysicalPartitionGroup {
 	 * @see niagara.query_engine.PhysicalIncrementalGroup#emptyGroupValue()
 	 */
 	public Object emptyGroupValue() {
-		return null;
+		//return null;
+		return Double.valueOf("0");
 	}
 	
 
@@ -118,7 +124,7 @@ public class PhysicalPartitionAvg extends PhysicalPartitionGroup {
 		//the first element is the pointer to the next available element to put the new input item;
 		//the last two elements are used to save the current sum and count;
 		for (int i = 1; i <= range; i++ )
-			emptyGroup.addElement(emptyGroupValue);
+			emptyGroup.addElement(emptyGroupValue());
 		emptyGroup.addElement(Double.valueOf("0"));
 		emptyGroup.addElement(Double.valueOf("0"));
 		return emptyGroup;		
