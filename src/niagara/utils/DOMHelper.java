@@ -182,7 +182,7 @@ public class DOMHelper {
 	    if(child.getNodeType() == org.w3c.dom.Node.TEXT_NODE) {
 		String text = child.getNodeValue();
 		text = eatWhite(text);
-		if(!(text.equals(""))) {
+		if(text != null && !(text.equals(""))) {
 		    printTextLine(child.getNodeValue(), indentLevel);
 		}
 	    } else if (child.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
