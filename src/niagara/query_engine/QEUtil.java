@@ -1,6 +1,7 @@
 
+
 /**********************************************************************
-  $Id: QEUtil.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: QEUtil.java,v 1.2 2000/05/31 17:21:37 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
