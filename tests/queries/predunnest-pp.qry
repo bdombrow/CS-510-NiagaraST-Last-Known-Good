@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- Test unnest - projection pushing bug -->
+
+<plan top="cons">
+
+<constant id="scan">
+<![CDATA[
+<list>
+<item><num>3</num><num>4</num><num>4</num></item>
+<item><num>-1</num><num>6</num></item>
+<item/>
+<item><num>6</num><num>7</num><num>8</num></item>
+</list>
+]]>
+</constant>
+
+<unnest id="item" type="element" regexp="list.item" input="scan"/>
+<unnest id="num" regexp="num" input="item"/>
+
+<select id="select" input="num">
+<pred op="gt"><var value="$num"/><number value="5"/></pred>
+</select>
+
+<construct id="cons" input="select">
+<![CDATA[
+<foo> $item </foo>
+]]>
+</construct>
+
+</plan>
