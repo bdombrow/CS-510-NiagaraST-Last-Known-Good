@@ -9,7 +9,6 @@
 <!ATTLIST scan 
           id       ID                    #REQUIRED
 
-	  index    CDATA                 #REQUIRED
 	  type	   (tag|element|content) "element"
 
 	  regexp   CDATA                 #REQUIRED

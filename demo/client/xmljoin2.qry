@@ -7,8 +7,8 @@
 <dtdscan id="dtd1">
 <url value="http://www.cse.ogi.edu/~vpapad/xml/numbers.xml"/>
 </dtdscan>
-<scan id="t" index="0" regexp="PLAY.TITLE" input="dtd"/>
-<scan id="n" index="0" regexp="PLAY.NUM" input = "dtd1"/>
+<scan id="t" regexp="PLAY.TITLE" input="dtd"/>
+<scan id="n" regexp="PLAY.NUM" input = "dtd1"/>
 <join id="join" input="n t" physical="niagara.query_engine.PhysicalNLJoinOperator">
 <pred op="gt"><var value="$n"/><number value="18"/></pred></join>
 <construct id="cons" input="join">
