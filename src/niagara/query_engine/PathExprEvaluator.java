@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.9 2002/04/12 20:57:46 vpapad Exp $
+  $Id: PathExprEvaluator.java,v 1.10 2002/04/17 03:10:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -87,9 +87,34 @@ public class PathExprEvaluator {
             if (s.accepting && matches.add(n))
                     results.add(n);
 
+
+	    // Put any attribute that matches a transition from
+            // the current state to an accepting state in the results
+	    // If the transition leads to a non-accepting state,
+	    // we know that it's useless to follow it on attributes,
+	    // since they don't have any descendants.
+
+	    if (n.getNodeType() == Node.ELEMENT_NODE) {
+		HashMap transitions = s.transitions;
+		DFAState onWildcard = s.onWildcard;
+
+		NamedNodeMap nnm = n.getAttributes();
+		int nattrs = nnm.getLength();
+		for (int i = 0; i < nattrs; i++) {
+		    Attr a = (Attr) nnm.item(i);
+		    DFAState next = (DFAState) transitions.get(a.getName());
+		    if (next != null && next.accepting && matches.add(a))
+			results.add(a);
+		    if (onWildcard != null && onWildcard != next
+			&& onWildcard.accepting && matches.add(a))
+			results.add(a);
+		}
+	    }
+
             Node currentNode = n;
             DFAState currentState = s;
 
+	    
             // If there's only one 'next node', we'll skip the stack
             // and store it in n
             n = null;

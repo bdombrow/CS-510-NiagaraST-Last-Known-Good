@@ -68,6 +68,11 @@ public class AtomicEvaluator {
 		//
 		Node node = (Node) reachableNodes.get(nodeid);
 
+		if (node.getNodeType() == Node.ATTRIBUTE_NODE) {
+		    values.add(node.getNodeValue());
+		    continue;
+		}
+
 		// Now get its first child
 		//
 		Node firstChild = node.getFirstChild();

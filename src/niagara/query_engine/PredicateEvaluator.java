@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PredicateEvaluator.java,v 1.6 2002/04/08 19:03:09 vpapad Exp $
+  $Id: PredicateEvaluator.java,v 1.7 2002/04/17 03:10:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -530,10 +530,8 @@ class Comparison extends Predicate {
                                          Object rightValue) {
 	// Check to see whether values exist
 	//
-	if (leftValue == null || rightValue == null) {
-	    System.err.println("A null value passed for Comparison");
-	    return false;
-	}
+	if (leftValue == null || rightValue == null)
+	    throw new PEException("A null value passed for Comparison");
 
 	// Do the comparison  based on the operator type
 	//
@@ -551,8 +549,8 @@ class Comparison extends Predicate {
 
 	case opType.GEQ: return greaterThanEquals(leftValue, rightValue); 
 	    
-	default: System.err.println("ERROR: invalid opType for arithOpNode");
-	         return false;
+	default: 
+	    throw new PEException("ERROR: invalid opType for arithOpNode");
 	}
     }
 }

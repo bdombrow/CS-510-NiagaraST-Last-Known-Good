@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.9 2002/03/26 23:52:31 tufte Exp $
+  $Id: PhysicalConstructOperator.java,v 1.10 2002/04/17 03:10:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -70,11 +70,6 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     // we create
     private Document doc;
     
-    // We check to see if elements in the input tuples have a document owner
-    // and use that in preference to the document specified in setResultDocument
-    // We use this member to only perform this check once
-    private boolean checkedInputTuples;
-
     ///////////////////////////////////////////////////////////////////////////
     // These are the methods of the PhysicalConstructOperator class          //
     ///////////////////////////////////////////////////////////////////////////
@@ -132,25 +127,6 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 						 StreamTupleElement tupleElement,
 						 int streamId,
 						 ResultTuples result) {
-	/* KT - what was the point of this?? - it seems to cause problems -
-	 * scan followed by construct does not work properly when
-	 * this code is in
-	 */
-	 /*
-	  * if (!checkedInputTuples) {
-	  *  Document inputDoc = null;
-	  * for (int i = 0; i < tupleElement.size(); i++) {
-          *	Node n = (Node) tupleElement.getAttribute(i);
-	  *     if (n != null && n.getOwnerDocument() != null) {
-	  *        System.out.println("XXX found another document owner!!!");
-	  *        doc = n.getOwnerDocument();
-          *        break;
-          *	}
-	  * }
-	  * checkedInputTuples = true;
-	* }
-        */
-
 	// Recurse down the result template to construct result
 	//
 	ArrayList resultList = constructResult(tupleElement, resultTemplate);
@@ -252,23 +228,17 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	    result.add(doc.createTextNode((String) leafData.getValue()));
 	}
 	else if (type == dataType.ATTR) {
-
 	    // First get the schema attribute
-	    //
 	    schemaAttribute schema = (schemaAttribute) leafData.getValue();
 
 	    // Now construct result based on whether it is to be interpreted
 	    // as an element or a parent
-	    //
 	    if (schema.getType() == varType.ELEMENT_VAR) {
-
 		// The value of the leafData is a schema attribute - from it
 		// get the attribute id in the tuple to construct from
-		//
 		int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
 
 		// Add the attribute as the result
-		//
 		result.add(tupleElement.getAttribute(attributeId));
 	    }
 	    else if (schema.getType() == varType.CONTENT_VAR) {
@@ -336,6 +306,51 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	   tagName = (String)tagData.getValue();
 
 	Element resultElement = doc.createElement(tagName);
+
+	Vector attrs = internalNode.getStartTag().getAttrList();
+	for (int i = 0; i < attrs.size(); i++) {
+	    attr attribute = (attr) attrs.get(i);
+	    String name = attribute.getName();
+	    data attrData = attribute.getValue();
+	    int type = attrData.getType();
+	    if (type == dataType.STRING) {
+		// Add the string value to the result
+		resultElement.setAttribute(name, (String) attrData.getValue());
+	    }
+	    else if (type == dataType.ATTR) {
+		// First get the schema attribute
+		schemaAttribute schema = (schemaAttribute) attrData.getValue();
+		
+		// Now construct result based on whether it is to be interpreted
+		// as an element or a parent
+		if (schema.getType() == varType.ELEMENT_VAR) {
+		    // The value of the leafData is a schema attribute - from it
+		    // get the attribute id in the tuple to construct from
+		    int attributeId = ((schemaAttribute) attrData.getValue()).getAttrId();
+		    
+		    // Add the attribute as the result
+		    // This better BE an attribute!
+		    Attr a = (Attr) tupleElement.getAttribute(attributeId);
+		    System.err.println("XXX adding attribute: " + name + "=" + a.getValue());
+		    resultElement.setAttribute(name, a.getValue());
+		}
+		else if (schema.getType() == varType.CONTENT_VAR) {
+		    int attributeId = ((schemaAttribute) attrData.getValue()).getAttrId();
+		    
+		    // This better BE an element
+		    Element elt = (Element) tupleElement.getAttribute(attributeId);
+		    
+		    // Concatenate the node values of the element's children
+		    StringBuffer attrValue = new StringBuffer("");
+		    Node n = elt.getFirstChild();
+		    while (n != null) 
+			attrValue.append(n.getNodeValue());
+		    resultElement.setAttribute(name, attrValue.toString());
+		}
+		else 
+		    throw new PEException("Unknown type in attribute constructor");
+	    }
+	}
 
 	// Recurse on all children and construct result
 	//
