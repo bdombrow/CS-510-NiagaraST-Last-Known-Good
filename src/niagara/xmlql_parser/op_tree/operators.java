@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: operators.java,v 1.2 2000/06/26 21:59:52 vpapad Exp $
+  $Id: operators.java,v 1.3 2000/08/03 04:41:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -52,6 +52,8 @@ public class operators {
 	public static constructOp Construct; // constructing XML results
     	public static nestOp Nest;
         public static averageOp Average;
+    public static SumOp Sum;
+    public static CountOp Count;
         public static dupOp Duplicate; //Trigger
         public static splitOp Split; //Trigger
         public static trigActionOp TrigAct; //Trigger
@@ -68,6 +70,8 @@ public class operators {
 	private static String[] constructAlgo = {"niagara.query_engine.PhysicalConstructOperator"};
 	private static String[] nestAlgo = {"niagara.query_engine.PhysicalNestOperator"};
         private static String[] averageAlgo = {"niagara.query_engine.PhysicalAverageOperator"};
+        private static String[] sumAlgo = {"niagara.query_engine.PhysicalSumOperator"};
+        private static String[] countAlgo = {"niagara.query_engine.PhysicalCountOperator"};
         private static String[] duplicateAlgo = {"niagara.query_engine.PhysicalDuplicateOperator"};
         private static String[] splitAlgo = {"niagara.query_engine.PhysicalSplitOperator"};
         private static String[] trigActAlgo =
@@ -148,6 +152,20 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(averageAlgo[i]);
 		Average = new averageOp(algoClasses);
+
+		// Sum
+		numOfAlgo = sumAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(sumAlgo[i]);
+		Sum = new SumOp(algoClasses);
+
+		// Count
+		numOfAlgo = countAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(countAlgo[i]);
+		Count = new CountOp(algoClasses);
 
 		// Duplicate
                 numOfAlgo = duplicateAlgo.length;

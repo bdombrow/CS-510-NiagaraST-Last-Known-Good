@@ -105,6 +105,12 @@ public class XMLQueryPlanParser {
 	else if (nodeName.equals("avg")) {
 	    handleAvg(e);
 	}
+	else if (nodeName.equals("sum")) {
+	    handleSum(e);
+	}
+	else if (nodeName.equals("count")) {
+	    handleCount(e);
+	}
 	else if (nodeName.equals("dtdscan")) {
 	    handleDtdScan(e);
 	}
@@ -302,6 +308,7 @@ public class XMLQueryPlanParser {
 	    String varName = st.nextToken();
 
 	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
+	    
 	    groupbySAs.addElement(oldAttr);
 	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
 	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
@@ -323,6 +330,98 @@ public class XMLQueryPlanParser {
 	
 	avgNode.setSchema(sc);
 	avgNode.setVarTbl(qpVarTbl);
+    }
+
+    void handleSum(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	SumOp op = (SumOp) operators.Sum.clone();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+	String groupby = e.getAttribute("groupby");
+	String sumattr = e.getAttribute("sumattr");
+	String inputAttr = e.getAttribute("input");
+	
+	logNode input = (logNode) ids2nodes.get(inputAttr);
+	varTbl oldVarTbl = input.getVarTbl();
+
+	varTbl qpVarTbl = new varTbl();
+	Schema sc = new Schema();
+
+	// Parse the groupby attribute to see what to group on
+	Vector groupbySAs = new Vector();
+	StringTokenizer st = new StringTokenizer(groupby);
+	while (st.hasMoreTokens()) {
+	    String varName = st.nextToken();
+
+	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
+	    groupbySAs.addElement(oldAttr);
+	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
+	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
+	}
+
+	schemaAttribute summingAttribute = oldVarTbl.lookUp(sumattr);
+
+	op.setSummingInfo(new skolem("sum", groupbySAs), summingAttribute);
+	
+	//The attribute we're going to add to the result
+	schemaAttribute resultSA = new schemaAttribute(groupbySAs.size());
+	
+	// Register variable -> resultSA
+	qpVarTbl.addVar("$" + id, resultSA);
+	
+	logNode sumNode = new logNode(op, input);
+	
+	ids2nodes.put(id, sumNode);
+	
+	sumNode.setSchema(sc);
+	sumNode.setVarTbl(qpVarTbl);
+    }
+
+    void handleCount(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	CountOp op = (CountOp) operators.Count.clone();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+	String groupby = e.getAttribute("groupby");
+	String countattr = e.getAttribute("countattr");
+	String inputAttr = e.getAttribute("input");
+	
+	logNode input = (logNode) ids2nodes.get(inputAttr);
+	varTbl oldVarTbl = input.getVarTbl();
+
+	varTbl qpVarTbl = new varTbl();
+	Schema sc = new Schema();
+
+	// Parse the groupby attribute to see what to group on
+	Vector groupbySAs = new Vector();
+	StringTokenizer st = new StringTokenizer(groupby);
+	while (st.hasMoreTokens()) {
+	    String varName = st.nextToken();
+
+	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
+	    groupbySAs.addElement(oldAttr);
+	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
+	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
+	}
+
+	schemaAttribute countingAttribute = oldVarTbl.lookUp(countattr);
+
+	op.setCountingInfo(new skolem("count", groupbySAs), countingAttribute);
+	
+	//The attribute we're going to add to the result
+	schemaAttribute resultSA = new schemaAttribute(groupbySAs.size());
+	
+	// Register variable -> resultSA
+	qpVarTbl.addVar("$" + id, resultSA);
+	
+	logNode countNode = new logNode(op, input);
+	
+	ids2nodes.put(id, countNode);
+	
+	countNode.setSchema(sc);
+	countNode.setVarTbl(qpVarTbl);
     }
 
     void handleDtdScan(Element e) 

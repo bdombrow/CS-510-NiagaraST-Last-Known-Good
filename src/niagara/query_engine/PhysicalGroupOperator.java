@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.2 2000/07/11 21:53:56 vpapad Exp $
+  $Id: PhysicalGroupOperator.java,v 1.3 2000/08/03 04:39:28 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -543,18 +543,18 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	//
 	int numGroupingAttributes = groupAttributeList.size();
 
-	for (int grp = 0; grp < numGroupingAttributes; ++grp) {
-	    
-	    // Get the group attribute
-	    //
-	    int attributeId = 
-		((schemaAttribute) groupAttributeList.elementAt(grp)).getAttrId();
+	    for (int grp = 0; grp < numGroupingAttributes; ++grp) {
+		// Get the group attribute
+		int attributeId = 
+		    ((schemaAttribute) groupAttributeList.elementAt(grp)).getAttrId();
 
-	    // Append the relevant attribute from the representative tuple
-	    // to the result
-	    //
-	    tupleElement.appendAttribute(representativeTuple.getAttribute(attributeId));
-	}
+		// Append the relevant attribute from the representative tuple
+		// to the result
+		if (representativeTuple != null) 
+		    tupleElement.appendAttribute(representativeTuple.getAttribute(attributeId));
+		else
+		    tupleElement.appendAttribute(null);
+	    }
 	
 
 	// Add the grouped result as the attribute

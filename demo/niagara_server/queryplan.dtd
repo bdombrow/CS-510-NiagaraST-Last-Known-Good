@@ -24,6 +24,22 @@
           physical CDATA               #IMPLIED
           input   IDREF                #REQUIRED>
 
+<!ELEMENT sum     EMPTY>
+<!ATTLIST sum 
+          id       ID                    #REQUIRED
+	  groupby  CDATA	       #REQUIRED
+	  sumattr  CDATA	       #REQUIRED
+          physical CDATA               #IMPLIED
+          input   IDREF                #REQUIRED>
+
+<!ELEMENT count     EMPTY>
+<!ATTLIST count 
+          id       ID                    #REQUIRED
+	  groupby  CDATA	       #REQUIRED
+	  countattr  CDATA	       #REQUIRED
+          physical CDATA               #IMPLIED
+          input   IDREF                #REQUIRED>
+
 <!ELEMENT select  (and | or | not | pred)>
 <!ATTLIST select 
           id       ID                    #REQUIRED
