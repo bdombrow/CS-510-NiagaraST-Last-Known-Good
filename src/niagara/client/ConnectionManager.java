@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.6 2001/07/10 04:42:43 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.7 2001/07/17 06:37:48 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,6 +32,8 @@ import java.io.*;
 import java.net.*;
 import javax.swing.tree.*;
 import java.util.*; 
+
+import gnu.regexp.*;
 
 import niagara.client.dtdTree.DTD;
 
@@ -257,11 +259,25 @@ public class ConnectionManager implements QueryExecutionIF
 			       + " " + REQUEST_TYPE +"= \"" + attr + "\">");
 		writer.println("<" + REQUEST_DATA + ">");
 		writer.println("<![CDATA[");
-				// the actual query
-		writer.println(query.getText());
-		writer.println("]]>");
-		writer.println("</" + REQUEST_DATA + ">");
-		writer.println("</" + REQUEST_MESSAGE + ">");
+		
+                // XXX this is total hack!
+                // the query may contain CDATA sections itself (argh!)
+                // Hack as follows:
+                // Change all ]]> to ESC]ESC]ESC> 
+                // Of course this still does not cover all the cases
+                String qtext = query.getText();
+                try {
+                    RE re = new RE("]]>");
+                    String esc = re.substituteAll(qtext, "ESC]ESC]ESC>");
+                    writer.println(esc);
+                    writer.println("]]>");
+                    writer.println("</" + REQUEST_DATA + ">");
+                    writer.println("</" + REQUEST_MESSAGE + ">");
+                }
+                catch (REException rexc) {
+                    System.out.println("CDATA escaping: regular expression failure");
+                    System.exit(-1);
+                }
 	    }
 	    
 	    // TODO wait for server qid to come accross.
