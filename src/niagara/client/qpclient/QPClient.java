@@ -23,8 +23,8 @@ import java.io.*;
 import java.util.Iterator;
 import htmllayout.*;
 
-public class QPClient extends JFrame implements ActionListener, 
-						SimpleClient.ResultsListener {
+public class QPClient extends JFrame 
+    implements ActionListener, SimpleClient.ResultsListener {
     QPGraphController qgc;
     QPGraphImpl qgi;
     GraphPane gp;
