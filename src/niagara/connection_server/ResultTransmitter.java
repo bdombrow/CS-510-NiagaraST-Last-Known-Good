@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.18 2003/03/03 08:23:13 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.19 2003/03/05 19:25:10 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,8 +43,7 @@ import niagara.data_manager.DataManager;
 
 public class ResultTransmitter implements Runnable {
     // The queryInfo of the query to which this transmitter belongs
-    private ServerQueryInfo queryInfo;
-    
+    private ServerQueryInfo queryInfo;    
     private RequestMessage request;
     
     // this will be used to access the output stream to send out results
@@ -59,9 +58,6 @@ public class ResultTransmitter implements Runnable {
     // for suspending and resuming the thread
     private boolean suspended = false;
 
-    // whether this thread is scheduled for killing
-    private boolean killThread = false;
-
     // The response message in construction
     private ResponseMessage response;
     
@@ -69,7 +65,7 @@ public class ResultTransmitter implements Runnable {
     private int resultsSoFar = 0;
     
     // The size (in bytes) of a batch in a batched query
-    private static final int BatchSize = 512;
+    private static final int BATCHSIZE = 1024;
     
     // Tags for element and attribute list
     private static final String ELEMENT = "<!ELEMENT";
@@ -79,6 +75,10 @@ public class ResultTransmitter implements Runnable {
     // are coming directly from a generator in which case
     // prettyprint is handled by generator
     private boolean prettyprint = true;
+    private boolean timedOut = false; // true if last get timed out
+    private boolean killThread = false;
+
+    public static boolean QUIET = false;
     
     /** Constructor
 	@param handler The request handler that created this transmitter
@@ -135,6 +135,12 @@ public class ResultTransmitter implements Runnable {
 	}
     }
     
+    // for use by RequestHandler when client requests that this
+    // query be killed
+    public void destroy() {
+	killThread = true;
+    }
+
     private void handleDTDQuery() throws IOException {
     	ResponseMessage response = new ResponseMessage(request,ResponseMessage.DTD);
 	try {
@@ -214,94 +220,64 @@ public class ResultTransmitter implements Runnable {
     private void handleQEQuery() 
 	throws ShutdownException, InterruptedException, IOException {
 	QueryResult queryResult = queryInfo.queryResult;
+	boolean timedOut;
 
         // XXX vpapad: Taking this out of the loop
         response = 
         new ResponseMessage(request,
                     ResponseMessage.QUERY_RESULT);
-        
-	while (true) {
-	    // if this thread has been marked for committing suicide, do it
-	    if (killThread) 
+
+	// do the allocation here instead of inside getNext, so 
+	// we only allocate one resultObject
+	QueryResult.ResultObject resultObject = queryResult.getNewResultObject();
+
+	while (true) {        
+	    if(killThread) {
 		return;
-        
+	    }
+
 	    // see if the transmitter is currently suspended
 	    // It could be becuase of two reasons
 	    // 1. No Pending Requests 2. Last results were suspended
 	    boolean suspend = checkSuspension();		    
 	    
-	    // if we are going to suspend, better send the results collected so far
-	    if (suspend && !NiagraServer.QUIET)
+	    // if we are going to suspend, better send the results collected 
+	    // so far
+	    if (suspend && !QUIET)
 		sendResults();
 	    
 	    // as long as atleast one suspension condition is true, keep waiting
 	    while (checkSuspension())
 		doWait();
-	    
-	    // if this thread is scheduled for killing
-	    if (killThread)
+
+	    if(killThread) {
 		return;
-	    
-	    QueryResult.ResultObject resultObject;
+	    }
 	    
 	    //get the next result (KT: gets one result)
 	    // KT HERE IS WHERE SERVER RESULTS ARE PRODUCED  
-	    try {
-		resultObject = queryResult.getNext(2000);
-	    } catch (QueryResult.ResultsAlreadyReturnedException e) {
-		return;
-	    }
-	    
-	    switch (resultObject.status) {
-		// If this was the last stream element this query is done
-	    case QueryResult.EndOfResult:
-		if(!NiagraServer.QUIET)
-		    sendResults();
-		
-		// send the end result response
-		response = 
-		    new ResponseMessage(request,
-					ResponseMessage.END_RESULT);
-		handler.sendResponse(response);
+	    int ctrlFlag = queryResult.getNextResult(PageStream.MAX_DELAY, 
+						     resultObject);
+	    timedOut = false;
 
-		//everything done! kill the query		
-		try {
-		    handler.killQuery(request.serverID);		
-		} catch (RequestHandler.InvalidQueryIDException iqide) {
-		    // ignore this error - this simply means
-		    // that the RequestParser has closed the connection
-		    // and killed all associated queries before we got here
-		    // KT
-		}
-		return;
+	    if(ctrlFlag != CtrlFlags.NULLFLAG) {
+		assert resultObject.result == null : 
+		    "KT didn't think this should happen";
+		processCtrlMsg(ctrlFlag);
+	    } else {
+		assert resultObject.result != null :
+		    "KT HELP!!!";
 		
-		// If it is just a regular query result save it
-	    case QueryResult.FinalQueryResult:
-	    case QueryResult.PartialQueryResult:
+		// It is a query result, so save it
 		// add the result to responseData
 		totalResults--;
 		resultsSoFar++;
-		if (response.dataSize() > BatchSize && !NiagraServer.QUIET)
-		    sendResults();
-		// KT - what is this??? - don't need a response for each
-		// result element do we???
-		if(!NiagraServer.QUIET) {
+		if(!QUIET) {
+		    if (response.dataSize() > BATCHSIZE)
+			sendResults();
 		    response.appendResultData(resultObject, prettyprint);
-		    handler.sendResponse(response);
 		}
-		break;
-		
-	    case QueryResult.QueryError:
-		processError();
-		break;
-		
-		// if no more new results have come in a while
-	    case QueryResult.TimedOut:
-		if(!NiagraServer.QUIET)
-		    sendResults();
-		break;
 	    }
-	    
 	}
     }
     
@@ -312,23 +288,18 @@ public class ResultTransmitter implements Runnable {
     */
     private void handleTriggerQuery() 
 	throws ShutdownException, IOException {
-		// first get the query result
+    /* KT - BROKE THIS BIG TIME
 	QueryResult queryResult = (QueryResult) queryInfo.queryResultQueue.get();
-	while (true) {
-	    
-	    // if this thread has been marked for committing suicide, do it
-	    if (killThread) 
-		return;
-	    
-	    ResponseMessage response = 
-		new ResponseMessage(request,
-				    ResponseMessage.QUERY_RESULT);
-	    
-	    QueryResult.ResultObject resultObject;
-	    
+	QueryResult.ResultObject resultObject = queryResult.getNewResultObject();
+
+	ResponseMessage response = 
+	    new ResponseMessage(request,
+				ResponseMessage.QUERY_RESULT);
+	
+	while (true) {	    
 	    //get the next result
 	    try {
-		resultObject = queryResult.getNext();
+		queryResult.getNext(resultObject);
 	    }
 	    // If something goes wrong, kill this query and move on to the next query result
 	    catch (InterruptedException e) {
@@ -370,7 +341,9 @@ public class ResultTransmitter implements Runnable {
 	    }
 
 	}
+    */
     }
+
 
     /** 
      * Function to "handle" an Accumulate Query.  This function
@@ -381,120 +354,106 @@ public class ResultTransmitter implements Runnable {
      */
     private void handleAccumQuery() 
 	throws ShutdownException, InterruptedException, IOException{
+
 	QueryResult queryResult = queryInfo.queryResult;
-	QueryResult.ResultObject resultObject;
-	boolean alreadyReturningPartial = false;
+	QueryResult.ResultObject resultObject = queryResult.getNewResultObject();
 	
-	/* give the query some time to get started */
-	/* 	transmitThread.sleep(5000); */
-        int count = 0;
 	while (true) {
-	    /* If a kill query message has been sent, killThread will
-	     * be set to true. So, return to end this thread's execution
-	     */
-	    if (killThread) {
+	    if(killThread) {
 		return;
 	    }
-	    
+
 	    /* I removed all the suspension stuff and made it so that
 	     * AccumFile queries can't be suspended because I don't
 	     * fully understand suspension and because it doesn't
 	     * seem necessary for AccumFile stuff
 	     */
-	    try {
-		/* request the generation of partial results - 
-		 * who knows if this will work or not
-		 */
-		//		if(count >= 2000 && !alreadyReturningPartial) {
-		//   System.out.println("Accum Mgr requesting partial result");
-		//   try {
-		//	queryInfo.queryResult.returnPartialResults();
-		//   }
-		//   catch (QueryResult.AlreadyReturningPartialException arpe) {
-		//	//
-		//   }
-		//   count = 0;
-		//} 
-		
-		/* get the result and update the accum file dir */
-	        /* OK, now wait for the result to come popping up */
-	        resultObject = queryResult.getNext(100);
-		
-		if(resultObject.status == QueryResult.TimedOut) {
-                    count += 100;
-		} else {
-		    alreadyReturningPartial = false; 
-		    switch (resultObject.status) {
-		    case QueryResult.PartialQueryResult:
-			/* In this case, resultObject.result is a Document 
-			 * AccumFileDir stores standard DOM Docs, since that
-			 * is what the system uses now 
-			 */
-			DataManager.AccumFileDir.put(queryInfo.accumFileName, 
-						     resultObject.result);
-			break;
-			
-		    case QueryResult.FinalQueryResult:
-			/* In this case, resultObject.result is a Document 
-			 * AccumFileDir stores standard DOM Docs, since that
-			 * is what the system uses now 
-			 */
-			DataManager.AccumFileDir.put(queryInfo.accumFileName, 
-						     resultObject.result);
-			
-			/* send final results to client */
-			response = 
-			    new ResponseMessage(request,
-						ResponseMessage.QUERY_RESULT);
-			response.appendData(getResultData(resultObject, prettyprint));
-			handler.sendResponse(response);
-			
-			break;
-		    
-		case QueryResult.QueryError:
-		    processError();
-		    break;
 
-		case QueryResult.EndOfResult:
-		    /* send the end result response */
+	    /* get the result and update the accum file dir */
+	    /* OK, now wait for the result to come popping up */
+	    timedOut = false;
+	    int ctrlFlag = queryResult.getNextResult(PageStream.MAX_DELAY, 
+						     resultObject);
+	    
+	    if(ctrlFlag != CtrlFlags.NULLFLAG) {
+		processCtrlMsg(ctrlFlag);
+	    } else {
+		if(resultObject.isPartial) {
+		    /* In this case, resultObject.result is a Document 
+		     * AccumFileDir stores standard DOM Docs, since that
+		     * is what the system uses now 
+		     */
+		    DataManager.AccumFileDir.put(queryInfo.accumFileName, 
+						 resultObject.result);
+		} else {
+		    // final result
+		    DataManager.AccumFileDir.put(queryInfo.accumFileName, 
+						 resultObject.result);
+		    
+		    /* send final results to client */
 		    response = 
 			new ResponseMessage(request,
-					    ResponseMessage.END_RESULT);
+					    ResponseMessage.QUERY_RESULT);
+		    response.appendData(getResultData(resultObject, 
+						      prettyprint));
 		    handler.sendResponse(response);
-		
-		    /* everything done! kill the query */
-		    try {
-			handler.killQuery(request.serverID);
-		    } catch (RequestHandler.InvalidQueryIDException e) {
-			// ignore this error - this simply means
-			// that the RequestParser has closed the connection
-			// and killed all associated queries before we got here
-			// KT
-		    }
-		    return;
-
-		case QueryResult.EndOfPartialResult:
-		    /* think I can ignore this */
-		    break;
-
-		    case QueryResult.NonBlockingResult:
-		    case QueryResult.TimedOut:
-			/* should only get partial results, something
-			 * is wrong if I get one of the other statuses, I think
-			 */
-			throw new PEException("Unexpected QueryResult status" +
-					  String.valueOf(resultObject.status));
-		    
-		default:
-		    throw new PEException("Unexpected QueryResult status");
-		    }
 		}
-	    } catch (QueryResult.ResultsAlreadyReturnedException e) {
-		throw new PEException("HELP - What happened??");
-	    } 
+	    }
 	}
     }
-    
+
+
+    /**
+     * process a control message received from the stream
+     * possibilities for ctrlFlag are SYNCH_PARTIAL
+     * END_PARTIAL, EOS, TIMED_OUT
+     */
+    private void processCtrlMsg(int ctrlFlag) 
+	throws java.io.IOException, ShutdownException {
+	switch(ctrlFlag) {
+	case CtrlFlags.EOS:
+	    if(!QUIET)
+		sendResults();
+	    
+	    // send the end result response		
+	    handler.sendResponse(new ResponseMessage(request,
+						  ResponseMessage.END_RESULT));
+	    
+	    //everything done! kill the query		
+	    try {
+		handler.killQuery(request.serverID);		
+	    } catch (RequestHandler.InvalidQueryIDException iqide) {
+		// ignore this error - this simply means
+		// that the RequestParser has closed the connection
+		// and killed all associated queries before we got here
+		// KT
+	    }
+	    return;
+	    
+	case CtrlFlags.TIMED_OUT:
+	    // if no more new results have come in a while
+	    // send the results and request more..
+	    if(!QUIET && timedOut && !queryInfo.isAccumFileQuery()) {
+		// If we timed out two times in a row, then
+		// send the results
+		sendResults();
+	    }
+	    // returns a ctrl flag
+	    int newCtrlFlag = queryInfo.queryResult.requestBufFlush();
+	    if(newCtrlFlag != CtrlFlags.NULLFLAG) {
+		processCtrlMsg(newCtrlFlag);
+	    }
+	    timedOut = true;
+	    break;
+	case CtrlFlags.SYNCH_PARTIAL:
+	case CtrlFlags.END_PARTIAL:
+	    // belive I can ignore these two
+	    break;
+	default:
+	    assert false : "Unexpected control flag " + 
+		CtrlFlags.name[ctrlFlag];
+	}
+    }
 
     /**handle a request for more elements
        This method is valid only for Query Engine queries
@@ -555,30 +514,12 @@ public class ResultTransmitter implements Runnable {
 
     /**Extract the XML string from the result object
      */
-    private String getResultData(QueryResult.ResultObject ro, boolean prettyprint) {
+    private String getResultData(QueryResult.ResultObject ro, 
+				 boolean prettyprint) {
         return XMLUtils.flatten(ro.result, prettyprint);
     }
 
     
-    /**
-     * Shut down the query in the event of serious error
-     *
-     */
-
-    private void processError () throws IOException {
-	System.out.println("Request for shut down. Sending error message");
-	ResponseMessage response = new ResponseMessage(request,ResponseMessage.ERROR);
-	response.setData("Internal Error in Query Engine");
-	handler.sendResponse(response);
-	// there is no purpose left in my life. I should die
-	destroy();
-    }
-
-    // set the kill flag
-    public void destroy() { 
-	killThread = true;
-    }
-
     // send the results collected so far
     private void sendResults() throws IOException {
 	if (response.dataSize() != 0)

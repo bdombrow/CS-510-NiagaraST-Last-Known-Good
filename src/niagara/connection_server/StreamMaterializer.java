@@ -1,5 +1,5 @@
 /**
- * $Id: StreamMaterializer.java,v 1.3 2002/04/29 19:47:51 tufte Exp $
+ * $Id: StreamMaterializer.java,v 1.4 2003/03/05 19:25:10 tufte Exp $
  */
 
 package niagara.connection_server;
@@ -23,8 +23,7 @@ public class StreamMaterializer extends Thread {
 	    while (true) {
 		StreamTupleElement ste = inputStream.getTuple(500);
 		if (ste == null) {
-		    if(!inputStream.timedOut() &&
-		       inputStream.getCtrlFlag() == CtrlFlags.EOS) {
+		    if(inputStream.getCtrlFlag() == CtrlFlags.EOS) {
 			break;
 		    } else {
 			// if we time out or get a control flag other than

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.21 2003/02/22 08:06:08 tufte Exp $
+  $Id: NiagraServer.java,v 1.22 2003/03/05 19:25:10 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,8 +49,6 @@ import java.net.InetAddress;
 */
 public class NiagraServer {
 
-
-
     // All constants defined here
     private static String SEHOST;
     private static int SEPORT = niagara.search_engine.util.Const.SERVER_PORT;
@@ -92,8 +90,6 @@ public class NiagraServer {
     // Catalog
     private static String catalogFileName = "catalog.xml";
     private static Catalog catalog = null;
-
-    public static boolean QUIET = false;
 
     public static boolean KT_PERFORMANCE = true;
     public static boolean RUNNING_NIPROF = false;
@@ -278,7 +274,7 @@ public class NiagraServer {
                     // hard wired defaults
                     valid_args = true;
                 } else if (args[i].equals("-quiet")) {
-                    QUIET = true;
+                    ResultTransmitter.QUIET = true;
                 } else if (args[i].equals("-dtd-hack")) {
                     dtd_hack = true;
                     valid_args = true;

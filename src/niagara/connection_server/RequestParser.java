@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestParser.java,v 1.8 2003/02/25 06:16:28 vpapad Exp $
+  $Id: RequestParser.java,v 1.9 2003/03/05 19:25:10 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -148,10 +148,6 @@ public class RequestParser extends HandlerBase implements Runnable {
 	    } catch (InvalidPlanException e) {
 		error = true;
 		err_type = ResponseMessage.PARSE_ERROR;
-		message = e.getMessage();
-	    } catch (QueryResult.ResultsAlreadyReturnedException e) {
-		error = true;
-		err_type = ResponseMessage.EXECUTION_ERROR;
 		message = e.getMessage();
 	    } catch (QueryResult.AlreadyReturningPartialException e) {
 		error = true;

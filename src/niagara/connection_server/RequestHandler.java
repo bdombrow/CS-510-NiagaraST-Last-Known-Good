@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.20 2003/02/25 06:16:28 vpapad Exp $
+  $Id: RequestHandler.java,v 1.21 2003/03/05 19:25:10 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -131,7 +131,6 @@ public class RequestHandler {
         throws
             InvalidQueryIDException,
             InvalidPlanException,
-            QueryResult.ResultsAlreadyReturnedException,
             QueryResult.AlreadyReturningPartialException,
             ShutdownException,
             TRIGException,
@@ -311,8 +310,8 @@ public class RequestHandler {
                 if (queryInfo == null)
                     throw new InvalidQueryIDException();
 
-                // Put a get partial message downstream
-                queryInfo.queryResult.returnPartialResults();
+                // Put a get partial message upstream
+                queryInfo.queryResult.requestPartialResult();
                 break;
 
             case RequestMessage.RUN_GC :
