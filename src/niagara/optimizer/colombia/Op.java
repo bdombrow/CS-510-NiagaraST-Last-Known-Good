@@ -1,4 +1,4 @@
-/* $Id: Op.java,v 1.13 2003/09/16 04:45:29 vpapad Exp $
+/* $Id: Op.java,v 1.14 2003/10/11 03:55:08 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -49,7 +49,7 @@ public abstract class Op {
     /** number of inputs */
     public abstract int getArity();
 
-    /* We require logical and physical operators to redefine 
+    /** We require logical and physical operators to redefine 
      * equals and hashCode, in the context of the optimizer.
      * We don't  worry too much about data structures that
      * are used afterwards in query execution.
@@ -65,6 +65,9 @@ public abstract class Op {
      * that x.equals(y) => x.hashCode() == y.hashCode() remains true.
      */
     public abstract boolean equals(Object other);
+
+    /** Since all operators must redefine <code>equals</code>, they must
+     * also redefine <code>hashCode</code> */
     public abstract int hashCode();
 
     /** This is a utility method that subclasses can use

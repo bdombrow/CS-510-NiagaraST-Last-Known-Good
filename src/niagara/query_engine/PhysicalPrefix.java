@@ -1,5 +1,5 @@
 /*
-  $Id: PhysicalPrefix.java,v 1.4 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalPrefix.java,v 1.5 2003/10/11 03:55:41 vpapad Exp $
 */
 
 package niagara.query_engine;
@@ -18,9 +18,8 @@ public class PhysicalPrefix extends PhysicalOperator {
     /** Pass through up to <code>length</code> tuples before shutting down */
     private int length;
 
-    private int cnt;
-
-    /** Number of tuples that passed through so far */
+    /** Number of tuples that passed through so far.
+     * @execution */
     private int tuplesPassed;
 
     public PhysicalPrefix() {
@@ -58,17 +57,12 @@ public class PhysicalPrefix extends PhysicalOperator {
 	}
         else
             putTuple(inputTuple, 0);
-        cnt++;
-        System.err.println("XXX vpapad: prefix tuple sent " + cnt);
     }
 
     public boolean isStateful() {
         return false;
     }
 
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
-     */
     public Cost findLocalCost(
         ICatalog catalog,
         LogicalProperty[] inputLogProp) {
@@ -85,23 +79,14 @@ public class PhysicalPrefix extends PhysicalOperator {
         return length == ((PhysicalPrefix) o).length;
     }
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
     public int hashCode() {
         return length;
     }
 
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
-     */
     public PhysicalProperty findPhysProp(PhysicalProperty[] input_phys_props) {
         return input_phys_props[0];
     }
 
-    /* 
-     * @see niagara.utils.SerializableToXML#dumpAttributesInXML(java.lang.StringBuffer)
-     */
     public void dumpAttributesInXML(StringBuffer sb) {
         sb.append(" length='").append(length).append("'");
     }
