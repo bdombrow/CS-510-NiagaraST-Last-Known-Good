@@ -1,5 +1,5 @@
 /**
- * $Id: MQPClient.java,v 1.5 2002/10/29 01:56:21 vpapad Exp $
+ * $Id: MQPClient.java,v 1.6 2003/01/13 05:04:56 tufte Exp $
  */
 
 package niagara.client;
@@ -57,6 +57,7 @@ public class MQPClient extends SimpleClient {
 
         Element plan = null;
         String query = "";
+
         Document d = parser.getDocument();
 
         // Get root element
@@ -80,7 +81,9 @@ public class MQPClient extends SimpleClient {
         plan.insertBefore(display, plan.getFirstChild());
 
         // Get the query in string format
-        query = XMLUtils.flatten(plan);
+	// don't use prettyprint - vassilis is a unix guy, he certainly
+	// won't want any extra characters messing up his query
+        query = XMLUtils.flatten(plan, false); 
         
         // Send plan to server, and wait for results
         m_start = System.currentTimeMillis();

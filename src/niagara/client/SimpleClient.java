@@ -59,17 +59,12 @@ public class SimpleClient implements UIDriverIF {
     }
     
     public void queryDone() {
-	// KT-VPAPAD - debug statements for client deadlock error
-	//System.out.println("DLDEBUG Thread " + Thread.currentThread().getName() + " requesting mutex on SimpleClient (queryDone)");
 	synchronized(this) {
-	    //System.out.println("DLDEBUG Thread " + Thread.currentThread().getName() + " has mutex on SimpleClient (queryDone)");
 	    m_stop = System.currentTimeMillis();
 	    notify();
             if (!silent)
                 System.err.println("Total time: " + (m_stop - m_start) + "ms.");
 	}
-	//System.out.println("DLDEBUG Thread " + Thread.currentThread().getName() + " released mutex on SimpleClient (queryDone)");
-
     }
     
     public void notifyFinalResult(int id) {
@@ -102,7 +97,8 @@ public class SimpleClient implements UIDriverIF {
 
     protected static void usage() {
         System.err.println(
-            "Usage: SimpleClient [-h host] [-t timeout] [-p port] [-qf QueryFileName]\n"
+            "Usage: SimpleClient -qf QueryFileName(s) [-h host] [-t timeout]"
+	    + "[-p port] \n"
             + "[-x repetitions] [-d delay] [-w wait] [-o outputFileName]\n"
             + "[-quiet] [-explain] [-ch client host] [-cp client port] [-silent]");
         System.exit(-1);
@@ -188,65 +184,40 @@ public class SimpleClient implements UIDriverIF {
                 usage();
             }
         }
+	if(!queryfile)
+	    usage();
     }
     
     protected void processQueries() {
         String query;
 
         try {
-            if (!queryfile) {
-                query = "";
-                String line = "";
-
-                BufferedReader br =
-                    new BufferedReader(new InputStreamReader(System.in));
-                do {
-                    query = query + line;
-                    line = br.readLine();
-                } while (line != null);
-		// kt - don't think this needs to be synch
-		// I removed it - hope this doesn't cause trouble!
-		// if it is synchronized, causes deadlock on error
-		//System.out.println("DLDEBUG: Thread " + Thread.currentThread().getName() + " requesting mutex on SimpleClient (processQueries)");
-		synchronized(this) {
-		    //System.out.println("DLDEBUG: Thread " + Thread.currentThread().getName() + " got mutex on SimpleClient (processQueries)");
-		    try {
-			processQuery(query);
-		    } catch (ClientException e) {
-			// do nothing - error is printed elsewhere
-		    }
-		    //System.out.println("DLDEBUG: Thread " + Thread.currentThread().getName() + " releasing mutex on SimpleClient (processQueries)");
-		    wait();
-		}
-		System.exit(0);
-            } else {
-		int nQueries = queryFiles.size();
-                for (int i = 0; i < nQueries; i++) {
-                    char cbuf[] = new char[MAX_QUERY_LEN];
-                    query = getQueryFromFile((String) queryFiles.get(i), cbuf);
-                    int reps = ((Integer) repetitions.get(i)).intValue();
-                    int delay = ((Integer) delays.get(i)).intValue();
-                    int wait = ((Integer) waits.get(i)).intValue();
-		    for (int j = 0; j < reps; j++) {
-			if (j > 0 && delay > 0)
-			    Thread.sleep(delay);
-			// kt - don't think this needs to be synch
-			// I removed it - hope this doesn't cause trouble!
-			// if it is synchronized, causes deadlock on error
-			synchronized (this) {
-			    try {
-				processQuery(query);
-			    } catch (ClientException ce) {
-				// do nothing - error reported elsewhere
-			    }
-			    wait();
+	    int nQueries = queryFiles.size();
+	    for (int i = 0; i < nQueries; i++) {
+		char cbuf[] = new char[MAX_QUERY_LEN];
+		query = getQueryFromFile((String) queryFiles.get(i), cbuf);
+		int reps = ((Integer) repetitions.get(i)).intValue();
+		int delay = ((Integer) delays.get(i)).intValue();
+		int wait = ((Integer) waits.get(i)).intValue();
+		for (int j = 0; j < reps; j++) {
+		    if (j > 0 && delay > 0)
+			Thread.sleep(delay);
+		    // kt - don't think this needs to be synch
+		    // I removed it - hope this doesn't cause trouble!
+		    // if it is synchronized, causes deadlock on error
+		    synchronized (this) {
+			try {
+			    processQuery(query);
+			} catch (ClientException ce) {
+			    // do nothing - error reported elsewhere
 			}
+			wait();
 		    }
-		    if (i < nQueries - 1 && wait > 0)
-			Thread.sleep(wait);
-                }
-                System.exit(0);
-            }
+		}
+		if (i < nQueries - 1 && wait > 0)
+		    Thread.sleep(wait);
+	    }
+	    System.exit(0);
         } catch (IOException e) {
             System.err.println(
                 "SimpleClient: IO error while reading query or query file");
@@ -283,16 +254,26 @@ public class SimpleClient implements UIDriverIF {
 
     }
 
-    public void processQuery(String queryText) throws ClientException {
-        if (!silent)
-            System.err.println("Executing query " + queryText);
-        if (queryText.equalsIgnoreCase("gc")) {
-            cm.runGarbageCollector();
-            return;
-        } else if (queryText.equalsIgnoreCase("shutdown")) {
-            cm.shutdownServer();
-            return;
+    public void processQuery(String fullQueryText) throws ClientException {
+	// remove any leading or trailing whitespace
+	String queryText = fullQueryText.trim(); 
+        if (!silent) {
+            System.err.println("Executing query: " + queryText);
+	    System.err.flush(); // make query print before results
         }
+        if (queryText.equalsIgnoreCase(ConnectionManager.RUN_GC)) {
+	    System.out.println("Requesting garbage collection");
+            cm.runSpecialFunc(ConnectionManager.RUN_GC);
+            return;
+        } else if (queryText.equalsIgnoreCase(ConnectionManager.SHUTDOWN)) {
+	    System.out.println("Shutting down server");
+            cm.runSpecialFunc(ConnectionManager.SHUTDOWN);
+            return;
+        } else if (queryText.equalsIgnoreCase(ConnectionManager.DUMPDATA)) {
+	    System.out.println("Requesting profile data dump");
+            cm.runSpecialFunc(ConnectionManager.DUMPDATA);
+	    return;
+	}
 
         m_start = System.currentTimeMillis();
         Query q = null;

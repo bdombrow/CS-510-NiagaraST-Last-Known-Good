@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.12 2002/10/12 20:10:25 tufte Exp $
+  $Id: SimpleConnectionReader.java,v 1.13 2003/01/13 05:04:56 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -92,7 +92,7 @@ class SimpleConnectionReader extends AbstractConnectionReader
 			ui.errorMessage(local_id, line + "\n");
 		    }
 		    if (line.indexOf("\"end_result\">") != -1) {
-                        addResult("</niagara:results>");
+                        addResult("\n</niagara:results>");
                         ui.notifyNew(local_id);
 			ui.notifyFinalResult(local_id);
                     }
@@ -104,7 +104,7 @@ class SimpleConnectionReader extends AbstractConnectionReader
 		} else {
 		    addResult(line);
                     if (line.indexOf("<?xml") != -1)
-                        addResult("<niagara:results>");
+                        addResult("\n<niagara:results>\n");
                     ui.notifyNew(local_id);
 		}
 		line = br.readLine();

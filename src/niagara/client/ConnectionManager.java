@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.15 2002/10/31 04:36:24 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.16 2003/01/13 05:04:56 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,6 +63,7 @@ public class ConnectionManager implements QueryExecutionIF {
     public static final String RESUME_QUERY = "resume_query";
     public static final String RUN_GC = "gc";
     public static final String SHUTDOWN = "shutdown";
+    public static final String DUMPDATA = "dumpdata";
     
     
     // private variables
@@ -331,33 +332,15 @@ public class ConnectionManager implements QueryExecutionIF {
 	writeMessage(id, GET_PARTIAL);
     }
     
-    /**
-     * run the garbage collector
-     */
-    
-    public void runGarbageCollector() {
-	System.out.println("Requesting garbage collection");
+    public void runSpecialFunc(String func) {
 	int id = getID();
 	// Register the query
 	// args are id, query text, query type
 	final QueryRegistry.Entry e = 
-	    reg.registerQuery(id, "gc", QueryType.NOTYPE);
+	    reg.registerQuery(id, func, QueryType.NOTYPE);
 	// Set the query type
 	e.type = QueryType.NOTYPE;
-	
-	writeMessageNoSID(id, RUN_GC); 
-    }
-    
-    public void shutdownServer() {
-	System.out.println("Shutting down server");
-	int id = getID();
-	// Register the query
-	// args are id, query text, query type
-	final QueryRegistry.Entry e = 
-	    reg.registerQuery(id, "shutdown", QueryType.NOTYPE);
-	// Set the query type
-	e.type = QueryType.NOTYPE;
-	writeMessageNoSID(id, SHUTDOWN); 
+	writeMessageNoSID(id, func); 
     }
     
     /**
