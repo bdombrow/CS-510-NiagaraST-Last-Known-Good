@@ -2,7 +2,7 @@
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 
 <plan top="cons">
-<filescan id="catfile" fileName = "../../NEXMark/data/categories.xml"/>
+<filescan id="catfile" filename = "../../NEXMark/data/categories.xml"/>
 
 <unnest id="category" regexp="Categories.category" input="catfile"/>
 
