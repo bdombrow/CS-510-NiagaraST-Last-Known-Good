@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: YPCrawler.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: YPCrawler.java,v 1.2 2002/12/10 01:11:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,6 +25,7 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
+package niagara.search_engine.crawler;
 
 import java.util.*;
 import java.net.*;
