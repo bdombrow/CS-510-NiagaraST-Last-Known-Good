@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.11 2002/04/06 02:13:07 vpapad Exp $
+  $Id: NiagraServer.java,v 1.12 2002/04/20 19:40:37 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,14 +64,16 @@ public class NiagraServer
 
     private static boolean connectToSE = true;
 
+    // SAXDOM
+    private static final int SAXDOM_DEFAULT_NUMBER_OF_PAGES = 1024;
+    private static final int SAXDOM_DEFAULT_PAGE_SIZE = 1024;
     private static boolean useSAXDOM = false;
+    private static int saxdom_pages = SAXDOM_DEFAULT_NUMBER_OF_PAGES;
+    private static int saxdom_page_size = SAXDOM_DEFAULT_PAGE_SIZE;
 
     // Defaults
     private static int DEFAULT_QUERY_THREADS = 10;
     private static int DEFAULT_OPERATOR_THREADS = 50;
-
-    private static int DEFAULT_NUMBER_OF_PAGES = 1024;
-    private static int DEFAULT_PAGE_SIZE = 1024;
 
     // The port for client communication 
     private static int client_port = 9020;
@@ -122,7 +124,11 @@ public class NiagraServer
                 Console console = new Console(this, System.in);
                 console.start();
             }
-            
+
+            if (useSAXDOM)
+		BufferManager.createBufferManager(saxdom_pages,
+						  saxdom_page_size);
+
             if (connectToSE)
                 seClient = new SEClient(SEHOST);
 	      if(!KT_PERFORMANCE) { 
@@ -288,7 +294,7 @@ public class NiagraServer
                     valid_args = true;
                 } else if (args[i].equals("-quiet")) {
 		    QUIET = true;
-		} else if (args[i].equals("-stream")) {
+	} else if (args[i].equals("-stream")) {
 		    STREAM = true;
 		} else if (args[i].equals("-dtd-hack")) {
                     dtd_hack = true;
@@ -311,8 +317,7 @@ public class NiagraServer
                     }
                     i++; // Cover for argument
                     valid_args = true;
-                }
-                else if (args[i].equals("-server-port")) {
+                } else if (args[i].equals("-server-port")) {
                     if ((i+1) >= args.length) {
                         cerr("Please supply a parameter to -server-port");
                         usage();
@@ -328,8 +333,7 @@ public class NiagraServer
                     }
                     i++; // Cover for argument
                     valid_args = true;
-                }
-                else if (args[i].equals("-catalog")) {
+                } else if (args[i].equals("-catalog")) {
                     if ((i+1) >= args.length) {
                         cerr("Please supply a parameter to -catalog");
                         usage();
@@ -339,8 +343,7 @@ public class NiagraServer
                     }
                     i++; // Cover for argument
                     valid_args = true;
-                }
-                else if (args[i].equals("-dom")) {
+                } else if (args[i].equals("-dom")) {
                     if ((i+1) >= args.length) {
                         cerr("Please supply a parameter to -dom");
                         usage();
@@ -350,14 +353,16 @@ public class NiagraServer
                     }
                     i++; // Cover for argument
                     valid_args = true;
-                }
-                else if (args[i].equals("-saxdom")) {
-                    // XXX vpapad: number of pages and page size
-                    // should be a user-settable parameter
-                    BufferManager.createBufferManager(DEFAULT_NUMBER_OF_PAGES,
-                                                      DEFAULT_PAGE_SIZE);
+                } else if (args[i].equals("-saxdom")) {
                     useSAXDOM = true;
-
+                    valid_args = true;
+                } else if (args[i].equals("-saxdom-pages")) {
+		    saxdom_pages = parseIntArgument(args, i);
+                    i++; // Cover for argument
+                    valid_args = true;
+                } else if (args[i].equals("-saxdom-page-size")) {
+		    saxdom_page_size = parseIntArgument(args, i);
+                    i++; // Cover for argument
                     valid_args = true;
                 }
             }
@@ -446,6 +451,24 @@ public class NiagraServer
 			}
 		}
 
+    private static int parseIntArgument(String args[], int pos) {
+	if ((pos+1) >= args.length) {
+	    cerr("Please supply a parameter to " + args[pos]);
+	    usage();
+	} else {
+	    try {
+		return Integer.parseInt(args[pos+1]);
+	    }
+	    catch (NumberFormatException nfe) {
+		cerr("Invalid argument to " + args[pos]);
+		usage();
+	    }
+	}
+	
+	System.exit(-1);
+        return -1; /* Unreachable */
+    }
+
     /**
      * Print help and usage information
      */
@@ -463,6 +486,8 @@ public class NiagraServer
         cout("\t-catalog <file> Catalog file.");
         cout("\t-dom  <implementation name> Default DOM implementation.");
         cout("\t-saxdom  Use SAXDOM for input documents.");
+	cout("\t-saxdom-pages <number> Number of SAXDOM pages.");
+	cout("\t-saxdom-page-size <number> Size of each SAXDOM page.");
         cout("\t-help   print this help screen");
         System.exit(-1);
     }
