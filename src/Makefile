@@ -33,9 +33,8 @@ export JAVADOC     = $(JAVA_HOME)javadoc
 #  Niagra libs
 #----------------
 
-
-export PARSELIB      = $(LIBDIR)/xml4j.jar
-export OLDPARSELIB   = $(LIBDIR)/xml4j.old.jar
+export XML4J          = $(LIBDIR)/xml4j.jar
+#export OLDPARSELIB   = $(LIBDIR)/xml4j.old.jar
 export COMMONLIB     = $(LIBDIR)/common.jar
 export XMLQLPARSE    = $(LIBDIR)/xmlql_parser.jar
 export LOGICALOPTREE = $(LIBDIR)/logicaloptree.jar
@@ -57,9 +56,9 @@ export HTMLLAYOUT   = $(LIBDIR)/htmllayout.jar
 export JETTY	    = $(LIBDIR)/com.mortbay.jetty.jar
 export SERVLET	    = $(LIBDIR)/javax.servlet.jar
 
-export XERCES	    = $(LIBDIR)/xerces.jar
+export XERCES	    = $(LIBDIR)/xerces.1.4.2.jar
 
-export CLASSPATH     = .:$(XERCES):$(COMMONLIB):$(REGEXPLIB):$(XMLQLPARSE):$(LOGICALOPTREE):$(DMLIB):$(CUPLIB):$(PARSELIB):$(TRIGGERM):$(TRIGLIB):$(QBELIB2):$(SAX):$(DIFF):$(FHOSE):$(DIVA):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET)
+export CLASSPATH     = .:$(XERCES):$(COMMONLIB):$(REGEXPLIB):$(XMLQLPARSE):$(LOGICALOPTREE):$(DMLIB):$(CUPLIB):$(XML4J):$(TRIGGERM):$(TRIGLIB):$(QBELIB2):$(SAX):$(DIFF):$(FHOSE):$(DIVA):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET)
 
 export DEBUG = -g
 
@@ -75,7 +74,7 @@ APPLET_DIR = /p/niagara/public/html
 #  list and it will be built using 'make all'
 #
 ##############################################################################
-all:	se_server ndom ql_parser con_server qe trigger client mqpclient dm applet nitree type_system
+all:	se_server ndom ql_parser con_server qe client mqpclient dm applet type_system
 
 #client: 
 #	$(JAVAC) $(JAVAFLAGS) `find niagara/client -name \*.java`
@@ -137,10 +136,10 @@ applet_clean:
 classpath:
 	@echo $(CLASSPATH)
 clean:
-	rm -f */*.class */*/*.class */*/*/*.class *.class niagara.jar
+	rm -f */*.class */*/*.class */*/*/*.class */*/*/*/*.class *.class niagara.jar
 
 really_clean:
-	rm -f */*.class */*/*.class */*/*/*.class *.class niagara.jar \
+	rm -f */*.class */*/*.class */*/*/*.class */*/*/*/*.class *.class niagara.jar \
 	niagara/xmlql_parser/syntax_tree/QueryParser.java \
 	niagara/xmlql_parser/syntax_tree/sym.java \
 	niagara/xmlql_parser/syntax_tree/Scanner.java \
