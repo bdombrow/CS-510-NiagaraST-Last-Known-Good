@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SelectSig.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: SelectSig.java,v 1.2 2001/08/08 21:29:02 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,7 +41,6 @@ package niagara.trigger_engine;
 import java.io.*;
 import java.lang.*;
 import java.util.*;
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;

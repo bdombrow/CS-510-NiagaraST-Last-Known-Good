@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TrigFileMgr.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: TrigFileMgr.java,v 1.2 2001/08/08 21:29:02 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,7 +40,6 @@ package niagara.trigger_engine;
 
 import java.io.*;
 import java.util.*;
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import niagara.data_manager.*;
 
@@ -109,8 +108,8 @@ class TrigFileMgr {
         //System.err.println("Will use " + fname + " to store constTbl");
 
         InputStream is;
-        TXDocument doc;
-        doc =(TXDocument) DM.createDoc(fname);
+        Document doc;
+        doc =(Document) DM.createDoc(fname);
         Element root = doc.getDocumentElement();
 	if(root==null) {
 	    root = doc.createElement("pairs");
@@ -127,14 +126,14 @@ class TrigFileMgr {
 	    return tmpFileName;
 
 	//new value, we need to create an entry in the const table
-        TXElement tmp = new TXElement("pair");
-        TXElement tmpv = new TXElement("value");
-        TXElement tmpc = new TXElement("tmpFileName");
+        Element tmp = doc.createElement("pair");
+        Element tmpv = doc.createElement("value");
+        Element tmpc = doc.createElement("tmpFileName");
 
-        tmpv.appendChild(new TXText(val));
+        tmpv.appendChild(doc.createTextNode(val));
 
 	tmpFileName = getTmpFileName(groupId,val);
-        tmpc.appendChild(new TXText(""+tmpFileName));
+        tmpc.appendChild(doc.createTextNode(""+tmpFileName));
 
         tmp.appendChild(tmpv);
         tmp.appendChild(tmpc);

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TriggerManager.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: TriggerManager.java,v 1.2 2001/08/08 21:29:02 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -47,7 +47,6 @@ package niagara.trigger_engine;
 
 import niagara.query_engine.*;
 import niagara.data_manager.*;
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import java.io.*;
 import java.util.*;
