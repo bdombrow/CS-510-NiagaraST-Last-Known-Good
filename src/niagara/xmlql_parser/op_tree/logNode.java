@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: logNode.java,v 1.13 2003/03/05 19:29:18 tufte Exp $
+  $Id: logNode.java,v 1.14 2003/03/08 02:23:57 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -57,9 +57,6 @@ public class logNode implements SchedulablePlan, java.io.Serializable {
 
     protected logNode[] inputs; // array of inputs or logNode
 
-    protected int[] inputsId; // For Trigger ONLY!
-    protected int Id; // for trig use.  Not trig system Id = -1
-
     protected boolean isHead;
 
     /**
@@ -68,7 +65,6 @@ public class logNode implements SchedulablePlan, java.io.Serializable {
     public logNode() {
         operator = null;
         inputs = new logNode[1];
-        Id = -1;
     }
 
     /**
@@ -90,7 +86,6 @@ public class logNode implements SchedulablePlan, java.io.Serializable {
      */
     public logNode(op _op) {
         operator = _op;
-        Id = -1;
         inputs = new logNode[] {
         };
         tupleDes = null;
@@ -106,7 +101,6 @@ public class logNode implements SchedulablePlan, java.io.Serializable {
      */
     public logNode(op _op, logNode leftin, logNode rightin) {
         inputs = new logNode[2];
-        Id = -1;
         inputs[0] = leftin;
         inputs[1] = rightin;
         operator = _op;
@@ -114,16 +108,7 @@ public class logNode implements SchedulablePlan, java.io.Serializable {
 
     public logNode(op operator, logNode[] inputs) {
         this.operator = operator;
-        Id = -1;
         this.inputs = inputs;
-    }
-
-    public int getId() {
-        return Id;
-    }
-
-    public void setId(int id) {
-        Id = id;
     }
 
     /**
@@ -182,21 +167,6 @@ public class logNode implements SchedulablePlan, java.io.Serializable {
      */
     public logNode input() {
         return input(0);
-    }
-
-    /**
-     * to set the Nth child
-     *
-     * @param the root of the subtree
-     * @param the position of this child
-     */
-    public void setInput(logNode newChild, int index) {
-        if (index >= inputs.length)
-            System.err.println("index out of range");
-        inputs[index] = newChild;
-        if (inputsId == null)
-            return;
-        inputsId[index] = newChild.Id;
     }
 
     public void setInputs(logNode[] inputs) {

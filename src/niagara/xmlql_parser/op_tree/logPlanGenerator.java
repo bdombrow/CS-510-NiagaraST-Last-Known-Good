@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logPlanGenerator.java,v 1.6 2003/03/07 21:03:00 tufte Exp $
+  $Id: logPlanGenerator.java,v 1.7 2003/03/08 02:23:57 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -868,13 +868,6 @@ public class logPlanGenerator {
 		return (logNode)partialTree.elementAt(0);
 	}
 
-	//return the files for dtdScan. used for trigger system
-	//to monitor the sources
-	public Vector getListOfInClause() {
-		return listOfInClause;
-	}
-
-
 	/**
 	 * test program for testing the generation of logical plan
 	 */
@@ -890,12 +883,8 @@ public class logPlanGenerator {
        	   java_cup.runtime.Symbol parse_tree = p.parse();
 
 	   // get the syntax tree for the query
-	   xqlExt q = (xqlExt)(parse_tree.value);
-	   q.dump();
-           System.out.println("No errors. Parsing took ");
-	   
-	   System.out.println("Plan");
-	   query xml_query = q.getQuery();
+           System.out.println("Plan");
+	   query xml_query = (query) (parse_tree.value); 
 
 	   // initialise the logPlanGenerator with the syntax tree 
 	   // for the query

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: dtdScanOp.java,v 1.7 2003/03/07 23:36:43 vpapad Exp $
+  $Id: dtdScanOp.java,v 1.8 2003/03/08 02:23:57 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,19 +49,17 @@ public class dtdScanOp extends NullaryOp implements Initializable {
    private Attribute variable;
    private Vector docs;// Vector of urls to scan.
    private String type;// dtd name (e.g book.dtd)
-   private Vector docsCpy; //trigger. the copy of the docs
 
     public dtdScanOp() {}
     
-    public dtdScanOp(Attribute variable, Vector docs, String type, Vector docsCpy) {
+    public dtdScanOp(Attribute variable, Vector docs, String type) {
         this.variable = variable;
         this.docs = docs;
         this.type = type;
-        this.docsCpy = docsCpy;
     }
     
     public dtdScanOp(dtdScanOp op) {
-        this(op.variable, op.docs, op.type, op.docsCpy);
+        this(op.variable, op.docs, op.type);
     }
     
     public Op copy() {
@@ -102,34 +100,6 @@ public class dtdScanOp extends NullaryOp implements Initializable {
    public Vector getDocs() {
 	return docs;
    }
-
-   //trigger --Jianjun
-   public Vector getDocsCpy() {
-	return docsCpy;
-   }
-
-   //trigger --Jianjun
-   public void makeDocsCpy() {
-	String srcFileName;
-	int size = docs.size();
-	docsCpy = new Vector();
-	for (int i=0; i<size; i++) {
-		Object o = docs.elementAt(i);
-		if (o instanceof data) {
-			srcFileName=new String((String)((data)o).getValue());	
-		}
-		else {
-			srcFileName = new String((String)o);
-		}
-		docsCpy.addElement(srcFileName);
-	}
-   }
-
-   //trigger --Jianjun
-   public void restoreDocs() {
-	docs = docsCpy;
-   }
-
 
     /**
      * This function sets the vector of documents associated with the

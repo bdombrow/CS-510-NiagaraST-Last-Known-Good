@@ -37,8 +37,7 @@ OBJ =   op.class		\
 	nestOp.class		\
 	averageOp.class		\
 	logNode.class		\
-	logPlanGenerator.class  \
-        trigActionOp.class
+	logPlanGenerator.class
 
 ##############################################################################
 
