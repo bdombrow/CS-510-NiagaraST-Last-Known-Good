@@ -134,6 +134,7 @@ public class PhysicalUnnest extends PhysicalOperator {
      * @see niagara.query_engine.PhysicalOperator#opInitialize()
      */
     protected void opInitialize() {
+        scanField = inputTupleSchemas[0].getPosition(root.getName());
         pev = new PathExprEvaluator(path);
         elementList = new NodeVector();
     }
