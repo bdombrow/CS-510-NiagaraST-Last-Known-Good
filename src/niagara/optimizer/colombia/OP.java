@@ -1,4 +1,4 @@
-/* $Id: OP.java,v 1.6 2002/10/23 22:32:42 vpapad Exp $ */
+/* $Id: OP.java,v 1.7 2002/10/23 22:53:06 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 /** Abstract superclass for all operators, logical or physical */
@@ -17,8 +17,11 @@ public abstract class Op {
     /** number of inputs */
     public abstract int getArity();
 
+    // XXX vpapad temporary hack
+    /*
     public abstract boolean equals(Object other);
     public abstract int hashCode();
+    */
 
     public int getNumberOfOutputs() { return 1;}
     
