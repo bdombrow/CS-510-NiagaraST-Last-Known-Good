@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: PhysicalScanOperator.java,v 1.2 2000/07/08 05:22:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -137,7 +137,6 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	// Get the nodes reachable using the path expression scanned
 	//
         
-        //System.err.println("Debuging.... " + attribute + " " + rExp);
         if(attribute instanceof TXDocument) {
             // System.err.println( ((TXDocument)attribute).getText());
             String rootName = ((TXDocument)attribute).getRootName();

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PredicateEvaluator.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: PredicateEvaluator.java,v 1.2 2000/07/08 05:22:54 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -186,6 +186,10 @@ public class PredicateEvaluator {
 	    //
 	    return evaluateLogicalPredicate(tuples,
 					    (predLogOpNode) pred);
+	}
+	else if (pred == null) {
+	    // Null predicate means cartesian -- always true
+	    return true;
 	}
 	else{
 	    System.err.println("ERROR: invalid predicate type");

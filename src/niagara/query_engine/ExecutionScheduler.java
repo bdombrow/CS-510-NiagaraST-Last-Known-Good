@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.3 2000/06/26 22:10:28 vpapad Exp $
+  $Id: ExecutionScheduler.java,v 1.4 2000/07/08 05:22:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -275,18 +275,18 @@ public class ExecutionScheduler {
 		// the parsed XML documents
 		//
 		try {
-            System.err.println("Try to scan " +
-							   dtdScanOperator.getDocs().elementAt(0));
-            boolean scan = 
-				dataManager.getDocuments(dtdScanOperator.getDocs(),
-										 null,
-										 new SourceStream(inputStreams[0]));
-            if(!scan) System.err.println("dtdScan FAILURE! " +
-										 dtdScanOperator.getDocs().elementAt(0));
+		    System.err.println("Try to scan " +
+				       dtdScanOperator.getDocs().elementAt(0));
+		    boolean scan = 
+			dataManager.getDocuments(dtdScanOperator.getDocs(), null,
+						 new SourceStream(inputStreams[0]));
+		    if(!scan) 
+			System.err.println("dtdScan FAILURE! " 
+					   + dtdScanOperator.getDocs().elementAt(0));
 		}
 		catch (Exception e) {
-            e.printStackTrace();
-			System.err.println("Data Manager Already Closed!!!");
+		    e.printStackTrace();
+		    System.err.println("Data Manager Already Closed!!!");
 		}
     }
 
@@ -323,8 +323,9 @@ public class ExecutionScheduler {
 	//
 	System.err.println("Attempting to start firehose ");
 
-	FirehoseThread firehose = new FirehoseThread(fhScanOp.getSpec(),
-						     new SourceStream(inputStreams[0]));
+	FirehoseThread firehose = 
+	    new FirehoseThread(fhScanOp.getSpec(), 
+			       new SourceStream(inputStreams[0]));
 
 	
 	// start the thread
