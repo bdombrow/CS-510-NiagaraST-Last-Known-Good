@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: varTbl.java,v 1.4 2000/08/28 22:06:15 vpapad Exp $
+  $Id: varTbl.java,v 1.5 2001/07/17 06:53:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -166,6 +166,25 @@ public class varTbl {
 	return hm;
     }
 
+    public String getVars() {
+        String toReturn = " vars='";
+        String[] vars = new String[varList.size()];
+
+	for (int i=0; i < varList.size(); i++) {
+	    varToAttr vta = (varToAttr) varList.get(i);
+	    String varName = vta.getVar();
+	    schemaAttribute sa = (schemaAttribute) vta.
+		getAttributeList().get(0);
+	    int position = sa.getAttrId();
+            vars[position] = varName;
+	}
+
+        for (int i = 0; i < vars.length; i++) {
+            toReturn += vars[i] + " ";
+        }
+        toReturn += "' ";
+        return toReturn;
+    }
 	/**
 	 * print to the standard output
 	 */

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: opType.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: opType.java,v 1.2 2001/07/17 06:53:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,6 +31,8 @@
  *
  */
 package niagara.xmlql_parser.syntax_tree;
+
+import java.util.Hashtable;
 
 public class opType {
      
@@ -64,6 +66,49 @@ public class opType {
      public static final int CONTAIN = 30;
      public static final int DIRECT_CONTAIN = 31;
      public static final int IS = 32;
+
+    static String[] code2name;
+    static Hashtable name2code;
+
+    static {
+        code2name = new String[32];
+        name2code = new Hashtable();
+        
+        code2name[LT] = "lt";
+        name2code.put("lt", new Integer(LT));
+
+        code2name[GT] = "gt";
+        name2code.put("gt", new Integer(GT));
+
+        code2name[LEQ] = "le";
+        name2code.put("le", new Integer(LEQ));
+
+        code2name[GEQ] = "ge";
+        name2code.put("ge", new Integer(GEQ));
+
+        code2name[NEQ] = "ne";
+        name2code.put("ne", new Integer(NEQ));
+
+        code2name[EQ] = "eq";
+        name2code.put("eq", new Integer(EQ));
+
+        code2name[OR] = "or";
+        name2code.put("or", new Integer(OR));
+
+        code2name[AND] = "and";
+        name2code.put("and", new Integer(AND));
+
+        code2name[NOT] = "not";
+        name2code.put("not", new Integer(NOT));
+    }
+
+    public static String getName(int code) {
+        return code2name[code];
+    }
+    
+    public static int getCode(String name) {
+        return ((Integer) name2code.get(name)).intValue();
+    }
 };
 
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: predLogOpNode.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
+  $Id: predLogOpNode.java,v 1.3 2001/07/17 06:53:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -145,6 +145,10 @@ public class predLogOpNode extends predicate {
 			rchild.replaceVar(leftVarTbl, rightVarTbl);
 	}
 
+    public String dumpChildrenInXML() {
+        return getLeftChild().toXML() 
+            + getRightChild().toXML();
+    }
 	/**
 	 * print this node on the standard output
 	 * 

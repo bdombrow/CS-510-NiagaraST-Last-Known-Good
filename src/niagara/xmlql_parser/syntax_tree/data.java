@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: data.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
+  $Id: data.java,v 1.3 2001/07/17 06:53:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -74,6 +74,7 @@ public class data {
     public void setValue(Object o) {
 	value=o;
     }
+
 
     /**
      * prints this object to the standard output

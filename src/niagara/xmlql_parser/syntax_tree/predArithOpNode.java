@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: predArithOpNode.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
+  $Id: predArithOpNode.java,v 1.3 2001/07/17 06:53:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -175,6 +175,34 @@ public class predArithOpNode extends predicate {
 
     public data getRightExp() {
         return rexp;
+    }
+
+    // XXX horrible hack
+    public void setVarList(Vector varList) {
+        this.varList = varList;
+    }
+
+
+    public String dumpChildrenInXML() {
+        String lxml, rxml;
+        int varCnt = 0;
+        
+        if (lexp.type == dataType.NUMBER)
+            lxml = "<number value='" + lexp.value + "'/>";
+        else if (lexp.type == dataType.STRING || lexp.type == dataType.IDEN) 
+            lxml = "<string value='" + lexp.value + "'/>";
+        else {
+            lxml = "<var value='" + varList.get(0) + "'/>";
+            varCnt++;
+        }
+        if (rexp.type == dataType.NUMBER)
+            rxml = "<number value='" + rexp.value + "'/>";
+        else if (rexp.type == dataType.STRING) 
+            rxml = "<string value='" + rexp.value + "'/>";
+        else {
+            rxml = "<var value='" + varList.get(varCnt) + "'/>";
+        }
+        return lxml + rxml;
     }
 
     /**

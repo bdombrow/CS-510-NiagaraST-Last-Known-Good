@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: regExpOpNode.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
+  $Id: regExpOpNode.java,v 1.3 2001/07/17 06:53:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -168,11 +168,25 @@ public class regExpOpNode extends regExp {
 	     ((regExpDataNode)rchild).dump(depth+1);
 	 
      }
-	
-     //trigger --Jianjun
-     public String toString() {
-	System.err.println("trigger--not supported yet");
-	return null;
-     }
+
+    //  only covers path expressions
+    public String toString() {
+        switch(operator) {
+        case opType.STAR: 
+            return "(" + lchild.toString() + ")*";
+        case opType.PLUS: 
+            return "(" + lchild.toString() + ")+";
+        case opType.QMARK: 
+            return "(" + lchild.toString() + ")?";
+        case opType.DOT: 
+            return lchild.toString() + "." + rchild.toString();
+        case opType.BAR:
+            return "(" + lchild.toString() + "|" + rchild.toString() + ")";
+        case opType.DOLLAR:
+            return "$";
+        default: 
+            return "INVALID";
+        }
+    }
 }
 
