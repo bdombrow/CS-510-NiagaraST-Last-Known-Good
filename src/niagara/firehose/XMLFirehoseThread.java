@@ -34,7 +34,11 @@ class XMLFirehoseThread extends Thread {
 		fhSpec = msg.getSpec();
 		boolean useStreamingFormat = fhSpec.isStreaming();
 		boolean usePrettyPrint = fhSpec.isPrettyPrint();
-		boolean trace = fhSpec.getTrace();
+		String trace = fhSpec.getTrace();
+		BufferedWriter bwTrace = null;
+		if (trace.length() != 0)
+		    bwTrace =
+			new BufferedWriter(new FileWriter(trace, false));
 		switch(fhSpec.getDataType()) {
 		case FirehoseConstants.XMLB:
 		    xml_generator = new XMLBGenerator(fhSpec.getNumTLElts(), 
@@ -57,7 +61,7 @@ class XMLFirehoseThread extends Thread {
 							    fhSpec.getNumTLElts(),
 							    useStreamingFormat, 
 							    usePrettyPrint,
-							    trace);
+							    bwTrace);
 		    break;
 		case FirehoseConstants.PACKET:
 		    boolean fLive = false;
@@ -156,6 +160,9 @@ class XMLFirehoseThread extends Thread {
 		}
 		if(useStreamingFormat)
 		    client_out.write(FirehoseConstants.CLOSE_STREAM.getBytes());
+
+		if (bwTrace != null)
+		    bwTrace.close();
 	    } catch (FileNotFoundException e) {
 		// ugh on error, what should I do??
 		// can't send error messages anymore...

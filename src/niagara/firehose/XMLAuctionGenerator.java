@@ -17,15 +17,15 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     String tab3 = "";
     String nl = "";
     private long idTrace = 0;
-    private FileWriter fwTrace;
+    private Writer wrtTrace;
 
   public XMLAuctionGenerator(String stFile, String desc2,
 			     int numTLElts, boolean streaming,
-			     boolean prettyPrint, boolean trace) {
+			     boolean prettyPrint, Writer wrtTrace) {
       this.stFile = stFile;
       this.desc2 = desc2;
       this.numTLElts = numTLElts;
-      this.trace = trace;
+      this.wrtTrace = wrtTrace;
       if (m_av == null)
 	  m_av = new AuctionValues();
       useStreamingFormat = streaming;
@@ -49,15 +49,6 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     
     cal.set(2001,10,2,1,12,53);
 
-    if (trace) {
-	try {
-	    fwTrace = new FileWriter("auction.gen", true);
-	} catch (java.io.IOException ex) {
-	    System.out.println("Can't create auction gen trace file: " +
-			       ex.getMessage());
-	}
-    }
-    
     //Get the auction values
     m_av.init(stFile, cal);
     
@@ -79,15 +70,6 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     stringBuf.append("</site>");
     stringBuf.append(nl);
 
-    if (trace) {
-	try {
-	    fwTrace.close();
-	} catch (java.io.IOException ex) {
-	    System.out.println("Can't close auction gen trace file: " +
-			       ex.getMessage());
-	}
-    }
-    
     return stringBuf.toString().getBytes();
   }
 
@@ -105,7 +87,7 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     // KT - if this is too slow - make two cases with pretty print and
     // without to reduce calls to append
     stb.append("<open_auctions");
-    if (trace)
+    if (wrtTrace != null)
 	writeTrace(stb);
     stb.append(">");
     stb.append(nl);
@@ -157,7 +139,7 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     // calls to append - remove the +s.
     
     stb.append("<people");
-    if (trace)
+    if (wrtTrace != null)
 	writeTrace(stb);
     stb.append(">");
     stb.append(nl);
@@ -318,10 +300,10 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
 	//The trace contains a unique ID, and a timestamp, so that
 	// we can determine latency at the client
 	try {
-	    fwTrace.write(String.valueOf(idTrace));
-	    fwTrace.write(",");
-	    fwTrace.write(String.valueOf(ts));
-	    fwTrace.write("\n");
+	    wrtTrace.write(String.valueOf(idTrace));
+	    wrtTrace.write(",");
+	    wrtTrace.write(String.valueOf(ts));
+	    wrtTrace.write("\n");
 	} catch (java.io.IOException ex) {
 	    System.out.println("Write to gen trace file failed: " +
 			       ex.getMessage());

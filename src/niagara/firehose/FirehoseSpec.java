@@ -25,7 +25,7 @@ public class FirehoseSpec extends StreamSpec {
     private int numTLElts;     // num top-level elts in XMLB and AUCTION docs
     private int rate;
     private boolean prettyPrint;
-    private boolean trace;
+    private String trace;
 
     /**
      * Initialize the firehose spec
@@ -52,7 +52,7 @@ public class FirehoseSpec extends StreamSpec {
 			int dataType, String descriptor, String descriptor2,
 			int numGenCalls,int numTLElts, int rate, 
 			boolean streaming, boolean prettyPrint,
-			boolean trace) {
+			String trace) {
 	this.listenerPortNum = listenerPortNum;
 	this.listenerHostName = listenerHostName;
 	this.dataType = dataType;
@@ -111,7 +111,7 @@ public class FirehoseSpec extends StreamSpec {
 	return prettyPrint;
     }
 
-    public boolean getTrace() {
+    public String getTrace() {
 	return trace;
     }
 
@@ -127,7 +127,7 @@ public class FirehoseSpec extends StreamSpec {
 		   ", Rate " + String.valueOf(rate) +
 		   ", Streaming " + String.valueOf(streaming) +
 		   ", PrettyPrint " + String.valueOf(prettyPrint) +
-		   ", Trace = " + String.valueOf(trace));
+		   ", Trace = " + trace);
     }
 
     // appends all the firehose spec info into the given string buffer
@@ -233,7 +233,10 @@ public class FirehoseSpec extends StreamSpec {
 	if(ttype != StreamTokenizer.TT_WORD) {
 	    throw new CorruptMsgException("invalid trace value");
 	}
-	trace = (Boolean.valueOf(input_stream.sval)).booleanValue();     
+	if(input_stream.sval.equals("NULL"))
+	    trace = "";
+	else
+	    trace = input_stream.sval;
     }
 }
 
