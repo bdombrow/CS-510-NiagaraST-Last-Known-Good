@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: FetchThread.java,v 1.7 2002/04/29 19:48:41 tufte Exp $
+  $Id: FetchThread.java,v 1.8 2003/02/26 06:34:51 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -100,7 +100,7 @@ class FetchThread implements Runnable {
 	    throw new PEException(" !!! *** Fetch Failed");
 	} catch (InterruptedException ie) {
 	    try {
-		req.s.putCtrlMsg(CtrlFlags.SHUTDOWN);
+		req.s.putCtrlMsg(CtrlFlags.SHUTDOWN, "Interrupted");
 	    } catch (ShutdownException se) {  // ignore
 	    } catch (InterruptedException ine) {} // ignore
 	} catch (ShutdownException se) {

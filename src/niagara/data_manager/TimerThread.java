@@ -1,5 +1,5 @@
 /**
- * $Id: TimerThread.java,v 1.1 2003/02/25 06:14:21 vpapad Exp $
+ * $Id: TimerThread.java,v 1.2 2003/02/26 06:34:51 tufte Exp $
  *
  */
 
@@ -46,6 +46,8 @@ public class TimerThread extends SourceThread {
 
     protected SinkTupleStream outputStream;
 
+    protected int cnt;
+
     public TimerThread() {
     }
 
@@ -68,6 +70,7 @@ public class TimerThread extends SourceThread {
 
     public void plugIn(SinkTupleStream outputStream, DataManager dm) {
         this.outputStream = outputStream;
+	outputStream.setSendImmediate();
     }
 
     /**
@@ -207,7 +210,8 @@ public class TimerThread extends SourceThread {
             do {
                 try {
                     tt.outputStream.put(node);
-                    System.err.println("XXX vpapad: tuple sent");
+		    cnt++;
+                    System.err.println("XXX vpapad: timer tuple sent " + cnt);
                     return;
                 } catch (InterruptedException ie) {
                     // Do nothing
