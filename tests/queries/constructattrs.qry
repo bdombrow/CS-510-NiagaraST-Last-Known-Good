@@ -12,6 +12,6 @@
 <unnest id="name" regexp="list.person.name" input="const"/>
 
 <construct id="cons" input="name">
-<![CDATA[ <person name=$name> </person> ]]>
+<![CDATA[ <person id=$name> </person> ]]>
 </construct>
 </plan>

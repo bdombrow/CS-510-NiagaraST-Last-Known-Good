@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <niagara:results>
 
-<person name="Me"></person>
-<person name="Myself"></person>
-<person name="I"></person>
+<person id="Me"></person>
+<person id="Myself"></person>
+<person id="I"></person>
 
 </niagara:results>
