@@ -1,4 +1,4 @@
-include ../make.incl
+include ../../../make.incl
 
 all:	parsertest.class Yylex.class parser.class QueryPlan.class Optimizer.class
 #	cat test.seql
@@ -9,6 +9,7 @@ sym.class: sym.java
 	$(JAVAC)  $(JAVAFLAGS)  sym.java
 
 sym.java: seql.cup
+	$(JAVA) -version
 	$(JAVA) $(JAVAFLAGS)  java_cup.Main -interface -package search_engine.seql < seql.cup
 
 Yylex.java: seql.jlex
@@ -16,28 +17,28 @@ Yylex.java: seql.jlex
 	mv seql.jlex.java Yylex.java
 
 parser.class: parser.java queryNode.class SyntaxErrorException.class
-	$(JAVAC) $(JAVAFLAGS)  parser.java
+	$(JAVAC) $(JAVACFLAGS)  parser.java
 
 parser.java: seql.cup
 	$(JAVA) $(JAVAFLAGS)  java_cup.Main -interface -package search_engine.seql < seql.cup
 
 SyntaxErrorException.class: SyntaxErrorException.java
-	$(JAVAC) $(JAVAFLAGS)  SyntaxErrorException.java
+	$(JAVAC) $(JAVACFLAGS)  SyntaxErrorException.java
 
 Yylex.class: Yylex.java sym.class 
-	$(JAVAC) $(JAVAFLAGS)  Yylex.java
+	$(JAVAC) $(JAVACFLAGS)  Yylex.java
 
 queryNode.class: ast.java sym.class
-	$(JAVAC) $(JAVAFLAGS) ast.java
+	$(JAVAC) $(JAVACFLAGS) ast.java
 
 QueryPlan.class: QueryPlan.java 
-	$(JAVAC) $(JAVAFLAGS)  QueryPlan.java 
+	$(JAVAC) $(JAVACFLAGS)  QueryPlan.java 
 
 parsertest.class: parsertest.java Yylex.class parser.class queryNode.class
-	$(JAVAC) $(JAVAFLAGS)  parsertest.java 
+	$(JAVAC) $(JAVACFLAGS)  parsertest.java 
 
 Optimizer.class: Optimizer.java
-	$(JAVAC) $(JAVAFLAGS)  Optimizer.java 
+	$(JAVAC) $(JAVACFLAGS)  Optimizer.java 
 
 classpath:
 	@echo $(CLASSPATH)

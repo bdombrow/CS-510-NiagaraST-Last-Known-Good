@@ -1,4 +1,4 @@
-include ../make.incl
+include ../../../make.incl
 
 src = 	Client.java			\
         QueryHandler.java  		\

@@ -7,7 +7,7 @@
 #
 ############################################################################
 
-include ../make.incl
+include ../../../make.incl
 
 SRCS = DocMap.java \
 	InvertedFile.java \

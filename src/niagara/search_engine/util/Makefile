@@ -7,7 +7,8 @@
 #
 ############################################################################
 
-include ../make.incl
+#include the common makefile so everyone uses the same classpath
+include ../../../make.incl
 
 #############################################################################
 SRCS = 	Const.java 			\
