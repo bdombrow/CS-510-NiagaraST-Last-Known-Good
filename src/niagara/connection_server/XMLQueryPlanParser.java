@@ -895,7 +895,7 @@ public class XMLQueryPlanParser {
 	for (int i=0; i < children.getLength(); i++) {
 	    if (children.item(i).getNodeType() != Node.ELEMENT_NODE)
 		continue;
-	    content = content + XMLUtils.flatten(children.item(i));
+	    content = content + XMLUtils.explosiveFlatten(children.item(i));
 	}
 	String inputAttr = e.getAttribute("input");
 	
