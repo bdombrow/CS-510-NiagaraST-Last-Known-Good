@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.22 2003/02/22 08:07:15 tufte Exp $
+ * $Id: StreamThread.java,v 1.23 2003/02/23 05:00:26 tufte Exp $
  */
 
 package niagara.data_manager;
@@ -65,7 +65,7 @@ public class StreamThread extends SourceThread {
 	if(niagara.connection_server.NiagraServer.RUNNING_NIPROF)
 	    JProf.registerThreadName(this.getName());
 
-        if (NiagraServer.usingSAXDOM()) 
+        if (NiagraServer.usingSAXDOM() && spec.isStream())
             parser = DOMFactory.newParser("saxdom");
         else
             parser = DOMFactory.newParser();
@@ -75,16 +75,17 @@ public class StreamThread extends SourceThread {
 	try {
 	    inputStream = createInputStream();
 	   
-	    if(parser instanceof SAXDOMParser) {
+	    // firehose scan, we assume stream format
+	    // and must use SAXDOMParser
+	    // stream spec is either firehose spec or filescan spec
+
+	    if(parser instanceof SAXDOMParser && spec.isStream()) {
 		// Use SAXDOMParser - assumes niagara:stream format
 		((SAXDOMParser)(parser)).setOutputStream(outputStream);
 		InputSource inputSource = new InputSource(inputStream);
 		parser.parse(inputSource);
-	    } else if(parser.supportsStreaming()) {
+		/* }else if(parser.supportsStreaming()) {
 		// This must be a modified Xerces parser in streaming mode
-		// Note this is awkward, I want streaming, but I don't
-		// want streaming format... No good way to specify this now
-		// for the firehose.
 
 		// stream is done when inputStream.read() returns -1
 		InputSource inputSource = new InputSource(inputStream);
@@ -93,8 +94,21 @@ public class StreamThread extends SourceThread {
 		    // IOException is thrown when done - handled below
 		    parser.parse(inputSource);
 		    outputStream.put(parser.getDocument());
-		}
+		    }*/
+	    } else if(!spec.isStream()) {
+		// have a regular file and no stream format
+		// means only one document
+		InputSource inputSource = 
+		    new InputSource(inputStream);
+		parser.parse(inputSource);
+		outputStream.put(parser.getDocument());
 	    } else {
+		throw new PEException("KT: Unsupported");
+		// Are not using saxdom, but have a stream document
+		// We assume in this case that there is no niagara:stream
+		// format 
+
+		/* Please save this code in case I want it again someday KT
 		System.out.println("KT: WARNING USING INEFFICIENT READ IN");
 		try {
 		    bufferedInput = 
@@ -162,8 +176,9 @@ public class StreamThread extends SourceThread {
 		    // parse final doc and put in output stream, then return
 		    parseAndSendBuffer(buffer);
 		}
+		*/
 	    }
-	    
+		
 	} catch (org.xml.sax.SAXException saxE){
 	    System.err.println("StreamThread::SAX exception parsing document. Message: " 
 			       + saxE.toString());
@@ -183,9 +198,10 @@ public class StreamThread extends SourceThread {
 	    }
 	    // if source was created IOException tends to mean end
 	    // of stream and should be ignored
-	} catch(niagara.data_manager.DMException dmE) {
+	    /*} catch(niagara.data_manager.DMException dmE) {
 	    System.err.println("StreamThread::Stream Exception. Message " +
 			       dmE.getMessage());
+	    */
 	} catch (ShutdownException se) {
 	    System.err.println("StreamThread::ShutdownException. Message " +
 			       se.getMessage());
