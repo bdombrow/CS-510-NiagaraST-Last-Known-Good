@@ -20,12 +20,11 @@ class OpenAuction {
 	this.rnd = rnd;
     }
     
-    // increase the price, return the amount of increase
-    // increases are always even $ amounts
+    // increase the price, return the new bid amount
     public int increasePrice() {
 	int increase = rnd.nextInt(25)+1; // zero increases not allowed
 	currPrice += increase;
-	return increase;
+	return currPrice;
     }
     
     // curr price is always an even dollar amount

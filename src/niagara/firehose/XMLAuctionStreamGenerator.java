@@ -3,6 +3,7 @@ package niagara.firehose;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.lang.reflect.Array;
 
 class XMLAuctionStreamGenerator extends XMLFirehoseGen {
     String tab = "";
@@ -107,6 +108,9 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
     private void writeMyBuf() throws IOException {
 	myBuf.append("</site>");
 	myBuf.append(nl);
+	/*for(int i = 0; i<myBuf.length(); i++)
+	    System.out.print(Array.get(myBuf.array(), i));
+	    System.out.println();*/
 	writer.write_chars(myBuf.array(), myBuf.length());
     } 
     
@@ -144,9 +148,9 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 	    myb.append(nl);
 	    
 	    myb.append(tab3);
-	    myb.append("<increase>");
+	    myb.append("<bid>");
 	    myb.append(openAuctions.increasePrice(itemId));
-	    myb.append(".00</increase>");
+	    myb.append(".00</bid>");
 	    myb.append(nl);
 	    
 	    myb.append(tab2);
@@ -193,11 +197,13 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 	    myb.append(nl);
 	    
 	    // initial
+	    /* No intial - this is not realistic
 	    myb.append(tab2);
 	    myb.append("<initial>");
 	    myb.append(openAuctions.getCurrPrice(auctionId));
 	    myb.append("</initial>");
 	    myb.append(nl);
+	    */
 
 	    // reserve 
 	    if(rnd.nextBoolean()) {

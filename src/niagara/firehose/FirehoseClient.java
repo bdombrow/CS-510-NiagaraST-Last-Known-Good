@@ -85,10 +85,6 @@ public class FirehoseClient {
         
     private void open_socket() 
 	throws UnknownHostException, IOException {
-	// create a socket
-	//System.out.println("FHClient: host name " + 
-	//		   fhSpec.getListenerHostName() +
-	//		   " port num " + fhSpec.getListenerPortNum());
 	sock = new Socket(fhSpec.getListenerHostName(), 
 			  fhSpec.getListenerPortNum());
     }
