@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<niagara:stream xmlns:niagara="http://www.cse.ogi.edu/dot/niagara/">
+<Suspects>
+<Suspect><Name>Bad Guy</Name><IP>12.250.178.44</IP></Suspect>
+<Suspect><Name>Max</Name><IP>12.228.114.114</IP></Suspect>
+<Suspect><Name>Royal Ugly Dude</Name><IP>142.179.95.181</IP></Suspect>
+<Suspect><Name>Kizer Sosay</Name><IP>205.188.199.163</IP></Suspect>
+<Suspect><Name>The Riddler</Name><IP>216.26.4.249</IP></Suspect>
+</Suspects>
+</niagara:stream>

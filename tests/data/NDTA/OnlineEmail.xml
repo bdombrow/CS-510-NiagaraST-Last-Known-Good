@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<niagara:stream xmlns:niagara="http://www.cse.ogi.edu/dot/niagara/">
+<Servers>
+<Server><Host>hotmail.com</Host></Server>
+<Server><Host>mail.yahoo.com</Host></Server>
+<Server><Host>webmail.aol.com</Host></Server>
+<Server><Host>lanmail.dreamscape.com</Host></Server>
+<Server><Host>gomailus.go.com</Host></Server>
+</Servers>
+</niagara:stream>
