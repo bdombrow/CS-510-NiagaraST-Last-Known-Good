@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: constructOp.java,v 1.3 2000/08/21 00:38:37 vpapad Exp $
+  $Id: constructOp.java,v 1.4 2000/08/21 04:07:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -75,6 +75,10 @@ public class constructOp extends unryOp {
 		resultTemplate = temp;
 		this.clear = clear;
 	}
+
+    public void setConstruct(constructBaseNode temp) {
+	setConstruct(temp, false);
+    }
 
     public boolean isClear() {
 	return clear;
