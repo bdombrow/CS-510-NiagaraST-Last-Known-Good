@@ -1,11 +1,11 @@
-/* $Id: PushProjection.java,v 1.2 2003/09/13 03:44:02 vpapad Exp $ */
+/* $Id: PushProjection.java,v 1.3 2003/12/24 01:51:55 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.Project;
+import niagara.logical.LogicalOperator;
 import niagara.optimizer.AnyLogicalOp;
 import niagara.optimizer.NoOp;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.op_tree.op;
 
 /** Push Project through a logical operator */
 public class PushProjection extends CustomRule {
@@ -26,7 +26,7 @@ public class PushProjection extends CustomRule {
         PhysicalProperty ReqdProp) {
         // xop is the logical operator beneath project
         Expr xexpr = before.getInput(0);
-        op xop = (op) xexpr.getOp();
+        LogicalOperator xop = (LogicalOperator) xexpr.getOp();
         int arity = xexpr.getArity();
 
         // Get the schemas of x's inputs

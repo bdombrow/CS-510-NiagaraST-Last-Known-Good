@@ -1,4 +1,4 @@
-/* $Id: AssociateJoinLtoR.java,v 1.2 2003/09/16 04:55:22 vpapad Exp $ */
+/* $Id: AssociateJoinLtoR.java,v 1.3 2003/12/24 01:51:56 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.Iterator;
 
 import niagara.optimizer.colombia.*;
 import niagara.logical.*;
-import niagara.xmlql_parser.op_tree.joinOp;
+import niagara.logical.predicates.*;
 
 /** Join associativity, left to right : (A x B) x C -> A x (B x C) */
 public class AssociateJoinLtoR extends CustomRule {
@@ -16,17 +16,17 @@ public class AssociateJoinLtoR extends CustomRule {
             name,
             3,
             new Expr(
-                new joinOp(),
+                new Join(),
                 new Expr(
-                    new joinOp(),
+                    new Join(),
                     new Expr(new LeafOp(0)),
                     new Expr(new LeafOp(1))),
                 new Expr(new LeafOp(2))),
             new Expr(
-                new joinOp(),
+                new Join(),
                 new Expr(new LeafOp(0)),
                 new Expr(
-                    new joinOp(),
+                    new Join(),
                     new Expr(new LeafOp(1)),
                     new Expr(new LeafOp(2)))));
     }
@@ -53,11 +53,11 @@ public class AssociateJoinLtoR extends CustomRule {
         // after:   BC is join 1, AxBC is join 2
 
         // from upper (second) join
-        joinOp op2 = (joinOp) before.getOp();
+        Join op2 = (Join) before.getOp();
         EquiJoinPredicateList preds2 = op2.getEquiJoinPredicates();
 
         // from lower (first) join
-        joinOp op1 = (joinOp) before.getInput(0).getOp();
+        Join op1 = (Join) before.getInput(0).getOp();
         EquiJoinPredicateList preds1 = op1.getEquiJoinPredicates();
 
         UpdateableEquiJoinPredicateList allPreds = preds1.updateableCopy();
@@ -124,10 +124,10 @@ public class AssociateJoinLtoR extends CustomRule {
         // extension join is only optimization issue, not correctness issue
         // anyway. In future, should examine catalogs to see if these
         // are extension joins
-        joinOp newOp1 = new joinOp(bcPred, newPreds1, joinOp.NONE);
+        Join newOp1 = new Join(bcPred, newPreds1, Join.NONE);
         Predicate abcPred =
             And.conjunction(split2.getRight(), op1.getNonEquiJoinPredicate());
-        joinOp newOp2 = new joinOp(abcPred, newPreds2, joinOp.NONE);
+        Join newOp2 = new Join(abcPred, newPreds2, Join.NONE);
 
         // Phew!
         return new Expr(

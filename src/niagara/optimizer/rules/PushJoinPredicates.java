@@ -1,13 +1,13 @@
-/* $Id: PushJoinPredicates.java,v 1.4 2003/09/13 03:44:02 vpapad Exp $ */
+/* $Id: PushJoinPredicates.java,v 1.5 2003/12/24 01:51:56 vpapad Exp $ */
 package niagara.optimizer.rules;
 
-import niagara.logical.And;
 import niagara.logical.EquiJoinPredicateList;
-import niagara.logical.Predicate;
-import niagara.logical.True;
+import niagara.logical.Join;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.op_tree.joinOp;
 import niagara.logical.Select;
+import niagara.logical.predicates.And;
+import niagara.logical.predicates.Predicate;
+import niagara.logical.predicates.True;
 
 /** Push as many of the non-equijoin predicates of a join operator
  * to its inputs */
@@ -17,13 +17,13 @@ public class PushJoinPredicates extends CustomRule {
             name,
             2,
             new Expr(
-                new joinOp(),
+                new Join(),
                 new Expr(new LeafOp(0)),
                 new Expr(new LeafOp(1))),
                 // This is not necessarily true, we may be able
                 // to push predicates down only to one of the leaves
             new Expr(
-                new joinOp(),
+                new Join(),
                 new Expr(new Select(),
                     new Expr(new LeafOp(0)),
                 new Expr(new Select(),
@@ -34,7 +34,7 @@ public class PushJoinPredicates extends CustomRule {
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {
-        joinOp j = (joinOp) before.getOp();
+        Join j = (Join) before.getOp();
         Expr leftLeaf = before.getInput(0);
         Expr rightLeaf = before.getInput(1);
         Attrs leftAttrs =
@@ -60,7 +60,7 @@ public class PushJoinPredicates extends CustomRule {
             right = new Expr(new Select(pushRight), right);
 
         EquiJoinPredicateList eq = j.getEquiJoinPredicates();
-        joinOp newJ = new joinOp(remJoin, eq, j.getProjectedAttrs(),
+        Join newJ = new Join(remJoin, eq, j.getProjectedAttrs(),
 				 j.getExtensionJoin());
         return new Expr(newJ, left, right);
     }
@@ -69,7 +69,7 @@ public class PushJoinPredicates extends CustomRule {
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {
-        joinOp j = (joinOp) before.getOp();
+        Join j = (Join) before.getOp();
         Expr leftLeaf = before.getInput(0);
         Expr rightLeaf = before.getInput(1);
         Attrs leftAttrs =

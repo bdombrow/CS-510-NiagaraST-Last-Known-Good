@@ -6,11 +6,13 @@ import java.util.*;
 
 import niagara.data_manager.DataManager;
 import niagara.data_manager.SourceThread;
+import niagara.logical.Resource;
+import niagara.logical.LogicalOperator;
 import niagara.optimizer.colombia.Expr;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.Op;
 import niagara.optimizer.colombia.PhysicalOp;
-import niagara.query_engine.PhysicalOperator;
+import niagara.physical.PhysicalOperator;
 import niagara.query_engine.PhysicalOperatorQueue;
 import niagara.query_engine.SchedulablePlan;
 import niagara.query_engine.SchemaProducer;
@@ -18,8 +20,6 @@ import niagara.query_engine.TupleSchema;
 import niagara.utils.PEException;
 import niagara.utils.SerializableToXML;
 import niagara.utils.SinkTupleStream;
-import niagara.xmlql_parser.op_tree.ResourceOp;
-import niagara.xmlql_parser.op_tree.op;
 
 public class Plan implements SchedulablePlan {
     private Op operator;
@@ -37,8 +37,8 @@ public class Plan implements SchedulablePlan {
         this.operator = operator;
         this.inputs = new Plan[] {
         };
-        if (operator instanceof op) 
-            isSchedulable = ((op) operator).isSchedulable();
+        if (operator instanceof LogicalOperator) 
+            isSchedulable = ((LogicalOperator) operator).isSchedulable();
         else
             isSchedulable = true;
     }
@@ -73,7 +73,7 @@ public class Plan implements SchedulablePlan {
         inputs = new Plan[expr.getArity()];
         if (operator.isPhysical())
             setCost(expr.getCost(catalog).getValue());
-        isSchedulable = (! (operator instanceof ResourceOp));
+        isSchedulable = (! (operator instanceof Resource));
         for (int i = 0; i < inputs.length; i++) {
             Expr e = expr.getInput(i);
             if (hm.containsKey(e))
@@ -101,8 +101,8 @@ public class Plan implements SchedulablePlan {
         return e;
     }
     
-    public ResourceOp getResource() {
-        return (ResourceOp) operator;
+    public Resource getResource() {
+        return (Resource) operator;
     }
     
     public Op getOperator() {
@@ -323,7 +323,7 @@ public class Plan implements SchedulablePlan {
         if (visited.contains(this))
             return;
         visited.add(this);
-        if (operator instanceof ResourceOp)
+        if (operator instanceof Resource)
             resources.add(this);
         else if (isSchedulable && lookingForRoot) {
             roots.add(this);

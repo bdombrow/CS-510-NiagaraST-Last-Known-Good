@@ -3,9 +3,9 @@ package niagara.optimizer.rules;
 
 //import niagara.logical.EquiJoinPredicateList;
 import niagara.logical.EquiJoinPredicateList;
-import niagara.logical.Predicate;
+import niagara.logical.Join;
+import niagara.logical.predicates.Predicate;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.op_tree.joinOp;
 
 /** Commute a remote subplan on the left ith a local subplan on the right */
 public class CommuteJoin extends CustomRule {
@@ -15,11 +15,11 @@ public class CommuteJoin extends CustomRule {
             name,
             2,
             new Expr(
-                new joinOp(),
+                new Join(),
                 new Expr(new LeafOp(0)),
                 new Expr(new LeafOp(1))),
             new Expr(
-                new joinOp(),
+                new Join(),
                 new Expr(new LeafOp(1)),
                 new Expr(new LeafOp(0))));
     }
@@ -28,28 +28,28 @@ public class CommuteJoin extends CustomRule {
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {
-        joinOp op = (joinOp) before.getOp();
+        Join op = (Join) before.getOp();
         EquiJoinPredicateList eqPreds = op.getEquiJoinPredicates().reversed();
         Predicate pred = op.getNonEquiJoinPredicate();
 
-	int newExtJoin = joinOp.NONE;
+	int newExtJoin = Join.NONE;
 	switch(op.getExtensionJoin()) {
-	case joinOp.LEFT:
-	    newExtJoin = joinOp.RIGHT;
+	case Join.LEFT:
+	    newExtJoin = Join.RIGHT;
 	    break;
-	case joinOp.RIGHT:
-	    newExtJoin = joinOp.LEFT;
+	case Join.RIGHT:
+	    newExtJoin = Join.LEFT;
 	    break;
-	case joinOp.NONE:
-	    newExtJoin = joinOp.NONE;
+	case Join.NONE:
+	    newExtJoin = Join.NONE;
 	    break;
-	case joinOp.BOTH:
-	    newExtJoin = joinOp.BOTH;
+	case Join.BOTH:
+	    newExtJoin = Join.BOTH;
 	    break;
 	}
 
         return new Expr(
-            new joinOp(pred, eqPreds, newExtJoin),
+            new Join(pred, eqPreds, newExtJoin),
             new Expr((before.getInput(1))),
             new Expr((before.getInput(0))));
     }

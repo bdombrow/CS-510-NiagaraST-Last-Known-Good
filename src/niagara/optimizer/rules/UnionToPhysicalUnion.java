@@ -1,9 +1,9 @@
-/* $Id: UnionToPhysicalUnion.java,v 1.3 2003/09/13 03:44:02 vpapad Exp $ */
+/* $Id: UnionToPhysicalUnion.java,v 1.4 2003/12/24 01:51:56 vpapad Exp $ */
 package niagara.optimizer.rules;
 
+import niagara.logical.Union;
 import niagara.optimizer.colombia.*;
-import niagara.query_engine.PhysicalUnionOperator;
-import niagara.xmlql_parser.op_tree.UnionOp;
+import niagara.physical.PhysicalUnion;
 
 /** Union To PhysicalUnion implementation rule */
 public class UnionToPhysicalUnion extends CustomRule {
@@ -13,12 +13,12 @@ public class UnionToPhysicalUnion extends CustomRule {
         super(
             name,
             0,
-            new Expr(new UnionOp()) {
+            new Expr(new Union()) {
                 public Expr getInput(int i) {
                     return new Expr(new LeafOp(i));
                 }
             },
-            new Expr(new PhysicalUnionOperator()));
+            new Expr(new PhysicalUnion()));
     }
     
     public Expr nextSubstitute(
@@ -28,7 +28,7 @@ public class UnionToPhysicalUnion extends CustomRule {
             Expr[] inputs = new Expr[before.getArity()];
             for (int i = 0; i < inputs.length; i++)
                 inputs[i] = before.getInput(i);
-                PhysicalUnionOperator op = new PhysicalUnionOperator();
+                PhysicalUnion op = new PhysicalUnion();
                 op.initFrom((LogicalOp) before.getOp());
         return new Expr(op, inputs);
     }

@@ -1,10 +1,10 @@
-/* $Id: SelectIntoJoin.java,v 1.3 2003/09/13 03:44:02 vpapad Exp $ */
+/* $Id: SelectIntoJoin.java,v 1.4 2003/12/24 01:51:56 vpapad Exp $ */
 package niagara.optimizer.rules;
 
-import niagara.logical.Predicate;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.op_tree.joinOp;
 import niagara.logical.Select;
+import niagara.logical.Join;
+import niagara.logical.predicates.Predicate;
 
 public class SelectIntoJoin extends CustomRule {
     public SelectIntoJoin(String name) {
@@ -14,11 +14,11 @@ public class SelectIntoJoin extends CustomRule {
             new Expr(
                 new Select(),
                 new Expr(
-                    new joinOp(),
+                    new Join(),
                     new Expr(new LeafOp(0)),
                     new Expr(new LeafOp(1)))),
             new Expr(
-                new joinOp(),
+                new Join(),
                 new Expr(new LeafOp(0)),
                 new Expr(new LeafOp(1))));
     }
@@ -34,11 +34,11 @@ public class SelectIntoJoin extends CustomRule {
         Expr joinExpr = before.getInput(0);
         Expr leftLeaf = joinExpr.getInput(0);
         Expr rightLeaf = joinExpr.getInput(1);
-        joinOp oldJ = (joinOp) joinExpr.getOp();
+        Join oldJ = (Join) joinExpr.getOp();
         Attrs leftAttrs = ((LeafOp) leftLeaf.getOp()).getGroup().getLogProp().getAttrs();
         Attrs rightAttrs = ((LeafOp) rightLeaf.getOp()).getGroup().getLogProp().getAttrs();
         
-        joinOp newJ = oldJ.withExtraCondition(sPred, leftAttrs, rightAttrs);
+        Join newJ = oldJ.withExtraCondition(sPred, leftAttrs, rightAttrs);
         
         return new Expr(
             newJ,

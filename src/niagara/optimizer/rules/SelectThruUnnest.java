@@ -1,12 +1,12 @@
-/* $Id: SelectThruUnnest.java,v 1.3 2003/09/13 03:44:02 vpapad Exp $ */
+/* $Id: SelectThruUnnest.java,v 1.4 2003/12/24 01:51:56 vpapad Exp $ */
 package niagara.optimizer.rules;
 
-import niagara.logical.And;
-import niagara.logical.Predicate;
-import niagara.logical.True;
 import niagara.logical.Unnest;
 import niagara.optimizer.colombia.*;
 import niagara.logical.Select;
+import niagara.logical.predicates.And;
+import niagara.logical.predicates.Predicate;
+import niagara.logical.predicates.True;
 
 /** Push parts of a predicate thru unnest */
 public class SelectThruUnnest extends CustomRule {

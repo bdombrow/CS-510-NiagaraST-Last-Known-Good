@@ -1,4 +1,4 @@
-/* $Id: Exchange.java,v 1.2 2003/09/16 04:55:22 vpapad Exp $ */
+/* $Id: Exchange.java,v 1.3 2003/12/24 01:51:56 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.Iterator;
 
 import niagara.optimizer.colombia.*;
 import niagara.logical.*;
-import niagara.xmlql_parser.op_tree.joinOp;
+import niagara.logical.predicates.*;
 
 /** The Exchange rule: (A x B) x (C x D) -> (A x C) x  (B x D) */
 public class Exchange extends CustomRule {
@@ -16,23 +16,23 @@ public class Exchange extends CustomRule {
             name,
             4,
             new Expr(
-                new joinOp(),
+                new Join(),
                 new Expr(
-                    new joinOp(),
+                    new Join(),
                     new Expr(new LeafOp(0)),
                     new Expr(new LeafOp(1))),
                 new Expr(
-                    new joinOp(),
+                    new Join(),
                     new Expr(new LeafOp(2)),
                     new Expr(new LeafOp(3)))),
             new Expr(
-                new joinOp(),
+                new Join(),
                 new Expr(
-                    new joinOp(),
+                    new Join(),
                     new Expr(new LeafOp(0)),
                     new Expr(new LeafOp(2))),
                 new Expr(
-                    new joinOp(),
+                    new Join(),
                     new Expr(new LeafOp(1)),
                     new Expr(new LeafOp(3)))));
     }
@@ -55,11 +55,11 @@ public class Exchange extends CustomRule {
         Attrs dAttrs = B.getGroup().getLogProp().getAttrs();
 
         // Old join operators and predicates
-        joinOp abcdJoin = (joinOp) before.getOp();
+        Join abcdJoin = (Join) before.getOp();
         EquiJoinPredicateList abcdPreds = abcdJoin.getEquiJoinPredicates();
-        joinOp abJoin = (joinOp) before.getInput(0).getOp();
+        Join abJoin = (Join) before.getInput(0).getOp();
         EquiJoinPredicateList abPreds = abJoin.getEquiJoinPredicates();
-        joinOp cdJoin = (joinOp) before.getInput(1).getOp();
+        Join cdJoin = (Join) before.getInput(1).getOp();
         EquiJoinPredicateList cdPreds = cdJoin.getEquiJoinPredicates();
 
         // New predicates
@@ -154,9 +154,9 @@ public class Exchange extends CustomRule {
         // extension join is only optimization issue, not correctness issue
         // anyway. In future, should examine catalogs to see if these
         // are extension joins
-        joinOp acJoin = new joinOp(acPred, acPreds, joinOp.NONE);
-        joinOp bdJoin = new joinOp(bdPred, bdPreds, joinOp.NONE);
-        joinOp acbdJoin = new joinOp(acbdPred, acbdPreds, joinOp.NONE);
+        Join acJoin = new Join(acPred, acPreds, Join.NONE);
+        Join bdJoin = new Join(bdPred, bdPreds, Join.NONE);
+        Join acbdJoin = new Join(acbdPred, acbdPreds, Join.NONE);
 
         return new Expr(
             acbdJoin,
