@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.13 2003/03/05 19:27:05 tufte Exp $
+  $Id: QueryResult.java,v 1.14 2003/03/05 19:28:30 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,10 +44,6 @@ import niagara.connection_server.NiagraServer;
 
 public class QueryResult {
 
-    /////////////////////////////////////////////////////////////
-    // These are exceptions thrown by members of this class    //
-    /////////////////////////////////////////////////////////////
-
     /**
      * This exception is thrown when an attempt is made to get a partial
      * result when a request is already pending
@@ -57,51 +53,6 @@ public class QueryResult {
 
     }
 
-
-    /////////////////////////////////////////////////////////////
-    // These are public static variables of this class         //
-    /////////////////////////////////////////////////////////////
-
-    /**
-     * This return code implies that all the results have been returned
-     */
-    // public static final int EndOfResult = 0; // EOS
-
-    /**
-     * This return code implies that all partial result have been returned
-     */
-    //public static final int EndOfPartialResult = 1; //END_PARTIAL
-
-    /**
-     * This return code implies that there was an error in executing
-     * the query
-     */
-    //public static final int QueryError = 2;
-
-    /**
-     * This return code implies that the query is non-blocking
-     */
-    // public static final int NonBlockingResult = 3; //SYNCH_PARTIAL
-
-    /**
-     * This return code implies the presence of a partial result
-     */
-    //public static final int PartialQueryResult = 4;
-
-    /**
-     * This return code implies the presence of a final result
-     */
-    //public static final int FinalQueryResult = 5;
-
-    /**
-     * This return code implies that a call timed out
-     */
-    //public static final int TimedOut = 6;
-
-
-    ///////////////////////////////////////////////////////////////////
-    // These are public nested classes                               //
-    ///////////////////////////////////////////////////////////////////
 
     /**
      * This is a class for returning result to the user
