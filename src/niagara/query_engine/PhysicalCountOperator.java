@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.8 2002/10/24 03:05:56 vpapad Exp $
+  $Id: PhysicalCountOperator.java,v 1.9 2002/10/24 03:11:58 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,7 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
+import niagara.optimizer.colombia.LogicalOp;
 
 /**
  * This is the <code>PhysicalCountOperator</code> that extends the
