@@ -1,4 +1,4 @@
-// $Id: FirehoseScanOp.java,v 1.8 2002/12/10 00:51:53 vpapad Exp $
+// $Id: FirehoseScanOp.java,v 1.9 2003/02/07 08:57:34 vpapad Exp $
 
 package niagara.xmlql_parser.op_tree;
 
@@ -63,8 +63,8 @@ public class FirehoseScanOp extends StreamOp {
     }
 
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof FileScanOp)) return false;
-        if (obj.getClass() != FileScanOp.class) return obj.equals(this);
+        if (obj == null || !(obj instanceof FirehoseScanOp)) return false;
+        if (obj.getClass() != FirehoseScanOp.class) return obj.equals(this);
         FirehoseScanOp other = (FirehoseScanOp) obj;
         return streamSpec.equals(other.streamSpec) && variable.equals(other.variable);
     }
