@@ -1,4 +1,4 @@
-/* $Id: Project.java,v 1.7 2003/07/09 04:59:41 tufte Exp $ */
+/* $Id: Project.java,v 1.8 2003/09/13 03:54:02 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.optimizer.colombia.Attribute;
@@ -40,7 +40,7 @@ public class Project extends unryOp {
      */
     public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
         LogicalProperty inputLogProp = input[0];
-        assert inputLogProp.Contains(attrs) : "Cannot project on invisible attributes";
+        assert inputLogProp.contains(attrs) : "Cannot project on invisible attributes";
         LogicalProperty result = inputLogProp.copy();        
         Attrs oldAttrs = result.getAttrs();
         // Maintain order of input tuple for projected attributes

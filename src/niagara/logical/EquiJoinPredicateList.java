@@ -1,4 +1,4 @@
-/* $Id: EquiJoinPredicateList.java,v 1.2 2002/12/10 01:21:22 vpapad Exp $ */
+/* $Id: EquiJoinPredicateList.java,v 1.3 2003/09/13 03:52:11 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.*;
@@ -13,7 +13,7 @@ public class EquiJoinPredicateList {
     ArrayList left;
     ArrayList right;
 
-    // No equijoin predicates
+    /** Constructor with no equijoin predicates */
     public EquiJoinPredicateList() {
         this.left = new ArrayList();
         this.right = new ArrayList();
@@ -65,6 +65,10 @@ public class EquiJoinPredicateList {
 
     public int size() {
         return left.size();
+    }
+    
+    public boolean isEmpty() {
+        return size() == 0;
     }
 
     /** Attributes on the left hand side of the equality predicates */
