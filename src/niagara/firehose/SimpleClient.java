@@ -49,7 +49,8 @@ class ClientMain {
     int numTLElts = 1;
     boolean streaming = true;
     boolean prettyPrint = false;
-    String trace; 
+    int rate = 0;
+    String trace = ""; 
     boolean quiet = false;
     boolean shutdown = false;
 
@@ -124,7 +125,7 @@ class ClientMain {
 	    
 	    //get num top level elts
 	    if ((idx+1) < args.length && args[idx].compareTo("-tl") == 0) {
-		if(stype != FirehoseConstants.XMLB || 
+		if(stype != FirehoseConstants.XMLB && 
 		   stype != FirehoseConstants.AUCTION) {
 		    System.err.println("Warning -tl numTopLevelElts will be ignored");
 		}
@@ -162,11 +163,19 @@ class ClientMain {
 		idx++;
 		ok = true;
 	    }
+    
+            //get rate
+            if ((idx+1) < args.length && args[idx].equals("-r")) {
+                temp = new Integer(args[idx+1]);
+                rate = temp.intValue();
+                idx += 2;
+                ok = true;
+            }
 
             // get trace
 	    if(idx < args.length && args[idx].compareTo("-tr") == 0) {
                trace = args[idx+1];
-	       idx++;
+	       idx += 2;
 	       ok = true;
 	    }
 	    
@@ -184,7 +193,7 @@ class ClientMain {
       stUsage.append(" [-h host_name] [-ng numGenCalls]");
       stUsage.append(" [-tl numTopLevelElts] [-cw client_wait]");
       stUsage.append(" [-ns ] (no streaming) [-q] (quiet)");
-      stUsage.append(" [-pp ] (prettyprint) [-tr] (trace) [-shutdown]");
+      stUsage.append(" [-pp ] (prettyprint) [-r rate] [-tr trace_filename] (trace) [-shutdown]");
       System.out.println(stUsage.toString());
     }
 
@@ -204,8 +213,8 @@ class ClientMain {
       FirehoseSpec fhSpec = new FirehoseSpec(port_num, host_name,
 					     stype, stream_descriptor,
 					     stream_descriptor2,
-					     1, 1,
-					     1, streaming, prettyPrint,
+					     numGenCalls, numTLElts,
+					     rate, streaming, prettyPrint,
 					     trace);
 
       InputStream is = fhclient.open_stream(fhSpec);

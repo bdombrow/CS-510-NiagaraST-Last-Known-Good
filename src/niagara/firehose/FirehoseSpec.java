@@ -64,7 +64,6 @@ public class FirehoseSpec extends StreamSpec {
 	this.streaming = streaming;
 	this.prettyPrint = prettyPrint;
 	this.trace = trace;
-	return;
     }
 
     public FirehoseSpec() {
