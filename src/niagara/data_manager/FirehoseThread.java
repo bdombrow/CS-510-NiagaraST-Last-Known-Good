@@ -50,6 +50,8 @@ public class FirehoseThread implements Runnable {
 	int err = fhClient.open_stream(spec.getRate(), spec.getType(),
 			     spec.getDescriptor(), spec.getIters());
 	while(err == 0 && messageEOF == false && streamShutdown == false) {
+	    System.out.println("XXX In the loop");
+
 	    err = fhClient.get_data();
 	    if(err == 0) {
 		messageEOF = fhClient.get_eof();
@@ -60,7 +62,10 @@ public class FirehoseThread implements Runnable {
 		     * the stream gets a shutdown message (from
 		     * an operator above
 		     */
-		    streamShutdown = processMessageBuffer();
+		    streamShutdown = ! processMessageBuffer();
+		    System.out.println("XXX after processMessageBuffer");
+		    System.out.println("XXX err is: " + err);
+		    System.out.println("XXX stream shutdown is: " + streamShutdown);
 		}
 	    }
 	}
@@ -99,6 +104,7 @@ public class FirehoseThread implements Runnable {
 	if(succeed == false) {
 	    /* means we got a shutdown message from the operator above */
 	    close_firehose_stream();
+	    System.out.println("XXX shutdown message from the operator above");
 	}
 	return succeed;
     }
@@ -119,6 +125,17 @@ public class FirehoseThread implements Runnable {
 	 * terminating the buffer and seing if that works
 	 * Note: messageBuffer may be longer than actual message 
 	 */
+
+	System.out.println("DEBUG: " + messageBuffer);
+	int i1 = messageBuffer.indexOf("SYSTEM \"\"");
+	if (i1 !=  -1) {
+	    messageBuffer = messageBuffer.substring(0, i1) + 
+		"SYSTEM \"http://www.cse.ogi.edu/~vpapad/xml/play.dtd\"" +
+		messageBuffer.substring(i1 + "SYSTEM \"\"".length());
+	}
+
+  	if (messageBuffer.indexOf(0) != -1)
+  	    messageBuffer = messageBuffer.substring(0, messageBuffer.indexOf(0));	
 	TXDocument doc = parser.readStream(new StringReader(messageBuffer));
 
 	/* get rid of the parser instance */
@@ -132,6 +149,8 @@ public class FirehoseThread implements Runnable {
      */
     private void close_firehose_stream() {
 	// this is the best we can do for now
+	System.out.println("XXX close_firehose_stream requested");
+
 	fhClient.request_stream_close();
 	return;
     }
