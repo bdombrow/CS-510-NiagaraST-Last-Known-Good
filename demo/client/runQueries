@@ -1,0 +1,230 @@
+#!/usr/bin/perl -w
+
+read_args(@ARGV);
+
+# we only create a result file if we are doing more than
+# one run
+if($numruns > 1 || @queries > 1 || @dsizes > 1) {
+   $make_result_file = "true";
+   $runserver = "true";
+} 
+
+if($make_result_file) {
+    $resdate = `date`;
+    chomp($resdate);
+    $resdate =~ s/ /_/g;
+    $resdate =~ s/__/_/g;
+
+    # this is the default result name - but use comment if we have it
+    $resfn = "results/$resdate.dat";
+    if($comment) {
+        @datesplit = split(/_/, $resdate);
+        $month = $datesplit[1];
+	$date = $datesplit[2];
+	$year = $datesplit[5];
+        $commentfn = "results/$month\_$date\_$year\_$comment.dat";
+        if(! (-e $commentfn)) {
+            $resfn = $commentfn;
+	}
+    }
+
+    print "Result File:  $resfn \n";
+    open(RESULTDATA, ">$resfn") || 
+          die "Unable to open result data file $resfn\n";
+    print RESULTDATA "$resdate   $comment   $runservercommand\n";
+}
+
+for($i=0; $i<$numqueries; $i++) {
+    for($j=0; $j<$numdsizes; $j++) {
+	run_query_config($queries[$i], $dsizes[$j], $numruns);
+    }
+}
+
+if($make_result_file) {
+    close(RESULTDATA);
+    print "Result are in: $resfn \n";
+}
+
+
+sub run_query_config {
+    ($qtn, $dsize, $numruns) = @_;
+
+    print "RUN CONNFIG templ:$qtn datasz:$dsize runs:$numruns \n";
+
+    # get the template file name
+    if(!$query_file) {
+        $qftn = $qtn . ".xqp";
+        open(QFT, $qftn) 
+            || die "Unable to open query template file $qftn";
+
+        $tqfn = "tempquery.xqp";
+        if(-e $tqfn) {
+	    system "/bin/rm", $tqfn || die "Unable to remove file $tqfn";
+        }
+        open(TQF, ">$tqfn") || die "Unable to open temporary query file $tqfn";
+
+        # substitute the datasize into the filename 
+        while(<QFT>) {
+           if(/DATASZ/) {
+               s/DATASZ/$dsize/g;
+           }
+           print TQF;
+        }
+
+        close(QFT);
+        close(TQF);
+    } else {
+        $tqfn = $qtn;
+    }
+
+    if($runserver) {
+        $serverpid = fork();
+	if($serverpid == 0) {
+	   print "Starting server\n";
+           $ischild = "true";
+	   chdir "../niagara_server";
+	   exec("$runservercommand -quiet -disable-buf-flush"); 
+	} else {
+             #sleep to let the server get running
+	     sleep(15);
+	}
+    }
+
+    if($make_result_file) {
+        print RESULTDATA "--------------------------------------\n";
+        print RESULTDATA "$qtn $dsize \n";
+    }
+
+    @times = 0;
+    $numignore = 3;
+    for($k = 1; $k<=$numruns; $k++) {
+        print "Running $qtn  $dsize  Run $k \n";
+        open(RES, "runSimple -qf $tqfn $serverargs 2>&1 |");
+	while(<RES>) {
+	    if($make_result_file && /Total time:/) {
+		$totaltime = (split(/:/))[1];
+		print RESULTDATA "   $k   $totaltime";
+		if($k > $numignore) {
+		  $times[$k-$numignore-1] = (split(/ /, $totaltime))[1];
+  	        } 
+            } 
+	    if (!$make_result_file || $verbose) {
+	        print;
+            }
+	} # end while
+	close(RES);
+	#`runSimple -qf gc.xqp`;
+   } # end for
+
+    # shutdown the server
+    if($runserver && !$ischild) {
+        #shutdown server
+        print "Shutting down server\n";
+        `runSimple -qf utilqueries/shutdown.xqp`;
+        #make sure server shuts down
+        sleep(5);
+    }
+
+    # calcuate std dev and average if I have at least two
+    # "valid" runs to use in the calcuation
+    if($numruns > ($numignore+1)) {
+       avg_stdev(@times);
+    }
+
+    if($make_result_file) { 
+        print RESULTDATA "--------------------------------------\n\n";
+    }
+}
+
+sub read_args {
+    
+    if(@ARGV == 0) {
+	$invalid = "true";
+    }
+
+    #defaults
+    $numruns = "1";
+    $comment = "";
+    $runservercommand = "runServer";
+    $serverargs = "";
+
+    $option = shift;
+    while(!$invalid && $option) {
+	if($option eq "-runs") {
+	    $numruns = shift;
+	} elsif ($option eq "-qf") {
+            $found_queries = "true";
+	    $query_file = "true"; 
+            $values = shift;
+            @queries = ($values);
+	    $numqueries = 1;
+	} elsif ($option eq "-qt") {
+	    $found_queries = "true";
+	    $values = shift;
+	    @queries = split(/:/,$values);
+	    $numqueries = @queries;
+        } elsif ($option eq "-datasizes") {
+	    $found_dsize = "true";
+	    $values = shift;
+	    @dsizes = split(/:/,$values);
+	    $numdsizes = @dsizes;
+	} elsif ($option eq "-verbose") {
+	    $verbose = "true";
+	} elsif ($option eq "-comment") {
+            $comment = shift;
+	} elsif ($option eq "-jvm") {
+            $jvm = shift;
+	    if($jvm eq "ibm") {
+                $runservercommand = "runIBM";
+	    } elsif ($jvm eq "sun") {
+                $runservercommand = "runServer";
+	    } else {
+	       die "Invalid jvm $jvm. Only ibm and sun are valid.\n";
+	    }
+	} elsif ($option eq "-sa") {
+	   # server args
+	   $serverargs = shift;
+	} else{
+            $invalid = "true";
+	}
+	$option = shift;
+    }
+    
+    if($query_file && $found_dsize) {
+         die "Datasize invalid if using query file, datasize only works with template\n";
+	 exit;
+    }
+
+    if(!$found_dsize) {
+       @dsizes = ("XS");
+       $numdsizes = 1;
+    }
+
+    if($invalid || !$found_queries) {
+	die "Usage runQueries -qf queryfile | -qt querytempl[:querytempl...] [-datasizes dsize[:dsize...]] [-runs numruns] [-comment comment] [-jvm ibm|sun]\n";
+    }
+}
+
+sub avg_stdev {
+    @input = @_;
+    $avg = 0;
+   
+    $total = 0;
+    foreach $t (@input) {
+       $total += $t; 
+    }
+    
+    $cnt = @input;
+    $avg = $total/$cnt;
+    printf RESULTDATA "%s %d %s %.2f\n", "Average of last", $cnt, "runs:", $avg;
+
+    #std dev, sum square of differences, divide by N, take square root
+    $var = 0;
+    foreach $t (@input) {
+        $var += ($t - $avg)**2;
+    }
+    $var = $var/($cnt-1); # unbiased??
+    $stdev = sqrt($var);
+    printf RESULTDATA "%s %d %s %.2f\n", "Std dev of last", $cnt, "runs:", $stdev;
+
+}
