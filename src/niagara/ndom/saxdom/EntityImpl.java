@@ -1,5 +1,5 @@
 /**
- * $Id: EntityImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
+ * $Id: EntityImpl.java,v 1.3 2004/02/10 03:34:29 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -7,6 +7,8 @@
  */
 
 package niagara.ndom.saxdom;
+
+import niagara.utils.PEException;
 
 import org.w3c.dom.*;
 
@@ -37,4 +39,15 @@ public class EntityImpl extends NodeImpl implements Entity {
         return BufferManager.getNotationName(index);
     }
 
+    public String getInputEncoding() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String getXmlEncoding() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String getXmlVersion() {
+        throw new PEException("Not implemented yet");
+    }
 }

@@ -1,5 +1,5 @@
 /**
- * $Id: TextImpl.java,v 1.3 2002/04/06 02:15:08 vpapad Exp $
+ * $Id: TextImpl.java,v 1.4 2004/02/10 03:34:30 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -7,6 +7,8 @@
  */
 
 package niagara.ndom.saxdom;
+
+import niagara.utils.PEException;
 
 import org.w3c.dom.*;
 
@@ -29,4 +31,15 @@ public class TextImpl  extends CharacterDataImpl implements Text {
     }
 
 
+    public String getWholeText() {
+        throw new PEException("Not implemented yet");    
+    }
+
+    public boolean isElementContentWhitespace() {
+        throw new PEException("Not implemented yet");    
+    }
+
+    public Text replaceWholeText(String content) throws DOMException {
+        throw new PEException("Not implemented yet");    
+    }
 }

@@ -1,5 +1,5 @@
 /**
- * $Id: DocumentImpl.java,v 1.7 2002/05/02 22:04:56 vpapad Exp $
+ * $Id: DocumentImpl.java,v 1.8 2004/02/10 03:34:29 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -8,7 +8,10 @@
 
 package niagara.ndom.saxdom;
 
+import niagara.utils.PEException;
+
 import org.w3c.dom.*;
+
 import java.lang.ref.Reference;
 
 public class DocumentImpl extends NodeImpl implements Document {
@@ -20,6 +23,8 @@ public class DocumentImpl extends NodeImpl implements Document {
      */
     private Reference ref;
 
+    private int pins;
+    
     public DocumentImpl(Page firstPage, int index) {
         super(null, index);
 
@@ -27,6 +32,7 @@ public class DocumentImpl extends NodeImpl implements Document {
 
         firstPage.pin();
         ref = BufferManager.registerFirstPage(this, firstPage);
+        pins = 1;
     }
 
     public short getNodeType() {
@@ -42,6 +48,16 @@ public class DocumentImpl extends NodeImpl implements Document {
         BufferManager.registerLastPage(ref, page);
     }
 
+    public void pin() {
+        pins++;
+    }
+    
+    public void unpin() {
+        pins--;
+        if (pins == 0)
+            BufferManager.free(ref);
+    }
+    
     // We don't support DTDs yet.
     public DocumentType getDoctype() {
         return null;
@@ -111,7 +127,7 @@ public class DocumentImpl extends NodeImpl implements Document {
 
     // At last, something we CAN do!
     public NodeList getElementsByTagName(String tagname) {
-        return BufferManager.getElementsByTagName(index, tagname);
+        return BufferManager.getElementsByTagName(this, index, tagname);
     }
 
     // The specification does not allow a NO_MODIFICATION_ALLOWED exception
@@ -151,4 +167,48 @@ public class DocumentImpl extends NodeImpl implements Document {
     }
     
 
+    public String getDocumentURI() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public DOMConfiguration getDomConfig() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String getInputEncoding() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String getXmlEncoding() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public boolean getXmlStandalone() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String getXmlVersion() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void normalizeDocument() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public Node renameNode(Node n, String namespaceURI, String qualifiedName)
+        throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setDocumentURI(String documentURI) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setXmlStandalone(boolean xmlStandalone) throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setXmlVersion(String xmlVersion) throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
 }

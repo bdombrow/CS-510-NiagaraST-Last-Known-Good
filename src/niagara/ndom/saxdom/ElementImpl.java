@@ -1,5 +1,5 @@
 /**
- * $Id: ElementImpl.java,v 1.7 2002/09/25 19:54:18 vpapad Exp $
+ * $Id: ElementImpl.java,v 1.8 2004/02/10 03:34:29 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -7,6 +7,8 @@
  */
 
 package niagara.ndom.saxdom;
+
+import niagara.utils.PEException;
 
 import org.w3c.dom.*;
 
@@ -64,7 +66,7 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     public NodeList getElementsByTagName(String name) {
-        return BufferManager.getElementsByTagName(index, name);
+        return BufferManager.getElementsByTagName(doc, index, name);
     }
 
     public String getAttributeNS(String namespaceURI, String localName) {
@@ -109,4 +111,24 @@ public class ElementImpl extends NodeImpl implements Element {
         return BufferManager.hasAttributeNS(index, namespaceURI, localName);
     }
 
+    public TypeInfo getSchemaTypeInfo() {
+        throw new PEException("Not implemented yet");    
+    }
+
+    public void setIdAttribute(String name, boolean isId) throws DOMException {
+        throw new PEException("Not implemented yet");    
+    }
+
+    public void setIdAttributeNode(Attr idAttr, boolean isId)
+        throws DOMException {
+        throw new PEException("Not implemented yet");    
+    }
+
+    public void setIdAttributeNS(
+        String namespaceURI,
+        String localName,
+        boolean isId)
+        throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
 }

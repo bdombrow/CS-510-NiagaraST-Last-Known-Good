@@ -1,4 +1,4 @@
-/* $Id: SAXDOMReader.java,v 1.1 2003/12/24 01:59:51 vpapad Exp $ */
+/* $Id: SAXDOMReader.java,v 1.2 2004/02/10 03:34:30 vpapad Exp $ */
 package niagara.ndom.saxdom;
 
 import java.io.FileInputStream;
@@ -144,7 +144,7 @@ public class SAXDOMReader extends SAXDOMIO {
     private void setPage(Page page) {
         // Unpin previous page, if any
         if (this.page != null)
-            this.page.unpin(1);
+            this.page.unpin();
 
         this.page = page;
 

@@ -1,5 +1,5 @@
 /**
- * $Id: AttrImpl.java,v 1.5 2002/11/01 01:56:20 vpapad Exp $
+ * $Id: AttrImpl.java,v 1.6 2004/02/10 03:34:29 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -7,6 +7,8 @@
  */
 
 package niagara.ndom.saxdom;
+
+import niagara.utils.PEException;
 
 import org.w3c.dom.*;
 
@@ -62,5 +64,13 @@ public class AttrImpl extends NodeImpl implements Attr {
     
     public NodeList getChildNodes() {
         return BufferManager.fakeGetChildNodes(doc, index);
+    }
+    
+    public TypeInfo getSchemaTypeInfo() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public boolean isId() {
+        throw new PEException("Not implemented yet");
     }
 }

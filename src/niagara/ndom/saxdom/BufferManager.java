@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.21 2003/12/24 01:59:51 vpapad Exp $
+ * $Id: BufferManager.java,v 1.22 2004/02/10 03:34:29 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -47,15 +47,6 @@ public class BufferManager {
      * memory exception */
     private static final int timeout = 1000;
 
-    /** The page reclaimer thread will wait for <code>reclaimerTimeout</code>
-     *  milliseconds for newly freed documents to appear before it performs
-     *  a batch of unpinnings */
-    private static final int reclaimerTimeout = 50;
-
-    /** If the usedDocuments queue is not empty, the page reclaimer 
-     *  thread will batch up to <code>unpinBatchSize</code> unpin operations*/
-    private static final int unpinBatchSize = 100;
-
     // No public constructor, BufferManager is a singleton
     private BufferManager(int size, int page_size) {
         pages = new Page[size];
@@ -89,7 +80,13 @@ public class BufferManager {
     }
 
     public static void addFreePage(Page page) {
-        free_pages.push(page);
+        synchronized (free_pages) {
+            boolean wasEmpty = free_pages.empty();
+            free_pages.push(page);
+            // Since we're adding just one page, we only notify one consumer
+            if (wasEmpty)
+                free_pages.notify();
+        }
     }
 
     public static Reference registerFirstPage(DocumentImpl d, Page page) {
@@ -108,83 +105,56 @@ public class BufferManager {
     }
 
     class PageReclaimer extends Thread {
-        private int[] page_unpins = new int[pages.length];
-
         public void run() {
             while (true) {
-                int unpins = 0;
-
-                while (unpins < unpinBatchSize) {
-                    Reference r;
-                    try {
-                        r = usedDocuments.remove(reclaimerTimeout);
-                    } catch (InterruptedException e) {
-                        continue;
-                    }
-
-                    if (r == null)
-                        if (unpins > 0)
-                            break;
-                        else
-                            continue;
-
-                    Page first, last;
-                    synchronized (pages) {
-                        first = (Page) firstPageRegistry.remove(r);
-                        last = (Page) lastPageRegistry.remove(r);
-                                                
-                    }
-
-                    Page page = first;                    
-                    do {
-                        unpins++;
-                        page_unpins[page.getNumber()]++;
-
-                        if (page == last)                        
-                            break;
-
-                        page = page.getNext();
-                    } while (page != null);
-                }
-
-                // Perform a batch of unpins
-                boolean wasEmpty = free_pages.empty();
-
-                for (int i = 0; unpins > 0 && i < page_unpins.length; i++) {
-                    int pins = page_unpins[i];
-                    if (pins == 0)
-                        continue;
-                    pages[i].unpin(pins);
-                    unpins -= pins;
-                    page_unpins[i] = 0;
-                }
-
-                synchronized (free_pages) {
-                    if (wasEmpty && !free_pages.empty())
-                        free_pages.notify();
+                try {
+                    free(usedDocuments.remove());
+                } catch (InterruptedException e) {
+                    continue;
                 }
             }
         }
     }
 
+    static void free(Reference r) {
+        assert r != null;
+
+        Page first, last;
+        synchronized (pages) {
+            first= (Page) firstPageRegistry.remove(r);
+            last= (Page) lastPageRegistry.remove(r);
+        }
+
+        assert first != null && last != null;
+
+        Page page= first;
+        do {
+            Page next= page.getNext();
+            page.unpin();
+            if (page == last)
+                break;
+            page= next;
+        } while (page != null);
+    }
+
     public static Page getFreePage() {
-        if (free_pages.empty()) {
-            System.gc();
-            synchronized (free_pages) {
+        synchronized (free_pages) {
+            if (free_pages.empty()) {
+                System.gc();
                 try {
                     free_pages.wait(timeout);
                 } catch (InterruptedException e) {
                 }
             }
+
+            // Did we time out?
+            if (free_pages.empty())
+                throw new InsufficientMemoryException();
+
+            return (Page) free_pages.pop();
         }
-
-        if (free_pages.empty())
-            // XXX vpapad: Run away! Run away!
-            throw new InsufficientMemoryException();
-
-        return (Page) free_pages.pop();
     }
-
+    
     // Accessors and utility methods 
 
     public static Page getPage(int index) {
@@ -259,7 +229,7 @@ public class BufferManager {
         throw new PEException("Not Implemented Yet!");
     }
 
-    public static Node getParentNode(int index) {
+    public static Node getParentNode(DocumentImpl doc, int index) {
         throw new PEException("Not Implemented Yet!");
     }
 
@@ -654,7 +624,7 @@ public class BufferManager {
         return getEventString(index);
     }
 
-    public static NodeList getElementsByTagName(int index, String tagname) {
+    public static NodeList getElementsByTagName(DocumentImpl doc, int index, String tagname) {
         throw new PEException("Not Implemented Yet!");
     }
 

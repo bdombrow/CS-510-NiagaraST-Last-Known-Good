@@ -1,5 +1,5 @@
 /**
- * $Id: NodeImpl.java,v 1.6 2003/12/24 01:59:51 vpapad Exp $
+ * $Id: NodeImpl.java,v 1.7 2004/02/10 03:34:30 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -9,6 +9,7 @@
 package niagara.ndom.saxdom;
 
 import org.w3c.dom.*;
+import niagara.utils.PEException;
 
 public abstract class NodeImpl implements Node {
 
@@ -20,6 +21,14 @@ public abstract class NodeImpl implements Node {
         this.index = index;
     }
 
+    public void pin() {
+        doc.pin();
+    }
+    
+    public void unpin() {
+        doc.unpin();
+    }
+    
     public boolean equals(Object other) {
         if (! (other instanceof NodeImpl))
             return false;
@@ -59,7 +68,7 @@ public abstract class NodeImpl implements Node {
     public abstract short getNodeType();
 
     public Node getParentNode() {
-        return BufferManager.getParentNode(index);
+        return BufferManager.getParentNode(doc, index);
     }
 
     public NodeList getChildNodes() {
@@ -107,10 +116,10 @@ public abstract class NodeImpl implements Node {
                                "SAXDOM objects are read-only.");
     }
 
-
     public Node appendChild(Node newChild) throws DOMException {
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "SAXDOM objects are read-only.");
+        throw new DOMException(
+            DOMException.NOT_SUPPORTED_ERR,
+            "This node does not support appendChild");
     }
 
     public boolean hasChildNodes() {
@@ -184,4 +193,54 @@ public abstract class NodeImpl implements Node {
         return null;
     }
     public void setVersion(String s) {}
+    public short compareDocumentPosition(Node other) throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String getBaseURI() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public Object getFeature(String feature, String version) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String getTextContent() throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public Object getUserData(String key) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public boolean isDefaultNamespace(String namespaceURI) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public boolean isEqualNode(Node arg) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public boolean isSameNode(Node other) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String lookupNamespaceURI(String prefix) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String lookupPrefix(String namespaceURI) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setTextContent(String textContent) throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public Object setUserData(
+        String key,
+        Object data,
+        UserDataHandler handler) {
+        throw new PEException("Not implemented yet");
+    }
 }

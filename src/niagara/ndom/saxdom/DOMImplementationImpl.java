@@ -1,5 +1,5 @@
 /**
- * $Id: DOMImplementationImpl.java,v 1.1 2002/03/26 22:07:50 vpapad Exp $
+ * $Id: DOMImplementationImpl.java,v 1.2 2004/02/10 03:34:29 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -7,6 +7,8 @@
  */
 
 package niagara.ndom.saxdom;
+
+import niagara.utils.PEException;
 
 import org.w3c.dom.*;
 
@@ -40,4 +42,7 @@ public class DOMImplementationImpl implements DOMImplementation {
         return null;
     }
 
+    public Object getFeature(String feature, String version) {
+        throw new PEException("Not implemented yet");    
+    }
 }
