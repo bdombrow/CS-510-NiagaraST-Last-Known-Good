@@ -96,5 +96,5 @@ classpath:
 	@echo $(CLASSPATH)
 
 clean:
-	rm -f *.class *~ re.cup construct.cup REParser.java RESym.java ConstructParser.java ConstructSym.java
+	rm -f *.class *~ re.cup construct.cup REParser.java RESym.java ConstructParser.java ConstructSym.java QueryParser.java Scanner.java sym.java
 
