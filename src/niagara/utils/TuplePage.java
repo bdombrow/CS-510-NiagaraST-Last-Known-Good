@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TuplePage.java,v 1.1 2002/04/29 19:54:57 tufte Exp $
+  $Id: TuplePage.java,v 1.2 2002/04/29 20:02:53 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,7 +46,7 @@ public class TuplePage {
     private StreamTupleElement tuples[];
 
     // number of tuples in a page
-    private final static int PAGE_SIZE = 60;
+    private final static int PAGE_SIZE = 30;
 
     // pointer to the first open position in the tuple array
     // tuples are filled in sequentially starting at position 0
