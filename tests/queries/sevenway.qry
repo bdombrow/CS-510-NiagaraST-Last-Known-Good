@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<!-- $Id$ -->
+
+<plan top="cons">
+
+<constant id="const1">
+<![CDATA[
+<list>
+<item><id>1</id><value>item 1</value></item>
+<item><id>2</id><value>item 2</value></item>
+<item><id>3</id><value>item 3</value></item>
+<item><id>4</id><value>item 4</value></item>
+<item><id>5</id><value>item 5</value></item>
+<item><id>6</id><value>item 6</value></item>
+<item><id>7</id><value>item 7</value></item>
+<item><id>8</id><value>item 8</value></item>
+</list>
+]]>
+</constant>
+
+<constant id="const2">
+<![CDATA[
+<list>
+<item><id>1</id><value>item 1</value></item>
+<item><id>2</id><value>item 2</value></item>
+<item><id>3</id><value>item 3</value></item>
+<item><id>4</id><value>item 4</value></item>
+<item><id>5</id><value>item 5</value></item>
+<item><id>6</id><value>item 6</value></item>
+<item><id>7</id><value>item 7</value></item>
+</list>
+]]>
+</constant>
+
+<constant id="const3">
+<![CDATA[
+<list>
+<item><id>1</id><value>item 1</value></item>
+<item><id>2</id><value>item 2</value></item>
+<item><id>3</id><value>item 3</value></item>
+<item><id>4</id><value>item 4</value></item>
+<item><id>5</id><value>item 5</value></item>
+<item><id>6</id><value>item 6</value></item>
+</list>
+]]>
+</constant>
+
+<constant id="const4">
+<![CDATA[
+<list>
+<item><id>1</id><value>item 1</value></item>
+<item><id>2</id><value>item 2</value></item>
+<item><id>3</id><value>item 3</value></item>
+<item><id>4</id><value>item 4</value></item>
+<item><id>5</id><value>item 5</value></item>
+</list>
+]]>
+</constant>
+
+<constant id="const5">
+<![CDATA[
+<list>
+<item><id>1</id><value>item 1</value></item>
+<item><id>2</id><value>item 2</value></item>
+<item><id>3</id><value>item 3</value></item>
+<item><id>4</id><value>item 4</value></item>
+</list>
+]]>
+</constant>
+
+<constant id="const6">
+<![CDATA[
+<list>
+<item><id>1</id><value>item 1</value></item>
+<item><id>2</id><value>item 2</value></item>
+<item><id>3</id><value>item 3</value></item>
+</list>
+]]>
+</constant>
+
+<constant id="const7">
+<![CDATA[
+<list>
+<item><id>1</id><value>item 1</value></item>
+<item><id>2</id><value>item 2</value></item>
+</list>
+]]>
+</constant>
+
+<constant id="const8">
+<![CDATA[
+<list>
+<item><id>1</id><value>item 1</value></item>
+</list>
+]]>
+</constant>
+
+
+<unnest id="scan1" regexp="list.item.id" input="const1"/>
+<unnest id="scan2" regexp="list.item.id" input="const2"/>
+<unnest id="scan3" regexp="list.item.id" input="const3"/>
+<unnest id="scan4" regexp="list.item.id" input="const4"/>
+<unnest id="scan5" regexp="list.item.id" input="const5"/>
+<unnest id="scan6" regexp="list.item.id" input="const6"/>
+<unnest id="scan7" regexp="list.item.id" input="const7"/>
+<unnest id="scan8" regexp="list.item.id" input="const8"/>
+
+<join id="join1" input="scan1 scan2" left="scan1" right="scan2"/>
+<join id="join2" input="scan3 join1" left="scan3" right="scan1"/>
+<join id="join3" input="join2 scan4" left="scan3" right="scan4"/>
+<join id="join4" input="scan5 join3" left="scan5" right="scan3"/>
+<join id="join5" input="join4 scan6" left="scan3" right="scan6"/>
+<join id="join6" input="scan7 join5" left="scan7" right="scan6"/>
+<join id="join7" input="join6 scan8" left="scan2" right="scan8"/>
+
+<construct id="cons" input="join7"><![CDATA[
+<result><s1>$scan1</s1> <s2>$scan2</s2> <s3>$scan7</s3></result>]]>
+</construct>
+</plan>
