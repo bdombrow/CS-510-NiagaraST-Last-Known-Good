@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheUtil.java,v 1.6 2003/03/08 02:21:39 vpapad Exp $
+  $Id: CacheUtil.java,v 1.7 2003/09/13 03:46:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -273,106 +273,10 @@ public class CacheUtil {
         }
         return ret;
     }
-    public static Vector tmpDocToVec(Document tmpDoc) {
-        Element ele = tmpDoc.getDocumentElement();
-        if(ele==null) return(new Vector());
-        Element next = (Element)ele.getFirstChild();
-
-        Vector ret = new Vector();
-        for( ; next!=null; next=(Element)next.getNextSibling()) {
-            ret.addElement(new StreamTupleElement(next));
-        }
-        return ret;
-    }
-
     public static boolean isPush(String fileName) {
         if(TrigTmpRex.isMatch(fileName)) return true;
         return false;
     }
-    public static void setFileSpan(Document doc, long span) {
-        Element root = doc.getDocumentElement();
-        root.setAttribute("TIMESPAN", ""+span);
-    }
-    public static long getNodeTimeStamp(Node n) {
-        return Long.parseLong(((Element)n).getAttribute("TIMESTAMP"));
-    }
-
-    /** get Diff docs constructed from doc, and diff.  The elements
-     * in result is starting at 2nd level
-     */
-    public static Document getQEDiffDoc(Document diff, long since, long to)
-    {
-        Element diffRoot = diff.getDocumentElement();
-
-        Vector nodelist = new Vector();
-        if(diffRoot!=null) {
-            for(Node n = diffRoot.getFirstChild(); n!=null;
-                    n=n.getNextSibling()) {
-
-                long ttmmpp = getNodeTimeStamp(n); 
-                // System.out.println("CU::getQEDiff: stamp " + ttmmpp + " since " + since);
-                if(ttmmpp <= since) {
-                    continue;
-                }
-
-                Element child = (Element)n;
-                if(child.getTagName().compareTo("Insert")==0) {
-                    Element toadd = (Element) child.getFirstChild();
-                    nodelist.add(toadd);
-                }
-                else if(child.getTagName().compareTo("Delete")==0) {
-                    // System.out.println("Ouch.  We don't do delete right now");
-                }           
-            }
-        }
-       
-        String roottag = diff.getDocumentElement().getAttribute("ROOTTAG");
-        Document ret = DOMFactory.newDocument();
-	if(roottag==null || roottag.equals("")) {
-	    System.out.println("Illegal roottag " + roottag);
-	    Node tmpret = ret.createElement("xxxxxx");
-	    ret.appendChild(tmpret);
-	    return ret;
-	}
-	System.out.println("Root Tag is " + roottag);
-        Node retRoot = ret.createElement(roottag);
-        System.out.println("%%%%%% CU:getQEDiff: pushing up " + nodelist.size());
-        for(int i=0; i<nodelist.size(); i++) {
-            retRoot.appendChild(((Node)nodelist.elementAt(i)).cloneNode(true));
-        }
-        ret.appendChild(retRoot);
-	int shrink = shrinkDiff(diff);
-	System.out.println("Shink diff file : " + shrink); 
-        return ret;
-    }              
-
-    public static int shrinkDiff(Document doc) {
-        
-        Element root = doc.getDocumentElement();
-        long span = Long.parseLong(root.getAttribute("TIMESPAN"));
-        long laststamp = Long.parseLong(root.getAttribute("LASTSTAMP"));
-        // give 5 sec to take over round off error.
-        long tmp = laststamp - span - 5000;
-        Element next;
-        int shrinked = 0;
-        //try {
-            while(true) {
-                next = (Element)root.getFirstChild();
-                if( next!=null &&
-                        Long.parseLong(next.getAttribute("TIMESTAMP"))<tmp
-                  ) {
-                    shrinked++;
-                    root.removeChild(next);
-                }
-                else 
-                    break;
-            }
-	    //} catch(Exception e) {
-            //e.printStackTrace();
-	    //}
-        return shrinked;
-    }
-
     public static void setTimeStamp(Vector v, long ts) {
         for(int i=0; i<v.size(); i++) {
             StreamTupleElement ste = (StreamTupleElement)v.elementAt(i);

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCache.java,v 1.5 2003/03/08 01:01:53 vpapad Exp $
+  $Id: MemCache.java,v 1.6 2003/09/13 03:46:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -304,29 +304,6 @@ abstract class MemCache implements DMCache {
         return me.val;
     }
 
-    public Object fetch_force_reload(Object k) throws CacheFetchException {
-        boolean needadd = false;
-        MemCacheEntry me = null;
-        String key = CacheUtil.normalizePath(k);
-        _mutex.lock();
-        me = (MemCacheEntry)_entryHash.get(key);
-        if(me==null) { 
-            me = new MemCacheEntry(key, null);
-            _entryHash.put(key, me);
-            needadd = true;
-        } 
-        me.addPinCount();
-        _mutex.unlock();
-        Object v = lowerCache.fetch_reload(key, me);
-        // if(v==null) throw(new CacheFetchException("reload failed"));
-        _mutex.lock();
-        me.setval(v);
-        me.minusPinCount();
-        _mutex.unlock();
-        if(needadd) addentry(me);
-        return me.val;
-    }
-
     /** pin the key=>val pair in Memory.  The pair maybe pined
      * mutiple times. 
      */
@@ -385,92 +362,5 @@ abstract class MemCache implements DMCache {
                 me.flush();
             }
         }
-    }
-
-    public void unpinOnce(Object key) {
-        MemCacheEntry me = (MemCacheEntry)_entryHash.get(key);
-        if(me==null) return;
-        if(!me.isOnce()) return;
-        if(me.minusOnce()) { 
-	    System.out.print("Trying unpin once file");
-            try {
-                unpin(key);
-            } catch (CacheUnpinException cupe) {
-                System.err.println("Unpin once file failed");
-            }
-        }
-    }
-
-    public void setOnceCount(Object key, int onceCount) {
-        MemCacheEntry me = (MemCacheEntry)_entryHash.get(key);
-        if(me==null) return;
-        me.setOnce(onceCount);
-    }
-
-    /** Create a Document and add to the Cache.  If create called 
-     * on an _EXISTING_ file, the existing doc is returned. 
-     */
-    public Document createDoc(String s) {
-        Document ret = null;
-        try {
-            ret = (Document)fetch_reload(s, null);
-	} catch (CacheFetchException fe) {
-	    // was ignored before... KT
-	    throw new PEException("CacheFetchException " + fe.getMessage());
-	}
-        return ret;
-    }
-
-    /** Modify a doc.  This method is called if somebody holding
-     * it want a sync.
-     */
-    public void modifyDoc(Object key, Object val) {
-        remap(key, val);
-        //
-        /*
-           MemCacheEntry ne = (MemCacheEntry)_entryHash.get(key);
-           if(ne!=null) {
-           ne.setval(val);
-           ne.setDirty(true);
-           }
-           else {
-           ne = new MemCacheEntry(key, val);
-           ne.setDirty(true);
-           addentry(ne);
-           }
-         */
-    }
-
-    public void flushDoc(String file) {
-        // System.err.println("Flushing " + file);
-        String key = CacheUtil.normalizePath(file);
-        MemCacheEntry me = (MemCacheEntry)_entryHash.get(key);
-        if(me!=null && (!me.isOnce()) ) me.flush();
-    }
-    public boolean deleteDoc(String s) {
-        MemCacheEntry ne = (MemCacheEntry)_entryHash.get(s);
-        if(ne!=null && ne.cache!=null) { 
-            ne.cache.removeentry(s);
-        }
-        _entryHash.remove(s);
-        File tmpF = new File(s);
-        if(tmpF.exists()) tmpF.delete();
-        else return false;
-        return true;
-    }
-
-    public String getType(Object s) {
-        String key = CacheUtil.normalizePath(s);
-        MemCacheEntry me = (MemCacheEntry)_entryHash.get(key);
-        if(me==null) return(new String("getType: " + s + " not in Mem"));
-        return me.getType();
-    }
-    public void setOnce(Object k) {
-        MemCacheEntry me = (MemCacheEntry)_entryHash.get(k);
-        if(me!=null) me.setOnce(1);
-    }
-    public void setTimeSpan(Object k, long tsp) {
-        MemCacheEntry me = (MemCacheEntry)_entryHash.get(k);
-        if(me!=null) me.setTimeSpan(tsp);
     }
 }
