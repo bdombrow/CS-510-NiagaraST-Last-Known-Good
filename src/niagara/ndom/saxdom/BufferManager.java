@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.13 2002/09/24 23:15:03 ptucker Exp $
+ * $Id: BufferManager.java,v 1.14 2002/09/25 20:20:36 ptucker Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -238,43 +238,17 @@ public class BufferManager {
     }
 
     public static String getTagName(int index) {
-	//If this is a START_ELEMENT, we need to also check if there was a
-	// prefix associated with it
-	if (getEventType(index) == SAXEvent.START_ELEMENT) {
-	    Page page = getPage(index);
-	    int offset = getOffset(index);
-	    if (offset == page.getSize() -1) {
-		page = page.getNext();
-		offset = 0;
-	    } else 
-		offset++;
-
-	    if (page.getEventType(offset) == SAXEvent.NAMESPACE_URI) {
-		return (page.getEventString(offset) + getEventString(index));
-	    } else
-		return getEventString(index);
-	} else
-	    return getEventString(index);
+	//XXX (ptucker) we don't store the prefix with elements, only the
+	// namespace URI. Since this wants prefix:localname, we
+	// for now will output only the local name.
+	return getEventString(index);
     }
 
     public static String getName(int index) {
-	//If this is a START_ELEMENT, we need to also check if there was a
-	// prefix associated with it
-	if (getEventType(index) == SAXEvent.START_ELEMENT) {
-	    Page page = getPage(index);
-	    int offset = getOffset(index);
-	    if (offset == page.getSize() -1) {
-		page = page.getNext();
-		offset = 0;
-	    } else 
-		offset++;
-
-	    if (page.getEventType(offset) == SAXEvent.NAMESPACE_URI) {
-		return (page.getEventString(offset) + getEventString(index));
-	    } else
-		return getEventString(index);
-	} else
-	    return getEventString(index);
+	//XXX (ptucker) we don't store the prefix with elements, only the
+	// namespace URI. Since this wants prefix:localname, we
+	// for now will output only the local name.
+	return getEventString(index);
     }
 
     public static String getValue(int index) {
@@ -678,10 +652,6 @@ public class BufferManager {
     }
 
     public static String getNamespaceURI(int index) {
-        throw new PEException("Not Implemented Yet!");
-    }
-
-    public static String getPrefix(int index) {
 	Page page = getPage(index);
 	int offset = getOffset(index);
 	if (offset == page.getSize() -1) {
@@ -695,6 +665,10 @@ public class BufferManager {
 	    return null;
 	
 	return page.getEventString(offset);
+    }
+
+    public static String getPrefix(int index) {
+        throw new PEException("Not Implemented Yet!");
     }
 
     public static String getLocalName(int index) {
