@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: JoinInput.java,v 1.1 2000/05/30 21:03:25 tufte Exp $
+  $Id: JoinInput.java,v 1.2 2003/07/08 02:08:21 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,8 +27,6 @@
 
 
 package niagara.client.qbe;
-import java.io.*;
-import java.util.*;
 
 /**
   * interface between GUI and underlying parser

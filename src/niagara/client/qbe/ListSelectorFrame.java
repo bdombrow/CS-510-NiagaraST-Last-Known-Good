@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ListSelectorFrame.java,v 1.1 2000/05/30 21:03:25 tufte Exp $
+  $Id: ListSelectorFrame.java,v 1.2 2003/07/08 02:08:21 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -78,7 +78,7 @@ public class ListSelectorFrame extends JDialog
 			   1000 /* Width  */,
 			   5000 /* Height */);
 	dtdlist.setSelectedIndex(0);
-	this.selectedObject = dtdlist.getSelectedValue();
+	selectedObject = dtdlist.getSelectedValue();
 	dtdlist.setVisible(true);
 	dtdlist.addMouseListener(this);
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: XmlInterface.java,v 1.2 2002/10/12 20:10:28 tufte Exp $
+  $Id: XmlInterface.java,v 1.3 2003/07/08 02:08:21 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,8 +30,6 @@ package niagara.client.qbe;
 import java.awt.*;
 import java.awt.event.*;
 import com.ibm.xml.parser.*;
-import org.w3c.dom.*;
-import java.io.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
