@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.29 2003/03/19 00:37:32 tufte Exp $
+<!-- $Id: queryplan.dtd,v 1.30 2003/03/19 22:40:53 tufte Exp $
      DTD for query plans -->
 
 <!-- 
@@ -337,6 +337,5 @@
 
 <!ELEMENT nest ANY>
 <!ATTLIST nest 
-	  groupby  CDATA	       #REQUIRED
-          clear    (yes|no)     "no"
+	  neston    CDATA	       #REQUIRED
           %StandardAttributes;>
