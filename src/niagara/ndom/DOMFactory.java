@@ -1,13 +1,11 @@
 /**
- * $Id: DOMFactory.java,v 1.7 2003/07/03 19:40:23 tufte Exp $
+ * $Id: DOMFactory.java,v 1.8 2003/07/18 01:04:43 tufte Exp $
  *
  */
 
 package niagara.ndom;
 
 import org.w3c.dom.*;
-import org.xml.sax.*;
-
 import java.util.Hashtable;
 
 /**

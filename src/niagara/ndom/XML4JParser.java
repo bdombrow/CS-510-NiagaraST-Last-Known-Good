@@ -1,12 +1,11 @@
 /**
- * $Id: XML4JParser.java,v 1.5 2003/03/07 23:45:29 vpapad Exp $
+ * $Id: XML4JParser.java,v 1.6 2003/07/18 01:04:43 tufte Exp $
  *
  */
 
 package niagara.ndom;
 
 import org.w3c.dom.Document;
-import niagara.ndom.*;
 import java.io.IOException;
 
 import org.xml.sax.*;

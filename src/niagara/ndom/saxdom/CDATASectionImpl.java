@@ -1,5 +1,5 @@
 /**
- * $Id: CDATASectionImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
+ * $Id: CDATASectionImpl.java,v 1.3 2003/07/18 01:04:43 tufte Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -7,8 +7,6 @@
  */
 
 package niagara.ndom.saxdom;
-
-import org.w3c.dom.*;
 
 public class CDATASectionImpl extends TextImpl {
 

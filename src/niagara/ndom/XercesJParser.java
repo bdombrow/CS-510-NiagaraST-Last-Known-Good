@@ -1,5 +1,5 @@
 /**
- * $Id: XercesJParser.java,v 1.4 2003/03/07 23:45:30 vpapad Exp $
+ * $Id: XercesJParser.java,v 1.5 2003/07/18 01:04:43 tufte Exp $
  *
  */
 
@@ -10,8 +10,6 @@ import java.io.IOException;
 
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
-
-import org.apache.xerces.parsers.*;
 
 /**
  * <code>XercesJParser</code> is a wrapper for org.apache.xerces.parsers.DOMParser;
