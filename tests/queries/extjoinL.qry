@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<filescan id="inputA" filename = "../../tests/data/A.xml"/>
+
+<unnest id="TupleA" root="" regexp="Relation.Tuple"  input="inputA"/>
+
+<unnest id="AA" root="" regexp="A" type="content" input="TupleA"/> 
+
+<unnest id="AB" root="$TupleA" regexp="B" type="content" input="AA"/>
+
+
+<filescan id="inputB" filename = "../../tests/data/B.xml"/>
+
+<unnest id="TupleB" root="" regexp="Relation.Tuple" input="inputB"/>
+
+<unnest id="BA" root="" regexp="A" type="content" input="TupleB"/>
+
+<unnest id="BB" root="TupleB" regexp="B" type="content" input="BA"/>
+
+<join id="join" left="$AA" right="$BA" extensionjoin="left"
+      input="AB BB">
+</join>
+
+<construct id="cons" input="join">
+<result>
+  <A> $AA </A>
+  <AB> $AB </AB>
+  <BB> $BB </BB>
+</result>
+
+</construct>
+</plan>
