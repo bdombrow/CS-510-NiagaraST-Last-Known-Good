@@ -1,8 +1,5 @@
 /*
- * $RCSfile:
- * $Revision:
- * $Date:
- * $Author:
+ * $Id: StreamThread.java,v 1.7 2002/04/30 22:22:35 vpapad Exp $
  */
 
 
@@ -28,8 +25,8 @@ import com.microstar.xml.*;
 import niagara.ndom.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
-// KT ugly!! for stream variable - sorry!!!
-import niagara.connection_server.NiagraServer; 
+
+import niagara.connection_server.NiagraServer;
 
 public class StreamThread implements Runnable {
     private StreamSpec spec;
@@ -77,11 +74,11 @@ public class StreamThread implements Runnable {
 	try {
 	    inputStream = createInputStream();
 	   
-	    if(parser instanceof SAXDOMParser && NiagraServer.STREAM) {
+	    if(parser instanceof SAXDOMParser && spec.isStreaming()) {
 		((SAXDOMParser)(parser)).setOutputStream(outputStream);
 		InputSource inputSource = new InputSource(inputStream);
 		parser.parse(inputSource);
-	    } else if(NiagraServer.STREAM && parser.supportsStreaming()) {
+	    } else if(spec.isStreaming() && parser.supportsStreaming()) {
 		// stream is done when inputStream.read() returns -1
 		InputSource inputSource = new InputSource(inputStream);
 		sourcecreated=true;

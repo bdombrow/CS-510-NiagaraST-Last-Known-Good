@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.20 2002/04/26 02:37:54 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.21 2002/04/30 22:22:31 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -865,11 +865,15 @@ public class XMLQueryPlanParser {
 
 	String typeStr = e.getAttribute("type");
 	StreamSpec sSpec;
+
+        boolean isStreaming = e.getAttribute("streaming").equals("yes");
+
 	if(typeStr.equals("file")) {
-	    sSpec = new StreamSpec(e.getAttribute("fileName"));
+	    sSpec = new StreamSpec(e.getAttribute("fileName"), isStreaming);
 	} else if (typeStr.equals("firehose")) {
 	    sSpec = new StreamSpec(e.getAttribute("host"),
-				   Integer.parseInt(e.getAttribute("port")));
+				   Integer.parseInt(e.getAttribute("port")),
+                                   isStreaming);
 	} else {
 	    throw new InvalidPlanException("Invalid type - typeStr: " + typeStr);
 	}

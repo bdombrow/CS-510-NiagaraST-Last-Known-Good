@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.12 2002/04/20 19:40:37 vpapad Exp $
+  $Id: NiagraServer.java,v 1.13 2002/04/30 22:22:31 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -96,7 +96,6 @@ public class NiagraServer
 
     private static Catalog catalog = null;
 
-    public static boolean STREAM = false;
     public static boolean QUIET = false;
 
     public static boolean KT_PERFORMANCE = false;
@@ -294,8 +293,6 @@ public class NiagraServer
                     valid_args = true;
                 } else if (args[i].equals("-quiet")) {
 		    QUIET = true;
-	} else if (args[i].equals("-stream")) {
-		    STREAM = true;
 		} else if (args[i].equals("-dtd-hack")) {
                     dtd_hack = true;
                     valid_args = true;
