@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalMaxOperator.java,v 1.1 2003/02/05 21:17:50 jinli Exp $
+  $Id: PhysicalMaxOperator.java,v 1.2 2003/02/07 06:50:05 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -94,6 +94,7 @@ public class PhysicalMaxOperator extends PhysicalGroupOperator {
 	    // Sum is initialized to 0
 	    //
 	    this.maxOfValues = 0;
+	    
 	}
 
 
@@ -105,13 +106,16 @@ public class PhysicalMaxOperator extends PhysicalGroupOperator {
 	 */
 
 	public void updateStatistics (double newValue) {
+
 	    // Increment the number of values
 	    //
 	    ++numValues;
 
+	    // Try to convert to double 
+
 	    // Update the sum
 	    //
-	    if (newValue > maxOfValues)
+	    if (newValue > maxOfValues) 
 		maxOfValues = newValue;
 	}
 
@@ -151,7 +155,7 @@ public class PhysicalMaxOperator extends PhysicalGroupOperator {
     AtomicEvaluator ae;
 
     ArrayList atomicValues;
-
+   
     public void initFrom(LogicalOp logicalOperator) {
         super.initFrom(logicalOperator);
 	// Get the summing attribute of the sum logical operator
@@ -200,18 +204,19 @@ public class PhysicalMaxOperator extends PhysicalGroupOperator {
 		    // Get the string atomic value
 		    //
 		    String atomicValue = (String) atomicValues.get(0);
-		    
+
 		    // Try to convert to double 
 		    Double doubleValue = new Double(atomicValue);
 		    
 		    // Return the double value
 		    return doubleValue;
+		    
 		}
 	    } catch (java.lang.NumberFormatException e) {
 		    // believe that atomicValue is generated, so it should
 		    // always be OK, if it isn't generated, should
 		    // throw UserErrorException... KT
-		    throw new PEException("Unable to convert atomicValue to double in PhysicalSumOperator: " + e.getMessage());
+		    throw new PEException("Unable to convert atomicValue to double in PhysicalMaxOperator: " + e.getMessage());
 	    }
     }
 
@@ -286,7 +291,9 @@ public class PhysicalMaxOperator extends PhysicalGroupOperator {
 
 	// Create number of values and sum of values variables
 	int numValues = 0;
+
 	double maxValues = 0;
+	double tmp = 0;
 
 	// If the partial result is not null, update with partial result stats
 	if (partialResult != null) {
@@ -298,7 +305,9 @@ public class PhysicalMaxOperator extends PhysicalGroupOperator {
 	    // Update number of values and the sum of values
 	    //
 	    numValues += partialStats.getNumberOfValues();
-	    maxValues += partialStats.getMaxOfValues();
+	    tmp = partialStats.getMaxOfValues();
+	    if (tmp > maxValues)
+		maxValues = tmp;
 	}
 	
 	// If the final result is not null, update with final result stats
@@ -309,7 +318,9 @@ public class PhysicalMaxOperator extends PhysicalGroupOperator {
 
 	    // Update number of values and sum of values
 	    numValues += finalStats.getNumberOfValues();
-	    maxValues += finalStats.getMaxOfValues();
+	    tmp = finalStats.getMaxOfValues();
+	    if (tmp > maxValues) 
+		maxValues = tmp;
 	}
 
 	// If the number of values is 0, sum does not make sense
