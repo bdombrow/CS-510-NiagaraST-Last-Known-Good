@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.11 2003/03/08 02:24:54 vpapad Exp $ -->
+<!-- $Id: build.xml,v 1.12 2003/07/09 19:11:49 tufte Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -19,14 +19,6 @@
     </dependset>
     <available property="cups.ok" file="${src}/niagara/xmlql_parser/syntax_tree/re.cup"/>
 
-    <!-- Check if the lexer/parser files for SEQL are up to date -->
-    <dependset>
-      <srcfilelist dir="${src}/niagara/search_engine/seql"
-        files="seql.cup,seql.jlex"/>
-      <targetfilelist dir="${src}/niagara/search_engine/seql"
-        files="sym.java,parser.java"/>
-    </dependset>
-    <available property="se.cup.ok" file="${src}/niagara/search_engine/seql/parser.java"/>
   </target>
 
   <!-- Run the lexer and parser generators -->
@@ -66,46 +58,30 @@
     </exec>
   </target>
 
-  <!-- Run the lexer and parser generators for SEQL -->
-  <target name="create.se.cup" unless="se.cup.ok">
-    <java fork="yes" dir="${src}/niagara/search_engine/seql"
-      classpath="${lib}/JLex.jar"
-      classname="JLex.Main">
-      <arg value="seql.jlex"/>
-    </java>
-    <move file="${src}/niagara/search_engine/seql/seql.jlex.java" 
-      tofile="${src}/niagara/search_engine/seql/Yylex.java"/>
-
-    <exec executable="/bin/sh"
-    	dir="${src}/niagara/search_engine/seql">
-	<arg value="-c"/>
-      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -interface -package search_engine.seql &lt; seql.cup"/>
-    </exec>
-  </target>
-
   <!-- Compile everything -->
-  <target name="compile" depends="init,create.cups,create.se.cup">
+  <target name="compile" depends="init,create.cups">
     <javac srcdir="${src}" destdir="${build}" source="1.4" debug="yes" 
-    	excludes="niagara/client/qbe/**,niagara/client/qpclient/**,niagara/xmlql_parser/op_tree/TypeChk.java,niagara/utils/nitree/**,niagara/utils/*.java,niagara/search_engine/crawler/YPCrawler.java">
+    	excludes="niagara/client/qbe/**,niagara/client/qpclient/**,niagara/xmlql_parser/op_tree/TypeChk.java,niagara/utils/nitree/**">
       <classpath>
-        <pathelement location="${lib}/xercesImpl.xerces-2_2_1.jar"/>
-        <pathelement location="${lib}/xmlParserAPIs.xerces-2_2_1.jar"/>
-        <pathelement location="${lib}/xml4j.jar"/>
+        <!-- In alpha order -->
         <pathelement location="${lib}/aelfred.jar"/>
-        <pathelement location="${lib}/gnu-regexp.jar"/>
-        <pathelement location="${lib}/cup_all.jar"/>
-        <pathelement location="${lib}/XMLGenerator.jar"/>
-        <pathelement location="${lib}/diva.jar"/>
-        <pathelement location="${lib}/junit.jar"/>
-        <pathelement location="${lib}/djava.jar"/>
-        <pathelement location="${lib}/htmllayout.jar"/>
         <pathelement location="${lib}/com.mortbay.jetty.jar"/>
+        <pathelement location="${lib}/cup_all.jar"/>
+        <pathelement location="${lib}/diva.jar"/>
+        <pathelement location="${lib}/djava.jar"/>
+        <pathelement location="${lib}/gnu-regexp.jar"/>
+        <pathelement location="${lib}/htmllayout.jar"/>
         <pathelement location="${lib}/javax.servlet.jar"/>
         <pathelement location="${lib}/JFlex.zip"/>
         <pathelement location="${lib}/JLex.jar"/>
+	<pathelement location="${lib}/jpcap.jar"/>
+        <pathelement location="${lib}/junit.jar"/>
         <pathelement location="${lib}/PerlTools.jar"/>
         <pathelement location="${lib}/w4f.jar"/>
-	<pathelement location="${lib}/jpcap.jar"/>
+        <pathelement location="${lib}/xercesImpl.xerces-2_2_1.jar"/>
+        <pathelement location="${lib}/xml4j.jar"/>
+        <pathelement location="${lib}/XMLGenerator.jar"/>
+        <pathelement location="${lib}/xmlParserAPIs.xerces-2_2_1.jar"/>
       </classpath>
     </javac>
   </target>    
