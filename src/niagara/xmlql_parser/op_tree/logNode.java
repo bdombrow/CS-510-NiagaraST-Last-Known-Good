@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: logNode.java,v 1.9 2002/10/31 04:17:05 vpapad Exp $
+  $Id: logNode.java,v 1.10 2002/10/31 06:09:16 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -367,7 +367,7 @@ public class logNode implements SchedulablePlan, java.io.Serializable {
         TupleSchema[] ts = new TupleSchema[getArity()];
         for (int i = 0; i < getArity(); i++)
             ts[i] = new TupleSchema();
-        physicalOperator.constructTupleSchema(ts);
+        physicalOperator.constructMinimalTupleSchema(ts);
         return physicalOperator;
     }
     
