@@ -1,4 +1,5 @@
 #######################################################################
+#  $Id: make.incl,v 1.3 2002/04/26 02:37:44 vpapad Exp $
 #
 #  Make include file - for common constant info
 #  Added 1-17-02 by Kristin Tufte - remove the fact that some 
@@ -27,7 +28,7 @@ export JAVADOC     = $(JAVA_HOME)javadoc
 #  Specify required libs here
 #-------------------------------------
 export XML4J          = $(LIBDIR)/xml4j.jar
-export CUPLIB        = $(LIBDIR)/java_cup.jar:$(LIBDIR)/cup_runtime.jar:$(LIBDIR)/cup_all.jar
+export CUPLIB        = $(LIBDIR)/cup_all.jar
 export REGEXPLIB     = $(LIBDIR)/gnu-regexp.jar
 export SWINGLIB      = $(LIBDIR)/swingall.jar
 export SAX	      = $(LIBDIR)/aelfred.jar

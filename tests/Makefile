@@ -10,5 +10,11 @@ catalog: TestCatalog.class
 	@echo "Testing sanity of catalog parsing"
 	@java -classpath ${CLASSPATH} TestCatalog
 
-classpath:
+classpath : FORCE
 	@echo ${CLASSPATH}
+
+%.class : %.java
+	@javac -classpath ${CLASSPATH} $<
+
+
+FORCE : 
