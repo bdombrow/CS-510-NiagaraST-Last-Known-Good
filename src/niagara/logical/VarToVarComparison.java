@@ -1,4 +1,4 @@
-/* $Id: VarToVarComparison.java,v 1.2 2002/10/31 03:32:21 vpapad Exp $ */
+/* $Id: VarToVarComparison.java,v 1.3 2002/12/03 23:13:33 vpapad Exp $ */
 package niagara.logical;
 import java.util.ArrayList;
 
@@ -29,9 +29,6 @@ public class VarToVarComparison extends Comparison {
     public Atom getLeft() { return left; }
     public Atom getRight() { return right; }
 
-    /**
-     * @see niagara.logical.Predicate#copy()
-     */
     public Predicate copy() {
         return new VarToVarComparison(getOperator(), left, right);
     }
@@ -49,11 +46,15 @@ public class VarToVarComparison extends Comparison {
         return operator ^ left.hashCode() ^ right.hashCode();
     }
 
-    /**
-     * @see niagara.logical.Predicate#split(Attrs)
-     */
     public Predicate split(Attrs variables) {
         if (variables.Contains(left) && variables.Contains(right))
+            return new And(this, True.getTrue());
+        else
+            return new And(True.getTrue(), this);
+    }
+    
+    public Predicate splitEquiJoin(Attrs leftAttrs, Attrs rightAttrs) {
+        if (leftAttrs.Contains(left) && rightAttrs.Contains(right))
             return new And(this, True.getTrue());
         else
             return new And(True.getTrue(), this);
