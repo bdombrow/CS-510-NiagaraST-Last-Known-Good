@@ -1,7 +1,6 @@
 /*
- * $Id: StreamThread.java,v 1.16 2002/08/17 16:02:49 tufte Exp $
+ * $Id: StreamThread.java,v 1.17 2002/08/17 16:03:19 tufte Exp $
  */
-
 
 package niagara.data_manager;
 
