@@ -1,8 +1,6 @@
 /*
- * $Id: StreamThread.java,v 1.13 2002/08/17 15:47:22 tufte Exp $
+ * $Id: StreamThread.java,v 1.14 2002/08/17 15:51:59 tufte Exp $
  */
-
-
 
 
 
