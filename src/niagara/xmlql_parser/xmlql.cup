@@ -15,7 +15,8 @@ package niagara.xmlql_parser;
 
 import niagara.logical.*;
 import niagara.logical.predicates.*;
- 
+import niagara.connection_server.InvalidPlanException;
+
 import java.util.*;
 import java_cup.runtime.*;
 
@@ -43,11 +44,10 @@ parser code {:
      	System.err.println(m);
    }
    
-   public void report_fatal_error(String message, Object info) 
+   public void report_fatal_error(String message, Object info) throws Exception
    {
      report_error(message, info);
-     System.out.println("Irrecoverable Parse Error. Check query syntax");
-     //System.exit(1);
+     throw new InvalidPlanException("Irrecoverable Parse Error. Check query syntax");
    }
 
 :};
