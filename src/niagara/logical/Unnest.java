@@ -1,4 +1,4 @@
-/* $Id: Unnest.java,v 1.4 2003/02/25 06:13:16 vpapad Exp $ */
+/* $Id: Unnest.java,v 1.5 2003/02/28 05:30:48 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.optimizer.colombia.*;
@@ -85,7 +85,7 @@ public class Unnest extends unryOp {
      * @see niagara.xmlql_parser.op_tree.op#projectedOutputAttributes(Attrs)
      */
     public void projectedOutputAttributes(Attrs outputAttrs) {
-        projectedAttrs = outputAttrs;
+        projectedAttrs = outputAttrs.copy();
     }
 
     /**
