@@ -55,7 +55,9 @@ export FHOSE            = $(FIREHOSEDIR)
 export CLASSPATH     = .:..:$(COMMONLIB):$(REGEXPLIB):$(XMLQLPARSE):$(LOGICALOPTREE):$(DMLIB):$(CUPLIB):$(PARSELIB):$(TRIGGERM):$(TRIGLIB):$(QBELIB2):$(SAX):$(DIFF):$(FHOSE)
 #export CLASSPATH     = .:..:$(REGEXPLIB):$(CUPLIB):$(PARSELIB):$(QBELIB2):$(SAX):$(DIFF)
 
-export JAVAFLAGS     = -classpath $(CLASSPATH)
+export DEBUG = -g
+
+export JAVAFLAGS     = -classpath $(CLASSPATH) $(DEBUG)
 
 # local stuff
 APPLET_DIR = /p/niagara/public/html
@@ -89,7 +91,7 @@ dm:
 	$(JAVAC) $(JAVAFLAGS) niagara/data_manager/*.java
 
 nitree:
-	$(JAVAC) $(JAVAFLAGS) niagara/utils/nitree/*.java
+	$(JAVAC) $(JAVAFLAGS) niagara/utils/nitree/NIDocument.java
 
 type_system:
 	$(JAVAC) $(JAVAFLAGS) niagara/utils/type_system/*.java
