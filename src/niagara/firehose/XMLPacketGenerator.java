@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import net.sourceforge.jpcap.capture.*;
+import net.sourceforge.jpcap.simulator.*;
+import net.sourceforge.jpcap.net.*;
+import net.sourceforge.jpcap.util.*;
 
 public class XMLPacketGenerator extends XMLFirehoseGen {
     private static PacketHandler m_ph = null;
