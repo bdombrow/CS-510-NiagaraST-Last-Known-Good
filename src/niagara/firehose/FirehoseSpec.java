@@ -23,7 +23,7 @@ public class FirehoseSpec extends StreamSpec {
     private String descriptor2;
     private int numGenCalls; // number of times firehose will call generator
     private int numTLElts;     // num top-level elts in XMLB and AUCTION docs
-    private long rate;
+    private int rate;
     private boolean prettyPrint;
     private boolean trace;
 
@@ -79,7 +79,7 @@ public class FirehoseSpec extends StreamSpec {
 	return listenerHostName;
     }
 
-    public long getRate() {
+    public int getRate() {
 	return rate;
     }
 

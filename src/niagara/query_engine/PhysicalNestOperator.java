@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.6 2002/08/18 17:38:52 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.7 2002/09/10 04:18:38 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -301,7 +301,6 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 	int numNodes = nodeVector.size();
 
 	for (int node = 0; node < numNodes; ++node) {
-
 	    resultElement.appendChild(((Node)
 			 nodeVector.elementAt(node)).cloneNode(true));
 	}

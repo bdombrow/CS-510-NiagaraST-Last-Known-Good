@@ -4,6 +4,7 @@ import java.lang.*;
 import java.io.*;
 import java.net.*;
 import java.util.Vector;
+import java.lang.reflect.Array;
 
 import niagara.utils.*;
 
@@ -13,9 +14,8 @@ class XMLFirehoseThread extends Thread {
     private XMLGenMessage msg;
     private BufferedOutputStream client_out;
     private FirehoseSpec fhSpec;
-
-    private String stDoc;
     private File temp_file;
+
     
     public XMLFirehoseThread(String str, MsgQueue _queue) {
 	super(str);
@@ -31,12 +31,10 @@ class XMLFirehoseThread extends Thread {
 		// set up a writer associated with the socket
 		client_out = new BufferedOutputStream(msg.get_client_socket().getOutputStream());
 
-		// KT - better name than getDataType!! ???
 		fhSpec = msg.getSpec();
 		boolean useStreamingFormat = fhSpec.isStreaming();
 		boolean usePrettyPrint = fhSpec.isPrettyPrint();
 		boolean trace = fhSpec.getTrace();
-		System.out.println(fhSpec.getDataType());
 		switch(fhSpec.getDataType()) {
 		case FirehoseConstants.XMLB:
 		    xml_generator = new XMLBGenerator(fhSpec.getNumTLElts(), 
@@ -88,18 +86,74 @@ class XMLFirehoseThread extends Thread {
 		default:
 		    throw new PEException("KT unexpected stream data type");
 		}
+
+
 		int numGenCalls = fhSpec.getNumGenCalls();
 
 		// generate a and send the documents 
 		int count = 0;
+		int writtenBytes = 0;
+		byte[] genBytes;
+		int numGenBytes;
+		int leftToWrite;
+
+		int bytesPerSec = fhSpec.getRate()*1024; // rate in KB/sec
+		boolean useRate = true;
+		if(bytesPerSec == 0)
+		    useRate = false;
+		long startTime = System.currentTimeMillis();
+
 		if(useStreamingFormat)
 		    client_out.write(FirehoseConstants.OPEN_STREAM.getBytes());
 		while((count < numGenCalls || numGenCalls == -1) &&
 		      xml_generator.getEOF() == false) {
-		    stDoc = xml_generator.generateXMLString();
-		    client_out.write(stDoc.getBytes());
-		    count++; 
-		}	
+
+		    genBytes = xml_generator.generateXMLBytes();
+		    count++;
+
+		    if(!useRate) {
+			client_out.write(genBytes);		
+		    } else {
+			numGenBytes = Array.getLength(genBytes);
+			
+			if(numGenBytes+writtenBytes > bytesPerSec) {
+			    int toWrite = bytesPerSec - writtenBytes;
+			    client_out.write(genBytes, 0, toWrite);
+			    leftToWrite = numGenBytes-toWrite;
+			    writtenBytes += toWrite;
+			} else {
+			    client_out.write(genBytes);
+			    leftToWrite = 0;
+			    writtenBytes += numGenBytes;
+			}
+			
+			if(writtenBytes == bytesPerSec) {
+			    long curTime = System.currentTimeMillis();
+			    if((curTime - startTime) < 1000) { // 1000 milliseconds in one second
+				try {
+				    Thread.sleep(1000 - (curTime-startTime));
+				} catch (java.lang.InterruptedException e) {
+				    // 
+				    System.err.println("KT: HELP Got Interrupted Exception in XMLFirehoseThread - IGNORING IT"); // uugh, don't know what else to do
+				}
+			    } else {
+				System.out.println("KT: WARNING: Data generation is too slow to keep up with rate");
+			    }
+			    // start another second
+			    startTime = System.currentTimeMillis();
+			    writtenBytes = 0;
+			}
+
+			if(leftToWrite != 0) {
+			    if(leftToWrite <= bytesPerSec) {
+				client_out.write(genBytes, numGenBytes-leftToWrite, leftToWrite);
+				writtenBytes += leftToWrite;
+			    } else {
+				throw new PEException("KT: uugh, generated more than one seconds worth of data!!");
+			    }
+			}
+		    }	
+		}
 		if(useStreamingFormat)
 		    client_out.write(FirehoseConstants.CLOSE_STREAM.getBytes());
 	    } catch (FileNotFoundException e) {
@@ -116,17 +170,13 @@ class XMLFirehoseThread extends Thread {
 		// getContent from the url
 		System.err.println("ERROR: IO Problem: " 
 				   + e.getMessage());
-
-		// else, there is nothing we can do - we can't 
-		// communicate with the client -
-		// assume this is a problem with this specific
-		// client connection - just continue - socket will be
-		// closed below
 	    } catch (SecurityException e) {
 		// problem opening temp.xml
 		System.err.println("ERROR: Security Violation: "
 				   + e.getMessage());
-	    } 
+	    } catch (EOSException e) {
+		// do nothing, just go on
+	    }
 
 	    // prepare for next message
 	    xml_generator = null;

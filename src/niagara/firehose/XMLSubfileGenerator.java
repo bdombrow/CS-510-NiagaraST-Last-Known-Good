@@ -19,7 +19,7 @@ class XMLSubfileGenerator extends XMLFirehoseGen {
 	usePrettyPrint = prettyprint;
     }
 
-    public String generateXMLString() {
+    public byte[] generateXMLBytes() {
 
 	// KT - WARNING - need to handle useStreamingFormat in this function
 	// but I don't see how to do it. if useStreamingFormat is true,
@@ -29,7 +29,7 @@ class XMLSubfileGenerator extends XMLFirehoseGen {
 	if (m_sh == null) 
 	    m_sh = new SubfileHandler();
 	
-	return m_sh.getNextDoc(stFile);
+	return m_sh.getNextDoc(stFile).getBytes();
     }
 }
 

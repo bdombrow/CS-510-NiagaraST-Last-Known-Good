@@ -36,7 +36,7 @@ class XMLBGenerator extends XMLFirehoseGen {
     }
 
     // was getXMLBData()
-    public String generateXMLString() {
+    public byte[] generateXMLBytes() {
 
 	int iElement = -1;
 	String stEnd = null;
@@ -97,6 +97,6 @@ class XMLBGenerator extends XMLFirehoseGen {
 	    System.out.println("\t" + stb.toString());
 	}
 
-	return stb.toString();
+	return stb.toString().getBytes();
     }
 }

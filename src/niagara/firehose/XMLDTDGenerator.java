@@ -17,7 +17,7 @@ class XMLDTDGenerator extends XMLFirehoseGen {
 	xmlGenerator = new XMLGenerator();
     }
 
-    public String generateXMLString() throws IOException{
+    public byte[] generateXMLBytes() throws IOException{
         Document d = xmlGenerator.generateXML(dtdName);
 
 	// convert the document to a string and return, but check

@@ -37,7 +37,7 @@ public class XMLPacketGenerator extends XMLFirehoseGen {
 	}
     }
 
-    public String generateXMLString() {
+    public byte[] generateXMLBytes() {
 	if (m_stb == null) {
 	    m_stb = new StringBuffer(1000*numTLElts);
 	}
@@ -61,7 +61,7 @@ public class XMLPacketGenerator extends XMLFirehoseGen {
 
 	String stOut = m_stb.toString();
 	m_stb.setLength(0);
-	return stOut;
+	return stOut.getBytes();
     }
 
     public boolean getEOF() { return m_fEOF; }

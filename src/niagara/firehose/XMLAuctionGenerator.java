@@ -39,7 +39,7 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
       }
   }
   
-  public String generateXMLString() {
+  public byte[] generateXMLBytes() {
       // KT - appears we can ignore useStreamingFormat - don't see
       // the xml header being added anywhere
       
@@ -61,10 +61,10 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     //Get the auction values
     m_av.init(stFile, cal);
     
-    System.out.println("Initial Auction Values: " +
-		       m_av.getPersonCount() + " persons, " + 
-		       m_av.getItemCount() + " items, " + 
-		       m_av.getOpenAuctionCount() + " open auctions");
+    //System.out.println("Initial Auction Values: " +
+    //		       m_av.getPersonCount() + " persons, " + 
+    //		       m_av.getItemCount() + " items, " + 
+    //		       m_av.getOpenAuctionCount() + " open auctions");
 
     // Generate appropriate data
     StringBuffer stringBuf = new StringBuffer();
@@ -88,7 +88,7 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
 	}
     }
     
-    return stringBuf.toString();
+    return stringBuf.toString().getBytes();
   }
 
   private void generateBid(StringBuffer stb, int numBids) {
