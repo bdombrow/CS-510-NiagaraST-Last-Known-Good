@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.16 2002/10/31 04:29:27 vpapad Exp $
+ * $Id: BufferManager.java,v 1.17 2002/11/01 01:56:20 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -495,6 +495,13 @@ public class BufferManager {
         } else
             offset++;
         return makeNode(doc, getIndex(page, offset));
+    }
+    
+    public static NodeList fakeGetChildNodes(DocumentImpl doc, int index) {
+        ArrayList al = new ArrayList(1);
+        Node n = fakeAttributeChildren(doc, index);
+        al.add(n);
+        return new NodeListImpl(al);
     }
     
     public static Node getFirstChild(DocumentImpl doc, int index) {

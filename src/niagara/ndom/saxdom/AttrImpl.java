@@ -1,5 +1,5 @@
 /**
- * $Id: AttrImpl.java,v 1.4 2002/09/27 01:26:19 vpapad Exp $
+ * $Id: AttrImpl.java,v 1.5 2002/11/01 01:56:20 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -56,10 +56,11 @@ public class AttrImpl extends NodeImpl implements Attr {
         return BufferManager.getOwnerElement(index);
     }
 
-    /**
-     * @see org.w3c.dom.Node#getFirstChild()
-     */
     public Node getFirstChild() {
         return BufferManager.fakeAttributeChildren(doc, index);
+    }
+    
+    public NodeList getChildNodes() {
+        return BufferManager.fakeGetChildNodes(doc, index);
     }
 }
