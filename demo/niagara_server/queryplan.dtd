@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.37 2003/09/30 19:27:38 jinli Exp $
+<!-- $Id: queryplan.dtd,v 1.38 2003/12/06 06:56:04 jinli Exp $
      DTD for query plans -->
 
 <!-- 
@@ -16,7 +16,8 @@
 		    prefix | punctuate | send | display | topn |
 		    firehosescan | filescan | construct | 
 		    bucket | partitionavg | partitionmax |
-		    accumulate | nest | magic_construct | windowCount)+>
+		    accumulate | nest | magic_construct | 
+		    windowCount | windowMax | windowAverage )+>
 		    
 <!ATTLIST plan top IDREF        #REQUIRED
           %PositionAttributes;>
@@ -75,6 +76,12 @@
 	  avgattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
 
+<!ELEMENT windowAverage    EMPTY>
+<!ATTLIST windowAverage
+	  groupby  CDATA		#REQUIRED
+	  avgattr  CDATA		#REQUIRED
+	  %StandardAttributes;>
+
 <!ELEMENT slidingAvg     EMPTY>
 <!ATTLIST slidingAvg 
 	  groupby  CDATA	       #REQUIRED
@@ -103,6 +110,12 @@
 	  maxattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
 
+<!ELEMENT windowMax	EMPTY>
+<!ATTLIST windowMax
+	  groupby  CDATA		#REQUIRED
+	  maxattr  CDATA		#REQUIRED
+	  %StandardAttributes;>
+	  
 <!ELEMENT slidingMax     EMPTY>
 <!ATTLIST slidingMax 
 	  groupby  CDATA	       #REQUIRED

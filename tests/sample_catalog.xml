@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.19 2003/09/30 19:36:49 jinli Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.20 2003/12/06 06:58:20 jinli Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -89,6 +89,10 @@
       class="niagara.xmlql_parser.op_tree.SlidingSumOp">
       <physical name="PhysicalSlidingSum" class="niagara.query_engine.PhysicalSlidingSumOperator"/>
     </logical>
+    <logical name="min"
+      class="niagara.xmlql_parser.op_tree.MinOp">
+      <physical name="PhysicalMin" class="niagara.query_engine.PhysicalMinOperator"/>
+    </logical>
      <logical name="max"
       class="niagara.xmlql_parser.op_tree.MaxOp">
       <physical name="PhysicalMax" class="niagara.query_engine.PhysicalMaxOperator"/>
@@ -104,6 +108,14 @@
     <logical name="windowCount"
       class="niagara.xmlql_parser.op_tree.windowCountOp">
       <physical name="PhysicalWindowCount" class="niagara.query_engine.PhysicalWindowCountOperator"/>
+    </logical>
+    <logical name="windowMax"
+      class="niagara.xmlql_parser.op_tree.windowMaxOp">
+      <physical name="PhysicalWindowMax" class="niagara.query_engine.PhysicalWindowMaxOperator"/>
+    </logical>
+    <logical name="windowAverage"
+      class="niagara.xmlql_parser.op_tree.windowAverageOp">
+      <physical name="PhysicalWindowAverage" class="niagara.query_engine.PhysicalWindowAverageOperator"/>
     </logical>
     <logical name="slidingCount"
       class="niagara.xmlql_parser.op_tree.SlidingCountOp">
@@ -171,7 +183,7 @@
   		<before><logical name="display"/></before>
  		<after><op name="PhysicalDisplay"/></after>
   	</rule>
-	<rule type="simple" name="select to PhysicalSelect">
+  	<rule type="simple" name="select to PhysicalSelect">
   		<before><logical name="select"/></before>
  		<after><op name="PhysicalSelect"/></after>
   	</rule> 
@@ -219,6 +231,15 @@
 		<before><logical name="windowCount"/></before>
 		<after><op name="PhysicalWindowCount"/></after>
 	</rule>
+	<rule type="simple" name="windowMax to PhysicalWindowMax">
+		<before><logical name="windowMax"/></before>
+		<after><op name="PhysicalWindowMax"/></after>
+	</rule>
+	<rule type="simple" name="windowAverage to PhysicalWindowAverage">
+		<before><logical name="windowAverage"/></before>
+		<after><op name="PhysicalWindowAverage"/></after>
+	</rule>
+
   	<rule type="simple" name="slidingCount to PhysicalSlidingCount">
   		<before><logical name="slidingCount"/></before>
  		<after><op name="PhysicalSlidingCount"/></after>
@@ -231,6 +252,10 @@
   		<before><logical name="slidingSum"/></before>
  		<after><op name="PhysicalSlidingSum"/></after>
   	</rule>
+	<rule type="simple" name="min to PhysicalMin">
+		<before><logical name="min"/></before>
+		<after><op name="PhysicalMin"/></after>
+	</rule>
   	<rule type="simple" name="max to PhysicalMax">
   		<before><logical name="max"/></before>
  		<after><op name="PhysicalMax"/></after>
@@ -296,7 +321,6 @@
 	        <before><logical name="nest"/></before>
 		<after><op name="PhysicalNest"/></after>
         </rule>
-	
   	<rule type="constructed" name="select-unnest to PhysicalPredicatedUnnest"
   		condition="isPushableInto" argument="unn">
   		<before>
@@ -312,17 +336,8 @@
 	  		</op>
   		</after>
   	</rule>
-  	
-  	<!-- The duplicate-free join reordering rules from Pellenkoft et al., VLDB '97 -->
-  	<rule type="custom" name="CommuteJoin" class="niagara.optimizer.rules.CommuteJoin" 
-  	         mask="CommuteJoin,AssociateJoinRtoL,AssociateJoinLtoR,Exchange"/>
-  	<rule type="custom" name="AssociateJoinRtoL" class="niagara.optimizer.rules.AssociateJoinRtoL"
-  	         mask="AssociateJoinRtoL,AssociateJoinLtoR,Exchange"/>
-  	<rule type="custom" name="AssociateJoinLtoR" class="niagara.optimizer.rules.AssociateJoinLtoR" 
-  	         mask="AssociateJoinRtoL,AssociateJoinLtoR,Exchange"/>
-  	<rule type="custom" name="Exchange" class="niagara.optimizer.rules.Exchange" 
-  	         mask="AssociateJoinRtoL,AssociateJoinLtoR,Exchange"/>
-
+  	<rule type="custom" name="CommuteJoin" class="niagara.optimizer.rules.CommuteJoin" mask="CommuteJoin"/>
+  	<rule type="custom" name="AssociateJoin" class="niagara.optimizer.rules.AssociateJoinRtoL"/>
   	<rule type="custom" name="SelectIntoJoin" class="niagara.optimizer.rules.SelectIntoJoin"/>
   	<rule type="custom" name="PushJoinPredicates" class="niagara.optimizer.rules.PushJoinPredicates"/>
   	<rule type="custom" name="SelectThruUnnest" class="niagara.optimizer.rules.SelectThruUnnest"/>
@@ -350,14 +365,6 @@
   		<before><logical name="resource" condition="isLocallyResolvable"/></before>
  		<after><op name="dtdscan"/></after>
   	</rule>
-	<!-- To disable projection pushing, comment out this rule (and uncomment the next one) -->  	
-  	<rule type="custom" name="PushProjection" class="niagara.optimizer.rules.PushProjection"/>
-  	<!--
-  	<rule type="simple" name="project to noop">
-  		<before><logical name="project"/></before>
- 		<after><op name="noop"/></after> 
-  	</rule>
-  	-->
   </ruleset>
   
   	<!-- Cost Model -->
