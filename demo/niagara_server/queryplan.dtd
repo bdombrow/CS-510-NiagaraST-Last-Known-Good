@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.28 2003/03/15 17:51:36 ptucker Exp $
+<!-- $Id: queryplan.dtd,v 1.29 2003/03/19 00:37:32 tufte Exp $
      DTD for query plans -->
 
 <!-- 
@@ -13,7 +13,7 @@
 		    firehosescan | accumulate | 
                     expression | send | display | topn |
 	            incrmax | incravg | count |
-		    sort | dup | union)+>
+		    sort | dup | union | nest)+>
 
 <!ATTLIST plan top IDREF        #REQUIRED
           %PositionAttributes;>
@@ -334,3 +334,9 @@
 	  initialAccumFile CDATA #IMPLIED
 	  clear     (true | false) "false"
 	  %StandardAttributes;>
+
+<!ELEMENT nest ANY>
+<!ATTLIST nest 
+	  groupby  CDATA	       #REQUIRED
+          clear    (yes|no)     "no"
+          %StandardAttributes;>
