@@ -21,7 +21,7 @@ public abstract class LogicalOp extends Op {
      * Determine the logical properties of this operator's output,
      * given the logical properties of its inputs
      */
-    public abstract LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input);
+//    public abstract LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input);
 
     public boolean is_logical() {
         return true;
