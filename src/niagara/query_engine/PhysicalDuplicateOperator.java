@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalDuplicateOperator.java,v 1.4 2002/05/07 03:10:55 tufte Exp $
+  $Id: PhysicalDuplicateOperator.java,v 1.5 2002/10/24 03:10:52 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +28,8 @@
 package niagara.query_engine;
 
 import org.w3c.dom.*;
-import java.lang.reflect.Array;
+
+import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -43,55 +43,18 @@ import niagara.xmlql_parser.syntax_tree.*;
  */
 
 public class PhysicalDuplicateOperator extends PhysicalOperator {
-	
-    ////////////////////////////////////////////////////////
-    // Data members of the PhysicalDuplicateOperator Class
-    ////////////////////////////////////////////////////////
-
-    // This is the array having information about blocking and non-blocking
-    // streams
-    //
+    // No blocking input streams
     private static final boolean[] blockingSourceStreams = { false };
 
     // The number of sink streams for the operator
-    //
     int numSinkStreams;
     
-
-    ///////////////////////////////////////////////////
-    // Methods of the PhysicalDuplicateOperator Class
-    ///////////////////////////////////////////////////
-
-    /**
-     * This is the constructor for the PhysicalDuplicateOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     */
-     
-    public PhysicalDuplicateOperator (op logicalOperator,
-				      SourceTupleStream[] sourceStreams,
-				      SinkTupleStream[] sinkStreams,
-				      Integer responsiveness) {
-
-	// Call the constructor of the super class
-	//
-	super(sourceStreams,
-	      sinkStreams,
-	      blockingSourceStreams,
-	      responsiveness);
-
-	// Get the number of sink streams
-	//
-	this.numSinkStreams = Array.getLength(sinkStreams);
+    public PhysicalDuplicateOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
     }
-		     
+    
+    public void initFrom(LogicalOp logicalOperator) { }
+
 
     /**
      * This function processes a tuple element read from a source stream
@@ -109,13 +72,6 @@ public class PhysicalDuplicateOperator extends PhysicalOperator {
 					 int streamId)
 	throws ShutdownException, InterruptedException {
 	// Copy the input tuple to all the sink streams
-        //try {
-            Document doc = (Document) tupleElement.getAttribute(0);
-            String rootName = doc.getDocumentElement().getTagName();
-	    //} catch (Exception e) {
-	    //throw new PEException("KT?? Non doc tupleElement. Go on");
-	    //}
-    
 	for (int dest = 0; dest < numSinkStreams; ++dest) {
 	    putTuple(tupleElement, dest);
 	}
@@ -125,4 +81,18 @@ public class PhysicalDuplicateOperator extends PhysicalOperator {
 	return false;
     }
     
+    /**
+     * @see niagara.query_engine.PhysicalOperator#plugInStreams(SourceTupleStream[], SinkTupleStream[], boolean[], Integer)
+     */
+    public void plugInStreams(
+        SourceTupleStream[] sourceStreams,
+        SinkTupleStream[] sinkStreams,
+        boolean[] blockingSourceStreams,
+        Integer responsiveness) {
+        super.plugInStreams(
+            sourceStreams,
+            sinkStreams,
+            responsiveness);
+            this.numSinkStreams = sinkStreams.length;
+    }
 }

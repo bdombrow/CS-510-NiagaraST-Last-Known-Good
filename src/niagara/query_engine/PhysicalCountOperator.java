@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.7 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalCountOperator.java,v 1.8 2002/10/24 03:05:56 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -59,18 +58,9 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
     
     private class CountingSufficientStatistics {
 
-	//////////////////////////////////////////////////////////
-	// These are the private members of the class           //
-	//////////////////////////////////////////////////////////
-
 	// The number of values
-	//
 	int numValues;
 
-
-	//////////////////////////////////////////////////////////
-	// These are the methods of the class                   //
-	//////////////////////////////////////////////////////////
 
 	/**
 	 * This is the constructor that initializes Count sufficient
@@ -127,37 +117,9 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
 
     ArrayList atomicValues;
 
-    ////////////////////////////////////////////////////////////////////
-    // These are the methods of the class                             //
-    ////////////////////////////////////////////////////////////////////
-
-    /**
-     * This is the constructor for the PhysicalCountOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     */
-
-    public PhysicalCountOperator(op logicalOperator,
-				 SourceTupleStream[] sourceStreams,
-				 SinkTupleStream[] sinkStreams,
-				 Integer responsiveness) {
-
-	// Call the constructor of the super class
-	//
-	super(logicalOperator,
-	      sourceStreams,
-	      sinkStreams,
-	      responsiveness);
-
+    
+    public void initFrom(LogicalOp logicalOperator) {
 	// Get the counting attribute of the Count logical operator
-	//
 	countingAttribute = ((CountOp) logicalOperator).getCountingAttribute();
         ae = new AtomicEvaluator(countingAttribute);
         atomicValues = new ArrayList();
