@@ -1,4 +1,4 @@
-/* $Id: SourceThread.java,v 1.1 2002/10/24 00:09:51 vpapad Exp $ */
+/* $Id: SourceThread.java,v 1.2 2002/10/30 01:41:26 vpapad Exp $ */
 package niagara.data_manager;
 
 import niagara.connection_server.NiagraServer;
