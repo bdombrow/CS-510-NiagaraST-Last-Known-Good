@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.12 2003/07/03 19:40:39 tufte Exp $
+ * $Id: Page.java,v 1.13 2003/07/03 19:42:13 tufte Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -28,7 +28,6 @@ public class Page {
     private String[] event_string;
     private int[] next_sibling;
     private boolean[] is_magic;
-    //private int[] first_child;
 
     private Page previous;
     private Page next;
@@ -48,7 +47,6 @@ public class Page {
         event_type = new byte[size];
         event_string = new String[size];
         next_sibling = new int[size];
-        //first_child = new int[size];
 
         this.number = number;
 
