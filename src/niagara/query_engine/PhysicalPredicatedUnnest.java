@@ -1,4 +1,4 @@
-/* $Id: PhysicalPredicatedUnnest.java,v 1.1 2002/12/10 01:17:45 vpapad Exp $ */
+/* $Id: PhysicalPredicatedUnnest.java,v 1.2 2003/02/28 05:27:34 vpapad Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -245,7 +245,7 @@ public class PhysicalPredicatedUnnest extends PhysicalOperator {
         super.constructTupleSchema(inputSchemas);
         // Without projection, (length of output tuple) = (length of input tuple + 1)
         projecting =
-            (inputSchemas[0].getLength() + 1 != outputTupleSchema.getLength());
+            (inputSchemas[0].getLength() + 1 > outputTupleSchema.getLength());
         if (projecting)
             attributeMap = inputSchemas[0].mapPositions(outputTupleSchema);
     }
@@ -257,5 +257,10 @@ public class PhysicalPredicatedUnnest extends PhysicalOperator {
         sb.append(">");
         pred.toXML(sb);
         sb.append("</").append(getName()).append(">");
+    }
+
+    public void dumpAttributesInXML(StringBuffer sb) {
+        sb.append(" variable='").append(variable.getName()).append("'");
+        super.dumpAttributesInXML(sb);
     }
 }

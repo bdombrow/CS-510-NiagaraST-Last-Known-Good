@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.10 2003/02/25 06:10:26 vpapad Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.11 2003/02/28 05:27:34 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -178,12 +178,12 @@ public class PhysicalNLJoinOperator extends PhysicalJoin {
     public Cost findLocalCost(ICatalog catalog, LogicalProperty[] inputLogProp) {
         double leftCard = inputLogProp[0].getCardinality();
         double rightCard = inputLogProp[1].getCardinality();
-        float outputCard = logProp.getCardinality();
-
+        double outputCard = logProp.getCardinality();
+        
         // we have to evaluate the predicate for every tuple combination
         Cost cost = predEval.getCost(catalog).times(leftCard * rightCard);
         cost.add(new Cost((leftCard + rightCard) + catalog.getDouble("tuple_reading_cost")));
-        cost.add(new Cost(constructTupleCost(catalog)));
+        cost.add(new Cost(outputCard * constructTupleCost(catalog)));
         return cost;
     } 
 

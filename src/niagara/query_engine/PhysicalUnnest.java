@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.6 2003/02/25 06:10:25 vpapad Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.7 2003/02/28 05:27:34 vpapad Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -210,9 +210,15 @@ public class PhysicalUnnest extends PhysicalOperator {
 
     public void constructTupleSchema(TupleSchema[] inputSchemas) {
         super.constructTupleSchema(inputSchemas);
-        // Without projection, (length of output tuple) = (length of input tuple + 1)
-        projecting = (inputSchemas[0].getLength() + 1 != outputTupleSchema.getLength());
+        // Without projection, (length of output tuple) < (length of input tuple + 1)
+        projecting = (inputSchemas[0].getLength() + 1 > outputTupleSchema.getLength());
         if (projecting)
             attributeMap = inputSchemas[0].mapPositions(outputTupleSchema);
     }
+
+    public void dumpAttributesInXML(StringBuffer sb) {
+        sb.append(" variable='").append(variable.getName()).append("'");
+        super.dumpAttributesInXML(sb);
+    }
+
 }
