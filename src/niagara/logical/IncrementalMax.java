@@ -33,10 +33,16 @@ public class IncrementalMax extends IncrementalGroup {
         return maxAttribute;
     }
 
+    public boolean outputOldValue() {
+        return true;
+    }
+
     public void dump() {System.out.println(getName());}
 
     public Op copy() {
-        return new IncrementalMax(skolemAttributes, maxAttribute);
+        IncrementalMax op = new IncrementalMax(skolemAttributes, maxAttribute);
+        op.setEmptyGroupValue(emptyGroupValue);
+        return op;
     }
     
     public boolean equals(Object o) {

@@ -25,6 +25,11 @@ public abstract class IncrementalGroup extends unryOp {
 	return skolemAttributes;
     }
 
+    /** Does the output schema of this operator include the old group value?*/
+    public boolean outputOldValue() {
+        return false;
+    }
+
     public LogicalProperty findLogProp(
         ICatalog catalog,
         LogicalProperty[] input) {
@@ -40,6 +45,8 @@ public abstract class IncrementalGroup extends unryOp {
             Attribute a = (Attribute) groupbyAttrs.get(i);
             attrs.add(a);
         }
+        if (outputOldValue()) 
+            attrs.add(new Variable("old" + skolemAttributes.getName()));
         attrs.add(new Variable(skolemAttributes.getName()));
         
         return  new LogicalProperty(card, attrs, inpLogProp.isLocal());
