@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.19 2003/02/05 21:17:50 jinli Exp $
+  $Id: PhysicalGroupOperator.java,v 1.20 2003/02/25 06:10:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,6 @@ package niagara.query_engine;
 
 import java.util.*;
 
-import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;

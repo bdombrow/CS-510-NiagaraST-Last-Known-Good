@@ -6,7 +6,6 @@ import niagara.utils.*;
 import niagara.ndom.*;
 
 import org.w3c.dom.*;
-import java.util.*;
 
 /** Sample user-defined expression class */
 public class TestExpression implements ExpressionIF {

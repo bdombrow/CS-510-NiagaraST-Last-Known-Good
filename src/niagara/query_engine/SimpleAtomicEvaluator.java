@@ -1,12 +1,8 @@
-/* $Id: SimpleAtomicEvaluator.java,v 1.1 2002/12/10 01:17:45 vpapad Exp $ */
+/* $Id: SimpleAtomicEvaluator.java,v 1.2 2003/02/25 06:10:25 vpapad Exp $ */
 package niagara.query_engine;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.w3c.dom.Node;
 
-import niagara.utils.NodeVector;
 import niagara.utils.StreamTupleElement;
 import niagara.xmlql_parser.syntax_tree.schemaAttribute;
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryOptimizer.java,v 1.3 2002/10/27 02:37:57 vpapad Exp $
+  $Id: QueryOptimizer.java,v 1.4 2003/02/25 06:10:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,6 @@
 package niagara.query_engine;
 
 import java.util.Vector;
-import java.util.Hashtable;
 import niagara.data_manager.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;

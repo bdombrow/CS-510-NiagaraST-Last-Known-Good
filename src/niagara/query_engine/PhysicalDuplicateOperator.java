@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalDuplicateOperator.java,v 1.7 2002/10/31 03:54:39 vpapad Exp $
+  $Id: PhysicalDuplicateOperator.java,v 1.8 2003/02/25 06:10:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -26,12 +26,11 @@
 
 package niagara.query_engine;
 
-import org.w3c.dom.*;
 
 import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
+
 /**
  * This is the <code>PhysicalDuplicateOperator</code> that extends
  * the basic PhysicalOperator. The Duplicate operator duplicates the

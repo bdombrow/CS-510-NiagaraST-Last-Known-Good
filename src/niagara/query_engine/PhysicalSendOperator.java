@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalSendOperator.java,v 1.5 2002/10/31 03:54:38 vpapad Exp $
+ * $Id: PhysicalSendOperator.java,v 1.6 2003/02/25 06:10:26 vpapad Exp $
  *
  */
 
@@ -11,7 +11,6 @@ import org.w3c.dom.*;
 
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.connection_server.*;

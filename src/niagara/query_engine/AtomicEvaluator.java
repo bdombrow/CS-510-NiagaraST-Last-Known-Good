@@ -1,8 +1,7 @@
-/* $Id: AtomicEvaluator.java,v 1.7 2002/12/10 01:17:45 vpapad Exp $ */
+/* $Id: AtomicEvaluator.java,v 1.8 2003/02/25 06:10:26 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.w3c.dom.Node;
 

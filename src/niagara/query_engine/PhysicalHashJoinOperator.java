@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.10 2003/01/13 05:09:47 tufte Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.11 2003/02/25 06:10:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
 
 /**
  * This is the <code>PhysicalHashJoinOperator</code> that extends

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.22 2003/01/13 05:09:47 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.23 2003/02/25 06:10:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -705,7 +705,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
      * @param streamId The source stream to which the control element
      *                 is to be put
      *
-     * @return True if the operator is to continue and false otherwise
      * @exception ShutdownException query shutdown by user or execution error
      */
     private void sendCtrlMsgToSource (int ctrlFlag, int streamId)

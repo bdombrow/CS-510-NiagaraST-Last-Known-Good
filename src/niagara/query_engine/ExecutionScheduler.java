@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.17 2003/01/13 05:09:47 tufte Exp $
+  $Id: ExecutionScheduler.java,v 1.18 2003/02/25 06:10:25 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,12 +28,9 @@ package niagara.query_engine;
 
 import org.w3c.dom.*;
 
-import java.lang.reflect.Constructor;
-import java.util.Vector;
 import java.util.HashMap;
 import niagara.data_manager.*;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
 import niagara.ndom.*;
 
 import niagara.connection_server.*;

@@ -1,10 +1,8 @@
-/* $Id: PhysicalUnnest.java,v 1.5 2002/12/10 01:17:45 vpapad Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.6 2003/02/25 06:10:25 vpapad Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
-import java.util.ArrayList;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 import niagara.logical.Unnest;

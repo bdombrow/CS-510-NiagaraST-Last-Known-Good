@@ -1,7 +1,6 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.17 2003/02/22 08:08:50 tufte Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.18 2003/02/25 06:10:25 vpapad Exp $ */
 package niagara.query_engine;
 
-import java.util.Vector;
 import org.w3c.dom.*;
 
 import niagara.ndom.*;
@@ -13,7 +12,6 @@ import java.io.*;
 import niagara.ndom.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
 import niagara.data_manager.*;
 import niagara.connection_server.NiagraServer;
 
@@ -183,7 +181,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
         Object attr = tupleElement.getAttribute(mergeIndex);
 
         Element domElt;
-        Document domDoc;
         if (attr instanceof Element) {
             domElt = (Element) attr;
         } else if (attr instanceof Document) {

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.9 2003/02/22 08:08:50 tufte Exp $
+  $Id: QueryResult.java,v 1.10 2003/02/25 06:10:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,8 +31,6 @@ package niagara.query_engine;
 import org.w3c.dom.*;
 
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
 import niagara.connection_server.NiagraServer;
 
@@ -497,9 +495,7 @@ public class QueryResult {
      */
 
     private Document extractXMLDocument (StreamTupleElement tupleElement) {
-
 		// First get the last attribute of the tuple
-		//
 		Node lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
 	
 		if(lastAttribute instanceof Document) {

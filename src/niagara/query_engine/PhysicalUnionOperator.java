@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalUnionOperator.java,v 1.8 2002/10/31 03:54:38 vpapad Exp $
+  $Id: PhysicalUnionOperator.java,v 1.9 2003/02/25 06:10:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,16 +27,11 @@
 
 package niagara.query_engine;
 
-import org.w3c.dom.*;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
-import niagara.optimizer.*;
 import niagara.optimizer.colombia.*;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
 
 
 /**

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.9 2002/10/31 03:54:38 vpapad Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.10 2003/02/25 06:10:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -26,15 +26,12 @@
 
 package niagara.query_engine;
 
-import niagara.ndom.*;
 import niagara.optimizer.colombia.*;
 
 import org.w3c.dom.*;
-import java.util.*;
 import java.io.StringReader;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
 
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.parser.wrapper.*;

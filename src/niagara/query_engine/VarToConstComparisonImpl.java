@@ -1,8 +1,6 @@
 /* $Id */
 package niagara.query_engine;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.w3c.dom.Node;
 

@@ -1,7 +1,6 @@
-/* $Id: TrueImpl.java,v 1.2 2002/12/10 01:17:45 vpapad Exp $ */
+/* $Id: TrueImpl.java,v 1.3 2003/02/25 06:10:25 vpapad Exp $ */
 package niagara.query_engine;
 
-import java.util.HashMap;
 
 import org.w3c.dom.Node;
 

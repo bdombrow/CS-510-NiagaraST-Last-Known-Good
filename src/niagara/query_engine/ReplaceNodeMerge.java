@@ -20,8 +20,6 @@ package niagara.query_engine;
  * @author Kristin Tufte
  */
 
-import java.lang.*;
-import java.lang.reflect.*;
 import java.io.*;
 
 import org.w3c.dom.*;

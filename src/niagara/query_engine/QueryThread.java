@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: QueryThread.java,v 1.5 2002/10/27 03:08:04 vpapad Exp $
+  $Id: QueryThread.java,v 1.6 2003/02/25 06:10:25 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,9 +27,6 @@
 
 package niagara.query_engine;
 
-import java.util.Vector;
-import java.io.FileReader;
-import java.io.File;
 import java.io.StringReader;
 import niagara.data_manager.*;
 import niagara.xmlql_parser.op_tree.*;

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHeadOperator.java,v 1.5 2002/10/31 03:54:38 vpapad Exp $
+  $Id: PhysicalHeadOperator.java,v 1.6 2003/02/25 06:10:25 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,7 +35,6 @@ package niagara.query_engine;
  * execution, it removes traces of the query from the system.
  *
  */
-import niagara.optimizer.colombia.LogicalOp;
 import niagara.utils.*;
 
 public class PhysicalHeadOperator extends UnoptimizablePhysicalOperator {

@@ -1,4 +1,4 @@
-/* $Id: PhysicalIncrementalAverage.java,v 1.5 2002/11/01 01:56:59 vpapad Exp $ */
+/* $Id: PhysicalIncrementalAverage.java,v 1.6 2003/02/25 06:10:26 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -7,10 +7,7 @@ import niagara.logical.IncrementalAverage;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.Op;
-import niagara.utils.SinkTupleStream;
-import niagara.utils.SourceTupleStream;
 import niagara.utils.StreamTupleElement;
-import niagara.xmlql_parser.op_tree.*;
 
 import org.w3c.dom.Node;
 

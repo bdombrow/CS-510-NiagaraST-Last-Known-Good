@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.13 2002/09/25 20:22:07 ptucker Exp $
+  $Id: PathExprEvaluator.java,v 1.14 2003/02/25 06:10:25 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,10 +30,7 @@ package niagara.query_engine;
 import org.w3c.dom.*;
 import java.util.*;
 
-import niagara.ndom.saxdom.DOMImplementationImpl;
-
 import niagara.xmlql_parser.syntax_tree.*;
-import niagara.xmlql_parser.op_tree.*;
 import niagara.utils.*;
 
 public class PathExprEvaluator {

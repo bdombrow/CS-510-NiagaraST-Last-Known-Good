@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.9 2002/12/10 01:17:45 vpapad Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.10 2003/02/25 06:10:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,11 +31,9 @@ import java.util.ArrayList;
 import org.w3c.dom.*;
 
 import niagara.logical.And;
-import niagara.logical.Predicate;
 import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
 
 /** Naive nested-loops join */
 public class PhysicalNLJoinOperator extends PhysicalJoin {

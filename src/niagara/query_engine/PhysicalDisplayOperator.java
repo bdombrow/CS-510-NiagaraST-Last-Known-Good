@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalDisplayOperator.java,v 1.7 2003/01/13 05:09:47 tufte Exp $
+ * $Id: PhysicalDisplayOperator.java,v 1.8 2003/02/25 06:10:26 vpapad Exp $
  *
  */
 
@@ -10,11 +10,9 @@ import org.w3c.dom.*;
 import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
 /**
  * This is the <code>PhysicalDisplayOperator</code> that extends

@@ -2,7 +2,6 @@
 package niagara.query_engine;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.w3c.dom.Node;
 
@@ -11,7 +10,6 @@ import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.utils.PEException;
 import niagara.utils.StreamTupleElement;
-import niagara.xmlql_parser.syntax_tree.opType;
 
 /** A comparison between two variables */
 public class VarToVarComparisonImpl extends ComparisonImpl {

@@ -2,7 +2,6 @@
 package niagara.query_engine;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.w3c.dom.Node;
 
@@ -42,7 +41,6 @@ public class PathToConstComparisonImpl extends ComparisonImpl {
 
         // Loop over every combination of values and check whether
         // predicate holds
-        //
         int numLeft = leftValues.size();
 
         for (int left = 0; left < numLeft; ++left) {

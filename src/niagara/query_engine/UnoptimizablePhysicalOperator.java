@@ -1,13 +1,11 @@
-/* $Id: UnoptimizablePhysicalOperator.java,v 1.5 2002/10/31 03:54:38 vpapad Exp $ */
+/* $Id: UnoptimizablePhysicalOperator.java,v 1.6 2003/02/25 06:10:25 vpapad Exp $ */
 package niagara.query_engine;
 
-import java.util.ArrayList;
 
 import niagara.optimizer.colombia.*;
 import niagara.utils.PEException;
 import niagara.utils.SinkTupleStream;
 import niagara.utils.SourceTupleStream;
-import niagara.xmlql_parser.op_tree.op;
 
 public abstract class UnoptimizablePhysicalOperator extends PhysicalOperator {
     public UnoptimizablePhysicalOperator(

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalMaxOperator.java,v 1.2 2003/02/07 06:50:05 jinli Exp $
+  $Id: PhysicalMaxOperator.java,v 1.3 2003/02/25 06:10:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,8 +34,6 @@ import org.w3c.dom.*;
 
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
-import niagara.ndom.*;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.Op;
