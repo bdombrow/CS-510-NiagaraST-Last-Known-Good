@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.6 2002/09/24 23:18:45 ptucker Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.7 2002/10/27 02:37:57 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,6 +28,10 @@
 package niagara.query_engine;
 
 import java.util.Vector;
+
+import niagara.logical.*;
+import niagara.optimizer.colombia.*;
+
 import java.util.ArrayList;
 import java.util.Enumeration;
 import niagara.utils.*;
@@ -45,99 +48,43 @@ import niagara.xmlql_parser.syntax_tree.*;
  */
 
 public class PhysicalHashJoinOperator extends PhysicalOperator {
-	
-    //////////////////////////////////////////////////////
-    // Data members of the PhysicalHashJoinOperator Class
-    //////////////////////////////////////////////////////
-
-    // This is the array having information about blocking and non-blocking
-    // streams
-    //
+    // No blocking input streams
     private static final boolean[] blockingSourceStreams = { false, false };
 
-    private PredicateEvaluator predEval;
+    private PredicateImpl pred;
+    private Predicate joinPredicate;
+    private EquiJoinPredicateList eqjoinPreds;
+    
     private Hasher[] hashers;
     private String[] rgstPValues;
     private String[] rgstTValues;
     private ArrayList[] rgPunct = new ArrayList[2];
-    private Vector[] rgvAttr = new Vector[2];
 
     // The array of hash tables of partial tuple elements that are read from the
     // source streams. The index of the array corresponds to the index of the
     // stream from which the tuples were read.
-    //
     DuplicateHashtable[] partialSourceTuples;
 
     // The array of hash tables of final tuple elements that are read from the
     // source streams. The index of the array corresponds to the index of the
     // stream from which the tuples were read.
-    //
     DuplicateHashtable[] finalSourceTuples;
     
-    ///////////////////////////////////////////////////
-    // Methods of the PhysicalHashJoinOperator Class
-    ///////////////////////////////////////////////////
-
-    /**
-     * This is the constructor for the PhysicalHashJoinOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     */
-     
-    public PhysicalHashJoinOperator (op logicalOperator,
-				     SourceTupleStream[] sourceStreams,
-				     SinkTupleStream[] sinkStreams,
-				     Integer responsiveness) {
-
-	// Call the constructor of the super class
-	//
-	super(sourceStreams,
-	      sinkStreams,
-	      blockingSourceStreams,
-	      responsiveness);
-
+    public PhysicalHashJoinOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
+    }
+    
+    public void initFrom(LogicalOp logicalOperator) {
 	// Type cast the logical operator to a join operator
-	//
 	joinOp logicalJoinOperator = (joinOp) logicalOperator;
 
-	predEval = new PredicateEvaluator(logicalJoinOperator.getPredicate());
-
-	rgvAttr[0] = logicalJoinOperator.getLeftEqJoinAttr();
-	rgvAttr[1] = logicalJoinOperator.getRightEqJoinAttr();
-
-        hashers = new Hasher[2];
-        hashers[0] = new Hasher(rgvAttr[0]);
-        hashers[1] = new Hasher(rgvAttr[1]);
-
-	rgstPValues = new String[rgvAttr[0].size()];
-	rgstTValues = new String[rgvAttr[0].size()];
-
-	// Initialize the array of hash tables of partial source tuples - there are
-	// two input stream, so the array is of size 2
-	//
-	partialSourceTuples = new DuplicateHashtable[2];
-
-	partialSourceTuples[0] = new DuplicateHashtable();
-	partialSourceTuples[1] = new DuplicateHashtable();
-
-	// Initialize the array of hash tables of final source tuples - there are
-	// two input stream, so the array is of size 2
-	//
-	finalSourceTuples = new DuplicateHashtable[2];
-
-	finalSourceTuples[0] = new DuplicateHashtable();
-	finalSourceTuples[1] = new DuplicateHashtable();
-
-	//Initialize the punctuation lists
-	rgPunct[0] = new ArrayList();
-	rgPunct[1] = new ArrayList();
+        // In hash join, we hope that most tuples that hash the same
+        // do indeed pass the equijoin predicates, so we put them last
+        joinPredicate = And.conjunction(logicalJoinOperator.getNonEquiJoinPredicate(), 
+                                         logicalJoinOperator.getEquiJoinPredicates().toPredicate());
+        pred = joinPredicate.getImplementation();
+        
+        eqjoinPreds = logicalJoinOperator.getEquiJoinPredicates();
     }
 		     
 
@@ -283,7 +230,7 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 
 	    // Check whether the predicate is satisfied
 	    //
-	    if (predEval.eval(leftTuple, rightTuple)) {
+	    if (pred.evaluate(leftTuple, rightTuple)) {
 
 		// Yes, it is satisfied - so create a result. The result is
 		// potentially partial if either of the tuples is potentially
@@ -359,6 +306,124 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 
     public boolean isStateful() {
 	return true;
+    }
+    
+public PhysicalProperty[] InputReqdProp(
+    PhysicalProperty PhysProp,
+    LogicalProperty InputLogProp,
+    int InputNo) {
+    if (PhysProp.equals(PhysicalProperty.ANY))
+        return new PhysicalProperty[] {
+    };
+    return null;
+}
+
+/**
+ * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
+ */
+public Cost FindLocalCost(
+    ICatalog catalog,
+    LogicalProperty[] InputLogProp) {
+    float LeftCard = InputLogProp[0].getCardinality();
+    float RightCard = InputLogProp[1].getCardinality();
+    float OutputCard = logProp.getCardinality();
+
+    double cost = 0;
+    cost += (LeftCard + RightCard) * catalog.getDouble("tuple_reading_cost");
+    cost += (LeftCard + RightCard) * catalog.getDouble("tuple_hashing_cost");
+    cost += OutputCard * catalog.getDouble("tuple_construction_cost");
+    Cost c = new Cost(cost);
+    // XXX vpapad: We must compute the predicate on all the tuple combinations
+    // that pass the equality predicates we're hashing on; but how do we
+    // compute that? We'll just assume that's the same as the tuples that
+    // appear in the output (best case)
+    c.add(pred.getCost(catalog).times(OutputCard));
+    return c;
+}
+
+/**
+ * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
+ */
+public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+    return PhysicalProperty.ANY;
+}
+
+    /**
+     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
+     */
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        // XXX vpapad: Does not handle projects yet!
+        inputTupleSchemas = inputSchemas;
+        outputTupleSchema = inputSchemas[0].copy();
+        for (int i = 0; i < inputSchemas[1].getLength(); i++) {
+            outputTupleSchema.addMapping(inputSchemas[1].getVariable(i));
+        }
+    }
+
+    /**
+     * @see niagara.query_engine.PhysicalOperator#opInitialize()
+     */
+    protected void opInitialize() {
+        Attrs leftAttrs = eqjoinPreds.getLeft();
+        Attrs rightAttrs = eqjoinPreds.getRight();
+
+        hashers = new Hasher[2];
+        hashers[0] = new Hasher(leftAttrs);
+        hashers[1] = new Hasher(rightAttrs);
+
+        rgstPValues = new String[leftAttrs.size()];
+        rgstTValues = new String[rightAttrs.size()];
+        
+        pred.resolveVariables(inputTupleSchemas[0], 0);
+        pred.resolveVariables(inputTupleSchemas[1], 1);
+
+        hashers[0].resolveVariables(inputTupleSchemas[0], 0);
+        hashers[0].resolveVariables(inputTupleSchemas[1], 1);
+        hashers[1].resolveVariables(inputTupleSchemas[0], 0);
+        hashers[1].resolveVariables(inputTupleSchemas[1], 1);
+        
+
+        // Initialize the array of hash tables of partial source tuples - there are
+        // two input stream, so the array is of size 2
+        partialSourceTuples = new DuplicateHashtable[2];
+
+        partialSourceTuples[0] = new DuplicateHashtable();
+        partialSourceTuples[1] = new DuplicateHashtable();
+
+        // Initialize the array of hash tables of final source tuples - there are
+        // two input stream, so the array is of size 2
+        finalSourceTuples = new DuplicateHashtable[2];
+
+        finalSourceTuples[0] = new DuplicateHashtable();
+        finalSourceTuples[1] = new DuplicateHashtable();
+
+        //Initialize the punctuation lists
+        rgPunct[0] = new ArrayList();
+        rgPunct[1] = new ArrayList();
+
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+        PhysicalHashJoinOperator op = new PhysicalHashJoinOperator();
+        op.pred = pred;
+        op.joinPredicate = joinPredicate;
+        op.eqjoinPreds = eqjoinPreds;
+        return op;
+    }
+
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalHashJoinOperator))
+            return false;
+        if (o.getClass() != PhysicalHashJoinOperator.class)
+            return o.equals(this);
+        return joinPredicate.equals(((PhysicalHashJoinOperator) o).joinPredicate);
+    }
+    
+    public int hashCode() {
+        return joinPredicate.hashCode();
     }
 }
 

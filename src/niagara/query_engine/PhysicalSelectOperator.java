@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.7 2002/09/24 23:18:46 ptucker Exp $
+  $Id: PhysicalSelectOperator.java,v 1.8 2002/10/27 02:37:56 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,70 +31,38 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
+import niagara.logical.Predicate;
+import niagara.optimizer.colombia.*;
+
 /**
- * This is the <code>PhysicalSelectOperator</code> that extends
- * the basic PhysicalOperator with the implementation of the Select
- * operator.
- *
- * @version 1.0
+ * Implementation of the Select operator.
  */
  
 public class PhysicalSelectOperator extends PhysicalOperator {
-	
-    /////////////////////////////////////////////////////
-    //   Data members of the PhysicalSelectOperator Class
-    /////////////////////////////////////////////////////
-
-    // This is the array having information about blocking and non-blocking
-    // streams
-    //
+    // No blocking source streams
     private static final boolean[] blockingSourceStreams = { false };
 
     // The is the predicate to apply to the tuples
-    //
-    private PredicateEvaluator predEval;
+    private Predicate pred;
     
-
-    ///////////////////////////////////////////////////
-    //   Methods of the PhysicalSelectOperator Class
-    ///////////////////////////////////////////////////
-
-    /**
-     * This is the constructor for the PhysicalSelectOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     * @param predicate The predicate evaluated in the select operator
-     */
-     
-    public PhysicalSelectOperator (op logicalOperator,
-                                   SourceTupleStream[] sourceStreams,
-                                   SinkTupleStream[] sinkStreams,
-                                   Integer responsiveness) {
-		
-	// Call the appropriate constructor of the super class
-	super(sourceStreams, sinkStreams, 
-	      blockingSourceStreams, responsiveness);
-	
+    private PredicateImpl predEval;
+    
+    public PhysicalSelectOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
+    }
+    
+    public void initFrom(LogicalOp logicalOperator) {
 	// Type cast logical operator to a select operator
 	selectOp logicalSelectOperator = (selectOp) logicalOperator;
-	
-	predEval =  new PredicateEvaluator(logicalSelectOperator.
-					   getPredicate());
-	
-	// XXX hack
-	clear = ((selectOp) logicalOperator).getClear();
+        pred = logicalSelectOperator.getPredicate();	
     }
-		     
-    // XXX hack
-    boolean[] clear;
 
+    public Op copy() {
+        PhysicalSelectOperator p = new PhysicalSelectOperator();
+        p.pred = pred.copy();
+        return p;
+    }
+    
     /**
      * This function processes a tuple element read from a source stream
      * when the operator is non-blocking. This over-rides the corresponding
@@ -111,28 +78,8 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 			     StreamTupleElement inputTuple, int streamId)
 	throws ShutdownException, InterruptedException {
 	// Evaluate the predicate on the desired attribute of the tuple
-	if (predEval.eval(inputTuple)) {
-	    /*
-	    // If the predicate is satisfied, add the tuple to the result
-	    // XXX hack
-	    StreamTupleElement newTuple = 
-		new StreamTupleElement(inputTuple.isPartial());
-	    System.out.println("clear.length: " + clear.length);
-	    for (int i = 0; i < clear.length; i++) {
-		if (clear[i] || i == 0) { // XXX hack on hack. doc is not variable
-		    System.out.println("\tappending null");
-		    newTuple.appendAttribute(null);
-		} else {
-		    System.out.println("\tappending attribute " + i);
-		    newTuple.appendAttribute(inputTuple.getAttribute(i));
-		}
-	    }
-	    putTuple(newTuple, 0);
-	    */
+	if (predEval.evaluate(inputTuple, null))
 	    putTuple(inputTuple, 0);
-	} else {
-	    return;
-	}
     }
     
     /**
@@ -157,6 +104,58 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 
     public boolean isStateful() {
 	return false;
+    }
+    
+public PhysicalProperty[] InputReqdProp(PhysicalProperty PhysProp, LogicalProperty InputLogProp, int InputNo) {
+    assert InputNo == 0;
+    if (PhysProp.equals(PhysicalProperty.ANY))
+        return new PhysicalProperty[] {};
+    return new PhysicalProperty[] {PhysProp};
+}
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
+     */
+    public Cost FindLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] InputLogProp) {
+        float InputCard = InputLogProp[0].getCardinality();
+        Cost cost = new Cost(InputCard * catalog.getDouble("tuple_reading_cost"));
+        cost.add(predEval.getCost(catalog).times(InputCard));
+        return cost;
+    }
+    
+    /**
+     * @see niagara.query_engine.PhysicalOperator#opInitialize()
+     */
+    protected void opInitialize() {
+            predEval =  pred.getImplementation();
+    }
+    
+    /**
+     * @see java.lang.Object#equals(Object)
+     */
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalSelectOperator))
+            return false;
+        if (o.getClass() != PhysicalSelectOperator.class)
+            return o.equals(this);
+        return pred.equals(
+            ((PhysicalSelectOperator) o).pred);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+        return pred.hashCode();
+    }
+    
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
+     */
+    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+        return input_phys_props[0];
     }
 }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryOptimizer.java,v 1.2 2001/08/08 21:27:57 tufte Exp $
+  $Id: QueryOptimizer.java,v 1.3 2002/10/27 02:37:57 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -137,7 +137,7 @@ public class QueryOptimizer {
 
 	// if it is constructOp, we keep descending
 	if (operator instanceof constructOp) {
-	    int numInputs = logicalPlan.numInputs ();
+	    int numInputs = logicalPlan.getArity ();
 
 	    if (numInputs != 1) {
 		System.err.print ("notify chun of assertion failure:");
@@ -149,7 +149,7 @@ public class QueryOptimizer {
 
 	// same goes for joinOp. note that statistics are not gathered now
 	else if (operator instanceof joinOp) {
-	    int numInputs = logicalPlan.numInputs();
+	    int numInputs = logicalPlan.getArity();
 
 	    boolean proceed = true;
 	    for (int i = 0; i < numInputs; i++) {
@@ -251,7 +251,7 @@ public class QueryOptimizer {
 		selectNodes.addElement (logPlanRoot);
 	    }
 
-	    int numInputs = logPlanRoot.numInputs();
+	    int numInputs = logPlanRoot.getArity();
 
 	    // recurse
 	    for (int i = 0; i < numInputs; i++) {
@@ -387,7 +387,7 @@ public class QueryOptimizer {
 	    //
 	    boolean proceed = true;
 
-	    int numInputs = logPlanRoot.numInputs();
+	    int numInputs = logPlanRoot.getArity();
 
 	    // since this function is only called for one branch of the
 	    // logical plan tree, which should contain at most one dtd
@@ -498,7 +498,7 @@ public class QueryOptimizer {
 
 	    // Recurse on all children
 	    //
-	    int numInputs = logicalPlan.numInputs();
+	    int numInputs = logicalPlan.getArity();
 
 	    boolean proceed = true;
 
@@ -532,19 +532,12 @@ public class QueryOptimizer {
 	// reference should be made to the ordering of join algorithms as is done
 	// now.
 	//
-	if (joinOperator.getLeftEqJoinAttr().size() > 0 &&
-	    joinOperator.getRightEqJoinAttr().size() > 0) {
-
+	if (joinOperator.isCartesian())
+            // Choose Nested loop join
+            joinOperator.setSelectedAlgoIndex(0);
+        else    
 	    // Choose hash join
-	    //
 	    joinOperator.setSelectedAlgoIndex(1);
-	}
-	else {
-
-	    // Choose Nested loop join
-	    //
-	    joinOperator.setSelectedAlgoIndex(0);
-	}
     }
 }
 

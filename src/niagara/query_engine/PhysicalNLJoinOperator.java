@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.5 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.6 2002/10/27 02:37:57 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,111 +24,57 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.query_engine;
 
 import java.util.ArrayList;
 
 import org.w3c.dom.*;
+
+import niagara.logical.And;
+import niagara.logical.Predicate;
+import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
-/**
- * This is the <code>PhysicalNLJoinOperator</code> that extends
- * the basic PhysicalOperator with the implementation of the Nested
- * Loop join operator.
- *
- * @version 1.0
- */
-
+/** Naive nested-loops join */
 public class PhysicalNLJoinOperator extends PhysicalOperator {
-	
-    /////////////////////////////////////////////////////
-    //   Data members of the PhysicalNLJoinOperator Class
-    /////////////////////////////////////////////////////
-
     // This is the array having information about blocking and non-blocking
     // streams
-    //
     private static final boolean[] blockingSourceStreams = { false, false };
 
     // The predicate used for joining
-    //
-    private predicate joinPredicate;
+    private Predicate joinPredicate;
 
-    private PredicateEvaluator predEval;
+    private PredicateImpl predEval;
 
     // The array of lists of partial tuple elements that are read from the source
     // streams. The index of the array corresponds to the index of the stream
     // from which the tuples were read.
-    //
     ArrayList[] partialSourceTuples;
 
     // The array of lists of final tuple elements that are read from the source
     // streams. The index of the array corresponds to the index of the stream
     // from which the tuples were read.
-    //
     ArrayList[] finalSourceTuples;
 
-    
-    ///////////////////////////////////////////////////
-    //   Methods of the PhysicalNLJoinOperator Class
-    ///////////////////////////////////////////////////
-
-    /**
-     * This is the constructor for the PhysicalNLJoinOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     * @param joinPredicate The predicate evaluated in the join operator
-     */
-     
-    public PhysicalNLJoinOperator (op logicalOperator,
-				   SourceTupleStream[] sourceStreams,
-				   SinkTupleStream[] sinkStreams,
-				   Integer responsiveness) {
-
-		// Call the constructor of the super class
-		//
-		super(sourceStreams,
-		      sinkStreams,
-		      blockingSourceStreams,
-		      responsiveness);
-
-		// Type cast the logical operator to a join operator
-		//
-		joinOp logicalJoinOperator = (joinOp) logicalOperator;
-
-		// Set the predicate for evaluating the select
-		//
-		this.joinPredicate = logicalJoinOperator.getPredicate();
-
-                predEval = new PredicateEvaluator(joinPredicate);
-
-		// Initialize the array of lists of partial source tuples - there are two
-		// input stream, so the array is of size 2
-		//
-		partialSourceTuples = new ArrayList[2];
-
-		partialSourceTuples[0] = new ArrayList();
-		partialSourceTuples[1] = new ArrayList();
-
-		// Initialize the array of lists of final source tuples - there are two
-		// input stream, so the array is of size 2
-		//
-		finalSourceTuples = new ArrayList[2];
-
-		finalSourceTuples[0] = new ArrayList();
-		finalSourceTuples[1] = new ArrayList();
+    public PhysicalNLJoinOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
     }
-		     
+    
+    public void initFrom(LogicalOp logicalOperator) {
+        // Type cast the logical operator to a join operator
+        joinOp logicalJoinOperator = (joinOp) logicalOperator;
+
+        // In NL join, we hope that most tuples do not satisfy 
+        // the equijoin predicates, so we check them first
+        joinPredicate =
+            And.conjunction(
+                logicalJoinOperator.getEquiJoinPredicates().toPredicate(),
+                logicalJoinOperator.getNonEquiJoinPredicate());
+
+        predEval = joinPredicate.getImplementation();
+    }
 
     /**
      * This function processes a tuple element read from a source stream
@@ -142,38 +87,38 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
      * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected void nonblockingProcessSourceTupleElement (
-	    		 StreamTupleElement tupleElement, int streamId)
-	throws ShutdownException, InterruptedException {
-		// First add the tuple element to the appropriate source stream
-		//
-		if (tupleElement.isPartial()) {
-			partialSourceTuples[streamId].add(tupleElement);
-		}
-		else {
-			finalSourceTuples[streamId].add(tupleElement);
-		}
+    protected void nonblockingProcessSourceTupleElement(
+        StreamTupleElement tupleElement,
+        int streamId)
+        throws ShutdownException, InterruptedException {
+        // First add the tuple element to the appropriate source stream
+        //
+        if (tupleElement.isPartial()) {
+            partialSourceTuples[streamId].add(tupleElement);
+        } else {
+            finalSourceTuples[streamId].add(tupleElement);
+        }
 
-		// Determine the id of the other stream
-		//
-		int otherStreamId = 1 - streamId;
+        // Determine the id of the other stream
+        int otherStreamId = 1 - streamId;
 
-		// Now loop over all the partial elements of the other source 
-		// and evaluate the predicate and construct a result tuple 
-		// if the predicate is satsfied
-		constructJoinResult(tupleElement, streamId,
-				    partialSourceTuples[otherStreamId]);
-	
-		// Now loop over all the final elements of the other source 
-		// and evaluate the predicate and construct a result tuple 
-		// if the predicate is satisfied
-		// is satisfied
-		//
-		constructJoinResult(tupleElement, streamId,
-				    finalSourceTuples[otherStreamId]);
+        // Now loop over all the partial elements of the other source 
+        // and evaluate the predicate and construct a result tuple 
+        // if the predicate is satsfied
+        constructJoinResult(
+            tupleElement,
+            streamId,
+            partialSourceTuples[otherStreamId]);
+
+        // Now loop over all the final elements of the other source 
+        // and evaluate the predicate and construct a result tuple 
+        // if the predicate is satisfied
+        constructJoinResult(
+            tupleElement,
+            streamId,
+            finalSourceTuples[otherStreamId]);
     }
 
-    
     /**
      * This function removes the effects of the partial results in a given
      * source stream. This function over-rides the corresponding function
@@ -183,12 +128,11 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
      *                 which are to be removed.
      */
 
-    protected void removeEffectsOfPartialResult (int streamId) {
+    protected void removeEffectsOfPartialResult(int streamId) {
 
-		// Clear the list of tuples in the appropriate stream
-		partialSourceTuples[streamId].clear();
+        // Clear the list of tuples in the appropriate stream
+        partialSourceTuples[streamId].clear();
     }
-
 
     /**
      * This function constructs a join result based on joining with tupleElement
@@ -202,53 +146,139 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
      *
      */
 
-    private void constructJoinResult (StreamTupleElement tupleElement, 
-				      int streamId, ArrayList sourceTuples) 
-    throws ShutdownException, InterruptedException {
-	// Loop over all the elements of the other source stream and
-	// evaluate the predicate and construct a result tuple if the
-	// predicate is satisfied
-	//
-	int numTuples = sourceTuples.size();
-	
-	for (int tup = 0; tup < numTuples; ++tup) {
-	    StreamTupleElement otherTupleElement = 
-		(StreamTupleElement) sourceTuples.get(tup);
-	    
-	    // Make the right order for predicate evaluation
-	    StreamTupleElement leftTuple;
-	    StreamTupleElement rightTuple;
-	    
-	    if (streamId == 0) {
-		leftTuple = tupleElement;
-		rightTuple = otherTupleElement;
-	    }
-	    else {
-		leftTuple = otherTupleElement;
-		rightTuple = tupleElement;
-	    }
-	    // Check whether the predicate is satisfied
-	    //
-	    if (predEval.eval(leftTuple, rightTuple)) {
-		// Yes, it is satisfied - so create a result. The result is
-		// potentially partial if either of the tuples is potentially
-		// partial
-		StreamTupleElement resultTuple = 
-		    new StreamTupleElement(leftTuple.isPartial() ||
-					   rightTuple.isPartial(),
-				   leftTuple.size() + rightTuple.size());
+    private void constructJoinResult(
+        StreamTupleElement tupleElement,
+        int streamId,
+        ArrayList sourceTuples)
+        throws ShutdownException, InterruptedException {
+        // Loop over all the elements of the other source stream and
+        // evaluate the predicate and construct a result tuple if the
+        // predicate is satisfied
+        //
+        int numTuples = sourceTuples.size();
 
-		resultTuple.appendAttributes(leftTuple);
-		resultTuple.appendAttributes(rightTuple);
-		
-    		// Add the result to the output
-		putTuple(resultTuple, 0);
-	    }
-	}
+        for (int tup = 0; tup < numTuples; ++tup) {
+            StreamTupleElement otherTupleElement =
+                (StreamTupleElement) sourceTuples.get(tup);
+
+            // Make the right order for predicate evaluation
+            StreamTupleElement leftTuple;
+            StreamTupleElement rightTuple;
+
+            if (streamId == 0) {
+                leftTuple = tupleElement;
+                rightTuple = otherTupleElement;
+            } else {
+                leftTuple = otherTupleElement;
+                rightTuple = tupleElement;
+            }
+            // Check whether the predicate is satisfied
+            if (predEval.evaluate(leftTuple, rightTuple)) {
+                // Yes, it is satisfied - so create a result. The result is
+                // potentially partial if either of the tuples is potentially
+                // partial
+                StreamTupleElement resultTuple =
+                    new StreamTupleElement(
+                        leftTuple.isPartial() || rightTuple.isPartial(),
+                        leftTuple.size() + rightTuple.size());
+
+                resultTuple.appendAttributes(leftTuple);
+                resultTuple.appendAttributes(rightTuple);
+
+                // Add the result to the output
+                putTuple(resultTuple, 0);
+            }
+        }
     }
 
     public boolean isStateful() {
-	return true;
+        return true;
+    }
+
+    public Cost FindLocalCost(ICatalog catalog, LogicalProperty[] inputLogProp) {
+        double leftCard = inputLogProp[0].getCardinality();
+        double rightCard = inputLogProp[1].getCardinality();
+        float outputCard = logProp.getCardinality();
+
+        // we have to evaluate the predicate for every tuple combination
+        Cost cost = predEval.getCost(catalog).times(leftCard * rightCard);
+        cost.add(new Cost((leftCard + rightCard) + catalog.getDouble("tuple_reading_cost")));
+        cost.add(new Cost(outputCard * catalog.getDouble("tuple_construction_cost")));
+        return cost;
+    } 
+
+    public PhysicalProperty[] InputReqdProp(
+        PhysicalProperty PhysProp,
+        LogicalProperty InputLogProp,
+        int InputNo) {
+        if (PhysProp.equals(PhysicalProperty.ANY) || InputNo == 1)
+            return new PhysicalProperty[] {};
+        else // require the same property for the left input
+            return new PhysicalProperty[] {PhysProp};
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
+     */
+    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+        // In terms of ordering, nested loops join has the properties
+        // of its left input
+        return input_phys_props[0].copy();
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+        PhysicalNLJoinOperator op = new PhysicalNLJoinOperator();
+        op.joinPredicate = joinPredicate;
+        op.predEval = predEval;
+        return op;
+    }
+
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalNLJoinOperator))
+            return false;
+        if (o.getClass() != PhysicalNLJoinOperator.class)
+            return o.equals(this);
+        return joinPredicate.equals(((PhysicalNLJoinOperator) o).joinPredicate);
+    }
+    
+    public int hashCode() {
+        return joinPredicate.hashCode();
+    }
+    
+    /**
+     * @see niagara.query_engine.PhysicalOperator#opInitialize()
+     */
+    protected void opInitialize() {
+        // Initialize the array of lists of partial source tuples
+        partialSourceTuples = new ArrayList[] {new ArrayList(), new ArrayList()};
+
+        // Initialize the array of lists of final source tuples 
+        finalSourceTuples = new ArrayList[] {new ArrayList(), new ArrayList()};
+
+        predEval.resolveVariables(inputTupleSchemas[0], 0);
+        predEval.resolveVariables(inputTupleSchemas[1], 1);
+    }
+    
+    /**
+     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
+     */
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        // XXX vpapad: Does not handle projects yet!
+        inputTupleSchemas = inputSchemas;
+        outputTupleSchema = inputSchemas[0].copy();
+        for (int i = 0; i < inputSchemas[1].getLength(); i++) {
+            outputTupleSchema.addMapping(inputSchemas[1].getVariable(i));
+        }
+    }
+    /**
+     * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
+     */
+    public void dumpChildrenInXML(StringBuffer sb) {
+        sb.append(">");
+        joinPredicate.toXML(sb);
+        sb.append("</").append(getName()).append(">");
     }
 }
-
