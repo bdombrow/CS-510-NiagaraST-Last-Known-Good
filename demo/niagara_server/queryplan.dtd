@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.26 2003/02/26 23:22:01 vpapad Exp $
+<!-- $Id: queryplan.dtd,v 1.27 2003/03/03 08:21:55 tufte Exp $
      DTD for query plans -->
 
 <!-- 
@@ -12,7 +12,7 @@
                     dtdscan | filescan | constant | resource | 
 		    firehosescan | accumulate | 
                     expression | send | display | topn |
-	            incrmax | incravg | 
+	            incrmax | incravg | count |
 		    sort | dup | union)+>
 
 <!ATTLIST plan top IDREF        #REQUIRED
@@ -149,7 +149,8 @@
           id       ID                   #REQUIRED
 	  left	   CDATA		#IMPLIED
 	  right	   CDATA		#IMPLIED
-      input    IDREFS               #REQUIRED
+          input    IDREFS               #REQUIRED
+          extensionjoin (left | right | both | none)  "none"
 	  %PositionAttributes;>
 
 <!ELEMENT and     (and | or | not | pred)+>
@@ -295,8 +296,8 @@
 <!ELEMENT filescan  EMPTY>
 <!ATTLIST filescan 
           id       ID           #REQUIRED
-          fileName CDATA        #REQUIRED
-	  isStream (yes | no) "no"
+          filename CDATA        #REQUIRED
+	  isstream (yes | no) "no"
 	  %PositionAttributes;>
 <!-- isStream should be yes if file is a stream in niagara:stream
      format, no otherwise. If isStream is no, then file must
