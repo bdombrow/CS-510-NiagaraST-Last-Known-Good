@@ -56,6 +56,12 @@ public class DateNodeHelper extends NumberNodeHelperBase
     }
 
     public boolean nodeEquals(Node lNode, Node rNode) {	
+	if(lNode == null) {
+	    if(rNode == null)
+		return true;
+	    else
+		return false;
+	}
 	return valueOf(lNode).equals(valueOf(rNode));
     }
 
@@ -68,10 +74,16 @@ public class DateNodeHelper extends NumberNodeHelperBase
     }
 
     public boolean sum(Node lNode, Node rNode, Node resultNode) {
-	long lVal = ((Date)valueOf(lNode)).getTime();
 	long rVal = ((Date)valueOf(rNode)).getTime();
-	Date d = new Date(lVal + rVal);
-	DOMHelper.setTextValue(resultNode, d.toString());
+
+	if(lNode == null) {
+	    Date d = new Date(rVal);
+	    DOMHelper.setTextValue(resultNode, d.toString());
+	} else {
+	    long lVal = ((Date)valueOf(lNode)).getTime();
+	    Date d = new Date(lVal + rVal);
+	    DOMHelper.setTextValue(resultNode, d.toString());
+	}
 	return true;
     }
 

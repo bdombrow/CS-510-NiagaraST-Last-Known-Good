@@ -58,18 +58,19 @@ public class NodeHelpers {
 	    } else if (rValueType.equals(NodeHelpers.DATE)) {
 		return NodeHelpers.DATEHELPER;
 	    } else {
-		throw new MTException("Invalid type");
+		throw new MTException("Invalid type R: " + rValueType);
 	    }
 	} else if (lValueType.equals(NodeHelpers.INT)) {
 	    if(rValueType.equals(NodeHelpers.DOUBLE)) {
 		return NodeHelpers.DOUBLEHELPER;
 	    } else if (rValueType.equals(NodeHelpers.DATE)) {
-		throw new MTException("Invalid coercion");
+		throw new MTException("Invalid coercion L: " + lValueType +
+				      "R: " + rValueType);
 	    } else if (rValueType.equals(NodeHelpers.INT) ||
 		       rValueType.equals(NodeHelpers.STR)) {
 		return NodeHelpers.INTHELPER;
 	    } else {
-		throw new MTException("Invalid type");
+		throw new MTException("Invalid type R: " + rValueType);
 	    }
 	} else if (lValueType.equals(NodeHelpers.DATE)) {
 	    if(rValueType.equals(NodeHelpers.DATE) ||
@@ -77,9 +78,10 @@ public class NodeHelpers {
 		return NodeHelpers.DATEHELPER;
 	    } else if (rValueType.equals(NodeHelpers.DOUBLE) ||
 		       rValueType.equals(NodeHelpers.INT)) {
-		throw new MTException("Invalid coercion");
+		throw new MTException("Invalid coercion L: " + lValueType +
+				      "R: " + rValueType);
 	    } else {
-		throw new MTException("Invalid type");
+		throw new MTException("Invalid type R: " + rValueType);
 	    } 
 	} else if (lValueType.equals(NodeHelpers.DOUBLE)) {
 	    if(rValueType.equals(NodeHelpers.DOUBLE) ||
@@ -87,12 +89,13 @@ public class NodeHelpers {
 	       rValueType.equals(NodeHelpers.STR)) {
 		return NodeHelpers.DOUBLEHELPER;
 	    } else if (rValueType.equals(NodeHelpers.DATE)) {
-		throw new MTException("Invalid coercion");
+		throw new MTException("Invalid coercion L: " + lValueType +
+				      "R: " + rValueType);
 	    } else {
-		throw new MTException("Invalid type");
+		throw new MTException("Invalid type. R: " + rValueType);
 	    }
 	} else {
-	    throw new MTException("Invalid type");
+	    throw new MTException("Invalid type. L: " + lValueType);
 	}
     }
 

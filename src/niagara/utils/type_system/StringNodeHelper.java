@@ -42,7 +42,23 @@ public class StringNodeHelper implements NodeHelper {
     }
 
     public boolean nodeEquals(Node lNode, Node rNode) {
-	return DOMHelper.getTextValue(lNode).equals(DOMHelper.getTextValue(rNode));
+	if(lNode == null) {
+	    if(rNode == null) {
+		return true;
+	    }
+	    else
+		return false;
+	}
+	String tvl = DOMHelper.getTextValue(lNode);
+	String tvr = DOMHelper.getTextValue(rNode); 
+	if(tvl == null || tvr == null) {
+	    if(tvl == null && tvr == null) {
+		return true;
+	    }
+	    else
+		return false;
+	}
+	return tvr.equals(tvl);
     }
     public String getName() {
         return "StringNodeHelper";

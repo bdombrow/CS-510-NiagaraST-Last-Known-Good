@@ -55,6 +55,14 @@ public class IntegerNodeHelper extends NumberNodeHelperBase
 	 * return lVal.equals(rVal)
 	 *  } 
 	*/
+
+	if(lNode == null) {
+	    if(rNode != null)
+		return true;
+	    else
+		return false;
+	}
+
 	Object lVal = valueOf(lNode);
 	Object rVal = valueOf(rNode);
 	return lVal.equals(rVal);
@@ -76,19 +84,33 @@ public class IntegerNodeHelper extends NumberNodeHelperBase
      * @ return Returns true if a new value is calculated (always)
      */
     public boolean average(Node lNode, Node rNode, Node resultNode) {
-	int lCnt = getCount(lNode);
 	int rCnt = getCount(rNode);
-	int lVal = ((Integer)valueOf(lNode)).intValue();
 	int rVal = ((Integer)valueOf(rNode)).intValue();
-	DOMHelper.setTextValue(resultNode, String.valueOf((lVal+rVal)/(lCnt + rCnt)));
-	setCount(resultNode, lCnt+rCnt);
+	
+	if(rCnt != 1)
+	    throw new PEException("KT why is this happening");
+	
+	if(lNode == null) {
+	    DOMHelper.setTextValue(resultNode, String.valueOf(rVal/rCnt));
+	    setCount(resultNode, rCnt);
+	} else {
+	    int lCnt = getCount(lNode);
+	    int lVal = ((Integer)valueOf(lNode)).intValue();
+	    DOMHelper.setTextValue(resultNode, String.valueOf((lVal+rVal)/(lCnt + rCnt)));
+	    setCount(resultNode, lCnt+rCnt);
+	}
 	return true;
     }
 
     public boolean sum(Node lNode, Node rNode, Node resultNode) {
-	int lVal = ((Integer)valueOf(lNode)).intValue();
 	int rVal = ((Integer)valueOf(rNode)).intValue();
-	DOMHelper.setTextValue(resultNode, String.valueOf(lVal+rVal));
+
+	if(lNode == null) {
+	    DOMHelper.setTextValue(resultNode, String.valueOf(rVal));
+	} else {
+	    int lVal = ((Integer)valueOf(lNode)).intValue();
+	    DOMHelper.setTextValue(resultNode, String.valueOf(lVal+rVal));
+	}
 	return true;
     }
 
