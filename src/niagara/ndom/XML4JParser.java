@@ -1,12 +1,12 @@
 /**
- * $Id: XML4JParser.java,v 1.2 2002/03/26 23:52:07 tufte Exp $
+ * $Id: XML4JParser.java,v 1.3 2002/08/17 16:49:48 tufte Exp $
  *
  */
 
 package niagara.ndom;
 
 import org.w3c.dom.Document;
-import niagara.ndom.DOMParser;
+import niagara.ndom.*;
 import java.io.IOException;
 
 import com.ibm.xml.parsers.DOMParser;
