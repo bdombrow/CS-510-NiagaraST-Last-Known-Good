@@ -26,8 +26,12 @@ PARSELIB     = $(LIBDIR)/xml4j.jar
 COMMONLIB    = $(LIBDIR)/common.jar
 CUPLIB	     = $(LIBDIR)/cup_all.jar
 ASTLIB	     = $(LIBDIR)/ast.jar
+REGEXPLIB     = $(LIBDIR)/gnu-regexp.jar
+JETTY        = $(LIBDIR)/com.mortbay.jetty.jar
+SERVLET      = $(LIBDIR)/javax.servlet.jar
 
-CLASSPATH  = .:$(NIAGROOT)/src:$(PARSELIB):$(BASELIB):$(CUPLIB):$(ASTLIB):$(COMMONLIB):$(NIAGROOT)/src/$(FHOSE)
+
+CLASSPATH  = .:$(NIAGROOT)/src:$(PARSELIB):$(BASELIB):$(CUPLIB):$(ASTLIB):$(COMMONLIB):$(NIAGROOT)/src/$(FHOSE):$(REGEXPLIB):$(JETTY):$(SERVLET)
 JAVAFLAGS  = -classpath $(CLASSPATH)
 
 
