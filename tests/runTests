@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: runTests,v 1.3 2002/10/30 10:45:31 vpapad Exp $
+# $Id: runTests,v 1.4 2002/10/31 04:40:49 vpapad Exp $
 
 $temp = "tempresults";
 if(-e $temp) {
@@ -11,17 +11,17 @@ for $f (@queries) {
     #Remove "queries/" prefix 
     $f =~ s@[^/]*/@@;
     # Don't run the test if we don't know the expected results!
-    next unless (-e "results/$f.result");
-    print "$f\t";
+    next unless (-e "expected/$f.result");
+    print "$f", (' ' x (32 - length($f)));
 
     #Ugly! But how do you redirect stderr in a way that works
     #for both tcsh and bash? 
     `/bin/sh -c "./runSimple -silent -qf queries/$f 2>&1 >$temp"`;
-    $diffs = system "cmp -s results/$f.result $temp";
+    $diffs = system "cmp -s expected/$f.result $temp";
     if ($diffs != 0) {
-	print "FAILED\n";
-	system "diff results/$f.result $temp";
+	print " FAILED\n";
+	system "diff expected/$f.result $temp";
     } else {
-	print "OK\n";
+	print " OK\n";
     }
 }
