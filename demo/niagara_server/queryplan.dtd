@@ -132,4 +132,5 @@
 	  mergeTemplate CDATA	#REQUIRED
 	  accumFileName CDATA	#REQUIRED
 	  physical      CDATA   ""
-	  input         IDREF   #REQUIRED>
+	  input         IDREF   #REQUIRED
+	  clear     (true | false) "false">
