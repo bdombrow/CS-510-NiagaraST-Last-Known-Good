@@ -1,5 +1,5 @@
 #######################################################################
-#  $Id: make.incl,v 1.9 2002/09/09 22:06:44 tufte Exp $
+#  $Id: make.incl,v 1.10 2003/03/08 02:24:54 vpapad Exp $
 #
 #  Make include file - for common constant info
 #  Added 1-17-02 by Kristin Tufte - remove the fact that some 
@@ -59,7 +59,6 @@ export JPCAP       = $(LIBDIR)/jpcap.jar
 #export QELIB         = $(LIBDIR)/qe.jar
 #export DMLIB         = $(LIBDIR)/dm.jar
 #export QBELIB1	      = $(LIBDIR)/qbe1.jar
-#export TRIGLIB	      = $(LIBDIR)/trig.jar
 #export QBELIB2	      = $(LIBDIR)/qbe2.jar
 
 export CLASSPATH     = .:$(XERCES2):$(REGEXPLIB):$(CUPLIB):$(DIFF):$(DIVA):$(JUNIT):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET):$(JFLEX):$(NIAGSRC):$(XMLGEN):$(SAX):$(XML5J):$(JPCAP)

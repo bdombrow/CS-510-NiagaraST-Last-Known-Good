@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.10 2003/02/27 07:50:37 vpapad Exp $ -->
+<!-- $Id: build.xml,v 1.11 2003/03/08 02:24:54 vpapad Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -33,12 +33,12 @@
   <target name="create.cups" unless="cups.ok">
     <exec executable="/bin/sh" dir="${src}/niagara/xmlql_parser/syntax_tree">
       <arg value="-c"/>
-      <arg value="sed -e 's!start with XmlqlExt!start with RegularExpression!' -e 's!QueryParser!REParser!g' &lt; xmlql.cup &gt; re.cup"/>
+      <arg value="sed -e 's!start with Xmlql!start with RegularExpression!' -e 's!QueryParser!REParser!g' &lt; xmlql.cup &gt; re.cup"/>
     </exec>
 
     <exec executable="/bin/sh" dir="${src}/niagara/xmlql_parser/syntax_tree">
       <arg value="-c"/>
-      <arg value="sed -e 's!start with XmlqlExt!start with QueryInConstruct!' -e 's!QueryParser!ConstructParser!g' &lt; xmlql.cup &gt; construct.cup"/>
+      <arg value="sed -e 's!start with Xmlql!start with QueryInConstruct!' -e 's!QueryParser!ConstructParser!g' &lt; xmlql.cup &gt; construct.cup"/>
     </exec>
 
     <java fork="yes" dir="${src}/niagara/xmlql_parser/syntax_tree"

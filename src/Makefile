@@ -1,5 +1,5 @@
 #######################################################################
-# $Id: Makefile,v 1.16 2002/08/16 17:55:33 tufte Exp $
+# $Id: Makefile,v 1.17 2003/03/08 02:24:54 vpapad Exp $
 #
 #  Makefile to build query engine related stuff
 #
@@ -21,7 +21,7 @@ include make.incl
 #  list and it will be built using 'make all'
 #
 ##############################################################################
-all:	se_server ql_parser con_server ndom qe trigger client mqpclient dm applet type_system saxdom optimizer firehose
+all:	se_server ql_parser con_server ndom qe client mqpclient dm applet type_system saxdom optimizer firehose
 
 client:
 	$(JAVAC) $(JAVAFLAGS) niagara/client/*.java niagara/client/qpclient/*.java
@@ -36,8 +36,6 @@ ql_parser:
 	cd niagara/xmlql_parser/syntax_tree && $(MAKE)
 	cd niagara/xmlql_parser/op_tree && $(MAKE)
 
-trigger:
-	$(JAVAC) $(JAVACFLAGS) niagara/trigger_engine/*.java
 qe:
 	$(JAVAC) $(JAVACFLAGS) niagara/query_engine/*.java
 optimizer: 
