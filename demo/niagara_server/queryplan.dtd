@@ -2,7 +2,7 @@
 <!ENTITY % NLJoin '"niagara.query_engine.PhysicalNLJoinOperator"'>
 <!ENTITY % HashJoin '"niagara.query_engine.PhysicalHashJoinOperator"'>
 
-<!ELEMENT plan     (scan | select | join | construct | dtdscan | firehosescan)+>
+<!ELEMENT plan     (scan | select | join | avg | construct | dtdscan | firehosescan)+>
 <!ATTLIST plan top IDREF        #REQUIRED>
 
 <!ELEMENT scan     EMPTY>
@@ -10,9 +10,17 @@
           id       ID                    #REQUIRED
 
 	  type	   (tag|element|content) "element"
-
+	  root	   CDATA                 ""
 	  regexp   CDATA                 #REQUIRED
 
+          physical CDATA               #IMPLIED
+          input   IDREF                #REQUIRED>
+
+<!ELEMENT avg     EMPTY>
+<!ATTLIST avg 
+          id       ID                    #REQUIRED
+	  groupby  CDATA	       #REQUIRED
+	  avgattr  CDATA	       #REQUIRED
           physical CDATA               #IMPLIED
           input   IDREF                #REQUIRED>
 
