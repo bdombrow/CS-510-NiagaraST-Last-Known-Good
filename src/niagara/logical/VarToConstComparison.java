@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import niagara.optimizer.colombia.Attrs;
 import niagara.query_engine.PathToConstComparisonImpl;
 import niagara.query_engine.VarToConstComparisonImpl;
-import niagara.query_engine.VarToVarComparisonImpl;
 import niagara.query_engine.PredicateImpl;
 import niagara.xmlql_parser.syntax_tree.regExp;
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Nest.java,v 1.4 2003/07/09 04:59:41 tufte Exp $
+  $Id: Nest.java,v 1.5 2003/07/27 02:30:43 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -50,7 +50,9 @@ import niagara.xmlql_parser.syntax_tree.*;
 public class Nest extends niagara.xmlql_parser.op_tree.groupOp {
 
     // This stores the template of the result
-    private constructBaseNode resultTemplate;
+    // KT - we require a root node be specified in a nest construct template
+    // that is <![CDATA[   $var ]]> is not a valid nest construct template
+    private constructInternalNode resultTemplate;
 
     public Nest() {
 	resultTemplate = null;
@@ -96,7 +98,7 @@ public class Nest extends niagara.xmlql_parser.op_tree.groupOp {
      *
      * @param resultTemplate The template of the result
      */
-    public void setNest (constructBaseNode resultTemplate) {
+    public void setNest (constructInternalNode resultTemplate) {
 	// Set the result template
 	this.resultTemplate = resultTemplate;
     }
@@ -107,7 +109,7 @@ public class Nest extends niagara.xmlql_parser.op_tree.groupOp {
      *
      * @return Result template associated with the operator
      */
-    public constructBaseNode getResTemp () {
+    public constructInternalNode getResTemp () {
 
 	// Return the result template
 	return resultTemplate;
@@ -141,8 +143,6 @@ public class Nest extends niagara.xmlql_parser.op_tree.groupOp {
 					   + content);
         }
 	loadGroupingAttrsFromXML(e, inputProperties[0], "neston");
-	//groupingAttrs = 
-	//((constructInternalNode) resultTemplate).getSkolem();
 	verifyTopLevelAttrs();
     }
 
@@ -152,68 +152,42 @@ public class Nest extends niagara.xmlql_parser.op_tree.groupOp {
     // can appear in the select clause of a query with groupby)
     private void verifyTopLevelAttrs() //LogicalProperty inputLogProp) 
 	throws InvalidPlanException {
-	// get attribute from the resultTemplate 
-	// appears we know that resultTemplate is a constructInternalNode
-        Vector attrs = ((constructInternalNode)resultTemplate).
-	                            getStartTag().getAttrList();
+	// get attribute from the resultTemplate
+	
+	Vector attrs = resultTemplate.getStartTag().getAttrList();
+	
 	int numAttrs = attrs.size();
 	for(int i = 0; i<numAttrs; i++) {
 	    attr attribute = (attr)attrs.get(i);
 	    data attrData = attribute.getValue();
 	    switch(attrData.getType()) {
 	    case dataType.STRING:
-		// think ok - nothing to check
-		break;
-		
-	    case dataType.ATTR:
-		// maybe I don't need this code...
-		assert false : "KT Don't think I should get attrs here";
-		break;
-		/* old code frm when I thought there might be attrs,
-		   save for a bit...
-                schemaAttribute schema = (schemaAttribute) attrData.getValue();
-                switch(schema.getType()) {
-		case varType.ELEMENT_VAR:
-		case varType.CONTENT_VAR:
-		    int attributeId =
-                        ((schemaAttribute) attrData.getValue()).getAttrId();
-		    // look up attribute id in something??
-		    //Attribute a = inputLogProp.GetAttr(attributeId);
-		    //assert a != null: "Couldn't find attribute in log prop ";
- 		    //String attrName = a.getName(); 
-		    Vector v = groupingAttrs.getVarList(); 
-		    boolean ok = false;
-		    for(int j = 0; j<v.size(); j++) {
-			schemaAttribute sa = (schemaAttribute)v.get(j);
-			if(sa.getAttrId() == attributeId)
-			    ok = true;
-		    }
-		    if(!ok)
-			throw new InvalidPlanException("Detected invalid top level attribute in Nest"); 
-		default:
-		    assert false: "Unknown var type in attribute constructor";
-		}
-		break;*/
-
-	    case dataType.VAR:
-		String varname = (String)attrData.getValue();
-		if (varname.charAt(0) == '$')
+			// think ok - nothing to check
+			break;
+		case dataType.VAR:
+			String varname = (String)attrData.getValue();
+			if (varname.charAt(0) == '$')
 		    varname = varname.substring(1);
-		Vector v = groupingAttrs.getVarList(); 
-		boolean ok = false;
-		for(int j = 0; j<v.size(); j++) {
-		    // v.get(j) is of type Variable
-		    String gpname  = ((Variable)v.get(j)).getName();
-		    if(gpname.equals(varname))
-			ok = true;
-		}
-		if(!ok) 
-		    throw new InvalidPlanException("Detected invalid top level attribute in Nest");
-		break;
+			Vector v = groupingAttrs.getVarList(); 
+			boolean ok = false;
+			for(int j = 0; j<v.size(); j++) {
+		    	// v.get(j) is of type Variable
+		    	String gpname  = ((Variable)v.get(j)).getName();
+		    	if(gpname.equals(varname))
+				ok = true;
+			}
+			if(!ok) 
+		    	throw new InvalidPlanException("Detected invalid top level attribute in Nest");
+			break;
 		
 	    default:
+	    // dont think I should get anything of type ATTR here
 		assert false: "Unknown data type " + attrData.getType();
-            }    
+	    }   
 	}
+    }
+    
+    protected int getResultType() {  
+		return varType.ELEMENT_VAR;
     }
 }

@@ -1,4 +1,4 @@
-/* $Id: Unnest.java,v 1.7 2003/07/03 19:39:02 tufte Exp $ */
+/* $Id: Unnest.java,v 1.8 2003/07/27 02:30:43 tufte Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -22,6 +22,8 @@ public class Unnest extends unryOp {
     private regExp path;
     /** The attributes we're projecting on (null means keep all attributes) */
     private Attrs projectedAttrs;
+    /** keep or not tuples that do not have a match to the path expression */
+    private boolean outer;
 
     public Unnest() {
     }
@@ -30,15 +32,18 @@ public class Unnest extends unryOp {
         Attribute variable,
         Attribute root,
         regExp path,
-        Attrs projectedAttrs) {
+        Attrs projectedAttrs,
+        boolean outer) {
         this.variable = variable;
         this.root = root;
         this.path = path;
         this.projectedAttrs = projectedAttrs;
+        this.outer = outer;
     }
 
     public Unnest(Unnest op) {
-        this(op.variable, op.root, op.path, op.projectedAttrs);
+        this(op.variable, op.root, op.path, op.projectedAttrs,
+        	op.outer);
     }
 
     public Op opCopy() {
@@ -60,7 +65,9 @@ public class Unnest extends unryOp {
             + " into "
             + variable.getName()
             + " project on "
-            + projectedAttrs.toString();
+            + projectedAttrs.toString()
+            + " include non matches "
+            + String.valueOf(outer);
     }
 
     public void dumpAttributesInXML(StringBuffer sb) {
@@ -70,6 +77,7 @@ public class Unnest extends unryOp {
             .append(((NodeDomain) variable.getDomain()).getTypeDescription())
             .append("'");
         sb.append(" root='").append(root.getName()).append("'");
+        sb.append(" non matches= ").append(String.valueOf(outer));
     }
 
     public LogicalProperty findLogProp(
@@ -115,12 +123,14 @@ public class Unnest extends unryOp {
         return variable.equals(u.variable)
             && root.equals(u.root)
             && path.equals(u.path)
-            && equalsNullsAllowed(projectedAttrs, u.projectedAttrs);
+            && equalsNullsAllowed(projectedAttrs, u.projectedAttrs)
+            && outer == u.outer;
     }
 
     public int hashCode() {
         // XXX vpapad: need hashCode for regExp
-        return variable.hashCode() ^ root.hashCode() ^ path.hashCode() ^ hashCodeNullsAllowed(projectedAttrs);
+        return variable.hashCode() ^ root.hashCode() ^ path.hashCode() 
+        ^ hashCodeNullsAllowed(projectedAttrs);
     }
 
     /**
@@ -148,6 +158,10 @@ public class Unnest extends unryOp {
     public Attrs getProjectedAttrs() {
         return projectedAttrs;
     }
+    
+    public boolean outer() {
+    	return outer;
+    }
 
     public void loadFromXML(Element e, LogicalProperty[] inputProperties)
         throws InvalidPlanException {
@@ -155,6 +169,8 @@ public class Unnest extends unryOp {
         String typeAttr = e.getAttribute("type");
         String rootAttr = e.getAttribute("root");
         String regexpAttr = e.getAttribute("regexp");
+        outer = e.getAttribute("outer")
+        	.equalsIgnoreCase("yes");
 
         int type;
         if (typeAttr.equals("tag")) {
