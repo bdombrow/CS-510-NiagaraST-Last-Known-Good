@@ -45,8 +45,6 @@ Identifier = [a-zA-Z0-9]([:jletterdigit:])*
 
 StringChar = [^\"\n]
 
-SkolemId = {Identifier}"ID"
-
 %state STRING
 
 %%
@@ -103,7 +101,6 @@ SkolemId = {Identifier}"ID"
   \" 		{ yybegin(STRING); s = new String();}
 
   "id"		{ return symbol(sym.ID); }
-  {SkolemId}    { return symbol(sym.SKOLEMID, new String(yytext())); }
 
   {Identifier} 	{ return symbol(sym.IDEN, new String(yytext())); }
   {Var} 	{ return symbol(sym.VAR, new String(yytext())); }

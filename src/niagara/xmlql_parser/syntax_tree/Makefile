@@ -89,13 +89,14 @@ Scanner.java: xmlql.flex sym.class
 	$(JAVA) $(JAVAFLAGS) JFlex.Main xmlql.flex
 
 # Generate REParser.java 
+re_parser/REParser.java: xmlql.cup
 	mkdir -p re_parser && cat xmlql.cup | sed -e 's!.*package.*!import niagara.xmlql_parser.syntax_tree.*;!' -e 's!^.*start with.*!start with RegularExpression;!' -e 's!QueryParser!REParser!g'  > re_parser/re.cup && $(JAVA) $(JAVAFLAGS) java_cup.Main -expect 5 -parser REParser -package niagara.xmlql_parser.syntax_tree.re_parser < re_parser/re.cup && mv REParser.java sym.java re_parser
 
 # Generate ConstructParser.java 
 construct_parser/ConstructParser.java: xmlql.cup
 	mkdir -p construct_parser && cat xmlql.cup | sed -e 's!.*package.*!import niagara.xmlql_parser.syntax_tree.*;!' -e 's!^.*start with.*!start with QueryInConstruct;!' -e 's!QueryParser!ConstructParser!g'  > construct_parser/construct.cup && $(JAVA) $(JAVAFLAGS) java_cup.Main -expect 5 -parser ConstructParser -package niagara.xmlql_parser.syntax_tree.construct_parser < construct_parser/construct.cup && mv ConstructParser.java sym.java construct_parser
 
-install: sym.class Scanner.class ConstructParser.class QueryParser.class $(OBJ)
+install: sym.class Scanner.class re_parser/REParser.class construct_parser/ConstructParser.class QueryParser.class $(OBJ)
 	cd ../../..;$(JAR) -cfv ../lib/$(TARG_LIB) niagara/xmlql_parser/syntax_tree/*.class
 
 

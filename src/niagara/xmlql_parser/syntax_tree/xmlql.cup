@@ -102,7 +102,6 @@ terminal EXPIRE;
 terminal DO;
 
 terminal ID;
-terminal String SKOLEMID;
 
 terminal String IDEN;
 terminal String VAR;
@@ -492,9 +491,9 @@ StartTag ::= LT IDEN:i SkolemId:s AttributeList:al GT
 		{: RESULT = new startTag(new data(dataType.VAR, v), s, al); :}
 	   ;
 
-SkolemId ::= ID EQ SKOLEMID:s LPAREN VarList:vl RPAREN
+SkolemId ::= ID EQ IDEN:s LPAREN VarList:vl RPAREN
 		{: RESULT = new skolem(s, vl); :}
-	   | ID EQ SKOLEMID:s LPAREN RPAREN
+	   | ID EQ IDEN:s LPAREN RPAREN
 		{: RESULT = new skolem(s, new Vector()); :}
 	   |
 		{: RESULT = null; :}
