@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.2 2000/08/09 23:53:48 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.3 2000/08/23 03:55:02 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -380,7 +380,7 @@ public class ResultTransmitter implements Runnable {
 		    /* there are two thread sleep functions 
 		     * sleep(long millis), sleep(long millis, int nanos)
 		     */
-		    transmitThread.sleep(1000);
+		    transmitThread.sleep(10000);
 		    
 		    /* request the generation of partial results - 
 		     * who knows if this will work or not
