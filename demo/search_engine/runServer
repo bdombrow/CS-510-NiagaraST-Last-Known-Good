@@ -1,2 +1,0 @@
-java -mx500M -classpath `cat ../classpath` niagara.search_engine.server.SEServer -optimize
-
