@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagaraUI.java,v 1.2 2000/06/12 01:13:01 vpapad Exp $
+  $Id: NiagaraUI.java,v 1.3 2000/06/13 00:08:02 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -579,7 +579,8 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
             openFileDialog.setFilenameFilter(new queryFileFilter("qry"));
             openFileDialog.setModal(true);
             openFileDialog.setVisible(true);
-            String queryFileName = openFileDialog.getFile();
+            String queryFileName = openFileDialog.getDirectory() + System.getProperty("file.separator") + openFileDialog.getFile();
+
 	    
 	    if ( queryFileName == null || queryFileName.equals("") ) return;
 
