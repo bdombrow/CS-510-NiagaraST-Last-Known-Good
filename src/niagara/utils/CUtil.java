@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CUtil.java,v 1.2 2000/08/09 23:54:05 tufte Exp $
+  $Id: CUtil.java,v 1.3 2000/08/21 00:50:37 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,7 +34,6 @@ import java.lang.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import com.sun.java.swing.*;
 import com.ibm.xml.parser.util.*;
 
 /**
