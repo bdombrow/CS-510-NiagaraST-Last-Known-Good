@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.35 2003/07/24 00:04:24 jinli Exp $
+<!-- $Id: queryplan.dtd,v 1.36 2003/07/27 02:47:53 tufte Exp $
      DTD for query plans -->
 
 <!-- 
@@ -34,6 +34,8 @@
      type : Whether we want the element itself, its content, or its tag name
      root:  Where is the regular expression rooted. Default: unnest's input
      regexp: The XML-QL regular expression
+     includeNonMatches: whether to include in the result tuples that do
+                         not have a match to the regexp (in the "root" attr)
 -->
 
 <!ELEMENT unnest     EMPTY>
@@ -42,6 +44,7 @@
 	  type	   (tag|element|content) "element"
 	  root	   CDATA                 ""
 	  regexp   CDATA               #REQUIRED
+	  outer    (yes|no)     "no"
 	  %StandardAttributes;>
 
 <!ELEMENT sort     EMPTY>
