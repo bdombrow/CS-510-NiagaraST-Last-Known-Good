@@ -15,34 +15,39 @@ public class XMLUtils {
 	}
     }
 
-    // XXX vpapad Must rewrite with StringBuffer
     public static String flatten(Node n) {
+        StringBuffer sb = new StringBuffer();
+        flatten(n, sb);
+        return sb.toString();
+    }
+
+    public static void flatten(Node n, StringBuffer sb) {
 	short type = n.getNodeType();
 	if (type == Node.ELEMENT_NODE) {
-	    String ret =  "<" + n.getNodeName();
+	    sb.append("<" + n.getNodeName());
 	    NamedNodeMap attrs = n.getAttributes();	    
 	    for (int i=0; i < attrs.getLength(); i++) {
 		Attr a = (Attr) attrs.item(i);
-		ret = ret + " " + a.getName() + "=\"" + a.getValue() + "\"";
+		sb.append(" " + a.getName() + "=\"" + a.getValue() + "\"");
 	    }
-	    ret = ret + ">";
+	    sb.append(">");
 	    NodeList nl = n.getChildNodes();
 	    for (int i=0; i < nl.getLength(); i++) {
-                ret += flatten(nl.item(i));
+                flatten(nl.item(i), sb);
 	    }
-	    return ret + "</" + n.getNodeName() + ">";
+	    sb.append("</" + n.getNodeName() + ">");
 	}
 	else if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE) {
-	    return n.getNodeValue();
+	    sb.append(n.getNodeValue());
 	}
 	else if (type == Node.DOCUMENT_NODE) {
             if (n.getFirstChild() != null)
-                return flatten(n.getFirstChild());
+                flatten(n.getFirstChild(), sb);
             else
-                return "<!-- Empty document node -->";
+                sb.append("<!-- Empty document node -->");
 	}
 	else
-	    return "<!-- XMLUtils.flatten() could not serialize this node -->";
+	    sb.append("<!-- XMLUtils.flatten() could not serialize this node -->");
     }
 }
 
