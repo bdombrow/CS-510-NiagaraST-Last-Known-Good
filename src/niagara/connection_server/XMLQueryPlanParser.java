@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.35 2003/02/08 00:56:45 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.36 2003/02/20 05:44:37 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -1015,9 +1015,11 @@ public class XMLQueryPlanParser {
         NodeList children = e.getChildNodes();
         String content = "";
         for (int i = 0; i < children.getLength(); i++) {
-            if (children.item(i).getNodeType() != Node.ELEMENT_NODE)
-                continue;
-            content = content + XMLUtils.explosiveFlatten(children.item(i));
+            int nodeType = children.item(i).getNodeType();
+            if (nodeType == Node.ELEMENT_NODE)
+                content += XMLUtils.explosiveFlatten(children.item(i));
+	    else if (nodeType == Node.CDATA_SECTION_NODE)
+		content += children.item(i).getNodeValue();
         }
         String inputAttr = e.getAttribute("input");
 
