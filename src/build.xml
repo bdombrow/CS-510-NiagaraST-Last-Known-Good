@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.15 2003/10/11 03:54:34 vpapad Exp $ -->
+<!-- $Id: build.xml,v 1.16 2003/10/23 18:15:07 tufte Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -61,7 +61,7 @@
   <!-- Compile everything -->
   <target name="compile" depends="init,create.cups">
     <javac srcdir="${src}" destdir="${build}" source="1.4" debug="true"
-    	excludes="niagara/client/qbe/**,niagara/client/qpclient/**">
+    	excludes="niagara/client/qbe/**,niagara/client/qpclient/**,NEXMarkGenerator">
       <classpath refid="compilation.classpath"/>
     </javac>
   </target>    
