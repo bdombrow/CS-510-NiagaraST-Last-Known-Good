@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.8 2002/04/18 23:13:14 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.9 2002/04/19 15:55:04 vpapad Exp $
  *
  */
 
@@ -83,12 +83,11 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
             // parsing error
             throw new PEException("Got unknown SAX Exception: " + e);
         } 
-	reset();
     }    
 
     public void parse(InputSource is) throws SAXException, IOException {
-        parser.parse(is, this);
         reset();
+        parser.parse(is, this);
     }
 
     public void reset() {
@@ -96,7 +95,6 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
         hasErrors = hasWarnings = false;
         sb.setLength(0);
         depth = -1;
-	streaming = false;
 	seenHeader = false;
     }
 
@@ -153,7 +151,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
         throws SAXException {
 
         // ignore stream header
-        if (!seenHeader) {
+        if (streaming && !seenHeader) {
 	    seenHeader = true;
             return;
 	}
