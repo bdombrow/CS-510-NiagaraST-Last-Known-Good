@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: QueryOptimizer.java,v 1.5 2003/03/07 21:02:00 tufte Exp $
+  $Id: QueryOptimizer.java,v 1.6 2003/09/17 20:03:07 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -172,9 +171,7 @@ public class QueryOptimizer {
 
 	    if (!proceed) return false;
 
-	    String sequery = SEQueryExtractor.makeQuery (
-		selectNodes, logicalPlan.getSchema(), false);
-	    if (sequery == null) sequery = "@doc";
+	    String sequery = "@doc";
 
 	    if (dtdVector.size() > 0) {
 		if (dtdVector.size() != 1) {
