@@ -15,7 +15,7 @@ import diva.canvas.*;
 import diva.graph.*;
 import diva.graph.model.*;
 
-import com.ibm.xml.parsers.*;
+import niagara.ndom.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import java.io.*;
@@ -105,7 +105,7 @@ public class QPClient extends JFrame implements ActionListener,
 	throws InvalidQueryPlanException {
 	GraphModel gm = new GraphModel(new QPGraphImpl());
 
-	DOMParser parser = new DOMParser();
+	DOMParser parser = DOMFactory.newParser();
 
 	try {
 	    parser.parse(new InputSource(new FileInputStream(qpfile)));
