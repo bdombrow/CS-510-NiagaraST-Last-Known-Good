@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.1 2000/08/03 04:39:28 vpapad Exp $
+  $Id: PhysicalCountOperator.java,v 1.2 2000/08/07 02:00:49 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -197,27 +197,7 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
 	    return null;
 	}
 	else {
-
-	    // Get the string atomic value
-	    //
-	    String atomicValue = (String) atomicValues.elementAt(0);
-
-	    // Try to convert to int  - if that fails, just return null
-	    //
-	    try {
-		// Get the int value
-		//
-		Integer intValue = new Integer(atomicValue);
-
-		// Return the int value
-		//
-		return intValue;
-	    }
-	    catch (java.lang.NumberFormatException e) {
-		// Cannot convert to int
-		//
-		return null;
-	    }
+	    return new Integer(1);
 	}
     }
 

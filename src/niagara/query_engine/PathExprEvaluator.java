@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: PathExprEvaluator.java,v 1.2 2000/08/07 02:00:48 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -87,7 +87,7 @@ public class PathExprEvaluator
 		// If this is a leaf node, just get all child nodes mathching data name and return
 		//
 		if(rExp instanceof regExpDataNode){
-			
+		    
 			regExpDataNode re = (regExpDataNode)rExp;
 			data regExpData = re.getData();
 			Object o  = regExpData.getValue();
@@ -208,8 +208,8 @@ public class PathExprEvaluator
 				int lsize = leftNodes.size();
 				for(i = 0; i < lsize; i++){
 					
-					rightNodes = getReachableNodes((Element)leftNodes.elementAt(i), 
-												   re.getRightChild());
+				    rightNodes = getReachableNodes(leftNodes.elementAt(i), 
+								   re.getRightChild());
 					
 					/*
 					  if(leftNodes.elementAt(i) instanceof TXDocument){
