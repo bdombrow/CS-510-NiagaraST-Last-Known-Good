@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSlidingAverageOperator.java,v 1.1 2003/02/05 21:17:50 jinli Exp $
+  $Id: PhysicalSlidingAverageOperator.java,v 1.2 2003/03/19 22:43:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -149,17 +149,12 @@ public class PhysicalSlidingAverageOperator extends PhysicalWindowOperator {
     // This is the aggregating attribute for the average operator
     //
     Attribute averageAttribute;
-
     private AtomicEvaluator ae;
-
-//    private Document doc;
-
     private ArrayList atomicValues;
    
    
     
-    public void initFrom(LogicalOp logicalOperator) {
-        super.initFrom(logicalOperator);
+    protected void localInitFrom(LogicalOp logicalOperator) {
 	// Get the summing attribute of the sum logical operator
 	averageAttribute = ((SlidingAverageOp) logicalOperator).getAveragingAttribute();
 	
@@ -167,13 +162,6 @@ public class PhysicalSlidingAverageOperator extends PhysicalWindowOperator {
 	//
 	super.range = ((SlidingAverageOp) logicalOperator).getWindowRange();
 	super.every = ((SlidingAverageOp) logicalOperator).getWindowEvery();
-	
-	// Initialize the sliding window
-	//
-	super.window = new ArrayList(range);
-	super.streamIds = new ArrayList(range);
-	super.count = 0;
-	super.everyCount = 0;
     }
 
 
@@ -190,8 +178,13 @@ public class PhysicalSlidingAverageOperator extends PhysicalWindowOperator {
         ae = new AtomicEvaluator(averageAttribute.getName());
         ae.resolveVariables(inputTupleSchemas[0], 0);
         atomicValues = new ArrayList();
-        
-        
+
+	// Initialize the sliding window
+	//
+	super.window = new ArrayList(range);
+	super.streamIds = new ArrayList(range);
+	super.count = 0;
+	super.everyCount = 0;        
     }    
 
 
@@ -369,27 +362,24 @@ public class PhysicalSlidingAverageOperator extends PhysicalWindowOperator {
 	return resultElement;
     }
 
-    public void setResultDocument(Document doc) {
-        this.doc = doc;
-    }
-    
-    public Op copy() {
-        PhysicalSlidingAverageOperator op = new PhysicalSlidingAverageOperator();
-        if (logicalGroupOperator != null)
-            op.initFrom(logicalGroupOperator);
-        return op;
+    protected PhysicalGroupOperator localCopy() {
+        PhysicalSlidingAverageOperator op = 
+	    new PhysicalSlidingAverageOperator();
+	op.averageAttribute = averageAttribute;
+	op.range = range;
+	op.every = every;
+	return op;
     }
 
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalSlidingAverageOperator))
-            return false;
-        if (o.getClass() != PhysicalSlidingAverageOperator.class)
-            return o.equals(this);
-        return logicalGroupOperator.equals(((PhysicalSlidingAverageOperator) o).logicalGroupOperator);
+    protected boolean localEquals(Object o) {
+	PhysicalSlidingAverageOperator other = 
+	    (PhysicalSlidingAverageOperator)o;
+        return averageAttribute.equals(other.averageAttribute) &&
+	    range == other.range && every == other.every;
     }
 
     public int hashCode() {
-        return logicalGroupOperator.hashCode();
+        return groupAttributeList.hashCode() ^ averageAttribute.hashCode();
     }    
 
 }

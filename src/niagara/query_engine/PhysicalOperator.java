@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.28 2003/03/08 02:23:04 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.29 2003/03/19 22:43:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -343,7 +343,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
      * This function sends (best effort) shutdown messages to all
      * source and sink streams
      */
-    private void shutDownOperator (String msg) {	
+    private void shutDownOperator (String msg) {
 	// try to close each sink stream, even if we get an error closing
 	// one stream, we still try to close all the rest
 	// ignore all errors since we are shutting down (this is
@@ -353,6 +353,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 		try {
 		    sendCtrlMsgToSource(CtrlFlags.SHUTDOWN, msg, i);
 		} catch(ShutdownException e) {
+		} catch(InterruptedException e) {
 		}
 	    }
 	}
@@ -384,6 +385,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 		try {
 		    sendCtrlMsgToSource(CtrlFlags.SHUTDOWN, null, i);
 		} catch(ShutdownException e) {
+		} catch(InterruptedException e) {
 		}
 	    }
 	}
@@ -798,14 +800,19 @@ implements SchemaProducer, SerializableToXML, Initializable {
      */
     private void sendCtrlMsgToSource (int ctrlFlag, String ctrlMsg, 
 				      int streamId)
-	throws ShutdownException{
+	throws ShutdownException, InterruptedException{
 	int retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag, 
 							     ctrlMsg);
 
+	if(retCtrlFlag == CtrlFlags.EOS) {
+	    processCtrlMsgFromSource(retCtrlFlag, streamId);
+	    return;
+	} 
+
 	// only control flag putCtrlMsg may return is EOS
-	if(retCtrlFlag != CtrlFlags.NULLFLAG) {
-	    throw new PEException("Unexpected ctrl flag in sendCtrlMsgToSource " + CtrlFlags.name[ctrlFlag]);
-	}
+	assert retCtrlFlag == CtrlFlags.NULLFLAG :
+	    "Unexpected ctrl flag in sendCtrlMsgToSource " +
+	    CtrlFlags.name[retCtrlFlag];
 	return;
     }
 
@@ -818,7 +825,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
      * @exception ShutdownException query shutdown by user or execution error
      */
     private void sendCtrlMsgToSources(int ctrlFlag, String ctrlMsg)
-	throws ShutdownException {
+	throws ShutdownException, InterruptedException {
 	// Loop over all source streams and put the control
 	// element in all open ones
 	for (int i = 0; i < numSourceStreams; i++) {

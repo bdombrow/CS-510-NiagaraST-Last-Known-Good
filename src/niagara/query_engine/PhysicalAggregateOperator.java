@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalAggregateOperator.java,v 1.1 2003/03/19 00:36:09 tufte Exp $
+  $Id: PhysicalAggregateOperator.java,v 1.2 2003/03/19 22:43:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -54,14 +54,13 @@ public abstract class PhysicalAggregateOperator extends PhysicalGroupOperator {
     AtomicEvaluator ae;
     ArrayList atomicValues;
 
-    protected abstract PhysicalOperator getInstance();
+    protected abstract PhysicalAggregateOperator getInstance();
     protected abstract Node constructAggrResult(AggrResult partialResult,
 						AggrResult finalResult);
     protected abstract void updateAggrResult(AggrResult result, 
 					     Object ungroupedResult);
 
-    public void initFrom(LogicalOp logicalOperator) {
-        super.initFrom(logicalOperator);
+    protected void localInitFrom(LogicalOp logicalOperator) {
 	aggrAttr = ((AggregateOp)logicalOperator).getAggrAttr();
     }
 
@@ -120,28 +119,18 @@ public abstract class PhysicalAggregateOperator extends PhysicalGroupOperator {
 				   (AggrResult)finalResult);
     }
 
-    public Op copy() {
-        PhysicalOperator op = getInstance();
-        if (logicalGroupOperator != null)
-            op.initFrom(logicalGroupOperator);
+    protected PhysicalGroupOperator localCopy() {
+        PhysicalAggregateOperator op = getInstance();
+	op.aggrAttr = this.aggrAttr;
         return op;
     }
 
-    
-    public boolean equals(Object o) {
-	if(o ==  null)
-	    return false;
-	if(!this.getClass().isInstance(o))
-	    return false;
-        if (o.getClass() != this.getClass())
-            return o.equals(this);
-	PhysicalAggregateOperator other = (PhysicalAggregateOperator)o;
-        return logicalGroupOperator.equals(other.logicalGroupOperator) &&
-	    aggrAttr.equals(other.aggrAttr);
+    protected boolean localEquals(Object o) {
+        return aggrAttr.equals(((PhysicalAggregateOperator)o).aggrAttr);
     }
 
     public int hashCode() {
-        return logicalGroupOperator.hashCode() ^ aggrAttr.hashCode();
+        return groupAttributeList.hashCode() ^ aggrAttr.hashCode();
     }
 
     /*

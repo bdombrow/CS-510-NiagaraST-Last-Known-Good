@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalMaxOperator.java,v 1.5 2003/03/19 00:36:09 tufte Exp $
+  $Id: PhysicalMaxOperator.java,v 1.6 2003/03/19 22:43:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -139,7 +139,7 @@ public class PhysicalMaxOperator extends PhysicalAggregateOperator {
 	return resultElement;
     }
 
-    protected PhysicalOperator getInstance() {
+    protected PhysicalAggregateOperator getInstance() {
 	return new PhysicalMaxOperator();
     }
 }

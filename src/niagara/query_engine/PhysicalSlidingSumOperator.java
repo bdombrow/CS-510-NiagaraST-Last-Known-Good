@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSlidingSumOperator.java,v 1.2 2003/03/03 08:20:13 tufte Exp $
+  $Id: PhysicalSlidingSumOperator.java,v 1.3 2003/03/19 22:43:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -157,8 +157,7 @@ public class PhysicalSlidingSumOperator extends PhysicalWindowOperator {
 
     ArrayList atomicValues;
     
-    public void initFrom(LogicalOp logicalOperator) {
-        super.initFrom(logicalOperator);
+    protected void localInitFrom(LogicalOp logicalOperator) {
 	// Get the summing attribute of the sum logical operator
 	summingAttribute = ((SlidingSumOp) logicalOperator).getSummingAttribute();
 	
@@ -166,14 +165,7 @@ public class PhysicalSlidingSumOperator extends PhysicalWindowOperator {
 	//
 	super.range = ((SlidingSumOp) logicalOperator).getWindowRange();
 	super.every = ((SlidingSumOp) logicalOperator).getWindowEvery();
-	
-	// Initialize the sliding window
-	//
-	super.window = new ArrayList(range);
-	super.streamIds = new ArrayList(range);
-	super.count = 0;
-	super.everyCount = 0;
-	
+		
     }
 
 
@@ -190,6 +182,14 @@ public class PhysicalSlidingSumOperator extends PhysicalWindowOperator {
         ae = new AtomicEvaluator(summingAttribute.getName());
         ae.resolveVariables(inputTupleSchemas[0], 0);
         atomicValues = new ArrayList();
+
+	// Initialize the sliding window
+	//
+	super.window = new ArrayList(range);
+	super.streamIds = new ArrayList(range);
+	super.count = 0;
+	super.everyCount = 0;
+
     }
 
     
@@ -367,23 +367,22 @@ public class PhysicalSlidingSumOperator extends PhysicalWindowOperator {
 	return resultElement;
     }    
     
-    public Op copy() {
+    protected PhysicalGroupOperator localCopy() {
         PhysicalSlidingSumOperator op = new PhysicalSlidingSumOperator();
-        if (logicalGroupOperator != null)
-            op.initFrom(logicalGroupOperator);
+	op.summingAttribute = summingAttribute;
+	op.range = range;
+	op.every = every;
         return op;
     }
 
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalSlidingSumOperator))
-            return false;
-        if (o.getClass() != PhysicalSlidingSumOperator.class)
-            return o.equals(this);
-        return logicalGroupOperator.equals(((PhysicalSlidingSumOperator) o).logicalGroupOperator);
+    protected boolean localEquals(Object o) {
+	PhysicalSlidingSumOperator other = (PhysicalSlidingSumOperator)o;
+        return summingAttribute.equals(other.summingAttribute) &&
+	    range == other.range && every == other.every;
     }
 
     public int hashCode() {
-        return logicalGroupOperator.hashCode();
+        return groupAttributeList.hashCode() ^ summingAttribute.hashCode();
     }
     
 }

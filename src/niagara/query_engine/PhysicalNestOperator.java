@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.11 2003/03/19 00:36:09 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.12 2003/03/19 22:43:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,9 +27,6 @@
 
 package niagara.query_engine;
 
-import java.util.Vector;
-import java.util.ArrayList;
-
 import org.w3c.dom.*;
 import niagara.utils.*;
 import niagara.logical.Nest;
@@ -48,8 +45,8 @@ import niagara.optimizer.colombia.*;
 
 public class PhysicalNestOperator extends PhysicalGroupOperator {
 
-    // KT is this correct?? no blocking inputs
-    private static final boolean[] blockingSourceStreams = { false };
+    // KT - This was false - think this should be true...
+    private static final boolean[] blockingSourceStreams = { true };
 
     // This has the result template for the nest operator
     private constructBaseNode resultTemplate;
@@ -60,10 +57,8 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
     // The number of grouping attributes
     private int numGroupingAttributes;
 
-    // The result document - all result elements of nest
-    // will be a part of this document. Need this document
-    // since we can longer create an element without a parent document
-    Document resultDoc;
+    // temporary result list storage place
+    private NodeVector resultList;
 
     /**
      * This is the constructor for the PhysicalNestOperator class that
@@ -79,17 +74,37 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      */
     public PhysicalNestOperator() {
         setBlockingSourceStreams(blockingSourceStreams);
-	resultDoc = DOMFactory.newDocument();
     }
 
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
      */
-    public void initFrom(LogicalOp logicalOp) {
-        super.initFrom(logicalOp);
+    public void localInitFrom(LogicalOp logicalOp) {
 	this.resultTemplate = ((Nest)logicalOp).getResTemp();
     }
 
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    protected PhysicalGroupOperator localCopy() {
+        PhysicalNestOperator op = new PhysicalNestOperator();
+        // XXX vpapad: We treat resultTemplate as an immutable object
+        op.resultTemplate = resultTemplate;
+        return op;
+    }
+
+    protected boolean localEquals(Object other) {
+	return resultTemplate.equals(
+                    ((PhysicalNestOperator)other).resultTemplate);
+    }
+
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+	return groupAttributeList.hashCode() ^ resultTemplate.hashCode();
+    }
 
     /////////////////////////////////////////////////////////////////////////
     // These functions are the hooks that are used to implement specific   //
@@ -106,11 +121,15 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
         // Get the root tag of the constructed results
 	rootTag = (String) ((constructInternalNode)
-			    resultTemplate).getStartTag().getSdata().getValue();
+			 resultTemplate).getStartTag().getSdata().getValue();
 
 	// Get the number of grouping attributes
-	skolem grouping = ((constructInternalNode) resultTemplate).getSkolem();
-	numGroupingAttributes = grouping.getVarList().size();
+	numGroupingAttributes = groupAttributeList.size();
+	
+	resultList = new NodeVector();
+	// old code - am not using skolem anymore...
+	//skolem grouping = ((constructInternalNode) resultTemplate).getSkolem();
+	//numGroupingAttributes = grouping.getVarList().size();
     }
 
 
@@ -122,15 +141,20 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      * @return The constructed object; If no object is constructed, returns
      *         null
      */
-    protected final Object constructUngroupedResult (StreamTupleElement tupleElement) {
-	
+    protected final Object constructUngroupedResult (StreamTupleElement 
+						     tupleElement) 
+    throws ShutdownException {	
+
 	// Construct the result as per the template for the tuple
-	ArrayList resultList =
-	    physConstructResult(tupleElement, resultTemplate);
+	resultList.quickReset();
+	PhysicalConstructOperator.constructResult(tupleElement, 
+						  resultTemplate,
+						  resultList, doc);
 
 	// The list can have a size of only one, get that result
-	// and return its children
-	return ((Node)resultList.get(0)).getChildNodes();
+	// and return it
+	assert resultList.size() == 1;
+	return resultList.get(0);
     }
 
 
@@ -147,31 +171,37 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
     protected final Object mergeResults (Object groupedResult,
 					 Object ungroupedResult) {
-
 	// Set up the final result - if the groupedResult is null, then
 	// create holder for final result, else just use groupedResult
-	Vector finalResult;
+	// ungrouped nodes was a node list, now it is the whole node
+	// created by constructResult, 
+	// grouped result will be a node containing a root element
+	// followed by a list of children 
+	// if grouped result is null, we first add stripped down root element
+
+	NodeVector resultVec;
 
 	if (groupedResult == null) {
-	    finalResult = new Vector();
+	    resultVec = new NodeVector();
+	    // add root element to the result
+	    resultVec.add(((Node)ungroupedResult).cloneNode(false));
 	} else {
-	    finalResult = (Vector) groupedResult;
+	    resultVec = (NodeVector) groupedResult;
 	}
 
 	// The ungrouped result is a node list
-	NodeList ungroupedNodes = (NodeList) ungroupedResult;
+	NodeList ungroupedNodes = ((Node)ungroupedResult).getChildNodes();
 
 	// Add all items in ungrouped result
 	int numNodes = ungroupedNodes.getLength();
 
 	for (int node = 0; node < numNodes; ++node) {
-	    finalResult.add(ungroupedNodes.item(node));
+	    resultVec.add(ungroupedNodes.item(node));
 	}
 
 	// Return the grouped result
-	return finalResult;
+	return resultVec;
     }
-
 
     /**
      * This function returns an empty result in case there are no groups
@@ -186,7 +216,7 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 	// else return null
 	if (numGroupingAttributes == 0) {
 	    // Just create and return a Element with the root tag
-	    return resultDoc.createElement(rootTag);
+	    return doc.createElement(rootTag);
 	} else {
 	    return null;
 	}
@@ -206,27 +236,28 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
     protected final Node constructResult (Object partialResult,
 					  Object finalResult) {
-	// Create a result element with root tag
-	Element resultElement = resultDoc.createElement(rootTag);
+	//Element resultElement = doc.createElement(rootTag);
+	// first element in finalResult and partial result 
+	// should be the same
+	Element resultElement;
+	if(finalResult != null)
+	    resultElement = (Element)((NodeVector)finalResult).get(0);
+	else if(partialResult != null)
+	    resultElement = (Element)((NodeVector)partialResult).get(0);
+	else
+	    resultElement = (Element)constructEmptyResult();
 
-	// If the partial result is not null, add all elements of the partial result
+	// If the partial result is not null, add all elements 
+	// of the partial result
 	if (partialResult != null) {
-
-	    // Type cast to a vector
-	    Vector vecPartialResult = (Vector) partialResult;
-
 	    // Add nodes in vector to result
-	    addNodesToResult(resultElement, vecPartialResult);
+	    addNodesToResult(resultElement, (NodeVector)partialResult);
 	}
 	
 	// If the final result is not null, add all element of the final result
 	if (finalResult != null) {
-
-	    // Type cast to a vector
-	    Vector vecFinalResult = (Vector) finalResult;
-
 	    // Add nodes in vector to result
-	    addNodesToResult(resultElement, vecFinalResult);
+	    addNodesToResult(resultElement, (NodeVector) finalResult);
 	}
 	return resultElement;
     }
@@ -238,173 +269,17 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      * @param resultElement The result Element
      * @param nodeVector The vector of nodes to be added
      */
-
     private void addNodesToResult (Element resultElement, 
-				   Vector nodeVector) {
+				   NodeVector nodeVector) {
 
 	// Loop over all elements and add a clone to the result element
 	int numNodes = nodeVector.size();
 
-	for (int node = 0; node < numNodes; ++node) {
+	// ignore node at index 0, that is the root element...
+	for (int node = 1; node < numNodes; ++node) {
 	    resultElement.appendChild(((Node)
-			 nodeVector.elementAt(node)).cloneNode(true));
+			 nodeVector.get(node)).cloneNode(true));
 	}
-    }
-
-    // vpapad: Brought these over from PhysicalConstruct operator,
-    // because constructResult is no longer a static method
-    public ArrayList physConstructResult (
-				       StreamTupleElement tupleElement,
-				       constructBaseNode templateRoot) {
-
-	// Check if the template root is an internal node or a leaf node
-	// and process accordingly
-	if (templateRoot instanceof constructLeafNode) {
-	    return processLeafNode(tupleElement,
-				   (constructLeafNode) templateRoot);
-	} else if (templateRoot instanceof constructInternalNode) {
-	    return processInternalNode(tupleElement,
-				       (constructInternalNode) templateRoot);
-	} else {
-	    System.err.println("Error: Unknown construct node type!");
-	    return null;
-	}
-    }
-
-
-    /**
-     * This function processes a leaf node during the construction process
-     *
-     * @param tupleElement The tuple to construct the result from
-     * @param leafConstructNode The leaf node having details of construction
-     *
-     * @return The list of results constructed
-     */
-
-    private ArrayList processLeafNode (StreamTupleElement tupleElement,
-				       constructLeafNode leafNode) {
-	
-	// Create a place holder for the result
-	ArrayList result = new ArrayList();
-	
-	// Get the data of the leaf node
-	data leafData = leafNode.getData();
-	
-	switch(leafData.getType()) {
-	case dataType.STRING: 
-	    // Add the string value to the result
-	    result.add(resultDoc.createTextNode((String) leafData.getValue()));
-	    break;
-	    
-	case dataType.ATTR:
-	    // First get the schema attribute
-	    schemaAttribute schema = (schemaAttribute) leafData.getValue();
-
-	    // Now construct result based on whether it is to be interpreted
-	    // as an element or a parent
-	    int attrId;
-	    switch(schema.getType()) {
-	    case varType.ELEMENT_VAR:
-		// The value of the leafData is a schema attribute - from it
-		// get the attribute id in the tuple to construct from
-		attrId = ((schemaAttribute) leafData.getValue()).getAttrId();
-
-		// Add the attribute as the result
-		result.add(tupleElement.getAttribute(attrId));
-		break;
-
-	    case varType.CONTENT_VAR:
-		// The value of the leafData is a schema attribute - from it
-		// get the attribute id in the tuple to construct from
-		attrId = ((schemaAttribute) leafData.getValue()).getAttrId();
-
-		// Get the children of the attribute
-		NodeList nodeList =
-		    ((Node) tupleElement.getAttribute(attrId)).getChildNodes();
-
-		// Add all the children to the result
-		int numChildren = nodeList.getLength();
-
-		for (int child = 0; child < numChildren; ++child) {
-		    result.add(nodeList.item(child));
-		}
-		break;
-
-	    default:
-		assert false: "Unknown schema attribute type in construct leaf node";
-	    }
-	    
-	default:
-	    assert false: "Unknown type in construct leaf node";
-	}
-	
-	// Return the constructed result
-	return result;
-    }
-    
-    
-    /**
-     * This function processes a internal node during the construction process
-     *
-     * @param tupleElement The tuple to construct the result from
-     * @param interalNode The internal node having details of construction
-     *
-     * @return The list of results constructed
-     */
-
-    private ArrayList processInternalNode (
-					 StreamTupleElement tupleElement,
-					 constructInternalNode internalNode) {
-
-	// Create a new element node with the required tag name
-	// taking care of tagvariables
-	data tagData = internalNode.getStartTag().getSdata();
-	String tagName;
-
-	if(tagData.getType() == dataType.ATTR) {
-	   schemaAttribute sattr = (schemaAttribute)tagData.getValue();
-	   int attrId = sattr.getAttrId();
-	   tagName = ((Node)tupleElement.getAttribute(attrId)).getNodeName();
-	} else {
-	   tagName = (String)tagData.getValue();
-	}
-
-	Element resultElement = resultDoc.createElement(tagName);
-
-	// Recurse on all children and construct result
-	Vector children = internalNode.getChildren();
-	int numChildren = children.size();
-
-	for (int child = 0; child < numChildren; child++) {
-
-	    // Get constructed results from child
-	    ArrayList childResult = 
-		physConstructResult(tupleElement,
-				(constructBaseNode) children.get(child));
-
-	    // Add each constructed result to the result element
-	    int numResults = childResult.size();
-	    for (int res = 0; res < numResults; ++res) {
-                Node n = ((Node) childResult.get(res)).cloneNode(true);
-                DOMFactory.importNode(resultDoc, n);
-                resultElement.appendChild(n);
-	    }
-	}
-
-	// Construct the result array list
-	ArrayList result = new ArrayList(1);
-	result.add(resultElement);
-
-	// Return the result
-	return result;
-    }
-
-
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
-     */
-    public final PhysicalProperty findPhysProp(PhysicalProperty[] input_phys_props) {
-        throw new PEException("Optimization is not supported for this operator");
     }
 
     /**
@@ -412,37 +287,27 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      */
     public final Cost findLocalCost(
         ICatalog catalog,
-        LogicalProperty[] InputLogProp) {
-        throw new PEException("Optimization is not supported for this operator");
-    }
+        LogicalProperty[] inputLogProp) {
+	// KT - stolen from construct and PhysicalGroup
+	// XXX vpapad: really naive. Only considers the hashing cost
+        float inpCard = inputLogProp[0].getCardinality();
+        float outputCard = logProp.getCardinality();
 
+        double cost = inpCard * catalog.getDouble("tuple_reading_cost");
+        cost += inpCard * catalog.getDouble("tuple_hashing_cost");
+        cost += outputCard * catalog.getDouble("tuple_construction_cost");
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
-    public int hashCode() {
-        return System.identityHashCode(this);
-    }
-
-    /**
-     * @see niagara.optimizer.colombia.Op#copy()
-     */
-    public final Op copy() {
-        throw new PEException("Optimization is not supported for this operator");
-    }
-    
-    public boolean equals(Object other) {
-        return this == other;
+        // XXX vpapad: Absolutely no connection to reality!
+        // We consider only a fixed cost per output tuple
+	cost += constructTupleCost(catalog) * getLogProp().getCardinality();
+        return new Cost(cost);            
     }
     
     /**
      * @see niagara.query_engine.PhysicalOperator#constructTupleSchema(TupleSchema[])
      */
     public void constructTupleSchema(TupleSchema[] inputSchemas) {
-        throw new PEException("Optimization is not supported for this operator");
+        super.constructTupleSchema(inputSchemas);
+        resultTemplate.replaceVar(new varTbl(inputSchemas[0]));        
     }
-    
-    public TupleSchema getTupleSchema() {
-        throw new PEException("Optimization is not supported for this operator");
-    }    
 }

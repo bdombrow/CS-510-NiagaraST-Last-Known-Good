@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSlidingMaxOperator.java,v 1.2 2003/03/03 08:20:13 tufte Exp $
+  $Id: PhysicalSlidingMaxOperator.java,v 1.3 2003/03/19 22:43:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -161,8 +161,7 @@ public class PhysicalSlidingMaxOperator extends PhysicalWindowOperator {
 
     ArrayList atomicValues;
     
-    public void initFrom(LogicalOp logicalOperator) {
-        super.initFrom(logicalOperator);
+    protected void localInitFrom(LogicalOp logicalOperator) {
 	// Get the summing attribute of the sum logical operator
 	maxingAttribute = ((SlidingMaxOp) logicalOperator).getMaxingAttribute();
 	
@@ -170,14 +169,6 @@ public class PhysicalSlidingMaxOperator extends PhysicalWindowOperator {
 	//
 	super.range = ((SlidingMaxOp) logicalOperator).getWindowRange();
 	super.every = ((SlidingMaxOp) logicalOperator).getWindowEvery();
-	
-	// Initialize the sliding window
-	//
-	super.window = new ArrayList(range);
-	super.streamIds = new ArrayList(range);
-	super.count = 0;
-	super.everyCount = 0;
-	
     }
 
 
@@ -194,6 +185,13 @@ public class PhysicalSlidingMaxOperator extends PhysicalWindowOperator {
         ae = new AtomicEvaluator(maxingAttribute.getName());
         ae.resolveVariables(inputTupleSchemas[0], 0);
         atomicValues = new ArrayList();
+
+	// Initialize the sliding window
+	//
+	super.window = new ArrayList(range);
+	super.streamIds = new ArrayList(range);
+	super.count = 0;
+	super.everyCount = 0;
     }
 
     
@@ -265,12 +263,6 @@ public class PhysicalSlidingMaxOperator extends PhysicalWindowOperator {
 
 	// Add effects of ungrouped result (which is a Double)
 	//
-	if(finalResult == null) {
-           System.out.println("aha, finalResult is null");
-	} 
-	if(ungroupedResult ==  null) {
-           System.out.println("aha, ungroupedResult is null");
-	}
 	finalResult.updateStatistics(((Double) ungroupedResult).doubleValue());
 
 	// Return the grouped result
@@ -378,23 +370,22 @@ public class PhysicalSlidingMaxOperator extends PhysicalWindowOperator {
 	return resultElement;
     }
     
-    public Op copy() {
+    protected PhysicalGroupOperator localCopy() {
         PhysicalSlidingMaxOperator op = new PhysicalSlidingMaxOperator();
-        if (logicalGroupOperator != null)
-            op.initFrom(logicalGroupOperator);
+	op.maxingAttribute = maxingAttribute;
+	op.range = range;
+	op.every = every;
         return op;
     }
 
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalSlidingMaxOperator))
-            return false;
-        if (o.getClass() != PhysicalSlidingMaxOperator.class)
-            return o.equals(this);
-        return logicalGroupOperator.equals(((PhysicalSlidingMaxOperator) o).logicalGroupOperator);
+    protected boolean localEquals(Object o) {
+	PhysicalSlidingMaxOperator other = (PhysicalSlidingMaxOperator)o;
+        return maxingAttribute.equals(other.maxingAttribute) &&
+	    range == other.range && every == other.every;
     }
 
     public int hashCode() {
-        return logicalGroupOperator.hashCode();
+        return groupAttributeList.hashCode() ^ maxingAttribute.hashCode();
     }
     
     

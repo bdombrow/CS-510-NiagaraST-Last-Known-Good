@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.15 2003/03/19 00:36:09 tufte Exp $
+  $Id: PhysicalAverageOperator.java,v 1.16 2003/03/19 22:43:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -132,7 +132,7 @@ public class PhysicalAverageOperator extends PhysicalAggregateOperator {
 	return resultElement;
     }
 
-    protected PhysicalOperator getInstance() {
+    protected PhysicalAggregateOperator getInstance() {
 	return new PhysicalAverageOperator();
     }
 }

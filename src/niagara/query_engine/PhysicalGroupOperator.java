@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.22 2003/03/19 00:36:09 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.23 2003/03/19 22:43:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -160,9 +160,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     // source stream is blocking
     private static final boolean[] blockingSourceStreams = { true };
 
-    // The logical operator for grouping
-    protected groupOp logicalGroupOperator;
-
     // The list of attributes to group by
     protected Vector groupAttributeList;
 
@@ -185,9 +182,30 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
 
-    public void initFrom(LogicalOp logicalOperator) {
-        // Typecast to a group logical operator
-        logicalGroupOperator = (groupOp) logicalOperator;
+    public final void initFrom(LogicalOp logicalOperator) {
+        skolem grouping = ((groupOp)logicalOperator).getSkolemAttributes();
+        groupAttributeList = grouping.getVarList();
+	// have subclass do initialization
+	localInitFrom(logicalOperator);
+    }
+
+    public final Op copy() {
+	PhysicalGroupOperator op = localCopy();
+	op.groupAttributeList = groupAttributeList;
+	return op;
+    }
+
+    public final boolean equals(Object o) {
+	if(o ==  null)
+	    return false;
+	if(!this.getClass().isInstance(o))
+	    return false;
+        if (o.getClass() != this.getClass())
+            return o.equals(this);
+	if(!groupAttributeList.equals(
+			((PhysicalGroupOperator)o).groupAttributeList))
+	    return false;
+	return localEquals(o);
     }
 
     /**
@@ -196,11 +214,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *
      * @return True if the operator is to continue and false otherwise
      */
-    protected void opInitialize() {
-        // Get the grouping attributes
-        skolem grouping = logicalGroupOperator.getSkolemAttributes();
-        groupAttributeList = grouping.getVarList();
-
+    protected final void opInitialize() {
         hasher = new Hasher(groupAttributeList);
         hasher.resolveVariables(inputTupleSchemas[0]);
 
@@ -227,7 +241,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	StreamTupleElement tupleElement,
         int streamId)
         throws ShutdownException {
-
         // First get the hash code for the grouping attributes
         String hashKey = hasher.hashKey(tupleElement);
         Object ungroupedResult = this.constructUngroupedResult(tupleElement);
@@ -280,7 +293,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * @param partial If this function call is due to a request for a
      *                partial result
      *
-     * @return True if the operator is to continue and false otherwise
      */
 
     protected final void flushCurrentResults(boolean partial)
@@ -311,20 +323,15 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
         }
 
         // For each group, construct results
-        //
         while (iter.hasNext()) {
-
             // Get the next element in the hash table
-            //
             HashEntry hashEntry = (HashEntry) iter.next();
 
             // Update hash entry for partial results
-            //
             hashEntry.updatePartialResult(currPartialResultId);
 
             // Get the result object if at least partial or final
             // result is not null
-            //
             Object partialResult = hashEntry.getPartialResult();
             Object finalResult = hashEntry.getFinalResult();
 
@@ -507,8 +514,12 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * This function is called to initialize a grouping operator for execution
      * by setting up relevant structures etc.
      */
-
     protected abstract void initializeForExecution();
+
+    /* do initialization - called from initFrom */
+    protected abstract void localInitFrom(LogicalOp logicalOperator);
+    protected abstract PhysicalGroupOperator localCopy(); // called from copy()
+    protected abstract boolean localEquals(Object o); // called from equals()
 
     /**
      * This function constructs a ungrouped result from a tuple

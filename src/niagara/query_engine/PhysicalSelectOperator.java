@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.12 2003/03/07 21:02:00 tufte Exp $
+  $Id: PhysicalSelectOperator.java,v 1.13 2003/03/19 22:43:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,8 +43,7 @@ public class PhysicalSelectOperator extends PhysicalOperator {
     private static final boolean[] blockingSourceStreams = { false };
 
     // The is the predicate to apply to the tuples
-    private Predicate pred;
-    
+    private Predicate pred;    
     private PredicateImpl predEval;
     
     public PhysicalSelectOperator() {
@@ -52,9 +51,7 @@ public class PhysicalSelectOperator extends PhysicalOperator {
     }
     
     public void initFrom(LogicalOp logicalOperator) {
-	// Type cast logical operator to a select operator
-	Select logicalSelectOperator = (Select) logicalOperator;
-        pred = logicalSelectOperator.getPredicate();	
+        pred = ((Select)logicalOperator).getPredicate();	
         predEval =  pred.getImplementation();
     }
 
