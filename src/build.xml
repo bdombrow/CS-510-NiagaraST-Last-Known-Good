@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.13 2003/07/17 23:21:54 tufte Exp $ -->
+<!-- $Id: build.xml,v 1.14 2003/09/22 00:06:15 vpapad Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -34,7 +34,7 @@
     </exec>
 
     <java fork="yes" dir="${src}/niagara/xmlql_parser/syntax_tree"
-      classpath="${lib}/JFlex.zip"
+      classpath="${lib}/JFlex.1_3_5.jar"
       classname="JFlex.Main">
       <arg value="xmlql.flex"/>
     </java>
@@ -72,7 +72,7 @@
         <pathelement location="${lib}/gnu-regexp.jar"/>
         <pathelement location="${lib}/htmllayout.jar"/>
         <pathelement location="${lib}/javax.servlet.jar"/>
-        <pathelement location="${lib}/JFlex.zip"/>
+        <pathelement location="${lib}/JFlex.1_3_5.jar"/>
         <pathelement location="${lib}/JLex.jar"/>
 	<pathelement location="${lib}/jpcap.jar"/>
         <pathelement location="${lib}/junit.jar"/>
