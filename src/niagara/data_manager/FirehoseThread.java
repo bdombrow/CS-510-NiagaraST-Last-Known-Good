@@ -15,8 +15,10 @@ package niagara.data_manager;
   */
 
 import com.ibm.xml.parser.*;
+import com.ibm.xml.parsers.TXDOMParser;
 import org.w3c.dom.*;
 import java.io.*;
+import org.xml.sax.*;
 
 import niagara.query_engine.*;
 import niagara.utils.*;
@@ -116,17 +118,11 @@ public class FirehoseThread implements Runnable {
      */
 
     private TXDocument parseMessageBuffer() {
-	/* have to get a new parser each time - according to IBM doc
-	 * a parser instance shouldn't be reused
-	 */
-	Parser parser = new Parser(new String("http://www.cse.ogi.edu/~tufte/firehose_default.xml"));
-	
-	/* parse the messageBuffer - let's try null
-	 * terminating the buffer and seing if that works
+	/* parse the messageBuffer 
 	 * Note: messageBuffer may be longer than actual message 
 	 */
 
-	System.out.println("DEBUG: " + messageBuffer);
+	// Bug in IBM's XMLGenerator
 	int i1 = messageBuffer.indexOf("SYSTEM \"\"");
 	if (i1 !=  -1) {
 	    messageBuffer = messageBuffer.substring(0, i1) + 
@@ -134,13 +130,21 @@ public class FirehoseThread implements Runnable {
 		messageBuffer.substring(i1 + "SYSTEM \"\"".length());
 	}
 
+	// Get rid of 0x0's
   	if (messageBuffer.indexOf(0) != -1)
-  	    messageBuffer = messageBuffer.substring(0, messageBuffer.indexOf(0));	
-	TXDocument doc = parser.readStream(new StringReader(messageBuffer));
+ 	    messageBuffer = messageBuffer.substring(0, messageBuffer.indexOf(0));	
+	System.out.println("DEBUG: " + messageBuffer);
 
-	/* get rid of the parser instance */
-	parser = null;
-	return doc;
+	try {
+	    TXDOMParser parser = new TXDOMParser();
+	    parser.parse(new InputSource(new ByteArrayInputStream(messageBuffer.getBytes())));
+	    TXDocument doc = (TXDocument) parser.getDocument();
+	    return doc;
+	}
+	catch (Exception ex) {
+	    ex.printStackTrace();
+	    return null;
+	}
     }
 	    
     /* need a new function on fhClient to say - I'm going away
