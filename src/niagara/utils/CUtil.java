@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CUtil.java,v 1.5 2001/08/08 21:30:32 tufte Exp $
+  $Id: CUtil.java,v 1.6 2002/03/26 22:07:19 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -248,7 +248,13 @@ public class CUtil {
      */
     public static Document parseXML(String url) 
 	throws ParseException {
-        niagara.ndom.DOMParser parser = DOMFactory.newParser();
+
+        niagara.ndom.DOMParser parser;
+        if (niagara.connection_server.NiagraServer.usingSAXDOM())
+            parser = DOMFactory.newParser("saxdom");
+        else
+            parser = DOMFactory.newParser();
+
         boolean exceptionCaught = false;
 
         try {
