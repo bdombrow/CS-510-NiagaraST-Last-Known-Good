@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCache.java,v 1.6 2003/09/13 03:46:15 vpapad Exp $
+  $Id: MemCache.java,v 1.7 2003/09/22 02:00:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -71,16 +71,6 @@ abstract class MemCache implements DMCache {
         _mutex.unlock();
     }
 
-    /** get TimeStamp of a file or URL */
-    public static long getTimeStamp(String ss) {
-        String s = CacheUtil.normalizePath(ss); 
-        if(CacheUtil.isTrigTmp(s)) {
-            MemCacheEntry me = (MemCacheEntry)_entryHash.get(s);
-            if(me!=null) return me.getTimeStamp();
-        }
-        return CacheUtil.getTimeStamp(s);
-    }
-    
     /** replace old k=>oldval to k=>val */
     public void remap(Object key, Object val) {
         remap(key, val, 0);

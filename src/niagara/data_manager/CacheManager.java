@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheManager.java,v 1.8 2003/03/08 02:21:39 vpapad Exp $
+  $Id: CacheManager.java,v 1.9 2003/09/22 02:00:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -88,17 +88,6 @@ public class CacheManager {
         else vClock = now;
     }
     
-    public boolean isModified(String s, long from, long to) {
-	System.out.println("CM::isModified: Detecting " + s);
-	System.out.println("CM::isModified: From " + from + " To " + to);
-        setVClock(to);
-        long tsp = MemCache.getTimeStamp(s);
-	System.out.println("CM::fileTimeStamp: " + tsp);
-        if(tsp >= from || tsp == 0) return true;
-        else return false;
-    }
-    
-            
     public synchronized boolean getDocuments(Vector xmlURLList, 
 					     regExp pathExpr,   
 					     SinkTupleStream stream) 

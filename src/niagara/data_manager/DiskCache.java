@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DiskCache.java,v 1.6 2003/03/08 01:01:53 vpapad Exp $
+  $Id: DiskCache.java,v 1.7 2003/09/22 02:00:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -147,12 +147,5 @@ class DiskCache implements DMCache {
 	} catch (ParseException pe) {
 	    throw new CacheFetchException("Error parsing: " +k);
 	}
-    }
-
-    public String urlToFile(String s) {
-        return dirName + "/CACHE/" + CacheUtil.urlToFile(s);
-    }
-    public String pathToFile(String s) {
-        return dirName + "/CACHE/" + CacheUtil.pathToFile(s);
     }
 }
