@@ -6,12 +6,13 @@ package niagara.xmlql_parser.op_tree;
  */
 
 public class StreamSpec {
-    /*protected boolean useStreamFormat;
-       public boolean useStreamFormat() {
-            return useStreamFormat;
-       }
-    */
-       public void dump(java.io.PrintStream ps) {
+    protected boolean isStream;
 
-       }
+    public boolean isStream() {
+	return isStream;
+    }
+
+    public void dump(java.io.PrintStream ps) {
+	
+    }
 }

@@ -14,8 +14,9 @@ public class FileScanSpec extends StreamSpec{
     /**
      * Initialize the stream spec
      */
-    public FileScanSpec(String file_name) {
+    public FileScanSpec(String file_name, boolean isStream) {
 	this.file_name = file_name;
+	this.isStream = isStream;
     }
 
     public String getFileName() {
