@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamPunctuationElement.java,v 1.3 2002/12/10 00:59:43 vpapad Exp $
+  $Id: StreamPunctuationElement.java,v 1.4 2003/03/15 17:58:23 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,6 +39,7 @@ package niagara.utils;
  */
 
 import org.w3c.dom.*;
+import java.util.StringTokenizer;
 
 public final class StreamPunctuationElement extends StreamTupleElement {
     public static final String STPUNCTNS = "PUNCT";
@@ -178,12 +179,59 @@ public final class StreamPunctuationElement extends StreamTupleElement {
 	    //wildcard, everything matches that.
 	    fMatch = true;
 	else if (stPunct.charAt(0) == '(' || stPunct.charAt(0) == '[') {
-	    //range of values. See if that value we have is in that range.
+	    //range of values. See if that value we have is in that
+	    // range.
+	    boolean fMinIncl = stPunct.charAt(0) == '[';
+	    boolean fMaxIncl = stPunct.charAt(stPunct.length()-1) == ']';
+	    fMatch = checkInRange(fMinIncl, fMaxIncl, stPunct, stValue);
 	} else if (stPunct.charAt(0) == '{') {
-	    //list of items. See if the tuple value matches an item in the list
+	    //list of items. See if the tuple value matches an item
+	    // in the list
+	    StringTokenizer stok =
+	        new StringTokenizer(stPunct, "{}, ");
+	    while(fMatch == false && stok.hasMoreElements()) {
+	        String stTok = stok.nextToken();
+		fMatch = stTok.equals(stValue);
+	    }
 	} else {
 	    //must be a constant. They should be equal
 	    fMatch = stPunct.equals(stValue);
+	}
+
+	return fMatch;
+    }
+
+    private static boolean checkInRange(boolean fMinIncl,
+        boolean fMaxIncl, String stPunct, String stValue) {
+	//Find the ',' to determine stMin
+	int i=1; //Skip the leading '(' or '['
+	for (; i<stPunct.length() && stPunct.charAt(i) != ','; i++) ;
+	String stMin = stPunct.substring(1,i).trim();
+	String stMax = stPunct.substring(i+1,stPunct.length()-2).trim();
+	boolean fMatch = false;
+
+	//See if we can convert the strings to doubles. If so,
+	// do a numeric comparison. Otherwise, string comparison
+	try {
+	    double dblMin = Double.NEGATIVE_INFINITY,
+	           dblMax = Double.POSITIVE_INFINITY;
+	    if (stMin.length() != 0)
+	        dblMin = Double.parseDouble(stMin);
+	    if (stMax.length() != 0)
+	        dblMax = Double.parseDouble(stMax);
+	    double dblVal = Double.parseDouble(stValue);
+
+	    //Since we're still here, match on a numeric comparison
+	    fMatch = (dblMin < dblVal && dblVal < dblMax) ||
+	             (fMinIncl && dblMin == dblVal) ||
+	 	     (fMaxIncl && dblMax == dblVal);
+	} catch (NumberFormatException ex) {
+	    //OK, we have to do a string compare
+	    int nMinComp = stValue.compareTo(stMin);
+	    int nMaxComp = stValue.compareTo(stMax);
+	    fMatch = (nMinComp > 0 && nMaxComp < 0) ||
+	             (fMinIncl && nMinComp == 0) ||
+		     (fMaxIncl && nMaxComp == 0);
 	}
 
 	return fMatch;
