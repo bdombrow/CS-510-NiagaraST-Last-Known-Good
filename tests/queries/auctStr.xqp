@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<!-- "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd" -->
+
+<plan top="fh">
+
+<firehosescan id="fh" host="localhost" port="5001" rate="1000" datatype="auction_stream" num_gen_calls="100" streaming="yes" desc="" num_tl_elts="1" prettyprint = "yes" >
+</firehosescan>
+
+</plan>
+
+
