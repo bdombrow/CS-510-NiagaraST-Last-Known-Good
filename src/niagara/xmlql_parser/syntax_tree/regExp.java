@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: regExp.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
+  $Id: regExp.java,v 1.3 2002/03/26 23:54:12 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,6 +43,7 @@ public abstract class regExp {
 
     public abstract void dump(int depth);
     public abstract String toString();
+    public abstract boolean isNever();
                     
     public void genTab(int depth){
 	for(int i=0; i<depth; i++)

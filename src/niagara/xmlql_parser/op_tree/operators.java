@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: operators.java,v 1.6 2001/07/17 06:52:23 vpapad Exp $
+  $Id: operators.java,v 1.7 2002/03/26 23:53:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -47,6 +47,7 @@ public class operators {
 	public static dbScanOp DbScan;     // to read a database (not used)
 	public static dtdScanOp DtdScan;   // to read the XML data sources
     public static FirehoseScanOp FirehoseScan;   // to read from a firehose
+    public static StreamScanOp StreamScan; // to read from a stream
     public static ConstantOp constantOp;   // embedded XML document
     public static ResourceOp resourceOp;   // an abstract resource
         public static tupleScanOp TupleScan; //Trigger
@@ -76,6 +77,7 @@ public class operators {
 	private static String[] dbScanAlgo = {"niagara.query_engine.PhysicalScanOperator"};
 	private static String[] dtdScanAlgo = {};
     private static String[] firehoseScanAlgo = {}; 
+    private static String[] streamScanAlgo = {}; 
     private static String[] constantOpAlgo = {}; 
     private static String[] resourceOpAlgo = {}; 
         private static String[] tupleScanAlgo = {};
@@ -130,6 +132,14 @@ public class operators {
 			algoClasses[i] = Class.forName(firehoseScanAlgo[i]);
 		FirehoseScan = new FirehoseScanOp(algoClasses);
                 operatorNames.put(FirehoseScan.getClass().getName(), "fhscan");
+
+		// StreamScan
+		numOfAlgo = streamScanAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(streamScanAlgo[i]);
+		StreamScan = new StreamScanOp(algoClasses);
+                operatorNames.put(StreamScan.getClass().getName(), "streamscan");
 
 		// ConstantOp
 		numOfAlgo = constantOpAlgo.length;

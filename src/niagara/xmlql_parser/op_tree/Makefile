@@ -9,31 +9,12 @@
 #
 ##############################################################################
 
+include ../../../make.incl
 
 #-------------------------------------
 # Specify all relative path info here
 #-------------------------------------
-NIAGROOT    = ../../../..
-API         = /p/niagra/api
-LIBDIR      = $(NIAGROOT)/lib
 TARG_LIB    = logicaloptree.jar
-
-
-#-------------------------------------
-#  Other required libs
-#-------------------------------------
-PARSELIB     = $(LIBDIR)/xml4j.jar
-COMMONLIB    = $(LIBDIR)/common.jar
-CUPLIB	     = $(LIBDIR)/cup_all.jar
-ASTLIB	     = $(LIBDIR)/ast.jar
-REGEXPLIB     = $(LIBDIR)/gnu-regexp.jar
-JETTY        = $(LIBDIR)/com.mortbay.jetty.jar
-SERVLET      = $(LIBDIR)/javax.servlet.jar
-export SAX   = $(LIBDIR)/aelfred.jar
-
-
-CLASSPATH  = .:$(NIAGROOT)/src:$(PARSELIB):$(BASELIB):$(CUPLIB):$(ASTLIB):$(COMMONLIB):$(NIAGROOT)/src/$(FHOSE):$(REGEXPLIB):$(JETTY):$(SERVLET):$(SAX)
-JAVAFLAGS  = -classpath $(CLASSPATH)
 
 
 ##############################################################################
@@ -65,7 +46,7 @@ OBJ =   op.class		\
 ##############################################################################
 
 %.class: %.java
-	$(JAVAC) $(JAVAFLAGS) $<
+	$(JAVAC) $(JAVACFLAGS) $<
 
 all: $(OBJ) 
 

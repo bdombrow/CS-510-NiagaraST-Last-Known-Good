@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: regExpDataNode.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
+  $Id: regExpDataNode.java,v 1.3 2002/03/26 23:54:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -75,4 +75,15 @@ public class regExpDataNode extends regExp {
 	public String toString() {
 	     return expData.toString();
 	}
+
+    public boolean isNever() {
+	if(expData.getType() == dataType.VAR) {
+	    if(((String)(expData.getValue())).equals("NEVER")){
+		return true;
+	    }
+	}
+	return false;
+    }
 }
+
+

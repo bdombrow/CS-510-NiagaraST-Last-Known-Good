@@ -50,7 +50,7 @@ public class AccumulateOp extends unryOp {
      * @param mergeIndex  The index in the tuple structure of the XML 
      *              documents/fragments to be merged
      */
-    public void setAccumulate(String mergeTemplateStr, 
+    public void setAccumulate(String _mergeTemplate, 
 			      schemaAttribute _mergeAttr,
 			      String _accumFileName, 
 			      String _initialAccumFile,
@@ -63,7 +63,7 @@ public class AccumulateOp extends unryOp {
 	clear = _clear;
 
 	/* true indicates that accumulate constraints should be checked */
-	mergeTree.create(mergeTemplateStr, true);
+	mergeTree.create(_mergeTemplate, true);
 	return;
     }
 

@@ -9,30 +9,11 @@
 #  make clean:    deletes all class files
 #
 ############################################################################
+include ../../../make.incl
 
-#-------------------------------------
-# Specify all relative path info here
-#-------------------------------------
-NIAGROOT    = ../../../..
 API         = /p/niagra/api
-LIBDIR      = $(NIAGROOT)/lib
 TARG_LIB    = xmlql_parser.jar
-JAVAC       = javac
-JAVA        = java
 
-
-#-------------------------------------
-#  Other required libs
-#-------------------------------------
-PARSELIB    = $(LIBDIR)/xml4j.jar
-COMMONLIB   = $(LIBDIR)/common.jar
-CUPLIB      = $(LIBDIR)/cup_all.jar
-JFLEXLIB    = $(LIBDIR)/JFlex.zip
-
-CLASSPATH  = .:$(NIAGROOT)/src:$(BASELIB):$(JFLEXLIB):$(CUPLIB):$(PARSELIB):$(COMMONLIB)
-
-JAVAFLAGS  = -classpath $(CLASSPATH)
-DEBUG = 
 #############################################################################
 
 
@@ -77,7 +58,7 @@ OBJ = EscapedUnicodeReader.class   \
 all: sym.class Scanner.class construct_parser/ConstructParser.class re_parser/REParser.class QueryParser.class $(OBJ)
 
 %.class: %.java
-	$(JAVAC) $(JAVAFLAGS) $(DEBUG) $<
+	$(JAVAC) $(JAVACFLAGS) $<
 
 # Generate QueryParser.java and sym.java
 QueryParser.java: xmlql.cup

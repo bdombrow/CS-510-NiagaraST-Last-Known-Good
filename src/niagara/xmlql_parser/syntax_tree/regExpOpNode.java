@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: regExpOpNode.java,v 1.3 2001/07/17 06:53:29 vpapad Exp $
+  $Id: regExpOpNode.java,v 1.4 2002/03/26 23:54:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -187,6 +187,10 @@ public class regExpOpNode extends regExp {
         default: 
             return "INVALID";
         }
+    }
+
+    public boolean isNever() {
+	return false;
     }
 }
 
