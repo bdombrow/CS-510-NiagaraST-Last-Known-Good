@@ -79,7 +79,7 @@ public class SimpleClient implements UIDriverIF {
     public void errorMessage(int id, String err) {
         if (resultListeners.size() == 0) {
 	    System.err.println();
-            System.err.println("SimpleClient Error: " + err);
+            System.err.println("SimpleClient Received Error: " + err);
 	    // Wake up main thread which is holding the mutex on this 
 	    // object, must wake up otherwise we deadlock in queryDone
 	    // main thread may be waiting to get the server id
