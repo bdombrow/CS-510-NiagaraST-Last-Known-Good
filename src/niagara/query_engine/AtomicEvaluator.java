@@ -17,7 +17,7 @@ public class AtomicEvaluator {
     StreamTupleElement[] oneTuple;
     NodeVector reachableNodes;
 
-    AtomicEvaluator(Object value) {
+    public AtomicEvaluator(Object value) {
         if (value instanceof String) {
             isConstant = true;
             constant = (String) value;
