@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ServerQueryInfo.java,v 1.4 2003/03/08 00:57:05 vpapad Exp $
+  $Id: ServerQueryInfo.java,v 1.5 2003/08/01 17:28:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,7 +25,6 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.connection_server;
 
 /**Stores the info about a query in the server
@@ -33,58 +32,46 @@ package niagara.connection_server;
 import niagara.utils.*;
 import niagara.query_engine.*;
 
-public class ServerQueryInfo { 
-    
+public class ServerQueryInfo {
+
     // constants for the variable queryType
-    final static int SearchEngine = 0;
     final static int QueryEngine = 1;
     final static int GetDTD = 3;
     final static int AccumFile = 4;
 
-    int queryType;
+    private int queryType;
 
     // The tranmitter thread for this query
-    ResultTransmitter transmitter;
+    private ResultTransmitter transmitter;
     private int queryId;
 
     // Is this query synchronous? 
     // (Implies no result padding, and closing of connection at the end)
     private boolean synchronous;
-    
-    SynchronizedQueue queryResultQueue;
+    private SynchronizedQueue queryResultQueue;
 
-    // se query related data
-    String searchEngineQuery;
-    
     // qe query related data
-    QueryResult queryResult;
-
-    String accumFileName;
+    private QueryResult queryResult;
+    private String accumFileName;
 
     /**Constructor
        @param queryId The Server Query Id (different from QID given by QE/Client 
        @param queryType Tells the module to which this query belongs
     */
-    public ServerQueryInfo(int queryId,int queryType) {
-	this.queryId = queryId;
-	this.queryType = queryType;
-	
-	searchEngineQuery = "";
+    public ServerQueryInfo(int queryId, int queryType) {
+        this.queryId = queryId;
+        this.queryType = queryType;
     }
 
     public ServerQueryInfo(int queryId, int queryType, boolean synchronous) {
         this(queryId, queryType);
         this.synchronous = synchronous;
     }
-    
-    boolean isSEQuery() {
-	return queryType == SearchEngine;
-    }
 
     boolean isQEQuery() {
-	return queryType == QueryEngine;
+        return queryType == QueryEngine;
     }
-   
+
     boolean isAccumFileQuery() {
         return queryType == AccumFile;
     }
@@ -96,11 +83,32 @@ public class ServerQueryInfo {
     boolean isSynchronous() {
         return synchronous;
     }
-    
+
     public int getQueryId() {
-	return queryId;
+        return queryId;
+    }
+    
+    public void setQueryResult(QueryResult qr) {
+    	queryResult = qr;	
+    }
+    
+    public void setTransmitter(ResultTransmitter rt) {
+        transmitter = rt;	
+    }
+    
+    public void setAccumFileName(String afName) {
+    	accumFileName = afName;
+    }
+    
+    public ResultTransmitter getTransmitter() {
+    	return transmitter;
+    }
+    
+    public QueryResult getQueryResult() {
+    		return queryResult;
+    }
+    
+    public String getAccumFileName() {
+    	return accumFileName;
     }
 }
-
-
-

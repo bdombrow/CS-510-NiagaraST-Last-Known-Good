@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestMessage.java,v 1.7 2003/03/08 00:57:05 vpapad Exp $
+  $Id: RequestMessage.java,v 1.8 2003/08/01 17:28:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,7 +63,7 @@ public class RequestMessage {
     String requestType;
     int serverID;
     int localID;
-
+    
     String requestData;
 
     public RequestMessage() {

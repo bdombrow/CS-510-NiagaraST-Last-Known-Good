@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.10 2003/07/09 04:59:40 tufte Exp $
+  $Id: ResponseMessage.java,v 1.11 2003/08/01 17:28:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,7 +63,7 @@ class ResponseMessage
     /**
      * server query ID. The ID of the query on the server
      */
-    public int serverID;
+    private int serverID;
     /**
      * Message type
      */
@@ -83,6 +83,10 @@ class ResponseMessage
     
     public void appendData(String moreData) {
         responseData.append(moreData);
+    }
+    
+    public int getServerID() {
+    	return serverID;
     }
     
     public void appendResultData(QueryResult.ResultObject ro, 
@@ -105,12 +109,11 @@ class ResponseMessage
     /**
      * Constructor
      */
-    public ResponseMessage(RequestMessage request, int type)
-    {
-	this.localID = request.localID;
-	this.serverID = request.serverID;
-	this.type = type;
-	responseData = new StringBuffer();
+    public ResponseMessage(RequestMessage request, int type) {
+		this.localID = request.localID;
+		this.serverID = request.serverID;
+		this.type = type;
+		responseData = new StringBuffer();
     }
 
     /**Convert this response to an XML string
@@ -120,7 +123,7 @@ class ResponseMessage
         if (padding) {
             writer.write("<responseMessage localID =\"");
             writer.write(String.valueOf(localID));
-	    writer.write("\" serverID = \"");
+	    	writer.write("\" serverID = \"");
             writer.write(String.valueOf(serverID));
             writer.write("\" responseType = \"");
             writer.write(getResponseType());
@@ -151,7 +154,6 @@ class ResponseMessage
 	case QUERY_RESULT: return "query_result";
 	case END_RESULT: return "end_result";
 	case DTD_LIST : return "dtd_list";
-	case INVALID_SERVER_ID : return "invalid_server_id";
 	case PARSE_ERROR : return "parse_error";
 	case ERROR : return "server_error";
 	case SERVER_QUERY_ID: return "server_query_id";
