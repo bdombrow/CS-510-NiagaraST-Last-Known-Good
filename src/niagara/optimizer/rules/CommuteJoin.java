@@ -33,6 +33,16 @@ public class CommuteJoin extends Rule {
     public void initialize() {
         maskRule("CommuteJoin");
     }
+    
+// XXX vpapad hack 
+    public Expr next_substitute(
+        Expr before,
+        MExpr mexpr,
+        PhysicalProperty ReqdProp) {
+            return null;
+        }
+
+/*
 
     public Expr next_substitute(
         Expr before,
@@ -47,4 +57,5 @@ public class CommuteJoin extends Rule {
             new Expr((before.getInput(1))),
             new Expr((before.getInput(0))));
     }
+*/    
 }
