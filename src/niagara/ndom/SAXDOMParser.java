@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.1 2002/03/26 22:07:41 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.2 2002/03/26 23:52:07 tufte Exp $
  *
  */
 
@@ -65,6 +65,9 @@ public class SAXDOMParser implements niagara.ndom.DOMParser {
         return sh.hasWarnings();
     }
 
+    public boolean supportsStreaming() {
+	return false;
+    }
 }
 
 class SAXDOMHandler extends DefaultHandler {
@@ -155,4 +158,5 @@ class SAXDOMHandler extends DefaultHandler {
     public void warning(SAXParseException e) throws SAXException {
         hasWarnings = true;
     }
+
 }

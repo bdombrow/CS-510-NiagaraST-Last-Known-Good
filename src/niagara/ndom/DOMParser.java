@@ -1,5 +1,5 @@
 /**
- * $Id: DOMParser.java,v 1.1 2001/07/17 03:36:36 vpapad Exp $
+ * $Id: DOMParser.java,v 1.2 2002/03/26 23:52:07 tufte Exp $
  *
  */
 
@@ -49,5 +49,13 @@ public interface DOMParser {
      * @return <code>true</code> if any warnings occured during parsing
      */
     boolean hasWarnings();
+
+    /**
+     * Indicates if the implementation supports streaming of
+     * documents. That is if the implementation can parse a 
+     * stream of documents from one input source, or if we need
+     * to provide a new input source for each call to parse.
+     */
+    boolean supportsStreaming();
 }
 

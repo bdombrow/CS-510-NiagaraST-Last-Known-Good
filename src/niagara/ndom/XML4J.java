@@ -1,5 +1,5 @@
 /**
- * $Id: XML4J.java,v 1.1 2001/07/17 03:36:37 vpapad Exp $
+ * $Id: XML4J.java,v 1.2 2002/03/26 23:52:07 tufte Exp $
  *
  */
 
@@ -26,4 +26,9 @@ class XML4J implements DOMImplementation {
     public Node importNode(Document d, Node n) {
         return d.importNode(n, true);
     }
+
+    public boolean supportsStreaming() {
+	return false;
+    }
 }
+

@@ -1,5 +1,5 @@
 /**
- * $Id: XercesJ.java,v 1.1 2001/07/17 03:36:37 vpapad Exp $
+ * $Id: XercesJ.java,v 1.2 2002/03/26 23:52:07 tufte Exp $
  *
  */
 
@@ -21,10 +21,11 @@ class XercesJ implements DOMImplementation {
     }
 
     public DOMParser newParser() {
-        return new XercesJParser();
+        return new niagara.ndom.XercesJParser();
     }
 
     public Node importNode(Document d, Node n) {
         return d.importNode(n, true);
     }
+
 }

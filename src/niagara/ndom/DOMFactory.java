@@ -1,5 +1,5 @@
 /**
- * $Id: DOMFactory.java,v 1.2 2002/03/26 22:07:41 vpapad Exp $
+ * $Id: DOMFactory.java,v 1.3 2002/03/26 23:52:07 tufte Exp $
  *
  */
 
@@ -27,13 +27,14 @@ public class DOMFactory {
 
     private static Hashtable name2impl;
     static {
-        name2impl = new Hashtable();
-        name2impl.put("xml4j", new XML4J());
-        name2impl.put("xerces", new XercesJ()); 
+	name2impl = new Hashtable();
+	name2impl.put("xml4j", new XML4J());
+	name2impl.put("xerces", new XercesJ()); 
+	name2impl.put("xerces2", new XercesJ2());
         name2impl.put("saxdom", new SAXDOM()); 
-
-        // xerces is the default
-        impl = (DOMImplementation) name2impl.get("xerces");
+	
+	// new xerces parser is the default
+	impl = (DOMImplementation) name2impl.get("xerces2");
     }
 
     /**
@@ -98,6 +99,7 @@ public class DOMFactory {
         else 
             return impl.importNode(d, n);
     }
+
 }
 
 

@@ -1,5 +1,5 @@
 /**
- * $Id: XML4JParser.java,v 1.1 2001/07/17 03:36:37 vpapad Exp $
+ * $Id: XML4JParser.java,v 1.2 2002/03/26 23:52:07 tufte Exp $
  *
  */
 
@@ -46,6 +46,9 @@ public class XML4JParser implements niagara.ndom.DOMParser {
         return (sh.hasWarnings());
     }
 
+    public boolean supportsStreaming() {
+	return false;
+    }
 }
 
  class SimpleXML4JHandler implements ErrorHandler {
@@ -78,4 +81,5 @@ public class XML4JParser implements niagara.ndom.DOMParser {
     public void warning(SAXParseException e) {
         hasWarnings = true;
     }
+
 }

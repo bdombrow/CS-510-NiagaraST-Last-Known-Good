@@ -1,5 +1,5 @@
 /**
- * $Id: XercesJParser.java,v 1.2 2002/03/26 23:52:08 tufte Exp $
+ * $Id: XercesJ2Parser.java,v 1.1 2002/03/26 23:52:08 tufte Exp $
  *
  */
 
@@ -11,31 +11,39 @@ import java.io.IOException;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
-import org.apache.xerces.parsers.*;
+import javax.xml.parsers.*;
 
 /**
  * <code>XercesJParser</code> is a wrapper for org.apache.xerces.parsers.DOMParser;
  *
  * @author <a href="mailto:vpapad@king.cse.ogi.edu">Vassilis Papadimos</a>
  */
-public class XercesJParser implements niagara.ndom.DOMParser {
+public class XercesJ2Parser implements niagara.ndom.DOMParser {
 
-    private org.apache.xerces.parsers.DOMParser parser;
+    private DocumentBuilder parser;
     private SimpleHandler sh;
+    private Document d;
 
-    public XercesJParser() {
-        parser = new org.apache.xerces.parsers.DOMParser();
-        sh = new SimpleHandler();
+    public XercesJ2Parser(DocumentBuilderFactory dbf) {
+
+	try {
+	    parser = dbf.newDocumentBuilder();
+	    sh = new SimpleHandler();
+	} catch (javax.xml.parsers.ParserConfigurationException pce) {
+	    System.err.println("Unable to create XercesJ2Parser " + 
+			       pce.getMessage());
+	}
     }
 
-    public void parse(InputSource is) throws SAXException, IOException {
+    public void parse(org.xml.sax.InputSource is) 
+	throws SAXException, IOException {
         sh.reset();
         parser.setErrorHandler(sh);
-        parser.parse(is);
+        d = parser.parse(is);
     }
 
     public Document getDocument() {
-        return parser.getDocument();
+        return d;
     }
 
     public boolean hasErrors() {
@@ -47,14 +55,15 @@ public class XercesJParser implements niagara.ndom.DOMParser {
     }
 
     public boolean supportsStreaming() {
-	return false;
+	return true;
     }
+
 }
 
-class SimpleHandler extends DefaultHandler {
+class SimpleHandler2 extends DefaultHandler {
     private boolean hasErrors, hasWarnings;
 
-    public SimpleHandler() {
+    public SimpleHandler2() {
         reset();
     }
 
