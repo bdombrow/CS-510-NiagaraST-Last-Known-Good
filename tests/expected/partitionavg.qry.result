@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:results>
+
+<maximum>
+   <group>1</group>
+   <prev>NaN</prev>
+   <new>10.0</new>
+</maximum>
+<maximum>
+   <group>2</group>
+   <prev>NaN</prev>
+   <new>5.0</new>
+</maximum>
+<maximum>
+   <group>1</group>
+   <prev>10.0</prev>
+   <new>7.5</new>
+</maximum>
+<maximum>
+   <group>3</group>
+   <prev>NaN</prev>
+   <new>15.0</new>
+</maximum>
+<maximum>
+   <group>1</group>
+   <prev>7.5</prev>
+   <new>11.666666666666666</new>
+</maximum>
+<maximum>
+   <group>2</group>
+   <prev>5.0</prev>
+   <new>-2.5</new>
+</maximum>
+<maximum>
+   <group>1</group>
+   <prev>11.666666666666666</prev>
+   <new>15.0</new>
+</maximum>
+<maximum>
+   <group>1</group>
+   <prev>15.0</prev>
+   <new>20.0</new>
+</maximum>
+<maximum>
+   <group>1</group>
+   <prev>20.0</prev>
+   <new>20.0</new>
+</maximum>
+<maximum>
+   <group>1</group>
+   <prev>20.0</prev>
+   <new>23.333333333333332</new>
+</maximum>
+<maximum>
+   <group>1</group>
+   <prev>23.333333333333332</prev>
+   <new>23.333333333333332</new>
+</maximum>
+<maximum>
+   <group>4</group>
+   <prev>NaN</prev>
+   <new>20.0</new>
+</maximum>
+
+</niagara:results>
