@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.32 2003/07/08 20:51:06 ptucker Exp $
+<!-- $Id: queryplan.dtd,v 1.33 2003/07/10 21:57:54 ptucker Exp $
      DTD for query plans -->
 
 <!-- 
@@ -252,7 +252,6 @@
           id       ID           #REQUIRED
 	  datainput CDATA       #REQUIRED
 	  dataattr CDATA        #REQUIRED
-	  dataroot CDATA        #REQUIRED
 	  timer    CDATA        #REQUIRED
 	  input    IDREFS       #REQUIRED
 	  %PositionAttributes;>
