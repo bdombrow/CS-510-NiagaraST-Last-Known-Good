@@ -1,4 +1,4 @@
-/* $Id: Variable.java,v 1.8 2003/09/16 02:49:21 vpapad Exp $ */
+/* $Id: Variable.java,v 1.9 2003/09/16 04:53:35 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.connection_server.InvalidPlanException;
@@ -18,7 +18,7 @@ public class Variable implements Atom, Attribute {
         // We want unique names for variables
         this.name = name.intern();
         this.domain = domain;
-        if(domain == null)
+        if (domain == null)
             this.domain = NodeDomain.getDomain(varType.NULL_VAR);
     }
 
@@ -41,7 +41,7 @@ public class Variable implements Atom, Attribute {
             throw new InvalidPlanException("Unknown variable: " + varName);
         return attr;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -49,7 +49,7 @@ public class Variable implements Atom, Attribute {
     public SimpleAtomicEvaluator getSimpleEvaluator() {
         return new SimpleAtomicEvaluator(name);
     }
-    
+
     public AtomicEvaluator getEvaluator() {
         return new AtomicEvaluator(name);
     }
@@ -57,7 +57,7 @@ public class Variable implements Atom, Attribute {
     public AtomicEvaluator getEvaluator(regExp path) {
         return new AtomicEvaluator(name, path);
     }
-    
+
     public void toXML(StringBuffer sb) {
         sb.append("<var value='$").append(name).append("'/>");
     }
@@ -65,7 +65,7 @@ public class Variable implements Atom, Attribute {
     public boolean isConstant() {
         return false;
     }
-    
+
     public boolean isVariable() {
         return true;
     }
@@ -79,24 +79,23 @@ public class Variable implements Atom, Attribute {
             return false;
         if (other.getClass() != Variable.class)
             return other.equals(this);
-        return
-            name == ((Variable) other).getName() && 
-            domain.equals(((Variable) other).getDomain());
+        return equals((Variable) other);
     }
 
-    String Dump() {
-        return " Name:" + name + " Domain:" + domain.getName();
+    public boolean equals(Attribute other) {
+        return name == other.getName()
+            && domain.equals(other.getDomain());
     }
-
+    
     public Attribute copy() {
         return new Variable(name, domain);
     }
-    
+
     public int hashCode() {
         return name.hashCode() ^ domain.hashCode();
     }
-    
+
     public boolean matchesName(String name) {
-        return this.name == name.intern();
+        return this.name.equals(name);
     }
 }

@@ -1,4 +1,4 @@
-/* $Id: AssociateJoinLtoR.java,v 1.1 2003/09/13 03:44:02 vpapad Exp $ */
+/* $Id: AssociateJoinLtoR.java,v 1.2 2003/09/16 04:55:22 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.util.HashMap;
@@ -60,15 +60,15 @@ public class AssociateJoinLtoR extends CustomRule {
         joinOp op1 = (joinOp) before.getInput(0).getOp();
         EquiJoinPredicateList preds1 = op1.getEquiJoinPredicates();
 
-        // new equijoin predicates
-        EquiJoinPredicateList newPreds1 = new EquiJoinPredicateList();
-        EquiJoinPredicateList newPreds2 = new EquiJoinPredicateList();
-
-        EquiJoinPredicateList allPreds = preds1.copy();
+        UpdateableEquiJoinPredicateList allPreds = preds1.updateableCopy();
         allPreds.addAll(preds2);
-        Attrs leftAttrs = allPreds.getLeft();
-        Attrs rightAttrs = allPreds.getRight();
         HashMap attr2class = allPreds.getEquivalenceClasses();
+
+        // new equijoin predicates
+        UpdateableEquiJoinPredicateList newPreds1 =
+            new UpdateableEquiJoinPredicateList();
+        UpdateableEquiJoinPredicateList newPreds2 =
+            new UpdateableEquiJoinPredicateList();
 
         // Now distribute old predicates
         // AC predicates go to the new top join (2)
@@ -76,24 +76,24 @@ public class AssociateJoinLtoR extends CustomRule {
         // An AB predicate A.x = B.y goes to  (2),
         // and if we can find a C attribute C.z equivalent 
         // to A.x, we also add B.y = C.z to (1)
-        forallpreds : for (int i = 0; i < leftAttrs.size(); i++) {
-            Attribute la = leftAttrs.get(i);
-            Attribute ra = rightAttrs.get(i);
-            if (cAttrs.Contains(ra)) {
-                if (bAttrs.Contains(la))
+        forallpreds : for (int i = 0; i < allPreds.size(); i++) {
+            Attribute la = allPreds.getLeftAt(i);
+            Attribute ra = allPreds.getRightAt(i);
+            if (cAttrs.contains(ra)) {
+                if (bAttrs.contains(la))
                     newPreds1.add(la, ra);
                 else {
-                    assert aAttrs.Contains(la);
+                    assert aAttrs.contains(la);
                     newPreds2.add(la, ra);
                 }
             } else {
-                assert aAttrs.Contains(la) && bAttrs.Contains(ra);
+                assert aAttrs.contains(la) && bAttrs.contains(ra);
                 newPreds2.add(la, ra);
                 HashSet eqClass = (HashSet) attr2class.get(la);
                 Iterator it = eqClass.iterator();
                 while (it.hasNext()) {
                     Attribute cz = (Attribute) it.next();
-                    if (cAttrs.Contains(cz)) { // Bingo!
+                    if (cAttrs.contains(cz)) { // Bingo!
                         newPreds1.add(ra, cz);
                         continue forallpreds;
                     }

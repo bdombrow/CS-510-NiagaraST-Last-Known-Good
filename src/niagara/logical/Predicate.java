@@ -1,4 +1,4 @@
-/* $Id: Predicate.java,v 1.4 2003/03/07 20:59:38 tufte Exp $ */
+/* $Id: Predicate.java,v 1.5 2003/09/16 04:53:35 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.*;
@@ -17,14 +17,13 @@ import niagara.xmlql_parser.syntax_tree.varTbl;
 import niagara.xmlql_parser.syntax_tree.opType;
 import niagara.connection_server.InvalidPlanException;
 
+/** A generic predicate. Predicate objects are immutable. */
 abstract public class Predicate implements condition {
     /** Get an implementation for this predicate */
     public abstract PredicateImpl getImplementation();
 
     /** Append all the variables referenced in this predicate to al*/
     public abstract void getReferencedVariables(ArrayList al);
-
-    public abstract Predicate copy();
 
     /** Split this predicate into a conjunction of two 
      * predicates: one that only references the specified
@@ -43,7 +42,7 @@ abstract public class Predicate implements condition {
         return new And(True.getTrue(), this);
     }
 
-    public EquiJoinPredicateList toEquiJoinPredicateList(
+    public UpdateableEquiJoinPredicateList toEquiJoinPredicateList(
         Attrs leftAttrs,
         Attrs rightAttrs) {
         throw new PEException("Cannot convert an arbitrary predicate to an equijoin predicate list");

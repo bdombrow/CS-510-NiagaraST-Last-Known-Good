@@ -28,13 +28,6 @@ public class ConstToVarComparison extends Comparison {
     public Atom getLeft() {return left;}
     public Atom getRight() {return right;}
     
-    /**
-     * @see niagara.logical.Predicate#copy()
-     */
-    public Predicate copy() {
-        return new ConstToVarComparison(getOperator(), left, right);
-    }
-
     public int hashCode() { 
         return operator ^ left.hashCode() ^ right.hashCode();
     }    
@@ -52,7 +45,7 @@ public class ConstToVarComparison extends Comparison {
      * @see niagara.logical.Predicate#split(Attrs)
      */
     public And split(Attrs variables) {
-        if (variables.Contains(right))
+        if (variables.contains(right))
             return new And(this, True.getTrue());
         else
             return new And(True.getTrue(), this);

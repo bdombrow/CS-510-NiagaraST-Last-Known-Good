@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: joinOp.java,v 1.12 2003/07/09 04:59:38 tufte Exp $
+  $Id: joinOp.java,v 1.13 2003/09/16 04:56:50 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,6 +41,7 @@ import niagara.logical.And;
 import niagara.logical.EquiJoinPredicateList;
 import niagara.logical.Predicate;
 import niagara.logical.True;
+import niagara.logical.UpdateableEquiJoinPredicateList;
 import niagara.logical.Variable;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
@@ -99,21 +100,6 @@ public class joinOp extends binOp {
 
     public int getExtensionJoin(){
 	return extensionJoin;
-    }
-
-    /**
-     * @return the attributes of the left relation that equi-joins with those of 
-     *         right relation
-     */
-    public Attrs getLeftEqJoinAttr() {
-        return equiJoinPredicates.getLeft();
-    }
-
-    /**
-     * @return the attributes of the right relation in the equi-join
-     */
-    public Attrs getRightEqJoinAttr() {
-        return equiJoinPredicates.getRight();
     }
 
     /**
@@ -222,8 +208,8 @@ public class joinOp extends binOp {
     
     public Op opCopy() {
         return new joinOp(
-            pred.copy(),
-            equiJoinPredicates.copy(),
+            pred,
+            equiJoinPredicates,
             (projectedAttrs == null)?null:projectedAttrs.copy(),
 	    extensionJoin);
     }
@@ -272,8 +258,11 @@ public class joinOp extends binOp {
         Predicate equiPred = newJoinPred.getLeft();
         Predicate nonEquiPred = newJoinPred.getRight();
         
-        if (!equiPred.equals(True.getTrue()))
-            newJoin.equiJoinPredicates.addAll(equiPred.toEquiJoinPredicateList(leftAttrs, rightAttrs));
+        if (!equiPred.equals(True.getTrue())) {
+            UpdateableEquiJoinPredicateList p = equiJoinPredicates.updateableCopy();
+            p.addAll(equiPred.toEquiJoinPredicateList(leftAttrs, rightAttrs));
+            newJoin.equiJoinPredicates = p;
+        }
         
         newJoin.pred = And.conjunction(nonEquiPred, pred);
         return newJoin;

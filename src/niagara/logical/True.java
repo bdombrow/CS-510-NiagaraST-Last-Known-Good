@@ -1,4 +1,4 @@
-/* $Id: True.java,v 1.1 2002/10/06 23:40:13 vpapad Exp $ */
+/* $Id: True.java,v 1.2 2003/09/16 04:53:35 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.ArrayList;
@@ -31,13 +31,6 @@ public class True extends Predicate {
     public void childrenInXML(StringBuffer sb) {}
     public void toXML(StringBuffer sb) {}
     
-    /**
-     * @see niagara.logical.Predicate#copy()
-     */
-    public Predicate copy() {
-        return this;
-    }
-
     /**
      * @see java.lang.Object#equals(Object)
      */

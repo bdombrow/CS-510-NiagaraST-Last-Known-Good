@@ -1,4 +1,4 @@
-/* $Id: Exchange.java,v 1.1 2003/09/13 03:44:02 vpapad Exp $ */
+/* $Id: Exchange.java,v 1.2 2003/09/16 04:55:22 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.util.HashMap;
@@ -63,29 +63,27 @@ public class Exchange extends CustomRule {
         EquiJoinPredicateList cdPreds = cdJoin.getEquiJoinPredicates();
 
         // New predicates
-        EquiJoinPredicateList acbdPreds = new EquiJoinPredicateList();
-        EquiJoinPredicateList acPreds = new EquiJoinPredicateList();
-        EquiJoinPredicateList bdPreds = new EquiJoinPredicateList();
+        UpdateableEquiJoinPredicateList acbdPreds = new UpdateableEquiJoinPredicateList();
+        UpdateableEquiJoinPredicateList acPreds = new UpdateableEquiJoinPredicateList();
+        UpdateableEquiJoinPredicateList bdPreds = new UpdateableEquiJoinPredicateList();
 
         // Gather all equijoin predicates
-        EquiJoinPredicateList allPreds = abcdPreds.copy();
+        UpdateableEquiJoinPredicateList allPreds = abcdPreds.updateableCopy();
         allPreds.addAll(abPreds);
         allPreds.addAll(cdPreds);
 
-        Attrs leftAttrs = allPreds.getLeft();
-        Attrs rightAttrs = allPreds.getRight();
         HashMap attr2class = allPreds.getEquivalenceClasses();
 
         // Now distribute old predicates
         // AC and BD predicates go to their respective lower joins
         // AB, AD, BC, and CD go to the upper join, and if we can
         // find an equivalent attribute we push it to one of the lower joins as well
-        forallpreds : for (int i = 0; i < leftAttrs.size(); i++) {
-            Attribute la = leftAttrs.get(i);
-            Attribute ra = rightAttrs.get(i);
-            if (aAttrs.Contains(la) && cAttrs.Contains(ra))
+        forallpreds : for (int i = 0; i < allPreds.size(); i++) {
+            Attribute la = allPreds.getLeftAt(i);
+            Attribute ra = allPreds.getRightAt(i);
+            if (aAttrs.contains(la) && cAttrs.contains(ra))
                 acPreds.add(la, ra);
-            else if (bAttrs.Contains(la) && dAttrs.Contains(ra))
+            else if (bAttrs.contains(la) && dAttrs.contains(ra))
                 bdPreds.add(la, ra);
             else {
                 acbdPreds.add(la, ra);
@@ -95,17 +93,17 @@ public class Exchange extends CustomRule {
 
                 // Try to push it to the lower joins
                 Attrs checkLeft, checkRight;
-                if (aAttrs.Contains(la) && bAttrs.Contains(ra)) {
+                if (aAttrs.contains(la) && bAttrs.contains(ra)) {
                     checkLeft = cAttrs;
                     checkRight = dAttrs;
-                } else if (aAttrs.Contains(la) && dAttrs.Contains(ra)) {
+                } else if (aAttrs.contains(la) && dAttrs.contains(ra)) {
                     checkLeft = cAttrs;
                     checkRight = bAttrs;
-                } else if (bAttrs.Contains(la) && cAttrs.Contains(ra)) {
+                } else if (bAttrs.contains(la) && cAttrs.contains(ra)) {
                     checkLeft = dAttrs;
                     checkRight = aAttrs;
                 } else {
-                    assert cAttrs.Contains(la) && dAttrs.Contains(ra);
+                    assert cAttrs.contains(la) && dAttrs.contains(ra);
                     checkLeft = aAttrs;
                     checkRight = bAttrs;
                 }
@@ -183,11 +181,11 @@ public class Exchange extends CustomRule {
 
     /** Find an attribute in <code>schema</code> (if any) that 
      * belongs in a given equivalence class */
-    public static Attribute findEquivalent(Attrs schema, HashSet eqClass) {
+    private static Attribute findEquivalent(Attrs schema, HashSet eqClass) {
         Iterator it = eqClass.iterator();
         while (it.hasNext()) {
             Attribute z = (Attribute) it.next();
-            if (schema.Contains(z)) // Bingo!
+            if (schema.contains(z)) // Bingo!
                 return z;
         }
         return null;

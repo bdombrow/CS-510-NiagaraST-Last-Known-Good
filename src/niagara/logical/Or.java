@@ -56,13 +56,6 @@ public class Or extends BinaryPredicate {
     }
 
     /**
-     * @see niagara.logical.Predicate#copy()
-     */
-    public Predicate copy() {
-        return new Or(left, right);
-    }
-
-    /**
      * @see java.lang.Object#equals(Object)
      */
     public boolean equals(Object other) {

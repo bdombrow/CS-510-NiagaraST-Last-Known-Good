@@ -1,4 +1,4 @@
-/* $Id: Project.java,v 1.8 2003/09/13 03:54:02 vpapad Exp $ */
+/* $Id: Project.java,v 1.9 2003/09/16 04:53:35 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.optimizer.colombia.Attribute;
@@ -47,7 +47,7 @@ public class Project extends unryOp {
         Attrs newAttrs = new Attrs(attrs.size());
         for (int i = 0; i < oldAttrs.size(); i++) {
             Attribute a = oldAttrs.get(i);
-            if (attrs.Contains(a))
+            if (attrs.contains(a))
                 newAttrs.add(a);
         }
         result.setAttrs(newAttrs);

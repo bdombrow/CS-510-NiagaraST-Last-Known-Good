@@ -50,17 +50,10 @@ public class VarToConstComparison extends Comparison {
     }
     
     /**
-     * @see niagara.logical.Predicate#copy()
-     */
-    public Predicate copy() {
-        return new VarToConstComparison(getOperator(), left, right);
-    }
-
-    /**
      * @see niagara.logical.Predicate#split(Attrs)
      */
     public And split(Attrs variables) {
-        if (variables.Contains(left))
+        if (variables.contains(left))
             return new And(this, True.getTrue());
         else
             return new And(True.getTrue(), this);

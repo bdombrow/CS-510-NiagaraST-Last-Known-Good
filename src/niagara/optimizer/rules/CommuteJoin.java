@@ -30,7 +30,7 @@ public class CommuteJoin extends CustomRule {
         PhysicalProperty ReqdProp) {
         joinOp op = (joinOp) before.getOp();
         EquiJoinPredicateList eqPreds = op.getEquiJoinPredicates().reversed();
-        Predicate pred = op.getNonEquiJoinPredicate().copy();
+        Predicate pred = op.getNonEquiJoinPredicate();
 
 	int newExtJoin = joinOp.NONE;
 	switch(op.getExtensionJoin()) {

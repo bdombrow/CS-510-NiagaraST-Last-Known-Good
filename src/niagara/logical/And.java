@@ -1,4 +1,4 @@
-/* $Id: And.java,v 1.2 2002/12/10 01:21:22 vpapad Exp $ */
+/* $Id: And.java,v 1.3 2003/09/16 04:53:36 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.ArrayList;
@@ -70,14 +70,16 @@ public class And extends BinaryPredicate {
         Predicate nonEquiPred = conjunction(l2, r2);
         return new And(equiPred, nonEquiPred);
     }
-    
+
     public static Predicate conjunction(Predicate left, Predicate right) {
         True t = True.getTrue();
-        if (left.equals(t)) return right;
-        if (right.equals(t)) return left;
-        return new And(left, right);    
+        if (left.equals(t))
+            return right;
+        if (right.equals(t))
+            return left;
+        return new And(left, right);
     }
-    
+
     /**
      * @see java.lang.Object#equals(Object)
      */
@@ -99,15 +101,11 @@ public class And extends BinaryPredicate {
         return new Or(left.negation(), right.negation());
     }
 
-    public Predicate copy() {
-        return new And(left, right);
-    }
-    
     public float selectivity() {
         // Independence assumption
         return left.selectivity() * right.selectivity();
     }
-    
+
     public void beginXML(StringBuffer sb) {
         sb.append("<and>");
     }
@@ -121,11 +119,12 @@ public class And extends BinaryPredicate {
         sb.append("</and>");
     }
 
-    public EquiJoinPredicateList toEquiJoinPredicateList(
+    public UpdateableEquiJoinPredicateList toEquiJoinPredicateList(
         Attrs leftAttrs,
         Attrs rightAttrs) {
-            EquiJoinPredicateList result = left.toEquiJoinPredicateList(leftAttrs, rightAttrs);
-            result.addAll(right.toEquiJoinPredicateList(leftAttrs, rightAttrs));
-            return result;
+        UpdateableEquiJoinPredicateList result =
+            left.toEquiJoinPredicateList(leftAttrs, rightAttrs).updateableCopy();
+        result.addAll(right.toEquiJoinPredicateList(leftAttrs, rightAttrs));
+        return result;
     }
 }

@@ -1,4 +1,4 @@
-/* $Id: VarToVarComparison.java,v 1.4 2002/12/10 01:21:22 vpapad Exp $ */
+/* $Id: VarToVarComparison.java,v 1.5 2003/09/16 04:53:35 vpapad Exp $ */
 package niagara.logical;
 import java.util.ArrayList;
 
@@ -34,10 +34,6 @@ public class VarToVarComparison extends Comparison {
         return right;
     }
 
-    public Predicate copy() {
-        return new VarToVarComparison(getOperator(), left, right);
-    }
-
     public boolean equals(Object o) {
         if (o == null || !(o instanceof VarToVarComparison))
             return false;
@@ -54,7 +50,7 @@ public class VarToVarComparison extends Comparison {
     }
 
     public And split(Attrs variables) {
-        if (variables.Contains(left) && variables.Contains(right))
+        if (variables.contains(left) && variables.contains(right))
             return new And(this, True.getTrue());
         else
             return new And(True.getTrue(), this);
@@ -62,20 +58,20 @@ public class VarToVarComparison extends Comparison {
 
     public Predicate splitEquiJoin(Attrs leftAttrs, Attrs rightAttrs) {
         if (operator == opType.EQ) {
-            if (leftAttrs.Contains(left) && rightAttrs.Contains(right))
+            if (leftAttrs.contains(left) && rightAttrs.contains(right))
                 return new And(this, True.getTrue());
-            else if (leftAttrs.Contains(right) && rightAttrs.Contains(left))
+            else if (leftAttrs.contains(right) && rightAttrs.contains(left))
                 return new And(new VarToVarComparison(opType.EQ, right, left), True.getTrue());
         }
         
         return new And(True.getTrue(), this);
     }
 
-    public EquiJoinPredicateList toEquiJoinPredicateList(
+    public UpdateableEquiJoinPredicateList toEquiJoinPredicateList(
         Attrs leftAttrs,
         Attrs rightAttrs) {
-        EquiJoinPredicateList result = new EquiJoinPredicateList();
-        if (leftAttrs.Contains(left) && rightAttrs.Contains(right))
+        UpdateableEquiJoinPredicateList result = new UpdateableEquiJoinPredicateList();
+        if (leftAttrs.contains(left) && rightAttrs.contains(right))
             result.add(left, right);
         else
             throw new PEException("This comparison cannot be part of an equijoin predicate list");

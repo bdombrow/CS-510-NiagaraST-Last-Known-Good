@@ -1,4 +1,4 @@
-/* $Id: False.java,v 1.1 2002/10/06 23:40:12 vpapad Exp $ */
+/* $Id: False.java,v 1.2 2003/09/16 04:53:36 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.ArrayList;
@@ -31,10 +31,6 @@ public class False extends Predicate {
     public void childrenInXML(StringBuffer sb) {}
     public void toXML(StringBuffer sb) {}
     
-    public Predicate copy() {
-        return this;
-    }
-
     public boolean equals(Object obj) {
         return this == obj;
     }

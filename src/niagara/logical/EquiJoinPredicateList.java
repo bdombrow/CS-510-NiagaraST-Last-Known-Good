@@ -1,4 +1,4 @@
-/* $Id: EquiJoinPredicateList.java,v 1.3 2003/09/13 03:52:11 vpapad Exp $ */
+/* $Id: EquiJoinPredicateList.java,v 1.4 2003/09/16 04:53:35 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.*;
@@ -9,9 +9,10 @@ import niagara.xmlql_parser.syntax_tree.opType;
 
 /** A conjunction of equality predicates */
 public class EquiJoinPredicateList {
+    // EquiJoinPredicateList objects are immutable
 
-    ArrayList left;
-    ArrayList right;
+    protected ArrayList left;
+    protected ArrayList right;
 
     /** Constructor with no equijoin predicates */
     public EquiJoinPredicateList() {
@@ -21,10 +22,8 @@ public class EquiJoinPredicateList {
 
     public EquiJoinPredicateList(ArrayList left, ArrayList right) {
         assert left.size() == right.size();
-        this.left = new ArrayList(left.size());
-        this.left.addAll(left);
-        this.right = new ArrayList(right.size());
-        this.right.addAll(right);
+        this.left = (ArrayList) left.clone();
+        this.right = (ArrayList) right.clone();
     }
 
     public Predicate toPredicate() {
@@ -32,7 +31,7 @@ public class EquiJoinPredicateList {
         for (int i = left.size() - 1; i >= 0; i--) {
             Variable la = (Variable) left.get(i);
             Variable ra = (Variable) right.get(i);
-            p = And.conjunction(Comparison.newComparison(opType.EQ, la, ra), p);
+            p = And.conjunction(new VarToVarComparison(opType.EQ, la, ra), p);
         }
         return p;
     }
@@ -41,32 +40,15 @@ public class EquiJoinPredicateList {
         al.addAll(left);
         al.addAll(right);
     }
-    
-    public EquiJoinPredicateList copy() {
-        return new EquiJoinPredicateList(left, right);
-    }
 
-    public void add(Attribute leftAttr, Attribute rightAttr) {
-        left.add(leftAttr);
-        right.add(rightAttr);
-    }
-
-    
-    /** Remove the predicate at position pos*/
-    public void remove(int pos) {
-        left.remove(pos);
-        right.remove(pos);
-    }
-    
-    public void addAll(EquiJoinPredicateList other) {
-        left.addAll(other.left);
-        right.addAll(other.right);
+    public UpdateableEquiJoinPredicateList updateableCopy() {
+        return new UpdateableEquiJoinPredicateList(left, right);
     }
 
     public int size() {
         return left.size();
     }
-    
+
     public boolean isEmpty() {
         return size() == 0;
     }
@@ -81,13 +63,19 @@ public class EquiJoinPredicateList {
         return new Attrs(right);
     }
 
-    /** Returns a reversed (deep) copy of this EquiJoinPredicateList */
-    public EquiJoinPredicateList reversed() {
-        return new EquiJoinPredicateList(
-            (ArrayList) right.clone(),
-            (ArrayList) left.clone());
+    public Attribute getLeftAt(int i) {
+        return (Attribute) left.get(i);
     }
-    
+
+    public Attribute getRightAt(int i) {
+        return (Attribute) right.get(i);
+    }
+
+    /** Returns a reversed copy of this EquiJoinPredicateList */
+    public EquiJoinPredicateList reversed() {
+        return new EquiJoinPredicateList(right, left);
+    }
+
     public HashMap getEquivalenceClasses() {
         // Compute the equivalence classes for A, B, and C attributes
         // XXX vpapad: in Columbia something like this was done in
@@ -99,12 +87,9 @@ public class EquiJoinPredicateList {
         // Maps each attribute to its equivalence class
         HashMap attr2class = new HashMap();
 
-        Attrs leftAttrs = getLeft();
-        Attrs rightAttrs = getRight();
-
-        for (int i = 0; i < leftAttrs.size(); i++) {
-            Attribute la = leftAttrs.get(i);
-            Attribute ra = rightAttrs.get(i);
+        for (int i = 0; i < size(); i++) {
+            Attribute la = getLeftAt(i);
+            Attribute ra = getRightAt(i);
             HashSet leftEQ = (HashSet) attr2class.get(la);
             HashSet rightEQ = (HashSet) attr2class.get(ra);
 
@@ -142,35 +127,9 @@ public class EquiJoinPredicateList {
         return attr2class;
     }
 
-    /** Remove unnecessary predicates, using an equivalence classes
-     * hashmap (and remove the corresponding entries from the hashmap) */
-    public void removeDuplicates(HashMap eqClasses) {
-        int predsToCheck = left.size();    
-        int i = 0;
-        while (i < predsToCheck) {    
-            Attribute la = (Attribute) left.get(i);
-            Attribute ra = (Attribute) right.get(i);
-    
-            HashSet eqClass1 = (HashSet) eqClasses.get(la);
-            HashSet eqClass2 = (HashSet) eqClasses.get(ra);
-
-            boolean asl = eqClass1.remove(ra);
-            boolean asr = eqClass2.remove(la);
-            // If this predicate is necessary for the equivalence
-            // classes of either the left or the right attribute,
-            // let it be
-            if ( asl || asr)
-                i++; 
-            else {
-                // the predicate is subsumed by a predicate we checked before
-                remove(i);
-                predsToCheck--;
-            }
-        }
-    }    
-    
     public void toXML(StringBuffer sb) {
-        if (left.size() == 0) return;
+        if (left.size() == 0)
+            return;
         sb.append(" left='").append(((Attribute) left.get(0)).getName());
         for (int i = 1; i < left.size(); i++)
             sb.append(",").append(((Attribute) left.get(i)).getName());
@@ -191,7 +150,7 @@ public class EquiJoinPredicateList {
         if (other.getClass() != EquiJoinPredicateList.class)
             return other.equals(this);
         EquiJoinPredicateList o = (EquiJoinPredicateList) other;
-        if (size() != o.size()) 
+        if (size() != o.size())
             return false;
         for (int i = 0; i < left.size(); i++) {
             if (!left.get(i).equals(o.left.get(i)))
@@ -211,7 +170,7 @@ public class EquiJoinPredicateList {
         // of the same equijoin predicate list
         for (int i = 0; i < left.size(); i++) {
             hashCode ^= (left.get(i).hashCode() + i);
-            hashCode ^= (right.get(i).hashCode() + i);            
+            hashCode ^= (right.get(i).hashCode() + i);
         }
         return hashCode;
     }

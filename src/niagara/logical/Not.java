@@ -1,4 +1,4 @@
-/* $Id: Not.java,v 1.1 2002/10/06 23:40:12 vpapad Exp $ */
+/* $Id: Not.java,v 1.2 2003/09/16 04:53:35 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.ArrayList;
@@ -37,13 +37,6 @@ public class Not extends Predicate {
         pred.getReferencedVariables(al);
     }
     
-    /**
-     * @see niagara.logical.Predicate#copy()
-     */
-    public Predicate copy() {
-        return new Not(pred);
-    }
-
     /**
      * @see java.lang.Object#equals(Object)
      */

@@ -62,13 +62,13 @@ public class AssociateJoinRtoL extends CustomRule {
         EquiJoinPredicateList preds1 = op1.getEquiJoinPredicates();
 
         // new equijoin predicates
-        EquiJoinPredicateList newPreds1 = new EquiJoinPredicateList();
-        EquiJoinPredicateList newPreds2 = new EquiJoinPredicateList();
+        UpdateableEquiJoinPredicateList newPreds1 =
+            new UpdateableEquiJoinPredicateList();
+        UpdateableEquiJoinPredicateList newPreds2 =
+            new UpdateableEquiJoinPredicateList();
 
-        EquiJoinPredicateList allPreds = preds1.copy();
+        UpdateableEquiJoinPredicateList allPreds = preds1.updateableCopy();
         allPreds.addAll(preds2);
-        Attrs leftAttrs = allPreds.getLeft();
-        Attrs rightAttrs = allPreds.getRight();
         HashMap attr2class = allPreds.getEquivalenceClasses();
 
         // Now distribute old predicates
@@ -77,24 +77,24 @@ public class AssociateJoinRtoL extends CustomRule {
         // A BC predicate B.x = C.y goes to  (2),
         // and if we can find an A attribute A.z equivalent 
         // to C.y, we also add A.z = B.x to (1)
-        forallpreds : for (int i = 0; i < leftAttrs.size(); i++) {
-            Attribute la = leftAttrs.get(i);
-            Attribute ra = rightAttrs.get(i);
-            if (aAttrs.Contains(la)) {
-                if (bAttrs.Contains(ra))
+        forallpreds : for (int i = 0; i < allPreds.size(); i++) {
+            Attribute la = allPreds.getLeftAt(i);
+            Attribute ra = allPreds.getRightAt(i);
+            if (aAttrs.contains(la)) {
+                if (bAttrs.contains(ra))
                     newPreds1.add(la, ra);
                 else {
-                    assert cAttrs.Contains(ra);
+                    assert cAttrs.contains(ra);
                     newPreds2.add(la, ra);
                 }
             } else {
-                assert bAttrs.Contains(la) && cAttrs.Contains(ra);
+                assert bAttrs.contains(la) && cAttrs.contains(ra);
                 newPreds2.add(la, ra);
                 HashSet eqClass = (HashSet) attr2class.get(ra);
                 Iterator it = eqClass.iterator();
                 while (it.hasNext()) {
                     Attribute az = (Attribute) it.next();
-                    if (aAttrs.Contains(az)) { // Bingo!
+                    if (aAttrs.contains(az)) { // Bingo!
                         newPreds1.add(az, la);
                         continue forallpreds;
                     }
