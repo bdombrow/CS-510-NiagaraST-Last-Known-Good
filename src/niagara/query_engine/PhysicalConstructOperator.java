@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.13 2002/10/26 04:34:15 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.14 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -333,18 +333,6 @@ public class PhysicalConstructOperator extends PhysicalOperator {
         return resultTemplate.equals(other.resultTemplate)
                         && variable.equals(other.variable);
     }
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#InputReqdProp(PhysicalProperty, LogicalProperty, int)
-     */
-    public PhysicalProperty[] InputReqdProp(
-        PhysicalProperty physProp,
-        LogicalProperty inputLogProp,
-        int inputNo) {
-        if (physProp.equals(PhysicalProperty.ANY))
-            return new PhysicalProperty[] {};
-        else
-            return new PhysicalProperty[] {physProp};
-    }
 
     /**
      * @see niagara.optimizer.colombia.Op#copy()
@@ -360,7 +348,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
      */
-    public Cost FindLocalCost(
+    public Cost findLocalCost(
         ICatalog catalog,
         LogicalProperty[] InputLogProp) {
         // XXX vpapad: Absolutely no connection to reality!
@@ -370,12 +358,6 @@ public class PhysicalConstructOperator extends PhysicalOperator {
         return new Cost(
             catalog.getDouble("tuple_construction_cost")
                 * InputLogProp[0].getCardinality());
-    }
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
-     */
-    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
-        return PhysicalProperty.ANY;
     }
 
     /**

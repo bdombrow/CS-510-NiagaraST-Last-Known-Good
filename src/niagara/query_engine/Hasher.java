@@ -1,6 +1,7 @@
-/* $Id: Hasher.java,v 1.4 2002/10/27 03:08:04 vpapad Exp $ */
+/* $Id: Hasher.java,v 1.5 2002/10/31 03:54:38 vpapad Exp $ */
 package niagara.query_engine;
 
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
 import niagara.utils.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -12,7 +13,6 @@ import java.util.Vector;
 import java.util.StringTokenizer;
 
 public class Hasher {
-    
     AtomicEvaluator[] evaluators;
     ArrayList[] values;
 
@@ -30,7 +30,7 @@ public class Hasher {
         values = new ArrayList[attributeList.size()];
 
         for (int i = 0; i < attributeList.size(); i++) {
-            evaluators[i] = new AtomicEvaluator((schemaAttribute) attributeList.get(i));
+            evaluators[i] = new AtomicEvaluator(((Attribute) attributeList.get(i)).getName());
             values[i] = new ArrayList(1);
         }
     }
@@ -51,27 +51,21 @@ public class Hasher {
      *         do not have a hashable value, then returns null.
      */
     public String hashKey (StreamTupleElement tupleElement) {
-
 	// Create storage for the result
-	//
 	StringBuffer hashResult = new StringBuffer();
 
 	// For each attribute, get the atomic value and add that to the
 	// hash code
-	//
 	int numAttributes = evaluators.length;
 
 	for (int att = 0; att < numAttributes; ++att) {
-
 	    evaluators[att].getAtomicValues(tupleElement, null, values[att]);
 
 	    // If there is not exactly one atomic value, then it is an error
-	    //
 	    if (values[att].size() != 1)
 		throw new PEException("More than one atomic value in hashCode eval");
 
 	    // Add the atomic value (a string) to the current result
-	    //
 	    hashResult.append('<');
 	    hashResult.append((String) values[att].get(0));
 	    hashResult.append('<');
@@ -80,7 +74,6 @@ public class Hasher {
 	}
 
 	// Return the hash result
-	//
 	return hashResult.toString();
     }
 
@@ -94,9 +87,12 @@ public class Hasher {
 	}
     }
     
-    public void resolveVariables(TupleSchema ts, int streamId) {
+    public void resolveVariables(TupleSchema ts) {
         for (int i = 0; i < evaluators.length; i++) {
-            evaluators[i].resolveVariables(ts, streamId);           
+            // XXX vpapad: setting stream id to 0
+            // Do we ever need a hasher on attributes from multiple 
+            // streams?
+            evaluators[i].resolveVariables(ts, 0);           
         }
     }
 }

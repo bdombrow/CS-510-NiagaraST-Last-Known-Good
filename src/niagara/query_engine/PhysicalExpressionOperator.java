@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.8 2002/10/24 23:27:53 vpapad Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.9 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -24,11 +24,10 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.query_engine;
 
 import niagara.ndom.*;
-import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.*;
 
 import org.w3c.dom.*;
 import java.util.*;
@@ -44,77 +43,88 @@ import koala.dynamicjava.parser.wrapper.*;
  * The <code>PhysicalExpressionOperator</code> class is derived from the abstract class
  * <code>PhysicalOperator</code>. It implements evaluating an arbitrary Expression 
  * on an incoming tuple, producing a new wider outgoing tuple.
- *
- * @version 1.0
  */
 
 public class PhysicalExpressionOperator extends PhysicalOperator {
-    // This is the array having information about blocking and non-blocking
-    // streams
-    //
+    // No blocking input streams
     private static final boolean[] blockingSourceStreams = { false };
 
-    private ExpressionIF expressionObject; // An object of a class that implements ExpressionIF
-    private String expression; // A string to be interpreted for every tuple
-    boolean interpreted;
+    private ExpressionOp expressionOp;
+
+    /** An object of a class that implements ExpressionIF */
+    protected ExpressionIF expressionObject;
+    /** A string to be interpreted for every tuple */
+    private String expression;
 
     public PhysicalExpressionOperator() {
         setBlockingSourceStreams(blockingSourceStreams);
     }
-    
+
     public void initFrom(LogicalOp logicalOperator) {
-	// Type cast the logical operator to a Expression operator
-	//
-	ExpressionOp logicalExpressionOperator = (ExpressionOp) logicalOperator;
-	interpreted = logicalExpressionOperator.isInterpreted();
-
-	if (interpreted) {
-	    expression = logicalExpressionOperator.getExpression();
-	    try {
-
-		String source = "package; import niagara.utils.XMLUtils; import java.util.*; import niagara.ndom.*; import org.w3c.dom.*;  public class UserExpression extends XMLUtils implements " 
-		    + " niagara.xmlql_parser.op_tree.ExpressionIF {\n"  
-		    + "public void setupVarTable(HashMap hm) {};\n"
-		    + " public org.w3c.dom.Node processTuple(niagara.utils.StreamTupleElement ste) throws Exception {\n";
-		HashMap hm = logicalExpressionOperator.getVarTable(); 
-		Iterator variables = hm.keySet().iterator();
-
-		while (variables.hasNext()) {
-		    String varname = (String) variables.next();
-		    int attrpos = ((Integer) hm.get(varname)).intValue();
-		    String vname = varname.substring(1);
-		    source += " int "  + vname + " = XMLUtils.getInt(ste, " + attrpos + ");\n";
-		}
-		source += "int result; " + expression;
-  		source += "; org.w3c.dom.Element e = (org.w3c.dom.Element) ste.getAttribute(1); return e.getOwnerDocument().createTextNode(Integer.toString(result));\n"
-  		    + "}} new UserExpression();";
-
-		Interpreter interpreter = new TreeInterpreter(new JavaCCParserFactory());
-		expressionObject = (ExpressionIF) 
-		    interpreter.interpret(new StringReader(source), "user.java");
-	    } catch(koala.dynamicjava.interpreter.InterpreterException ie) {
-		throw new UserErrorException("invalid expression " +
-					      ie.getMessage());
-	    }
-	}
-	else {
-	    Class expressionClass = logicalExpressionOperator.getExpressionClass();
-	    // Create an object of the class specified in the logical op
-	    try {
-		expressionObject = (ExpressionIF) expressionClass.newInstance();
-		expressionObject.setupVarTable(logicalExpressionOperator.getVarTable());
-	    } catch(InstantiationException ie) {
-		System.err.println("ExpressionOp: An error occured while constructing an object of the class:\n" 
-				   + expressionClass +
-				   " " + ie.getMessage());
-	    } catch (IllegalAccessException iae) {
-		System.err.println("ExpressionOp: An error occured while constructing an object of the class:\n" 
-				   + expressionClass +
-				   " " + iae.getMessage());
-	    }
-	}
+        // Type cast the logical operator to a Expression operator
+        expressionOp = (ExpressionOp) logicalOperator;
     }
 
+    public void opInitialize() {
+        boolean interpreted = expressionOp.isInterpreted();
+
+        if (interpreted) {
+            expression = expressionOp.getExpression();
+            try {
+
+                String source =
+                    "package; import niagara.query_engine.TupleSchema; import niagara.utils.XMLUtils; import java.util.*; import niagara.ndom.*; import org.w3c.dom.*;  public class UserExpression extends XMLUtils implements "
+                        + " niagara.xmlql_parser.op_tree.ExpressionIF {\n"
+                        + "org.w3c.dom.Document doc = niagara.ndom.DOMFactory.newDocument();"
+                         + " public void setupSchema(TupleSchema ts) {};\n"
+                        + " public org.w3c.dom.Node processTuple(niagara.utils.StreamTupleElement ste) throws Exception {\n";
+                Attrs attrs = expressionOp.getVariablesUsed();
+
+                for (int i = 0; i < attrs.size(); i++) {
+                    String varname = attrs.get(i).getName();
+                    int attrpos = inputTupleSchemas[0].getPosition(varname);
+                    source += " int "
+                        + varname
+                        + " = XMLUtils.getInt(ste, "
+                        + attrpos
+                        + ");\n";
+                }
+                source += "int result; " + expression;
+                source
+                    += "; return doc.createTextNode(String.valueOf(result));\n"
+                    + "}} new UserExpression();";
+
+                Interpreter interpreter =
+                    new TreeInterpreter(new JavaCCParserFactory());
+                expressionObject =
+                    (ExpressionIF) interpreter.interpret(
+                        new StringReader(source),
+                        "user.java");
+            } catch (koala.dynamicjava.interpreter.InterpreterException ie) {
+                throw new UserErrorException(
+                    "invalid expression " + ie.getMessage());
+            }
+        } else {
+            Class expressionClass = expressionOp.getExpressionClass();
+            // Create an object of the class specified in the logical op
+            try {
+                expressionObject = (ExpressionIF) expressionClass.newInstance();
+                expressionObject.setupSchema(inputTupleSchemas[0]);
+            } catch (InstantiationException ie) {
+                System.err.println(
+                    "ExpressionOp: An error occured while constructing an object of the class:\n"
+                        + expressionClass
+                        + " "
+                        + ie.getMessage());
+            } catch (IllegalAccessException iae) {
+                System.err.println(
+                    "ExpressionOp: An error occured while constructing an object of the class:\n"
+                        + expressionClass
+                        + " "
+                        + iae.getMessage());
+            }
+        }
+    }
 
     /**
      * This function processes a tuple element read from a source stream
@@ -127,18 +137,54 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
      * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected void nonblockingProcessSourceTupleElement (
-					StreamTupleElement inputTuple,
-					int streamId)
-	throws ShutdownException, InterruptedException {
-	Node res = expressionObject.processTuple(inputTuple);
-	StreamTupleElement outputTuple = (StreamTupleElement) inputTuple.clone();
-	outputTuple.appendAttribute(res);
-	// Add the output tuple to the result
-	putTuple(outputTuple, 0);
-    }    
+    protected void nonblockingProcessSourceTupleElement(
+        StreamTupleElement inputTuple,
+        int streamId)
+        throws ShutdownException, InterruptedException {
+        Node res = expressionObject.processTuple(inputTuple);
+        StreamTupleElement outputTuple =
+            (StreamTupleElement) inputTuple.clone();
+        outputTuple.appendAttribute(res);
+        // Add the output tuple to the result
+        putTuple(outputTuple, 0);
+    }
 
     public boolean isStateful() {
-	return false;
+        return false;
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+        PhysicalExpressionOperator op = new PhysicalExpressionOperator();
+        op.expressionOp = expressionOp;
+        return op;
+    }
+
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalExpressionOperator))
+            return false;
+        if (o.getClass() != PhysicalExpressionOperator.class)
+            return o.equals(this);
+        PhysicalExpressionOperator other = (PhysicalExpressionOperator) o;
+        return expressionOp == other.expressionOp;
+    }
+
+    public int hashCode() {
+        return expressionOp.hashCode();
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#findLocalCost(ICatalog, LogicalProperty[])
+     */
+    public Cost findLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] inputLogProp) {
+        return new Cost(
+            inputLogProp[0].getCardinality()
+                * (catalog.getDouble("tuple_reading_cost")
+                    + catalog.getDouble("expression_cost")
+                    + catalog.getDouble("tuple_construction_cost")));
     }
 }

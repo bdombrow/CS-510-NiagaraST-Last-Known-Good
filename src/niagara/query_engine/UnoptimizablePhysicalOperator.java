@@ -1,4 +1,4 @@
-/* $Id: UnoptimizablePhysicalOperator.java,v 1.4 2002/10/26 04:34:14 vpapad Exp $ */
+/* $Id: UnoptimizablePhysicalOperator.java,v 1.5 2002/10/31 03:54:38 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -25,26 +25,16 @@ public abstract class UnoptimizablePhysicalOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
      */
-    public final PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+    public final PhysicalProperty findPhysProp(PhysicalProperty[] input_phys_props) {
         throw new PEException("Optimization is not supported for this operator");
     }
 
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
      */
-    public final Cost FindLocalCost(
+    public final Cost findLocalCost(
         ICatalog catalog,
         LogicalProperty[] InputLogProp) {
-        throw new PEException("Optimization is not supported for this operator");
-    }
-
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#InputReqdProp(PhysicalProperty, LogicalProperty, int)
-     */
-    public final PhysicalProperty[] InputReqdProp(
-        PhysicalProperty PhysProp,
-        LogicalProperty InputLogProp,
-        int InputNo) {
         throw new PEException("Optimization is not supported for this operator");
     }
 
@@ -76,7 +66,7 @@ public abstract class UnoptimizablePhysicalOperator extends PhysicalOperator {
      * @see niagara.query_engine.PhysicalOperator#constructTupleSchema(TupleSchema[])
      */
     public void constructTupleSchema(TupleSchema[] inputSchemas) {
-        throw new PEException("Optimization is not supported for this operator");
+        ;
     }
     
     public TupleSchema getTupleSchema() {

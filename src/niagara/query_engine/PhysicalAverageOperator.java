@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.12 2002/10/27 03:08:04 vpapad Exp $
+  $Id: PhysicalAverageOperator.java,v 1.13 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,8 +30,7 @@ package niagara.query_engine;
 import java.util.ArrayList;
 
 import niagara.ndom.*;
-import niagara.optimizer.colombia.Attribute;
-import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.*;
 
 import org.w3c.dom.*;
 
@@ -50,15 +49,13 @@ import niagara.xmlql_parser.syntax_tree.*;
  */
 
 public class PhysicalAverageOperator extends PhysicalGroupOperator {
-
-    // These are private nested classes used internally               //
+    // These are private nested classes used internally
 
     /**
-     * Instances of this class store sufficient statistics for computing
-     * the average
+     * Sufficient statistics for computing the average
      */
     private class AverageSufficientStatistics {
-	// These are the private members of the class           //
+	// These are the private members of the class
 
 	// The number and sum of the of values
 	int numValues;
@@ -80,7 +77,6 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	 * @param newValue The value by which the statistics are to be
 	 *                 updated
 	 */
-
 	public void updateStatistics (double newValue) {
 	    ++numValues;
 	    sumOfValues += newValue;
@@ -92,11 +88,7 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	 *
 	 * @return Returns the number of values in the statistics
 	 */
-
 	public double getNumberOfValues () {
-
-	    // Return the number of values
-	    //
 	    return numValues;
 	}
 
@@ -107,11 +99,7 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	 *
 	 * @return The sum of the values in the sufficient statistics
 	 */
-
 	public double getSumOfValues () {
-
-	    // Return the sum of the values
-	    //
 	    return sumOfValues;
 	}
     }
@@ -137,11 +125,6 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	averageAttribute = ((averageOp) logicalOperator).getAveragingAttribute();
     }
     
-    protected void opInitialize() {
-        ae = new AtomicEvaluator(averageAttribute.getName());
-        ae.resolveVariables(inputTupleSchemas[0], 0);
-        atomicValues = new ArrayList();
-    }
 
 
     /////////////////////////////////////////////////////////////////////////
@@ -153,9 +136,10 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
      * This function is called to initialize a grouping operator for execution
      * by setting up relevant structures etc.
      */
-
     protected final void initializeForExecution () {
-	// Nothing to do
+        ae = new AtomicEvaluator(averageAttribute.getName());
+        ae.resolveVariables(inputTupleSchemas[0], 0);
+        atomicValues = new ArrayList();
     }
 
 
@@ -249,9 +233,7 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
      */
 
     protected final Node constructEmptyResult () {
-
 	// Always return null
-	//
 	return null;
     }
 
@@ -316,15 +298,34 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	Text childElement = doc.createTextNode(Double.toString(average));
 
 	// Add the text node as a child of the element node
-	//
 	resultElement.appendChild(childElement);
 	
 	// Return the result element
-	//
 	return resultElement;
     }
 
     public void setResultDocument(Document doc) {
         this.doc = doc;
+    }
+    
+    public Op copy() {
+        PhysicalAverageOperator op = new PhysicalAverageOperator();
+        if (logicalGroupOperator != null)
+            op.initFrom(logicalGroupOperator);
+        return op;
+    }
+    
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalAverageOperator))
+            return false;
+        if (o.getClass() != PhysicalAverageOperator.class)
+            return o.equals(this);
+        PhysicalAverageOperator other = (PhysicalAverageOperator) o;
+        return logicalGroupOperator.equals(other.logicalGroupOperator) &&
+        averageAttribute.equals(other.averageAttribute);
+    }
+
+    public int hashCode() {
+        return logicalGroupOperator.hashCode() ^ averageAttribute.hashCode();
     }
 }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHeadOperator.java,v 1.4 2002/10/24 23:19:38 vpapad Exp $
+  $Id: PhysicalHeadOperator.java,v 1.5 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,13 +34,11 @@ package niagara.query_engine;
  * commands by shutting down the execution. Also, at the end of the
  * execution, it removes traces of the query from the system.
  *
- * @version 1.0
- *
  */
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.utils.*;
 
-public class PhysicalHeadOperator extends PhysicalOperator {
+public class PhysicalHeadOperator extends UnoptimizablePhysicalOperator {
 	
     /////////////////////////////////////////////////////
     //   Data members of the PhysicalHeadOperator Class
@@ -132,9 +130,5 @@ public class PhysicalHeadOperator extends PhysicalOperator {
 
     public boolean isStateful() {
 	return false;
-    }
-    
-    public void initFrom(LogicalOp logicalOp) {
-        throw new PEException("PhysicalHeadOperator cannot be initialized with logical operators");
     }
 }

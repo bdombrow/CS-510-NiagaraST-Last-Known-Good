@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.7 2002/10/27 02:37:57 vpapad Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.8 2002/10/31 03:54:39 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -208,9 +208,7 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 	}
 
 	for (int tup = 0; tup < numTuples; ++tup) {
-
 	    // Get the appropriate tuple for the other source stream
-	    //
 	    StreamTupleElement otherTupleElement = 
 		(StreamTupleElement) sourceTuples.get(tup);
 
@@ -308,20 +306,11 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 	return true;
     }
     
-public PhysicalProperty[] InputReqdProp(
-    PhysicalProperty PhysProp,
-    LogicalProperty InputLogProp,
-    int InputNo) {
-    if (PhysProp.equals(PhysicalProperty.ANY))
-        return new PhysicalProperty[] {
-    };
-    return null;
-}
 
 /**
  * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
  */
-public Cost FindLocalCost(
+public Cost findLocalCost(
     ICatalog catalog,
     LogicalProperty[] InputLogProp) {
     float LeftCard = InputLogProp[0].getCardinality();
@@ -341,24 +330,6 @@ public Cost FindLocalCost(
     return c;
 }
 
-/**
- * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
- */
-public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
-    return PhysicalProperty.ANY;
-}
-
-    /**
-     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
-     */
-    public void constructTupleSchema(TupleSchema[] inputSchemas) {
-        // XXX vpapad: Does not handle projects yet!
-        inputTupleSchemas = inputSchemas;
-        outputTupleSchema = inputSchemas[0].copy();
-        for (int i = 0; i < inputSchemas[1].getLength(); i++) {
-            outputTupleSchema.addMapping(inputSchemas[1].getVariable(i));
-        }
-    }
 
     /**
      * @see niagara.query_engine.PhysicalOperator#opInitialize()
@@ -377,10 +348,10 @@ public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
         pred.resolveVariables(inputTupleSchemas[0], 0);
         pred.resolveVariables(inputTupleSchemas[1], 1);
 
-        hashers[0].resolveVariables(inputTupleSchemas[0], 0);
-        hashers[0].resolveVariables(inputTupleSchemas[1], 1);
-        hashers[1].resolveVariables(inputTupleSchemas[0], 0);
-        hashers[1].resolveVariables(inputTupleSchemas[1], 1);
+        hashers[0].resolveVariables(inputTupleSchemas[0]);
+        hashers[0].resolveVariables(inputTupleSchemas[1]);
+        hashers[1].resolveVariables(inputTupleSchemas[0]);
+        hashers[1].resolveVariables(inputTupleSchemas[1]);
         
 
         // Initialize the array of hash tables of partial source tuples - there are

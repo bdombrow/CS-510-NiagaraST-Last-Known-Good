@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.8 2002/10/27 02:37:56 vpapad Exp $
+  $Id: PhysicalSelectOperator.java,v 1.9 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,11 +55,13 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 	// Type cast logical operator to a select operator
 	selectOp logicalSelectOperator = (selectOp) logicalOperator;
         pred = logicalSelectOperator.getPredicate();	
+        predEval =  pred.getImplementation();
     }
 
     public Op copy() {
         PhysicalSelectOperator p = new PhysicalSelectOperator();
-        p.pred = pred.copy();
+        p.pred = pred;
+        p.predEval = predEval;
         return p;
     }
     
@@ -106,17 +108,10 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 	return false;
     }
     
-public PhysicalProperty[] InputReqdProp(PhysicalProperty PhysProp, LogicalProperty InputLogProp, int InputNo) {
-    assert InputNo == 0;
-    if (PhysProp.equals(PhysicalProperty.ANY))
-        return new PhysicalProperty[] {};
-    return new PhysicalProperty[] {PhysProp};
-}
-
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
      */
-    public Cost FindLocalCost(
+    public Cost findLocalCost(
         ICatalog catalog,
         LogicalProperty[] InputLogProp) {
         float InputCard = InputLogProp[0].getCardinality();
@@ -125,16 +120,6 @@ public PhysicalProperty[] InputReqdProp(PhysicalProperty PhysProp, LogicalProper
         return cost;
     }
     
-    /**
-     * @see niagara.query_engine.PhysicalOperator#opInitialize()
-     */
-    protected void opInitialize() {
-            predEval =  pred.getImplementation();
-    }
-    
-    /**
-     * @see java.lang.Object#equals(Object)
-     */
     public boolean equals(Object o) {
         if (o == null || !(o instanceof PhysicalSelectOperator))
             return false;
@@ -154,8 +139,23 @@ public PhysicalProperty[] InputReqdProp(PhysicalProperty PhysProp, LogicalProper
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
      */
-    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+    public PhysicalProperty findPhysProp(PhysicalProperty[] input_phys_props) {
         return input_phys_props[0];
+    }
+    
+    /**
+     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
+     */
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        inputTupleSchemas = inputSchemas;
+        outputTupleSchema = inputTupleSchemas[0];
+    }
+    
+    /**
+     * @see niagara.query_engine.PhysicalOperator#opInitialize()
+     */
+    protected void opInitialize() {
+        predEval.resolveVariables(inputTupleSchemas[0], 0);
     }
 }
 

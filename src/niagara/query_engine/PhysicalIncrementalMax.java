@@ -1,26 +1,30 @@
-/* $Id: PhysicalIncrementalMax.java,v 1.2 2002/10/24 23:13:13 vpapad Exp $ */
+/* $Id: PhysicalIncrementalMax.java,v 1.3 2002/10/31 03:54:38 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
 
 import niagara.logical.IncrementalMax;
-import niagara.utils.SinkTupleStream;
-import niagara.utils.SourceTupleStream;
-import niagara.utils.StreamTupleElement;
+import niagara.optimizer.colombia.*;
+import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.op;
 
 import org.w3c.dom.Node;
 
 public class PhysicalIncrementalMax extends PhysicalIncrementalGroup {
+    private Attribute maxAttribute;
     private AtomicEvaluator ae;
     private ArrayList values;
     private Double emptyGroupValue;
 
+    public void initFrom(LogicalOp logicalOperator) {
+        super.initFrom(logicalOperator);
+        // Get the counting attribute of the Count logical operator
+        maxAttribute = ((IncrementalMax) logicalOperator).getMaxAttribute();
+    }
+
     public void opInitialize() {
         super.opInitialize();
-        ae =
-            new AtomicEvaluator(
-                ((IncrementalMax) logicalGroupOperator).getMaxAttribute());
+        ae = new AtomicEvaluator(maxAttribute.getName());
 	emptyGroupValue = ((IncrementalMax) logicalGroupOperator).getEmptyGroupValue();
         values = new ArrayList();
     }
@@ -64,5 +68,24 @@ public class PhysicalIncrementalMax extends PhysicalIncrementalGroup {
      */
     public Node constructOutput(Object groupInfo) {
         return doc.createTextNode(String.valueOf(groupInfo));
+    }
+
+    public Op copy() {
+        PhysicalIncrementalMax op = new PhysicalIncrementalMax();
+        op.initFrom(logicalGroupOperator);
+        return op;
+    }
+
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalIncrementalMax))
+            return false;
+        if (o.getClass() != PhysicalIncrementalMax.class)
+            return o.equals(this);
+        return logicalGroupOperator.equals(
+            ((PhysicalIncrementalMax) o).logicalGroupOperator);
+    }
+
+    public int hashCode() {
+        return logicalGroupOperator.hashCode();
     }
 }

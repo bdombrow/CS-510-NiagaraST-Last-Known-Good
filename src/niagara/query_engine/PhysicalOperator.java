@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.18 2002/10/26 21:26:45 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.19 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,7 @@ package niagara.query_engine;
  * @version 1.0
  */
 
+import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.PhysicalOp;
 import niagara.optimizer.rules.Initializable;
 
@@ -797,14 +798,17 @@ implements SchemaProducer, SerializableToXML, Initializable {
     ////////////////////////////////////////////////////////////////////
 
 
-    /** Operators should implement this method to construct their output
-     * tuple schema, given the schemas for their inputs */
-    // XXX vpapad: commenting out to get CVS to compile
+    /** Construct the output tuple schema, given the input schemas */
     public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        // Default implementation: save input schema, 
+        // use logical properties to construct output schema
+        inputTupleSchemas = inputSchemas;
+        outputTupleSchema = new TupleSchema();
+        Attrs attrs = logProp.getAttrs();
+        for (int i = 0; i < attrs.size(); i++) {
+            outputTupleSchema.addMapping(attrs.get(i));
+        }
     }
-    /*
-    public abstract void constructTupleSchema(TupleSchema[] inputSchemas);
-    */
     
     /**
      * if an operator needs to do initialization, it should override

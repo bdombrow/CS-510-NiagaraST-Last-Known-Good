@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.17 2002/10/27 03:08:04 vpapad Exp $
+  $Id: PhysicalGroupOperator.java,v 1.18 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -24,13 +24,12 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.query_engine;
 
 import java.util.*;
 
 import niagara.logical.Variable;
-import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -54,154 +53,118 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * table
      */
     private class HashEntry {
-	// This is the object representing the final results
-	//
-	private Object finalResult;
+        // This is the object representing the final results
+        private Object finalResult;
 
-	// This is the object representing the partial results
-	//
-	private Object partialResult;
+        // This is the object representing the partial results
+        private Object partialResult;
 
-	// This is the id of the currency of the partial results
-	//
-	private int partialResultId;
+        // This is the id of the currency of the partial results
+        private int partialResultId;
 
-	// This is a representative tuple of the hash entry
-	//
-	StreamTupleElement representativeTuple;
+        // This is a representative tuple of the hash entry
+        StreamTupleElement representativeTuple;
 
-	/////////////////////////////////////////////////////////////////
-	// These are the methods of the class                          //
-	/////////////////////////////////////////////////////////////////
+        /**
+         * This is the constructor of a hash entry that initialize it with
+         * a representative tuple
+         *
+         * @param currPartialResultId The current id of partial results
+         * @param representativeTuple A representative tuple for this hash entry
+         */
+        public HashEntry(
+            int currPartialResultId,
+            StreamTupleElement representativeTuple) {
 
-	/**
-	 * This is the constructor of a hash entry that initialize it with
-	 * a representative tuple
-	 *
-	 * @param currPartialResultId The current id of partial results
-	 * @param representativeTuple A representative tuple for this hash entry
-	 */
+            // Initialize the results to nothing
+            finalResult = null;
+            partialResult = null;
 
-	public HashEntry (int currPartialResultId,
-			  StreamTupleElement representativeTuple) {
+            // Initialize the partial result id
+            this.partialResultId = currPartialResultId;
 
-	    // Initialize the results to nothing
-	    //
-	    finalResult = null;
-	    partialResult = null;
+            // Initialize the representative tuple
+            this.representativeTuple = representativeTuple;
+        }
 
-	    // Initialize the partial result id
-	    //
-	    this.partialResultId = currPartialResultId;
+        /**
+         * This function returns the final result associated with this entry
+         *
+         * @return The final result
+         */
 
-	    // Initialize the representative tuple
-	    //
-	    this.representativeTuple = representativeTuple;
-	}
+        public Object getFinalResult() {
+            // Return the final result
+            return finalResult;
+        }
 
-	/**
-	 * This function returns the final result associated with this entry
-	 *
-	 * @return The final result
-	 */
+        /**
+         * This function sets the final result of this entry
+         *
+         * @param finalResult The final result to be set
+         */
 
-	public Object getFinalResult () {
+        public void setFinalResult(Object finalResult) {
+            this.finalResult = finalResult;
+        }
 
-	    // Return the final result
-	    //
-	    return finalResult;
-	}
+        /**
+         * This function returns the partial result associated with this entry
+         *
+         * @return The partial result
+         */
+        public Object getPartialResult() {
+            return partialResult;
+        }
 
+        /**
+         * This function sets the partial result of this entry
+         *
+         * @param partialResult The partial result to be set
+         */
 
-	/**
-	 * This function sets the final result of this entry
-	 *
-	 * @param finalResult The final result to be set
-	 */
+        public void setPartialResult(Object partialResult) {
+            this.partialResult = partialResult;
+        }
 
-	public void setFinalResult (Object finalResult) {
+        /**
+         * This function updates the partial result to make it consistent with the
+         * current partial result id
+         *
+         * @param currPartialResultId The current partial result id of the operator
+         */
 
-	    this.finalResult = finalResult;
-	}
+        public void updatePartialResult(int currPartialResultId) {
+            // If the stored partial id is less than the current partial id, then
+            // clear the partial result and update the stored partial id
+            if (partialResultId < currPartialResultId) {
+                // Clear the partial results
+                partialResult = null;
 
+                // Update the stored partial result id
+                partialResultId = currPartialResultId;
+            }
+        }
 
-	/**
-	 * This function returns the partial result associated with this entry
-	 *
-	 * @return The partial result
-	 */
-
-	public Object getPartialResult () {
-
-	    // Return the partial result
-	    //
-	    return partialResult;
-	}
-
-
-	/**
-	 * This function sets the partial result of this entry
-	 *
-	 * @param partialResult The partial result to be set
-	 */
-
-	public void setPartialResult (Object partialResult) {
-
-	    this.partialResult = partialResult;
-	}
-
-
-	/**
-	 * This function updates the partial result to make it consistent with the
-	 * current partial result id
-	 *
-	 * @param currPartialResultId The current partial result id of the operator
-	 */
-
-	public void updatePartialResult (int currPartialResultId) {
-
-	    // If the stored partial id is less than the current partial id, then
-	    // clear the partial result and update the stored partial id
-	    //
-	    if (partialResultId < currPartialResultId) {
-
-		// Clear the partial results
-		//
-		partialResult = null;
-
-		// Update the stored partial result id
-		//
-		partialResultId = currPartialResultId;
-	    }
-	}
-
-
-	/**
-	 * This function returns the representative tuple associated with
-	 * this hash entry
-	 *
-	 * @return The representative tuple associated with the hash entry
-	 */
-
-	public StreamTupleElement getRepresentativeTuple () {
-
-	    // Return the representative tuple
-	    //
-	    return representativeTuple;
-	}
+        /**
+         * This function returns the representative tuple associated with
+         * this hash entry
+         *
+         * @return The representative tuple associated with the hash entry
+         */
+        public StreamTupleElement getRepresentativeTuple() {
+            // Return the representative tuple
+            return representativeTuple;
+        }
     }
 
-
-    // This is the array having information about blocking and non-blocking
-    // streams
-    //
+    // source stream is blocking
     private static final boolean[] blockingSourceStreams = { true };
 
     // The logical operator for grouping
-    private groupOp logicalGroupOperator;
+    protected groupOp logicalGroupOperator;
 
     // The list of attributes to group by
-    //
     private Vector groupAttributeList;
 
     private Hasher hasher;
@@ -216,21 +179,18 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
     // This is the current partial id of the operator used to discard previous
     // partial results
-    //
     private int currPartialResultId;
-    
+
     protected Document doc;
 
     public PhysicalGroupOperator() {
         setBlockingSourceStreams(blockingSourceStreams);
     }
-    
+
     public void initFrom(LogicalOp logicalOperator) {
-	// Typecast to a group logical operator
-        System.err.println("XXX initFrom called " + logicalOperator);
-	logicalGroupOperator = (groupOp) logicalOperator;
+        // Typecast to a group logical operator
+        logicalGroupOperator = (groupOp) logicalOperator;
     }
-    
 
     /**
      * This function initializes the data structures for an operator.
@@ -238,32 +198,27 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *
      * @return True if the operator is to continue and false otherwise
      */
+    protected void opInitialize() {
+        // Get the grouping attributes
+        skolem grouping = logicalGroupOperator.getSkolemAttributes();
 
-    protected void opInitialize () {
-	// Get the grouping attributes
-	skolem grouping = logicalGroupOperator.getSkolemAttributes();
-
-	groupAttributeList = grouping.getVarList();
+        groupAttributeList = grouping.getVarList();
 
         hasher = new Hasher(groupAttributeList);
+        hasher.resolveVariables(inputTupleSchemas[0]);
 
-	rgstPValues = new String[groupAttributeList.size()];
-	rgstTValues = new String[groupAttributeList.size()];
+        rgstPValues = new String[groupAttributeList.size()];
+        rgstTValues = new String[groupAttributeList.size()];
 
-	// Initialize the hash table
-	//
-	hashtable = new Hashtable();
+        // Initialize the hash table
+        hashtable = new Hashtable();
 
-	// Initialize the current partial id to 0
-	//
-	currPartialResultId = 0;
+        // Initialize the current partial id to 0
+        currPartialResultId = 0;
 
-	// Ask subclasses to initialize
-	//
-	this.initializeForExecution();
-
+        // Ask subclasses to initialize
+        this.initializeForExecution();
     }
-
 
     /**
      * This function processes a tuple element read from a source stream
@@ -275,76 +230,57 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
+    protected final void blockingProcessSourceTupleElement(
+        StreamTupleElement tupleElement,
+        int streamId)
+        throws UserErrorException, ShutdownException {
 
-    protected final void blockingProcessSourceTupleElement (
-					 StreamTupleElement tupleElement,
-					 int streamId) 
-    throws UserErrorException, ShutdownException {
+        // First get the hash code for the grouping attributes
+        String hashKey = hasher.hashKey(tupleElement);
 
-	// First get the hash code for the grouping attributes
-	//
-	String hashKey = hasher.hashKey(tupleElement);
+        // If this is not a valid hash code, then nothing to do
 
-	// If this is not a valid hash code, then nothing to do
-	//	    
-	// First construct ungrouped result
-	//
-	Object ungroupedResult = this.constructUngroupedResult(tupleElement);
-	
-	// Probe hash table to see whether result for this hashcode
-	// already exist
-	//
-	
-	HashEntry prevResult = (HashEntry) hashtable.get(hashKey);
-	
-	if (prevResult == null) {
-	    
-	    // If it does not have the result, just create new one
-	    // with the current partial result id with the tupleElement
-	    // as the representative tuple
-	    //
-	    prevResult = new HashEntry(currPartialResultId, tupleElement);
-	    
-	    // Add the entry to hash table
-	    //
-	    hashtable.put(hashKey, prevResult);
-	}
-	else {
-	    
-	    // It did have the result - update partial results
-	    //
-	    prevResult.updatePartialResult(currPartialResultId);
-	}
-	
-	// Based on whether the tuple represents partial or final results
-	// merge ungrouped result with previously grouped results
-	//
-	if (tupleElement.isPartial()) {
-	    
-	    // Merge the partial result so far with current ungrouped result
-	    //
-	    Object newPartialResult = 
-		this.mergeResults(prevResult.getPartialResult(),
-				  ungroupedResult);
-	    
-	    // Update the partial result
-	    //
-	    prevResult.setPartialResult(newPartialResult);
-	}
-	else {
-	    
-	    // Merge the final result so far with current ungrouped result
-	    //
-	    Object newFinalResult =
-		this.mergeResults(prevResult.getFinalResult(),
-				  ungroupedResult);
-	    
-	    // Update the final result
-	    //
-	    prevResult.setFinalResult(newFinalResult);
-	}
+        // First construct ungrouped result
+        Object ungroupedResult = this.constructUngroupedResult(tupleElement);
+
+        // Probe hash table to see whether result for this hashcode
+        // already exist
+        HashEntry prevResult = (HashEntry) hashtable.get(hashKey);
+
+        if (prevResult == null) {
+            // If it does not have the result, just create new one
+            // with the current partial result id with the tupleElement
+            // as the representative tuple
+            prevResult = new HashEntry(currPartialResultId, tupleElement);
+
+            // Add the entry to hash table
+            hashtable.put(hashKey, prevResult);
+        } else {
+            // It did have the result - update partial results
+            prevResult.updatePartialResult(currPartialResultId);
+        }
+
+        // Based on whether the tuple represents partial or final results
+        // merge ungrouped result with previously grouped results
+        if (tupleElement.isPartial()) {
+            // Merge the partial result so far with current ungrouped result
+            Object newPartialResult =
+                this.mergeResults(
+                    prevResult.getPartialResult(),
+                    ungroupedResult);
+
+            // Update the partial result
+            prevResult.setPartialResult(newPartialResult);
+        } else {
+
+            // Merge the final result so far with current ungrouped result
+            Object newFinalResult =
+                this.mergeResults(prevResult.getFinalResult(), ungroupedResult);
+
+            // Update the final result
+            prevResult.setFinalResult(newFinalResult);
+        }
     }
-
 
     /**
      * This function returns the current output of the operator. This
@@ -357,73 +293,76 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * @return True if the operator is to continue and false otherwise
      */
 
-    protected final void flushCurrentResults(boolean partial) 
-    throws InterruptedException, ShutdownException {
-	// Get all the values in the hashtable and an iterator over the values
-	Collection values = hashtable.values();
-	Iterator iter = values.iterator();
+    protected final void flushCurrentResults(boolean partial)
+        throws InterruptedException, ShutdownException {
+        // Get all the values in the hashtable and an iterator over the values
+        Collection values = hashtable.values();
+        Iterator iter = values.iterator();
 
-	// If the iterator does not have any values, then call empty construct
-	if (!iter.hasNext()) {
-	    Node emptyResult = constructEmptyResult();
+        // If the iterator does not have any values, then call empty construct
+        if (!iter.hasNext()) {
+            Node emptyResult = constructEmptyResult();
 
-	    // If there is a non- empty result, then create tuple and add to
-	    // result
-	    if (emptyResult != null) {
+            // If there is a non- empty result, then create tuple and add to
+            // result
+            if (emptyResult != null) {
 
-		// Create tuple
-		StreamTupleElement tupleElement = 
-		    createTuple(emptyResult,
-				null,          // No representative tuple
-				partial);
+                // Create tuple
+                    StreamTupleElement tupleElement =
+                        createTuple(
+                            emptyResult,
+                            null,
+                // No representative tuple
+    partial);
 
-		// Add the tuple to the result
-		putTuple(tupleElement, 0);
-	    }
-	    return;
-	}
+                // Add the tuple to the result
+                putTuple(tupleElement, 0);
+            }
+            return;
+        }
 
-	// For each group, construct results
-	//
-	while (iter.hasNext()) {
+        // For each group, construct results
+        //
+        while (iter.hasNext()) {
 
-	    // Get the next element in the hash table
-	    //
-	    HashEntry hashEntry = (HashEntry) iter.next();
+            // Get the next element in the hash table
+            //
+            HashEntry hashEntry = (HashEntry) iter.next();
 
-	    // Update hash entry for partial results
-	    //
-	    hashEntry.updatePartialResult(currPartialResultId);
+            // Update hash entry for partial results
+            //
+            hashEntry.updatePartialResult(currPartialResultId);
 
-	    // Get the result object if at least partial or final
-	    // result is not null
-	    //
-	    Object partialResult = hashEntry.getPartialResult();
-	    Object finalResult = hashEntry.getFinalResult();
+            // Get the result object if at least partial or final
+            // result is not null
+            //
+            Object partialResult = hashEntry.getPartialResult();
+            Object finalResult = hashEntry.getFinalResult();
 
-	    Node resultNode = null;
+            Node resultNode = null;
 
-	    if (partialResult != null || finalResult != null) {
-		resultNode = this.constructResult(partialResult, finalResult);
-	    }
+            if (partialResult != null || finalResult != null) {
+                resultNode = this.constructResult(partialResult, finalResult);
+            }
 
-	    // If there is a non- empty result, then create tuple and add to
-	    // result
-	    //
-	    if (resultNode != null) {
+            // If there is a non- empty result, then create tuple and add to
+            // result
+            //
+            if (resultNode != null) {
 
-		// Create tuple
-		//
-		StreamTupleElement tupleElement = 
-		    createTuple(resultNode,
-				hashEntry.getRepresentativeTuple(),
-				partial);
+                // Create tuple
+                //
+                StreamTupleElement tupleElement =
+                    createTuple(
+                        resultNode,
+                        hashEntry.getRepresentativeTuple(),
+                        partial);
 
-		// Add the tuple to the result
-		putTuple(tupleElement, 0);
-	    }
-	}
-	return;
+                // Add the tuple to the result
+                putTuple(tupleElement, 0);
+            }
+        }
+        return;
     }
 
     /**
@@ -438,61 +377,65 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *
      */
 
-    protected void processPunctuation(StreamPunctuationElement inputTuple,
-				      int streamId)
-	throws ShutdownException, InterruptedException {
-	String stPunctGroupKey;
-	try {
-	    stPunctGroupKey = hasher.hashKey(inputTuple);
-	} catch (java.lang.ArrayIndexOutOfBoundsException ex) {
-	    //Not a punctuation for the group attribute. Ignore it.
-	    return;
-	}
+    protected void processPunctuation(
+        StreamPunctuationElement inputTuple,
+        int streamId)
+        throws ShutdownException, InterruptedException {
+        String stPunctGroupKey;
+        try {
+            stPunctGroupKey = hasher.hashKey(inputTuple);
+        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+            //Not a punctuation for the group attribute. Ignore it.
+            return;
+        }
 
-	Enumeration en = hashtable.keys();
+        Enumeration en = hashtable.keys();
 
-	//see if the tuples we have match the incoming punctuation
-	hasher.getValuesFromKey(stPunctGroupKey, rgstPValues);
-	while (en.hasMoreElements()) {
+        //see if the tuples we have match the incoming punctuation
+        hasher.getValuesFromKey(stPunctGroupKey, rgstPValues);
+        while (en.hasMoreElements()) {
 
-	    boolean fMatch = true;
-	    // Get the next element in the hash table
-	    //
-	    String key = (String) en.nextElement();
+            boolean fMatch = true;
+            // Get the next element in the hash table
+            //
+            String key = (String) en.nextElement();
 
-	    hasher.getValuesFromKey(key, rgstTValues);
-	    for (int i=0; i < rgstPValues.length && fMatch; i++) {
-		fMatch = StreamPunctuationElement.matchValue(rgstPValues[i],
-							     rgstTValues[i]);
-	    }
+            hasher.getValuesFromKey(key, rgstTValues);
+            for (int i = 0; i < rgstPValues.length && fMatch; i++) {
+                fMatch =
+                    StreamPunctuationElement.matchValue(
+                        rgstPValues[i],
+                        rgstTValues[i]);
+            }
 
-	    if (fMatch) {
-		// We found a group to output. Send its result on its way,
-		// and remove it from the hashtable.
+            if (fMatch) {
+                // We found a group to output. Send its result on its way,
+                // and remove it from the hashtable.
 
-		// Get the result object if at least partial or final
-		HashEntry hashEntry = (HashEntry) hashtable.get(key);
-		Object finalResult = hashEntry.getFinalResult();
-		Node resultNode = null;
-		if (finalResult != null)
-		    resultNode = this.constructResult(null, finalResult);
+                // Get the result object if at least partial or final
+                HashEntry hashEntry = (HashEntry) hashtable.get(key);
+                Object finalResult = hashEntry.getFinalResult();
+                Node resultNode = null;
+                if (finalResult != null)
+                    resultNode = this.constructResult(null, finalResult);
 
-		// If there is a non- empty result, then create tuple and add
-		// to result
-		if (resultNode != null) {
-		    StreamTupleElement tupleElement = 
-			createTuple(resultNode,
-				    hashEntry.getRepresentativeTuple(),
-				    false);
+                // If there is a non- empty result, then create tuple and add
+                // to result
+                if (resultNode != null) {
+                    StreamTupleElement tupleElement =
+                        createTuple(
+                            resultNode,
+                            hashEntry.getRepresentativeTuple(),
+                            false);
 
-		    // Add the tuple to the result
-		    putTuple(tupleElement, 0);
-		}
+                    // Add the tuple to the result
+                    putTuple(tupleElement, 0);
+                }
 
-		//Finally, remove this key from the hash table
-		hashtable.remove(key);
-	    }
-	}
+                //Finally, remove this key from the hash table
+                hashtable.remove(key);
+            }
+        }
     }
 
     /**
@@ -504,13 +447,12 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *                 which are to be removed.
      *
      */
-    protected final void removeEffectsOfPartialResult (int streamId) {
+    protected final void removeEffectsOfPartialResult(int streamId) {
 
-	// Just increment the current partial id
-	++currPartialResultId;
+        // Just increment the current partial id
+        ++currPartialResultId;
     }
 
-    
     /**
      * This function creates a group tuple given the grouped result
      *
@@ -521,47 +463,46 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * @return A tuple with the grouped result
      */
 
-    private StreamTupleElement createTuple (Node groupedResult,
-					    StreamTupleElement representativeTuple,
-					    boolean partial) {
+    private StreamTupleElement createTuple(
+        Node groupedResult,
+        StreamTupleElement representativeTuple,
+        boolean partial) {
 
-	// Create a result tuple element tagged appropriately as
-	// partial or final
-	//
-	StreamTupleElement tupleElement = new StreamTupleElement(partial);
+        // Create a result tuple element tagged appropriately as
+        // partial or final
+        //
+        StreamTupleElement tupleElement = new StreamTupleElement(partial);
 
-	// NOTE: When grouping is implemented right at the logical operator tree
-	// level, all that has to be done is to uncomment the following fragment
-	// This ensures that the grouping attributes are part of the tuple result
-	//
-	
-	// For each grouping attribute, add the corresponding element
-	// to the result tuple from the representative tuple
-	//
-	int numGroupingAttributes = groupAttributeList.size();
+        // NOTE: When grouping is implemented right at the logical operator tree
+        // level, all that has to be done is to uncomment the following fragment
+        // This ensures that the grouping attributes are part of the tuple result
+        //
 
-	    for (int grp = 0; grp < numGroupingAttributes; ++grp) {
-		// Get the group attribute
-		int attributeId = 
-		    ((schemaAttribute) groupAttributeList.elementAt(grp)).getAttrId();
+        // For each grouping attribute, add the corresponding element
+        // to the result tuple from the representative tuple
+        int numGroupingAttributes = groupAttributeList.size();
 
-		// Append the relevant attribute from the representative tuple
-		// to the result
-		if (representativeTuple != null) 
-		    tupleElement.appendAttribute(representativeTuple.getAttribute(attributeId));
-		else
-		    tupleElement.appendAttribute(null);
-	    }
-	
+        for (int grp = 0; grp < numGroupingAttributes; ++grp) {
+            // Get the group attribute
+            Attribute a = (Attribute) groupAttributeList.get(grp);
+            int attributeId = inputTupleSchemas[0].getPosition(a.getName());
 
-	// Add the grouped result as the attribute
-	//
-	tupleElement.appendAttribute(groupedResult);
+            // Append the relevant attribute from the representative tuple
+            // to the result
+            if (representativeTuple != null)
+                tupleElement.appendAttribute(
+                    representativeTuple.getAttribute(attributeId));
+            else
+                tupleElement.appendAttribute(null);
+        }
 
+        // Add the grouped result as the attribute
+        //
+        tupleElement.appendAttribute(groupedResult);
 
-	// Return the result tuple
-	//
-	return tupleElement;
+        // Return the result tuple
+        //
+        return tupleElement;
     }
 
     public void setResultDocument(Document doc) {
@@ -578,8 +519,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * by setting up relevant structures etc.
      */
 
-    protected abstract void initializeForExecution ();
-
+    protected abstract void initializeForExecution();
 
     /**
      * This function constructs a ungrouped result from a tuple
@@ -590,8 +530,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *         null
      */
 
-    protected abstract Object constructUngroupedResult (StreamTupleElement tupleElement);
-
+    protected abstract Object constructUngroupedResult(StreamTupleElement tupleElement);
 
     /**
      * This function merges a grouped result with an ungrouped result
@@ -604,9 +543,9 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * @return The new grouped result
      */
 
-    protected abstract Object mergeResults (Object groupedResult,
-					    Object ungroupedResult);
-
+    protected abstract Object mergeResults(
+        Object groupedResult,
+        Object ungroupedResult);
 
     /**
      * This function returns an empty result in case there are no groups
@@ -615,8 +554,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *         result is to be constructed
      */
 
-    protected abstract Node constructEmptyResult ();
-
+    protected abstract Node constructEmptyResult();
 
     /**
      * This function constructs a result from the grouped partial and final
@@ -629,27 +567,24 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *         returns null
      */
 
-    protected abstract Node constructResult (Object partialResult,
-					     Object finalResult);
+    protected abstract Node constructResult(
+        Object partialResult,
+        Object finalResult);
 
     public boolean isStateful() {
-	return true;
+        return true;
     }
 
-    // XXX vpapad: not ready yet
-    public void constructTupleSchema(TupleSchema[] inputSchemas) {
-    }
-    /*    
-    public void constructTupleSchema(TupleSchema[] inputSchemas) {
-        inputTupleSchemas = inputSchemas;
-        outputTupleSchema = new TupleSchema();
-        Vector gbyAttrs = logicalGroupOperator.getSkolemAttributes().getVarList();
+    public Cost findLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] inputLogProp) {
+        // XXX vpapad: really naive. Only considers the hashing cost
+        float inpCard = inputLogProp[0].getCardinality();
+        float outputCard = logProp.getCardinality();
 
-        // The resulting schema contains the groupby attributes
-        // plus the new aggregate field
-        for (int i = 0; i < gbyAttrs.size(); i++) {
-            outputTupleSchema.addMapping(new Variable((String) gbyAttrs.get(i)));
-        }
+        double cost = inpCard * catalog.getDouble("tuple_reading_cost");
+        cost += inpCard * catalog.getDouble("tuple_hashing_cost");
+        cost += outputCard * catalog.getDouble("tuple_construction_cost");
+        return new Cost(cost);
     }
-    */
 }

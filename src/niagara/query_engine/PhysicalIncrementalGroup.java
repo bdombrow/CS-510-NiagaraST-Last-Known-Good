@@ -1,14 +1,10 @@
-/* $Id: PhysicalIncrementalGroup.java,v 1.2 2002/10/24 03:17:09 vpapad Exp $ */
+/* $Id: PhysicalIncrementalGroup.java,v 1.3 2002/10/31 03:54:39 vpapad Exp $ */
 package niagara.query_engine;
 
-import java.util.HashMap;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 import niagara.logical.IncrementalGroup;
-import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -141,6 +137,19 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
 
     public boolean isStateful() {
         return true;
+    }
+
+    public Cost findLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] inputLogProp) {
+        // XXX vpapad: really naive. Only considers the hashing cost
+        float inpCard = inputLogProp[0].getCardinality();
+        float outputCard = logProp.getCardinality();
+
+        double cost = inpCard * catalog.getDouble("tuple_reading_cost");
+        cost += inpCard * catalog.getDouble("tuple_hashing_cost");
+        cost += outputCard * catalog.getDouble("tuple_construction_cost");
+        return new Cost(cost);
     }
 
     protected boolean outputOldValue() {

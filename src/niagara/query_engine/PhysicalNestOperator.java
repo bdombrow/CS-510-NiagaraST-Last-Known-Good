@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.9 2002/10/27 03:08:04 vpapad Exp $
+  $Id: PhysicalNestOperator.java,v 1.10 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -485,28 +485,19 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
      */
-    public final PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+    public final PhysicalProperty findPhysProp(PhysicalProperty[] input_phys_props) {
         throw new PEException("Optimization is not supported for this operator");
     }
 
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
      */
-    public final Cost FindLocalCost(
+    public final Cost findLocalCost(
         ICatalog catalog,
         LogicalProperty[] InputLogProp) {
         throw new PEException("Optimization is not supported for this operator");
     }
 
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#InputReqdProp(PhysicalProperty, LogicalProperty, int)
-     */
-    public final PhysicalProperty[] InputReqdProp(
-        PhysicalProperty PhysProp,
-        LogicalProperty InputLogProp,
-        int InputNo) {
-        throw new PEException("Optimization is not supported for this operator");
-    }
 
     /**
      * @see java.lang.Object#hashCode()

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalDuplicateOperator.java,v 1.6 2002/10/26 21:26:45 vpapad Exp $
+  $Id: PhysicalDuplicateOperator.java,v 1.7 2002/10/31 03:54:39 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -24,7 +24,6 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -43,15 +42,18 @@ import niagara.xmlql_parser.syntax_tree.*;
  */
 
 public class PhysicalDuplicateOperator extends PhysicalOperator {
+    private int numOutputStreams;
     // No blocking input streams
     private static final boolean[] blockingSourceStreams = { false };
 
     public PhysicalDuplicateOperator() {
         setBlockingSourceStreams(blockingSourceStreams);
     }
-    
-    public void initFrom(LogicalOp logicalOperator) {}
-    
+
+    public void initFrom(LogicalOp logicalOperator) {
+        numOutputStreams = ((dupOp) logicalOperator).getNumberOfOutputs();
+    }
+
     /**
      * This function processes a tuple element read from a source stream
      * when the operator is non-blocking. This over-rides the corresponding
@@ -63,17 +65,71 @@ public class PhysicalDuplicateOperator extends PhysicalOperator {
      * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected void nonblockingProcessSourceTupleElement (
-					 StreamTupleElement tupleElement,
-					 int streamId)
-	throws ShutdownException, InterruptedException {
-	// Copy the input tuple to all the sink streams
-	for (int dest = 0; dest < numSinkStreams; ++dest) {
-	    putTuple(tupleElement, dest);
-	}
+    protected void nonblockingProcessSourceTupleElement(
+        StreamTupleElement tupleElement,
+        int streamId)
+        throws ShutdownException, InterruptedException {
+        // Copy the input tuple to all the sink streams
+        for (int dest = 0; dest < numSinkStreams; ++dest) {
+            putTuple(tupleElement, dest);
+        }
     }
 
     public boolean isStateful() {
-	return false;
+        return false;
+    }
+
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalDuplicateOperator))
+            return false;
+        if (o.getClass() != PhysicalDuplicateOperator.class)
+            return o.equals(this);
+        return numOutputStreams == ((PhysicalDuplicateOperator) o).numOutputStreams;
+    }
+
+    public int hashCode() {
+        return numOutputStreams;
+    }
+
+    public Op copy() {
+        PhysicalDuplicateOperator op = new PhysicalDuplicateOperator();
+        op.numOutputStreams = numOutputStreams;
+        return op;
+    }
+
+    /**
+     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
+     */
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        inputTupleSchemas = inputSchemas;
+        outputTupleSchema = inputTupleSchemas[0];
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#findLocalCost(ICatalog, LogicalProperty[])
+     */
+    public Cost findLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] inputLogProp) {
+        float inputCard = inputLogProp[0].getCardinality();
+        float outputCard = logProp.getCardinality();
+
+        double cost = inputCard * catalog.getDouble("tuple_reading_cost");
+        cost += outputCard * catalog.getDouble("tuple_construction_cost");
+        return new Cost(cost);
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#findPhysProp(PhysicalProperty[])
+     */
+    public PhysicalProperty findPhysProp(PhysicalProperty[] input_phys_props) {
+        return input_phys_props[0];
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.Op#getNumberOfOutputs()
+     */
+    public int getNumberOfOutputs() {
+        return numOutputStreams;
     }
 }

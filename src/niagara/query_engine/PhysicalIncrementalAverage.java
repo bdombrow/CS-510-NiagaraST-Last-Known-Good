@@ -1,17 +1,21 @@
-/* $Id: PhysicalIncrementalAverage.java,v 1.2 2002/10/24 23:15:15 vpapad Exp $ */
+/* $Id: PhysicalIncrementalAverage.java,v 1.3 2002/10/31 03:54:38 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
 
 import niagara.logical.IncrementalAverage;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.Op;
 import niagara.utils.SinkTupleStream;
 import niagara.utils.SourceTupleStream;
 import niagara.utils.StreamTupleElement;
-import niagara.xmlql_parser.op_tree.op;
+import niagara.xmlql_parser.op_tree.*;
 
 import org.w3c.dom.Node;
 
 public class PhysicalIncrementalAverage extends PhysicalIncrementalGroup {
+    private Attribute avgAttribute;
     private AtomicEvaluator ae;
     private ArrayList values;
 
@@ -20,11 +24,15 @@ public class PhysicalIncrementalAverage extends PhysicalIncrementalGroup {
 	double sum;
     }
 
+    public void initFrom(LogicalOp logicalOperator) {
+        super.initFrom(logicalOperator);
+        // Get the averaging attribute from the logical operator
+        avgAttribute = ((IncrementalAverage) logicalOperator).getAvgAttribute();
+    }
+
     public void opInitialize() {
         super.opInitialize();
-        ae =
-            new AtomicEvaluator(
-                ((IncrementalAverage) logicalGroupOperator).getAvgAttribute());
+        ae = new AtomicEvaluator(avgAttribute.getName());
         values = new ArrayList();
     }
 
@@ -80,5 +88,24 @@ public class PhysicalIncrementalAverage extends PhysicalIncrementalGroup {
 	GroupStatistics gs = (GroupStatistics) groupInfo;
 	double avg = gs.sum / gs.count;
         return doc.createTextNode(String.valueOf(avg));
+    }
+    
+    public Op copy() {
+        PhysicalIncrementalAverage op = new PhysicalIncrementalAverage();
+        op.initFrom(logicalGroupOperator);
+        return op;
+    }
+
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalIncrementalAverage))
+            return false;
+        if (o.getClass() != PhysicalIncrementalAverage.class)
+            return o.equals(this);
+        return logicalGroupOperator.equals(
+            ((PhysicalIncrementalAverage) o).logicalGroupOperator);
+    }
+
+    public int hashCode() {
+        return logicalGroupOperator.hashCode();
     }
 }

@@ -1,3 +1,4 @@
+/* $Id: XMLBScoring.java,v 1.5 2002/10/31 03:54:38 vpapad Exp $ */
 package niagara.query_engine;
 
 import niagara.xmlql_parser.op_tree.*;
@@ -8,37 +9,38 @@ import org.w3c.dom.*;
 import java.util.HashMap;
 
 public class XMLBScoring implements ExpressionIF {
-    static final String runscored = "$runsscored";
-    static final String bases = "$bases";
-    static final String strikeout = "$strikeouts";
-    static final String runallowed = "$runsallowed";
-    static final String win = "$wins";
-    static final String steal = "$steals";
-
-    private HashMap varTable;
+    static final String runscored = "runsscored";
+    static final String bases = "bases";
+    static final String strikeout = "strikeouts";
+    static final String runallowed = "runsallowed";
+    static final String win = "wins";
+    static final String steal = "steals";
 
     private Document doc;
     public XMLBScoring() {
         doc = DOMFactory.newDocument();
+        varTable = new HashMap();    
     }
 
-    public void setupVarTable(HashMap varTable) {
-	this.varTable = varTable;
+    HashMap varTable;
+    
+    public void setupSchema(TupleSchema ts) {
+        varTable.put(runscored, new Integer(ts.getPosition(runscored)));
+        varTable.put(bases, new Integer(ts.getPosition(bases)));
+        varTable.put(strikeout, new Integer(ts.getPosition(strikeout)));
+        varTable.put(runallowed, new Integer(ts.getPosition(runallowed)));
+        varTable.put(win, new Integer(ts.getPosition(win)));
+        varTable.put(steal, new Integer(ts.getPosition(steal)));
     }
 
     private int getInt(StreamTupleElement ste, String v) {
 	Node n = (Node) ste.getAttribute(((Integer) varTable.get(v)).intValue());
-	//try {
 	    if (n instanceof Text) {
 		return Integer.parseInt(n.getNodeValue());
 	    }
 	    else { // This better be instanceof Element
 		return Integer.parseInt(((Text) n.getChildNodes().item(0)).getNodeValue());
 	    }
-	    //}
-	//catch (Exception e) {
-	//  return 0;
-	//}
     }
 
     public Node processTuple(StreamTupleElement ste) {

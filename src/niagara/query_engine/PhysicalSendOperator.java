@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalSendOperator.java,v 1.4 2002/10/24 02:48:18 vpapad Exp $
+ * $Id: PhysicalSendOperator.java,v 1.5 2002/10/31 03:54:38 vpapad Exp $
  *
  */
 
@@ -23,8 +23,9 @@ import java.io.*;
  * the basic PhysicalOperator with the implementation of the Send
  * operator.
  */
-
-public class PhysicalSendOperator extends PhysicalOperator {
+// XXX vpapad: making this unoptimizable for the time being
+// to get CVS to compile
+public class PhysicalSendOperator extends UnoptimizablePhysicalOperator {
     // This is the array having information about blocking and non-blocking
     // streams
     //

@@ -85,21 +85,8 @@ public class PhysicalUnnest extends PhysicalOperator {
     }
 
     // get the physical prop according to the order of the collection
-    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+    public PhysicalProperty findPhysProp(PhysicalProperty[] input_phys_props) {
         return input_phys_props[0].copy();
-    }
-
-    public PhysicalProperty[] InputReqdProp(
-        PhysicalProperty PhysProp,
-        LogicalProperty inputLogProp,
-        int InputNo) {
-        if (PhysProp.equals(PhysicalProperty.ANY)) {
-            // no requirement for input
-            return new PhysicalProperty[] {
-            };
-        }
-        // otherwise require the same property for our input
-        return new PhysicalProperty[] { PhysProp };
     }
 
     public boolean equals(Object o) {
@@ -120,7 +107,7 @@ public class PhysicalUnnest extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
      */
-    public Cost FindLocalCost(
+    public Cost findLocalCost(
         ICatalog catalog,
         LogicalProperty[] InputLogProp) {
         double inputCard = InputLogProp[0].getCardinality();
@@ -200,18 +187,5 @@ public class PhysicalUnnest extends PhysicalOperator {
             // still want the tuple to live on.
             putTuple(inputTuple, streamId);
         }
-    }
-    
-    /**
-     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
-     */
-    public void constructTupleSchema(TupleSchema[] inputSchemas) {
-        // Fix the field position of the root attribute
-        this.scanField = inputSchemas[0].getPosition(root.getName());
-
-        inputTupleSchemas = inputSchemas;
-        // Add variable to outgoing schema
-        outputTupleSchema = inputSchemas[0].copy();
-        outputTupleSchema.addMapping(variable);
     }
 }

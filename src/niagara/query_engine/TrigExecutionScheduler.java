@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: TrigExecutionScheduler.java,v 1.6 2002/10/24 02:39:03 vpapad Exp $
+  $Id: TrigExecutionScheduler.java,v 1.7 2002/10/31 03:54:39 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -214,7 +214,7 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
                     //            dupOp) ? "Dup" : "Split")); 
 		    int outputStreamNo;
 		    if (operator instanceof dupOp) 
-			outputStreamNo=((dupOp)operator).getNumDestinationStreams();
+			outputStreamNo=((dupOp)operator).getNumberOfOutputs();
 		    else
 			outputStreamNo=((splitOp)operator).getNumDestinationStreams();
 		    outputStreams = new SinkTupleStream[outputStreamNo]; 

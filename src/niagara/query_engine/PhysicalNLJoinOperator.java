@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.6 2002/10/27 02:37:57 vpapad Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.7 2002/10/31 03:54:39 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -195,7 +195,7 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
         return true;
     }
 
-    public Cost FindLocalCost(ICatalog catalog, LogicalProperty[] inputLogProp) {
+    public Cost findLocalCost(ICatalog catalog, LogicalProperty[] inputLogProp) {
         double leftCard = inputLogProp[0].getCardinality();
         double rightCard = inputLogProp[1].getCardinality();
         float outputCard = logProp.getCardinality();
@@ -207,7 +207,7 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
         return cost;
     } 
 
-    public PhysicalProperty[] InputReqdProp(
+    public PhysicalProperty[] inputReqdProp(
         PhysicalProperty PhysProp,
         LogicalProperty InputLogProp,
         int InputNo) {
@@ -220,7 +220,7 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
      */
-    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+    public PhysicalProperty findPhysProp(PhysicalProperty[] input_phys_props) {
         // In terms of ordering, nested loops join has the properties
         // of its left input
         return input_phys_props[0].copy();
@@ -262,17 +262,6 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
         predEval.resolveVariables(inputTupleSchemas[1], 1);
     }
     
-    /**
-     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
-     */
-    public void constructTupleSchema(TupleSchema[] inputSchemas) {
-        // XXX vpapad: Does not handle projects yet!
-        inputTupleSchemas = inputSchemas;
-        outputTupleSchema = inputSchemas[0].copy();
-        for (int i = 0; i < inputSchemas[1].getLength(); i++) {
-            outputTupleSchema.addMapping(inputSchemas[1].getVariable(i));
-        }
-    }
     /**
      * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
      */

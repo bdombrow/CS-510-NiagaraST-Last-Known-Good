@@ -1,12 +1,9 @@
 /**
- * $Id: PhysicalDisplayOperator.java,v 1.5 2002/10/26 04:34:15 vpapad Exp $
+ * $Id: PhysicalDisplayOperator.java,v 1.6 2002/10/31 03:54:38 vpapad Exp $
  *
  */
 
 package niagara.query_engine;
-
-import java.util.ArrayList;
-import java.util.Vector;
 
 import org.w3c.dom.*;
 
@@ -17,6 +14,7 @@ import niagara.xmlql_parser.syntax_tree.*;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 /**
  * This is the <code>PhysicalDisplayOperator</code> that extends
@@ -66,6 +64,15 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
         return query_id.hashCode() ^ url_location.hashCode();
     }
 
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalDisplayOperator))
+            return false;
+        if (o.getClass() != PhysicalDisplayOperator.class)
+            return o.equals(this);
+        PhysicalDisplayOperator other = (PhysicalDisplayOperator) o;
+        return query_id.equals(other.query_id) && url_location.equals(other.url_location);
+    }
+    
     /**
      * This function processes a tuple element read from a source stream
      * when the operator is in a non-blocking state. This over-rides the
@@ -140,29 +147,9 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
     }
 
     /**
-     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
-     */
-    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
-        return PhysicalProperty.ANY;
-    }
-
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#InputReqdProp(PhysicalProperty, LogicalProperty, int)
-     */
-    public PhysicalProperty[] InputReqdProp(
-        PhysicalProperty physProp,
-        LogicalProperty InputLogProp,
-        int InputNo) {
-        if (physProp.equals(PhysicalProperty.ANY))
-            return new PhysicalProperty[] {};
-        else
-            // PhysicalDisplay cannot guarantee any specific property
-            return null;
-    }
-    /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(LogicalProperty, LogicalProperty[])
      */
-    public Cost FindLocalCost(
+    public Cost findLocalCost(
         ICatalog catalog,
         LogicalProperty[] InputLogProp) {
         // Setup costs for opening a connection, plus a fixed cost per transmitted tuple

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSumOperator.java,v 1.12 2002/10/27 03:08:04 vpapad Exp $
+  $Id: PhysicalSumOperator.java,v 1.13 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,6 +38,7 @@ import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.Op;
 
 
 /**
@@ -153,14 +154,7 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
     public void initFrom(LogicalOp logicalOperator) {
         super.initFrom(logicalOperator);
 	// Get the summing attribute of the sum logical operator
-	//
 	summingAttribute = ((SumOp) logicalOperator).getSummingAttribute();
-    }
-    
-    protected void opInitialize() {
-        ae = new AtomicEvaluator(summingAttribute.getName());
-        ae.resolveVariables(inputTupleSchemas[0], 0);
-        atomicValues = new ArrayList();
     }
 
 
@@ -173,11 +167,10 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
      * This function is called to initialize a grouping operator for execution
      * by setting up relevant structures etc.
      */
-
-    protected final void initializeForExecution () {
-
-	// Nothing to do
-	//
+    protected void initializeForExecution() {
+        ae = new AtomicEvaluator(summingAttribute.getName());
+        ae.resolveVariables(inputTupleSchemas[0], 0);
+        atomicValues = new ArrayList();
     }
 
 
@@ -270,9 +263,7 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
      */
 
     protected final Node constructEmptyResult () {
-
 	// Always return null
-	//
 	return null;
     }
 
@@ -292,16 +283,13 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 					  Object finalResult) {
 
 	// Create number of values and sum of values variables
-	//
 	int numValues = 0;
 	double sumValues = 0;
 
 	// If the partial result is not null, update with partial result stats
-	//
 	if (partialResult != null) {
 
 	    // Type cast partial result to a summing sufficient statistics
-	    //
 	    SummingSufficientStatistics partialStats =
 		(SummingSufficientStatistics) partialResult;
 
@@ -312,29 +300,22 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 	}
 	
 	// If the final result is not null, update with final result stats
-	//
 	if (finalResult != null) {
-
 	    // Type cast final result to a summing sufficient statistics
-	    //
 	    SummingSufficientStatistics finalStats =
 		(SummingSufficientStatistics) finalResult;
 
 	    // Update number of values and sum of values
-	    //
 	    numValues += finalStats.getNumberOfValues();
 	    sumValues += finalStats.getSumOfValues();
 	}
 
 	// If the number of values is 0, sum does not make sense
-	//
 	if (numValues == 0) {
-
 	    return null;
 	}
 
 	// Compute the sum
-	//
 	double sum = sumValues;
 
 	// Create a sum result element
@@ -350,4 +331,23 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 	return resultElement;
     }
 
+
+    public Op copy() {
+        PhysicalSumOperator op = new PhysicalSumOperator();
+        if (logicalGroupOperator != null)
+            op.initFrom(logicalGroupOperator);
+        return op;
+    }
+
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalSumOperator))
+            return false;
+        if (o.getClass() != PhysicalSumOperator.class)
+            return o.equals(this);
+        return logicalGroupOperator.equals(((PhysicalSumOperator) o).logicalGroupOperator);
+    }
+
+    public int hashCode() {
+        return logicalGroupOperator.hashCode();
+    }
 }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.11 2002/10/27 03:08:04 vpapad Exp $
+  $Id: PhysicalCountOperator.java,v 1.12 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,8 +35,7 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
-import niagara.optimizer.colombia.Attribute;
-import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.*;
 
 /**
  * This is the <code>PhysicalCountOperator</code> that extends the
@@ -48,7 +47,6 @@ import niagara.optimizer.colombia.LogicalOp;
  */
 
 public class PhysicalCountOperator extends PhysicalGroupOperator {
-
     ////////////////////////////////////////////////////////////////////
     // These are private nested classes used internally               //
     ////////////////////////////////////////////////////////////////////
@@ -125,13 +123,6 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
 	countingAttribute = ((CountOp) logicalOperator).getCountingAttribute();
     }
     
-    protected void opInitialize() {
-        ae = new AtomicEvaluator(countingAttribute.getName());
-        ae.resolveVariables(inputTupleSchemas[0], 0);
-        atomicValues = new ArrayList();
-    }
-
-
     /////////////////////////////////////////////////////////////////////////
     // These functions are the hooks that are used to implement specific   //
     // Count operator (specializing the group operator)                  //
@@ -143,8 +134,9 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
      */
 
     protected final void initializeForExecution () {
-	// Nothing to do
-	//
+        ae = new AtomicEvaluator(countingAttribute.getName());
+        ae.resolveVariables(inputTupleSchemas[0], 0);
+        atomicValues = new ArrayList();
     }
 
 
@@ -286,5 +278,26 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
 	// Return the result element
 	//
 	return resultElement;
+    }
+    
+    public Op copy() {
+        PhysicalCountOperator op = new PhysicalCountOperator();
+        if (logicalGroupOperator != null)
+            op.initFrom(logicalGroupOperator);
+        return op;
+    }
+    
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalCountOperator))
+            return false;
+        if (o.getClass() != PhysicalCountOperator.class)
+            return o.equals(this);
+        PhysicalCountOperator other = (PhysicalCountOperator) o;
+        return logicalGroupOperator.equals(other.logicalGroupOperator) &&
+        countingAttribute.equals(other.countingAttribute);
+    }
+
+    public int hashCode() {
+        return logicalGroupOperator.hashCode() ^ countingAttribute.hashCode();
     }
 }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalUnionOperator.java,v 1.7 2002/10/26 21:25:10 vpapad Exp $
+  $Id: PhysicalUnionOperator.java,v 1.8 2002/10/31 03:54:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -141,7 +141,7 @@ public class PhysicalUnionOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(LogicalProperty, LogicalProperty[])
      */
-    public Cost FindLocalCost(ICatalog catalog, LogicalProperty[] inputLogProp) {
+    public Cost findLocalCost(ICatalog catalog, LogicalProperty[] inputLogProp) {
         double trc = catalog.getDouble("tuple_reading_cost");
         double sumCards = 0;
         for (int i = 0; i < inputLogProp.length; i++)
@@ -157,29 +157,6 @@ public class PhysicalUnionOperator extends PhysicalOperator {
     }
 
     /**
-     * @see niagara.optimizer.colombia.PhysicalOp#InputReqdProp(PhysicalProperty, LogicalProperty, int)
-     */
-    public PhysicalProperty[] InputReqdProp(
-        PhysicalProperty PhysProp,
-        LogicalProperty InputLogProp,
-        int InputNo) {
-        if (PhysProp.equals(PhysicalProperty.ANY)) {
-            // no requirement for input
-            return new PhysicalProperty[] {};
-        }
-        // otherwise require the same property for our input
-        return new PhysicalProperty[] {PhysProp};
-    }
-    
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
-     */
-    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
-        // We cannot guarantee any physical property
-        return PhysicalProperty.ANY;
-    }
-
-    /**
      * @see java.lang.Object#equals(Object)
      */
     public boolean equals(Object o) {
@@ -192,15 +169,5 @@ public class PhysicalUnionOperator extends PhysicalOperator {
 
     public int hashCode() {
         return getArity();
-    }
-    
-    /**
-     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
-     */
-    public void constructTupleSchema(TupleSchema[] inputSchemas) {
-        assert inputSchemas.length == getArity();
-        
-        inputTupleSchemas = inputSchemas;
-        outputTupleSchema = inputSchemas[0].copy();
     }
 }
