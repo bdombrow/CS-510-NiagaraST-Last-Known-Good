@@ -1,5 +1,6 @@
 package niagara.query_engine;
 
+
 /*
  * $RCSfile:
  * $Revision:
