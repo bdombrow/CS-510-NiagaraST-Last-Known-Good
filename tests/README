@@ -2,3 +2,6 @@ To run the tests:
 
 Start the server.
 run runTests
+
+
+You can also run some simple unit tests by running make.
