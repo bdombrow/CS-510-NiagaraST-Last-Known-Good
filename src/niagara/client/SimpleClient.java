@@ -63,7 +63,8 @@ public class SimpleClient implements UIDriverIF {
 	    m_stop = System.currentTimeMillis();
 	    notify();
             if (!silent && m_start != 0) {
-                System.err.println("Total time: " + (m_stop - m_start) + "ms.");
+                System.err.println("Total time: " + 
+				   (m_stop - m_start)/1000.0 + " sec.");
 	    }
 	}
     }
@@ -280,12 +281,12 @@ public class SimpleClient implements UIDriverIF {
 	    return;
 	}
 
-        m_start = System.currentTimeMillis();
         Query q = null;
         if (explain) 
             q = new ExplainQPQuery(queryText);
         else
             q = QueryFactory.makeQuery(queryText);
+        m_start = System.currentTimeMillis();
         final int id =
             cm.executeQuery(q, Integer.MAX_VALUE);
         if (timeout > 0) {
