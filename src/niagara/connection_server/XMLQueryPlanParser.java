@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.25 2002/08/18 17:37:48 tufte Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.26 2002/09/09 16:37:28 ptucker Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -504,12 +504,13 @@ public class XMLQueryPlanParser {
 	    Vector leftvect = new Vector();
 	    Vector rightvect = new Vector();
 	    try {
-		RE re = new RE("\\$[a-z0-9]*");
+		RE re = new RE("\\$[a-zA-Z0-9]*");
 		REMatch[] all_left = re.getAllMatches(leftattrs);
 		REMatch[] all_right = re.getAllMatches(rightattrs);
 		for (int i = 0; i < all_left.length; i++) {
 		    leftvect.addElement(leftv.lookUp(all_left[i].toString()));
 		    rightvect.addElement(rightv.lookUp(all_right[i].toString()));
+
 		    schemaAttribute sa = (schemaAttribute)leftvect.get(0);
 		    if(sa == null) {
                        System.out.println("null sa");
@@ -824,6 +825,7 @@ public class XMLQueryPlanParser {
 	int numTLElts = Integer.parseInt(e.getAttribute("num_tl_elts"));
         boolean streaming = e.getAttribute("streaming").equalsIgnoreCase("yes");
         boolean prettyPrint = e.getAttribute("prettyprint").equalsIgnoreCase("yes");
+        boolean trace = e.getAttribute("trace").equalsIgnoreCase("yes");
 
 	int dataType = -1;
 	boolean found = false;
@@ -841,7 +843,7 @@ public class XMLQueryPlanParser {
 	FirehoseSpec fhspec = 
 	    new FirehoseSpec(port, host, dataType, descriptor, descriptor2,
 	                     numGenCalls, numTLElts, rate, streaming,
-			     prettyPrint);
+			     prettyPrint, trace);
 	
 	FirehoseScanOp op = new FirehoseScanOp();
 	op.setSelectedAlgoIndex(0);
@@ -1068,6 +1070,8 @@ public class XMLQueryPlanParser {
 		type = opType.GEQ;
 	    else if (op.equals("ne"))
 		type = opType.NEQ;
+	    else if (op.equals("contain"))
+		type = opType.CONTAIN;
 	    else // eq
 		type = opType.EQ;
 
