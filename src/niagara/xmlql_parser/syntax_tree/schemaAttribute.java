@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: schemaAttribute.java,v 1.2 2000/08/21 00:41:05 vpapad Exp $
+  $Id: schemaAttribute.java,v 1.3 2001/08/08 21:33:43 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -191,7 +191,7 @@ public class schemaAttribute {
 
 	public void dump(int depth) {
 		Util.genTab(depth);
-		System.out.println(streamid + " - " + "'$"+attrNumber+"'"+ "type = " + type);
+		dump();
 	}
 
 	/**
@@ -199,6 +199,15 @@ public class schemaAttribute {
 	 */
 
 	public void dump() {
-		System.out.println(streamid + " - " + "'$"+attrNumber+"'"+ "type = " + type);
+		System.out.print("Stream id: " + streamid + 
+		                 "Attr number: $" + attrNumber + 
+				 "Type: " + type + 
+				 "Path:  ");
+                if(path != null) {
+	            path.dump(0);
+		} else {
+                  System.out.print("null");
+		}
+		System.out.println();
 	}
 }

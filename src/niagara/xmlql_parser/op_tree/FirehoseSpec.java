@@ -19,6 +19,7 @@ public class FirehoseSpec {
     private int type;
     private String descriptor;
     private int iters;
+    private int doc_count;
 
     public FirehoseSpec() {}
 
@@ -39,13 +40,14 @@ public class FirehoseSpec {
      */
     public FirehoseSpec(int _listenerPortNum, String _listenerHostName,
 			long _rate, int _type, String _descriptor,
-			int _iters) {
+			int _iters, int _doc_count) {
 	listenerPortNum = _listenerPortNum;
 	listenerHostName = _listenerHostName;
 	rate = _rate;
 	type = _type;
 	descriptor = _descriptor;
 	iters = _iters;
+	doc_count = _doc_count;
 	return;
     }
 
@@ -73,6 +75,10 @@ public class FirehoseSpec {
 	iters = _iters;
     }
     
+    public void setDocCount(int _doc_count) {
+	doc_count = _doc_count;
+    }
+
     public int getListenerPortNum() {
 	return listenerPortNum;
     }
@@ -97,6 +103,10 @@ public class FirehoseSpec {
 	return iters;
     }
 
+    public int getDocCount() {
+	return doc_count;
+    }
+
     public void dump(PrintStream os) {
 	os.println("Firehose Specification: ");
 	os.println("  Listener Port " + String.valueOf(listenerPortNum) +
@@ -111,6 +121,7 @@ public class FirehoseSpec {
 	os.println("  Rate " + String.valueOf(rate) +
 		   ", Type " + typeString +
 		   ", Descriptor " + descriptor +
-		   ", Iterations " + String.valueOf(iters));
+		   ", Iterations " + String.valueOf(iters) +
+		   ", Doc Count " + String.valueOf(doc_count));
     }
 }

@@ -32,6 +32,7 @@ JFLEXLIB    = $(LIBDIR)/JFlex.zip
 CLASSPATH  = .:$(NIAGROOT)/src:$(BASELIB):$(JFLEXLIB):$(CUPLIB):$(PARSELIB):$(COMMONLIB)
 
 JAVAFLAGS  = -classpath $(CLASSPATH)
+DEBUG = 
 #############################################################################
 
 
@@ -76,7 +77,7 @@ OBJ = EscapedUnicodeReader.class   \
 all: sym.class Scanner.class construct_parser/ConstructParser.class re_parser/REParser.class QueryParser.class $(OBJ)
 
 %.class: %.java
-	$(JAVAC) $(JAVAFLAGS) $<
+	$(JAVAC) $(JAVAFLAGS) $(DEBUG) $<
 
 # Generate QueryParser.java and sym.java
 QueryParser.java: xmlql.cup

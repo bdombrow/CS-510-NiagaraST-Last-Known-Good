@@ -32,7 +32,6 @@ SERVLET      = $(LIBDIR)/javax.servlet.jar
 export SAX   = $(LIBDIR)/aelfred.jar
 
 
-
 CLASSPATH  = .:$(NIAGROOT)/src:$(PARSELIB):$(BASELIB):$(CUPLIB):$(ASTLIB):$(COMMONLIB):$(NIAGROOT)/src/$(FHOSE):$(REGEXPLIB):$(JETTY):$(SERVLET):$(SAX)
 JAVAFLAGS  = -classpath $(CLASSPATH)
 
