@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.3 2003/02/26 06:35:33 tufte Exp $
+  $Id: PageStream.java,v 1.4 2003/03/03 08:26:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -91,13 +91,16 @@ public class PageStream {
     // for debugging identification
     private String name;
 
+    // instrumentation code
+    private static boolean INSTRUMENT = false;
+    private int timeouts;
     //private int existingDataPagesUsed;
     //private int dataPagesAllocd;
     //private int existingCtrlPagesUsed;
     //private int ctrlPagesAllocd;
-    //private int notifiedConsumer;
-    //private int notifiedProducer;
-    //private int notifiedOnCtrl;
+    private int notifiedConsumer;
+    private int notifiedProducer;
+    private int notifiedOnCtrl;
 
     /**
      *  Constructor
@@ -111,13 +114,18 @@ public class PageStream {
 	eos = false;
 	shutdown = false;
 	this.name = name;
-	//existingDataPagesUsed = 0;
-	//dataPagesAllocd = 0;
-	//existingCtrlPagesUsed = 0;
-	//ctrlPagesAllocd = 0;
-	//notifiedConsumer = 0;
-	//notifiedProducer = 0;
-	//notifiedOnCtrl = 0;
+
+	if(INSTRUMENT) {
+	    // instrumentation
+	    timeouts = 0;
+	    //existingDataPagesUsed = 0;
+	    //dataPagesAllocd = 0;
+	    //existingCtrlPagesUsed = 0;
+	    //ctrlPagesAllocd = 0;
+	    notifiedConsumer = 0;
+	    notifiedProducer = 0;
+	    notifiedOnCtrl = 0;
+	}
     }  
 
     // ----------------------------------------------------------------------
@@ -173,9 +181,16 @@ public class PageStream {
 	// got to run
 	
 	if(toConsumerQueue.isEmpty()) {
-	    wait(timeout);
-	    if(toConsumerQueue.isEmpty()) {
-		// I timed out...
+	    if(timeout > 0) {
+		wait(timeout);
+		if(toConsumerQueue.isEmpty()) {
+		    // I timed out...
+		    if(INSTRUMENT)
+			timeouts++;
+		    return null;
+		}
+	    } else {
+		// caller does not want to wait on this stream
 		return null;
 	    }
 	    // else must be something in queue, go on
@@ -200,7 +215,8 @@ public class PageStream {
 	}
 
 	if(notifyProducer) {
-	    //notifiedProducer++;
+	    if(INSTRUMENT)
+		notifiedProducer++;
 	    notify();
 	}
 
@@ -250,7 +266,8 @@ public class PageStream {
 	//		   CtrlFlags.name[ctrlMsgId]);
 	toProducerQueue.put(getCtrlPage(ctrlMsgId, ctrlMsgStr));
 	if(notify) {
-	    //notifiedOnCtrl++;
+	    if(INSTRUMENT)
+		notifiedOnCtrl++;
 	    notify();
 	}
 	return CtrlFlags.NULLFLAG; // indicates success
@@ -356,7 +373,11 @@ public class PageStream {
 	// be returned).
 	while (toConsumerQueue.isFull() &&
 	       toProducerQueue.isEmpty()) {
-		wait();
+	    // note - I think that if I get a control message from
+	    // "below" that is if the producer gets a control message
+	    // from the operator below it in the control tree, it
+	    // will not wake up
+	    wait();
 	}
 
 	// If there is a control element in the down stream buffer, 
@@ -389,7 +410,8 @@ public class PageStream {
 	    toConsumerQueue.put(page);
 
 	    if(notifyConsumer) {
-		//notifiedConsumer++;
+		if(INSTRUMENT)
+		    notifiedConsumer++;
 		notify();
 	    }
 	    return CtrlFlags.NULLFLAG; // indicates successful put
@@ -408,15 +430,21 @@ public class PageStream {
 	if (eos) 
 	    throw new PEException("KT end of stream received twice");
 	eos = true;
-	//System.out.println("Existing Data Pages Used " +existingDataPagesUsed);
-	//System.out.println("Data Pages Allocd " + dataPagesAllocd);
-	//System.out.println("Existing Ctrl Pages Used " +existingCtrlPagesUsed);
-	//System.out.println("Ctrl Pages Used " + ctrlPagesAllocd);
-	//System.out.println(name);
-	//System.out.println("notified consumer " + notifiedConsumer);
-	//System.out.println("notified producer " + notifiedProducer);
-	//System.out.println("notified on control " + notifiedOnCtrl);
-	//System.out.println();
+	if(INSTRUMENT) {
+	    System.out.println("PageStream: " + name + " had " + timeouts +
+			       " Timeouts ");
+	    //System.out.println("Existing Data Pages Used " 
+	    // +existingDataPagesUsed);
+	    //System.out.println("Data Pages Allocd " + dataPagesAllocd);
+	    //System.out.println("Existing Ctrl Pages Used " 
+	    //+existingCtrlPagesUsed);
+	    //System.out.println("Ctrl Pages Used " + ctrlPagesAllocd);
+	    //System.out.println(name);
+	    System.out.println("notified consumer " + notifiedConsumer);
+	    System.out.println("notified producer " + notifiedProducer);
+	    System.out.println("notified on control " + notifiedOnCtrl);
+	    //System.out.println();
+	}
     }
 
     // to be called by SinkTupleStream ONLY

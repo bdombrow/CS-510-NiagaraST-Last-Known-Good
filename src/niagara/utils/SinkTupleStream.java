@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.5 2003/02/26 06:35:33 tufte Exp $
+  $Id: SinkTupleStream.java,v 1.6 2003/03/03 08:26:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -250,20 +250,25 @@ public final class SinkTupleStream {
      * was encountered during buffer flushing
      */
     // only ctrl flag returned by pageStream.putPageToSink is GET_PARTIAL
-    private int flushBuffer() throws ShutdownException, InterruptedException {
-	int ctrlFlag = pageStream.putPageToSink(buffer);
-	if(ctrlFlag == CtrlFlags.GET_PARTIAL && reflectPartial) {
-	    reflectPartial(); // this will always put the buffer to the sink
-	    ctrlFlag = CtrlFlags.NULLFLAG;
+    public int flushBuffer() throws ShutdownException, InterruptedException {
+	if(buffer.isEmpty() && buffer.getFlag() == CtrlFlags.NULLFLAG) {
+	    // don't flush an empty buffer...
+	    return CtrlFlags.NULLFLAG;
+	} else {
+	    int ctrlFlag = pageStream.putPageToSink(buffer);
+	    if(ctrlFlag == CtrlFlags.GET_PARTIAL && reflectPartial) {
+		reflectPartial(); // this will always put the buffer to the sink
+		ctrlFlag = CtrlFlags.NULLFLAG;
+	    }
+	    
+	    if(ctrlFlag == CtrlFlags.NULLFLAG) {
+		// success
+		// get new empty buffer to write in
+		buffer = pageStream.getTuplePage();
+		buffer.startPutMode();
+	    }
+	    return ctrlFlag;
 	}
-
-	if(ctrlFlag == CtrlFlags.NULLFLAG) {
-	    // success
-	    // get new empty buffer to write in
-	    buffer = pageStream.getTuplePage();
-	    buffer.startPutMode();
-	}
-	return ctrlFlag;
     }
 
     /**

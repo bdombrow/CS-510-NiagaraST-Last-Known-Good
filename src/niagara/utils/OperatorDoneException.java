@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ShutdownException.java,v 1.3 2003/03/03 08:26:15 tufte Exp $
+  $Id: OperatorDoneException.java,v 1.1 2003/03/03 08:26:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,24 +29,18 @@
 package niagara.utils;
 
 /**
- * ShutdownException is thrown when a SHUTDOWN message is received
- * on a stream - should propagate all the way up to PhysicalOperator.
- * execute, where it is handled
- *
- * Shutdown should be used when query is shut down due to some
- * execution problem, user error, or client request.
+ * OperatorDoneException is thrown when an operator is done.
+ * This does not cause an error message to be propagated 
+ * to the client, rather operators below this operator are
+ * shutdown and this operators output streams are closed
  *
  * @version 1.0
  *
  */
 
-public class ShutdownException extends Exception {
+public class OperatorDoneException extends Exception {
 
-    public ShutdownException() {
-	super("Query was shut down");
+    public OperatorDoneException() {
     }
 
-    public ShutdownException(String msg) {
-	super(msg);
-    }
 }
