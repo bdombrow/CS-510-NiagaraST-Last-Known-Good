@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.7 2002/09/10 04:18:38 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.8 2002/10/24 01:54:26 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,6 +35,7 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
+import niagara.optimizer.colombia.*;
 
 /**
  * This is the <code>PhysicalNestOperator</code> that extends the
@@ -69,10 +69,6 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
     // since we can longer create an element without a parent document
     Document resultDoc;
 
-    ////////////////////////////////////////////////////////////////////
-    // These are the methods of the class                             //
-    ////////////////////////////////////////////////////////////////////
-
     /**
      * This is the constructor for the PhysicalNestOperator class that
      * initializes it with the appropriate logical operator, source streams,
@@ -91,12 +87,7 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 				SinkTupleStream[] sinkStreams,
 				Integer responsiveness) {
 
-	// Call the constructor of the super class
-	//
-	super(logicalOperator,
-	      sourceStreams,
-	      sinkStreams,
-	      responsiveness);
+        plugInStreams(sourceStreams, sinkStreams, responsiveness);
 
 	// Get the result template of the nest logical operator
 	//
@@ -485,4 +476,66 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 	return result;
     }
 
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
+     */
+    public final void initFrom(LogicalOp op) {
+      // Do nothing, unoptimizable operators should 
+      // get initialized in their constructors
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
+     */
+    public final PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+        throw new PEException("Optimization is not supported for this operator");
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
+     */
+    public final Cost FindLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] InputLogProp) {
+        throw new PEException("Optimization is not supported for this operator");
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#InputReqdProp(PhysicalProperty, LogicalProperty, int)
+     */
+    public final PhysicalProperty[] InputReqdProp(
+        PhysicalProperty PhysProp,
+        LogicalProperty InputLogProp,
+        int InputNo) {
+        throw new PEException("Optimization is not supported for this operator");
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public final Op copy() {
+        throw new PEException("Optimization is not supported for this operator");
+    }
+    
+    public boolean equals(Object other) {
+        return this == other;
+    }
+    
+    /**
+     * @see niagara.query_engine.PhysicalOperator#constructTupleSchema(TupleSchema[])
+     */
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        throw new PEException("Optimization is not supported for this operator");
+    }
+    
+    public TupleSchema getTupleSchema() {
+        throw new PEException("Optimization is not supported for this operator");
+    }    
 }
