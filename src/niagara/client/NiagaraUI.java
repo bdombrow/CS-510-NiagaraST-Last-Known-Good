@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagaraUI.java,v 1.5 2000/07/09 05:39:46 vpapad Exp $
+  $Id: NiagaraUI.java,v 1.6 2002/10/12 20:10:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -564,79 +564,74 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
     }    
 
     public synchronized void actionPerformed( ActionEvent e ) {
-        String actionCommand = e.getActionCommand();
-
-	// File Menu: Exit
-        if ( actionCommand.equals("Exit") ) {
-	    exitUI();
-	}
-	else 
-	// File Menu: Open Query
-        if ( actionCommand.equals("Open Query...") ) {
-            FileDialog openFileDialog = new FileDialog(this, "Open Query", FileDialog.LOAD);
-            openFileDialog.setDirectory(".");
-            openFileDialog.setFile("*.qry");
-            openFileDialog.setFilenameFilter(new queryFileFilter("qry"));
-            openFileDialog.setModal(true);
-            openFileDialog.setVisible(true);
-            String queryFileName = openFileDialog.getDirectory() + System.getProperty("file.separator") + openFileDialog.getFile();
-
+	try {
+	    String actionCommand = e.getActionCommand();
 	    
-	    if ( queryFileName == null || queryFileName.equals("") ) return;
-
-	    try {
-		String queryFromFile = new String();
-	    	String lineFromFile;
-	 	BufferedReader queryOpenFile = new BufferedReader(new FileReader(queryFileName));
-	    	while ( (lineFromFile = queryOpenFile.readLine()) != null ) {
-		    queryFromFile += lineFromFile;
-		    queryFromFile += "\n";
-		}
+	    // File Menu: Exit
+	    if ( actionCommand.equals("Exit") ) {
+		exitUI();
+	    }
+	    else 
+		// File Menu: Open Query
+		if ( actionCommand.equals("Open Query...") ) {
+		    FileDialog openFileDialog = new FileDialog(this, "Open Query", FileDialog.LOAD);
+		    openFileDialog.setDirectory(".");
+		    openFileDialog.setFile("*.qry");
+		    openFileDialog.setFilenameFilter(new queryFileFilter("qry"));
+		    openFileDialog.setModal(true);
+		    openFileDialog.setVisible(true);
+		    String queryFileName = openFileDialog.getDirectory() + System.getProperty("file.separator") + openFileDialog.getFile();
+		    
+		    
+		    if ( queryFileName == null || queryFileName.equals("") ) return;
+		    
+		    String queryFromFile = new String();
+		    String lineFromFile;
+		    BufferedReader queryOpenFile = new BufferedReader(new FileReader(queryFileName));
+		    while ( (lineFromFile = queryOpenFile.readLine()) != null ) {
+			queryFromFile += lineFromFile;
+			queryFromFile += "\n";
+		    }
 		    queryText.setText(queryFromFile);
 		    queryText.setCaretPosition(0);
-	    } catch ( java.io.FileNotFoundException eFileNotFound ) { System.out.println("IO Exception: File Not Found"); }
-              catch ( java.io.IOException eIO ) { System.out.println("IO Exception: Open File"); }
-       }
-	else 
-	// File Menu: Save Query
-       if ( actionCommand.equals("Save Query...") ) {
-	   FileDialog saveFileDialog = new FileDialog(this, "Save Query", FileDialog.SAVE);
-	   saveFileDialog.setDirectory(".");
-           saveFileDialog.setFile("*.qry");
-           saveFileDialog.setFilenameFilter(new queryFileFilter("qry"));
-           saveFileDialog.setModal(true);
-           saveFileDialog.setVisible(true);
-           String queryFileName = saveFileDialog.getFile();
-	   
-	   if ( queryFileName == null || queryFileName.equals("") ) return;
-
-	   try {
-	       BufferedWriter querySaveFile = new BufferedWriter(new FileWriter(queryFileName));
-	       String queryOut = new String(queryText.getText());	       
-	       querySaveFile.write(queryOut,0,queryOut.length());
-	       querySaveFile.flush();
-	       querySaveFile.close();
-	   } catch ( java.io.IOException eIO ) { System.out.println("IO Exception: Save File"); }
-	   
-       }
-       else
-       // QBE button action
-       if ( actionCommand.equals(qbeButton.getText()) ) {
-	   StringBuffer result = new StringBuffer();
-	   XmlInterface qbePopup = new XmlInterface(null,true,result,dtdList,this.qeIF);
-	   if ( !result.toString().equals("") )
-	       queryText.setText(result.toString());
-	   queryText.setCaretPosition(0);
-	   
-	   //qbePopup.dispose();
-       }
-       else
-	   // Pause/Resume button action
-       if ( actionCommand.equals(pauseButton.getText()) ) {
-	   if ( pauseButton.getText().equals("Pause") ) {
-	       int activeQuery;
-	       if ( (activeQuery = getActiveQuery()) > 0 ) {
-		   if ( qeIF.isResultFinal(activeQuery) ) {
+	}
+		else 
+		    // File Menu: Save Query
+		    if ( actionCommand.equals("Save Query...") ) {
+			FileDialog saveFileDialog = new FileDialog(this, "Save Query", FileDialog.SAVE);
+			saveFileDialog.setDirectory(".");
+			saveFileDialog.setFile("*.qry");
+			saveFileDialog.setFilenameFilter(new queryFileFilter("qry"));
+			saveFileDialog.setModal(true);
+			saveFileDialog.setVisible(true);
+			String queryFileName = saveFileDialog.getFile();
+			
+			if ( queryFileName == null || queryFileName.equals("") ) return;
+			
+			BufferedWriter querySaveFile = new BufferedWriter(new FileWriter(queryFileName));
+			String queryOut = new String(queryText.getText());	       
+			querySaveFile.write(queryOut,0,queryOut.length());
+			querySaveFile.flush();
+			    querySaveFile.close();
+		    }
+		    else
+			// QBE button action
+			if ( actionCommand.equals(qbeButton.getText()) ) {
+			    StringBuffer result = new StringBuffer();
+			    XmlInterface qbePopup = new XmlInterface(null,true,result,dtdList,this.qeIF);
+			    if ( !result.toString().equals("") )
+				queryText.setText(result.toString());
+			    queryText.setCaretPosition(0);
+			    
+			    //qbePopup.dispose();
+			}
+			else
+			    // Pause/Resume button action
+			    if ( actionCommand.equals(pauseButton.getText()) ) {
+				if ( pauseButton.getText().equals("Pause") ) {
+				    int activeQuery;
+				    if ( (activeQuery = getActiveQuery()) > 0 ) {
+					if ( qeIF.isResultFinal(activeQuery) ) {
 		       Toolkit.getDefaultToolkit().beep();
 		       JOptionPane.showMessageDialog(null,"All Results for Query Obtained","Niagara",JOptionPane.INFORMATION_MESSAGE);
 		   }
@@ -820,6 +815,13 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
 		    queryText.setText(result.toString());
 		    queryText.setCaretPosition(0);
 	       }
+	} catch (ClientException ex) {
+	    System.err.println("NiagaraUI got exception: " + ex.getMessage());
+	} catch (FileNotFoundException ex) {
+	    System.err.println("NiagaraUI got exception: " + ex.getMessage());
+	} catch (IOException ex) {
+	    System.err.println("NiagaraUI got exception: " + ex.getMessage());
+	}
     }
 
     public void clearInputArea() {
@@ -920,7 +922,7 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
 	statusText.setText("All results for Query "+id+" have arrived");	
     }
 
-    public void errorMessage(String err) { 
+    public void errorMessage(int id, String err) { 
 	Toolkit.getDefaultToolkit().beep();
 	JOptionPane.showMessageDialog(contentPane,err,"Error",JOptionPane.ERROR_MESSAGE);
     }

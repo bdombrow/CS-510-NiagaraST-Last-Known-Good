@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DNDTree.java,v 1.1 2000/05/30 21:03:25 tufte Exp $
+  $Id: DNDTree.java,v 1.2 2002/10/12 20:10:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -306,7 +306,7 @@ implements DropTargetListener,DragSourceListener, DragGestureListener {
 			boolean hasFocus) {
 	    
 			// Default bullet for tree nodes
-			Image image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("blueball.gif"));
+			Image image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/blueball.gif"));
 			xmlIcon = new ImageIcon(image);
 	    
 			super.getTreeCellRendererComponent(
@@ -343,12 +343,12 @@ implements DropTargetListener,DragSourceListener, DragGestureListener {
 		
 				// Set projection status
 				if ( xmlNode.isProjected() ) {
-					image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("redball.gif"));
+					image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/redball.gif"));
 					xmlIcon = new ImageIcon(image);
 				}
 				else
 					if( xmlNode.isAttribute() ) {
-						image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("yellowball.gif"));
+						image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/yellowball.gif"));
 						xmlIcon = new ImageIcon(image);
 					}
 		

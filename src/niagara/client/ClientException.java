@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UIDriverIF.java,v 1.2 2002/10/12 20:10:25 tufte Exp $
+  $Id: ClientException.java,v 1.1 2002/10/12 20:10:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -26,26 +26,23 @@
 **********************************************************************/
 
 
+package niagara.client;
+
 /**
- * This interface is implemented by the GUI
+ * ClientException is a generic exception used on the client
+ *
+ * @version 1.0
  *
  */
 
-package niagara.client;
+public class ClientException extends Exception {
 
-public interface UIDriverIF {
+   ClientException() {
+	super("ClientException");
+   }
 
-    /** Notifies the UI that new results for query have arrived
-     *  @param query id
-     */
-    public void notifyNew(int id);
+   ClientException(String msg) {
+	super("ClientException " + msg);
+   }
 
-    /** Notifies the UI that all the results for query have arrived
-     *  @param query id
-     */
-    public void notifyFinalResult(int id);
-
-    /** Displays error messages
-     */
-    public void errorMessage(int id, String err);
 }

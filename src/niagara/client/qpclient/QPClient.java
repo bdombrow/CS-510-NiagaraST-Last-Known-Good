@@ -23,6 +23,8 @@ import java.io.*;
 import java.util.Iterator;
 import htmllayout.*;
 
+import niagara.client.ClientException;
+
 public class QPClient extends JFrame 
     implements ActionListener, SimpleClient.ResultsListener {
     QPGraphController qgc;
@@ -241,14 +243,15 @@ public class QPClient extends JFrame
     }
 
     public void run() {
-	if (results == null) {
-	    jta = new JTextArea(20, 40);
-	    results = new JFrame("Results: " + current_file);
-	    results.setLocation(200, 200);
-	    jsp = new JScrollPane(jta);
-	    jsp.setPreferredSize(new Dimension(500, 300));
-	    jta.setEditable(false);
-	    again = new JButton("Run again!");
+	try {
+	    if (results == null) {
+		jta = new JTextArea(20, 40);
+		results = new JFrame("Results: " + current_file);
+		results.setLocation(200, 200);
+		jsp = new JScrollPane(jta);
+		jsp.setPreferredSize(new Dimension(500, 300));
+		jta.setEditable(false);
+		again = new JButton("Run again!");
 	    again.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 			run();
@@ -258,19 +261,22 @@ public class QPClient extends JFrame
 	    c.setLayout(new HtmlLayout("<table rows=2 cols=1><tr><td vert=max component=ta><tr><td horz=center component=again>"));
 	    c.add("ta", jsp);
 	    c.add("again", again);
+	    }
+	    again.setEnabled(false);
+	    jta.setText("");
+	    
+	    StringWriter sw = new StringWriter();
+	    PrintWriter pw = new PrintWriter(sw);
+	    root_node.save(pw, gp.getGraphView());
+	    
+	    SimpleClient sc = new SimpleClient(server_host);
+	    sc.addResultsListener(this);
+	    sc.processQuery(sw.toString());
+	    results.pack();
+	    results.setVisible(true);
+	} catch (ClientException ce) {
+	    // nothing to do...
 	}
-	again.setEnabled(false);
-	jta.setText("");
-
-	StringWriter sw = new StringWriter();
-	PrintWriter pw = new PrintWriter(sw);
-	root_node.save(pw, gp.getGraphView());
-
-	SimpleClient sc = new SimpleClient(server_host);
-	sc.addResultsListener(this);
-	sc.processQuery(sw.toString());
-	results.pack();
-	results.setVisible(true);
     }
     
     static String server_host = "localhost";

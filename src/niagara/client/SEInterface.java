@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SEInterface.java,v 1.1 2000/05/30 21:03:25 tufte Exp $
+  $Id: SEInterface.java,v 1.2 2002/10/12 20:10:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -391,7 +391,7 @@ public class SEInterface extends JDialog implements ActionListener {
 						      int row,
 						      boolean hasFocus) {
 	    
-	    Image image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("blueball.gif"));
+	    Image image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/blueball.gif"));
 	    seIcon = new ImageIcon(image);
 	    
 	    super.getTreeCellRendererComponent(
@@ -412,7 +412,7 @@ public class SEInterface extends JDialog implements ActionListener {
 		    setText(seNode.getName());
 
 		if ( seNode.isChecked() ) {
-		    image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("redball.gif"));
+		    image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("images/redball.gif"));
 		    seIcon = new ImageIcon(image);
 		}
 	    }

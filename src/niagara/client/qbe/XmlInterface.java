@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: XmlInterface.java,v 1.1 2000/05/30 21:03:25 tufte Exp $
+  $Id: XmlInterface.java,v 1.2 2002/10/12 20:10:28 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -291,11 +291,11 @@ class XmlInterfaceDialog extends JDialog
 	// icons..  NOTE: Location is hardcoded!!
 	//
 	try{
-	    openIcon   = new ImageIcon("niagara/client/arrowopened.gif");
-	    closeIcon  = new ImageIcon("niagara/client/arrowclosed.gif");
-	    blueIcon   = new ImageIcon("niagara/client/blueball.gif");
-	    redIcon    = new ImageIcon("niagara/client/redball.gif");
-	    yellowIcon = new ImageIcon("niagara/client/yellowball.gif");	    
+	    openIcon   = new ImageIcon("niagara/client/images/arrowopened.gif");
+	    closeIcon  = new ImageIcon("niagara/client/images/arrowclosed.gif");
+	    blueIcon   = new ImageIcon("niagara/client/images/blueball.gif");
+	    redIcon    = new ImageIcon("niagara/client/images/redball.gif");
+	    yellowIcon = new ImageIcon("niagara/client/images/yellowball.gif");	    
 	} catch (Exception e){
 	    e.printStackTrace();
 	}

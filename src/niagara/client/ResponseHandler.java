@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseHandler.java,v 1.1 2000/05/30 21:03:24 tufte Exp $
+  $Id: ResponseHandler.java,v 1.2 2002/10/12 20:10:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -531,7 +531,7 @@ class ResponseHandler extends HandlerBase
 				reg.addResults(lid, sid, nList);
 				reg.markFinal(lid);
 				// notify
-				ui.errorMessage("RH: Parse Error");
+				ui.errorMessage(lid, "RH: Parse Error");
 			}
 			else // General Error
 			{
@@ -543,7 +543,7 @@ class ResponseHandler extends HandlerBase
 				reg.addResults(lid, sid, l);
 				reg.markFinal(lid);
 				// notify
-				ui.errorMessage(" Error. Received "+rtype);
+				ui.errorMessage(lid, " Error. Received "+rtype);
 			}
 		}
 	

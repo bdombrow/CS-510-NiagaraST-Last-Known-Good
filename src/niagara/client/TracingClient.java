@@ -21,7 +21,7 @@ public class TracingClient extends SimpleClient {
 	firstTime = true;
     }
 
-    public void processQuery(String queryText) {
+    public void processQuery(String queryText) throws ClientException {
 	if (firstTime)
 	    firstTime = false;
 	else

@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class SimpleClient implements UIDriverIF {
-    ConnectionManager cm;
+    protected ConnectionManager cm;
     static final int MAX_QUERY_LEN = 10000;
     static String queryFilePath =
         "/disk/hopper/projects/disc/niagara/query_files/";
@@ -58,10 +58,17 @@ public class SimpleClient implements UIDriverIF {
         this.acr = acr;
     }
     
-    public synchronized void queryDone() {
-      m_stop = System.currentTimeMillis();
-      notify();
-      System.err.println("Total time: " + (m_stop - m_start) + "ms.");
+    public void queryDone() {
+	// KT-VPAPAD - debug statements for client deadlock error
+	//System.out.println("DLDEBUG Thread " + Thread.currentThread().getName() + " requesting mutex on SimpleClient (queryDone)");
+	synchronized(this) {
+	    //System.out.println("DLDEBUG Thread " + Thread.currentThread().getName() + " has mutex on SimpleClient (queryDone)");
+	    m_stop = System.currentTimeMillis();
+	    notify();
+	    System.err.println("Total time: " + (m_stop - m_start) + "ms.");
+	}
+	//System.out.println("DLDEBUG Thread " + Thread.currentThread().getName() + " released mutex on SimpleClient (queryDone)");
+
     }
     
     public void notifyFinalResult(int id) {
@@ -73,11 +80,18 @@ public class SimpleClient implements UIDriverIF {
         }
     }
 
-    public void errorMessage(String err) {
-	queryDone();
-        if (resultListeners.size() == 0)
-            System.err.println("SimpleClient error:" + err);
+    public void errorMessage(int id, String err) {
+        if (resultListeners.size() == 0) {
+	    System.err.println();
+            System.err.println("SimpleClient Error: " + err);
+	    // Wake up main thread which is holding the mutex on this 
+	    // object, must wake up otherwise we deadlock in queryDone
+	    // main thread may be waiting to get the server id
+	    cm.queryError(id);
+	    queryDone(); // prints time used
+	}
         else {
+	    queryDone();
             for (int i = 0; i < resultListeners.size(); i++) {
                 ((ResultsListener) resultListeners.get(i)).notifyError(err);
             }
@@ -166,15 +180,21 @@ public class SimpleClient implements UIDriverIF {
                     query = query + line;
                     line = br.readLine();
                 } while (line != null);
-		try {
-		    synchronized(this) {
-                        processQuery(query);
-		        wait();
+		// kt - don't think this needs to be synch
+		// I removed it - hope this doesn't cause trouble!
+		// if it is synchronized, causes deadlock on error
+		//System.out.println("DLDEBUG: Thread " + Thread.currentThread().getName() + " requesting mutex on SimpleClient (processQueries)");
+		synchronized(this) {
+		    //System.out.println("DLDEBUG: Thread " + Thread.currentThread().getName() + " got mutex on SimpleClient (processQueries)");
+		    try {
+			processQuery(query);
+		    } catch (ClientException e) {
+			// do nothing - error is printed elsewhere
 		    }
-		} catch (InterruptedException e) {
-			System.err.println("Unexpected interruption");
+		    //System.out.println("DLDEBUG: Thread " + Thread.currentThread().getName() + " releasing mutex on SimpleClient (processQueries)");
+		    wait();
 		}
-		System.exit(-1);
+		System.exit(0);
             } else {
 		int nQueries = queryFiles.size();
                 for (int i = 0; i < nQueries; i++) {
@@ -183,63 +203,34 @@ public class SimpleClient implements UIDriverIF {
                     int reps = ((Integer) repetitions.get(i)).intValue();
                     int delay = ((Integer) delays.get(i)).intValue();
                     int wait = ((Integer) waits.get(i)).intValue();
-                    try {
-                        for (int j = 0; j < reps; j++) {
-                            if (j > 0 && delay > 0)
-                                Thread.sleep(delay);
-                            synchronized (this) {
-                                processQuery(query);
-                                wait();
-                            }
-                        }
-                        if (i < nQueries - 1 && wait > 0)
-                            Thread.sleep(wait);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException("Unexpected interruption");
-                    }
+		    for (int j = 0; j < reps; j++) {
+			if (j > 0 && delay > 0)
+			    Thread.sleep(delay);
+			// kt - don't think this needs to be synch
+			// I removed it - hope this doesn't cause trouble!
+			// if it is synchronized, causes deadlock on error
+			synchronized (this) {
+			    try {
+				processQuery(query);
+			    } catch (ClientException ce) {
+				// do nothing - error reported elsewhere
+			    }
+			    wait();
+			}
+		    }
+		    if (i < nQueries - 1 && wait > 0)
+			Thread.sleep(wait);
                 }
                 System.exit(0);
             }
-            /* OLD Shell stuff - leave please, someday I will make this work - KT
-             * else {
-             *  char cbuf[] = new char[MAX_QUERY_LEN];
-             *  boolean stop = false;
-             *  StreamTokenizer stdIn =
-             *      new StreamTokenizer(new 
-             *      BufferedReader(new InputStreamReader(System.in)));
-             *  stdIn.eolIsSignificant(true);
-             *  int tt; * token type *
-             *  while(!stop) {
-             *    System.out.println("Query file: ");
-             *    tt = stdIn.nextToken();
-             *    if(tt == StreamTokenizer.TT_WORD) {
-             *  if(stdIn.sval.equalsIgnoreCase("quit")) {
-             *          stop = true;
-             *  } else {
-             *      stdIn.pushBack();
-             *      String fn = getQueryFileName(stdIn);
-             *      * read a file name from std in *
-             *      query = getQueryFromFile(fn, cbuf);
-             *      sc.processQuery(query);
-             *  }
-             *    } else if (tt == StreamTokenizer.TT_EOL) {
-             *  * ignore eols *
-             *  } else if (tt == StreamTokenizer.TT_NUMBER ||
-             *         tt == StreamTokenizer.TT_EOF) {
-             *  System.out.println("Invalid input");
-             *    } else {
-             *  System.out.println("Bad token type");
-             *    }
-             * }
-             *  return;
-             * }
-             */
         } catch (IOException e) {
             System.err.println(
                 "SimpleClient: IO error while reading query or query file");
             e.printStackTrace();
             System.exit(-1);
-        }
+        } catch (InterruptedException e) {
+	    System.err.println("Unexpected Thread Interruption: " + e.getMessage());
+	}
     }
     
     public static void main(String args[]) {
@@ -268,7 +259,7 @@ public class SimpleClient implements UIDriverIF {
 
     }
 
-    public void processQuery(String queryText) {
+    public void processQuery(String queryText) throws ClientException {
         System.err.println("Executing query " + queryText);
         if (queryText.equalsIgnoreCase("gc")) {
             cm.runGarbageCollector();

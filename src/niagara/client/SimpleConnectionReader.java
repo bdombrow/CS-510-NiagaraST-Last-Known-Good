@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.11 2002/09/27 02:58:54 vpapad Exp $
+  $Id: SimpleConnectionReader.java,v 1.12 2002/10/12 20:10:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -71,37 +71,47 @@ class SimpleConnectionReader extends AbstractConnectionReader
 	    BufferedReader br = new BufferedReader(cReader);
 	    String line;
 	    RE re = new RE("<responseMessage localID\\s*=\\s*\"([0-9]*)\"\\s*serverID\\s*=\\s*\"([0-9]*)\"\\s*responseType\\s*=\\s*\"server_query_id\"");
+	    RE reLid = new RE("<responseMessage localID\\s*=\\s*\"([0-9]*)\"");
+	    RE reLidNoPad = new RE("SERVER ERROR - localID\\s*=\\s*\"([0-9]*)\"");
 	    boolean registered = false;
 	    line = br.readLine();
 	    while (line != null) {
 		if (line.indexOf("<response") == 0  || 
 		    line.indexOf("</response") == 0) {
-		    if (line.indexOf("\"parse_error\"") != -1) {
-			ui.errorMessage("Syntax error in query!\n");
-		    }
 		    if (!registered && line.indexOf("\"server_query_id\"") != -1) {
 			REMatch m = re.getMatch(line);
 			local_id = Integer.parseInt(m.substituteInto("$1"));
 			server_id = Integer.parseInt(m.substituteInto("$2"));
 			queryRegistry.setServerId(local_id, server_id);
 		    }
+		    if (line.indexOf("error") != -1) {
+			REMatch m = reLid.getMatch(line);
+			local_id = Integer.parseInt(m.substituteInto("$1"));
+			line = br.readLine(); // response data line 
+			line = br.readLine(); // should be the error message
+			ui.errorMessage(local_id, line + "\n");
+		    }
 		    if (line.indexOf("\"end_result\">") != -1) {
                         addResult("</niagara:results>");
                         ui.notifyNew(local_id);
 			ui.notifyFinalResult(local_id);
                     }
-		}
-		else {
+		} else if (line.indexOf("ServerError") != -1) {
+		    //  handle the non-padded stuff
+			REMatch m = reLidNoPad.getMatch(line);
+		    local_id = Integer.parseInt(m.substituteInto("$1"));
+		    ui.errorMessage(local_id, line + "\n");
+		} else {
 		    addResult(line);
                     if (line.indexOf("<?xml") != -1)
                         addResult("<niagara:results>");
                     ui.notifyNew(local_id);
 		}
-
 		line = br.readLine();
 	    }
 	}
 	catch(gnu.regexp.REException e){
+	    e.printStackTrace();
 	    throw new PEException("Invalid response message reg exception " +
 			       e.getMessage());
 	    

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryExecutionIF.java,v 1.4 2001/08/08 21:21:36 tufte Exp $
+  $Id: QueryExecutionIF.java,v 1.5 2002/10/12 20:10:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,13 +46,13 @@ public interface QueryExecutionIF
 	 * @param n limit of initial results (after this hitting getnext is required)
 	 * @return the id of the query in the registry
 	 */
-	public int executeQuery(Query query, int n);
+	public int executeQuery(Query query, int n) throws ClientException;
 	
 	/**
 	 * Kill the query
 	 * @param id the query id to kill
 	 */
-	public void killQuery(int id);
+	public void killQuery(int id) throws ClientException;
 
 	/**
 	 * Suspend the query
@@ -83,7 +83,7 @@ public interface QueryExecutionIF
 	 * Request partial result from a query
 	 * @param id the query id
 	 */
-	public void getNext(int id, int resultCount);
+	public void getNext(int id, int resultCount) throws ClientException;
 
 	/**
 	 * Checks to see if the query has received final results
