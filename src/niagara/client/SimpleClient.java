@@ -65,7 +65,8 @@ public class SimpleClient implements UIDriverIF {
 	    //System.out.println("DLDEBUG Thread " + Thread.currentThread().getName() + " has mutex on SimpleClient (queryDone)");
 	    m_stop = System.currentTimeMillis();
 	    notify();
-	    System.err.println("Total time: " + (m_stop - m_start) + "ms.");
+            if (!silent)
+                System.err.println("Total time: " + (m_stop - m_start) + "ms.");
 	}
 	//System.out.println("DLDEBUG Thread " + Thread.currentThread().getName() + " released mutex on SimpleClient (queryDone)");
 
@@ -103,7 +104,7 @@ public class SimpleClient implements UIDriverIF {
         System.err.println(
             "Usage: SimpleClient [-h host] [-t timeout] [-p port] [-qf QueryFileName]\n"
             + "[-x repetitions] [-d delay] [-w wait] [-o outputFileName]\n"
-            + "[-quiet] [-explain] [-ch client host] [-cp client port]");
+            + "[-quiet] [-explain] [-ch client host] [-cp client port] [-silent]");
         System.exit(-1);
     }
 
@@ -114,7 +115,9 @@ public class SimpleClient implements UIDriverIF {
     protected static boolean queryfile = false;
     protected static String host;
     protected static int port;
+    /** Just show the output of the optimizer for the query */
     protected static boolean explain;
+    protected static boolean silent;
     // XXX vpapad: ugly... SimpleClient can't do this yet
     protected static String outputFileName;
     // XXX vpapad: even uglier... these only apply to MQPClient
@@ -174,6 +177,9 @@ public class SimpleClient implements UIDriverIF {
             } else if (args[i].equals("-cp")) {
                 clientPort = Integer.parseInt(args[i + 1]);
                 i += 2;
+            } else if (args[i].equals("-silent")) {
+                silent = true;
+                i++;
             } else {
                 usage();
             }
@@ -278,7 +284,8 @@ public class SimpleClient implements UIDriverIF {
     }
 
     public void processQuery(String queryText) throws ClientException {
-        System.err.println("Executing query " + queryText);
+        if (!silent)
+            System.err.println("Executing query " + queryText);
         if (queryText.equalsIgnoreCase("gc")) {
             cm.runGarbageCollector();
             return;
