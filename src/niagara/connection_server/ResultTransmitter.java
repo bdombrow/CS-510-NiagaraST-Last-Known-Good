@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.15 2003/01/13 05:05:43 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.16 2003/01/25 20:56:39 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,7 +42,6 @@ import niagara.data_manager.DataManager;
  */
 
 public class ResultTransmitter implements Runnable {
-
     // The queryInfo of the query to which this transmitter belongs
     private ServerQueryInfo queryInfo;
     
@@ -76,6 +75,9 @@ public class ResultTransmitter implements Runnable {
     private static final String ELEMENT = "<!ELEMENT";
     private static final String ATTLIST = "<!ATTLIST";
 
+    // by default, print nicely, exception is when results
+    // are coming directly from a generator in which case
+    // prettyprint is handled by generator
     private boolean prettyprint = true;
     
     /** Constructor
@@ -93,6 +95,10 @@ public class ResultTransmitter implements Runnable {
 	transmitThread.start();
     }
     
+    public void setPrettyprint(boolean prettyprint) {
+	this.prettyprint = prettyprint;
+    }
+
     public void run() {
 	try {
 	    if (queryInfo.isSEQuery()) 
@@ -228,6 +234,7 @@ public class ResultTransmitter implements Runnable {
 	    QueryResult.ResultObject resultObject;
 	    
 	    //get the next result (KT: gets one result)
+	    // KT HERE IS WHERE SERVER RESULTS ARE PRODUCED  
 	    try {
 		resultObject = queryResult.getNext(2000);
 	    } catch (QueryResult.ResultsAlreadyReturnedException e) {

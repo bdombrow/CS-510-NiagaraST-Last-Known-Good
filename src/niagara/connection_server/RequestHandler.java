@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.18 2003/01/13 05:05:43 tufte Exp $
+  $Id: RequestHandler.java,v 1.19 2003/01/25 20:56:39 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,6 +40,7 @@ import niagara.trigger_engine.*;
 import niagara.xmlql_parser.op_tree.logNode;
 import niagara.data_manager.ConstantOpThread;
 import niagara.data_manager.DataManager;
+import niagara.data_manager.StreamThread;
 import niagara.utils.*;
 
 /**There is one request handler per client and receives all the requests from that client
@@ -455,6 +456,7 @@ public class RequestHandler {
          */
         ServerQueryInfo serverQueryInfo;
         Op top = plan.getOperator();
+	    
         if (top instanceof PhysicalAccumulateOperator) {
             PhysicalAccumulateOperator pao = (PhysicalAccumulateOperator) top;
             serverQueryInfo =
@@ -476,6 +478,8 @@ public class RequestHandler {
         // start the transmitter thread for sending results back
         serverQueryInfo.transmitter =
             new ResultTransmitter(this, serverQueryInfo, request);
+	if (top instanceof StreamThread)
+	    serverQueryInfo.transmitter.setPrettyprint(false);
     }
 
     /**Method used by everyone to send responses to the client
@@ -615,9 +619,9 @@ public class RequestHandler {
 
         public ServerQueryInfo remove(int qid) {
             System.out.println(
-                "KT: Query with ServerQueryId "
-                    + qid
-                    + " removed from RequestHandler.QueryList");
+			       "KT: Query with ServerQueryId "
+			       + qid
+			       + " removed from RequestHandler.QueryList ");
             return (ServerQueryInfo) queryList.remove(new Integer(qid));
         }
 

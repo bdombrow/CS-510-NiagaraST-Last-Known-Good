@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.6 2003/01/13 05:05:43 tufte Exp $
+  $Id: ResponseMessage.java,v 1.7 2003/01/25 20:56:39 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -126,15 +126,22 @@ class ResponseMessage
             writer.write(getResponseType());
             writer.write("\">\n<responseData>\n");
         }
+	boolean termnl = true; // is there a terminating new line??
+	if(responseData.length() > 0 && 
+	   responseData.charAt(responseData.length()-1) != '\n')
+	    termnl = false;
         writer.write(responseData.toString());
-        // XXX vpapad: this is just here to make the output at the other
-        // end a bit more human readable
-        //writer.write("\n"); KT - use prettyprint instead
         if (padding) {
+	    // have to do this - client assumes that responseData is on
+	    // its own line KT
+	    if(!termnl) {
+		writer.write("\n");
+	    }
     	    writer.write("</responseData></responseMessage>\n");
         }
-        if (type == END_RESULT)
+        if (type == END_RESULT) {
             writer.write("</response>\n");
+	}
     }
 
     /** Get the responseType of the message in this object
