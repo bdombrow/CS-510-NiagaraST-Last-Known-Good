@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalSplitOperator.java,v 1.3 2002/04/29 19:51:24 tufte Exp $
+  $Id: PhysicalSplitOperator.java,v 1.4 2002/10/24 01:20:18 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,7 +43,7 @@ import niagara.xmlql_parser.syntax_tree.*;
 import java.util.*;
 import org.w3c.dom.*;
 
-public class PhysicalSplitOperator extends PhysicalOperator {
+public class PhysicalSplitOperator extends UnoptimizablePhysicalOperator {
 	
     ////////////////////////////////////////////////////////
     // Data members of the PhysicalSplitOperator Class
