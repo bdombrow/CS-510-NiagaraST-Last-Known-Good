@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.19 2002/12/10 00:56:21 vpapad Exp $
+  $Id: NiagraServer.java,v 1.20 2003/01/13 05:05:43 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,11 +42,14 @@ import niagara.ndom.saxdom.BufferManager;
 
 import java.net.InetAddress;
 
+
 /**The main Niagra Server which receives all the client requests
    It has an instance of query engine and a trigger manager and a SEClient for 
    contacting the SE Server
 */
 public class NiagraServer {
+
+
 
     // All constants defined here
     private static String SEHOST;
@@ -64,8 +67,8 @@ public class NiagraServer {
     private static int saxdom_page_size = SAXDOM_DEFAULT_PAGE_SIZE;
 
     // Defaults
-    private static int DEFAULT_QUERY_THREADS = 10;
-    private static int DEFAULT_OPERATOR_THREADS = 50;
+    private static int DEFAULT_QUERY_THREADS = 3;
+    private static int DEFAULT_OPERATOR_THREADS = 20;
 
     // The port for client communication 
     private static int client_port = 9020;
@@ -92,7 +95,9 @@ public class NiagraServer {
 
     public static boolean QUIET = false;
 
-    public static boolean KT_PERFORMANCE = false;
+    public static boolean KT_PERFORMANCE = true;
+    public static boolean RUNNING_NIPROF = false;
+    public static boolean TIME_OPERATORS = false;
 
     public NiagraServer() {
         try {
@@ -107,9 +112,8 @@ public class NiagraServer {
                         NUM_OP_THREADS,
                         SEHOST,
                         SEPORT,
-                        true,
-            // Connection Manager
-    connectToSE); // Search Engine
+                        true, // Connection Manager
+			connectToSE); // Search Engine
 
             // Create the trigger manager
             triggerManager = new TriggerManager(qe);
@@ -145,11 +149,12 @@ public class NiagraServer {
     	them in the configuration file */
     public static void main(String[] args)
     	{
-    
-    		// Initialize the QueryEngine parameters
-    		init(args);
-    
-    		new NiagraServer();
+	    // Initialize the QueryEngine parameters
+	    init(args);
+	    if(TIME_OPERATORS | RUNNING_NIPROF) {
+	       System.loadLibrary("profni");
+	    }
+	    new NiagraServer();
     	}
 
     public static void init(String[] args) {
@@ -337,7 +342,11 @@ public class NiagraServer {
                     saxdom_page_size = parseIntArgument(args, i);
                     i++; // Cover for argument
                     valid_args = true;
-                } else {
+                } else if (args[i].equals("-run-niprof")) {
+		    RUNNING_NIPROF = true;
+		} else if (args[i].equals("-time-operators")) { 
+		    TIME_OPERATORS = true;
+		} else {
                     cerr("Unknown option: " + args[i]);
                     usage();
                 }

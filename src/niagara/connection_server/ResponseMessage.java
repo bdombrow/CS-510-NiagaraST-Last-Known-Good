@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.5 2002/10/31 04:20:30 vpapad Exp $
+  $Id: ResponseMessage.java,v 1.6 2003/01/13 05:05:43 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -86,13 +86,15 @@ class ResponseMessage
         responseData.append(moreData);
     }
     
-    public void appendResultData(QueryResult.ResultObject ro) {
+    public void appendResultData(QueryResult.ResultObject ro, boolean prettyprint) {
         // XXX vpapad: really, really ugly
         Node node = (Node) ro.result;
         if (node instanceof NodeImpl) {
-            ((NodeImpl) node).flatten(responseData);
-        } else
-            XMLUtils.flatten(ro.result, responseData, false);
+            ((NodeImpl) node).flatten(responseData, prettyprint);
+        } else {
+            XMLUtils.flatten(ro.result, responseData, false, prettyprint);
+         }
+
     }
     
     public void setData(String data) {
@@ -127,7 +129,7 @@ class ResponseMessage
         writer.write(responseData.toString());
         // XXX vpapad: this is just here to make the output at the other
         // end a bit more human readable
-        writer.write("\n");
+        //writer.write("\n"); KT - use prettyprint instead
         if (padding) {
     	    writer.write("</responseData></responseMessage>\n");
         }

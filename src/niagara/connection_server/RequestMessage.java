@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestMessage.java,v 1.5 2002/10/29 01:28:34 vpapad Exp $
+  $Id: RequestMessage.java,v 1.6 2003/01/13 05:05:43 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,6 +30,9 @@ package niagara.connection_server;
 
 /** Contains the request message in an object form and implements some utility methods
 */
+
+import niagara.utils.*;
+
 public class RequestMessage {
     
     //Assigning numbers to request types
@@ -56,6 +59,7 @@ public class RequestMessage {
     static final int EXPLAIN_QP_QUERY = 14;
     // A mutant query
     static final int MQP_QUERY = 15;
+    static final int DUMPDATA = 16;
 
     String requestType;
     int serverID;
@@ -121,13 +125,15 @@ public class RequestMessage {
 	    return RUN_GC;
         if (requestType.equals("shutdown"))
 	    return SHUTDOWN;
+	if (requestType.equals("dumpdata"))
+	    return DUMPDATA;
         if (requestType.equals("synchronous_qp_query"))
             return SYNCHRONOUS_QP_QUERY;
         if (requestType.equals("explain_qp_query"))
             return EXPLAIN_QP_QUERY;
         if (requestType.equals("mqp_query"))
             return MQP_QUERY;
-	return -1;
+	throw new PEException("Invalid request type: " + requestType);
     }
 
     class InvalidRequestTypeException extends Exception {

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.17 2002/12/10 00:56:21 vpapad Exp $
+  $Id: RequestHandler.java,v 1.18 2003/01/13 05:05:43 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -330,6 +330,22 @@ public class RequestHandler {
                 sendResponse(doneMesg);
                 break;
 
+            case RequestMessage.DUMPDATA:
+		if(NiagraServer.RUNNING_NIPROF) {
+		    System.out.println("Requesting profile data dump");
+		    JProf.requestDataDump();
+		    ResponseMessage doneDumpMesg =
+			new ResponseMessage(request, ResponseMessage.END_RESULT);
+		    sendResponse(doneDumpMesg);
+		} else {
+		    System.out.println("Profiler not running - unable to dump data");
+		    ResponseMessage errMesg =
+			new ResponseMessage(request, ResponseMessage.ERROR);
+		    errMesg.setData("Profiler not running - unable to dump data");
+		    sendResponse(errMesg);
+		}
+                break;
+
             case RequestMessage.SHUTDOWN :
                 System.out.println("Shutdown message received");
                 ResponseMessage shutMesg =
@@ -441,8 +457,6 @@ public class RequestHandler {
         Op top = plan.getOperator();
         if (top instanceof PhysicalAccumulateOperator) {
             PhysicalAccumulateOperator pao = (PhysicalAccumulateOperator) top;
-            System.out.println(
-                "top node is accumulate: " + pao.getAccumFileName());
             serverQueryInfo =
                 new ServerQueryInfo(
                     qid,

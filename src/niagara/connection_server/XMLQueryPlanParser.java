@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.32 2002/12/10 01:58:16 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.33 2003/01/13 05:05:43 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -208,7 +208,6 @@ public class XMLQueryPlanParser {
 
     void handleUnnest(Element e) throws InvalidPlanException {
         String id = e.getAttribute("id");
-
         String inputAttr = e.getAttribute("input");
         String typeAttr = e.getAttribute("type");
         String rootAttr = e.getAttribute("root");
@@ -618,7 +617,7 @@ public class XMLQueryPlanParser {
         String content = "";
         NodeList children = e.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
-            content = content + XMLUtils.flatten(children.item(i));
+            content = content + XMLUtils.flatten(children.item(i), false);
         }
 
         String vars = e.getAttribute("vars");
@@ -649,6 +648,8 @@ public class XMLQueryPlanParser {
 
         SendOp op = new SendOp();
 
+  	op.setSelectedAlgoIndex(0);
+
         String inputAttr = e.getAttribute("input");
         Plan input = (Plan) ids2plans.get(inputAttr);
         LogicalProperty inputLogProp =
@@ -669,7 +670,7 @@ public class XMLQueryPlanParser {
         op.setQueryId(e.getAttribute("query_id"));
         op.setClientLocation(e.getAttribute("client_location"));
 
-        String inputAttr = e.getAttribute("input");
+	String inputAttr = e.getAttribute("input");
         Plan input = (Plan) ids2plans.get(inputAttr);
         LogicalProperty inputLogProp =
             (LogicalProperty) ids2logprops.get(inputAttr);

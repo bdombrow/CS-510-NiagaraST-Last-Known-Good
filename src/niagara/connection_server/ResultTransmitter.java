@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.14 2002/10/31 04:20:30 vpapad Exp $
+  $Id: ResultTransmitter.java,v 1.15 2003/01/13 05:05:43 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -75,6 +75,8 @@ public class ResultTransmitter implements Runnable {
     // Tags for element and attribute list
     private static final String ELEMENT = "<!ELEMENT";
     private static final String ATTLIST = "<!ATTLIST";
+
+    private boolean prettyprint = true;
     
     /** Constructor
 	@param handler The request handler that created this transmitter
@@ -266,7 +268,7 @@ public class ResultTransmitter implements Runnable {
 		// KT - what is this??? - don't need a response for each
 		// result element do we???
 		if(!NiagraServer.QUIET) {
-		    response.appendResultData(resultObject);
+		    response.appendResultData(resultObject, prettyprint);
 		    handler.sendResponse(response);
 		}
 		break;
@@ -338,7 +340,7 @@ public class ResultTransmitter implements Runnable {
 	    case QueryResult.PartialQueryResult:
 				// add the result to responseData
 		totalResults--;
-		response.setData(getResultData(resultObject));
+		response.setData(getResultData(resultObject, prettyprint));
 		handler.sendResponse(response);
 		break;
 		
@@ -364,7 +366,7 @@ public class ResultTransmitter implements Runnable {
 	QueryResult queryResult = queryInfo.queryResult;
 	QueryResult.ResultObject resultObject;
 	boolean alreadyReturningPartial = false;
-
+	
 	/* give the query some time to get started */
 	/* 	transmitThread.sleep(5000); */
         int count = 0;
@@ -385,21 +387,21 @@ public class ResultTransmitter implements Runnable {
 		/* request the generation of partial results - 
 		 * who knows if this will work or not
 		 */
-		if(count >= 2000 && !alreadyReturningPartial) {
-		    System.out.println("Accum Mgr requesting partial result");
-		    try {
-			queryInfo.queryResult.returnPartialResults();
-		    }
-		    catch (QueryResult.AlreadyReturningPartialException arpe) {
-			//
-		    }
-		    count = 0;
-		} 
+		//		if(count >= 2000 && !alreadyReturningPartial) {
+		//   System.out.println("Accum Mgr requesting partial result");
+		//   try {
+		//	queryInfo.queryResult.returnPartialResults();
+		//   }
+		//   catch (QueryResult.AlreadyReturningPartialException arpe) {
+		//	//
+		//   }
+		//   count = 0;
+		//} 
 		
 		/* get the result and update the accum file dir */
 	        /* OK, now wait for the result to come popping up */
 	        resultObject = queryResult.getNext(100);
-	
+		
 		if(resultObject.status == QueryResult.TimedOut) {
                     count += 100;
 		} else {
@@ -424,12 +426,12 @@ public class ResultTransmitter implements Runnable {
 			
 			/* send final results to client */
 			response = 
-			new ResponseMessage(request,
-					    ResponseMessage.QUERY_RESULT);
-		    response.appendData(getResultData(resultObject));
-		    handler.sendResponse(response);
-
-		    break;
+			    new ResponseMessage(request,
+						ResponseMessage.QUERY_RESULT);
+			response.appendData(getResultData(resultObject, prettyprint));
+			handler.sendResponse(response);
+			
+			break;
 		    
 		case QueryResult.QueryError:
 		    processError();
@@ -535,8 +537,8 @@ public class ResultTransmitter implements Runnable {
 
     /**Extract the XML string from the result object
      */
-    private String getResultData(QueryResult.ResultObject ro) {
-        return XMLUtils.flatten(ro.result);
+    private String getResultData(QueryResult.ResultObject ro, boolean prettyprint) {
+        return XMLUtils.flatten(ro.result, prettyprint);
     }
 
     
