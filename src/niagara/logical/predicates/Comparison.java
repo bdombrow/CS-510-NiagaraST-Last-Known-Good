@@ -1,4 +1,4 @@
-/* $Id: Comparison.java,v 1.1 2003/12/24 02:03:51 vpapad Exp $ */
+/* $Id: Comparison.java,v 1.2 2004/05/20 22:10:15 vpapad Exp $ */
 package niagara.logical.predicates;
 
 import niagara.logical.*;
@@ -22,18 +22,23 @@ abstract public class Comparison extends Predicate {
                 operator,
                 (Variable) left,
                 (Constant) right);
-        else if (left.isVariable() && right.isVariable())
+        if (left.isVariable() && right.isVariable())
             return new VarToVarComparison(
                 operator,
                 (Variable) left,
                 (Variable) right);
-        else if (left.isConstant() && right.isVariable())
+        if (left.isConstant() && right.isVariable())
             return new ConstToVarComparison(
                 operator,
                 (Constant) left,
                 (Variable) right);
-        else
-            throw new PEException("Cannot handle this comparison");
+        
+        if (left.isPath() && right.isConstant())
+            return new PathToConstComparison(
+                    operator,
+                    (Path) left,
+                    (Constant) right);
+        throw new PEException("Cannot handle this comparison");
     }
 
     public abstract Atom getLeft();

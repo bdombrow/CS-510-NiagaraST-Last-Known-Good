@@ -1,7 +1,8 @@
-/* $Id: Variable.java,v 1.10 2003/12/24 02:08:27 vpapad Exp $ */
+/* $Id: Variable.java,v 1.11 2004/05/20 22:10:07 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.connection_server.InvalidPlanException;
+import niagara.logical.path.RE;
 import niagara.logical.predicates.*;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Domain;
@@ -43,6 +44,20 @@ public class Variable implements Atom, Attribute {
         return attr;
     }
 
+    public static Attribute findVariable(LogicalProperty[] props, String varName) 
+        throws InvalidPlanException {
+        // Strip dollar signs from varName 
+        if (varName.charAt(0) == '$')
+            varName = varName.substring(1);
+
+        for (int i = 0; i < props.length; i++) {
+            Attribute attr = props[i].getAttr(varName);
+            if (attr != null)
+                return attr;
+        }
+        throw new InvalidPlanException("Unknown variable: " + varName);
+    }
+    
     public String getName() {
         return name;
     }
@@ -55,7 +70,7 @@ public class Variable implements Atom, Attribute {
         return new AtomicEvaluator(name);
     }
 
-    public AtomicEvaluator getEvaluator(regExp path) {
+    public AtomicEvaluator getEvaluator(RE path) {
         return new AtomicEvaluator(name, path);
     }
 
@@ -69,6 +84,10 @@ public class Variable implements Atom, Attribute {
 
     public boolean isVariable() {
         return true;
+    }
+    
+    public boolean isPath() {
+        return false;
     }
 
     public Domain getDomain() {

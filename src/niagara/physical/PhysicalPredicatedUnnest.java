@@ -1,4 +1,4 @@
-/* $Id: PhysicalPredicatedUnnest.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $ */
+/* $Id: PhysicalPredicatedUnnest.java,v 1.2 2004/05/20 22:10:22 vpapad Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -36,6 +36,10 @@ public class PhysicalPredicatedUnnest extends PhysicalOperator {
     private PathExprEvaluator pev;
     private NodeVector elementList;
     private int scanField;
+    /** Are we really adding a new attribute to the output tuple?*/
+    private boolean reallyUnnesting;
+    /** Position of new attribute in the output schema */
+    private int outputPos;
     /** Runtime predicate implementation */
     private PredicateImpl predEval;
 
@@ -109,14 +113,8 @@ public class PhysicalPredicatedUnnest extends PhysicalOperator {
             else // Just clone
                 tuple = inputTuple.copy(outSize);
 
-            // XXX vpapad: bug (or feature): Since PredicatedUnnest is 
-            // a physical operator, projection pushing will not remove
-            // attributes that are needed in the predicate, but not in
-            // any operator above us.
-
-            // Append a reachable node to the output tuple
-            // and put the tuple in the output stream
-            tuple.setAttribute(outSize - 1, n);
+            if (reallyUnnesting)
+                tuple.setAttribute(outputPos, n);
 
             putTuple(tuple, 0);
         }
@@ -249,6 +247,9 @@ public class PhysicalPredicatedUnnest extends PhysicalOperator {
             (inputSchemas[0].getLength() + 1 > outputTupleSchema.getLength());
         if (projecting)
             attributeMap = inputSchemas[0].mapPositions(outputTupleSchema);
+        reallyUnnesting = outputTupleSchema.contains(variable.getName());
+        if (reallyUnnesting)
+            outputPos = outputTupleSchema.getPosition(variable.getName());
     }
 
     /**

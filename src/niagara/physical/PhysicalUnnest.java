@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.2 2004/05/20 22:10:22 vpapad Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -36,6 +36,10 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
     //Current input tuple
     private Tuple inputTuple;
     private boolean matchFound;
+    /** Are we really adding a new attribute to the output tuple?*/
+    private boolean reallyUnnesting;
+    /** Position of new attribute in the output schema */
+    private int outputPos;
 
     public PhysicalUnnest() {
         setBlockingSourceStreams(blockingSourceStreams);
@@ -92,7 +96,8 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
 
         // Append a reachable node to the output tuple
         // and put the tuple in the output stream
-        inputTuple.setAttribute(outSize - 1, n);
+        if (reallyUnnesting)
+            inputTuple.setAttribute(outputPos, n);
         putTuple(inputTuple, 0);
         matchFound = true;
     }
@@ -213,6 +218,9 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
             (inputSchemas[0].getLength() + 1 > outputTupleSchema.getLength());
         if (projecting)
             attributeMap = inputSchemas[0].mapPositions(outputTupleSchema);
+        reallyUnnesting = outputTupleSchema.contains(variable.getName());
+        if (reallyUnnesting)
+            outputPos = outputTupleSchema.getPosition(variable.getName());
     }
 
     public void dumpAttributesInXML(StringBuffer sb) {

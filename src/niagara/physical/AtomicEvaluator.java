@@ -1,19 +1,20 @@
-/* $Id: AtomicEvaluator.java,v 1.1 2003/12/24 01:49:02 vpapad Exp $ */
+/* $Id: AtomicEvaluator.java,v 1.2 2004/05/20 22:10:22 vpapad Exp $ */
 package niagara.physical;
 
 import java.util.ArrayList;
 
 import org.w3c.dom.Node;
 
+import niagara.logical.path.Epsilon;
+import niagara.logical.path.RE;
 import niagara.query_engine.*;
 import niagara.utils.NodeVector;
 import niagara.utils.Tuple;
-import niagara.xmlql_parser.regExp;
 import niagara.xmlql_parser.schemaAttribute;
 
 public class AtomicEvaluator {
     private String name;
-    private regExp path;
+    private RE path;
     
     int streamId;
     int attributeId;
@@ -26,15 +27,13 @@ public class AtomicEvaluator {
      *  which later on must be resolved with resolveVariables */
     public AtomicEvaluator(String name) {
         this.name = name;
+        this.path = new Epsilon();
     }
 
-    public AtomicEvaluator(String name, regExp path) {
+    public AtomicEvaluator(String name, RE path) {
         this.name = name;
-        // XXX vpapad: we never really use path, it is an opportunity
-        // for optimization since it avoids an extra unnest
-        // alternatively using PathExprEvaluator just to get the
-        // tuple attribute itself is overkill
-        // - use SimpleAtomicEvaluator where possible
+        // If path is null using an AtomicEvaluator is overkill.
+        // Use SimpleAtomicEvaluator whenever possible.
         this.path = path;
     }
     

@@ -13,6 +13,7 @@ import niagara.utils.Tuple;
 
 import niagara.logical.Variable;
 import niagara.logical.predicates.Constant;
+import niagara.logical.predicates.PathToConstComparison;
 import niagara.logical.predicates.VarToConstComparison;
 
 /** Start with a tuple attribute, unnest a path, and compare the resulting
@@ -35,6 +36,17 @@ public class PathToConstComparisonImpl extends ComparisonImpl {
         leftValues = new ArrayList();
     }
 
+    public PathToConstComparisonImpl(PathToConstComparison pred) {
+        super(pred.getOperator());
+        Variable left = (Variable) pred.getLeft();
+        Constant right = (Constant) pred.getRight();
+        sel = pred.selectivity();
+        
+        rightValue = right.getValue();
+        leftAV = left.getEvaluator(pred.getPath());
+        leftValues = new ArrayList();
+    }
+    
     public boolean evaluate(Tuple t1, Tuple t2) {
         // Get the vector of atomic values to be compared
         leftValues.clear();

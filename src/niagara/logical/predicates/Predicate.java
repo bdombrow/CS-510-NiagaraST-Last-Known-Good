@@ -1,20 +1,28 @@
-/* $Id: Predicate.java,v 1.1 2003/12/24 02:03:51 vpapad Exp $ */
+/* $Id: Predicate.java,v 1.2 2004/05/20 22:10:15 vpapad Exp $ */
 package niagara.logical.predicates;
 
-import java.util.*;
+//import java.util.*;
+
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Vector;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import niagara.logical.*;
 import niagara.logical.UpdateableEquiJoinPredicateList;
+import niagara.logical.path.RE;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.physical.predicates.PredicateImpl;
 import niagara.utils.CUtil;
 import niagara.utils.PEException;
+import niagara.xmlql_parser.REParser;
+import niagara.xmlql_parser.Scanner;
 import niagara.xmlql_parser.condition;
 import niagara.xmlql_parser.opType;
+import niagara.xmlql_parser.regExp;
 import niagara.xmlql_parser.schemaAttribute;
 import niagara.xmlql_parser.varTbl;
 import niagara.connection_server.InvalidPlanException;
@@ -190,11 +198,33 @@ abstract public class Predicate implements condition {
 	if(inputProperties.length == 2)
 	    right = inputProperties[1];
 
-        if (e.getNodeName().equals("number"))
+        String name = e.getNodeName();
+        if (name.equals("number"))
             return new NumericConstant(e.getAttribute("value"));
-        else if (e.getNodeName().equals("string"))
+        else if (name.equals("string"))
             return new StringConstant(e.getAttribute("value"));
-        else { //var 
+        else if (name.equals("path")) {
+            RE path = null;
+
+            String regexpAttr = e.getAttribute("path");
+            try {
+                Scanner scanner = new Scanner(new StringReader(regexpAttr));
+                REParser rep = new REParser(scanner);
+                path  = regExp.regExp2RE((regExp) rep.parse().value);
+                rep.done_parsing();
+               } catch (InvalidPlanException ipe) {
+                   String msg = ipe.getMessage();
+                   throw new InvalidPlanException("Syntax error in regular expression: " + msg);
+            } catch (Exception ex) { // ugh cup throws "Exception!!!"
+                ex.printStackTrace();
+                throw new InvalidPlanException(
+                    "Error while parsing: " + regexpAttr);
+            }
+            
+            return new Path((Variable) Variable.findVariable(inputProperties, 
+                    e.getAttribute("var")), path);
+        }
+        else { //variable 
             String varname = e.getAttribute("value");
             // chop initial $ sign off
             if (varname.charAt(0) == '$')
