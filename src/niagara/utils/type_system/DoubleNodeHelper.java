@@ -9,7 +9,7 @@ package niagara.utils.type_system;
 
 import org.w3c.dom.*;
 
-import niagara.utils.PEException;
+import niagara.utils.*;
 
 /**
  * Class <code> DoubleNodeHelper </code> which performs functions
@@ -39,7 +39,7 @@ public class DoubleNodeHelper extends NumberNodeHelperBase
     public Class getNodeClass() { return myClass; }
 
     public Object valueOf(Node node) {
-	return Double.valueOf(node.getNodeValue().trim());
+	return Double.valueOf(DOMHelper.getTextValue(node).trim());
     }
     
     public boolean nodeEquals(Node lNode, Node rNode) {
@@ -61,18 +61,20 @@ public class DoubleNodeHelper extends NumberNodeHelperBase
 	    ((Double)valueOf(rNode)).doubleValue();
     }
     
-    public boolean average(Node lNode, Node rNode, 
-			   Node resultNode) {
-	double lVal = ((Double)valueOf(lNode)).doubleValue();
-	double rVal = ((Double)valueOf(rNode)).doubleValue();
-	resultNode.setNodeValue(String.valueOf((lVal+rVal)/2));
+    public boolean average(Node lNode, Node rNode, Node resultNode) {
+	int lCnt = getCount(lNode);
+	int rCnt = getCount(rNode);
+	double lVal = ((Double)valueOf(lNode)).doubleValue()*lCnt;
+	double rVal = ((Double)valueOf(rNode)).doubleValue()*rCnt;
+	DOMHelper.setTextValue(resultNode, String.valueOf((lVal+rVal)/(lCnt+rCnt)));
+	setCount(resultNode, lCnt+rCnt);
 	return true;
     }
 
     public boolean sum(Node lNode, Node rNode, Node resultNode) {
 	double lVal = ((Double)valueOf(lNode)).doubleValue();
 	double rVal = ((Double)valueOf(rNode)).doubleValue();
-	resultNode.setNodeValue(String.valueOf(lVal+rVal));
+	DOMHelper.setTextValue(resultNode, String.valueOf(lVal+rVal));
 	return true;
     }
 

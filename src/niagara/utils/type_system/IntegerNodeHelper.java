@@ -9,7 +9,7 @@ package niagara.utils.type_system;
 
 import org.w3c.dom.*;
 
-import niagara.utils.PEException;
+import niagara.utils.*;
 
 /**
  * Class <code> IntegerNodeHelper </code> which performs functions
@@ -43,8 +43,7 @@ public class IntegerNodeHelper extends NumberNodeHelperBase
     public Class getNodeClass() { return myClass; }
 
     public Object valueOf(Node node) {
-	String valString = node.getNodeValue().trim();
-	return Integer.valueOf(valString);
+	return Integer.valueOf(DOMHelper.getTextValue(node).trim());
     }
     
     public boolean nodeEquals(Node lNode, Node rNode) {
@@ -56,8 +55,9 @@ public class IntegerNodeHelper extends NumberNodeHelperBase
 	 * return lVal.equals(rVal)
 	 *  } 
 	*/
-	
-	return valueOf(lNode).equals(valueOf(rNode));
+	Object lVal = valueOf(lNode);
+	Object rVal = valueOf(rNode);
+	return lVal.equals(rVal);
     }
     
     public boolean lessThan(Node lNode, Node rNode) {
@@ -75,18 +75,20 @@ public class IntegerNodeHelper extends NumberNodeHelperBase
      *
      * @ return Returns true if a new value is calculated (always)
      */
-    public boolean average(Node lNode, Node rNode, 
-			   Node resultNode) {
+    public boolean average(Node lNode, Node rNode, Node resultNode) {
+	int lCnt = getCount(lNode);
+	int rCnt = getCount(rNode);
 	int lVal = ((Integer)valueOf(lNode)).intValue();
 	int rVal = ((Integer)valueOf(rNode)).intValue();
-	resultNode.setNodeValue(String.valueOf((lVal+rVal)/2.0));
+	DOMHelper.setTextValue(resultNode, String.valueOf((lVal+rVal)/(lCnt + rCnt)));
+	setCount(resultNode, lCnt+rCnt);
 	return true;
     }
 
     public boolean sum(Node lNode, Node rNode, Node resultNode) {
 	int lVal = ((Integer)valueOf(lNode)).intValue();
 	int rVal = ((Integer)valueOf(rNode)).intValue();
-	resultNode.setNodeValue(String.valueOf(lVal+rVal));
+	DOMHelper.setTextValue(resultNode, String.valueOf(lVal+rVal));
 	return true;
     }
 
@@ -99,3 +101,4 @@ public class IntegerNodeHelper extends NumberNodeHelperBase
     }
 
 }
+

@@ -12,7 +12,7 @@ import java.util.Date;
 
 import org.w3c.dom.*;
 
-import niagara.utils.PEException;
+import niagara.utils.*;
 
 /**
  * Class <code> DateNodeHelper </code> which performs functions
@@ -49,8 +49,8 @@ public class DateNodeHelper extends NumberNodeHelperBase
 	 * reasonable.  This is ugly!! 
 	 */
 	try {
-	    return dateFormat.parse(node.getNodeValue());
-	} catch (ParseException e) {
+	    return dateFormat.parse(DOMHelper.getTextValue(node));
+	} catch (java.text.ParseException e) {
 	    throw new PEException("ParseException: " + e.getMessage());
 	}
     }
@@ -63,8 +63,7 @@ public class DateNodeHelper extends NumberNodeHelperBase
 	return ((Date)valueOf(lNode)).before((Date)valueOf(rNode));
     }
 
-    public boolean average(Node lNode, Node rNode, 
-			   Node resultNode) {
+    public boolean average(Node lNode, Node rNode, Node resultNode) {
 	throw new PEException("Average called on Date !!");
     }
 
@@ -72,7 +71,7 @@ public class DateNodeHelper extends NumberNodeHelperBase
 	long lVal = ((Date)valueOf(lNode)).getTime();
 	long rVal = ((Date)valueOf(rNode)).getTime();
 	Date d = new Date(lVal + rVal);
-	resultNode.setNodeValue(d.toString());
+	DOMHelper.setTextValue(resultNode, d.toString());
 	return true;
     }
 

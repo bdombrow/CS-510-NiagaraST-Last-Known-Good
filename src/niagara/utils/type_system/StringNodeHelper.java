@@ -9,7 +9,7 @@ package niagara.utils.type_system;
 
 import org.w3c.dom.*;
 
-import niagara.utils.PEException;
+import niagara.utils.*;
 
 /**
  * Class <code> StringNodeHelper </code> which performs functions
@@ -38,11 +38,11 @@ public class StringNodeHelper implements NodeHelper {
     public Class getNodeClass() { return myClass;}
 
     public Object valueOf(Node node) {
-	return node.getNodeValue();
+	return DOMHelper.getTextValue(node);
     }
 
     public boolean nodeEquals(Node lNode, Node rNode) {
-	return lNode.getNodeValue().equals(rNode.getNodeValue());
+	return DOMHelper.getTextValue(lNode).equals(DOMHelper.getTextValue(rNode));
     }
     public String getName() {
         return "StringNodeHelper";
