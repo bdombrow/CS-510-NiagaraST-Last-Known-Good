@@ -45,6 +45,8 @@ Identifier = [a-zA-Z0-9]([:jletterdigit:])*
 
 StringChar = [^\"\n]
 
+IdEq = "id"{Space}*"="
+
 %state STRING
 
 %%
@@ -101,6 +103,7 @@ StringChar = [^\"\n]
   \" 		{ yybegin(STRING); s = new String();}
 
   "id"		{ return symbol(sym.ID); }
+  {IdEq}    { return symbol(sym.IDEQ); }
   {Identifier} 	{ return symbol(sym.IDEN, new String(yytext())); }
   {Var} 	{ return symbol(sym.VAR, new String(yytext())); }
   {Number}      { return symbol(sym.NUMBER,new String(yytext())); }

@@ -1,4 +1,4 @@
-// $Id: xmlql.cup,v 1.7 2003/02/07 07:02:15 vpapad Exp $
+// $Id: xmlql.cup,v 1.8 2003/02/27 07:51:16 vpapad Exp $
 ////////////////////////////////////////////////////////////////////////
 //
 //  xmlql.cup
@@ -107,6 +107,7 @@ terminal EXPIRE;
 terminal DO;
 
 terminal ID;
+terminal IDEQ;
 
 terminal String IDEN;
 terminal String VAR;
@@ -431,9 +432,9 @@ StartTagPattern ::= LT RegularExpression:r Ids:i AttributeList:al GT
 			   RESULT = new stp(new regExpDataNode(new data(dataType.VAR, v)), al); :}
 		  ;
 
-Ids ::= ID EQ STRING:s
+Ids ::= IDEQ STRING:s
 	  {: RESULT = new attr(new String("ID"),new data(dataType.STRING,s)); :}
-      | ID EQ VAR:v
+      | IDEQ VAR:v
 	  {: RESULT = new attr(new String("ID"),new data(dataType.VAR,v)); :}
       |
 	  {: RESULT = null; :}
@@ -449,6 +450,10 @@ Attribute ::= IDEN:i EQ STRING:s
 		  {: RESULT = new attr(i,new data(dataType.STRING,s)); :}
 	    | IDEN:i EQ VAR:v
 		  {: RESULT = new attr(i,new data(dataType.VAR,v)); :}
+        | IDEQ STRING:s
+		  {: RESULT = new attr("id",new data(dataType.STRING,s)); :}
+	    | IDEQ VAR:v
+		  {: RESULT = new attr("id",new data(dataType.VAR,v)); :}		  
 	    ;
 
 RegularExpression ::= RegularExpression:r STAR
@@ -514,9 +519,9 @@ StartTag ::= LT IDEN:i SkolemId:s AttributeList:al GT
 		{: RESULT = new startTag(new data(dataType.VAR, v), s, al); :}
 	   ;
 
-SkolemId ::= ID EQ IDEN:s LPAREN VarList:vl RPAREN
+SkolemId ::= IDEQ IDEN:s LPAREN VarList:vl RPAREN
 		{: RESULT = new skolem(s, vl); :}
-	   | ID EQ IDEN:s LPAREN RPAREN
+	   | IDEQ IDEN:s LPAREN RPAREN
 		{: RESULT = new skolem(s, new Vector()); :}
 	   |
 		{: RESULT = null; :}
