@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalWindowAverageOperator.java,v 1.1 2003/12/04 02:14:35 jinli Exp $
+  $Id: PhysicalWindowAverageOperator.java,v 1.2 2003/12/06 06:52:14 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -58,21 +58,10 @@ public class PhysicalWindowAverageOperator extends PhysicalWindowAggregateOperat
 	// KT - is this correct??
 	// code from old mrege results:
 	//finalResult.updateStatistics(((Integer) ungroupedResult).intValue());
-	
-	int size = ((Vector)ungroupedResult).size();
-	if (size == 2) {
-		result.cost = ((Long)((Vector)ungroupedResult).get(1)).longValue();
-	} else {
-		assert size == 1: "Jenny: StreamTupleElement!";
-		result.count++;	
-		result.doubleVal +=  ((Double)((Vector)ungroupedResult).get(0)).doubleValue(); // sum
-	}
+	result.count++;	
+	//result.doubleVal +=  ((Double)((Vector)ungroupedResult).get(0)).doubleValue(); // sum
+	result.doubleVal +=  ((Double) ungroupedResult).doubleValue(); // sum
 	    
-/*	assert ((Integer)ungroupedResult).intValue() == 1 :
-		"KT BAD BAD BAD";
-	result.count++;*/
-	
-	
 	}
 
 
@@ -107,17 +96,9 @@ public class PhysicalWindowAverageOperator extends PhysicalWindowAggregateOperat
 	atomicValues.clear();
 	ae.getAtomicValues(tupleElement, atomicValues);
 
-	Vector vect = new Vector();
 	assert atomicValues.size() == 1 : "Must have exactly one atomic value";
 	
-	vect.add(new Double((String)atomicValues.get(0)));
-	//if (Long.parseLong((String)atomicValues.get(0)) == -1)  // if it is the indicator that a window is to be closed;
-	if(tupleElement.timestamp != 0)
-	{		
-		vect.add(new Long( tupleElement.timestamp));
-	}
-	//return new Integer(1);
-	return vect;
+	return new Double((String)atomicValues.get(0));
 	}
 
 	/**
@@ -154,12 +135,10 @@ public class PhysicalWindowAverageOperator extends PhysicalWindowAggregateOperat
 			if (partialResult != null) {
 				numValues += partialResult.count;
 				sum += partialResult.doubleVal;
-				timestamp = System.currentTimeMillis() -  partialResult.cost;
 			}
 			if (finalResult != null) {
 				numValues += finalResult.count;
 				sum += finalResult.doubleVal;
-				timestamp = System.currentTimeMillis() -  finalResult.cost;
 			}
 
 			// If the number of values is 0, average does not make sense
@@ -170,9 +149,9 @@ public class PhysicalWindowAverageOperator extends PhysicalWindowAggregateOperat
 
 			// Create an average result element and return it
 			totalCost += timestamp;
-			Element resultElement = doc.createElement("Average");
+			Element resultElement = doc.createElement("niagara:windowAverage");
 			//Text childElement = doc.createTextNode(Double.toString(sum/numValues));
-			Text childElement = doc.createTextNode(Double.toString(sum/numValues) + "  accumulated cost: " + String.valueOf(totalCost) + " cost: " + String.valueOf(timestamp));
+			Text childElement = doc.createTextNode(Double.toString(sum/numValues));
 			resultElement.appendChild(childElement);
 			return resultElement;	
 	

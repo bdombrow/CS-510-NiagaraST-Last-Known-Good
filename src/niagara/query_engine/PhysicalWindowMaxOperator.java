@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalWindowMaxOperator.java,v 1.1 2003/12/04 02:14:35 jinli Exp $
+  $Id: PhysicalWindowMaxOperator.java,v 1.2 2003/12/06 06:52:14 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -45,7 +45,6 @@ import java.util.*;
 
 public class PhysicalWindowMaxOperator extends PhysicalWindowAggregateOperator {
 
-	int totalCost = 0;
 	/**
 	 * This function updates the statistics with a value
 	 *
@@ -58,35 +57,14 @@ public class PhysicalWindowMaxOperator extends PhysicalWindowAggregateOperator {
 	// KT - is this correct??
 	// code from old mrege results:
 	//finalResult.updateStatistics(((Integer) ungroupedResult).intValue());
-	
-	int size = ((Vector)ungroupedResult).size();
-	if (size == 2) {
-		result.cost = ((Long)((Vector)ungroupedResult).get(1)).longValue();
-	} else {
-
-		assert size == 1: "Jenny: StreamTupleElement!";
-		result.count++;
-		double newValue = ((Double)((Vector)ungroupedResult).get(0)).doubleValue();
-		if (newValue > result.doubleVal)  // doubleVal holds max
-			result.doubleVal = newValue; 
-	}
+	result.count++;
+	//double newValue = ((Double)((Vector)ungroupedResult).get(0)).doubleValue();
+	double newValue = ((Double)ungroupedResult).doubleValue();
+	if (newValue > result.doubleVal)  // doubleVal holds max
+		result.doubleVal = newValue; 
 	    
-/*	assert ((Integer)ungroupedResult).intValue() == 1 :
-		"KT BAD BAD BAD";
-	result.count++;*/
-	
-	
 	}
 
-
-	////////////////////////////////////////////////////////////////////
-	// These are the private variables of the class                   //
-	////////////////////////////////////////////////////////////////////
-
-	// This is the aggregating attribute for the Count operator
-	//Attribute countingAttribute;
-    
-    
     
 	/////////////////////////////////////////////////////////////////////////
 	// These functions are the hooks that are used to implement specific   //
@@ -107,20 +85,11 @@ public class PhysicalWindowMaxOperator extends PhysicalWindowAggregateOperator {
 							 tupleElement) {
 
 	// First get the atomic values
-		atomicValues.clear();
-		ae.getAtomicValues(tupleElement, atomicValues);
+	atomicValues.clear();
+	ae.getAtomicValues(tupleElement, atomicValues);
 
-	Vector vect = new Vector();
 	assert atomicValues.size() == 1 : "Must have exactly one atomic value";
-	vect.add(new Double((String)atomicValues.get(0)));
-	//vect.add(new Integer(1));
-	//if (Long.parseLong((String)atomicValues.get(0)) == -1)  // if it is the indicator that a window is to be closed;
-	if(tupleElement.timestamp != 0)
-	{			
-		vect.add(new Long( tupleElement.timestamp));
-	}
-	//return new Integer(1);
-	return vect;
+	return new Double((String)atomicValues.get(0));
 	}
 
 	/**
@@ -154,19 +123,17 @@ public class PhysicalWindowMaxOperator extends PhysicalWindowAggregateOperator {
 			int numValues = 0;
 			//double max = 0; //Jenny: Hack
 			long max = 0;
-			double timestamp = 0;
+			
 
 			if (partialResult != null) {
 				numValues += partialResult.count;
 				if (partialResult.doubleVal > max)
 				max = (long) partialResult.doubleVal; //Jenny:  Hack
-				timestamp = System.currentTimeMillis() -  partialResult.cost;
 			}
 			if (finalResult != null) {
 				numValues += finalResult.count;
 				if (finalResult.doubleVal > max) 
 				max = (long)finalResult.doubleVal; //Jenny: Hack
-				timestamp = System.currentTimeMillis() -  finalResult.cost;
 			}
 
 			// If the number of values is 0, sum does not make sense
@@ -174,10 +141,9 @@ public class PhysicalWindowMaxOperator extends PhysicalWindowAggregateOperator {
 				assert false : "KT don't think returning null is ok";
 				//return null;
 			}
-			totalCost += timestamp;
 			Element resultElement = doc.createElement("niagara:windowMax");
 			//Text childElement = doc.createTextNode(Double.toString(max));
-			Text childElement = doc.createTextNode(Long.toString(max) + " accumulated cost: " + String.valueOf(totalCost) + "   cost: " + String.valueOf(timestamp)); //Jenny:  Hack
+			Text childElement = doc.createTextNode(Long.toString(max)); 
 			resultElement.appendChild(childElement);
 			return resultElement;
 			

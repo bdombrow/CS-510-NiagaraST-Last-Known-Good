@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalWindowCountOperator.java,v 1.2 2003/12/04 02:13:04 jinli Exp $
+  $Id: PhysicalWindowCountOperator.java,v 1.3 2003/12/06 06:52:14 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -45,7 +45,6 @@ import java.util.*;
 
 public class PhysicalWindowCountOperator extends PhysicalWindowAggregateOperator {
 
-	int totalCost = 0;
 	/**
 	 * This function updates the statistics with a value
 	 *
@@ -59,31 +58,16 @@ public class PhysicalWindowCountOperator extends PhysicalWindowAggregateOperator
 	// code from old mrege results:
 	//finalResult.updateStatistics(((Integer) ungroupedResult).intValue());
 	
-	int size = ((Vector)ungroupedResult).size();
-	if (size == 2) {
-		result.cost = ((Long)((Vector)ungroupedResult).get(1)).longValue();
-	} else {
-		assert ((Integer)((Vector)ungroupedResult).get(0)).intValue() == 1 :
-				"KT BAD BAD BAD";
-		assert size == 1: "Jenny: StreamTupleElement!";
-		result.count++;	
+	//int size = ((Vector)ungroupedResult).size();
+	//assert ((Integer)((Vector)ungroupedResult).get(0)).intValue() == 1 :
+	assert ((Integer)ungroupedResult).intValue() == 1:
+			"KT BAD BAD BAD";
+
+	result.count++;	
 	}
-	    
-/*	assert ((Integer)ungroupedResult).intValue() == 1 :
-		"KT BAD BAD BAD";
-	result.count++;*/
 	
 	
-	}
 
-
-	////////////////////////////////////////////////////////////////////
-	// These are the private variables of the class                   //
-	////////////////////////////////////////////////////////////////////
-
-	// This is the aggregating attribute for the Count operator
-	//Attribute countingAttribute;
-    
     
     
 	/////////////////////////////////////////////////////////////////////////
@@ -105,20 +89,13 @@ public class PhysicalWindowCountOperator extends PhysicalWindowAggregateOperator
 							 tupleElement) {
 
 	// First get the atomic values
-		atomicValues.clear();
-		ae.getAtomicValues(tupleElement, atomicValues);
+	atomicValues.clear();
+	ae.getAtomicValues(tupleElement, atomicValues);
 
-	Vector vect = new Vector();
 	assert atomicValues.size() == 1 : "Must have exactly one atomic value";
+
+	return new Integer(1);
 	
-	vect.add(new Integer(1));
-	//if (Long.parseLong((String)atomicValues.get(0)) == -1)  // if it is the indicator that a window is to be closed;
-	if(tupleElement.timestamp != 0)
-	{		
-		vect.add(new Long( tupleElement.timestamp));
-	}
-	//return new Integer(1);
-	return vect;
 	}
 
 	/**
@@ -157,22 +134,16 @@ public class PhysicalWindowCountOperator extends PhysicalWindowAggregateOperator
 	int numValues = 0;
 	double timestamp = 0;
 
-	if (partialResult != null) {
+	if (partialResult != null) 
 		numValues += partialResult.count;
-		timestamp = System.currentTimeMillis() -  partialResult.cost;
-	}
-	
-	if (finalResult != null) {
-		numValues += finalResult.count;
-		timestamp = System.currentTimeMillis() - finalResult.cost;
-	}
 
-	// Create an Count result element
-	totalCost += timestamp;
-	if (timestamp > 100000)
-		timestamp = 0;
-	Element resultElement = doc.createElement("Count");
-	Text childElement = doc.createTextNode(Integer.toString(numValues) + "  accumulated cost: " + String.valueOf(totalCost) +  "  cost: " + String.valueOf(timestamp));
+	
+	if (finalResult != null) 
+		numValues += finalResult.count;
+	
+
+	Element resultElement = doc.createElement("niagara:windowCount");
+	Text childElement = doc.createTextNode(Integer.toString(numValues));
 	resultElement.appendChild(childElement);
 	
 	return resultElement;

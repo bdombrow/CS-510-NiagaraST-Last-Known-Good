@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowGroupOperator.java,v 1.1 2003/09/30 19:22:04 jinli Exp $
+  $Id: PhysicalWindowGroupOperator.java,v 1.2 2003/12/06 06:52:14 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -123,10 +123,16 @@ public abstract class PhysicalWindowGroupOperator extends PhysicalGroupOperator 
 		tmpTuple = (StreamTupleElement) tupleElement.clone();
 		//tmpTuple.deleteAttribute(1);
 		Node wid;
+		Node text;
 		for (long i = from; i <= to; i++ ) {
 			super.blockingProcessSourceTupleElement(tmpTuple, streamId);			
-			wid = tmpTuple.getAttribute(tupleSize-2);
-			wid.setNodeValue(String.valueOf(i+1));
+			//wid = tmpTuple.getAttribute(tupleSize-2);
+			//wid.setNodeValue(String.valueOf(i+1));
+			wid = doc.createElement("wid_from");
+			text = doc.createTextNode(String.valueOf(i+1));
+			wid.appendChild(text);
+			
+			tupleElement.setAttribute(tupleSize-2, wid);					
 		}
 	
 	}
