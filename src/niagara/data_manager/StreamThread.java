@@ -47,7 +47,7 @@ public class StreamThread implements Runnable {
 
     public StreamThread(StreamSpec spec, SourceStream outStream) {
 
-	//try {
+	//	try {
 	    this.spec = spec;
 	    outputStream = outStream;
 	    //parser = new com.microstar.xml.SAXDriver();
@@ -55,17 +55,16 @@ public class StreamThread implements Runnable {
                 parser = DOMFactory.newParser("saxdom");
             else
                 parser = DOMFactory.newParser();
-
 	    //parser = SAXParserFactory.newInstance().newSAXParser();
 	    firehoseSocket = null;
 	    //handler = new StreamSimpleHandler();
 	    //parser.setHandler(handler);
-	    //} catch (javax.xml.parsers.ParserConfigurationException pce) {
-	    //System.err.println("KT parser configuration error " + 
-	    // 		       pce.getMessage());
-	    //} catch(org.xml.sax.SAXException se) {
-	    //System.err.println("KT sax exception " + se.getMessage());
-	    //}
+	    /*  } catch (javax.xml.parsers.ParserConfigurationException pce) {
+	    System.err.println("KT parser configuration error " + 
+	     		       pce.getMessage());
+	    } catch(org.xml.sax.SAXException se) {
+	    System.err.println("KT sax exception " + se.getMessage());
+	    }*/
     }
 
     /**
@@ -78,15 +77,21 @@ public class StreamThread implements Runnable {
 	try {
 	    inputStream = createInputStream();
 	   
-	    if(false) {
-	    //if(NiagraServer.stream && parser.supportsStreaming()) {
+	    if(parser instanceof SAXDOMParser && NiagraServer.STREAM) {
+		((SAXDOMParser)(parser)).setOutputStream(outputStream);
+		InputSource inputSource = new InputSource(inputStream);
+		parser.parse(inputSource);
+	    } else if(NiagraServer.STREAM && parser.supportsStreaming()) {
 		// stream is done when inputStream.read() returns -1
 		boolean keepgoing = true;
 		InputSource inputSource = new InputSource(inputStream);
 		sourcecreated=true;
 		while(keepgoing) {
+		    System.out.println();
+		    System.out.println("KT Stream Thread calling parse");
 		    parser.parse(inputSource);
-		    //keepgoing = outputStream.put(parser.getDocument());
+		    keepgoing = outputStream.put(parser.getDocument());
+		    System.out.println("KT put doc in outputstream " + keepgoing);
 		}	
 	    } else {
 		try {
