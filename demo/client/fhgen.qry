@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE plan SYSTEM "queryplan.dtd">  
 <plan top="cons">
-<firehosescan id="fh" host="state.cse.ogi.edu" port="4514" rate="0" type="gen" desc="http://www.cse.ogi.edu/~vpapad/xml/play.dtd" iters="100"/>
+<firehosescan id="fh" host="state.cse.ogi.edu" port="5000" rate="0" type="gen" desc="http://www.cse.ogi.edu/~vpapad/xml/play.dtd" iters="100"/>
 <scan id="scan" regexp="PLAY.TITLE" input="fh"/>
 
 <construct id="cons" input="scan">
