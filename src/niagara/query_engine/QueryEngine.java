@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.11 2003/07/09 04:59:35 tufte Exp $
+  $Id: QueryEngine.java,v 1.12 2003/07/09 19:12:07 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -97,50 +97,38 @@ public class QueryEngine
      * @param ypServerHostName the name of the host on which the yp server runs
      * @param useConnectionManager flag to allow connection/no connection mngr
      */    
-    public QueryEngine(NiagraServer server, int maxQueries, 
-					   int maxOperators, 
-					   String ypServerHostName,
-					   int ypPort,
-					   boolean useConnectionManager,
-					   boolean useSearchEngine){
+    public QueryEngine(NiagraServer server, 
+                       int maxQueries, 
+		       int maxOperators, 
+		       boolean useConnectionManager) {
 
 		System.out.println("-----------------------------------------");
 		System.out.println("Starting Query Engine with these parameters");
 		System.out.println("-----------------------------------------");
-		System.out.println("\t-SE host = "+ypServerHostName);
-		System.out.println("\t-SE port = "+ypPort);
 		System.out.println("\t-maxQueryThread = "+maxQueries);
 		System.out.println("\t-maxOpThreads = "+maxOperators);
 		System.out.println("\t-Create connection manager = "+
 						   useConnectionManager);
-		System.out.println("\t-Use Permanent Connection to Search Engine = "+
-						   useSearchEngine);
 		System.out.println("-----------------------------------------\n");
 
                 this.server = server;
 
 		// Initialize the data manager
 		//
-		dataManager = new DataManager(".",                  // Path for temp files
-									  10000,                // Disk space
-									  0,                    //
-									  ypServerHostName,     // YP Host
-									  ypPort,               // Default YP Port
-									  10,                   // Fetch threads
-									  5,                    // URL Threads
-									  useSearchEngine);     // Use search engine (else YP)
+		dataManager = new DataManager(".", // Path for temp files
+					      10000,                // Disk space
+					      0,                    //
+					      10,                   // Fetch threads
+					      5);                    // URL Threads
 
 	
 		// Initialize the query id
-		//
 		lastQueryId = 0;
 
 		// Create a vector for operators scheduled for execution
-		//
 		opQueue = new PhysicalOperatorQueue(maxOperators);
 
 		// Create operator thread vector and fill it with operator threads
-		//
 		opThreads = new Vector(maxOperators);
 	
 		for(int opthread = 0; opthread < maxOperators; ++opthread) {

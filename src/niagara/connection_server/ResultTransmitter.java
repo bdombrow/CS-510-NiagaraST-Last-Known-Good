@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.22 2003/07/03 19:35:22 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.23 2003/07/09 19:12:02 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -212,6 +212,8 @@ public class ResultTransmitter implements Runnable {
 	Contacts the SE Server and sends back results to the client 
     */
     private void handleSEQuery() throws IOException{
+        assert false : "SEqueries are no longer supported";
+	/*
 	// submit the query to the client
 	String result = handler.server.seClient.query(queryInfo.searchEngineQuery);
 	// create the response message
@@ -229,6 +231,7 @@ public class ResultTransmitter implements Runnable {
 	    assert false;
 	}
 	return;
+	*/
     }
     
     /** Handles QE Query.

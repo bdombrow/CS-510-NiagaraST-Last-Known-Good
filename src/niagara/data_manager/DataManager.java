@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DataManager.java,v 1.9 2003/03/08 02:21:40 vpapad Exp $
+  $Id: DataManager.java,v 1.10 2003/07/09 19:12:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,8 +34,6 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
-import niagara.search_engine.server.*;
-
 import niagara.utils.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
@@ -51,12 +49,6 @@ public class DataManager {
     private static String xml_persist = ".dm_xmlcache";
     public CacheManager cacheM;
     private DTDDirectory dtdDir;
-
-    private String SEhost;
-    private int SEport;
-    private boolean usePermanent;
-    private SEClient client=null;
-
     private String tmpDir;
 
     /* Table storing accumulate files */
@@ -65,11 +57,8 @@ public class DataManager {
     public DataManager(String path, 
 		       int diskSpace, 
 		       int policy, 
-		       String server, 
-		       int port, 
 		       int numFetchThreads,
-		       int numUrlThreads,
-                       boolean usePermanentConnection) 
+		       int numUrlThreads)
     {
         // DTD and YP stuff.
         tmpDir = path;
@@ -92,23 +81,6 @@ public class DataManager {
         else {
             dtdDir = new DTDDirectory(path);
         }
-        SEhost = server;
-        SEport = port;
-
-        this.usePermanent = usePermanentConnection;
-        if(usePermanentConnection) {
-            System.err.println("Using Permanent Connection to Search Engine...");
-	    
-	    try {
-		client = new SEClient(SEhost);
-	    } catch (IOException ioe) { // KT-ERROR
-		System.err.println("Error: Can't connect to Search Engine..."+ ioe.getMessage());
-	    }
-	    
-        } else {
-            System.err.println("Using On-demand Connection to Search Engine...");
- 	    client = null;
-       }
 
         // Feng's Code all in CacheManager.
         cacheM = new CacheManager(tmpDir);
@@ -146,52 +118,13 @@ public class DataManager {
      */
 
     public synchronized DTDInfo getDTDInfo (Vector requestList) {
-	String query = (String)requestList.elementAt(0);
-	Document responseDoc;
-	try {
-	    if (!usePermanent) {
-		client =  new SEClient(SEhost);
-	    }
-	    String response = client.query(query);
-	    System.out.println("SE response:\n"+response);
-	    if (!usePermanent) {
-		client.closeConnection();
-	    }
-
-	    responseDoc = parseXML(response);
-	}
-	catch (IOException ioe) { 
-	    System.out.println("DM Error: Unable to get DTD Info: "+ioe.getMessage());
-	    responseDoc = null; 
-	}
-
-	if(responseDoc != null)
-	    return DMUtil.parseDTDInfo(responseDoc);
+	assert false : "Search Engine Not Supported";
 	return null;
     }
 
     public synchronized Vector getDTDList() {
-	Document responseDoc = null;
-
-	try {
-	    if (!usePermanent) {
-		client =  new SEClient(SEhost);
-	    }
-	    String response = client.listDTD();
-	    if (!usePermanent) {
-		client.closeConnection();
-	    }
-
-	    responseDoc = parseXML(response);
-	}
-	catch (IOException e) { 
-	    System.out.println("DM Error: Unable to get DTD List: "+e.getMessage());
-	    responseDoc = null; 
-	}
-
-	if(responseDoc != null)
-	    return DMUtil.parseDTDList(responseDoc);
-	return new Vector();
+        assert false : "Search Engine Not Supported";
+	return null;
     }
 
     /**
