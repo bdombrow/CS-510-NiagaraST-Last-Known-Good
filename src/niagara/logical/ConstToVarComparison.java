@@ -1,4 +1,4 @@
-/* ConstToVarComparison.java,v 1.2 2002/10/31 03:32:21 vpapad Exp */
+/* ConstToVarComparison.java,v 1.3 2002/10/31 03:33:19 vpapad Exp */
 package niagara.logical;
 import java.util.ArrayList;
 
