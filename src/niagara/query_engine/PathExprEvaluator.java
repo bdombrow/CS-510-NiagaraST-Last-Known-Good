@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.8 2002/04/06 02:16:00 vpapad Exp $
+  $Id: PathExprEvaluator.java,v 1.9 2002/04/12 20:57:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,6 +40,7 @@ public class PathExprEvaluator {
     private DFA dfa;
     private ArrayList nodes;
     private ArrayList states;
+    private ArrayList prevStates;
     private int top;
 
     private HashSet matches;
@@ -59,24 +60,25 @@ public class PathExprEvaluator {
         // Create the DFA
         dfa = nfa.getDFA();
 
-        System.out.println("XXX vpapad: " + dfa.toString());
-
         nodes = new ArrayList();
         states = new ArrayList();
+        prevStates = new ArrayList();
         matches = new HashSet();
     }
 
     public void getMatches(Node n, ArrayList results) {
-
         DFAState s = dfa.startState;
+        DFAState ps = null;
+
         top = -1;
 
         // XXX vpapad not handling attributes yet
 
-        while (top >= 0 || n != null ) {
+        while (top >= 0 || n != null) {
             if (n == null) {
                 n = (Node) nodes.get(top);
                 s = (DFAState) states.get(top);
+                ps = (DFAState) prevStates.get(top);
                 top--;
             }
 
@@ -85,46 +87,105 @@ public class PathExprEvaluator {
             if (s.accepting && matches.add(n))
                     results.add(n);
 
-            // Reverse the order of the children, to account for the stack
-            Node c = n.getLastChild();
+            Node currentNode = n;
+            DFAState currentState = s;
+
+            // If there's only one 'next node', we'll skip the stack
+            // and store it in n
             n = null;
 
-            HashMap transitions = s.transitions;
-            DFAState onWildcard = s.onWildcard;
+            // Find this node's next sibling that matches a transition
+            // from the previous state
+            if (ps != null) {
+                Node sibling = currentNode.getNextSibling();
 
+                HashMap transitions = ps.transitions;
+                DFAState onWildcard = ps.onWildcard;
+
+                boolean foundOne = false;                
+                while (sibling != null) {
+                    // Ignore text nodes for path following
+                    if (sibling.getNodeType() != Node.TEXT_NODE) {
+                        String label = sibling.getNodeName();
+                        DFAState next = (DFAState) transitions.get(label);
+                        if (onWildcard != null && onWildcard != next) {
+                            foundOne = true;
+                            // At this point, n is guaranteed to be null
+                            n = sibling;
+                            s = onWildcard;
+                            // Previous state is still ps
+                        }
+                        if (next != null) {
+                            foundOne = true;
+                            // If we found a 'next state' in the previous
+                            // "if", we're now forced to push it on the stack
+                            if (n != null) {
+                                top++;
+                                nodes.add(top, n);
+                                states.add(top, s);
+                                prevStates.add(top, ps);
+                            }
+                            n = sibling;
+                            s = next;
+                        }
+                    }
+                    // Only have to find the next matching sibling
+                    if (foundOne) break;
+                    sibling = sibling.getNextSibling();
+                }
+            }
+
+            Node c = currentNode.getFirstChild();
+            HashMap transitions = currentState.transitions;
+            DFAState onWildcard = currentState.onWildcard;
+
+            boolean foundOne = false;
             while (c != null) {
                 // Ignore text nodes for path following
                 if (c.getNodeType() != Node.TEXT_NODE) {
                     String label = c.getNodeName();
                     DFAState next = (DFAState) transitions.get(label);
-                    if (next != null) {
-                        if (n != null) {
-                            top++;
-                            nodes.add(top, n);
-                            states.add(top, s);
-                        }
-                        n = c;
-                        s = next;
-                    }
                     if (onWildcard != null && onWildcard != next) {
+                        foundOne = true;
+                        // If we found a 'next state' in the previous
+                        // "ifs", we're now forced to push it on the stack
                         if (n != null) {
                             top++;
                             nodes.add(top, n);
                             states.add(top, s);
+                            prevStates.add(top, ps);
                         } 
                         n = c;
                         s = onWildcard;
+                        // Current state becomes our children's previous state
+                        ps = currentState; 
+                    }
+                    if (next != null) {
+                        foundOne = true;
+                        if (n != null) {
+                            top++;
+                            nodes.add(top, n);
+                            states.add(top, s);
+                            prevStates.add(top, ps);
+                        }
+                        n = c;
+                        s = next;
+                        // Current state becomes our children's previous state
+                        ps = currentState;
                     }
                 }
-                c = c.getPreviousSibling();
+                if (foundOne) break;
+                c = c.getNextSibling();
             }
         }
 
         // Clean up stacks
         nodes.clear();
         states.clear();
+        prevStates.clear();
         matches.clear();
     }
+
 
     // XXX vpapad: this method is here just to get old code that called
     // getReachableNodes to compile. EXTREMELY INEFFICIENT.

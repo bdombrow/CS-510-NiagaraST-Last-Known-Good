@@ -54,7 +54,6 @@ public class AtomicEvaluator {
 	    // Invoke the path expression evaluator to get the nodes reachable
 	    // using the path expression
 	    //
-            reachableNodes.clear();
             pev.getMatches((Node) tuples[streamId].
                                       getAttribute(attributeId),
                            reachableNodes);
@@ -80,7 +79,8 @@ public class AtomicEvaluator {
 		    values.add(firstChild.getNodeValue());
 		}
 	    }
-	}
+            reachableNodes.clear();
+        }
     }
     
     void getAtomicValues(StreamTupleElement tuple, ArrayList values) {

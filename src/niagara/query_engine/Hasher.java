@@ -59,7 +59,6 @@ public class Hasher {
 	    //
 	    oneTuple[0] = tupleElement;
 
-            values[att].clear();
 	    evaluators[att].getAtomicValues(oneTuple, values[att]);
 
 	    // If there is not exactly one atomic value, then it is an error
@@ -72,6 +71,8 @@ public class Hasher {
 	    hashResult.append('<');
 	    hashResult.append((String) values[att].get(0));
 	    hashResult.append('<');
+
+            values[att].clear();
 	}
 
 	// Return the hash result
