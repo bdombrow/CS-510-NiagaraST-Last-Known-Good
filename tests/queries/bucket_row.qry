@@ -10,8 +10,10 @@
 <unnest id="scan1" regexp="NUM1" input="scan"/>
 <bucket id="bucket" winattr="$scan1" wintype="0" range="7" slide="3" input="scan1"/>
 <construct id="cons" input="bucket">
+<![CDATA[
 <bucket>
 $scan1 $wid_from $wid_to 
 </bucket>
+]]>
 </construct>
 </plan>
