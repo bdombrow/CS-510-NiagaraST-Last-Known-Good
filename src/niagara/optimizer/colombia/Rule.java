@@ -1,4 +1,4 @@
-/* $Id: Rule.java,v 1.8 2003/09/16 04:45:29 vpapad Exp $
+/* $Id: Rule.java,v 1.9 2003/09/17 23:40:46 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -155,16 +155,16 @@ public abstract class Rule {
         return mexpr.canFire(index);
     }
     
-    boolean topMatch(Class c) {
+    boolean topMatch(Op top) {
         // The results of this check are cached in RuleSet
         // We should never apply rules to physical expressions
-        assert c.isInstance(LogicalOp.class);
+        assert top instanceof LogicalOp;
 
         Op op = pattern.getOp();
         
         // if pattern is a leaf, means it represents a group, always matches
         // otherwise, the pattern should be logical op
-        return (op.isLeaf() || ((LogicalOp) op).opMatch(c));
+        return (op.isLeaf() || ((LogicalOp) op).opMatch(top.getClass()));
     }
 
     // default value is 1.0, resulting in exhaustive search

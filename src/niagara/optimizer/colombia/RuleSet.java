@@ -1,4 +1,4 @@
-/* $Id: RuleSet.java,v 1.6 2003/09/16 04:45:30 vpapad Exp $
+/* $Id: RuleSet.java,v 1.7 2003/09/17 23:40:46 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -106,7 +106,7 @@ public class RuleSet {
             int nrules = size();
             for (int i = 0; i < nrules; i++) {
                 Rule r = get(i);
-                if (r.topMatch(c))  
+                if (r.topMatch(op))  
                     matches.add(r);
             }
             topMatches.put(c, matches);
