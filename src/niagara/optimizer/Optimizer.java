@@ -1,5 +1,5 @@
 /**
- * $Id: Optimizer.java,v 1.2 2002/06/25 23:42:44 vpapad Exp $
+ * $Id: Optimizer.java,v 1.3 2002/06/25 23:45:40 vpapad Exp $
  */
 package niagara.optimizer;
 
@@ -9,7 +9,7 @@ import niagara.connection_server.Catalog;
 
 import niagara.optimizer.colombia.SSP;
 
-public class Optimizer {
+ public class Optimizer {
     private static SSP ssp; // Search space
 
     public static void init() {
