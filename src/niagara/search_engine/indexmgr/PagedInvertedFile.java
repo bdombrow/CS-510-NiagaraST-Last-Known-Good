@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PagedInvertedFile.java,v 1.1 2000/05/30 21:03:28 tufte Exp $
+  $Id: PagedInvertedFile.java,v 1.2 2002/08/17 16:50:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -250,7 +250,7 @@ public class PagedInvertedFile extends InvertedFile {
 
 		try {
 			byte[] data = newivl.flatten(positionType);
-			Util.assert (data != null && data.length > 0);
+			assert (data != null && data.length > 0): "Invalid data";
 			int offset = 0;
 
 			boolean wordIsNew = false;
@@ -262,7 +262,7 @@ public class PagedInvertedFile extends InvertedFile {
 	 		// if list already exist, we fill the last page first
 			if (mapentry != null) {
 				// next page of the last page must be null
-				Util.assert (get_next_page_no(mapentry.lastPageNo)==-1);
+			    assert (get_next_page_no(mapentry.lastPageNo)==-1);
 
 				offset += append_page (mapentry.lastPageNo, data, offset);
 			}
@@ -376,7 +376,7 @@ public class PagedInvertedFile extends InvertedFile {
 				offset += read_page(currPageNo, data, offset);
 				currPageNo = get_next_page_no (currPageNo);
 			}
-			Util.assert (offset == mapentry.sizeInBytes);
+			assert (offset == mapentry.sizeInBytes) : "Invalid offset";
 
 			// construct IVL
 			ivlToFill.parse (data, positionType);
@@ -455,7 +455,7 @@ public class PagedInvertedFile extends InvertedFile {
 		randomFile.seek (pageno*pageSize + 4);
 		int freeSpaceOffset = randomFile.readInt();
 		int bytesToRead = freeSpaceOffset-8;
-		Util.assert (bytesToRead <= buf.length-offset);
+		assert (bytesToRead <= buf.length-offset);
 
 		return randomFile.read(buf, offset, bytesToRead);
 	}

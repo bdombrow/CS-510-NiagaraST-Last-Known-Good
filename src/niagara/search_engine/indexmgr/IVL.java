@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: IVL.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: IVL.java,v 1.2 2002/08/17 16:50:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -94,9 +94,9 @@ public class IVL {
 			for (int i = 0; i < ivl.size(); i++) {
 				IVLEntry entry = (IVLEntry)ivl.elementAt(i);
 				offset += entry.write (data, offset);
-				Util.assert (offset <= size);
+				assert offset <= size : "Invalid offset";
 			}
-			Util.assert (offset == size);
+			assert offset == size: "Invalid offset";
 		}
 		catch (ArrayIndexOutOfBoundsException e) {
 			//System.err.println ("allocated size="+size);

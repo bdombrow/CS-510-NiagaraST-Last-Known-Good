@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Util.java,v 1.1 2000/05/30 21:03:28 tufte Exp $
+  $Id: Util.java,v 1.2 2002/08/17 16:50:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,15 +29,6 @@
 package niagara.search_engine.indexmgr;
 
 public class Util {
-    public static final void assert (boolean value){
-	if (!value) {
-	    try { throw new Exception("assertion failure"); }
-	    catch (Exception e) {
-		e.printStackTrace();
-		System.exit(1);
-	    }
-	}
-    }
 
   public static final int toInt (byte[] data, int offset) {
     int ret = ((int)(data[offset]) << 24) & 0xFF000000;
