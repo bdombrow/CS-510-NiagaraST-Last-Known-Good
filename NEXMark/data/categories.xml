@@ -1,0 +1,306 @@
+<?xml version="1.0"?>
+<Categories>
+  <category id="0" name="Antiques"/>
+  <category id="1" name="Antiquities"/>
+  <category id="2" name="Architectural and Garden"/>
+  <category id="3" name="Asian Antiques"/>
+  <category id="4" name="Books, Manuscripts"/>
+  <category id="5" name="Decorative Arts"/>
+  <category id="6" name="Ethnographic"/>
+  <category id="7" name="Furniture"/>
+  <category id="8" name="Maps, Atlases"/>
+  <category id="9" name="Maritime"/>
+  <category id="10" name="Musical Instruments"/>
+  <category id="11" name="Primitives"/>
+  <category id="12" name="Rugs, Carpets"/>
+  <category id="13" name="Science and Medicine"/>
+  <category id="14" name="Silver"/>
+  <category id="15" name="Textiles, Linens"/>
+  <category id="16" name="Antiques (post-1900)"/>
+  <category id="17" name="Other Antiques"/>
+  <category id="18" name="Art"/>
+  <category id="19" name="Digital Art"/>
+  <category id="20" name="Drawings"/>
+  <category id="21" name="Folk Art"/>
+  <category id="22" name="Mixed Media"/>
+  <category id="23" name="Paintings"/>
+  <category id="24" name="Photographic Images"/>
+  <category id="25" name="Posters"/>
+  <category id="26" name="Prints"/>
+  <category id="27" name="Sculpture, Carvings"/>
+  <category id="28" name="Self-Representing Artists"/>
+  <category id="29" name="Other Art"/>
+  <category id="30" name="Books"/>
+  <category id="31" name="Antiquarian and Collectible"/>
+  <category id="32" name="Audio"/>
+  <category id="33" name="Children"/>
+  <category id="34" name="Fiction and Literature"/>
+  <category id="35" name="Magazines and Catalogs"/>
+  <category id="36" name="Nonfiction"/>
+  <category id="37" name="Wholesale, Bulk Lots"/>
+  <category id="38" name="Other"/>
+  <category id="39" name="Business and Industrial"/>
+  <category id="40" name="Agriculture"/>
+  <category id="41" name="Businesses for Sale"/>
+  <category id="42" name="Construction"/>
+  <category id="43" name="Electronic Components"/>
+  <category id="44" name="Healthcare"/>
+  <category id="45" name="Industrial Supply, MRO"/>
+  <category id="46" name="Laboratory Equipment"/>
+  <category id="47" name="Metalworking Equipment"/>
+  <category id="48" name="Printing Equipment"/>
+  <category id="49" name="Restaurant and Foodservice"/>
+  <category id="50" name="Retail"/>
+  <category id="51" name="Test, Measurement Equipment"/>
+  <category id="52" name="Other Industries"/>
+  <category id="53" name="Clothing and Accessories"/>
+  <category id="54" name="Infants"/>
+  <category id="55" name="Boys"/>
+  <category id="56" name="Girls"/>
+  <category id="57" name="Men"/>
+  <category id="58" name="Uniforms"/>
+  <category id="59" name="Wedding Apparel"/>
+  <category id="60" name="Women"/>
+  <category id="61" name="Vintage Clothing, Accessories"/>
+  <category id="62" name="Wholesale Lots"/>
+  <category id="63" name="Coins"/>
+  <category id="64" name="Coins: US"/>
+  <category id="65" name="Coins: World"/>
+  <category id="66" name="Exonumia"/>
+  <category id="67" name="Paper Money: US"/>
+  <category id="68" name="Paper Money: World"/>
+  <category id="69" name="Scripophily"/>
+  <category id="70" name="Collectibles"/>
+  <category id="71" name="Advertising"/>
+  <category id="72" name="Animals"/>
+  <category id="73" name="Art, Animation and Photo Images"/>
+  <category id="74" name="Autographs"/>
+  <category id="75" name="Barware"/>
+  <category id="76" name="Bottles"/>
+  <category id="77" name="Breweriana"/>
+  <category id="78" name="Clocks"/>
+  <category id="79" name="Coin-Op, Banks and Casino"/>
+  <category id="80" name="Comics"/>
+  <category id="81" name="Cultural Items"/>
+  <category id="82" name="Decorative Collectibles"/>
+  <category id="83" name="Disneyana"/>
+  <category id="84" name="Fantasy, Mythical and Magic"/>
+  <category id="85" name="Furnishings and Tools"/>
+  <category id="86" name="Historical Memorabilia"/>
+  <category id="87" name="Holiday, Seasonal"/>
+  <category id="88" name="Housewares and Kitchenware"/>
+  <category id="89" name="Knives and Swords"/>
+  <category id="90" name="Lamps, Lighting"/>
+  <category id="91" name="Linens, Fabric and Textiles"/>
+  <category id="92" name="Metalware"/>
+  <category id="93" name="Militaria"/>
+  <category id="94" name="Pens and Writing Instruments"/>
+  <category id="95" name="Pop Culture"/>
+  <category id="96" name="Postcards and Paper"/>
+  <category id="97" name="Radio, Phonograph, TV, Phone"/>
+  <category id="98" name="Religions, Spirituality"/>
+  <category id="99" name="Rocks, Fossils, Minerals"/>
+  <category id="100" name="Science Fiction"/>
+  <category id="101" name="Science, Medical"/>
+  <category id="102" name="Tobacciana"/>
+  <category id="103" name="Trading Cards"/>
+  <category id="104" name="Transportation"/>
+  <category id="105" name="Vanity Perfume and Shaving Items"/>
+  <category id="106" name="Vintage Sewing"/>
+  <category id="107" name="Wholesale Lots"/>
+  <category id="108" name="Computers and Office Products"/>
+  <category id="109" name="Apple, Macintosh"/>
+  <category id="110" name="Desktop Components"/>
+  <category id="111" name="Desktop PCs"/>
+  <category id="112" name="Domain Names"/>
+  <category id="113" name="Drives, Media"/>
+  <category id="114" name="Input Peripherals"/>
+  <category id="115" name="Laptops and Accessories"/>
+  <category id="116" name="Monitors"/>
+  <category id="117" name="Multimedia Projectors"/>
+  <category id="118" name="Networking and Telecom"/>
+  <category id="119" name="Office Products"/>
+  <category id="120" name="Other Hardware"/>
+  <category id="121" name="Printers and Supplies"/>
+  <category id="122" name="Scanners"/>
+  <category id="123" name="Services"/>
+  <category id="124" name="Software"/>
+  <category id="125" name="Technology Books"/>
+  <category id="126" name="Video and Multimedia"/>
+  <category id="127" name="Wholesale Lots"/>
+  <category id="128" name="Consumer Electronics"/>
+  <category id="129" name="Car Audio and Electronics"/>
+  <category id="130" name="Gadgets and Other Electronics"/>
+  <category id="131" name="Home Audio and Video"/>
+  <category id="132" name="PDAs/Handheld PCs"/>
+  <category id="133" name="Phones and Wireless Devices"/>
+  <category id="134" name="Portable Audio and Video"/>
+  <category id="135" name="Professional Video Equipment"/>
+  <category id="136" name="Radio Equipment"/>
+  <category id="137" name="Video Games"/>
+  <category id="138" name="Wholesale Lots"/>
+  <category id="139" name="Dolls and Bears"/>
+  <category id="140" name="Barbie"/>
+  <category id="141" name="Bears"/>
+  <category id="142" name="Doll Clothes, Furniture"/>
+  <category id="143" name="Doll Making, Patterns, Repair"/>
+  <category id="144" name="Dolls"/>
+  <category id="145" name="Houses, Miniatures"/>
+  <category id="146" name="Paper Dolls"/>
+  <category id="147" name="Wholesale Lots"/>
+  <category id="148" name="					"/>
+  <category id="149" name="					"/>
+  <category id="150" name="Home and Garden"/>
+  <category id="151" name="Baby Items"/>
+  <category id="152" name="Bath"/>
+  <category id="153" name="Bedding"/>
+  <category id="154" name="Building and Repair Materials"/>
+  <category id="155" name="Candles, Fragrances, Floral"/>
+  <category id="156" name="Clocks"/>
+  <category id="157" name="Food and Wine"/>
+  <category id="158" name="Furniture"/>
+  <category id="159" name="Home Decor"/>
+  <category id="160" name="Housekeeping and Organizing"/>
+  <category id="161" name="Kitchen and Table"/>
+  <category id="162" name="Lamps, Lighting, Ceiling Fans"/>
+  <category id="163" name="Lawn and Garden"/>
+  <category id="164" name="Major Appliances"/>
+  <category id="165" name="Outdoor Living"/>
+  <category id="166" name="Pet Supplies"/>
+  <category id="167" name="Rugs, Mats"/>
+  <category id="168" name="Tools"/>
+  <category id="169" name="Window Treatments"/>
+  <category id="170" name="Wholesale Lots"/>
+  <category id="171" name="Jewelry, Gems and Watches"/>
+  <category id="172" name="Costume Jewelry"/>
+  <category id="173" name="Designer, Artisan Jewelry"/>
+  <category id="174" name="Ethnic, Tribal Jewelry"/>
+  <category id="175" name="Fine Jewelry"/>
+  <category id="176" name="Hair Jewelry"/>
+  <category id="177" name="Jewelry Boxes"/>
+  <category id="178" name="Jewelry Supplies"/>
+  <category id="179" name="Loose Beads"/>
+  <category id="180" name="Loose Gemstones"/>
+  <category id="181" name="Men"/>
+  <category id="182" name="Watches"/>
+  <category id="183" name="Wholesale Lots"/>
+  <category id="184" name="Movies and Television"/>
+  <category id="185" name="Memorabilia"/>
+  <category id="186" name="Video, Film"/>
+  <category id="187" name="Wholesale Lots"/>
+  <category id="188" name="Music"/>
+  <category id="189" name="CDs, Records, and Tapes"/>
+  <category id="190" name="Music Memorabilia"/>
+  <category id="191" name="Sheet Music, Music Books"/>
+  <category id="192" name="Musical Instruments"/>
+  <category id="193" name="Brass"/>
+  <category id="194" name="Electronic"/>
+  <category id="195" name="Equipment"/>
+  <category id="196" name="Guitar"/>
+  <category id="197" name="Harmonica"/>
+  <category id="198" name="Keyboard, Piano"/>
+  <category id="199" name="Percussion"/>
+  <category id="200" name="Pro Audio"/>
+  <category id="201" name="String"/>
+  <category id="202" name="Woodwind"/>
+  <category id="203" name="Wholesale Lots"/>
+  <category id="204" name="Other Instruments"/>
+  <category id="205" name="Photo and Optics"/>
+  <category id="206" name="Albums and Archival Materials"/>
+  <category id="207" name="Binoculars and Telescopes"/>
+  <category id="208" name="Books and Manuals"/>
+  <category id="209" name="Camcorders and Accessories"/>
+  <category id="210" name="Camera Body Parts/Accessories"/>
+  <category id="211" name="Darkroom Equip, Supplies"/>
+  <category id="212" name="Digital Cameras and Accessories"/>
+  <category id="213" name="Film and Movie Cameras"/>
+  <category id="214" name="Film and Processing Services"/>
+  <category id="215" name="Filters"/>
+  <category id="216" name="General Accessories"/>
+  <category id="217" name="Lenses"/>
+  <category id="218" name="Lighting and Studio Equipment"/>
+  <category id="219" name="Projection Equipment"/>
+  <category id="220" name="Stock Photography and Footage"/>
+  <category id="221" name="Tripods, Monopods"/>
+  <category id="222" name="Vintage"/>
+  <category id="223" name="Wholesale Lots"/>
+  <category id="224" name="Pottery and Glass"/>
+  <category id="225" name="Glass"/>
+  <category id="226" name="Pottery and China"/>
+  <category id="227" name="Real Estate"/>
+  <category id="228" name="Commercial"/>
+  <category id="229" name="Land"/>
+  <category id="230" name="Residential"/>
+  <category id="231" name="Timeshares for Sale"/>
+  <category id="232" name="Other Real Estate"/>
+  <category id="233" name="Sports"/>
+  <category id="234" name="Autographs"/>
+  <category id="235" name="Fan Shop"/>
+  <category id="236" name="Memorabilia"/>
+  <category id="237" name="Sporting Goods"/>
+  <category id="238" name="Trading Cards"/>
+  <category id="239" name="Stamps"/>
+  <category id="240" name="United States"/>
+  <category id="241" name="Australia"/>
+  <category id="242" name="Canada"/>
+  <category id="243" name="Br. Comm. Other"/>
+  <category id="244" name="UK (Great Britain)"/>
+  <category id="245" name="Europe"/>
+  <category id="246" name="Latin America"/>
+  <category id="247" name="Other World"/>
+  <category id="248" name="Philately"/>
+  <category id="249" name="Topical"/>
+  <category id="250" name="Tickets and Experiences"/>
+  <category id="251" name="Event Tickets"/>
+  <category id="252" name="Experiences"/>
+  <category id="253" name="Other Items"/>
+  <category id="254" name="Toys and Hobbies"/>
+  <category id="255" name="Action Figures"/>
+  <category id="256" name="Baby Toys"/>
+  <category id="257" name="Building Toys"/>
+  <category id="258" name="Classic Toys"/>
+  <category id="259" name="Crafting, Art Supplies"/>
+  <category id="260" name="Diecast, Toy Vehicles"/>
+  <category id="261" name="Educational"/>
+  <category id="262" name="Electronic, Battery, Wind-Up"/>
+  <category id="263" name="Fast Food, Advertising"/>
+  <category id="264" name="Games"/>
+  <category id="265" name="Model RR, Trains"/>
+  <category id="266" name="Models"/>
+  <category id="267" name="Outdoor Toys, Structures"/>
+  <category id="268" name="Pretend Play, Preschool"/>
+  <category id="269" name="Puzzles"/>
+  <category id="270" name="Radio Control"/>
+  <category id="271" name="Robots, Monsters, Space Toys"/>
+  <category id="272" name="Slot Cars"/>
+  <category id="273" name="Stuffed Animals, Beanbag"/>
+  <category id="274" name="Toy Soldiers"/>
+  <category id="275" name="TV, Character Toys"/>
+  <category id="276" name="Vintage, Antique Toys"/>
+  <category id="277" name="Wholesale Lots"/>
+  <category id="278" name="Travel"/>
+  <category id="279" name="Airline"/>
+  <category id="280" name="Cruises"/>
+  <category id="281" name="Lodging"/>
+  <category id="282" name="Luggage"/>
+  <category id="283" name="Vacation Packages"/>
+  <category id="284" name="Other Travel"/>
+  <category id="285" name="Everything Else"/>
+  <category id="286" name="eBay User Tools"/>
+  <category id="287" name="Education and Learning"/>
+  <category id="288" name="Genealogy"/>
+  <category id="289" name="Gifts and Occasions"/>
+  <category id="290" name="Health and Beauty"/>
+  <category id="291" name="Memberships"/>
+  <category id="292" name="Metaphysical"/>
+  <category id="293" name="Personal Security"/>
+  <category id="294" name="Personalized, Customized"/>
+  <category id="295" name="Religious Products and Supplies"/>
+  <category id="296" name="Reward Pts, Incentive Progs"/>
+  <category id="297" name="Services"/>
+  <category id="298" name="Shipping and Packing Supplies"/>
+  <category id="299" name="Show Supplies"/>
+  <category id="300" name="Test Auctions"/>
+  <category id="301" name="Weird Stuff"/>
+  <category id="302" name="Mature Audiences"/>
+</Categories>
