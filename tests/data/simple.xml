@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE PLAY SYSTEM "http://www.cse.ogi.edu/~tufte/xml/numbers.dtd">
+
+<ROOT>
+<PLAY>
+<NUM>1</NUM>
+</PLAY>
+<PLAY>
+<FOO>4</FOO>
+</PLAY>
+<PLAY>
+<NUM>1</NUM>
+</PLAY>
+<PLAY>
+<FOO>1</FOO>
+</PLAY>
+<PLAY>
+<BAT>5</BAT>
+</PLAY>
+<PLAY>
+<BAT>1</BAT>
+</PLAY>
+</ROOT>
