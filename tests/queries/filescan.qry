@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<filescan id="inputA" filename = "../../tests/data/A.xml"/>
+
+<unnest id="AA" root="" regexp="Relation.Tuple.A" type="content"
+        input="inputA"/>
+
+<construct id="cons" input="AA">
+<result>
+  <A> $AA </A>
+</result>
+
+</construct>
+</plan>

@@ -24,7 +24,6 @@
 </unnest>
 
 <join id="join" left="$acscan" right="$jcscan" 
-          physical="niagara.query_engine.PhysicalHashJoinOperator" 
           input="acscan jcscan">
 </join>
 
