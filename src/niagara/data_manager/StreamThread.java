@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.28 2003/07/03 19:36:29 tufte Exp $
+ * $Id: StreamThread.java,v 1.29 2003/08/01 17:28:23 tufte Exp $
  */
 
 package niagara.data_manager;
@@ -286,7 +286,6 @@ public class StreamThread extends SourceThread {
     private java.io.InputStream createFileStream() 
     throws java.io.FileNotFoundException{
     	String fileName = ((FileScanSpec)spec).getFileName();
-	System.out.println("Creating file stream: " + fileName);
 	return new FileInputStream(((FileScanSpec)spec).getFileName());
     }
 
