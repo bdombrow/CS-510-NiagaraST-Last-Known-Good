@@ -1,9 +1,11 @@
+/* $Id: PhysicalAccumulateOperator.java,v 1.12 2002/10/24 02:44:52 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.Vector;
 import org.w3c.dom.*;
 
 import niagara.ndom.*;
+import niagara.optimizer.colombia.LogicalOp;
 
 import org.xml.sax.*;
 import java.io.*;
@@ -45,34 +47,12 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     private Document accumDoc;
     private boolean recdData;
 
-    /*
-     * Methods of the PhysicalMergeOperator Class
-     */ 
 
-    /**
-     * Constructor for PhysicalAccumulateOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     */
-     
-    public PhysicalAccumulateOperator (op logicalOperator,
-				       SourceTupleStream[] sourceStreams,
-				       SinkTupleStream[] sinkStreams,
-				       Integer responsiveness) 
-        {
-	// Call the constructor of the super class
-	super(sourceStreams,
-	      sinkStreams,
-	      blockingSourceStreams,
-	      responsiveness);
-
+    public PhysicalAccumulateOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
+    }
+    
+    public void initFrom(LogicalOp logicalOperator) {
 	// Type cast the logical operator to a Accumulate operator
 	AccumulateOp logicalAccumulateOperator = 
 	    (AccumulateOp) logicalOperator;

@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalSendOperator.java,v 1.3 2002/05/23 06:31:41 vpapad Exp $
+ * $Id: PhysicalSendOperator.java,v 1.4 2002/10/24 02:48:18 vpapad Exp $
  *
  */
 
@@ -13,6 +13,7 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
+import niagara.optimizer.colombia.LogicalOp;
 import niagara.connection_server.*;
 
 import java.io.*;
@@ -21,9 +22,6 @@ import java.io.*;
  * This is the <code>PhysicalSendOperator</code> that extends
  * the basic PhysicalOperator with the implementation of the Send
  * operator.
- *
- * @version 1.0
- *
  */
 
 public class PhysicalSendOperator extends PhysicalOperator {
@@ -47,31 +45,11 @@ public class PhysicalSendOperator extends PhysicalOperator {
 
     private StreamMaterializer streamMaterializer;
 
-    /**
-     * This is the constructor for the PhysicalSendOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     */
-
-    public PhysicalSendOperator(op logicalOperator,
-				SourceTupleStream[] sourceStreams,
-				SinkTupleStream[] sinkStreams,
-				Integer responsiveness) {
-	
-
-	// Call the constructor of the super class
-	super(sourceStreams,
-	      sinkStreams,
-	      blockingSourceStreams,
-	      responsiveness);
-        
+    public PhysicalSendOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
+    }
+    
+    public void initFrom(LogicalOp logicalOperator) {
         SendOp send = (SendOp) logicalOperator;
         query_id = send.getQueryId();
         cs = send.getCS();
