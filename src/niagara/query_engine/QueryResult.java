@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.12 2003/03/03 08:20:13 tufte Exp $
+  $Id: QueryResult.java,v 1.13 2003/03/05 19:27:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -58,16 +58,6 @@ public class QueryResult {
     }
 
 
-    /**
-     * This exception is thrown when an attempt is made to read results
-     * from a previously closed stream
-     */
-
-    public class ResultsAlreadyReturnedException extends Exception {
-
-    }
-
-
     /////////////////////////////////////////////////////////////
     // These are public static variables of this class         //
     /////////////////////////////////////////////////////////////
@@ -75,38 +65,38 @@ public class QueryResult {
     /**
      * This return code implies that all the results have been returned
      */
-    public static final int EndOfResult = 0;
+    // public static final int EndOfResult = 0; // EOS
 
     /**
      * This return code implies that all partial result have been returned
      */
-    public static final int EndOfPartialResult = 1;
+    //public static final int EndOfPartialResult = 1; //END_PARTIAL
 
     /**
      * This return code implies that there was an error in executing
      * the query
      */
-    public static final int QueryError = 2;
+    //public static final int QueryError = 2;
 
     /**
      * This return code implies that the query is non-blocking
      */
-    public static final int NonBlockingResult = 3;
+    // public static final int NonBlockingResult = 3; //SYNCH_PARTIAL
 
     /**
      * This return code implies the presence of a partial result
      */
-    public static final int PartialQueryResult = 4;
+    //public static final int PartialQueryResult = 4;
 
     /**
      * This return code implies the presence of a final result
      */
-    public static final int FinalQueryResult = 5;
+    //public static final int FinalQueryResult = 5;
 
     /**
      * This return code implies that a call timed out
      */
-    public static final int TimedOut = 6;
+    //public static final int TimedOut = 6;
 
 
     ///////////////////////////////////////////////////////////////////
@@ -118,14 +108,8 @@ public class QueryResult {
      */
 
     public class ResultObject {
-
-		// The status of the request
-		//
-		public int status;
-
-		// The value read
-		//
-		public Document result;
+	public Document result; // the value read from stream
+	public boolean isPartial; // is result partial or final
     }
 
 
@@ -134,35 +118,14 @@ public class QueryResult {
     /////////////////////////////////////////////////////////////
 
     // The query id assigned by the query engine
-    //
     private int queryId;
 
     // The output stream to get results from
-    //
     private SourceTupleStream outputStream;
-
-    // Variable to store whether end of stream has been detected
-    //
-    private boolean endOfStream;
-
-    // Variable to store whether error in execution has been detected
-    //
-    private boolean errorInExecution;
 
     // Variable to store whether the output stream is in the process
     // of generating possibly partial results
-    //
     private boolean generatingPartialResult;
-
-    // for use when not sending results back to client, KT
-    // actually, it isn't good to create new result objects
-    // for every tuple anyway, but that is the least of our 
-    // problems!!!
-    private ResultObject dummyResultObject;
-
-    /////////////////////////////////////////////////////////////
-    // These are the methods of the class                      //
-    /////////////////////////////////////////////////////////////
 
     /**
      * This is the constructor that is initialized with information about
@@ -173,30 +136,9 @@ public class QueryResult {
      */
 
     public QueryResult (int queryId, PageStream outputPageStream) {
-
-		// Initialize the query id
-		//
-		this.queryId = queryId;
-
-		// Initialize the output stream
-		//
-		this.outputStream = new SourceTupleStream(outputPageStream);
-
-		// Initially, no end of stream
-		//
-		this.endOfStream = false;
-
-		// Initially, no error in execution
-		//
-		this.errorInExecution = false;
-
-		// Initially, not generating partial results
-		//
-		this.generatingPartialResult = false;
-
-		// for QUIET
-		dummyResultObject = new ResultObject();
-		dummyResultObject.status = FinalQueryResult;
+	this.queryId = queryId;
+	this.outputStream = new SourceTupleStream(outputPageStream);
+	this.generatingPartialResult = false;
     }
 
 
@@ -207,38 +149,31 @@ public class QueryResult {
      */
 
     public int getQueryId () {
-
-		return queryId;
+	return queryId;
     }
 
+    // KT - hack so I don't have to put ResultObject in it's own class,
+    // as it is I'm removing about 10,000 extra allocations, so I get
+    // one teeny weeny hack
+    public ResultObject getNewResultObject() {
+	return new ResultObject();
+    }
+    
 
     /**
      * This function blocks and waits for the next result from the output
      * stream
      *
-     * @return (a) The nature of the result: It could be either
-     *             <code>QueryError</code> If error in executing query
-     *             <code>EndOfResult</code> If all results have been consumed
-     *             <code>EndOfPartialResult</code> If all partial results
-     *                   have been sent
-     *             <code>NonBlockingResult</code> If query results are non-blocking
-     *             <code>QueryResult</code> An actual query result was read
-     *         (b) The actual query result
-     *
      * @exception java.lang.InterruptedException If thread is interrupted during
      *            execution
-     * @exception ResultsAlreadyReturnedException If stream has returned all
-     *            results already
+     *
+     * @returns Returns the control flag received from stream
      */
-
-    public ResultObject getNext ()
+    public int getNextResult (ResultObject resultObject)
 	throws java.lang.InterruptedException,
-	       ResultsAlreadyReturnedException,
 	       ShutdownException {
-	
-	// Call the internal getNext operator without a timeout
-	//
-	return internalGetNext(-1);
+	// -1 indicates no timeout - infinite timeout
+	return internalGetNext(-1, resultObject);
     }
 
 
@@ -247,61 +182,43 @@ public class QueryResult {
      * the specified timeout interval.
      *
      * @param timeout The specified timeout interval
+     * @param resultObject An object to be filled in with the result
      *
-     * @return (a) The nature of the result: It could be either
-     *             <code>QueryError</code> If error in executing query
-     *             <code>EndOfResult</code> If all results have been consumed
-     *             <code>EndOfPartialResult</code> If all partial results
-     *                   have been sent
-     *             <code>NonBlockingResult</code> If query results are non-blocking
-     *             <code>QueryResult</code> An actual query result was read
-     *             <code>TimedOut</code> If the function timed out
-     *         (b) The actual query result
-     *
-     * @exception ResultsAlreadyReturnedException If stream has returned all
-     *            results already
      */
-
-    public ResultObject getNext (int timeout)
-	throws ResultsAlreadyReturnedException,
-	       ShutdownException, InterruptedException {
-	
-	// Call the internal getNext operator with the timeout
-	return internalGetNext(timeout);
+    public int getNextResult (int timeout, ResultObject resultObject)
+	throws ShutdownException, InterruptedException {
+	return internalGetNext(timeout, resultObject);
     }
 
 
     /**
      * This function request partial results to be sent
      *
-     * @exception ResultsAlreadyReturnedException If stream has returned
-     *            all results already
      * @exception AlreadyReturningPartialException If a partial result
      *            request is pending
      */
 
-    public void returnPartialResults ()
-		throws ResultsAlreadyReturnedException,
-		AlreadyReturningPartialException,
-		ShutdownException {
-
-		// If end of stream, throw exception
-		if (endOfStream) {
-		    throw new ResultsAlreadyReturnedException();
-		}
+    public void requestPartialResult ()
+	throws AlreadyReturningPartialException,
+	       ShutdownException {
 		
-		// If partial results are already invoked, 
-		// then raise an exception
-		if (generatingPartialResult) {
-			throw new AlreadyReturningPartialException();
-		}
+	// If partial results are already invoked, 
+	// then raise an exception
+	if (generatingPartialResult) {
+	    throw new AlreadyReturningPartialException();
+	}
+	
+	// Send a request for a partial result		
+	System.out.println("QR putting partial request down stream");
+	// May return EOS, throw ShutdonwnEx or return NULLFLAG
+	// Think I can ignore EOS...famous last words
+	int ctrlFlag = outputStream.putCtrlMsg(CtrlFlags.GET_PARTIAL, null);
 
-		// Send a request for a partial result		
-		System.out.println("QR putting partial request down stream");
-		outputStream.putCtrlMsg(CtrlFlags.GET_PARTIAL, null);
-
-		// Set the status of generating partial results
-		generatingPartialResult = true;
+	assert (ctrlFlag == CtrlFlags.EOS || ctrlFlag == CtrlFlags.NULLFLAG) :
+	    "Unexpected control flag";
+	
+	// Set the status of generating partial results
+	generatingPartialResult = true;
     }
 
 
@@ -311,230 +228,116 @@ public class QueryResult {
 
     public void kill() { 
 	try {
-	    // If the query is still active then kill it
-	    if (!errorInExecution && !endOfStream) {	    
-		// Dont worry about error, just attempt to put control message
-		outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "kill query"); 
-		// Note that the query is in error
-		errorInExecution = true;
-	    }
+	    // Attempt to kill the query - best effort - ignore errors
+
+	    // return from outputStream.putCtrlMsg could be:
+	    // NULLFLAG, SHUTDOWN, SYNCH_PARTIAL, END_PARTIAL, EOS
+	    // can ignore all of them
+	    outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "kill query"); 
 	} catch(ShutdownException e) {
 	    // ignore since we are killing query...
 	}
+    }
+
+
+    /**
+     * send a request for buffer flush down stream - we've been waiting
+     * too long for results
+     *
+     * @returns a result status, similar to what is in resultObject.status
+     */
+    public int requestBufFlush() 
+	throws ShutdownException {
+	return outputStream.putCtrlMsg(CtrlFlags.REQUEST_BUF_FLUSH, null);
     }
 
      
     /**
      * This function blocks and waits for the next result from the output stream.
      *
-     * @return (a) The nature of the result: It could be either
-     *             <code>QueryError</code> If error in executing query
-     *             <code>EndOfResult</code> If all results have been consumed
-     *             <code>EndOfPartialResult</code> If all partial results
-     *                   have been sent
-     *             <code>NonBlockingResult</code> If query results are non-blocking
-     *             <code>QueryResult</code> An actual query result was read
-     *             <code>TimedOut</code> If the function timed out
-     *         (b) The actual query result
+     * @param timeout Amount of time to sleep on query output stream
+     * @param resultObject Object to be filled in with result
+     *
+     * @return control flag from stream
      *
      * @exception java.lang.InterruptedException If the thread was interrupted
      *            during execution. This happens only without a timeout
-     * @exception ResultsAlreadyReturnedException If stream has returned all
-     *            results already
      */
 
-    public ResultObject internalGetNext (int timeout) 
+    private int internalGetNext (int timeout, ResultObject resultObject) 
 	throws InterruptedException,
-	       ResultsAlreadyReturnedException,
 	       ShutdownException {
 
-	// Create a new result object
-	ResultObject resultObject;
-	if(!NiagraServer.QUIET) {
-	    resultObject = new ResultObject();
-	} else {
-	    resultObject = dummyResultObject;
-	}
-
-	// Check to make sure that stream has not been previously closed
-	if (endOfStream) {
-	    throw new ResultsAlreadyReturnedException();
-	}
-	
-	// If there has been an error in execution, notify
-	if (errorInExecution) {
-	    resultObject.status = QueryError;
-	    return resultObject;
-	}
-
-	// Get the next element from the output stream
-	//
-	StreamTupleElement tuple;
+	// Get the next element from the query output stream
+	resultObject.result = null;
 	
 	if(timeout < 0) {
-	    // neg or 0 implies no timeout, getTuple will block
-	    // until next result received
-	    timeout = 0; 
+	    // neg or 0 implies no timeout, we use
+	    // maxDelay, so we get tuples even from slow streams
+	    timeout = PageStream.MAX_DELAY; 
 	}
-	tuple = outputStream.getTuple(timeout);	
-	
+
+	StreamTupleElement tuple = outputStream.getTuple(timeout);	
+	int ctrlFlag = outputStream.getCtrlFlag();	
+
 	// Now handle the various types of results
 	if (tuple ==  null) {
-	    if(outputStream.timedOut()) {
-		// timed out 
-		processNullElement(resultObject);
-	    } else {
-		// get and process the control message
-		int ctrlFlag = outputStream.getCtrlFlag();
-		processCtrlMessage(resultObject, ctrlFlag);
+	    // process the control message
+	    if(ctrlFlag == CtrlFlags.END_PARTIAL ||
+	       ctrlFlag == CtrlFlags.SYNCH_PARTIAL) {
+		assert generatingPartialResult : "Unexpected partial result";
+		generatingPartialResult = false;
 	    }
 	} else {
-	    // got a tuple
-	    if(!NiagraServer.QUIET) {
-		// Process a stream tuple element read
-		processTupleElement(resultObject,tuple);
-	    }
+	    assert ctrlFlag == CtrlFlags.NULLFLAG :
+		"Unexpected control flag " + CtrlFlags.name[ctrlFlag];
+	    resultObject.isPartial = tuple.isPartial();
+	    resultObject.result = extractXMLDocument(tuple);
 	} 
-	
-	// Return the resultObject
-	return resultObject;
+	return ctrlFlag;
     }
-
-
-    /**
-     * This function processes the case when no result element is read
-     *
-     * @param resultObject The result to be returned to the client
-     */
-
-    private void processNullElement (ResultObject resultObject) {
-
-		// Nothing read - so had timed out
-		//
-		resultObject.status = TimedOut;
-    }
-
-
-    /**
-     * This function processes a control element read
-     *
-     * @param resultObject The result to be returned to the client
-     */
-
-    private void processCtrlMessage (ResultObject resultObject, 
-				     int ctrlFlag) {
-	// Act based on the type of the control message
-	if (ctrlFlag == CtrlFlags.SHUTDOWN) {
-	    // There is an error in the query
-	    resultObject.status = QueryError;
-	    
-	    // Note the presence of error
-	    errorInExecution = true;
-	} else if (ctrlFlag == CtrlFlags.END_PARTIAL) {
-	    // This is the end of a partial result
-	    if (!generatingPartialResult) {
-		throw new PEException("Error: Partial Result when not expecting");
-	    }
-	    
-	    // No more generating partial result
-	    generatingPartialResult = false;
-	    
-	    // Inform client
-	    resultObject.status = EndOfPartialResult;
-	} else if (ctrlFlag == CtrlFlags.SYNCH_PARTIAL) {
-			// This is a non-blocking result
-	    if (!generatingPartialResult) {
-		throw new PEException("Error: Partial Result when not expecting");
-	    }
-	    
-	    // No more generating partial result
-	    generatingPartialResult = false;
-	    
-	    // Inform client=
-	    resultObject.status = NonBlockingResult;
-	} else if (ctrlFlag == CtrlFlags.EOS) {
-	    // This is the end
-	    resultObject.status = EndOfResult;
-	    endOfStream = true;
-	} else {
-	    throw new PEException("unexpected control element");
-	}
-    }
-
-
-    /**
-     * This function processes a result tuple element
-     *
-     * @param resultObject The result to be returned to the client
-     * @param tupleElement The tuple element read from the output stream
-     */
-
-    private void processTupleElement (ResultObject resultObject,
-				      StreamTupleElement tupleElement) {
-
-	// This is a result element, check if partial or final
-	//
-	if (tupleElement.isPartial()) {
-	    resultObject.status = PartialQueryResult;
-	} else {
-	    resultObject.status = FinalQueryResult;
-	}
-	
-	// Extract XML result
-	//
-	resultObject.result = extractXMLDocument(tupleElement);
-    }
-
-    /**
-     * This function extracts an XML document result from a tuple element
-     *
-     * @param tupleElement The tuple element from which the XML document is
-     *                     extracted
-     *
-     * @return The extracted XML document
-     */
 
     private Document extractXMLDocument (StreamTupleElement tupleElement) {
-		// First get the last attribute of the tuple
-		Node lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
+	// First get the last attribute of the tuple
+	Node lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
 	
-		if(lastAttribute instanceof Document) {
-		    return (Document)lastAttribute;
-		} else if (lastAttribute instanceof Element) {
-		    // Create a Document and add add the result to the Doc
-		    Document resultDocument = DOMFactory.newDocument();
-		    Node n = DOMFactory.importNode(resultDocument, 
-						   lastAttribute);
-		    resultDocument.appendChild(n);
-		    return resultDocument;
-		} else if (lastAttribute instanceof Attr) {
-		    Document resultDocument = DOMFactory.newDocument();
-		    // create an element from the attribute
-		    Element newElt = 
-			resultDocument.createElement(((Attr)lastAttribute)
-						     .getName());
-		    Text txt =
-			resultDocument.createTextNode(((Attr)lastAttribute)
-						      .getValue());
-		    newElt.appendChild(txt);
-		    resultDocument.appendChild(newElt);
-		    return resultDocument;
-		} else if (lastAttribute instanceof Text) {
-		    Document resultDocument = DOMFactory.newDocument();
-		    // create an element from the attribute
-		    Element newElt = 
-			resultDocument.createElement("Text");
-		    Text txt =
-			resultDocument.createTextNode(lastAttribute.getNodeValue());
-		    newElt.appendChild(txt);
-		    resultDocument.appendChild(newElt);
-		    return resultDocument;
-		} else {
-		    throw new PEException("KT What did I get?? " +
-					  lastAttribute.getClass().getName());
-		}
+	if(lastAttribute instanceof Document) {
+	    return (Document)lastAttribute;
+	} else if (lastAttribute instanceof Element) {
+	    // Create a Document and add add the result to the Doc
+	    Document resultDocument = DOMFactory.newDocument();
+	    Node n = DOMFactory.importNode(resultDocument, 
+					   lastAttribute);
+	    resultDocument.appendChild(n);
+	    return resultDocument;
+	} else if (lastAttribute instanceof Attr) {
+	    Document resultDocument = DOMFactory.newDocument();
+	    // create an element from the attribute
+	    Element newElt = 
+		resultDocument.createElement(((Attr)lastAttribute)
+					     .getName());
+	    Text txt =
+		resultDocument.createTextNode(((Attr)lastAttribute)
+					      .getValue());
+	    newElt.appendChild(txt);
+	    resultDocument.appendChild(newElt);
+	    return resultDocument;
+	} else if (lastAttribute instanceof Text) {
+	    Document resultDocument = DOMFactory.newDocument();
+	    // create an element from the attribute
+	    Element newElt = 
+		resultDocument.createElement("Text");
+	    Text txt =
+		resultDocument.createTextNode(lastAttribute.getNodeValue());
+	    newElt.appendChild(txt);
+	    resultDocument.appendChild(newElt);
+	    return resultDocument;
+	} else {
+	    throw new PEException("KT What did I get?? " +
+				  lastAttribute.getClass().getName());
+	}
     }
-
+    
 
     public String toString() {
 		return ("Query Result Object for Query "+queryId);

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.26 2003/03/03 16:07:37 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.27 2003/03/05 19:27:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -154,7 +154,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 
 	// set up to ensure timely buffer flushing
 	sleepTime = 0; 
-	maxDelay = 1000;
+	maxDelay = PageStream.MAX_DELAY;
 
 	// Start reading from the first input stream
 	lastReadSourceStream = 0;
@@ -193,7 +193,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	SourceStreamsObject sourceObject = new SourceStreamsObject();
 
 	try {
-	    assert false : " Test ";
 	    // First initialize any necessary data structures etc. for the
 	    // operator, shut down if this fails
 	    initialize();
@@ -237,19 +236,34 @@ implements SchemaProducer, SerializableToXML, Initializable {
 		// no timeout here
 		checkForSinkCtrlMsg();
 
+		// Send flush buffer requests to source streams
+		// maybe they have tuples in their buffers that they
+		// haven't sent yet
 		if(sleepTime >= maxDelay) {
-		    sleepTime = 0;
+		    sleepTime = 0; // reset
+		    timedOut = false; // lets not use timeouts next time around
+
 		    int ctrlFlag = CtrlFlags.NULLFLAG;
-		    int sinkId = 0;
-		    for (; sinkId < numSinkStreams && 
-			     ctrlFlag == CtrlFlags.NULLFLAG; sinkId++) {
-			sinkStreams[sinkId].flushBuffer();
-			
+		    for(int sourceId = 0; sourceId < numSourceStreams &&
+			     ctrlFlag == CtrlFlags.NULLFLAG; sourceId++) {
+			// best we can do is send a message downstream
+			// only send message to active source streams
+			if(activeSourceStreams.contains(sourceId)) {
+			    if(PageStream.VERBOSE)
+				System.out.println(getName() + 
+					   "Requesting buffer flush on stream " 
+						   + sourceId);
+			    ctrlFlag = sourceStreams[sourceId].
+				         putCtrlMsg(CtrlFlags.REQUEST_BUF_FLUSH,
+					 null);
+			    if(ctrlFlag != CtrlFlags.NULLFLAG) {
+				processCtrlMsgFromSource(ctrlFlag, sourceId);
+			    }
+			}
 		    }
-		    if(ctrlFlag != CtrlFlags.NULLFLAG) {
-			processCtrlMsgFromSink(ctrlFlag, sinkId);
-		    }
+
 		}
+
 	    } // end of while loop
 	} catch (java.lang.InterruptedException e) {
 	    shutDownOperator("Operator Interrupted");
@@ -420,7 +434,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	} else {
 	    timeout = responsiveness/numActiveSourceStreams;
 	}
-	//timeout = responsiveness/numActiveSourceStreams;
 	
 	// Make sure the last read source stream is a valid index
 	if (lastReadSourceStream >= numActiveSourceStreams) {
@@ -453,8 +466,10 @@ implements SchemaProducer, SerializableToXML, Initializable {
 		// getNextTuple returned null, meaning we got a control
 		// message or the call timed out
 
+		int ctrlFlag = sourceStreams[streamId].getCtrlFlag();
+
 		// if we timed out, try the next stream
-		if(sourceStreams[streamId].timedOut()) {
+		if(ctrlFlag == CtrlFlags.TIMED_OUT) {
 		    sleepTime += timeout;
 		    lastReadSourceStream = 
 			(lastReadSourceStream + 1)%numActiveSourceStreams;
@@ -462,8 +477,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
 		}
 		    
 		// ok, we got a ctrl message, so process it
-		int ctrlFlag = sourceStreams[streamId].getCtrlFlag();
-
 		// No tuple element to be returned
 		sourceObject.tuple = null;
 		processCtrlMsgFromSource(ctrlFlag, streamId);
@@ -683,13 +696,13 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	throws java.lang.InterruptedException, ShutdownException {
 	// downstream control message is GET_PARTIAL
 	// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG 
+	// REQ_BUF_FLUSH is handled inside SinkTupleStream
 	// here (SHUTDOWN is handled with exceptions)
 
 	switch (ctrlFlag) {
 	case CtrlFlags.GET_PARTIAL:
 	    processGetPartialFromSink(streamId);
 	    break;
-
 	default:
 	    throw new PEException("KT unexpected control message from sink " + CtrlFlags.name[ctrlFlag]);
 	}
@@ -1151,6 +1164,13 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    for(int i = idx; i<currSize-1; i++)
 		streamIds[i] = streamIds[i+1];
 	    currSize--;
+	}
+
+	public boolean contains(int streamId) {
+	    if(indexOf(streamId) == -1)
+		return false;
+	    else
+		return true;
 	}
 
 	private int indexOf(int streamId) {
