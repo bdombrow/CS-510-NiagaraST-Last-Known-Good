@@ -26,14 +26,14 @@ import java.util.*;
 import org.w3c.dom.*;
 import com.ibm.xml.parser.TXElement;
 
-import niagara.utils.PEException;
+import niagara.utils.*;
 import niagara.query_engine.MatchTemplate;
 
 public class NIElement extends NINode {
 
     /* reference to dom element associated with this NIElement */
     private TXElement domElement; 
-    private Boolean writeable;  // reference to writeable bit in NIDocument 
+    private BooleanHolder writeable;// reference to writeable bit in NIDocument 
     private boolean initialized;  // indicates if dom_element ref has been set up 
     private NIDocument ownerDoc; 
     private MatchTemplate matcher; /* changes need to be propagated here */
@@ -64,7 +64,7 @@ public class NIElement extends NINode {
      */
 
     /* FOR CONVERSION FROM DOM */
-    void initialize(TXElement _domElement, Boolean _writeable, 
+    void initialize(TXElement _domElement, BooleanHolder _writeable, 
 		    NIDocument _ownerDoc) {
 	domElement = _domElement;
 	ownerDoc = _ownerDoc;
@@ -87,16 +87,50 @@ public class NIElement extends NINode {
      *
      * @param nodeValue The new value for the content of this element
      */
-    public void setNodeValue(String nodeValue) {
+    public void setTextValue(String newValue) 
+	throws NITreeException {
+	verifyWriteable();
 	/* first check to see if the values are equal - do not
 	 * do any updates if values are equal so as to avoid
 	 * unnecessary copies
 	 */
-	if(!(domElement.getNodeValue().equals(nodeValue))) {
-	    makeWriteable(); 
-	    domElement.setNodeValue(nodeValue);
+	Text textChild = ElementAssistant.getTextChild(domElement);
+	if(textChild ==  null) {
+	    domElement.appendChild(domElement.getOwnerDocument().
+				   createTextNode(newValue));
+	} else if(!(textChild.getNodeValue().equals(newValue))) {
+	    domElement.replaceChild(domElement.getOwnerDocument().
+				    createTextNode(newValue),
+				    textChild);
 	}
 	return;
+    }
+
+    /**
+     * Retrieve the value of the text child of this node
+     *
+     * @return Returns the value of the node
+     */
+    public String getTextValue() {
+	Node textNode = ElementAssistant.getTextChild(domElement);
+	if(textNode != null) {
+	    return textNode.getNodeValue();
+	} else {
+	    return null;
+	}
+    }
+
+    public String getNodeName() {
+	return domElement.getNodeName();
+    }
+
+    public String myGetNodeValue() {
+	return getTextValue();
+    }
+
+    public void mySetNodeValue(String nodeValue) 
+	throws NITreeException {
+	setTextValue(nodeValue);
     }
 
     public NIDocument getOwnerDocument() {
@@ -112,28 +146,32 @@ public class NIElement extends NINode {
      * on attributes - behavior is undefined if we
      * update an attribute used for matching
      */
-    public void setAttribute(String name, String value) {
+    public void setAttribute(String name, String value) 
+	throws NITreeException {
         /* make this element writeable, by copying if necessary
 	 * then call the appropriate function on the domElement
 	 */
-	makeWriteable(); 
+	verifyWriteable();
         domElement.setAttribute(name, value);
+	return;
     }
 
-    public NIAttribute setAttributeNode(NIAttribute niAttr) {
+    public NIAttribute setAttributeNode(NIAttribute niAttr) 
+	throws NITreeException {
         /* make this element writeable, by copying if necessary
 	 * then call the appropriate function on the domElement
 	 */
-	makeWriteable(); 
+	verifyWriteable(); 
 	Attr domAttr = domElement.setAttributeNode(niAttr.getDomAttr());
 	return toNIAttribute(domAttr);
     }
     
-    public NIAttribute removeAttributeNode(NIAttribute niAttr) {
+    public NIAttribute removeAttributeNode(NIAttribute niAttr) 
+	throws NITreeException {
 	/* make writeable, copying if necessary, then call
 	* appropriate function
 	*/
-	makeWriteable();
+	verifyWriteable();
 	Attr domAttr = domElement.removeAttributeNode(niAttr.getDomAttr());
 
 	return toNIAttribute(domAttr);
@@ -172,15 +210,15 @@ public class NIElement extends NINode {
      * Element (excluding Text elements)
      *
      * @return The first child which is an Element.
-     */
-    public NIElement getFirstChildElement() {
+     */ 
+    public NIElement getFirstElementChild() {
 	Node node = domElement.getFirstChild();
 
-	while(!(node instanceof Element) && node != null
-	      && !(node.getNodeName().equals(NINode.TEXT))) {
-	    node = domElement.getNextSibling();
+	while(!(node instanceof Element) && node != null) {
+	    node = node.getNextSibling();
 	}
-	return (NIElement)node;
+
+	return ownerDoc.getAssocNIElement((Element)node);
     }
 
     /**
@@ -189,15 +227,14 @@ public class NIElement extends NINode {
      *
      * @return The next sibling which is an element
      */
-    public NIElement getNextSiblingElement() {
+    public NIElement getNextElementSibling() {
 	Node node = domElement.getNextSibling();
 
-	while(!(node instanceof Element) && node != null
-	      && !(node.getNodeName().equals(NINode.TEXT))) {
-	    node = domElement.getNextSibling();
+	while(!(node instanceof Element) && node != null) {
+	    node = node.getNextSibling();
 	}
 
-	return (NIElement)node;
+	return ownerDoc.getAssocNIElement((Element)node);
     }
 
     /**
@@ -207,22 +244,31 @@ public class NIElement extends NINode {
      * @param tagName The tag name to search for
      *
      * @return The child with the specified tag name.
+     *
+     * @exception Throws NITreeException if there are multiple
+     *             children with this tag name
      */
-    public NIElement getChildByName(String tagName) {
+    public NIElement getChildByName(String tagName) 
+	throws NITreeException {
 	NodeList nl = domElement.getChildNodes();
 	int size = nl.getLength();
 	
 	/* iterate through the list and find the first child with the
 	 * given tag name
 	 */
+	NIElement returnElt = null;
 	for (int i = 0; i < size; i++){
 	    Node node = nl.item(i);
 	    if(tagName.equals(node.getNodeName()) && node instanceof Element) {
-		return ownerDoc.getAssocNIElement((Element)node);
-	    }
+		if(returnElt == null) {
+		    returnElt = ownerDoc.getAssocNIElement((Element)node);
+		} else {
+		    throw new NITreeException("Multiple children with given tag name detected");
+		}
+	    } 
 	}
-	/* none found - return null */
-	return null;
+
+	return returnElt;
     }
 
     /**
@@ -245,6 +291,9 @@ public class NIElement extends NINode {
 	for (int i = 0; i < size; i++){
 	    Node node = nl.item(i);
 	    if(tagName.equals(node.getNodeName()) && node instanceof Element) {
+		if(returnList == null) {
+		    returnList = new ArrayList();
+		}
 		returnList.add(ownerDoc.getAssocNIElement((Element)node));
 	    }
 	}
@@ -259,8 +308,9 @@ public class NIElement extends NINode {
      *
      * @param replacementElt Element that should replace this element
      */
-    public void replaceYourself(NIElement replacementElt) {
-	getParentNode().replaceChild(this, replacementElt);
+    public void replaceYourself(NIElement replacementElt) 
+	throws NITreeException {
+	getParentNode().replaceChild(replacementElt, this);
     }
     
     /**
@@ -271,7 +321,7 @@ public class NIElement extends NINode {
 	if(node instanceof Element) {
 	    return ownerDoc.getAssocNIElement((Element)node);
 	} else if (node instanceof Document) {
-	    if(node != ownerDoc) {
+	    if(node != ownerDoc.getDomDoc()) {
 		throw new PEException("Why me??!!");
 	    }
 	    return ownerDoc; /* this must be the parent ! */
@@ -289,18 +339,43 @@ public class NIElement extends NINode {
      * @param newChild New child element to replace oldChildElt
      *
      */
-    public void replaceChild(NIElement oldChild, NIElement newChild) 
-	throws NITreeException {
+    public void replaceChild(NIElement newChild, NIElement oldChild) 
+    throws NITreeException {
 	/* first make sure I'm writeable */
-	makeWriteable();
+	verifyWriteable();
 
 	/* now do the update */
-	domElement.replaceChild(oldChild.getDomElement(), 
-				newChild.getDomElement());
+	domElement.replaceChild(newChild.getDomElement(), 
+				oldChild.getDomElement());
 
 	/* now update the matcher - we know it has references
 	 * to our kids in it */
 	matcher.replaceElement(oldChild, newChild);
+	return;
+    }
+
+    /**
+     * Adds a child to the list of children
+     * If element is writeable - just make the update, if not
+     * make itself writeable and then do update
+     *
+     * @param child Child to be added 
+     *
+     */
+    public void appendChild(NIElement child) 
+    throws NITreeException {
+
+	/* first make sure I'm writeable */
+	verifyWriteable();
+
+	/* now do the update */
+	domElement.appendChild(child.getDomElement());
+
+	/* no need to update the matcher - only need to 
+	 * update the matcher if we change something it
+	 * has a pointer to
+	 */
+
 	return;
     }
 
@@ -310,23 +385,40 @@ public class NIElement extends NINode {
      * it's parent about the change so the parent can copy
      * itself if necessary.
      */
-    private void makeWriteable() {
-        if(writeable == Boolean.TRUE) {
+   public NIElement makeWriteable() 
+    throws NITreeException {
+        if(writeable.getValue() == true) {
             /* I'm already writeable, just return, yipee!! */
-	    return;
+	    return this;
 	}
 
 	/* ok, now need to clone myself and my domElement and
 	 * be a good kid and tell my parents about it
 	 * note clone makes the necessary association in the map table
 	 */
-        NIElement theNewMe = cloneElement();
+        NIElement theNewMe = cloneEltRefChildren();
 
 	/* Get myself replaced - this will notify my parent */
 	this.replaceYourself(theNewMe);
-	return;
+
+	return theNewMe;
     }
      
+    /**
+     * Verifies that this element is writeable - throws an exception
+     * if it isn't writeable
+     */
+   public void verifyWriteable() 
+    throws NITreeException {
+       if(writeable.getValue() == true) {
+	   /* I'm already writeable, just return, yipee!! */
+	   return;
+       } else {
+	   throw new NITreeException("Attempt to write a non-writeable element");
+       }
+       
+   }
+
     /**
      * Clones this node. The associated domElement is cloned.
      * The clone is shallow - children are not cloned, with
@@ -336,20 +428,33 @@ public class NIElement extends NINode {
      *
      * @return Returns the new NIElement
      */
-    private NIElement cloneElement() {
+    private NIElement cloneEltRefChildren() {
 	/* do a shallow clone of the domElement - note that
 	 * this does not clone the text of the domElement since
 	 * that is contained in a Text sub-element of the domElement
 	 * also note that cloned dom element doesn't have a parent!
+	 * cloneNode copies attributes...
 	 */ 
         Element newDomElement = (Element)domElement.cloneNode(false);
 
-	/* now clone the elements content (text element) */
-	NodeList textNodes = newDomElement.getElementsByTagName(NINode.TEXT);
-	for(int i=0; i < textNodes.getLength(); i++) {
-	    Node temp = textNodes.item(i);
-	    Node clonedTemp = temp.cloneNode(false);
-	    newDomElement.replaceChild(temp, clonedTemp);
+	/* now clone the element's content (text element) */
+	Node textNode = ElementAssistant.getTextChild(domElement);
+	if(textNode != null) {
+	    Node clone = textNode.cloneNode(false);
+	    newDomElement.appendChild(clone);
+	}
+
+	/* reference all the children of the clonee - what
+	 * we want is a copy of the clonee's data and attributes
+	 * and references to the clonee's children
+	 */
+	NIElement myChild = getFirstElementChild();
+	if(myChild != null) {
+	    Element child = myChild.getDomElement();
+	    while(child != null) {
+		newDomElement.appendChild(child);
+		child = ElementAssistant.getNextElementSibling(child);
+	    }
 	}
 
 	/* now create the new NIElement - this function will
@@ -362,7 +467,7 @@ public class NIElement extends NINode {
 
     private NIAttribute toNIAttribute(Attr domAttr) {
 	/* do I probe or create a new one? - probe is probably cheaper */
-	return ownerDoc.getAssocNIAttr(domAttr);
+	return ownerDoc.getAssocNIAttr(domAttr, this);
     }
 
     public void setMatcher(MatchTemplate _matcher) {

@@ -21,16 +21,18 @@ package niagara.query_engine;
 
 import java.lang.*;
 import java.lang.reflect.*;
+import java.io.*;
 
+import niagara.utils.*;
 import niagara.utils.type_system.*;
 import niagara.utils.nitree.*;
 
-class NodeMerge {
-    /* Three types of node merges - 
-     * 1) take the dominant content
-     * 2) do some aggregation of the content 
-     * 3) exact match
-     */
+/** Base class for three types of node merges - 
+ * 1) take the dominant content
+ * 2) do some aggregation of the content 
+ * 3) exact match
+ */
+abstract class NodeMerge {
 
     /* includeOuter is used to
      * specify what is to be done when an attr from left,right
@@ -41,69 +43,33 @@ class NodeMerge {
      * These values not used in merge, just stored here 
      * must be set for dominantcontent and aggregate merges
      */
-    private boolean includeLeftOuter;
-    private boolean includeRightOuter;
+    protected boolean includeLeftOuter;
+    protected boolean includeRightOuter;
     
-    /* isDominant indicates which side is dominant if
-     * content or attribute values are equal
-     * valid for dominant content and exact match merges
-     */
-    private boolean leftIsDominant;
-
-    /* both valid for only aggregate merge */
-    private Method aggMethod; /* typically a NodeHelper method */
-    private Object aggObject; /* on which aggMethod should be called */
-
-    /* allowed values are EXACT_MATCH, DOMINANT_CONTENT, AGGREGATE */
-    private String mergeType; 
-
-    private NodeHelper comparator;
-    private String name; /* mainly for debugging purposes */
+    protected String name; /* mainly for debugging purposes */
     
-    NodeMerge() {
-	includeLeftOuter = false;
-	includeRightOuter = false;
-	leftIsDominant = false;
-	aggMethod = null;
-	aggObject = null;
-	mergeType = null;
-	comparator = null;
-	name = null;
-    }
-
-    void setAsExactMatch(NodeHelper _comparator) {
-	mergeType = new String("EXACT_MATCH");
-	comparator = _comparator;
-	includeLeftOuter = includeRightOuter = leftIsDominant = false;
-	aggMethod = null;
-	aggObject = null;
+    protected void setInnerOuter(int mergeType) {
+	switch(mergeType) {
+	case MergeTree.MT_OUTER:
+	    includeLeftOuter = true;
+	    includeRightOuter = true;
+	    break;
+	case MergeTree.MT_LEFTOUTER:
+	    includeLeftOuter = true;
+	    includeRightOuter = false;
+	    break;
+	case MergeTree.MT_RIGHTOUTER:
+	    includeLeftOuter = false;
+	    includeRightOuter = true;
+	    break;
+	case MergeTree.MT_INNER:
+	    includeLeftOuter = false;
+	    includeRightOuter = false;
+	    break;
+	default:
+	    throw new PEException("Invalid Merge Type");
+	}
 	return;
-    }
-
-    void setAsDominantContent(boolean _leftIsDominant, 
-			      boolean _includeLeftOuter,
-			      boolean _includeRightOuter,
-			      NodeHelper _comparator) {
-	mergeType = new String("DOMINANT_CONTENT");
-	leftIsDominant = _leftIsDominant;
-	includeLeftOuter = _includeLeftOuter;
-	includeRightOuter = _includeRightOuter;
-	comparator = _comparator;
-	aggMethod = null;
-	aggObject = null;
-
-    }
-
-    void setAsAggregate(boolean _includeLeftOuter,
-			boolean _includeRightOuter,
-			Method _aggMethod, Object _aggObject) {
-	mergeType = new String("AGGREGATE");
-	leftIsDominant = false;
-	includeLeftOuter = _includeLeftOuter;
-	includeRightOuter = _includeRightOuter;
-	aggMethod = _aggMethod;
-	aggObject = _aggObject;
-	comparator = null;
     }
 
     /**
@@ -116,53 +82,9 @@ class NodeMerge {
      * @return Returns true if resultNode changed, false if
      *         no updates need to be made based on this merge
      */
+    abstract boolean merge(NINode lNode, NINode rNode, NINode resultNode)
+	throws OpExecException, NITreeException;
 
-    boolean merge(NINode lNode, NINode rNode, NINode resultNode) 
-	throws OpExecException {
-
-	if(mergeType.equals("EXACT_MATCH")) {
-	    if(!comparator.nodeEquals(lNode, rNode)) {
-		throw new 
-		    OpExecException("Non-matching elements in ExactMatchMerge");
-	    } else {
-		/* everything is OK */
-		return false;
-	    }
-	} else if(mergeType.equals("DOMINANT_CONTENT")) {
-	    NINode dominantNode = null;
-	    NINode submissiveNode = null;
-	    if(leftIsDominant) {
-		dominantNode = lNode;
-		submissiveNode = rNode;
-	    } else {
-		dominantNode = rNode;
-		submissiveNode = lNode;
-	    }
-	    
-	    if(dominantNode != resultNode && 
-	       !comparator.nodeEquals(dominantNode, submissiveNode)) {
-		resultNode.setNodeValue(dominantNode.getNodeValue());
-		return true;
-	    } else { 
-	    /* else nothing to do - result is already dominant or
-	       dominant and submissive values are the same */
-		return false;
-	    }
-	} else if(mergeType.equals("AGGREGATE")) {
-	    Object[] args = {lNode, rNode, resultNode};
-	    try {
-		return ((Boolean)aggMethod.invoke(aggObject, args)).booleanValue();
-	    } catch (IllegalAccessException e1){
-		throw new 
-		    OpExecException("Invalid Method Invocation");
-	    } catch (InvocationTargetException e2) {
-		throw new 
-		    OpExecException("Invalid Method Invocation");
-	    }
-	}
-	return false; /* make the compiler happy */
-    }
-    
     /**
      * Function to set name for this node merge object
      * no real use for this other than debugging - will typically
@@ -191,5 +113,8 @@ class NodeMerge {
     boolean includeRightOuter() {
 	return includeRightOuter;
     }
+
+    public abstract void dump(PrintStream os);
+    public abstract String getName();
 }
 

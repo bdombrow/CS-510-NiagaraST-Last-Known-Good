@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.3 2000/08/07 01:41:06 vpapad Exp $
+  $Id: RequestHandler.java,v 1.4 2000/08/09 23:53:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +34,7 @@ import java.net.*;
 import niagara.query_engine.*;
 import niagara.trigger_engine.*;
 import niagara.xmlql_parser.op_tree.logNode;
+import niagara.data_manager.DataManager;
 
 /**There is one request handler per client and receives all the requests from that client
    Then that request is further dispatched to the appropriate module and results sent back
@@ -118,8 +119,27 @@ public class RequestHandler {
 		    
 		    request.serverID = qid;
 		    
-		    // create and populate the query info
-		    ServerQueryInfo queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.QueryEngine);
+		    /* create and populate the query info
+		     * We assume that if the top node is Accumulate
+		     * operator, then we should run Accumulate file
+		     * query
+		     * Oh boy, this is ugly - I use the fact that the
+		     * query has already been parsed to help set up
+		     * the query info. What will I do when I have to
+		     * deal with a real query?? Modify queryInfo after
+		     * the fact?? Ugly!!!
+		     */
+		    ServerQueryInfo queryInfo;
+		    if(topNode.isAccumulateOp()) {
+			System.out.println("top node is accumulate: " +
+					   topNode.getAccumFileName());
+			queryInfo = new ServerQueryInfo(qid,
+					ServerQueryInfo.AccumFile);
+			queryInfo.accumFileName = topNode.getAccumFileName();
+		    } else {
+			queryInfo = new ServerQueryInfo(qid,
+				       ServerQueryInfo.QueryEngine);
+		    }
 		    queryInfo.queryResult = qr;
 		    queryList.put(qid,queryInfo);
 
@@ -312,8 +332,10 @@ public class RequestHandler {
 	    ResponseMessage errMesg = 
 		new ResponseMessage(request,ResponseMessage.INVALID_SERVER_ID);
 	    sendResponse(errMesg);
-	}
-	catch(Exception e){
+	} catch (XMLQueryPlanParser.InvalidPlanException ipe) {
+	    System.out.println("Invalid Plan: " + ipe.getMessage());
+	} catch(Exception e){
+	    System.out.println("Error Message" + e.getMessage());
 	    e.printStackTrace();
 	}
     }    

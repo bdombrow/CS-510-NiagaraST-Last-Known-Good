@@ -19,6 +19,8 @@ public interface NodeHelper {
 
     /* converts a Node into an object of the appropriate type */
     public Object valueOf(NINode node);
+
+    public String getName();
 }
 
 

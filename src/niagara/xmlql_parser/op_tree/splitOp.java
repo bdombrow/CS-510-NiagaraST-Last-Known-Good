@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: splitOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: splitOp.java,v 1.2 2000/08/09 23:54:20 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -94,5 +94,9 @@ public class splitOp extends unryOp {
     public int getNumDestinationStreams(){
         return mappingTbl.size();
      };
+
+    public void dump() {
+	System.out.println("SplitOp");
+    }
 }
 

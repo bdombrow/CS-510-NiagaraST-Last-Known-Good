@@ -77,6 +77,10 @@ public class MapTable {
 
 	WeakRefWithKey weakRef = (WeakRefWithKey)hashtable.get(key);
 
+	if(weakRef == null) {
+	    return null;
+	}
+
 	/* if get returns null, this means that this weak ref was cleared 
 	 * and enqueued in the time between the above call to checkWeakRefQueue 
 	 * and now.  Call checkWeakRefQueue() to get the obsolete key-value

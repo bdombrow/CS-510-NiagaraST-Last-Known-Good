@@ -22,23 +22,23 @@ import niagara.utils.PEException;
  */
 
 
-class DoubleNodeHelper extends NumberNodeHelperBase 
+public class DoubleNodeHelper extends NumberNodeHelperBase 
     implements NumberNodeHelper {
 
     private Class myClass;
 
     public DoubleNodeHelper() {
 	try {
-	    myClass = Class.forName("Double");
+	    myClass = Class.forName("java.lang.Double");
 	} catch (ClassNotFoundException e) {
-	    throw new PEException("This should never happen");
+	    throw new PEException("Coudn't get class for double");
 	}
     }
 
     public Class getNodeClass() { return myClass; }
 
     public Object valueOf(NINode node) {
-	return Double.valueOf(node.getNodeValue());
+	return Double.valueOf(node.myGetNodeValue());
     }
     
     public boolean nodeEquals(NINode lNode, NINode rNode) {
@@ -61,17 +61,28 @@ class DoubleNodeHelper extends NumberNodeHelperBase
     }
     
     public boolean average(NINode lNode, NINode rNode, 
-				  NINode resultNode) {
+				  NINode resultNode) 
+	throws NITreeException {
 	double lVal = ((Double)valueOf(lNode)).doubleValue();
 	double rVal = ((Double)valueOf(rNode)).doubleValue();
-	resultNode.setNodeValue(String.valueOf((lVal+rVal)/2));
+	resultNode.mySetNodeValue(String.valueOf((lVal+rVal)/2));
 	return true;
     }
 
-    public boolean sum(NINode lNode, NINode rNode, NINode resultNode) {
+    public boolean sum(NINode lNode, NINode rNode, NINode resultNode) 
+	throws NITreeException {
 	double lVal = ((Double)valueOf(lNode)).doubleValue();
 	double rVal = ((Double)valueOf(rNode)).doubleValue();
-	resultNode.setNodeValue(String.valueOf(lVal+rVal));
+	resultNode.mySetNodeValue(String.valueOf(lVal+rVal));
 	return true;
     }
+
+    public String getName() {
+        return "DoubleNodeHelper";
+    }
+
+    public String toString() {
+        return getName();
+    }
+
 }

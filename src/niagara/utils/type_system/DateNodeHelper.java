@@ -25,7 +25,7 @@ import niagara.utils.nitree.*;
  */
 
 
-class DateNodeHelper extends NumberNodeHelperBase
+public class DateNodeHelper extends NumberNodeHelperBase
     implements NumberNodeHelper {
 
     /* for now - we all use a default date format */
@@ -34,7 +34,7 @@ class DateNodeHelper extends NumberNodeHelperBase
 
     public DateNodeHelper() {
 	try {
-	    myClass = Class.forName("Date");
+	    myClass = Class.forName("java.text.DateFormat");
 	} catch (ClassNotFoundException e) {
 	    throw new PEException(); /* should never get here */
 	}
@@ -48,7 +48,7 @@ class DateNodeHelper extends NumberNodeHelperBase
 	 * reasonable.  This is ugly!! 
 	 */
 	try {
-	    return dateFormat.parse(node.getNodeValue());
+	    return dateFormat.parse(node.myGetNodeValue());
 	} catch (ParseException e) {
 	    throw new PEException("ParseException: " + e.getMessage());
 	}
@@ -67,11 +67,20 @@ class DateNodeHelper extends NumberNodeHelperBase
 	throw new PEException("Average called on Date !!");
     }
 
-    public boolean sum(NINode lNode, NINode rNode, NINode resultNode) {
+    public boolean sum(NINode lNode, NINode rNode, NINode resultNode) 
+	throws NITreeException {
 	long lVal = ((Date)valueOf(lNode)).getTime();
 	long rVal = ((Date)valueOf(rNode)).getTime();
 	Date d = new Date(lVal + rVal);
-	resultNode.setNodeValue(d.toString());
+	resultNode.mySetNodeValue(d.toString());
 	return true;
+    }
+
+    public String getName() {
+        return "DateNodeHelper";
+    }
+
+    public String toString() {
+        return getName();
     }
 }

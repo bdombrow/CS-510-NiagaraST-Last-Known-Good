@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: dupOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: dupOp.java,v 1.2 2000/08/09 23:54:19 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -56,5 +56,9 @@ public class dupOp extends unryOp {
     public int getNumDestinationStreams(){
         return numDestinationStreams;
     };
+
+    public void dump() {
+	System.out.println("dupOp");
+    }
 }
 

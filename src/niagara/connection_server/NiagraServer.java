@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.3 2000/08/07 01:41:06 vpapad Exp $
+  $Id: NiagraServer.java,v 1.4 2000/08/09 23:53:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -50,7 +50,6 @@ public class NiagraServer
     private static int SEPORT = niagara.search_engine.util.Const.SERVER_PORT;
     private static int NUM_QUERY_THREADS;
     private static int NUM_OP_THREADS;
-    private static int CONNECTION_MANAGER_PORT = 9020;
 
     private static boolean connectToSE = true;
 

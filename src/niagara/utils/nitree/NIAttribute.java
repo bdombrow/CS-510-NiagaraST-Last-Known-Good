@@ -14,23 +14,25 @@ package niagara.utils.nitree;
  */
 
 import org.w3c.dom.*;
+import niagara.utils.*;
 
 public class NIAttribute extends NINode {
 
     /* reference to dom element associated with this NIElement */
     Attr domAttr;
     boolean initialized;
-    NIElement niElt;
+    NIElement parentElt;
 
     public NIAttribute() {
 	domAttr = null;
 	initialized = false;
-	niElt = null;
+	parentElt = null;
     }
 
     /* FOR CONVERSION FROM DOM */
-    public void initialize(Attr _domAttr) {
+    public void initialize(Attr _domAttr, NIElement _parentElt) {
 	domAttr = _domAttr;
+	parentElt = _parentElt;
 	initialized = true;
     }
 
@@ -60,15 +62,39 @@ public class NIAttribute extends NINode {
     
     /** sets value of attr - defined by DOM
      */
-    public void setValue(String value) {
+    public void setValue(String value) 
+	throws NITreeException {
 	/* check for equality of values first to avoid
 	 * unnecessary copies - would be ideal if we had
 	 * a type here.
 	 */
 	if(!value.equals(domAttr.getValue())) {
-	    niElt.setAttribute(domAttr.getName(), value);
+	    parentElt.setAttribute(domAttr.getName(), value);
 	}
 	   return;
+    }
+
+    public String getNodeName() {
+	return domAttr.getNodeName();
+    }
+
+    public String getNodeValue() {
+	return domAttr.getNodeValue();
+    }
+
+    public void setNodeValue(String nodeValue) 
+	throws NITreeException {
+	setValue(nodeValue);
+    }
+
+    public void replaceChild(NIElement newChild, NIElement oldChild) 
+	throws NITreeException {
+	throw new PEException("Replace child not allowed on NIAttribute");
+    }
+
+    public void appendChild(NIElement child) 
+	throws NITreeException {
+	throw new PEException("Append child not allowed on NIAttribute");
     }
 
     /* 
@@ -76,6 +102,15 @@ public class NIAttribute extends NINode {
      */
     Attr getDomAttr() {
 	return domAttr;
+    }
+
+    public String myGetNodeValue() {
+	return getNodeValue();
+    }
+
+    public void mySetNodeValue(String nodeValue) 
+	throws NITreeException{
+	setNodeValue(nodeValue);
     }
 
 }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: QueryEngine.java,v 1.2 2000/08/09 23:54:00 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -219,7 +219,10 @@ public class QueryEngine
 		}
 	
 		// Add it to the query queue  FIX:: May have to make this non-blocking
-		//
+		/* Note, this puts the query info in a queue for a QueryThread
+		 * to pick up.  The Query Thread takes care of the parsing
+		 * and scheduling of this query
+		 */
 		queryQueue.addQuery(queryInfo);
 
 		// Create the query result object to return to the caller

@@ -17,7 +17,10 @@ package niagara.query_engine;
  * @author Kristin Tufte
  */
 
+import java.io.*;
+
 import niagara.utils.nitree.*;
+import niagara.utils.*;
 
 class DeepReplaceMerge extends MergeObject {
 
@@ -34,8 +37,14 @@ class DeepReplaceMerge extends MergeObject {
      *    be kept (replaced)
      *    
      */
-    DeepReplaceMerge(boolean _keepLeft) {
-	keepLeft = _keepLeft;
+    DeepReplaceMerge(int domSide) {
+	if(domSide == MergeTree.DS_RIGHT) {
+	    keepLeft = false;
+	} else if (domSide == MergeTree.DS_LEFT) {
+	    keepLeft = true;
+	} else {
+	    throw new PEException("Invalid dominant side");
+	}
     }
 
     /** accumulates the specified fragment element into the accumulator
@@ -47,9 +56,14 @@ class DeepReplaceMerge extends MergeObject {
      * @exception OpExecException Thrown if exact match criteria isn't met
      */
     void accumulate(NIElement accumElt, NIElement fragElt) 
-	throws OpExecException {
+	throws OpExecException, NITreeException {
 
 	/* convention - accumulator is always left */
+
+	/* Don't need to do anything special for the case when
+	 * there is an empty accumlElt (as may occur when we
+	 * start with a null accumulator)
+	 */
 
 	/* if keepLeft => accumulator is dominant =>
 	 * there is nothing to do
@@ -57,7 +71,6 @@ class DeepReplaceMerge extends MergeObject {
 	if(!keepLeft) {
 	    accumElt.replaceYourself(fragElt);
 	} 
-
 	return;
     }
 
@@ -71,7 +84,7 @@ class DeepReplaceMerge extends MergeObject {
      */
     NIElement merge(NIElement rElt, NIElement lElt, NIDocument resDoc,
 		    String tagName) 
-	throws OpExecException {
+	throws OpExecException, NITreeException {
 	NIElement resElt = null;
 	if(keepLeft) {
 	    resElt = lElt;
@@ -97,5 +110,25 @@ class DeepReplaceMerge extends MergeObject {
      */
     boolean isDeepMerge() {
 	return true;
+    }
+
+    public void dump(PrintStream os) {
+	if(keepLeft == true) {
+	    os.println("Deep Replace Merge: keep left");
+	} else {
+	    os.println("Deep Replace Merge: keep right");
+	}
+    }
+
+    public String toString() {
+	if(keepLeft == true) {
+	    return "Deep Replace Merge: keep left";
+	} else {
+	    return "Deep Replace Merge: keep right";
+	}
+    }
+
+    public String getName() {
+	return "Deep Replace";
     }
 }

@@ -20,6 +20,8 @@ package niagara.query_engine;
  * @author Kristin Tufte
  */
 
+import java.io.*;
+
 import niagara.utils.nitree.*;
 
 abstract class MergeObject {
@@ -36,7 +38,7 @@ abstract class MergeObject {
      * @return Returns nothing 
      */
     abstract void accumulate(NIElement accumElt, NIElement fragElt) 
-	throws OpExecException;
+	throws OpExecException, NITreeException;
 
     /** 
      * merges two fragments together
@@ -50,7 +52,7 @@ abstract class MergeObject {
      */
     abstract NIElement merge(NIElement lElt, NIElement rElt, 
 			     NIDocument resDoc, String tagName)
-	throws OpExecException;
+	throws OpExecException, NITreeException;
 
 
     /**
@@ -58,6 +60,17 @@ abstract class MergeObject {
      * recursion should continue after this merge is completed
      */
     abstract boolean isDeepMerge();
+
+    /**
+     * outputs a string representation of the contents to the
+     * given print stream
+     */
+    abstract public void dump(PrintStream os);
+
+    /**
+     * returns the name of the merge
+     */
+    abstract public String getName();
 }
 
 

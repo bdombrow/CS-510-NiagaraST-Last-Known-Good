@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ServerQueryInfo.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: ServerQueryInfo.java,v 1.2 2000/08/09 23:53:48 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,6 +40,7 @@ public class ServerQueryInfo {
     final static int QueryEngine = 1;
     final static int TriggerEngine = 2;
     final static int GetDTD = 3;
+    final static int AccumFile = 4;
 
     int queryType;
 
@@ -57,6 +58,7 @@ public class ServerQueryInfo {
     // qe query related data
     QueryResult queryResult;
 
+    String accumFileName;
 
     /**Constructor
        @param queryId The Server Query Id (different from QID given by QE/Client 
@@ -85,7 +87,15 @@ public class ServerQueryInfo {
     boolean isQEQuery() {
 	return queryType == QueryEngine;
     }
-    
+   
+    boolean isAccumFileQuery() {
+        return queryType == AccumFile;
+    }
+
+    boolean isDTDQuery() {
+        return queryType == GetDTD;
+    }
+
     public int getQueryId() {
 	return queryId;
     }

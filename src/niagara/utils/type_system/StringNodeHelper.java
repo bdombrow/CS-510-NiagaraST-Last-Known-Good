@@ -22,13 +22,13 @@ import niagara.utils.PEException;
  */
 
 
-class StringNodeHelper implements NodeHelper {
+public class StringNodeHelper implements NodeHelper {
     
     private Class myClass;
 
     public StringNodeHelper() {
 	try {
-	    myClass = Class.forName("String");
+	    myClass = Class.forName("java.lang.String");
 	} catch (ClassNotFoundException e) {
 	    throw new PEException(); /* should never get here */
 	}
@@ -37,11 +37,18 @@ class StringNodeHelper implements NodeHelper {
     public Class getNodeClass() { return myClass;}
 
     public Object valueOf(NINode node) {
-	return node.getNodeValue();
+	return node.myGetNodeValue();
     }
 
     public boolean nodeEquals(NINode lNode, NINode rNode) {
-	return lNode.getNodeValue().equals(rNode.getNodeValue());
+	return lNode.myGetNodeValue().equals(rNode.myGetNodeValue());
+    }
+    public String getName() {
+        return "StringNodeHelper";
+    }
+
+    public String toString() {
+        return getName();
     }
 
 }

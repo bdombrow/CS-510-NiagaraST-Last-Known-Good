@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SumOp.java,v 1.1 2000/08/03 04:41:10 vpapad Exp $
+  $Id: SumOp.java,v 1.2 2000/08/09 23:54:18 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -123,5 +123,9 @@ public class SumOp extends groupOp {
 
     public schemaAttribute getSummingAttribute () {
 	return summingAttribute;
+    }
+
+    public void dump() {
+	System.out.println("SumOp");
     }
 }

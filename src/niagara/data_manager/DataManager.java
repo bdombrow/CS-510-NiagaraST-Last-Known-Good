@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DataManager.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: DataManager.java,v 1.2 2000/08/09 23:53:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,14 +30,8 @@ package niagara.data_manager;
 import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import java.util.*;
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.URL;
-import java.net.MalformedURLException;
+import java.io.*;
+import java.net.*;
 
 import niagara.search_engine.server.*;
 
@@ -67,6 +61,9 @@ public class DataManager {
     private SEClient client=null;
 
     private String tmpDir;
+
+    /* Table storing accumulate files */
+    public static HashMap AccumFileDir = new HashMap();
     
     public DataManager(String path, 
 		       int diskSpace, 
@@ -88,6 +85,12 @@ public class DataManager {
                                +tmpDir+dtd_persist);
             
             dtdDir = (DTDDirectory)CUtil.persistent2memory(tmpDir+dtd_persist);
+	    /* uugh - this is not nice error handling, but it is an
+	    * improvement
+	    */
+	    if(dtdDir == null) {
+               System.err.println("WARNING: Error importing dtdDir");
+	    }
         }
         else {
             dtdDir = new DTDDirectory(path);
@@ -125,7 +128,7 @@ public class DataManager {
      *                             data manager is being closed 
      */
     public synchronized DTD getDTD(String dtdURL) 
-    {
+    throws ParseException, IOException, MalformedURLException {
 	DTD dtd = null;
         dtd = dtdDir.getDTD(dtdURL);
 	return dtd;
@@ -314,8 +317,8 @@ public class DataManager {
     //////////////  End //////////////////////////////////////
 
     public boolean getDocuments(Vector xmlURLList, 
-                                             regExp pathExpr,   
-                                             SourceStream stream) 
+				regExp pathExpr,   
+				SourceStream stream) 
     {
         return cacheM.getDocuments(xmlURLList, pathExpr, stream);
     }

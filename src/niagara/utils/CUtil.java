@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CUtil.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: CUtil.java,v 1.2 2000/08/09 23:54:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -68,7 +68,7 @@ public class CUtil {
      *
      */
     public static DTD parseDTD(String dtdURL) 
-    {
+	throws ParseException, FileNotFoundException, IOException, MalformedURLException {
 	
 	// Set up a parser
 	// 
@@ -77,34 +77,29 @@ public class CUtil {
 
 	// Parse the DTD
 	//
-        try {
-           
-	    // Parse from a file stream
-	    // 
-            if (dtdURL.indexOf(":") < 0) {    
-                FileInputStream inStream = new FileInputStream(dtdURL);
-                dtd = p.readDTDStream( inStream );
-            }
-	    
-	    // Parse from a URL stream
-	    //
-            else {
-                URL aurl = new URL(dtdURL);
-                InputStream inStream = aurl.openStream();
-                dtd = p.readDTDStream( inStream );
-            }
-	    
-	    // Throw exception if parse failed
-	    //
-            if (p.getNumberOfWarnings()+p.getNumberOfErrors()>0){
-                System.out.println("Parse Error: "+dtdURL+" is not valid DTD file");
-		return null;
-	    }
-	    return dtd;
+
+	// Parse from a file stream
+	// 
+	if (dtdURL.indexOf(":") < 0) {    
+	    FileInputStream inStream = new FileInputStream(dtdURL);
+	    dtd = p.readDTDStream( inStream );
 	}
-	catch (Exception e){
-            return null;
-        }	
+	
+	// Parse from a URL stream
+	//
+	else {
+	    URL aurl = new URL(dtdURL);
+	    InputStream inStream = aurl.openStream();
+	    dtd = p.readDTDStream( inStream );
+	}
+	
+	// Throw exception if parse failed
+	//
+	if (p.getNumberOfWarnings()+p.getNumberOfErrors()>0){
+	    System.out.println("Parse Error: "+dtdURL+" is not valid DTD file");
+	    throw new ParseException("Error parsing DTD File: " +dtdURL);
+	}
+	return dtd;
     }
     
 
@@ -280,13 +275,10 @@ public class CUtil {
 		Node child = nl.item(i);
 		if (pruneEmptyNodes(child)) st.push(child);
 	    }
-	    try {
-		while(!st.empty()) {
-		    Node child=(Node) st.pop();
-		    node.removeChild(child);
-		}
+	    while(!st.empty()) {
+		Node child=(Node) st.pop();
+		node.removeChild(child);
 	    }
-	    catch (Exception e) { }
 	}	
 	return empty;
     }
@@ -316,7 +308,7 @@ public class CUtil {
      *  @return the parsed XML document or null
      */
     public static TXDocument parseXML(String url)
-    {
+    throws FileNotFoundException, MalformedURLException, IOException, ParseException{
 	
 	// Set up a parser
 	// 
@@ -329,86 +321,59 @@ public class CUtil {
 
 	// Parse
 	//
-        try {
-           
-	    // Parse from a file stream
-	    // 
-            if (url.indexOf(":") < 0) {    
-                FileInputStream inStream = new FileInputStream(url);
-                p.readStream( inStream );
-            }
-	    
-	    // Parse from a URL stream
-	    //
-            else {
-                URL aurl = new URL(url);
-                InputStream inStream = aurl.openStream();
-                p.readStream( inStream );
-            }
-          
-	    // Throw exception if parse failed
-	    //
-            if (p.getNumberOfWarnings()+p.getNumberOfErrors()>0)
-                throw new Exception("Parse Error: "+url+
-				    " is not valid XML file");
-            return doc;
-
-        }
-        catch (Exception e) {
-            // e.printStackTrace();
-            return null;
-        }
+	// Parse from a file stream
+	// 
+	if (url.indexOf(":") < 0) {    
+	    FileInputStream inStream = new FileInputStream(url);
+	    p.readStream( inStream );
+	}
+	
+	// Parse from a URL stream
+	//
+	else {
+	    URL aurl = new URL(url);
+	    InputStream inStream = aurl.openStream();
+	    p.readStream( inStream );
+	}
+	
+	// Throw exception if parse failed
+	//
+	if (p.getNumberOfWarnings()+p.getNumberOfErrors()>0) {
+		System.out.println("WARNING: Error parsing " + url);
+	    throw new ParseException("Error parsing xml file: " + url);
+	}
+	return doc;
     }
 
     
     private static InputStream getInputStream(String fileName) 
-    { 
+	throws FileNotFoundException { 
         FileInputStream fileInStream;
-        try {
-	    fileInStream = new FileInputStream(fileName);
-        }
-        catch (FileNotFoundException e) {
-            return null;
-        }        
+	fileInStream = new FileInputStream(fileName);
         return fileInStream;
     }
 
 
     private static OutputStream getOutputStream(String fileName) 
-    { 
+	throws FileNotFoundException { 
         FileOutputStream fileOutStream;
-        try {
             fileOutStream = new FileOutputStream(fileName);
-        }
-        catch (FileNotFoundException e) {
-            return null;
-        }
         return fileOutStream;
     }
 
 
     private static InputStream getInputStream(Socket sock) 
-    { 
+	throws IOException { 
         InputStream inStream;
-        try {
-            inStream = sock.getInputStream();
-        }
-        catch (IOException e) {
-            return null;
-        }
+	inStream = sock.getInputStream();
         return inStream;
     }
    
  
     private static OutputStream getOutputStream(Socket sock) 
-    { 
+    throws IOException { 
         OutputStream outStream;
-        try {            
-            outStream = sock.getOutputStream();
-        }
-        catch (IOException e) {
-            return null;
-        }
+	outStream = sock.getOutputStream();
         return outStream;
     }
    
@@ -420,39 +385,34 @@ public class CUtil {
      *  @param fileName the persistent storage of an object
      *  @return a boolean indicating status
      */
-    public static boolean memory2persistent(Object obj, String fileName) 
-    {
-
-        // Create a file output stream, declare ref for object output stream
-        //
-        OutputStream outStream = getOutputStream(fileName);
-	ObjectOutputStream objOutStream = null;    
-        
-        if (outStream != null) {
-
+    public static boolean memory2persistent(Object obj, String fileName) {
+	try {
+	    // Create a file output stream, declare ref for object output stream
+	    //
+	    OutputStream outStream = getOutputStream(fileName);
+	    ObjectOutputStream objOutStream = null;    
+	    
 	    // Write the Object to an object output stream
 	    //
-            try {                
-		objOutStream = new ObjectOutputStream(outStream);
-      
-		if(objOutStream != null){
-		    objOutStream.writeObject(obj);
-		    outStream.close();
-		    return true;
-		}
-		return false;
-            }
-            catch (NotSerializableException e) {
-                System.err.println("CUtil:memory2persistent-object needs "+
-                                   "to implement Serializable interface\n");
-                return false;
-            }
-	    catch(IOException ioe){
-		System.err.println("IO exception: "+ioe);
-		return false;
-	    }
-        }
-	return false;
+	    objOutStream = new ObjectOutputStream(outStream);
+	    
+	    objOutStream.writeObject(obj);
+	    outStream.close();
+	    return true;
+	}
+	catch (NotSerializableException e) {
+	    System.err.println("CUtil:memory2persistent-object needs "+
+			       "to implement Serializable interface\n");
+	    return false;
+	} catch (FileNotFoundException fnfe) {
+	    System.err.println("Unable to make object persistent. File: " +
+			       fileName + " not found.");
+	    return false;
+	}
+	catch(IOException ioe){
+	    System.err.println("IO exception: "+ioe);
+	    return false;
+	}
     }
 
 
@@ -464,44 +424,32 @@ public class CUtil {
      */
     public static Object persistent2memory(String fileName)
     {
+	try {
+	    // Open a stream on the persistent object source
+	    //
+	    InputStream inStream = getInputStream(fileName);
+	    ObjectInputStream objInStream = null;
+	    Object retObject = null;
 
-        // Open a stream on the persistent object source
-        //
-        InputStream inStream = getInputStream(fileName);
-	ObjectInputStream objInStream = null;
-	Object retObject = null;
-        
-	if (inStream != null) {
-	 
 	    // Create an object input stream, read the object
 	    // close stream and return object, if error ret null
 	    //
-            try {                
-		objInStream = new ObjectInputStream(inStream);
-		if(objInStream != null){
-		    try{
-			retObject = objInStream.readObject();  // not pass by ref
-		    }catch(Exception ee){
-			System.out.println("Exception ocurred while reading object: "+ee);
-		    }
-		    objInStream.close();
-		    return retObject;
-		}
-		
-		inStream.close();
-            }
-            catch (NotSerializableException e) {
-                System.err.println("CUtil:persistent2memory-object needs "+
-                                   "to implement Serializable interface\n");
-		return null;
-            }
-	    catch (IOException ioe){
-		System.err.println("IOException: "+ioe);
-		return null;
-	    }
+	    objInStream = new ObjectInputStream(inStream);
+	    retObject = objInStream.readObject();  // not pass by ref
+	    objInStream.close();
+	    return retObject;
+	} catch (NotSerializableException e) {
+	    System.err.println("CUtil:persistent2memory-object needs "+
+			       "to implement Serializable interface\n");
+	    return null;
 	}
-
-	return null;
+	catch (IOException ioe){
+	    System.err.println("IOException in persistent2memory: "+ioe);
+	    return null;
+	} catch (ClassNotFoundException cnfe) {
+	    System.err.println("Unexplained class not found exception: "+cnfe);
+	    return null;
+	}
     }
 
 
@@ -514,39 +462,28 @@ public class CUtil {
      */
     public static boolean memory2socket(Object obj, Socket sock) 
     {
-        // Open an output stream connected to the socket
-        //
-        OutputStream outStream = getOutputStream(sock);
-	ObjectOutputStream objOutStream = null;
-                
-        if (outStream != null) {    
+	try {
+	    // Open an output stream connected to the socket
+	    //
+	    OutputStream outStream = getOutputStream(sock);
+	    ObjectOutputStream objOutStream = null;
             
 	    // Write the object to the socket stream, return true
 	    //
-	    try {                
-		objOutStream = new ObjectOutputStream(outStream);
-		if(objOutStream != null){
-		    try{
-			objOutStream.writeObject(obj);
-		    }
-		    catch(Exception re){
-			System.err.println("Failed to write the object to a stream: "+re);
-		    }
-		    
-		    objOutStream.close();
-		    return true;
-		}
-		outStream.close();
-	    }
-	    catch (NotSerializableException e) {
-		System.err.println("CUtil:objectToPersist-object needs "+
-				   "to implement Serializable interface\n");
-	    }
-	    catch (IOException ioe){
-		System.err.println("IOException: "+ioe);
-	    }
-	}	
-	return false;
+	    objOutStream = new ObjectOutputStream(outStream);
+	    objOutStream.writeObject(obj);		    
+	    objOutStream.close();
+	    return true;
+	}
+	catch (NotSerializableException e) {
+	    System.err.println("CUtil:objectToPersist-object needs "+
+			       "to implement Serializable interface\n");
+	    return false;
+	}
+	catch (IOException ioe){
+	    System.err.println("IOException: "+ioe);
+	    return false;
+	}
     }
 
 
@@ -559,38 +496,32 @@ public class CUtil {
      */
     public static Object socket2memory(Socket sock) 
     {
-        // Get the output stream
-        //
-        InputStream inStream = getInputStream(sock);
-        ObjectInputStream objInStream = null;
-        Object retObj = null;
-
-        if (inStream != null) {
+	try {
+	    // Get the output stream
+	    //
+	    InputStream inStream = getInputStream(sock);
+	    ObjectInputStream objInStream = null;
+	    Object retObj = null;
             
 	    // Read the object from the socket if possible
 	    //
-            try {                
-		objInStream = new ObjectInputStream(inStream);		
-		if(objInStream != null){
-		    try{
-			retObj = objInStream.readObject();
-		    }
-		    catch(Exception cce){
-			System.err.println("Error occured while reading object from socket");
-		    }
-		    objInStream.close();
-		    return retObj;
-		}
-            }
-            catch (NotSerializableException e) {
-                System.err.println("DMUtil:objectToPersist-object needs "+
-                                   "to implement Serializable interface\n");
-            }
-            catch(IOException ioe){
-		System.err.println("IOException: "+ ioe);
-	    }
+	    objInStream = new ObjectInputStream(inStream);		
+	    retObj = objInStream.readObject();
+	    objInStream.close();
+	    return retObj;	    
 	}
-        return null;
+	catch (NotSerializableException e) {
+	    System.err.println("DMUtil:objectToPersist-object needs "+
+			       "to implement Serializable interface\n");
+	    return null;
+	}
+	catch(IOException ioe){
+	    System.err.println("IOException: "+ ioe);
+	    return null;
+	} catch (ClassNotFoundException cnfe) {
+	    System.err.println("Unexplained class not found exception: "+cnfe);
+	    return null;
+	}
     }
 
 

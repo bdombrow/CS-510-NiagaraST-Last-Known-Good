@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: nestOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: nestOp.java,v 1.2 2000/08/09 23:54:19 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -131,4 +131,9 @@ public class nestOp extends groupOp {
 	//
 	return resultTemplate;
     }
+
+    public void dump() {
+	System.out.println("NestOp");
+    }
+
 }

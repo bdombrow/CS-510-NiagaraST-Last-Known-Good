@@ -21,8 +21,12 @@ package niagara.query_engine;
  */
 
 import java.util.*;
+import org.w3c.dom.*;
+import java.io.*;
 
 import niagara.utils.nitree.*;
+import niagara.utils.*;
+import niagara.utils.type_system.*;
 
 class ShallowContentMerge extends MergeObject {
 
@@ -38,27 +42,111 @@ class ShallowContentMerge extends MergeObject {
     private boolean rightIsResult;
 
     /**
-     * Constructor for ShallowContentMerge - sets up the NodeMerge
-     * fields based on arguments
-     *
-     * @param _contentMerge the NodeMerge object to be used for the Node content
-     * @param attrNames Array of attrNames associated with the attrMerges
-     * @param attrMerges Array of NodeMerges for the associated attributes
-     *
+     * Constructor for ShallowContentMerge - reads in a ShallowContent
+     * DOM element from the XML merge tree 
      */
-    ShallowContentMerge(NodeMerge _contentMerge, String[] attrNames,
-			NodeMerge[] attrMerges) {
-	contentMerge = _contentMerge;
-	attrMergesMap = new HashMap();
-
-	if(attrNames != null && attrMerges != null) {
-	    for(int i = 0; i < attrMerges.length; i++) {
-		attrMerges[i].setName(attrNames[i]); /* really for debugging */
-		attrMergesMap.put(attrNames[i], attrMerges[i]);
-	    }
+    ShallowContentMerge(Element shallowContElt, int treeDomSide,
+			int treeMergeType) 
+	throws MTException {
+	if(shallowContElt.getNodeName().equals("ExactMatch")) {
+	    createExactMatchMerge();
 	}
+
+	contentMerge = createNodeMerge(shallowContElt, 
+				       treeDomSide, treeMergeType);
+	
+ 	attrMergesMap = new HashMap();
+
+	/* Go through chidren of shallowContElt and create
+	 * attribute merging info
+	 */
+	String attrName;
+	NodeMerge attrNodeMerge;
+	Element attrShallowContElt;
+
+	Element attrMergeElt = 
+	    ElementAssistant.getFirstElementChild(shallowContElt);
+	while(attrMergeElt != null) {
+	    attrName = attrMergeElt.getAttribute("AttrName");
+	    attrShallowContElt = 
+		ElementAssistant.getFirstElementChild(attrMergeElt);
+	    if(attrShallowContElt != null) {
+		attrNodeMerge=createNodeMerge(attrShallowContElt, 
+					      treeDomSide, treeMergeType);
+		/* just for safety */
+		if(ElementAssistant.getNextElementSibling(attrMergeElt)
+		   != null) {
+		    throw new PEException("Unexpected sibling");
+		}
+	    } else {
+		/* attribute is listed, but no merge method specified -
+		 * exactMatch is the default
+		 */
+		NodeHelper comparator = 
+		    getAppropriateNodeHelper(shallowContElt);
+		attrNodeMerge = new ExactMatchNodeMerge(comparator);
+	    }
+	    attrNodeMerge.setName(attrName);
+	    attrMergesMap.put(attrName, attrNodeMerge);
+	    attrMergeElt =
+		ElementAssistant.getNextElementSibling(attrMergeElt);
+	}
+
 	return;
     }
+
+    private NodeHelper getAppropriateNodeHelper(Element shallowContElt) 
+	throws MTException {
+	String lValueType = shallowContElt.getAttribute("LValueType");
+	String rValueType = shallowContElt.getAttribute("RValueType");
+	
+	return NodeHelpers.getAppropriateNodeHelper(lValueType, rValueType);
+    }
+
+    private NodeMerge createNodeMerge(Element shallowContElt, 
+				      int treeDomSide, int treeMergeType) 
+	throws MTException {
+
+	String fcn = shallowContElt.getAttribute("Function");
+	NodeHelper comparator = getAppropriateNodeHelper(shallowContElt);
+	NodeMerge contentMerge;
+
+	if(fcn.equals("replace")) {
+	    contentMerge = new ReplaceNodeMerge(treeDomSide, treeMergeType,
+						comparator);
+	} else if (fcn.equals("exactMatch")) {
+	    contentMerge = new ExactMatchNodeMerge(comparator);
+	} else if (fcn.equals("sum") || fcn.equals("average") ||
+		   fcn.equals("max") || fcn.equals("min")) {
+	    if(!(comparator instanceof NumberNodeHelper)) {
+		throw new PEException("Invalid Node Helper - need NumberNodeHelper here");
+	    }
+	    /* oh, forgive me for this one... */
+	    if(fcn.equals("average")) {
+		comparator = NodeHelpers.DOUBLEHELPER;
+	    }
+	    contentMerge = new AggNodeMerge(treeMergeType, 
+					    (NumberNodeHelper)comparator, fcn);
+	} else {
+	    throw new MTException(fcn + " is an invalid shallow content function (sum | average | max |  min)");
+	}
+	return contentMerge;
+    }
+
+    private void createExactMatchMerge() {
+	contentMerge = new ExactMatchNodeMerge(NodeHelpers.STRINGHELPER);
+	
+ 	attrMergesMap = new HashMap();
+
+	String attrName = MergeTree.DEF_ATTR_STRING;
+	NodeMerge attrNodeMerge = new ExactMatchNodeMerge(NodeHelpers.STRINGHELPER);
+
+	attrNodeMerge.setName(attrName);
+	attrMergesMap.put(attrName, attrNodeMerge);
+
+	return;
+    }
+
 
     boolean isDeepMerge() { return false; }
 
@@ -67,10 +155,12 @@ class ShallowContentMerge extends MergeObject {
      * 
      * @param _contentMerge The new merge object for the content
      */
+    /*
     void addContentMerge(NodeMerge _contentMerge) {
 	contentMerge = _contentMerge;
 	return;
     }
+    */
 
     /**
      * Adds or changes the merge object for attribute named attrName
@@ -78,12 +168,13 @@ class ShallowContentMerge extends MergeObject {
      * @param attrName The name of the attribute for which NodeMerge is changing
      * @param attrMerge The new NodeMerge object
      */
-    void addAttrMerge(String attrName, NodeMerge attrMerge) {
-	/* remove any previous NodeMerge for this attribute */
+    /*    void addAttrMerge(String attrName, NodeMerge attrMerge) {
+	* remove any previous NodeMerge for this attribute *
 	attrMergesMap.remove(attrName);
 	attrMergesMap.put(attrName, attrMerge);
 	return;
     }
+    */
 
     /** accumulates the specified fragment element into the accumulator
      *
@@ -94,13 +185,21 @@ class ShallowContentMerge extends MergeObject {
      * @exception OpExecException Thrown if exact match criteria isn't met
      */
     void accumulate(NIElement accumElt, NIElement fragElt) 
-	throws OpExecException {
+	throws OpExecException, NITreeException {
 	/* traverse through all attributes and content - if an attribute 
 	 * value (or node content) matches, no action.  If a new 
 	 * attribute/content is found in fragElt, it is inserted into 
 	 * accumElt.  If content/attribute value doesn't match, the value 
 	 * from the "dominant" side is used.
 	 */
+
+	/* Handle the case with an empty accumElt here.
+	 * This may occur when we start with a null accumulator
+	 */
+	if (accumElt.myGetNodeValue() == null) {
+	    accumElt.mySetNodeValue(fragElt.myGetNodeValue());
+	    return;
+	}
 
 	/* convention - accumulator is always left */
 	internal_merge(accumElt, fragElt, accumElt);	
@@ -118,7 +217,7 @@ class ShallowContentMerge extends MergeObject {
      */
     NIElement merge(NIElement lElt, NIElement rElt, NIDocument resDoc,
 		    String tagName) 
-	throws OpExecException {
+	throws OpExecException, NITreeException {
 
 	NIElement resElt = resDoc.createNIElement(tagName);
 	
@@ -144,11 +243,11 @@ class ShallowContentMerge extends MergeObject {
      */
     private void internal_merge(NIElement lElt, NIElement rElt, 
 				NIElement resElt) 
-	throws OpExecException {
+	throws OpExecException, NITreeException {
 
 	/* first some setup */
 	leftElt = lElt;
-	rElt = rElt;
+	rightElt = rElt;
 	resultElt = resElt;
 
 	/* for efficiency - just do this test once - we may
@@ -181,7 +280,7 @@ class ShallowContentMerge extends MergeObject {
      * Maybe should turn this into a HashJoin class...
      */
     private void hashMergeAttributes() 
-	throws OpExecException {
+	throws OpExecException, NITreeException {
 	/* create hash maps from the attributes - I don't use
 	 * NamedNodeMap because I don't want attributes with
 	 * default values to be replaced, and because I don't
@@ -196,74 +295,83 @@ class ShallowContentMerge extends MergeObject {
 	ArrayList resultAttrs = new ArrayList(); 
 	ArrayList changedAttrs = new ArrayList();
 
-	/* join the attrMaps - join condition is equality of attribute names
-	 * look for matches in the maps - if a match found - then
-	 * proceed to merge the matching attributes - if no
-	 * match found, process the "outer" attribute appropriately
-	 */
-	/* iterate through right(fragment) and probe left (accum)
-	 */
-	Iterator rIterator = rAttrsMap.values().iterator();
-	while(rIterator.hasNext()) {
-	    NIAttribute rAttr = (NIAttribute)(rIterator.next());
+	if(lAttrsMap == null && rAttrsMap == null) {
+	    /* nothing to do - there are no attributes */
+	    return;
+	} else if (lAttrsMap == null) {
+	    /* only attributes on "right" */
+	    processAttrsAsOuter(rAttrsMap, false, rightIsResult,
+				resultAttrs, rightElt);
+	} else if (rAttrsMap == null) {
+	    processAttrsAsOuter(lAttrsMap, true, leftIsResult,
+				resultAttrs, leftElt);
+	} else {
 
-	    /* Ignore all attributes without any merge information  -
-	     * by removing them from the appropriate attrsMap
+	    /* join the attrMaps - join condition is equality of 
+	     * attribute names look for matches in the maps - if a match 
+	     * found - then proceed to merge the matching attributes - if no
+	     * match found, process the "outer" attribute appropriately
 	     */
-	    NodeMerge nodeMerge = (NodeMerge)
-		(attrMergesMap.get(rAttr.getName()));
-
-	    if(nodeMerge == null) {
-		rIterator.remove();
-	    } else {
-		/* get a matching left attribute */
-		NIAttribute lAttr = (NIAttribute)
-		    (lAttrsMap.get(rAttr.getName()));
+	    /* iterate through right(fragment) and probe left (accum)
+	     */
+	    Iterator rIterator = rAttrsMap.values().iterator();
+	    while(rIterator.hasNext()) {
+		NIAttribute rAttr = (NIAttribute)(rIterator.next());
 		
-		if(lAttr != null) {
-		    /* attribute names are the same, so we have the same
-		     * attribute, so merge the matching attributes 
-		     */
-		    NIAttribute tempResultAttr = new NIAttribute();
-		    boolean new_result;
-		    new_result = nodeMerge.merge(lAttr, rAttr, 
-						 tempResultAttr);
+		/* Ignore all attributes without any merge information  -
+		 * by removing them from the appropriate attrsMap
+		 */
+		NodeMerge nodeMerge = (NodeMerge)
+		    (attrMergesMap.get(rAttr.getName()));
 
-		    if((rightIsResult || leftIsResult) && new_result) {
-			changedAttrs.add(tempResultAttr);
-		    } else {
-			resultAttrs.add(tempResultAttr);
-		    }
-		    
-		    /* remove the leftAttr from the hash map
-		     * to indicate it has already been processed
-		     */
-		    lAttrsMap.remove(lAttr.getName());
+		/* handle the default (ATTR_DEFAULT).  If a default
+		 * is provided, it applies to all attributes that haven't
+		 * had AttributeMerge elements explicitly specified.
+		 */
+		if(nodeMerge == null) {
+		    nodeMerge = (NodeMerge)(attrMergesMap.
+					    get(MergeTree.DEF_ATTR_STRING));
+		}
+		
+		if(nodeMerge == null) {
+		    rIterator.remove();
 		} else {
-		    /* lAttr is null-means rAttr is a "Right Outer" attribute */
-		    processOuterAttr(rAttr, nodeMerge.includeRightOuter(), 
-				     rightIsResult, resultAttrs, rightElt);
+		    /* get a matching left attribute */
+		    NIAttribute lAttr = null;
+		    lAttr = (NIAttribute)
+			(lAttrsMap.get(rAttr.getName()));
+		    
+		    if(lAttr != null) {
+			/* attribute names are the same, so we have the same
+			 * attribute, so merge the matching attributes 
+			 */
+			NIAttribute tempResultAttr = new NIAttribute();
+			boolean new_result;
+			new_result = nodeMerge.merge(lAttr, rAttr, 
+						     tempResultAttr);
+			
+			if((rightIsResult || leftIsResult) && new_result) {
+			    changedAttrs.add(tempResultAttr);
+			} else {
+			    resultAttrs.add(tempResultAttr);
+			}
+		    
+			/* remove the leftAttr from the hash map
+			 * to indicate it has already been processed
+			 */
+			lAttrsMap.remove(lAttr.getName());
+		    } else {
+			/* lAttr is null-means rAttr is a 
+			 * "Right Outer" attribute */
+			processOuterAttr(rAttr, nodeMerge.includeRightOuter(), 
+					 rightIsResult, resultAttrs, rightElt);
+		    }
 		}
 	    }
-	}
 
-	/* Process remaining attributes from the left side */
-	Iterator lIterator = lAttrsMap.values().iterator();	
-	while(lIterator.hasNext()) {
-	    NIAttribute lAttr = (NIAttribute)(lIterator.next());
-
-	    /* Ignore all attributes without any merge information  -
-	     * by removing them from the appropriate attrsMap
-	     */
-	    NodeMerge nodeMerge = (NodeMerge)
-		(attrMergesMap.get(lAttr.getName()));
-	    if(nodeMerge == null) {
-		rIterator.remove();
-	    } else {
-		/* lAttr is null-means rAttr is a "Right Outer" attribute */
-		processOuterAttr(lAttr, nodeMerge.includeLeftOuter(), 
-				 leftIsResult, resultAttrs, leftElt);
-	    }
+	    /* Process remaining attributes from the left side */
+	    processAttrsAsOuter(lAttrsMap, true,
+				leftIsResult, resultAttrs, leftElt);
 	}
 
 	/* add the new result attributes to the result Elemement */
@@ -292,9 +400,48 @@ class ShallowContentMerge extends MergeObject {
 	return;
     }
 
+    /**
+     * Process all attributes in a map from a side. For some reason
+     * we know that these attrs do not have a match on the other side
+     * - this can be because the other attrsMap is null or because
+     * all matching attrs have already been processed
+     *
+     * @param attrsMap The hash map of the attributes to be processed
+     */
+    private void processAttrsAsOuter(HashMap attrsMap, boolean isLeft,
+				     boolean isResult, ArrayList resultAttrs,
+				     NIElement elt) 
+	throws NITreeException {
+	/* Process remaining attributes from the given side */
+	Iterator iterator = attrsMap.values().iterator();	
+	    while(iterator.hasNext()) {
+		NIAttribute attr = (NIAttribute)(iterator.next());
+		
+		/* Ignore all attributes without any merge information  -
+		 * by removing them from the appropriate attrsMap
+		 */
+		NodeMerge nodeMerge = (NodeMerge)
+		    (attrMergesMap.get(attr.getName()));
+		if(nodeMerge == null) {
+		    iterator.remove();
+		} else {
+		    boolean includeOuter;
+		    if(isLeft) {
+			includeOuter =  nodeMerge.includeLeftOuter();
+		    } else {
+			includeOuter = nodeMerge.includeRightOuter();
+		    }
+		    /* lAttr is null-means attr is a 
+		     * "1Outer" attribute */
+		    processOuterAttr(attr, includeOuter, isResult,
+				     resultAttrs, elt);
+		}
+	    }
+	}
+
 
     private void mergeContent() 
-	throws OpExecException {
+	throws OpExecException, NITreeException {
 	contentMerge.merge(leftElt, rightElt, resultElt);
 	return;
     }
@@ -308,6 +455,10 @@ class ShallowContentMerge extends MergeObject {
      * @return The newly-created hash map for the attributes.
      */
     private HashMap createAttrsHashMap(NIAttribute[] attributeArray) {
+	if(attributeArray == null) {
+	    return null;
+	}
+
 	HashMap attrsHM = new HashMap();
 	int len = attributeArray.length;
 	for(int i=0; i < len; i++) {
@@ -334,7 +485,8 @@ class ShallowContentMerge extends MergeObject {
      */
     private void processOuterAttr(NIAttribute attr, boolean includeOuter,
 				  boolean isResult, ArrayList resultAttrs,
-				  NIElement elt) {
+				  NIElement elt) 
+	throws NITreeException {
 	/* isResult  && inclOuter - nothing to do - attr already in result
 	 * isResult  && !inclOuter - remove attr from result
 	 * !isResult && inclOuter - add attr to result
@@ -348,4 +500,21 @@ class ShallowContentMerge extends MergeObject {
 	}
 	return;
     }
+
+    public void dump(PrintStream os) {
+	os.println("Shallow Content Merge");
+	contentMerge.dump(os);
+	return;
+    }
+
+    public String toString() {
+	return "Shallow Content Merge " + contentMerge.getName();
+    }
+
+    public String getName() {
+	return "ShallowContent";
+    }
 }
+
+
+

@@ -30,7 +30,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
      * streams.
      */
 
-    private static final boolean[] blockingSourceStreams = { false, false };
+    private static final boolean[] blockingSourceStreams = { true };
 
     /* The merge tree  */
     private MergeTree mergeTree;
@@ -41,6 +41,8 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     
     /* map table to use for accumDoc */
     private MapTable mapTable;
+
+    private boolean recdData;
 
     /*
      * Methods of the PhysicalMergeOperator Class
@@ -64,13 +66,14 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 				       Stream[] destinationStreams,
 				       Integer responsiveness) 
         {
-
 	// Call the constructor of the super class
 	//
 	super(sourceStreams,
 	      destinationStreams,
 	      blockingSourceStreams,
 	      responsiveness);
+
+	//System.out.println("PhysAccumOp: constructor called");
 
 	// Type cast the logical operator to a Accumulate operator
 	//
@@ -92,6 +95,10 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
 	/* create an empty accumulator */
 	createEmptyAccumulator();
+
+	recdData = false;
+
+	//System.out.println("PhysicalAccumulateOperator created");
     }
 		     
 
@@ -108,7 +115,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     protected boolean blockingProcessSourceTupleElement (StreamTupleElement tupleElement,
 							 int streamId) {
-
+	//System.out.println("PhysAccumOp: blkProcSTE called");
 	/* get the fragment to be merged from the tuple, convert it
 	 * to an element if necessary, then pass the work off to the merge tree
 	 */
@@ -118,9 +125,18 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	    // merge the fragment into the accumulated document
 	    mergeTree.accumulate(accumDoc, fragment);
 	    
+	    recdData = true;
+	    
 	    return true;
 	} catch (OpExecException e) {
+	    System.out.println("WARNING: Operator Execution Error " +
+			       e.getMessage());
+	    e.printStackTrace();
 	    return false; /* I think there's nothing better to do!! yeuch!!! */
+	} catch (NITreeException nite) {
+	    System.out.println("WARNING: NITree Error " + nite.getMessage());
+	    nite.printStackTrace();
+	    return false;
 	}
     }
 
@@ -155,16 +171,35 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     protected boolean getCurrentOutput (ResultTuples resultTuples, 
 					boolean partial) {
+
+	//System.out.println("PhysAccumOp: getCurrentOutput called");
+
+	if(recdData == false) {
+	    System.out.println("PhysAccumOp: WARNING - OUTPUTTING BEFORE DATA RECEIVED");
+	}
+
 	/* set the writeable bits in the accumulated tree so
 	 * that all nodes will have to be copied to be changed,
 	 * then put the accumulated tree into the resultTuples
+	 * Eventually might not need to do this - might want
+	 * to pass on the write permissions - but there are problems
+	 * with this - see notes in cloneNode
 	 */
 	accumDoc.globalSetWriteableFalse();
 
+	/* now need to clone document so that I can work on it -
+	 * but use a shallow clone - only clone the document - 
+	 * none of the elements - new doc's children are the
+	 * same as the clonee's children
+	 */
+	accumDoc = accumDoc.cloneDocRefDocElt(false);
+
+	/* finally, put the accumulated tree into the results */
 	StreamTupleElement result = new StreamTupleElement(partial);
-	result.appendAttribute(accumDoc.getDomDoc()); /* doc or elt? */
+	result.appendAttribute(accumDoc.getDomDoc().getDocumentElement());
 
 	resultTuples.add(result, 0);
+
 
 	return true;
     }
@@ -182,8 +217,23 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	} else if (attr instanceof Document) {
 	    domElt = ((Document)attr).getDocumentElement();
 	    domDoc = (Document)attr;
+	    /* Ok, this is really stupid, if there is a parsing problem,
+	     * I just get a null document element here (basically an
+	     * empty document). This is due to some brilliance in
+	     * the URLFetchThread - I don't understand why it has to
+	     * be done this way!!!!
+	     * So what I do is just throw an exception
+	     */
+	    if(domElt == null) {
+		throw new OpExecException("Got null document element - must mean there is a parsing problem with the fragment");
+	    }
+
 	} else {
 	    throw new OpExecException("Invalid instance type");
+	}
+	
+	if(domElt == null) {
+
 	}
 
 	NIDocument niDoc = NIDocument.getAssocNIDocument(domDoc, mapTable);

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheManager.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: CacheManager.java,v 1.2 2000/08/09 23:53:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -347,9 +347,10 @@ public class CacheManager {
                 // doc2 = (TXDocument)memCache.fetch_reload(s2, null);
                 // doc1 = (TXDocument) CUtil.parseXML(s1);
                 doc2 = CUtil.parseXML(s2);
-		if(doc2.getDocumentElement()==null)
-		    System.out.println("BAD DOCUMENT !!! ");
+		/*if(doc2.getDocumentElement()==null)
+		  System.out.println("BAD DOCUMENT !!! "); */
             } catch (Exception cfe) {
+		System.err.println("DIFF FAILED - should be an exception thrown here, but I don't have time to fix all this stuff!!!@!!");
                 // System.err.println("Error is getting Docs");
                 // System.err.println(s1 + " $$ " + s2);
                 return;
@@ -410,22 +411,23 @@ public class CacheManager {
     }
 
     public synchronized boolean getDocuments(Vector xmlURLList, 
-            regExp pathExpr,   
-            SourceStream stream) 
+					     regExp pathExpr,   
+					     SourceStream stream) 
     {
         int numFetches = xmlURLList.size();
         // System.err.println("Getting " + numFetches + " docs");
         // Put in the fetchInfo object in service queue
         //
         String tmps = (String)xmlURLList.elementAt(0);
-        if(CacheUtil.isOrdinary(tmps)) {
+	if(CacheUtil.isAccumFile(tmps)) {
+	    getAccumFile(tmps, stream);
+	} else if(CacheUtil.isOrdinary(tmps)) {
             // System.err.println("CacheM: Trying get Normal file " + tmps);
             Vector dottedPaths = null;   // DMUtil.convertPath(pathExpr);
             FetchRequest newRequest = new FetchRequest(stream, 
                     xmlURLList, dottedPaths);
             FetchThread fth = new FetchThread(newRequest, memCache);
-        }
-        else {
+	} else {
             // System.err.println("CacheM. getDoc " + tmps);
             getTrigDocument(tmps, pathExpr, stream);
         }
@@ -470,6 +472,30 @@ public class CacheManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /** Function to retrieve the most current document associated
+     * with an Accumulate File. Finds the document using the global
+     * Accumulate File Directory
+     *
+     * @param afName The name of the accum file
+     * @param s Stream to put result into.
+     *
+     */
+    private void getAccumFile(String afName, 
+			      SourceStream outputStream) {
+	try {
+	    Document accumDoc = (Document)DataManager.AccumFileDir.get(afName);
+	    outputStream.put(accumDoc);
+	    outputStream.close();
+	} catch (niagara.utils.NullElementException e) {
+	    throw new PEException("What happened?!" + e.getMessage());
+	} catch (niagara.utils.StreamPreviouslyClosedException e) {
+	    throw new PEException("What happened?!" + e.getMessage());
+	} catch (java.lang.InterruptedException e) {
+	    throw new PEException("What happened?!" + e.getMessage());
+	}
+	return;
     }
 
     public void shutdown() {

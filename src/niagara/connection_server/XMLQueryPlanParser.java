@@ -14,6 +14,8 @@ import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.xmlql_parser.syntax_tree.re_parser.*;
 import niagara.xmlql_parser.syntax_tree.construct_parser.*;
+import niagara.query_engine.MTException;
+import niagara.utils.PEException;
 
 public class XMLQueryPlanParser {
 
@@ -41,10 +43,12 @@ public class XMLQueryPlanParser {
 	    document = p.getDocument();
 	    Element root = (Element) document.getDocumentElement();
 	    return parsePlan(root);
-	}
-	catch (Exception e) {
-	    e.printStackTrace();
-	    throw new InvalidPlanException();
+	} catch (org.xml.sax.SAXException se) {
+	    throw new InvalidPlanException("Error parsing plan string " + se.getMessage());
+	} catch (java.io.IOException ioe) {
+	    throw new InvalidPlanException("IO Exception reading plan string " + ioe.getMessage());
+	} catch (java.lang.CloneNotSupportedException cnse) {
+	    throw new PEException("Couldn't clone something " + cnse.getMessage());
 	}
     }
 
@@ -60,7 +64,11 @@ public class XMLQueryPlanParser {
 	}
 
 	String top = root.getAttribute("top");
-	parseOperator((Element) ids2els.get(top));
+	Element e = (Element) ids2els.get(top);
+	if(e == null) {
+	    throw new InvalidPlanException("Invalid top node");
+	}
+	parseOperator(e);
 	return (logNode) ids2nodes.get(top);
     }
 
@@ -118,6 +126,8 @@ public class XMLQueryPlanParser {
 	}
 	else if (nodeName.equals("firehosescan")) {
 	    handleFirehoseScan(e);
+	} else if (e.getNodeName().equals("accumulate")) {
+	    handleAccumulate(e);
 	}
     }
 
@@ -489,7 +499,7 @@ public class XMLQueryPlanParser {
 	
 	FirehoseScanOp op = 
 	    (FirehoseScanOp) operators.FirehoseScan.clone();
-	
+	op.setSelectedAlgoIndex(0);
 	op.setFirehoseScan(fhspec);
 	logNode node = new logNode(op);
 	ids2nodes.put(id, node);	    
@@ -534,7 +544,49 @@ public class XMLQueryPlanParser {
 	
 	ids2nodes.put(id, node);
 	node.setVarTbl(qpVarTbl);
+
     }
+
+    private void handleAccumulate(Element e) 
+	throws InvalidPlanException {
+	try {
+	    System.out.println("accumulate");
+	    
+	    /* Need to create an AccumulateOp
+	     * 1) The MergeTemplate
+	     * 2) The MergeIndex - index of attribute to work on
+	     */
+	    String id = e.getAttribute("id");
+	    
+	    /* Either a file name, URI or Merge template string */
+	    String mergeTemplate = e.getAttribute("mergeTemplate");
+	    
+	    /* input specifies input operator, index specifies index
+	     * of attribute to work on 
+	     */
+	    String inputAttr = e.getAttribute("input");
+	    String indexAttr = e.getAttribute("index");
+	    
+	    /* name by which the accumulated file should be referred to */
+	    String accumFileName = e.getAttribute("accumFileName");
+	    
+	    AccumulateOp op = (AccumulateOp) operators.Accumulate.clone();
+	    op.setSelectedAlgoIndex(0);
+	    
+	    op.setAccumulate(mergeTemplate, Integer.parseInt(indexAttr),
+			     accumFileName);
+	    
+	    logNode node = new logNode(op, 
+				       (logNode) ids2nodes.get(inputAttr));
+	    ids2nodes.put(id, node);	   
+	} catch (MTException mte) {
+	    throw new InvalidPlanException("Invalid Merge Template" + 
+					   mte.getMessage());
+	} catch (java.lang.CloneNotSupportedException cnse) {
+	    throw new PEException("Clone of Accumulate failed");
+	}
+    }
+
 
     predicate parsePreds(Element e, varTbl leftv, varTbl rightv) {
 	predicate p;
@@ -626,5 +678,58 @@ public class XMLQueryPlanParser {
 	    return "";
     }
 
-    public class InvalidPlanException extends Exception {}
+    public class InvalidPlanException extends Exception {
+	public InvalidPlanException() {
+	    super("Invalid Plan Exception: ");
+	}
+	public InvalidPlanException(String msg) {
+	    super("Invalid Plan Exception: " + msg + " ");
+	}
+    }
 }
+
+/*
+
+	    try {
+		scanner = new Scanner(new StringReader(content));
+		ConstructParser cep = new ConstructParser(scanner);
+		cn = (constructBaseNode) cep.parse().value;
+		cep.done_parsing();
+	    }
+	    catch (Exception ex) {
+		System.err.println("Error while parsing: "+ content);
+		throw new InvalidPlanException();
+	    }
+	    
+	    cn.replaceVar(qpVarTbl);
+	    op.setConstruct(cn);
+
+	    logNode node = new logNode(op, (logNode) ids2nodes.get(inputAttr));
+	    ids2nodes.put(id, node);
+	}
+	else if (e.getNodeName().equals("firehosescan")) {
+	    System.out.println("firehosescan");
+
+	    String host = e.getAttribute("host");
+	    int port = Integer.parseInt(e.getAttribute("port"));
+	    int rate = Integer.parseInt(e.getAttribute("rate"));
+	    int iters = Integer.parseInt(e.getAttribute("iters"));
+	    String typeStr = e.getAttribute("type");
+	    int type;
+	    // XXX FIXME we should import FirehoseClient to get to these values
+	    if (typeStr.equals("file"))
+		type = 1;
+	    else // gen
+		type = 2;
+	    String desc = e.getAttribute("desc");
+	    FirehoseSpec fhspec = 
+		new FirehoseSpec(port, host, rate, type, desc, iters);
+	    
+	    FirehoseScanOp op = 
+		(FirehoseScanOp) operators.FirehoseScan.clone();
+	    
+	    op.setFirehoseScan(fhspec);
+	    logNode node = new logNode(op);
+	    ids2nodes.put(id, node);	    
+	}
+*/

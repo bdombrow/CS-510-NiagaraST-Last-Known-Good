@@ -54,6 +54,15 @@ public class FirehoseScanOp extends unryOp {
     public FirehoseSpec getSpec() {
 	return fhSpec;
     }
+
+    public void dump() {
+	System.out.println("FirehoseScan Operator: ");
+	fhSpec.dump(System.out);
+	System.out.println("Selected Algo " + 
+			   String.valueOf(selectedAlgorithmIndex));
+	System.out.println();
+    }
+
 }
 
 

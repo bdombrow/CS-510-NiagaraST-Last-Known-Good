@@ -11,11 +11,14 @@ package niagara.utils.type_system;
  */
 
 import niagara.utils.nitree.NINode;
+import niagara.utils.nitree.NITreeException;
 
-abstract class NumberNodeHelperBase implements NumberNodeHelper {
+public abstract class NumberNodeHelperBase implements NumberNodeHelper {
     public abstract boolean average(NINode lNode, NINode rNode, 
-				    NINode resultNode);
-    public abstract boolean sum(NINode lNode, NINode rNode, NINode resultNode);
+				    NINode resultNode)
+	throws NITreeException;
+    public abstract boolean sum(NINode lNode, NINode rNode, NINode resultNode)
+	throws NITreeException;
     public abstract boolean lessThan(NINode lNode, NINode rNode);
     public abstract boolean nodeEquals(NINode lNode, NINode rNode);
 

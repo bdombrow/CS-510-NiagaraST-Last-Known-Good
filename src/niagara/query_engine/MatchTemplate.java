@@ -8,9 +8,16 @@ package niagara.query_engine;
  */
 
 import java.util.*;
+import org.w3c.dom.*;
+import java.io.*;
+import com.ibm.xml.parser.*;
+import java.lang.reflect.*;
 
 import niagara.utils.*;
 import niagara.utils.nitree.*;
+import niagara.utils.type_system.*;
+import niagara.xmlql_parser.syntax_tree.*;
+import niagara.xmlql_parser.syntax_tree.re_parser.*;
 
 /**
  * Implementation of a <code> MatchTemplate </code> class whose
@@ -65,19 +72,100 @@ public class MatchTemplate {
 	currentParent = null;
     }
 
-    /**
-     * Initialize the MatchTemplate - may be done multiple times -
-     * that is a MatchTemplate instance may be reused
+    /** 
+     * Converts a MergeTemplate Element from the DOM MergeTree to
+     * an in memory MatchTemplate object
      *
      * Match info contains one entry for each possible tag name
      * of a child of this parent - value of entry is the MatchInfo
      * object for children with that tagName
      * args and structure may be wrong, but need to somehow
      * initialize the 
+     *
+     * @param tagName The tag name of the element to which this match
+     *                   template applies
+     * @param matchTempl An XML element containing the match template 
+     *                     specifying how to "match"
+     *                     two elements of this type
+     *
      */
-    void initialize(HashMap _matchInfo) {
+    void readXMLTemplate(String tagName, Element matchTempl) 
+	throws MTException {
 	reset();
-	matchInfo = _matchInfo;
+	matchInfo = new HashMap();
+	ArrayList matchList = null;
+
+	Element matchNode = ElementAssistant.getFirstElementChild(matchTempl);
+	while(matchNode != null) {
+	    System.out.println("Creating match info for " + tagName);
+	    if(matchList == null) {
+		matchList = new ArrayList();
+	    }
+	    matchList.add(createMatchInfo(matchNode));
+	    matchNode = ElementAssistant.getNextElementSibling(matchNode);
+	}
+
+	if(matchList != null) {
+	    matchInfo.put(tagName, matchList);
+	}
+
+	return;
+    }
+
+    private MatchInfo createMatchInfo(Element matchNode) 
+	throws MTException {
+
+	int mergeType;
+	NodeHelper nodeHelper;
+
+	/* DTD guarantees exactly one path node and exactly one
+	 * content or existence node
+	 */
+	Element pathNode = ElementAssistant.getFirstElementChild(matchNode);
+	Element contentNode =ElementAssistant.getNextElementSibling(pathNode);
+
+	regExp path = createPath(pathNode);
+	System.out.println("     Path is ");
+	path.dump(0);
+
+	if(contentNode != null && contentNode.getTagName().equals("Content")) {
+	    System.out.println("     Merge type is content");
+	    mergeType = MatchTemplate.CONTENT;
+	    
+	    String type = (contentNode).getAttribute("ValueType");
+	    nodeHelper = NodeHelpers.getAppropriateNodeHelper(type);
+	    System.out.println("     Value type is " + type);
+	} else {
+	    System.out.println("     Merge type is tag existence");
+	    mergeType = MatchTemplate.TAG_EXISTENCE;
+	    nodeHelper = null;
+	}
+
+	return new MatchInfo(mergeType, path, nodeHelper);
+    }
+
+    /* take a path specified as a string and convert it to a regular
+     * expression
+     */
+    private regExp createPath(Element pathNode) 
+	throws MTException {
+	String pathString = null;
+	try {
+	    pathString = ElementAssistant.
+		getTextChild(pathNode).getNodeValue();
+	    System.out.println("     Path string is " + pathString);
+	    
+	    Scanner scanner;
+	    regExp pathExp = null;
+	    scanner = new Scanner(new StringReader(pathString));
+	    REParser rep = new REParser(scanner);
+	    pathExp = (regExp) rep.parse().value;
+	    rep.done_parsing();
+	    
+	    return pathExp;
+	} catch (Exception e) {
+	    throw new MTException("Error parsing path String " + pathString + "  " + e.getMessage());
+	}
     }
 
     /** 
@@ -105,7 +193,13 @@ public class MatchTemplate {
      *
      * @return Returns matching element which is a child of parent.
      */
-    NIElement findUniqueMatch(NIElement parent, NIElement toMatch) {
+    NIElement findUniqueMatch(NIElement parent, NIElement toMatch, 
+			      boolean parentChanged) {
+	/* handle the null accumulator case */
+	if(parent.getChildrenByName(toMatch.getTagName()) == null) {
+	    return null;
+	}
+	
 	/* if necessary, create a new hash table */
 	if(parent != currentParent) {
 	    buildHashMap(parent, toMatch.getTagName());
@@ -114,14 +208,14 @@ public class MatchTemplate {
 	/* if necessary, add children with toMatch's tag name to
 	 * the hash map
 	 */
-	if(!tagList.contains(toMatch.getTagName())) {
+	if(!tagList.contains(toMatch.getTagName()) || parentChanged) {
 	    addToHashMap(parent, toMatch.getTagName());
 	}
 
 	/* get the "key" (valueList) and 
 	 * probe the hash table for a matching object 
 	 */
-	ArrayList mi =(ArrayList)matchInfo.get(toMatch.getTagName());
+	ArrayList mi = (ArrayList)matchInfo.get(toMatch.getTagName());
 	return (NIElement)children.get(createValueList(toMatch, mi));
     }
 
@@ -179,7 +273,7 @@ public class MatchTemplate {
 	     * that if this list of values equals a list from another
 	     * element - then those two elements are said to match 
 	     */
-	    ArrayList mi =(ArrayList)matchInfo.get(child.getTagName());
+	    ArrayList mi = (ArrayList) matchInfo.get(child.getTagName());
 	    ArrayList valueList = createValueList(child, mi);
 	    mi = null;
 
@@ -189,10 +283,7 @@ public class MatchTemplate {
 	     */
 	    Object oldMapping = children.put(valueList, child);
 	    
-	    if(oldMapping != null) {
-		throw new 
-		    PEException("Element with that key already in HashMap");
-	    }
+	    /* old mappings might exist if parent has been upated */
 	}
 
 	/* when done with all kids - add the tagName to the tagname list */
@@ -208,7 +299,7 @@ public class MatchTemplate {
      * @param oldElt Element to be replaced
      * @param newElt New element to replace oldElt
      */
-    public void replaceElement(NIElement oldElt, NIElement newElt) {
+    public void replaceElement(NIElement newElt, NIElement oldElt) {
 
 	if(oldElt.getTagName() != newElt.getTagName()) {
 	    System.err.println("BARF - bad tag names in MatchTemplate.replaceElement");
@@ -264,7 +355,8 @@ public class MatchTemplate {
 	 */
 	while(miIter.hasNext()) {
 	    MatchInfo mi = (MatchInfo)miIter.next();
-	    v = PathExprEvaluator.getReachableNodes(elt, mi.path());
+	    v = PathExprEvaluator.getReachableNodes(elt.getDomElement(), 
+						    mi.path());
 	    
 	    /* we don't allow matches on set values (yet), so throw
 	     * an error if there is more than one reachable node 
@@ -275,8 +367,17 @@ public class MatchTemplate {
 		valueList.add(null);
 	    } else {
 		/* vector size must be one - process this node */
-
-		NINode node = (NINode) v.elementAt(0);
+		Node node = (Node)v.elementAt(0);
+		NINode ninode;
+		if(node instanceof Element) {
+		    ninode = elt.getOwnerDocument().
+			getAssocNIElement((Element)node);
+		} else {
+		    /* must be an attribute, but don't know the parent
+		     */
+		    ninode = elt.getOwnerDocument().
+			getAssocNIAttr((Attr)node, null);
+		}
 
 		switch(mi.mergeType()) {
 		case MatchTemplate.TAG_EXISTENCE:
@@ -292,7 +393,7 @@ public class MatchTemplate {
 		     * node.getNodeValue()) into an instance
 		     * of the appropriate type
 		     */
-		    valueList.add(mi.nodeHelper.valueOf(node));
+		    valueList.add(mi.nodeHelper.valueOf(ninode));
 		    break;
 		default:
 		    throw new PEException("Invalid merge type");
@@ -303,4 +404,9 @@ public class MatchTemplate {
 
 	return valueList;
     }
+
+    public void dump(PrintStream os) {
+	os.println("Match Template");
+    }
+
 }

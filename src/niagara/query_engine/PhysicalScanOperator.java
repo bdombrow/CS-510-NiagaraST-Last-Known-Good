@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.2 2000/07/08 05:22:53 vpapad Exp $
+  $Id: PhysicalScanOperator.java,v 1.3 2000/08/09 23:53:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -147,9 +147,9 @@ public class PhysicalScanOperator extends PhysicalOperator {
         else if(attribute instanceof TXElement) {
             // System.err.println( ((TXElement)attribute).getText());
         }
-		//System.out.println("SCAN:Node scanned is " + ((Node)attribute).getNodeName());
+	//System.out.println("SCAN:Node scanned is " + ((Node)attribute).getNodeName());
 		
-		Vector elementList = PathExprEvaluator.getReachableNodes(attribute,this.rExp);
+	Vector elementList = PathExprEvaluator.getReachableNodes(attribute,this.rExp);
 		
 		
 

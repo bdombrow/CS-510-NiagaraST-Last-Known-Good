@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logNode.java,v 1.2 2000/06/26 21:59:52 vpapad Exp $
+  $Id: logNode.java,v 1.3 2000/08/09 23:54:19 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,6 +38,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.utils.*;
 
 public class logNode implements java.io.Serializable {
    protected op operator;	// operator
@@ -268,4 +269,15 @@ public class logNode implements java.io.Serializable {
 	   for(int i=0;i<inputs.length;i++)
 		input(i).dump();
    }
+
+    public boolean isAccumulateOp() {
+	return (operator instanceof AccumulateOp);
+    }
+
+    public String getAccumFileName() {
+	if(!isAccumulateOp()) {
+	    throw new PEException("Can't get AccumFile name from non-accumulate operator");
+	}
+	return ((AccumulateOp)operator).getAccumFileName();
+    }
 }

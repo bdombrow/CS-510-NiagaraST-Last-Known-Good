@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DTDDirEntry.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: DTDDirEntry.java,v 1.2 2000/08/09 23:53:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -162,7 +162,8 @@ public class DTDDirEntry implements Serializable{
      * @return a the parsed DTD object for this DTD entry, null if error
      */
     public DTD getDTD() 
-    {
+	throws ParseException, java.net.MalformedURLException, 
+	       java.io.FileNotFoundException, java.io.IOException {
         // return a clone if the DTD is already parsed
         //
         if( dtd != null ) {

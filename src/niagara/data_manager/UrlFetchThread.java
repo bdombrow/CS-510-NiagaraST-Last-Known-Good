@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UrlFetchThread.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: UrlFetchThread.java,v 1.2 2000/08/09 23:53:53 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -86,17 +86,24 @@ public class UrlFetchThread implements Runnable {
         }
 	String url = urlObj.getUrl();
         MemCacheEntry me = urlObj.getMemCacheEntry();
-        
-        TXDocument doc = CUtil.parseXML(url);
-        if(doc==null) {
-            // System.err.println("Fetch URL failed. Use dummy to shutdown");
-            doc = new TXDocument();
-        }
-        
+
+	TXDocument doc = null;
+        try {
+	    doc = CUtil.parseXML(url);
+
+	} catch (Exception e) {
+	    System.err.println("WARNING: Exception occurred during parsing of: " + url);
+	}
+
+	if(doc==null) {
+	    System.err.println("Fetch URL failed. Creating null document");
+	    doc = new TXDocument();
+	}
         if(me!=null) {
             me.setval(doc);
             me._notifyWaitingThreads();
         }
+        
         return true;
     }
 }

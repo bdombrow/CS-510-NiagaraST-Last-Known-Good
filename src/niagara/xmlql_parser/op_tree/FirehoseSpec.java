@@ -5,6 +5,9 @@ package niagara.xmlql_parser.op_tree;
  * like DTD to generate from, rate, etc.
  */
 
+import java.io.*;
+import FirehoseClient;
+
 public class FirehoseSpec {
 
     /* see FirehoseSpec constructor for descriptions of what these
@@ -92,5 +95,22 @@ public class FirehoseSpec {
 
     public int getIters() {
 	return iters;
+    }
+
+    public void dump(PrintStream os) {
+	os.println("Firehose Specification: ");
+	os.println("  Listener Port " + String.valueOf(listenerPortNum) +
+		   "  Listener Host " + listenerHostName);
+	String typeString = "unknown type";
+	if(type == FirehoseClient.FCSTREAMTYPE_FILE) {
+	    typeString = "file";
+	} else if (type == FirehoseClient.FCSTREAMTYPE_GEN) {
+	    typeString = "gen";
+	}
+
+	os.println("  Rate " + String.valueOf(rate) +
+		   ", Type " + typeString +
+		   ", Descriptor " + descriptor +
+		   ", Iterations " + String.valueOf(iters));
     }
 }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheUtil.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: CacheUtil.java,v 1.2 2000/08/09 23:53:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -85,6 +85,16 @@ public class CacheUtil {
     public static boolean isOrdinary(String s) {
         if(s.lastIndexOf('&')==-1) return true;
         else return false;
+    }
+
+    public static boolean isAccumFile(String name) {
+	if(DataManager.AccumFileDir.containsKey(name)) {
+	    System.out.println("Accum file dir contains: " + name);
+	    return true;
+	} else {
+	    System.out.println("Accum file dir does not contain: " + name);
+	    return false;
+	}
     }
 
     public static String fileToUrl(String f) {

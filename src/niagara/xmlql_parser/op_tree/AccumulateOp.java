@@ -19,11 +19,13 @@ import org.w3c.dom.*;
 
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.query_engine.MergeTree;
+import niagara.query_engine.MTException;
 
 public class AccumulateOp extends unryOp {
 
     private MergeTree mergeTree;
     private int mergeIndex;
+    private String accumFileName;
 
     /**
      * Constructor for AccumulateOp.  Just calls the super constructor.
@@ -41,15 +43,21 @@ public class AccumulateOp extends unryOp {
      * Creates the AccumulateOp. Traverses the mergeTemplate tree and
      * creates a MergeTree object.
      *
-     * @param mergeTemplate A DOM Document representing a parsed XML
-     *                      merge template
+     * @param mergeTempl The file name (or perhaps URI) where the merge
+     *                   template is located
+     *
      * @param mergeIndex  The index in the tuple structure of the XML 
      *              documents/fragments to be merged
      */
-    public void setAccumulate(Document mergeTemplate, int _mergeIndex) {
+    public void setAccumulate(String mergeTemplateStr, int _mergeIndex,
+			      String _accumFileName) 
+	throws MTException {
 	mergeIndex = _mergeIndex;
 	mergeTree = new MergeTree();
-	mergeTree.create(mergeTemplate);
+	accumFileName = _accumFileName;
+
+	/* true indicates that accumulate constraints should be checked */
+	mergeTree.create(mergeTemplateStr, true);
 	return;
     }
 
@@ -60,8 +68,23 @@ public class AccumulateOp extends unryOp {
 	return mergeTree;
     }
 
-   public int getMergeIndex() {
-       return mergeIndex; 
-   }
+    public int getMergeIndex() {
+	return mergeIndex; 
+    }
 
+    public String getAccumFileName() {
+	return accumFileName;
+    }
+
+    public void dump() {
+	System.out.println("Accumulate Operator: ");
+	mergeTree.dump(System.out);
+	System.out.println("MergeIndex " + String.valueOf(mergeIndex));
+	if(accumFileName != null) {
+	    System.out.println("AccumFileName " + accumFileName);
+	}
+	System.out.println("Selected Algo " + 
+			   String.valueOf(selectedAlgorithmIndex));
+	System.out.println();
+    }
 }

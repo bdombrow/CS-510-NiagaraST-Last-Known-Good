@@ -19,29 +19,23 @@ import org.w3c.dom.*;
 
 import niagara.utils.PEException;
 
-public class NINode {
-    private Node domNode;
+public abstract class NINode {
 
-    /* the tag name of Text elements in dom trees */
-    public static final String TEXT = "Text";
+    /* functions to get and set the "value" of a node, for attributes,
+     * returns the attribute value, for elements, returns the
+     * value of the text element, not supported for documents
+     */
+    public abstract String myGetNodeValue();
+    public abstract void mySetNodeValue(String nodeValue) 
+	throws NITreeException;
 
     /* DOM Functions */
-    public String getNodeName() {
-	return domNode.getNodeName();
-    }
+    public abstract String getNodeName();
 
-    public String getNodeValue() {
-	return domNode.getNodeValue();
-    }
+    public abstract void appendChild(NIElement child)
+	throws NITreeException;
 
-    public void setNodeValue(String nodeValue) {
-	domNode.setNodeValue(nodeValue);
-    }
+    public abstract void replaceChild(NIElement oldChild, NIElement newChild)
+	throws NITreeException;
 
-    public void replaceChild(NINode oldChild, NINode newChild) {
-	/* this must be implemented by NIElement and NIDocument
-	 * themselves, replaceChild isn't allowed on attributes
-	 */
-	throw new PEException("Invalid replaceChild operation");
-    }
 }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DTDDirectory.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: DTDDirectory.java,v 1.2 2000/08/09 23:53:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,6 +38,7 @@ package niagara.data_manager;
 import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import java.io.*;
+import java.net.*;
 import java.util.*;
 import java.lang.reflect.*;
 
@@ -167,7 +168,7 @@ public class DTDDirectory implements Serializable
      * @return the parsed DTD
      */
     public DTD getDTD(String DTDURL) 
-    {
+    throws niagara.utils.ParseException, IOException, MalformedURLException {
         int dtdid = addDTD(DTDURL);
         DTDDirEntry entry = (DTDDirEntry)DTDVector.elementAt(dtdid);
 

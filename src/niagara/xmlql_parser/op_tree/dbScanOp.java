@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: dbScanOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: dbScanOp.java,v 1.2 2000/08/09 23:54:19 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -53,6 +53,10 @@ public class dbScanOp extends unryOp {
    public String getRelName() {
 	return relName;
    }
+
+    public void dump() {
+	System.out.println("DbScanOp");
+    }
 
 }
 

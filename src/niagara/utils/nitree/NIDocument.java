@@ -15,6 +15,9 @@ package niagara.utils.nitree;
 
 import org.w3c.dom.*;
 import com.ibm.xml.parser.*;
+import java.lang.ref.*;
+import java.util.*;
+import java.io.*;
 
 import niagara.utils.*;
 
@@ -37,11 +40,17 @@ public class NIDocument extends NINode {
     /*
      * permission flags (for copy on write) are kept in the NIDocument so it is
      * easy to set/unset all of a tree's permissions at one time
+     * Instead of an array of Booleans for writeable - use an array of 
+     * WeakReferences so that the Boolean writeable bits go away when
+     * no NINode references them anymore
      */
-    private Boolean[] writeable;
-    private int writeableIndex;
-
+    private ArrayList writeableWR;
     private boolean initialized;
+
+    /* 
+     * for printing ...
+     */
+    private PrintWriter pw;
 
     /**
      * Creates an unitialized NIDocument.  Must be initialized before
@@ -50,8 +59,9 @@ public class NIDocument extends NINode {
     public NIDocument() {
 	mapTable = null;
 	domDoc = null;
-	writeableIndex = 0;
 	initialized = false;
+	writeableWR = new ArrayList();
+	pw = new PrintWriter(System.out);
         return;
     }
 
@@ -64,7 +74,6 @@ public class NIDocument extends NINode {
     public void initialize(MapTable _mapTable, Document _domDoc) {
 	mapTable = _mapTable;
 	domDoc = _domDoc;
-	writeableIndex = 0;
 	initialized = true;
 	return;
     }
@@ -75,15 +84,30 @@ public class NIDocument extends NINode {
     public boolean isInitialized() { return initialized; }
 
     /**
-     * resets all the writable bits to false
+     * resets all the writable bits to false, removing all cleared
+     * references along the way TODO - this cleaning needs to be done
+     * somewhere else and in a better fashion - this could leak too
+     * much memory
      */
     public void globalSetWriteableFalse() {
-	for(int i = 0; i<writeable.length; i++) {
-	    writeable[i] = Boolean.FALSE;
+	int size = writeableWR.size();
+	for(int i = 0; i<size; i++) {
+	    BooleanHolder tmp = 
+		(BooleanHolder)((WeakReference)writeableWR.get(i)).get();
+	    if(tmp == null) {
+		/* this reference has been cleared (object referred to
+		 * is no longer in use), so take it out of the list
+		 */
+		writeableWR.remove(i);
+		size--;
+		i--;
+	    } else {
+		tmp.setValue(false);
+	    }
 	}
 	return;
     }
-    
+
     /* 
      * returns the Dom Document associated with this NIDocument
      *
@@ -101,7 +125,10 @@ public class NIDocument extends NINode {
      *          a parameter
      */
     public NIElement getAssocNIElement(Element domElt) {
-	
+	if(domElt == null) {
+	    return null;
+	}
+
 	/*
 	 * Check to see if this element is in the map table already
 	 * and if not add it to the table
@@ -126,7 +153,7 @@ public class NIDocument extends NINode {
      *          a parameter
      */
 
-    public NIAttribute getAssocNIAttr(Attr domAttr) {
+    public NIAttribute getAssocNIAttr(Attr domAttr, NIElement parent) {
 	
 	/*
 	 * Check to see if this element is in the map table already
@@ -140,7 +167,9 @@ public class NIDocument extends NINode {
 
 	/* else have to create a new NIAttribute */
 	NIAttribute niAttr = new NIAttribute();
-	niAttr.initialize(domAttr);
+	niAttr.initialize(domAttr, parent);
+
+	mapTable.insert(domAttr, niAttr);
 	
 	return niAttr;
     }
@@ -218,12 +247,13 @@ public class NIDocument extends NINode {
 	/* initialize the element - we can update any elements
 	 * we create
 	 */
+	BooleanHolder tmp;
 	synchronized (this) {
-	    writeableIndex++;
-	    writeable[writeableIndex] = new Boolean(true);
-	    niElt.initialize((TXElement)domElement, 
-			     writeable[writeableIndex], this);
+	    tmp = new BooleanHolder(true);
+	    writeableWR.add(new WeakReference(tmp));
 	}
+
+	niElt.initialize((TXElement)domElement, tmp, this);
 
 	/* and insert into the map table to make association */
 	mapTable.insert(domElement, niElt);
@@ -236,12 +266,94 @@ public class NIDocument extends NINode {
      * before any operator that can update it is allowed to work
      * on it
      */
-    public void replaceChild(NINode oldChild, NINode newChild) {
+    public void replaceChild(NIElement newChild, NIElement oldChild) 
+	throws NITreeException {
 
 	/* now do the update */
-	domDoc.replaceChild(((NIElement)oldChild).getDomElement(), 
-			    ((NIElement)newChild).getDomElement());
+	domDoc.replaceChild(newChild.getDomElement(), 
+			    oldChild.getDomElement());
 	return;
     }
 
+
+    /* NOTE - this is important - we assume that a document is
+     * always writeable, that it has been cloned appropriately
+     * before any operator that can update it is allowed to work
+     * on it
+     */
+    public void appendChild(NIElement child) 
+	throws NITreeException {
+
+	/* now do the update */
+	domDoc.appendChild(child.getDomElement());
+	return;
+    }
+
+    public String getNodeName() {
+	return domDoc.getNodeName();
+    }
+
+    public String myGetNodeValue() {
+	throw new PEException("myGetNodeValue not supported for NIDocument");
+    }
+
+    public void mySetNodeValue(String nodeValue) 
+	throws NITreeException {
+	throw new PEException("mySetNodeValue not supported for NIDocument");
+    }
+
+    /** Function to clone a document - based on DOM's cloneNode.
+     * Copies all attributes, members, etc of the NIDocument and
+     * clones the associated DOM document. Clone of DOM doc is
+     * deep or not based on parameter
+     *
+     * @param deep Indicates if clone should copy children or not
+     */
+    public NIDocument cloneDocRefDocElt(boolean deep) {
+	/* for now I set all the writeable bits to false so that any
+	 * node in the cloned tree must be itself cloned - haven't figured
+	 * out yet, how to pass on write permissions 
+	 */
+	globalSetWriteableFalse();
+	
+	NIDocument cloneDoc = new NIDocument();
+	Document cloneDomDoc = (Document)domDoc.cloneNode(deep);
+	
+	cloneDoc.initialize(mapTable, cloneDomDoc); 
+
+	/* Set the document element of the cloned doc
+	 * to the doc element of the clonee
+	 */
+	cloneDoc.domDoc.appendChild(this.domDoc.getDocumentElement());
+	
+	/* don't copy the writeable array to the cloned NIDoc, we have
+	 * set all writeable bits to false, so if something needs to be
+	 * updated, it will get cloned and it will get a new 
+	 * writeable reference (make sure this is true)
+	 * Also would be nice if elements in the writeable array went
+	 * away when they were no longer referenced so that writeable
+	 * arrays don't grow indefinitely
+	 * fine unless someone
+	 * goes to the writeable array in the old tree and sets all
+	 * the bits to true.
+	 * Have to think about this cloning stuff really well - this will
+	 * work for accumulate, but need to think about this more when
+	 * we do something more complicated and want to pass on write
+	 * permissions.  Ideally, don't clear writeable array
+	 */
+
+	return cloneDoc;
+    }
+
+    /** from TXDocument
+     */
+    public void printWithFormat() {
+	try {
+	    ((TXDocument)domDoc).printWithFormat(pw, null, 3);
+	} catch (IOException ioe) {
+	    System.out.println("Error printing accum doc" + ioe.getMessage());
+	} catch (LibraryException le) {
+	    System.out.println("Error printing accum doc" + le.getMessage());
+	}
+    }
 }

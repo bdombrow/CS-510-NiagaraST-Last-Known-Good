@@ -26,23 +26,24 @@ import niagara.utils.PEException;
  * Class <code> IntegerNodeHelper </code> implements numeric
  * functions on nodes whose content is interpreted as integers
  */
-class IntegerNodeHelper extends NumberNodeHelperBase
+public class IntegerNodeHelper extends NumberNodeHelperBase
     implements NumberNodeHelper {
 
     private Class myClass;
 
     public IntegerNodeHelper() {
 	try {
-	    myClass = Class.forName("Integer");
+	    myClass = Class.forName("java.lang.Integer");
 	} catch (ClassNotFoundException e) {
-	    throw new PEException();
+	    throw new PEException("Class not found for integer");
 	}
     }
 
     public Class getNodeClass() { return myClass; }
 
     public Object valueOf(NINode node) {
-	return Integer.valueOf(node.getNodeValue());
+	String valString = node.myGetNodeValue();
+	return Integer.valueOf(valString);
     }
     
     public boolean nodeEquals(NINode lNode, NINode rNode) {
@@ -74,17 +75,28 @@ class IntegerNodeHelper extends NumberNodeHelperBase
      * @ return Returns true if a new value is calculated (always)
      */
     public boolean average(NINode lNode, NINode rNode, 
-				  NINode resultNode) {
+				  NINode resultNode) 
+	throws NITreeException {
 	int lVal = ((Integer)valueOf(lNode)).intValue();
 	int rVal = ((Integer)valueOf(rNode)).intValue();
-	resultNode.setNodeValue(String.valueOf((lVal+rVal)/2.0));
+	resultNode.mySetNodeValue(String.valueOf((lVal+rVal)/2.0));
 	return true;
     }
 
-    public boolean sum(NINode lNode, NINode rNode, NINode resultNode) {
+    public boolean sum(NINode lNode, NINode rNode, NINode resultNode) 
+	throws NITreeException {
 	int lVal = ((Integer)valueOf(lNode)).intValue();
 	int rVal = ((Integer)valueOf(rNode)).intValue();
-	resultNode.setNodeValue(String.valueOf(lVal+rVal));
+	resultNode.mySetNodeValue(String.valueOf(lVal+rVal));
 	return true;
     }
+
+    public String getName() {
+        return "IntegerNodeHelper";
+    }
+
+    public String toString() {
+        return getName();
+    }
+
 }

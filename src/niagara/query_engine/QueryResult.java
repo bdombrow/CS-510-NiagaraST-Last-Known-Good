@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: QueryResult.java,v 1.2 2000/08/09 23:54:00 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -301,6 +301,7 @@ public class QueryResult {
 		// Send a request for a partial result
 		//
 		try {
+		    System.out.println("QR putting partial request down stream");
 			outputStream.putControlElementDownStream(
 				new StreamControlElement(StreamControlElement.GetPartialResult));
 		}
@@ -429,7 +430,7 @@ public class QueryResult {
 			// Process a end of stream element
 			//
 			processEosElement(resultObject,
-							  (StreamEosElement) resultElement);
+					  (StreamEosElement) resultElement);
 		}
 		else {
 

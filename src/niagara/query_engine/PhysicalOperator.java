@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.2 2000/08/09 23:53:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,6 +38,8 @@ package niagara.query_engine;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.io.*;
+
 import niagara.utils.*;
 import niagara.data_manager.*;
 
@@ -662,7 +664,7 @@ public abstract class PhysicalOperator {
 	throws java.lang.InterruptedException,
 	       NullElementException,
 	       StreamPreviouslyClosedException {
-
+	
 	// Get the number of source streams to choose from
 	//
 	int numReadSourceStreams = readSourceStreams.size();
@@ -670,135 +672,135 @@ public abstract class PhysicalOperator {
 	// Calculate the time out for each stream
 	//
 	int timeout = responsiveness/numReadSourceStreams;
-
+	
 	// Make sure the last read source stream is a valid index
 	//
 	if (lastReadSourceStream >= numReadSourceStreams) {
 	    //lastReadSourceStream = numReadSourceStreams - 1;
-		lastReadSourceStream = 0;
+	    lastReadSourceStream = 0;
 	}
-
+	
 	// Start from next source stream
 	//
 	lastReadSourceStream = 
 	    (lastReadSourceStream + 1)%numReadSourceStreams;
-
+	
 	// Store this stream index
 	//
 	int startReadSourceStream = lastReadSourceStream;
-
+	
 	// Loop over all source streams, until a full round is completed
 	//
 	do {
-
+	    
 	    // Get the next stream id to read from
 	    //
 	    int streamId = 
 		((Integer)
 		 readSourceStreams.get(lastReadSourceStream)).intValue();
-
+	    
 	    // Wait for input from a source stream until the time out
 	    //
 	    StreamElement sourceElement = 
 		sourceStreams[streamId].getUpStreamElement(timeout);
-
+	    
 	    // If there was an element read, return it
 	    //
 	    if (sourceElement != null) {
-
-			if (sourceElement instanceof StreamControlElement) {
+		
+		if (sourceElement instanceof StreamControlElement) {
+		    
+		    // This is a control element, so process it
+		    //
+		    boolean proceed = processSourceControlElement(
+			      (StreamControlElement) sourceElement,
+			      streamId);
 				
-				// This is a control element, so process it
-				//
-				boolean proceed = processSourceControlElement(
-					(StreamControlElement) sourceElement,
-					streamId);
+		    // No tuple element to be returned
+		    //
+		    sourceObject.element = null;
+		    
+		    // Return whether operator is to proceed
+		    //
+		    return proceed;
+		}
+		else if (sourceElement instanceof StreamEosElement) {
 				
-				// No tuple element to be returned
-				//
-				sourceObject.element = null;
+		    // This is the end of stream, so mark the stream as closed
+		    //
+		    setSourceStreamStatus(streamId,
+					  SourceStreamStatus.Closed);
 				
-				// Return whether operator is to proceed
-				//
-				return proceed;
-			}
-			else if (sourceElement instanceof StreamEosElement) {
+		    // Remove the stream id from the list
+		    //
+		    readSourceStreams.remove(lastReadSourceStream);
 				
-				// This is the end of stream, so mark the stream as closed
-				//
-				setSourceStreamStatus(streamId,
-									  SourceStreamStatus.Closed);
+		    // No element to return
+		    //
+		    sourceObject.element = null;
 				
-				// Remove the stream id from the list
-				//
-				readSourceStreams.remove(lastReadSourceStream);
-				
-				// No element to return
-				//
-				sourceObject.element = null;
-				
-				boolean proceed = true;
-				
-				// If this causes the operator to become non-blocking, then
-				// put out the current output and clear the current output
-				//
-				if (blockingSourceStreams[streamId] && !isBlocking()) {
-					
-					// Put out the current output (which is not partial anymore)
-					//
-					proceed = putCurrentOutput(false);
-					
-					if (proceed) {
-						
-						// Clear the current output
-						//
-						proceed = this.clearCurrentOutput();
-						
-						// Shut down operator if necessary
-						//
-						if (!proceed) {
-							
-							shutDownOperator();
-						}
-					}
-				}
-				
-				// Update partial result creation if any. This is necessary because
-				// partial result creation may terminate when all input streams
-				// are either synchronized or closed.
-				//
-				if (proceed) {
-					proceed = updatePartialResultCreation();
-				}
-				
-				// Return whether the operator is to proceed
-				//
-				shutdownTrigOp();
-				return proceed;
-			}
-			else {
-				
-				// This has to be a tuple element - set the appropriate
-				// values for the result
-				//
-				sourceObject.element = (StreamTupleElement) sourceElement;
-				sourceObject.streamId = streamId;
-				
-				// The operator can continue
-				//
-				return true;
-			}
-	    } else {
-			// Try the next source stream
+		    boolean proceed = true;
+		    
+		    // If this causes the operator to become non-blocking, then
+		    // put out the current output and clear the current output
+		    //
+		    if (blockingSourceStreams[streamId] && !isBlocking()) {
+			
+			// Put out the current output (which is not partial anymore)
 			//
-			lastReadSourceStream = (lastReadSourceStream + 1)%numReadSourceStreams;
+			proceed = putCurrentOutput(false);
+			
+			if (proceed) {
+			    
+			    // Clear the current output
+			    //
+			    proceed = this.clearCurrentOutput();
+			    
+			    // Shut down operator if necessary
+			    //
+			    if (!proceed) {
+				
+				shutDownOperator();
+			    }
+			}
+		    }
+		    
+		    // Update partial result creation if any. This is necessary because
+		    // partial result creation may terminate when all input streams
+		    // are either synchronized or closed.
+		    //
+		    if (proceed) {
+			proceed = updatePartialResultCreation();
+		    }
+		    
+		    // Return whether the operator is to proceed
+		    //
+		    shutdownTrigOp();
+		    return proceed;
+		}
+		else {
+				
+		    // This has to be a tuple element - set the appropriate
+		    // values for the result
+		    //
+		    sourceObject.element = (StreamTupleElement) sourceElement;
+		    sourceObject.streamId = streamId;
+		    
+		    // The operator can continue
+		    //
+		    return true;
+		}
+	    } else {
+		// Try the next source stream
+		//
+		lastReadSourceStream = (lastReadSourceStream + 1)%numReadSourceStreams;
 	    }
 	} while (startReadSourceStream != lastReadSourceStream);
-
+	
 	// No luck with any source stream
 	//
 	sourceObject.element = null;
-
+	
 	// Operator can continue
 	//
 	return true;
@@ -1009,16 +1011,17 @@ public abstract class PhysicalOperator {
 	       NullElementException,
 	       StreamPreviouslyClosedException {
 
+	printMessage("PO: processing source control elt");
 	switch (controlElement.type()) {
 
 	case StreamControlElement.ShutDown:
-
+	    printMessage("PO: received shutdown request");
 	    // Propagate the shut down element to other streams if necessary
 	    //
  	    return this.propagateSourceShutDownElement(controlElement, streamId);
 
 	case StreamControlElement.SynchronizePartialResult:
-
+	    printMessage("PO: received synch partial result elt");
 	    // Remove the stream id from the set of source streams to read from
 	    //
 	    readSourceStreams.remove(readSourceStreams.indexOf(new Integer(streamId)));
@@ -1033,7 +1036,7 @@ public abstract class PhysicalOperator {
 	    return updatePartialResultCreation ();
 
 	case StreamControlElement.EndPartialResult:
-
+	    printMessage("PO: received end partial result elt");
 	    // Remove the stream id from the set of source streams to read from
 	    //
 	    readSourceStreams.remove(readSourceStreams.indexOf(new Integer(streamId)));
@@ -1224,6 +1227,8 @@ public abstract class PhysicalOperator {
 	       NullElementException,
 	       StreamPreviouslyClosedException {
 
+	printMessage("PO: processing dest control elt");
+
 	switch (controlElement.type()) {
 
 	case StreamControlElement.ShutDown:
@@ -1236,6 +1241,7 @@ public abstract class PhysicalOperator {
 	    return propagateDestinationShutDownElement(controlElement, streamId);
 
 	case StreamControlElement.GetPartialResult:
+	printMessage("PO: received get partial result elt");
 
 	    // Handle the get partial result request appropriately
 	    //
@@ -1929,5 +1935,19 @@ public abstract class PhysicalOperator {
     /*this function sets the data manager--Trigger*/
     public static void setDataManager(DataManager dm) {
 	DM=dm;
+    }
+
+    /**
+     * Print a message plus some information about the operator
+     */
+    void printMessage(String msg) {
+	System.out.print(this.getClass().getName() + " ");
+	if(isBlocking()) {
+	    System.out.print("(blocking):  ");
+	} else {
+	    System.out.print("(non-blocking):  ");
+	}
+	System.out.print(msg);
+	System.out.println();
     }
 }    

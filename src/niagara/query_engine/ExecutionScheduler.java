@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.4 2000/07/08 05:22:53 vpapad Exp $
+  $Id: ExecutionScheduler.java,v 1.5 2000/08/09 23:53:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -112,7 +112,7 @@ public class ExecutionScheduler {
      */
 
     public synchronized void executeOperators (logNode optimizedTree,
-											   QueryInfo queryInfo) {
+					       QueryInfo queryInfo) {
 
 		// First create a Physical Head Operator to handle this query
 		// in the system
@@ -152,7 +152,7 @@ public class ExecutionScheduler {
      */
 
     private void scheduleForExecution (logNode rootLogicalNode,
-									   Stream outputStream) {
+				       Stream outputStream) {
 
 		// Get the operator corresponding to the logical node
 		//
@@ -162,12 +162,12 @@ public class ExecutionScheduler {
 		//
 		if (operator instanceof dtdScanOp) {
 
-			processDTDScanOperator((dtdScanOp) operator, outputStream);
-		} else if (operator instanceof FirehoseScanOp) {
-		    processFirehoseScanOperator((FirehoseScanOp) operator, outputStream);
-		}
-		else {
+		    processDTDScanOperator((dtdScanOp) operator, outputStream);
 
+		} else if (operator instanceof FirehoseScanOp) {
+
+		    processFirehoseScanOperator((FirehoseScanOp) operator, outputStream);
+		} else {
 			// This is a regular operator node ... Create the output streams
 			// array
 			//
@@ -253,8 +253,7 @@ public class ExecutionScheduler {
      */
 
     protected void processDTDScanOperator (dtdScanOp dtdScanOperator,
-										   Stream outputStream) {
-
+					    Stream outputStream) {
 		// For now, we have the partial operator to add - THIS WILL GO
 		//
 		Stream[] outputStreams = new Stream[1];
@@ -264,10 +263,9 @@ public class ExecutionScheduler {
 		inputStreams[0] = new Stream(streamCapacity);
 
 		PhysicalPartialOperator partialOp = 
-			new PhysicalPartialOperator(null,
-										inputStreams,
-										outputStreams,
-										responsiveness);
+		    new PhysicalPartialOperator(null, inputStreams,
+						outputStreams, 
+						responsiveness);
 
 		opQueue.putOperator(partialOp);
 
@@ -295,7 +293,7 @@ public class ExecutionScheduler {
      * a firehose thread to fetch data from the firehose, parse the
      * documents that arrive, and put them in the appropriate stream
      *
-     * @param firehoseScanOperator The firehose scan operator that is to be scheduled
+     * @param firehoseScanOp The firehose scan operator to be scheduled
      *                        for execution
      * @param outputStream The stream to which the output of the scan operator
      *                     is to be fed
@@ -303,8 +301,6 @@ public class ExecutionScheduler {
 
     protected void processFirehoseScanOperator (FirehoseScanOp fhScanOp,
 						Stream outputStream) {
-	// For now, we have the partial operator to add - THIS WILL GO
-	//
 	Stream[] outputStreams = new Stream[1];
 	outputStreams[0] = outputStream;
 	
@@ -318,21 +314,19 @@ public class ExecutionScheduler {
 	opQueue.putOperator(partialOp);
 	
 	
-	// Ask the data manager to start filling the output stream with
-	// the parsed XML documents
-	//
+	/* Create a FirehoseThread which will connect to the appropriate
+	 * firehose and start reading documents from that firehose and
+	 * putting them into the output stream
+	 */
 	System.err.println("Attempting to start firehose ");
 
-	FirehoseThread firehose = 
-	    new FirehoseThread(fhScanOp.getSpec(), 
-			       new SourceStream(inputStreams[0]));
-
+	FirehoseThread firehose = new FirehoseThread(fhScanOp.getSpec(),
+				      new SourceStream(inputStreams[0]));
 	
 	// start the thread
 	Thread fhthread = new Thread(firehose);
 	fhthread.start();
+	return;
     }
-
-
 }
 

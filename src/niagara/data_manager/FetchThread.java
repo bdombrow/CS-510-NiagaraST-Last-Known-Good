@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: FetchThread.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: FetchThread.java,v 1.2 2000/08/09 23:53:53 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -66,6 +66,7 @@ class FetchThread implements Runnable {
         for(int i=0; i<req.urls.size(); i++) {
             try {
                 ret = cache.fetch(req.urls.elementAt(i), this);
+
             } catch(CacheFetchException cfe) {
                 System.err.println(" !!! *** Fetch Failed");
                 // ret = new TXDocument();
@@ -91,6 +92,12 @@ class FetchThread implements Runnable {
                     System.err.println("Closed Stream in Fetch");
                 }
             }
+	    /*try {
+		System.out.println("Fetch thread sleeping for 5 seconds");
+				Thread.sleep(5000);
+	} catch (java.lang.InterruptedException ie) {
+		System.out.println("Fetch thread interrupted! What does this mean??");
+	    }*/
         }
 outer:  while(tmpUrl.size()!=0) {
 	    if(!notified) _wait();
