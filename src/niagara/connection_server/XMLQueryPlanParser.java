@@ -151,6 +151,9 @@ public class XMLQueryPlanParser {
 	else if (nodeName.equals("firehosescan")) {
 	    handleFirehoseScan(e);
 	} 
+	else if (nodeName.equals("streamscan")) {
+	    handleStreamScan(e);
+	} 
 	else if (e.getNodeName().equals("accumulate")) {
 	    handleAccumulate(e);
 	}
@@ -512,8 +515,8 @@ public class XMLQueryPlanParser {
 		REMatch[] all_left = re.getAllMatches(leftattrs);
 		REMatch[] all_right = re.getAllMatches(rightattrs);
 		for (int i = 0; i < all_left.length; i++) {
-		    System.out.println("i"+i);
-		    System.out.println(all_left[i].toString());
+		    //KT System.out.println("i"+i);
+		    //KT System.out.println(all_left[i].toString());
 		    leftvect.addElement(leftv.lookUp(all_left[i].toString()));
 		    rightvect.addElement(rightv.lookUp(all_right[i].toString()));
 		    schemaAttribute sa = (schemaAttribute)leftvect.elementAt(0);
@@ -855,6 +858,29 @@ public class XMLQueryPlanParser {
 	ids2nodes.put(id, node);	    
     }
 
+    void handleStreamScan(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	String id = e.getAttribute("id");
+
+	String typeStr = e.getAttribute("type");
+	StreamSpec sSpec;
+	if(typeStr.equals("file")) {
+	    sSpec = new StreamSpec(e.getAttribute("fileName"));
+	} else if (typeStr.equals("firehose")) {
+	    sSpec = new StreamSpec(e.getAttribute("host"),
+				   Integer.parseInt(e.getAttribute("port")));
+	} else {
+	    throw new InvalidPlanException("Invalid type");
+	}
+
+	StreamScanOp op = 
+	    (StreamScanOp) operators.StreamScan.clone();
+	op.setSelectedAlgoIndex(0);
+	op.setStreamScan(sSpec);
+	logNode node = new logNode(op);
+	ids2nodes.put(id, node);	    
+    }
+
     void handleConstruct(Element e) 
 	throws CloneNotSupportedException, InvalidPlanException {
 	String id = e.getAttribute("id");
@@ -934,8 +960,6 @@ public class XMLQueryPlanParser {
     private void handleAccumulate(Element e) 
 	throws InvalidPlanException {
 	try {
-	    System.out.println("accumulate");
-	    
 	    /* Need to create an AccumulateOp
 	     * 1) The MergeTemplate
 	     * 2) The MergeIndex - index of attribute to work on

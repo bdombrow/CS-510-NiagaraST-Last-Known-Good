@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.7 2002/03/26 22:04:28 vpapad Exp $
+  $Id: NiagraServer.java,v 1.8 2002/03/26 23:51:33 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -91,6 +91,12 @@ public class NiagraServer
 
     private static Catalog catalog = null;
 
+    private static boolean quiet = false;
+
+    public static boolean STREAM = false;
+
+    public static boolean KT_PERFORMANCE = false;
+
     public NiagraServer() {
         try {
             // Create the query engine
@@ -108,7 +114,7 @@ public class NiagraServer
 	    
             // Create and start the connection manager
             connectionManager =
-                new ConnectionManager (client_port, this, dtd_hack);
+                new ConnectionManager (client_port, this, dtd_hack,quiet);
 
             if (startConsole) {
                 Console console = new Console(this, System.in);
@@ -117,22 +123,23 @@ public class NiagraServer
             
             if (connectToSE)
                 seClient = new SEClient(SEHOST);
-
-            // Start HTTP server for interserver communication
-            HttpServer hs = new HttpServer();
-            hs.addListener(new InetAddrPort(server_port));
-            HandlerContext hc = hs.addContext(null, "/servlet/*");
-            
-            ServletHandler sh = new ServletHandler();
-            ServletHolder sholder = sh.addServlet("/communication",
-                          "niagara.connection_server.CommunicationServlet");
-            
-
-            hc.addHandler(sh);
-            hs.start();
-
-            Context context = sh.getContext();
-            context.setAttribute("server", this);
+	      if(!KT_PERFORMANCE) { 
+		  // Start HTTP server for interserver communication
+		  HttpServer hs = new HttpServer();
+		  hs.addListener(new InetAddrPort(server_port));
+		  HandlerContext hc = hs.addContext(null, "/servlet/*");
+		  
+		  ServletHandler sh = new ServletHandler();
+		  ServletHolder sholder = sh.addServlet("/communication",
+							"niagara.connection_server.CommunicationServlet");
+		  
+		  
+		  hc.addHandler(sh);
+		  hs.start();
+		  
+		  Context context = sh.getContext();
+		  context.setAttribute("server", this);
+	      } 
         }
         catch (Exception ex) {
             cerr("Could not start server because of ");
@@ -277,7 +284,11 @@ public class NiagraServer
                     NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS; // hard wired defaults
                     NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
                     valid_args = true;
-                } else if (args[i].equals("-dtd-hack")) {
+                } else if (args[i].equals("-quiet")) {
+		    quiet = true;
+		} else if (args[i].equals("-stream")) {
+		    STREAM = true;
+		} else if (args[i].equals("-dtd-hack")) {
                     dtd_hack = true;
                     valid_args = true;
                 } else if (args[i].equals("-console")) {
