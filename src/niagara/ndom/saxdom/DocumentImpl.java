@@ -1,5 +1,5 @@
 /**
- * $Id: DocumentImpl.java,v 1.5 2002/04/06 02:15:08 vpapad Exp $
+ * $Id: DocumentImpl.java,v 1.6 2002/04/15 22:48:56 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -14,15 +14,16 @@ import java.util.Vector;
 
 public class DocumentImpl extends NodeImpl implements Document {
 
-    private Vector pages;
+    private Page firstPage;
+    private Page lastPage;
 
     public DocumentImpl(Page firstPage, int offset) {
         super(null, BufferManager.getIndex(firstPage, offset));
 
         doc = this;
 
-        pages = new Vector();
-        addPage(firstPage);
+        firstPage.pin();
+        lastPage = this.firstPage = firstPage;
     }
 
     public short getNodeType() {
@@ -35,14 +36,19 @@ public class DocumentImpl extends NodeImpl implements Document {
 
     public void addPage(Page page) {
         page.pin();
-        pages.add(page);
+        lastPage = page;
     }
 
     public void finalize() throws Throwable {
         // Unpin all pages for this document
-        for (int i = 0; i < pages.size(); i++)
-            ((Page) pages.get(i)).unpin();
-
+        Page page = firstPage;
+        do {
+            Page next = page.getNext();
+            page.unpin();
+            if (page == lastPage) break;
+            page = next;
+        } while (page != null);
+        
         super.finalize();
     }
 
