@@ -1,25 +1,8 @@
-/* $Id: Pattern.java,v 1.1 2002/12/10 01:18:27 vpapad Exp $ */
+/* $Id: Pattern.java,v 1.2 2003/08/01 17:29:06 tufte Exp $ */
 package niagara.optimizer.rules;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.StringTokenizer;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import niagara.connection_server.Catalog;
-import niagara.connection_server.ConfigurationError;
 import niagara.optimizer.colombia.Expr;
-import niagara.optimizer.colombia.LeafOp;
-import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.Op;
-import niagara.optimizer.colombia.PhysicalOp;
-import niagara.utils.PEException;
 
 
 abstract public class Pattern {

@@ -1,10 +1,8 @@
-/* $Id: SimpleRule.java,v 1.5 2003/07/03 19:43:43 tufte Exp $ */
+/* $Id: SimpleRule.java,v 1.6 2003/08/01 17:29:06 tufte Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
 
@@ -30,7 +28,7 @@ public class SimpleRule extends ParsedRule {
     public static SimpleRule fromXML(Element e, Catalog catalog) {
         String name = e.getAttribute("name");
         if (name.length() == 0)
-            catalog.confError("Each rule must have a name attribute");
+            Catalog.confError("Each rule must have a name attribute");
 
         String promiseStr = e.getAttribute("promise");
         boolean specifiedPromise = (promiseStr.length() != 0);
@@ -60,7 +58,7 @@ public class SimpleRule extends ParsedRule {
         String logicalOpName = beforeOp.getAttribute("name");
         Class logicalClass = catalog.getOperatorClass(logicalOpName);
         if (logicalClass == null)
-            catalog.confError(
+            Catalog.confError(
                 "Could not find logical operator with name: " + logicalOpName);
 
         Expr beforeExpr = null;
@@ -101,7 +99,7 @@ public class SimpleRule extends ParsedRule {
         String afterOpName = afterOp.getAttribute("name");
         Class afterClass = catalog.getOperatorClass(afterOpName);
         if (afterClass == null)
-            catalog.confError(
+            Catalog.confError(
                 "Could not find operator with name: " + afterOpName);
 
         Expr afterExpr = null;

@@ -1,4 +1,4 @@
-/* $Id: ParsedRule.java,v 1.2 2003/03/07 23:37:33 vpapad Exp $ */
+/* $Id: ParsedRule.java,v 1.3 2003/08/01 17:29:06 tufte Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,7 +33,7 @@ public abstract class ParsedRule extends Rule {
             try {
                 conditionMethod = c.getMethod(condition, getConditionArgTypes());
                 if (conditionMethod.getReturnType() != Boolean.TYPE)
-                    catalog.confError(
+                    Catalog.confError(
                         "Condition methods should return a boolean");
             } catch (NoSuchMethodException nsme) {
                 throw new PEException("Could not find method: " + condition);

@@ -1,10 +1,9 @@
-/* $Id: Consequent.java,v 1.1 2002/12/10 01:18:27 vpapad Exp $ */
+/* $Id: Consequent.java,v 1.2 2003/08/01 17:29:06 tufte Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
@@ -15,10 +14,8 @@ import org.w3c.dom.NodeList;
 import niagara.connection_server.Catalog;
 import niagara.connection_server.ConfigurationError;
 import niagara.optimizer.colombia.Expr;
-import niagara.optimizer.colombia.LeafOp;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.Op;
-import niagara.optimizer.colombia.PhysicalOp;
 import niagara.utils.PEException;
 
 /** Consequent patterns for <code>ConstructedRule</code>s.
@@ -63,7 +60,7 @@ public class Consequent extends Pattern {
        if (e.getTagName().equals("leaf")) {
             String posStr = e.getAttribute("name");
             if (posStr.length() == 0)
-                catalog.confError("Leaves must be annotated with a name attribute");
+                Catalog.confError("Leaves must be annotated with a name attribute");
             
             return new Consequent(posStr, new String[]{}, null, new Consequent[]{});
        }
@@ -74,14 +71,14 @@ public class Consequent extends Pattern {
             
         String opName = e.getAttribute("op");
         if (!((name != null) ^ (opName.length() != 0)))
-            catalog.confError("Must provide either a pattern or an operator name (but not both)");
+            Catalog.confError("Must provide either a pattern or an operator name (but not both)");
 
         Op op = null;
         
         if (opName.length() != 0) {
             Class opClass = catalog.getOperatorClass(opName);
             if (opClass == null)
-                catalog.confError("Cannot find operator " + opName);
+                Catalog.confError("Cannot find operator " + opName);
                 
             try {
                 // Operator must have a zero-argument public constructor

@@ -1,18 +1,15 @@
-/* $Id: ConstructedRule.java,v 1.1 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: ConstructedRule.java,v 1.2 2003/08/01 17:29:06 tufte Exp $ */
 package niagara.optimizer.rules;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import niagara.connection_server.Catalog;
 import niagara.connection_server.ConfigurationError;
 import niagara.optimizer.colombia.Expr;
 import niagara.optimizer.colombia.MExpr;
 import niagara.optimizer.colombia.PhysicalProperty;
-import niagara.optimizer.colombia.Rule;
 import niagara.utils.XMLUtils;
 
 /**
@@ -56,11 +53,11 @@ public class ConstructedRule extends ParsedRule {
     public static ConstructedRule fromXML(Element e, Catalog catalog) {
         String tagName = e.getTagName();
         if (!tagName.equals("rule"))
-            catalog.confError("Expected rule, found " + tagName);
+            Catalog.confError("Expected rule, found " + tagName);
 
         String name = e.getAttribute("name");
         if (name.length() == 0)
-            catalog.confError("Each rule must have a name attribute");
+            Catalog.confError("Each rule must have a name attribute");
 
         ConfigurationError checkPatterns =
             new ConfigurationError("Rules must contain one 'before' and one 'after' pattern");

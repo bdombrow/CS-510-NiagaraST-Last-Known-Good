@@ -1,4 +1,4 @@
-/* $Id: CustomRule.java,v 1.2 2003/06/03 07:56:53 vpapad Exp $ */
+/* $Id: CustomRule.java,v 1.3 2003/08/01 17:29:06 tufte Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.Constructor;
@@ -30,11 +30,11 @@ abstract public class CustomRule extends Rule {
     public static CustomRule fromXML(Element e, Catalog catalog) {
         String name = e.getAttribute("name");
         if (name.length() == 0)
-            catalog.confError("Each rule must have a name attribute");
+            Catalog.confError("Each rule must have a name attribute");
 
         String className = e.getAttribute("class");
         if (className.length() == 0)
-            catalog.confError("Custom rules must specify a class name");
+            Catalog.confError("Custom rules must specify a class name");
 
         CustomRule rule = null;
         try {
@@ -46,7 +46,7 @@ abstract public class CustomRule extends Rule {
             rule =
                 (CustomRule) ruleConstructor.newInstance(new Object[] { name });
         } catch (ClassNotFoundException cnfe) {
-            catalog.confError("Could not load class: " + className);
+            Catalog.confError("Could not load class: " + className);
         } catch (NoSuchMethodException nsme) {
             throw new PEException(
                 "Constructor could not be found for: " + className);

@@ -1,4 +1,4 @@
-/* $Id: Antecedent.java,v 1.2 2003/02/25 06:19:10 vpapad Exp $ */
+/* $Id: Antecedent.java,v 1.3 2003/08/01 17:29:06 tufte Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.Constructor;
@@ -44,7 +44,7 @@ public class Antecedent extends Pattern {
        if (e.getTagName().equals("leaf")) {
             String posStr = e.getAttribute("name");
             if (posStr.length() == 0)
-                catalog.confError("Leaves must have a name attribute");
+                Catalog.confError("Leaves must have a name attribute");
             int pos = Integer.parseInt(posStr);
             
             return new Antecedent(posStr, new LeafOp(pos), new Antecedent[]{});
@@ -58,7 +58,7 @@ public class Antecedent extends Pattern {
         // Required operator name
         String opName = e.getAttribute("op");
         if (opName.length() == 0)
-            catalog.confError("Must provide an operator name");
+            Catalog.confError("Must provide an operator name");
 
         Class opClass = catalog.getOperatorClass(opName);
         Op op = null;
