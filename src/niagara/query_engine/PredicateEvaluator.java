@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PredicateEvaluator.java,v 1.10 2002/09/11 01:07:37 ptucker Exp $
+  $Id: PredicateEvaluator.java,v 1.11 2002/09/19 20:27:24 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -466,6 +466,9 @@ class Comparison extends Predicate {
 	}
     }
 
+    //This is a simple test to determine if the string can be converted
+    // into a numeric value. It only handles negative numbers and decimal
+    // numbers. It does not check for exponents ('e').
     private boolean isNumber(String st) {
 	boolean fNumber=true;
 	int cPeriod=0;
@@ -473,11 +476,16 @@ class Comparison extends Predicate {
 	for (int i=0; i < st.length() && fNumber; i++) {
 	    if (Character.isDigit(st.charAt(i)) == false) {
 		if (st.charAt(i) == '.') {
+		    //Allow exactly one decimal point
 		    cPeriod++;
 		    if (cPeriod > 1)
 			fNumber=false;
+		} else if (st.charAt(i) == '-') {
+		    if (i != 0)
+			//negative is only allowed in the first position
+			fNumber = false;
 		} else
-		    fNumber =false;
+		    fNumber = false;
 	    }
 	}
 
@@ -497,7 +505,7 @@ class Comparison extends Predicate {
 	// a double and do a numeric comparison. If that fails, or if there
 	// are non-numeric characters in the string, do a string
 	// comparison.
-	if (fNumber) {
+	if (isNumber(leftValue) && isNumber(rightValue)) {
 	    try {
 		return numericCompare(leftValue, rightValue);
 	    } catch (java.lang.NumberFormatException e) {
