@@ -1,5 +1,5 @@
 /**
- * $Id: NamedNodeMapImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
+ * $Id: NamedNodeMapImpl.java,v 1.3 2002/04/17 03:09:18 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -14,67 +14,40 @@ import java.util.Vector;
 
 public class NamedNodeMapImpl implements NamedNodeMap {
 
-    private Document doc;
+    private DocumentImpl doc;
+    private int index;
 
-    private Hashtable name2node;
-    private Vector id2name;
-
-    public NamedNodeMapImpl(DocumentImpl doc) {
+    /**
+     * The only way anyone is ever going to get a NamedNodeMap
+     * out of SAXDOM is by calling Element.getAttributes()
+     * We use this fact to implement this class without any
+     * local storage.
+     */
+    public NamedNodeMapImpl(DocumentImpl doc, int index) {
         this.doc = doc;
-        name2node = new Hashtable();
-        id2name = new Vector();
+	this.index = index;
     }
 
     public Node getNamedItem(String name) {
-        return (Node) name2node.get(name);
+	return BufferManager.getAttributeNode(doc, index, name);
     }
 
     public Node setNamedItem(Node arg) throws DOMException {
-        if (arg.getOwnerDocument() != doc) 
-            throw new DOMException(DOMException.WRONG_DOCUMENT_ERR,
-                                    "Node belongs to a different document.");
-
-        // We never throw INUSE_ATTRIBUTE_ERR, attributes are always
-        // created as children of exactly one element
-
-        String name = arg.getNodeName();
-        Node old = (Node) name2node.get(name);
-                
-        name2node.put(name, arg);
-
-        for (int i=0; i < id2name.size(); i++) {
-            String s = (String) id2name.get(i);
-
-            if (s.equals(name)) { 
-                // Replacing
-                id2name.set(i, arg);
-                return old;
-            }
-        }
-        
-        // Appending
-        id2name.add(name);
-        return old;
+	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+			       "SAXDOM objects are read-only");
     }
 
     public Node removeNamedItem(String name) throws DOMException {
-        Node old = (Node) name2node.get(name);
-        if ( old == null) 
-            throw new DOMException(DOMException.NOT_FOUND_ERR,
-                                   "Node not found in map.");
-        
-        name2node.remove(name);
-        return old;
+	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+			       "SAXDOM objects are read-only");
     }
 
-    public Node item(int index) {
-        if (index < 0 || index >= id2name.size())
-            return null;
-        return (Node) name2node.get(id2name.get(index));
+    public Node item(int attrIndex) {
+	return BufferManager.getAttributeByIndex(doc, index, attrIndex);
     }
 
     public int getLength() {
-        return id2name.size();
+        return BufferManager.getNumberOfAttributes(doc, index);
     }
 
     public Node getNamedItemNS(String namespaceURI, String localName) {

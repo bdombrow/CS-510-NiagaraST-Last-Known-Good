@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.7 2002/04/06 02:15:08 vpapad Exp $
+ * $Id: BufferManager.java,v 1.8 2002/04/17 03:09:18 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -109,7 +109,7 @@ public class BufferManager {
     }
 
     public static String getValue(int index) {
-        throw new PEException("Not Implemented Yet!");
+	throw new PEException("Not Implemented Yet!");
     }
 
     public static Element getOwnerElement(int index) {
@@ -118,6 +118,22 @@ public class BufferManager {
 
     public static Node getParentNode(int index) {
         throw new PEException("Not Implemented Yet!");
+    }
+
+    public static String getAttributeValue(int index) {
+	Page page = getPage(index);
+	int offset = getOffset(index);
+	if (offset == page.getSize() -1) {
+	    page = page.getNext();
+	    offset = 0;
+	}
+	else 
+	    offset++;
+
+	if (page.getEventType(offset) != SAXEvent.ATTR_VALUE)
+	    throw new PEException("Could not find attribute value");
+	
+	return page.getEventString(offset);
     }
 
     public static String getAttribute(int index, String name) {
@@ -152,18 +168,120 @@ public class BufferManager {
         throw new PEException("Not Implemented Yet!");
     }
 
+    /**
+     * Find the attribute of the element with index <code>elementIndex</code>
+     * with name <code>name</code>
+     * @return the corresponding Attr node, or null, if there is none
+     */
     public static Attr getAttributeNode(DocumentImpl doc, 
-                                        int index, String name) {
-        EventIterator ei = new EventIterator(index);
-        do  {
-            byte et = ei.nextEventType();
-            if (et == SAXEvent.ATTR_NAME && ei.getEventString().equals(name)) 
-                return (Attr) makeNode(doc, ei.getIndex());
-            else if (et == SAXEvent.ATTR_NAME || et == SAXEvent.ATTR_VALUE) 
-                continue;
-            else break;
-        } while (true);
-        return null;
+                                        int elementIndex, String attrName) {
+        Page page = getPage(elementIndex);
+        int offset = getOffset(elementIndex);
+
+        int pageSize = page.getSize();
+
+        loop: while (true) {
+            if (offset == pageSize - 1) {
+                page = page.getNext();
+                offset = 0;
+            }
+            else
+                offset++;
+        
+            switch (page.getEventType(offset)) {
+            case SAXEvent.ATTR_NAME:
+		if (page.getEventString(offset).equals(attrName))
+		    return (Attr) makeNode(doc, getIndex(page, offset));
+		continue loop;
+            case SAXEvent.ATTR_VALUE:
+                continue loop;
+	    default:
+		break loop;
+            }
+        }
+
+	return null;
+    }
+
+    /**
+     * Find the <code>attrOffset</code>-th attribute of the element
+     * with index <code>elementIndex</code>
+     * @return the corresponding Attr node, or null, if there is none
+     */
+    static Node getAttributeByIndex(DocumentImpl doc, 
+				    int elementIndex, int attrOffset) {
+	int count = 0;
+
+	if (attrOffset < 0)
+	    return null;
+
+        Page page = getPage(elementIndex);
+        int offset = getOffset(elementIndex);
+
+        int pageSize = page.getSize();
+
+        loop: while (true) {
+            if (offset == pageSize - 1) {
+                page = page.getNext();
+                offset = 0;
+            }
+            else
+                offset++;
+        
+            switch (page.getEventType(offset)) {
+            case SAXEvent.ATTR_NAME:
+		if (count < attrOffset) {
+		    count++;
+		    continue loop;
+		}
+		else
+		    break loop;
+            case SAXEvent.ATTR_VALUE:
+                continue loop;
+	    default:
+		break loop;
+            }
+        }
+
+	if (count == attrOffset)
+	    return makeNode(doc, getIndex(page, offset));
+	else
+	    return null;
+    }
+
+    /**
+     * Find the number of attributes of the element with index 
+     * <code>elementIndex</code>
+     * @return the number of attributes
+     */
+    static int getNumberOfAttributes(DocumentImpl doc, int elementIndex) {
+	int count = 0;
+
+        Page page = getPage(elementIndex);
+        int offset = getOffset(elementIndex);
+
+        int pageSize = page.getSize();
+
+        loop: while (true) {
+            if (offset == pageSize - 1) {
+                page = page.getNext();
+                offset = 0;
+            }
+            else
+                offset++;
+        
+            switch (page.getEventType(offset)) {
+            case SAXEvent.ATTR_NAME:
+		count++;
+		continue loop;
+            case SAXEvent.ATTR_VALUE:
+                continue loop;
+	    default:
+		break loop;
+            }
+        }
+
+	return count;
     }
 
     public static NodeList getChildNodes(DocumentImpl doc, int index) {
@@ -271,20 +389,7 @@ public class BufferManager {
     }
 
     public static NamedNodeMap getAttributes(DocumentImpl doc, int index) {
-        NamedNodeMap nnm = new NamedNodeMapImpl(doc);
-        
-        EventIterator ei = new EventIterator(index);
-        do  {
-            ei.forwardEvent();
-            byte et = ei.getEventType();
-            if (et == SAXEvent.ATTR_NAME) 
-                nnm.setNamedItem(new AttrImpl(doc, ei.getIndex()));
-            else if (et == SAXEvent.ATTR_VALUE) 
-                continue;
-            else break;
-        } while (true);
-
-        return nnm;
+        return new NamedNodeMapImpl(doc, index);
     }
 
     public static boolean hasAttributes(int index) {
