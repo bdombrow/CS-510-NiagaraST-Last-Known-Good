@@ -1,4 +1,4 @@
-/* $Id: Unnest.java,v 1.6 2003/03/07 23:39:22 vpapad Exp $ */
+/* $Id: Unnest.java,v 1.7 2003/07/03 19:39:02 tufte Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -41,7 +41,7 @@ public class Unnest extends unryOp {
         this(op.variable, op.root, op.path, op.projectedAttrs);
     }
 
-    public Op copy() {
+    public Op opCopy() {
         return new Unnest(this);
     }
 

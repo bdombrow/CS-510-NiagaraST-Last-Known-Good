@@ -1,4 +1,4 @@
-/* $Id: Prefix.java,v 1.1 2003/02/25 06:13:16 vpapad Exp $ */
+/* $Id: Prefix.java,v 1.2 2003/07/03 19:39:02 tufte Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -25,7 +25,7 @@ public class Prefix extends unryOp {
         this(op.length);
     }
 
-    public Op copy() {
+    public Op opCopy() {
         return new Prefix(this);
     }
 

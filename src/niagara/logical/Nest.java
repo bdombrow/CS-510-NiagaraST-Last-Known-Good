@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Nest.java,v 1.2 2003/03/19 22:42:30 tufte Exp $
+  $Id: Nest.java,v 1.3 2003/07/03 19:39:02 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -61,7 +61,7 @@ public class Nest extends niagara.xmlql_parser.op_tree.groupOp {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
 	Nest newOp = new Nest();
 	newOp.resultTemplate = this.resultTemplate;
 	newOp.groupingAttrs = this.groupingAttrs;

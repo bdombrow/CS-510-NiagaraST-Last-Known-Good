@@ -1,4 +1,4 @@
-/* $Id: Timer.java,v 1.2 2003/02/26 23:22:00 vpapad Exp $ */
+/* $Id: Timer.java,v 1.3 2003/07/03 19:39:02 tufte Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -222,7 +222,7 @@ public class Timer extends NullaryOp {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         Timer top = new Timer();
         top.relative = relative;
         top.delay = delay;

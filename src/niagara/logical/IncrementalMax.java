@@ -37,7 +37,7 @@ public class IncrementalMax extends IncrementalGroup {
 
     public void dump() {System.out.println(getName());}
 
-    public Op copy() {
+    public Op opCopy() {
         IncrementalMax op = new IncrementalMax(skolemAttributes, maxAttribute);
         op.emptyGroupValue = emptyGroupValue;
         return op;

@@ -1,4 +1,4 @@
-/* $Id: Project.java,v 1.5 2003/02/25 06:13:16 vpapad Exp $ */
+/* $Id: Project.java,v 1.6 2003/07/03 19:39:02 tufte Exp $ */
 package niagara.logical;
 
 import niagara.optimizer.colombia.Attribute;
@@ -14,7 +14,7 @@ public class Project extends unryOp {
     /** attributes to project on */
     Attrs attrs;
    
-    public Op copy() {
+    public Op opCopy() {
         return new Project(this);
     }
 

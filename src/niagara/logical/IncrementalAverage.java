@@ -33,7 +33,7 @@ public class IncrementalAverage extends IncrementalGroup {
         System.out.println(getName());
     }
 
-    public Op copy() {
+    public Op opCopy() {
         return new IncrementalAverage(skolemAttributes, avgAttribute);
     }
 

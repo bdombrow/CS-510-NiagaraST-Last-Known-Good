@@ -1,4 +1,4 @@
-/* $Id: Select.java,v 1.1 2003/03/07 20:59:38 tufte Exp $ */
+/* $Id: Select.java,v 1.2 2003/07/03 19:39:02 tufte Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -30,7 +30,7 @@ public class Select extends unryOp {
         this(selOp.pred);
     }
 
-    public Op copy() {
+    public Op opCopy() {
         return new Select(this);
     }
 
