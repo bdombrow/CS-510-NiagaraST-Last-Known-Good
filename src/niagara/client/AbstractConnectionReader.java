@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: AbstractConnectionReader.java,v 1.3 2002/09/14 04:54:13 vpapad Exp $
+  $Id: AbstractConnectionReader.java,v 1.4 2002/10/29 02:01:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,8 +63,9 @@ public abstract class AbstractConnectionReader implements Runnable
 	 * This is the queryRegistry of the connection reader
 	 */
 	protected QueryRegistry queryRegistry;
-	
-	// Constructors
+
+        private boolean initialized;
+        	
 	/**
 	 * Constructor: This creates a connection to the server side
 	 * @param hostame Server host name
@@ -82,17 +82,20 @@ public abstract class AbstractConnectionReader implements Runnable
 				cWriter = new OutputStreamWriter(socket.getOutputStream());
 			}
                         catch (ConnectException ce) {
-                            System.err.println("Could not connect to " + hostname + ":" + port);
-                            System.exit(-1);
+                            ui.errorMessage(-1, "Could not connect to " + hostname + ":" + port);
+                            return;
                         }
 			catch(UnknownHostException e){
-				System.err.println("Unknown host");
+				ui.errorMessage(-1, "Unknown host");
+                            return;
 			}
 			catch(IOException e){
 				e.printStackTrace();
+                                return;
 			}
 
 			initializeConnectionReader(ui, dtdCache);
+                    initialized = true;
 		}
 	
 	/**
@@ -191,6 +194,10 @@ public abstract class AbstractConnectionReader implements Runnable
 				e.printStackTrace();
 			}
 		}
+        
+        public boolean isInitialized() {
+            return initialized;
+        }
 }
 
 
