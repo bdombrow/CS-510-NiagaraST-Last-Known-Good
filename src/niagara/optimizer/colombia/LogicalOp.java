@@ -1,3 +1,4 @@
+/* $Id: LogicalOp.java,v 1.5 2002/10/23 22:56:29 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 import java.util.ArrayList;
@@ -21,8 +22,14 @@ public abstract class LogicalOp extends Op {
      * Determine the logical properties of this operator's output,
      * given the logical properties of its inputs
      */
-    //public abstract LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input);
-
+    // XXX vpapad: temporary hack
+    /*
+    public abstract LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input);
+    */
+    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+        return null;
+    }
+        
     public boolean is_logical() {
         return true;
     }
