@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.39 2003/02/25 06:16:28 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.40 2003/03/03 08:23:13 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -510,7 +510,22 @@ public class XMLQueryPlanParser {
                         + id);
             }
         }
-        op.setJoin(pred, leftVars, rightVars);
+        String extensionJoinAttr = e.getAttribute("extensionjoin");
+	int extJoin;
+	if(extensionJoinAttr.equals("right")) {
+	    extJoin = joinOp.RIGHT;
+	} else if (extensionJoinAttr.equals("left")) {
+	    extJoin = joinOp.LEFT;
+	} else if (extensionJoinAttr.equals("none")) {
+	    extJoin = joinOp.NONE;
+	} else if (extensionJoinAttr.equals("both")) {
+	    extJoin = joinOp.BOTH;
+	} else {
+	    throw new InvalidPlanException("Invalid extension join value " +
+					   extensionJoinAttr);
+	}
+
+        op.setJoin(pred, leftVars, rightVars, extJoin);
 
         Plan joinNode = new Plan(op, left, right);
         ids2plans.put(id, joinNode);
@@ -1022,9 +1037,9 @@ public class XMLQueryPlanParser {
 
     void handleFileScan(Element e) throws InvalidPlanException {
         String id = e.getAttribute("id");
-        boolean isStream = e.getAttribute("isStream").equalsIgnoreCase("yes");
+        boolean isStream = e.getAttribute("isstream").equalsIgnoreCase("yes");
         FileScanSpec fsSpec =
-            new FileScanSpec(e.getAttribute("fileName"), isStream);
+            new FileScanSpec(e.getAttribute("filename"), isStream);
 
         FileScanOp op = new FileScanOp();
         op.setFileScan(fsSpec, new Variable(id));

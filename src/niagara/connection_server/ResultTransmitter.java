@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.17 2003/02/26 06:33:56 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.18 2003/03/03 08:23:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -118,13 +118,12 @@ public class ResultTransmitter implements Runnable {
 	    response = 
 		new ResponseMessage(request,
 				    ResponseMessage.EXECUTION_ERROR);
-	    System.out.println("se message " + se.getMessage());
 	    response.setData("Message: " + se.getMessage());
 	    try {
 		handler.sendResponse(response);
 	    } catch (IOException ioe) {
 		// nothing to be done, we did our best
-		System.err.println("KT unable to send error message to client - io error: " + ioe.getMessage());
+		System.err.println("KT unable to send error message to client: " + se.getMessage());
 	    }
 	} catch (InterruptedException ie) {
 	    // ditto...
@@ -132,6 +131,7 @@ public class ResultTransmitter implements Runnable {
 	    // probably means there was a problem sending message
 	    // to client
 	    System.err.println("KT ResultTransmitter - IO exception - likely problem sending message to client");
+	    queryInfo.queryResult.kill();
 	}
     }
     
