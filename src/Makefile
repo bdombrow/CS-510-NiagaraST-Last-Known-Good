@@ -19,6 +19,7 @@
 export NIAGROOT    = ..
 export JAVA_HOME   = 
 export LIBDIR      = $(NIAGROOT)/lib
+export FIREHOSEDIR = ../../firehose_1_0
 
 #-------------------------------------
 #  Specify required libs here
@@ -46,11 +47,13 @@ export DMLIB         = $(LIBDIR)/dm.jar
 export QBELIB1	      = $(LIBDIR)/qbe1.jar
 export TRIGLIB	      = $(LIBDIR)/trig.jar
 export QBELIB2	      = $(LIBDIR)/qbe2.jar
-export SAX	          = $(LIBDIR)/aelfred.jar
+export SAX	      = $(LIBDIR)/aelfred.jar
 export DIFF	      	= $(LIBDIR)/diff.jar
 export JFLEX		= $(LIBDIR)/JFlex.zip:$(LIBDIR)/JLex.jar
+export FHOSE            = $(FIREHOSEDIR)
 
-export CLASSPATH     = .:..:$(COMMONLIB):$(REGEXPLIB):$(XMLQLPARSE):$(LOGICALOPTREE):$(DMLIB):$(CUPLIB):$(PARSELIB):$(TRIGGERM):$(TRIGLIB):$(QBELIB2):$(SAX):$(DIFF)
+export CLASSPATH     = .:..:$(COMMONLIB):$(REGEXPLIB):$(XMLQLPARSE):$(LOGICALOPTREE):$(DMLIB):$(CUPLIB):$(PARSELIB):$(TRIGGERM):$(TRIGLIB):$(QBELIB2):$(SAX):$(DIFF):$(FHOSE)
+#export CLASSPATH     = .:..:$(REGEXPLIB):$(CUPLIB):$(PARSELIB):$(QBELIB2):$(SAX):$(DIFF)
 
 export JAVAFLAGS     = -classpath $(CLASSPATH)
 
@@ -64,7 +67,7 @@ APPLET_DIR = /p/niagara/public/html
 #  list and it will be built using 'make all'
 #
 ##############################################################################
-all:	ql_parser client se_server dm qe trigger con_server applet
+all:	ql_parser client se_server dm qe trigger con_server applet nitree type_system
 
 #client: 
 #	$(JAVAC) $(JAVAFLAGS) `find niagara/client -name \*.java`
@@ -84,6 +87,12 @@ qe:
 	$(JAVAC) $(JAVAFLAGS) niagara/query_engine/*.java
 dm:
 	$(JAVAC) $(JAVAFLAGS) niagara/data_manager/*.java
+
+nitree:
+	$(JAVAC) $(JAVAFLAGS) niagara/utils/nitree/*.java
+
+type_system:
+	$(JAVAC) $(JAVAFLAGS) niagara/utils/type_system/*.java
 
 se_server:
 	cd niagara/search_engine && $(MAKE)
@@ -116,3 +125,11 @@ classpath:
 clean:
 	rm -f */*.class */*/*.class */*/*/*.class *.class niagara.jar
 
+really_clean:
+	rm -f */*.class */*/*.class */*/*/*.class *.class niagara.jar \
+	niagara/xmlql_parser/syntax_tree/QueryParser.java \
+	niagara/xmlql_parser/syntax_tree/sym.java \
+	niagara/xmlql_parser/syntax_tree/Scanner.java \
+	niagara/search_engine/seql/parser.java \
+	niagara/search_engine/seql/Yylex.java \
+        niagara/search_engine/seql/sym.java
