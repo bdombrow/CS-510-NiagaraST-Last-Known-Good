@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryType.java,v 1.2 2000/06/26 21:48:12 vpapad Exp $
+  $Id: QueryType.java,v 1.3 2002/09/14 04:54:14 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,4 +39,5 @@ class QueryType
 	public static final int SEQL = 2;
 	public static final int TRIG = 3;
 	public static final int QP = 4;
+        public static final int SYNCHRONOUS_QP = 5;
 }

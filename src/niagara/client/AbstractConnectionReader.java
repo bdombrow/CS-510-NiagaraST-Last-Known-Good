@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: AbstractConnectionReader.java,v 1.2 2001/07/10 04:42:43 vpapad Exp $
+  $Id: AbstractConnectionReader.java,v 1.3 2002/09/14 04:54:13 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -168,12 +168,19 @@ public abstract class AbstractConnectionReader implements Runnable
 			String s = "<"+ REQUEST +">\n";
 			cWriter.write(s);
 		}
+        
+        private UIDriverIF ui;
+        public UIDriverIF getUI() {
+            return ui;
+        }
 
 	/**
 	 * Common constructor initializations
 	 */
 	private void initializeConnectionReader(UIDriverIF ui, DTDCache dtdCache)
 		{
+                        this.ui = ui;
+                        
 			// Construct a registry
 			queryRegistry = new QueryRegistry();
 			try{
@@ -184,12 +191,6 @@ public abstract class AbstractConnectionReader implements Runnable
 				e.printStackTrace();
 			}
 		}
-
-	// Entry Point (debug main)
-	public static void main(String argv[]) throws Exception
-		{
-			
-		}	
 }
 
 

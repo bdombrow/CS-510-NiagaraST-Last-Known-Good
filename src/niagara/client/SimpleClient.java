@@ -16,7 +16,7 @@ public class SimpleClient implements UIDriverIF {
     long m_start, m_stop;
 
     public SimpleClient(String host, int port) {
-	cm = new ConnectionManager(host, port, this, true);
+	cm = new ConnectionManager(new SimpleConnectionReader(host, port, this, new DTDCache()));
     }
 
     public SimpleClient(String host) {
@@ -27,6 +27,10 @@ public class SimpleClient implements UIDriverIF {
 	this("localhost", ConnectionManager.SERVER_PORT);
     }
 
+    public SimpleClient(AbstractConnectionReader acr) {
+        cm = new ConnectionManager(acr);
+    }
+    
     public interface ResultsListener {
 	void notifyNewResults(String results);
 	void notifyError(String error);
@@ -199,7 +203,7 @@ public class SimpleClient implements UIDriverIF {
     }
 
     public void processQuery(String queryText) {
-	System.out.println("Executing query " + queryText);
+	System.err.println("Executing query " + queryText);
 	if(queryText.equalsIgnoreCase("gc")) {
             cm.runGarbageCollector();
 	    return;

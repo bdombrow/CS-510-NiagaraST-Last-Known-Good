@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.12 2002/05/07 03:10:13 tufte Exp $
+  $Id: ConnectionManager.java,v 1.13 2002/09/14 04:54:13 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -102,21 +102,14 @@ public class ConnectionManager implements QueryExecutionIF
 
     // Constructors
     public ConnectionManager(String hostname, int port, UIDriverIF ui) {
-	this(hostname, port, ui, false);
+	this(new ConnectionReader(hostname, port, ui, new DTDCache()));
     }
 
-    public ConnectionManager(String hostname, int port, UIDriverIF ui, boolean simple) {
-	// create a cache for the dtd's
-	dtdCache = new DTDCache();
-
-	// Create a ConnectionReader object
-	if (simple) 
-	    connectionReader = new SimpleConnectionReader(hostname, port, ui, dtdCache);
-	else 
-	    connectionReader = new ConnectionReader(hostname, port, ui, dtdCache);
-
+    public ConnectionManager(AbstractConnectionReader cr) {
+        this.connectionReader = cr;
+        
 	// initialize the call back interface of the client
-	this.ui = ui;
+	this.ui = cr.getUI();
 			
 	// Get the output writer from the connection reader
 	writer = connectionReader.getPrintWriter();

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.9 2002/09/09 16:34:49 ptucker Exp $
+  $Id: SimpleConnectionReader.java,v 1.10 2002/09/14 04:54:14 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,12 +30,8 @@ package niagara.client;
 import java.net.*;
 import java.io.*;
 
-import java.util.Vector;
-
 import gnu.regexp.*;
 import niagara.utils.PEException;
-
-
 class SimpleConnectionReader extends AbstractConnectionReader 
     implements Runnable {
     UIDriverIF ui;
@@ -46,21 +42,23 @@ class SimpleConnectionReader extends AbstractConnectionReader
 	this.ui = ui;
     }
 
-    Vector results = new Vector();
+    StringBuffer results = new StringBuffer();
     
     synchronized private void addResult(String line) {
-	    results.addElement(line);
+	    results.append(line);
     }
     
     synchronized public String getResults() {
-	String resultStr = "";
-	for (int i=0; i < results.size(); i++) {
-	    resultStr += (String) results.elementAt(i);
-	}
-	results.clear();
+	String resultStr = results.toString();
+        results.setLength(0);
 	return resultStr;
     }
 
+    synchronized public void appendResults(StringBuffer sb) {
+        sb.append(results);
+        results.setLength(0);
+    }
+    
     /**
      * The run method accumulates result strings
      */
@@ -86,17 +84,21 @@ class SimpleConnectionReader extends AbstractConnectionReader
 			server_id = Integer.parseInt(m.substituteInto("$2"));
 			queryRegistry.setServerId(local_id, server_id);
 		    }
-		    if (line.indexOf("\"end_result\">") != -1)
+		    if (line.indexOf("\"end_result\">") != -1) {
+                        addResult("</niagara:results>");
+                        ui.notifyNew(local_id);
 			ui.notifyFinalResult(local_id);
+                    }
 		}
 		else {
 		    addResult(line);
+                    if (line.indexOf("<?xml") != -1)
+                        addResult("<niagara:results>");
                     ui.notifyNew(local_id);
 		}
 
 		line = br.readLine();
 	    }
-
 	}
 	catch(gnu.regexp.REException e){
 	    throw new PEException("Invalid response message reg exception " +
