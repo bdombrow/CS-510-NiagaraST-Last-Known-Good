@@ -74,52 +74,32 @@ public class Expr {
 
         int count = 0;
         for (int i = 0; i < inputs.length; i++)
-            count += inputs[i].numLeafOps();        
+            count += inputs[i].numLeafOps();
         return count;
     }
-    
+
     //Caching the computed cost for this physical expression
     double cachedCost = -1;
 
-    // // Return the cost of a physical plan with this expression as root
-    // Cost * GetCost(){
-    // 	if (cachedCost!=-1) return new Cost(cachedCost); 
-    // 	Cost * cost;
-    // 	LogicalProperty * localLogProp = ((PhysicalOp *)getOp()).getLogProp();
+    /** the cost of a physical plan with this expression as root */
+    public Cost getCost(ICatalog catalog) {
+        if (cachedCost != -1)
+            return new Cost(cachedCost);
+        Cost cost;
+        LogicalProperty localLogProp = ((PhysicalOp) getOp()).getLogProp();
+        LogicalProperty[] inputLogProps = new LogicalProperty[arity];
+        for (int i = 0; i < arity; i++) {
+            inputLogProps[i] = ((PhysicalOp) getInput(i).getOp()).getLogProp();
+        }
+        cost = ((PhysicalOp) getOp()).FindLocalCost(catalog, inputLogProps);
 
-    // 	if (getArity()==0)		//airty=0, means it is FILESCAN operator. 
-    // 		return (getOp().FindLocalCost(localLogProp, 0));
+        for (int i = 0; i < arity; i++) {
+            cost.add(getInput(i).getCost(catalog));
+        }
 
-    // 	if (getArity()==1) {
-    // 		LogicalProperty* inputLogProps[1]={((PhysicalOp *)GetInput(0).getOp()).getLogProp()}
-    // 		cost = getOp().FindLocalCost(localLogProp, inputLogProps);
-    // 		*cost += *GetInput(0).GetCost();
-    // 		cachedCost=cost.getValue();
-    // 		return cost;
-    // 	}
-    // 	if (getOp().IsDependent()){
-    // 		LogicalProperty* inputLogProps[2]={((PhysicalOp *)GetInput(0).getOp()).getLogProp()
-    // 										, ((PhysicalOp *)GetInput(1).getOp()).getLogProp()}
-    // 		cost = getOp().FindLocalCost(localLogProp, inputLogProps);
-    // 		double value = cost.getValue();
-    // 		double value1 = GetInput(0).GetCost().getValue();
-    // 		double value2 = GetInput(1).GetCost().getValue();
-    // 		float card = ((PhysicalOp *)GetInput(0).getOp()).getLogProp().GetCard();
-    // 		value = value + value1 + card*value2;
-    // 		cost = new Cost(value);
-    // 		cachedCost=value;
-    // 		return cost;
-    // 	}
-    // 	if (getArity()==2) {
-    // 		LogicalProperty* inputLogProps[2]={((PhysicalOp *)GetInput(0).getOp()).getLogProp()
-    // 										, ((PhysicalOp *)GetInput(1).getOp()).getLogProp()}
-    // 		cost = getOp().FindLocalCost(localLogProp, inputLogProps);
-    // 		*cost += *GetInput(0).GetCost();
-    // 		*cost += *GetInput(1).GetCost();
-    // 	}
-    // 	cachedCost=cost.getValue();
-    // 	return cost;
-    // }
+        cachedCost = cost.getValue();
+        return cost;
+    }
 
     // // Return the string representing the expression
     // // And meanwhile, output it with indentation

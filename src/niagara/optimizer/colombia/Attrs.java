@@ -56,12 +56,10 @@ public class Attrs {
         return result;
     }
 
-    //return FALSE if duplicate found, and don't add it to the set.
     ATTR GetAttr(String name) {
         for (int i = 0; i < size(); i++)
             if (get(i).getName().equals(name))
                 return get(i);
-        assert false; //looking for an attribute that does not exist
         return null;
     }
 

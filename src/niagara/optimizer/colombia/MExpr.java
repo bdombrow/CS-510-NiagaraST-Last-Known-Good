@@ -12,7 +12,6 @@ import java.util.BitSet;
 public class MExpr {
     private BitSet ruleMask; //If 1, do not fire rule with that index
 
-    private int counter; // how many winners point to this MEXPR
     private Op op; //Operator
     private Group[] inputs;
     private int grpID; //I reside in this group
@@ -24,32 +23,14 @@ public class MExpr {
     // link to the next mexpr in the same group 
     private MExpr nextMExpr;
 
-    /*
-    //This struct will be replaced with more efficient and flexible storage
-    //Histor of which rules have been fired on this MExpr
-            struct RuleHist {
-            } RuleHist;
-    */
-
-    int getCounter() {
-        return counter;
-    }
-    void incCounter() {
-        counter++;
-    }
-    void decCounter() {
-        if (counter != 0)
-            counter--;
-    }
-    
     Op getOp() {
         return op;
     }
-    
+
     public Group getInput(int i) {
         return inputs[i];
     }
-    
+
     void setInput(int i, Group group) {
         inputs[i] = group;
     }
@@ -72,8 +53,8 @@ public class MExpr {
         ruleMask.set(rule_no);
     }
 
-    //Can I fire this rule?
-    boolean can_fire(int rule_no) {
+    //Can I fire this rule? 
+    boolean canFire(int rule_no) {
         return !ruleMask.get(rule_no);
     }
 
@@ -83,26 +64,24 @@ public class MExpr {
         op = expr.getOp().copy();
         grpID = (grpid == ssp.NEW_GRPID) ? ssp.getNewGrpID() : grpid;
         Expr input;
-        counter = 0;
         ruleMask = new BitSet(ssp.getRulesetSize());
 
         // copy in the sub-expression
         int arity = getArity();
-        if (arity != 0) {
-            inputs = new Group[arity];
-            for (int i = 0; i < arity; i++) {
-                input = expr.getInput(i);
+        inputs = new Group[arity];
+        for (int i = 0; i < arity; i++) {
+            input = expr.getInput(i);
 
-                if (input.getOp().is_leaf())
-                    // deal with LEAF_OP, sharing the existed group
-                    inputs[i] = ((LEAF_OP) input.getOp()).getGroup();
-                else {
-                    // create a new sub group
-                    MExpr MExpr = ssp.CopyIn(input, ssp.NEW_GRPID);
-                    inputs[i] = MExpr.getGroup();
-                }
+            if (input.getOp().is_leaf())
+                // deal with LEAF_OP, sharing the existed group
+                inputs[i] = ((LEAF_OP) input.getOp()).getGroup();
+            else {
+                // create a new sub group
+                MExpr MExpr = ssp.copyIn(input, ssp.NEW_GRPID, true);
+                inputs[i] = MExpr.getGroup();
             }
         }
+        ssp.getTracer().newMExpr(this);
     }
 
     // copy constructor
@@ -110,6 +89,7 @@ public class MExpr {
     // so only consider physical mexpr, omitting some data members
     public MExpr(MExpr other) {
         op = other.getOp().copy();
+        ((PhysicalOp) op).setLogProp(((PhysicalOp) other.getOp()).getLogProp());
         grpID = other.getGrpID();
         assert op.is_physical() || op.is_item();
 
@@ -125,7 +105,7 @@ public class MExpr {
     public int hashCode() {
         int hash = op.hashCode();
         for (int i = 0; inputs != null && i < inputs.length; i++)
-            hash = hash ^ inputs[i].hashCode();
+            hash = hash ^ (inputs[i].hashCode() + i);
         return hash;
     }
 
@@ -133,7 +113,6 @@ public class MExpr {
         if (o == null || !(o instanceof MExpr))
             return false;
         MExpr mexpr = (MExpr) o;
-        //XXX vpapad: Checking operators with equals, will they also be identical objects?
         if (!op.equals(mexpr.op) || inputs.length != mexpr.inputs.length)
             return false;
         for (int i = 0; i < inputs.length; i++) {
@@ -181,15 +160,12 @@ public class MExpr {
     //         }
     //         return ((PhysicalOp*)Op).FindLocalCost(LocalLogProp, LogProps);
 
-    void clear_rule_mask() {
-        ruleMask.xor(ruleMask);
+    void setRuleMask(BitSet v) {
+        ruleMask.clear();
+        ruleMask.or(v);
     }
 
-    void set_rule_mask(BitSet v) {
-        ruleMask = v;
-    }
-
-    void add_rule_mask(BitSet v) {
+    void addRuleMask(BitSet v) {
         ruleMask.or(v);
     }
 
@@ -199,6 +175,8 @@ public class MExpr {
      */
     public void setGroup(Group group) {
         this.group = group;
+        if (op.is_physical())
+            ((PhysicalOp) op).setLogProp(group.getLogProp());
     }
 
     public String toString() {

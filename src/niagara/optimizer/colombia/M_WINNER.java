@@ -25,7 +25,7 @@ public class M_WINNER {
 		BPlan = new MExpr[S];
 		
 		// set the first physical property as "any" for all groups
-		PhysProp[0] = new PhysicalProperty(new ORDER(ORDER.KIND.ANY));
+		PhysProp[0] = new PhysicalProperty(new Order(Order.Kind.ANY));
 		
 		// set the cost to INF and plan to null initially for all groups
 		for (int i=0; i<S; i++)

@@ -7,10 +7,12 @@ public class LogicalProperty {
     float cardinality; 
     Attrs Attrs; // The list of attributes in the schema
 
-    // Can we evaluate this expression using only local resources?
-    boolean local;
+    // Does this expression reference local resources?
+    boolean hasLocal;
+    // Does this expression reference remote resources?
+    boolean hasRemote;
     
-    public LogicalProperty(float card, Attrs attrs, boolean local) {
+    public LogicalProperty(float card, Attrs attrs, boolean isLocal) {
         this.cardinality = card;
         this.Attrs = attrs.copy();
 
@@ -19,7 +21,8 @@ public class LogicalProperty {
         if (attrs == null)
             Attrs = new Attrs();
 
-        this.local = local;
+        this.hasLocal = isLocal;
+        this.hasRemote = !isLocal;
     }
 
     /** Initialize a logical property with a Get Operator */
@@ -27,7 +30,8 @@ public class LogicalProperty {
         cardinality = LogProp.getCardinality();
         assert cardinality >= 0;
         Attrs = new Attrs(attr);// attr is the only attribute at this point
-        local = LogProp.isLocal();
+        hasLocal = LogProp.hasLocal;
+        hasRemote = LogProp.hasRemote;
     }
 
     LogicalProperty(LogicalProperty other) { // copy constructor
@@ -39,7 +43,8 @@ public class LogicalProperty {
         for (int i = 0; i < other.GetAttrs().size(); i++)
             Attrs.add(other.GetAttrs().GetAt(i).copy());
 
-        local = other.local;
+        hasLocal = other.hasLocal;
+        hasRemote = other.hasRemote;
     }
 
     public LogicalProperty copy() {
@@ -69,15 +74,31 @@ public class LogicalProperty {
     }
 
     public boolean isLocal() {
-        return local;
+        return hasLocal && !hasRemote;
     }
     
     public boolean isRemote() {
-        return !local;
+        return hasRemote;
     }
     
-    public void setLocal(boolean local) {
-        this.local = local;
+    public boolean isMixed() {
+        return hasLocal && hasRemote;
+    }
+    
+    public boolean hasLocal() {
+        return hasLocal;
+    }
+    
+    public boolean hasRemote() {
+        return hasRemote;
+    }
+    
+    public void setHasLocal(boolean local) {
+        this.hasLocal = local;
+    }
+
+    public void setHasRemote(boolean remote) {
+        this.hasRemote = remote;
     }
 
     Strings GetAttrNames() {

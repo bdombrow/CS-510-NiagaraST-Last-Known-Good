@@ -56,7 +56,7 @@ public class O_GROUP extends Task {
         // if INFBOUND flag is on, set the bound to be INF
         if (ssp.INFBOUND) {
             Cost INFCost = new Cost(-1);
-            ((Context) ssp.vc.get(ContextID)).setUpperBound(INFCost);
+            ssp.getVc(ContextID).setUpperBound(INFCost);
         }
     }
 
@@ -110,7 +110,7 @@ public class O_GROUP extends Task {
         Group Group = group;
         MExpr FirstLogMExpr = Group.getFirstLogMExpr();
 
-        Context LocalCont = (Context) ssp.vc.get(ContextID);
+        Context LocalCont = ssp.getVc(ContextID);
         PhysicalProperty LocalReqdProp = LocalCont.getPhysProp();
 
         Group.SearchResults sr = Group.search_circle(LocalCont);
@@ -155,7 +155,7 @@ public class O_GROUP extends Task {
                 //                // PTRACE(
                 //                   // "%s",
                 //                    //"Push O_GROUP with current context, another with ANY context");
-                //                assert LocalReqdProp.getOrder().getKind() == ORDER.KIND.SORTED;
+                //                assert LocalReqdProp.getOrder().getKind() == Order.KIND.SORTED;
                 //                //temporary
                 //                if (ssp.GlobepsPruning) {
                 //                    Cost eps_bound = new Cost(epsBound);
@@ -164,7 +164,7 @@ public class O_GROUP extends Task {
                 //                } else
                 //                    ssp.addTask(new O_GROUP(ssp, GrpID, ContextID, ssp.TaskNo));
                 //
-                //                if (LocalReqdProp.getOrder().getKind() == ORDER.KIND.SORTED) {
+                //                if (LocalReqdProp.getOrder().getKind() == Order.KIND.SORTED) {
                 //                    Cost NewCost = new Cost((LocalCont.getUpperBd()));
                 //                    LogicalProperty LogProp = Group.getLogProp();
                 //                    MSORT Qsort;
@@ -172,7 +172,7 @@ public class O_GROUP extends Task {
                 //                    NewCost -= SortCost;
                 //
                 //                    Context NewContext =
-                //                        new Context(new PhysicalProperty(new ORDER(any)), NewCost, false);
+                //                        new Context(new PhysicalProperty(new Order(any)), NewCost, false);
                 //                    ssp.vc.add(NewContext);
                 //                    if (GlobepsPruning) {
                 //                        Cost eps_bound = new Cost(EpsBound);
@@ -200,7 +200,7 @@ public class O_GROUP extends Task {
             // push O_INPUTS on all physical mexprs
             ArrayList PhysMExprs = new ArrayList();
             int count = 0;
-            if (LocalReqdProp.getOrder().getKind() == ORDER.KIND.ANY) {
+            if (LocalReqdProp.getOrder().getKind() == Order.Kind.ANY) {
                 //PTRACE("%s", "push O_INPUTS on all physical mexprs");
                 assert sr.isContinuingSearch();
                 for (MExpr PhysMExpr = Group.getFirstPhysMExpr();

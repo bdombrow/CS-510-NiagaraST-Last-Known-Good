@@ -83,10 +83,12 @@ public abstract class Rule {
     public static final int UNNESTING_PROMISE = 2;
     // other unnesting rules           
 
-    private String name;
+    protected String name;
     protected Expr pattern; // pattern to match
     protected Expr substitute; // replacement for pattern
 
+    protected RuleSet ruleSet;
+    
     protected int arity; // number of leaf operators in pattern.
     //  Leaf ops must be numbered 0, 1, 2,..
 
@@ -111,6 +113,8 @@ public abstract class Rule {
         this.substitute = substitute;
     }
 
+    abstract public Rule copy();
+
     String GetName() {
         return (name);
     };
@@ -121,6 +125,11 @@ public abstract class Rule {
         return (substitute);
     };
 
+    boolean canFire(MExpr mexpr) {
+        if (ruleSet.isUnique()) return true;
+        return mexpr.canFire(index);
+    }
+    
     boolean top_match(Op op_arg) {
         assert op_arg.is_logical();
         // to make sure never O_EXPR a physcial mexpr
@@ -163,41 +172,50 @@ public abstract class Rule {
         PhysicalProperty ReqdProp);
 
     int get_index() {
-        return (index);
+        return index;
+        
     } // get the rule's index in the rule set
-    void set_index(int i) {
-        index = i;
+    void setIndex(int index) {
+        this.index = index;
     }
     
     /** Initialize masks */
     public void initMasks(int length) {
         mask = new BitSet(length);
         before_mask = new BitSet(length);
-        // XXX vpapad: is this needed?
-        mask.xor(mask);
-        before_mask.xor(before_mask);
     }
     
     // get the rule's mask
-    BitSet get_mask() {
+    BitSet getMask() {
         return mask;
-    }
-    void set_mask(BitSet v) {
-        mask = v;
     }
 
     // get the rule's before_mask
-    BitSet get_before_mask() {
+    BitSet getBeforeMask() {
         return before_mask;
-    }
-    void set_before_mask(BitSet v) {
-        before_mask = v;
     }
 
     String Dump() {
         return "Rule " + name + " ";
     }
 
+    /** initialize the rule after it has been added to a ruleset */
+    public void initialize() {
+        ;
+    }
+    
+    protected void maskRule(String ruleName) {
+        int idx = ruleSet.getIndex(ruleName);
+        if (idx < 0) return;
+        mask.set(idx);
+    }
+
+    protected void maskRuleBefore(String ruleName) {
+        int idx = ruleSet.getIndex(ruleName);
+        if (idx < 0) return;
+        before_mask.set(idx);
+    }
+    
     // if not stop generating logical expression when epsilon pruning is applied
     // need these to identify the substitue
 
@@ -210,5 +228,9 @@ public abstract class Rule {
     
     public String toString() {
         return GetName();
+    }
+
+    public void setRuleSet(RuleSet ruleSet) {
+        this.ruleSet = ruleSet;
     }
 }

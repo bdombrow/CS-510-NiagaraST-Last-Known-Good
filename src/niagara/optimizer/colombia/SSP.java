@@ -1,3 +1,4 @@
+/* $Id: SSP.java,v 1.3 2002/10/07 00:35:12 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import java.util.HashMap;
    more detail by an expression (class Expr).
 */
 public class SSP {
-    Tracer tracer;
+    private Tracer tracer;
 
     private int newGrpID;
 
@@ -44,8 +45,6 @@ public class SSP {
     //  REUSE_SIB: An attempt to improve pattern matching by reusing one side of generated mexprs.
     public boolean REUSE_SIB = false;
 
-    //  NOCART: Do not allow Cartesian products during optimization.
-
     //  INFBOUND: When optimizing a group, ignore the initial upper bound; use infinity instead
     public boolean INFBOUND = false;
 
@@ -53,9 +52,6 @@ public class SSP {
 
     // **************  include physcial mexpr in group or not *****************
     public boolean NO_PHYS_IN_GROUP = false;
-
-    //UNIQ:   on == Use the unique rule set rules
-    public boolean UNIQ = false;
 
     // IRPROP: off == Optimize each group for one property only
     // on == Optimize each group for all Interesting Relevant Properties
@@ -88,7 +84,7 @@ public class SSP {
     /** pending tasks */
     private PendingTasks ptasks;
 
-    private ArrayList rules;
+    private RuleSet ruleSet;
 
     // XXX vpapad moved from M_WINNER
     // XXX vpapad was: public  static std::vector< M_WINNER *> mc;
@@ -97,7 +93,7 @@ public class SSP {
     // XXX vpapad moved from Context
     //The vector of contexts, vc, implements sharing.  Each task which
     //creates a context  adds an entry to this vector.  
-    public ArrayList vc;
+    private ArrayList vc;
 
     // Hash table used to detect duplicate multiexpressions
     public HashMap mexprs;
@@ -109,9 +105,9 @@ public class SSP {
         return catalog;
     }
 
-    public SSP(ArrayList rules, ICatalog catalog) {
-
-        this.rules = rules;
+    public SSP(RuleSet ruleSet, ICatalog catalog) {
+        this.ruleSet = ruleSet;
+        ruleSet.setSSP(this);
         this.catalog = catalog;
         Groups = new ArrayList();
         mc = new ArrayList();
@@ -128,7 +124,7 @@ public class SSP {
     }
 
     int getRulesetSize() {
-        return rules.size();
+        return ruleSet.size();
     }
 
     // free up memory
@@ -157,10 +153,14 @@ public class SSP {
 
     //     std::vector< Group* > * GetGroups() { return &Groups; }
     //     // return the specific group
-    public Group GetGroup(int Gid) {
+    public Group getGroup(int Gid) {
         return (Group) Groups.get(Gid);
     }
 
+    public int getNumberOfGroups() {
+        return Groups.size();
+    }
+    
     //     void  ShrinkGroup(int group_no);	//shrink the group marked completed
     //     void  Shrink();			//shrink the ssp
 
@@ -281,12 +281,14 @@ public class SSP {
      *  to <code>MExpr</code>, register <code>MExpr</code> and return null 
      *  if there is none.
      */
-    MExpr FindDup(MExpr MExpr) {
-        MExpr dup = (MExpr) mexprs.get(MExpr);
-        if (dup != null && dup != MExpr)
+    MExpr FindDup(MExpr mexpr) {
+        MExpr dup = (MExpr) mexprs.get(mexpr);
+        if (mexpr.equals(dup)) {
+            tracer.duplicateMExprFound(mexpr);
             return dup;
+        }
 
-        mexprs.put(MExpr, MExpr);
+        mexprs.put(mexpr, mexpr);
         return null;
     }
 
@@ -297,6 +299,9 @@ public class SSP {
     // // QuanW 5/ 2000 
     int MergeGroups(int group_no1, int group_no2) {
 
+        //XXX vpapad: We can't handle group merging yet;
+
+        assert !ruleSet.isUnique(): "Duplicates detected in unique rule set";
         int ToGid = group_no1;
         int FromGid = group_no2;
 
@@ -306,11 +311,6 @@ public class SSP {
             FromGid = group_no1;
         }
 
-        if (UNIQ) {
-            //	assert(false);
-            //     	PTRACE("Merge group %d and %d\r\n", group_no1, group_no2); 
-            //     	PTRACE("!!!DUPLICTES DETECTED WHILE UNIQ IS SET!!!%s\r\n", "");
-        }
         return ToGid;
     }
 
@@ -322,7 +322,12 @@ public class SSP {
     // GrpID is the ID of the group where Mexpr will be put.  If GrpID is 
     // NEW_GRPID(-1), make a new group with that ID.
     // XXX vpapad: GrpId was passed by reference
-    public MExpr CopyIn(Expr Expr, int GrpID) {
+
+    public MExpr copyIn(Expr Expr, int GrpID) {
+        return copyIn(Expr, GrpID, false);
+    }
+    
+    public MExpr copyIn(Expr Expr, int GrpID, boolean returnDuplicate) {
         Group Group;
 
         // create the M_Expr which will reside in the group
@@ -332,29 +337,36 @@ public class SSP {
         // find duplicate.  Done only for logical, not physical, expressions.
         if (MExpr.getOp().is_logical()) {
             MExpr DupMExpr = FindDup(MExpr);
-            if (DupMExpr != null) // not null ,there is a duplicate
-                {
+            if (DupMExpr != null) { // not null ,there is a duplicate
                 //PTRACE0("duplicate mexpr : " + MExpr.LightDump());
 
                 // the duplicate is in the group the expr wanted to copyin
                 if (GrpID == DupMExpr.getGrpID()) {
-                    return null;
+                    if (returnDuplicate)
+                        return DupMExpr;
+                    else 
+                        return null;
                 }
 
                 // If the Mexpr is supposed to be in a new group, set the group id 
                 if (GrpID == NEW_GRPID) {
-                    GrpID = DupMExpr.getGrpID();
-
                     // because the NewGrpID increases when constructing 
                     // an MExpr with NEW_GRPID, we need to decrease it
                     newGrpID--;
 
-                    return null;
+                    if (returnDuplicate)
+                        return DupMExpr;
+                    else
+                        return null;
+                    
                 } else {
                     // otherwise, i.e., GrpID != DupMExpr.GrpID
                     // need do the merge
-                    GrpID = MergeGroups(GrpID, DupMExpr.getGrpID());
-                    return null;
+                    MergeGroups(GrpID, DupMExpr.getGrpID());
+                    if (returnDuplicate)
+                        return DupMExpr;
+                    else
+                        return null;
                 }
             } // if(DupMExpr != null)
         } //If the expression is logical
@@ -400,8 +412,9 @@ public class SSP {
                         Strings MKEYS = new Strings();
                         MKEYS.add(tmpKeySet.get(i - 1));
                         PhysicalProperty Prop =
-                            new PhysicalProperty(new ORDER(ORDER.KIND.SORTED, MKEYS));
-                        //Prop.KeyOrder.Add(new ORDER(ascending));
+                            new PhysicalProperty(
+                                new Order(Order.Kind.SORTED, MKEYS));
+                        //Prop.KeyOrder.Add(new Order(ascending));
                         MWin.SetPhysProp(i, Prop);
                     }
                     mc.ensureCapacity(GrpID + 1);
@@ -409,7 +422,7 @@ public class SSP {
                 }
             }
         } else {
-            Group = GetGroup(GrpID);
+            Group = getGroup(GrpID);
 
             // include the new MEXPR
             Group.newMExpr(MExpr);
@@ -448,7 +461,8 @@ public class SSP {
 
             Expr[] inputs = new Expr[WinnerMExpr.getArity()];
             for (int i = 0; i < WinnerMExpr.getArity(); i++) {
-                inputs[i] = CopyOut(WinnerMExpr.getInput(i), PhysicalProperty.ANY);
+                inputs[i] =
+                    CopyOut(WinnerMExpr.getInput(i), PhysicalProperty.ANY);
             }
             return new Expr(WinnerOp, inputs);
         } else { // normal case
@@ -482,7 +496,8 @@ public class SSP {
                         inputGroup.getLogProp(),
                         i);
 
-                if (properties == null) return null;
+                if (properties == null)
+                    return null;
 
                 PhysicalProperty ReqProp;
                 if (properties.length > 0)
@@ -496,6 +511,18 @@ public class SSP {
         }
     }
 
+    /** Fully extract the last logical expression for this group */
+    public Expr extractLastLogicalExpression(Group group) {
+        // XXX vpapad: does not handle shared subexpressions
+        MExpr mexpr = group.getLastLogMExpr();
+        Op op = mexpr.getOp();
+        Expr[] inputs = new Expr[mexpr.getArity()];
+        for (int i = 0; i < mexpr.getArity(); i++) {
+            inputs[i] = extractLastLogicalExpression(mexpr.getInput(i));
+        }
+        return new Expr(op, inputs);
+    }
+
     // 	// Return all the logical expression with no pruning. 
     // 	vector<Expr*> * GetExprs(int GrpID) {
     // 		return AllExprs(GrpID, 0, true);
@@ -503,95 +530,118 @@ public class SSP {
 
     // 	// Return all the physical plans with no pruning. 
     // 	vector<Expr*> * GetPlans(int GrpID){
-    // 		return AllExprs(GrpID, new PhysicalProperty(new ORDER(any)), false);
+    // 		return AllExprs(GrpID, new PhysicalProperty(new Order(any)), false);
     // 	}
 
-    // 	// Return all the logical expressions or physical plans with no pruning.
-    // 	//	Logical expressions if forLogical == true
-    // 	//	Physical plans if forLogical == false
-    // 	vector<Expr*> * AllExprs(int GrpID, PhysicalProperty * PhysProp, boolean forLogical)
-    // 	{
-    // 		vector<Expr*> * Exprs = new vector<Expr*>; 
-    // 		Group * ThisGroup = Ssp . GetGroup(GrpID);   
-    // 		MExpr * MExpr;
+//    // Return all the logical expressions or physical plans with no pruning.
+//    //	Logical expressions if forLogical == true
+//    //	Physical plans if forLogical == false
+//    ArrayList AllExprs(
+//        Group group,
+//        PhysicalProperty PhysProp,
+//        boolean forLogical) {
+//        ArrayList Exprs = new ArrayList();
+//        Group ThisGroup = group;
+//        MExpr MExpr;
+//
+//        if (forLogical)
+//            MExpr = ThisGroup.GetFirstLogMExpr();
+//        else
+//            MExpr = ThisGroup.GetFirstPhysMExpr();
+//
+//        while (MExpr != null) { // Traverse the MExpr list
+//            boolean possible;
+//            Group SubGroup;
+//            PhysicalProperty SubProp;
+//            Op op = MExpr.getOp();
+//
+//            if (!forLogical)
+//                ((PhysicalOp) op).SetGrpID(GrpID);
+//            // Set the GrpID for this operator (see Op for GrpID)
+//
+//            ArrayList SubExprs = null;
+//            ArrayList SubExprs1 = null;
+//
+//            // If the MExpr has no input
+//            if (MExpr.getArity() == 0)
+//                Exprs.add(new Expr(op.copy()));
+//
+//            // Get the expressions from the first input group,
+//            // if the M_Expr has at least one input group
+//            // Derive the expressions, when the M_Expr has one input group
+//            else {
+//                SubGroup = MExpr.GetInput(0);
+//                if (forLogical) // For logical expressions
+//                    SubExprs = Ssp.AllExprs(SubGroup.GetGroupID(), 0, true);
+//                else { // For physical plans
+//                    SubProp =
+//                        ((PhysicalOp *) op).InputReqdProp(
+//                            PhysProp,
+//                            SubGroup.getLogProp(),
+//                            0,
+//                            possible);
+//                    if (possible)
+//                        SubExprs =
+//                            Ssp.AllExprs(SubGroup, SubProp, false);
+//                }
+//            }
+//
+//            // Derive the expressions, when the M_Expr has one input group
+//            if (MExpr.getArity() == 1
+//                && SubExprs) { // If it has one input groups
+//                for (int i = 0; i < SubExprs.size(); i++)
+//                    Exprs.push_back(new Expr(op.Copy(), (* SubExprs)[i]));
+//            }
+//
+//            // Derive the expressions , when the M_Expr has two input group
+//            if (MExpr.getArity() == 2 && SubExprs) {
+//                SubGroup = Ssp.GetGroup(MExpr.GetInput(1));
+//                if (forLogical)
+//                    SubExprs1 = Ssp.AllExprs(SubGroup.GetGroupID(), 0, true);
+//                else {
+//                    SubProp =
+//                        ((PhysicalOp *) op).InputReqdProp(
+//                            PhysProp,
+//                            SubGroup.getLogProp(),
+//                            1,
+//                            possible);
+//                    if (possible)
+//                        SubExprs1 =
+//                            Ssp.AllExprs(SubGroup.GetGroupID(), SubProp, false);
+//                }
+//                if (SubExprs && SubExprs1) {
+//                    for (int i = 0; i < SubExprs.size(); i++)
+//                        for (int j = 0; j < SubExprs1.size(); j++)
+//                            Exprs.push_back(
+//                                new Expr(
+//                                    op.Copy(),
+//                                    (* SubExprs)[i],
+//                                    (* SubExprs1)[j]));
+//                }
+//            }
+//            MExpr = MExpr.GetNextMExpr();
+//        }
+//        return Exprs;
+//    } //AllExprs()
 
-    // 		if (forLogical) MExpr = ThisGroup.GetFirstLogMExpr();
-    // 		else MExpr = ThisGroup.GetFirstPhysMExpr();
+    public void optimize(Expr expr) {
+        tracer.startingOptimization();
 
-    // 		while (MExpr) // Traverse the MExpr list
-    // 		{
-    // 			if (MExpr.getOp().GetName()=="QSORT" && GrpID == MExpr.GetInput(0))
-    // 			{ // if MExpr contains a QSORT
-    // 				MExpr = MExpr.GetNextMExpr();
-    // 				continue;
-    // 			}
-    // 			boolean possible;
-    // 			Group * SubGroup;
-    // 			PhysicalProperty * SubProp; 
-    // 			Op * op = MExpr . getOp();
+        copyIn(expr, NEW_GRPID);
 
-    // 			if(!forLogical) ((PhysicalOp*)op).SetGrpID(GrpID); // Set the GrpID for this operator (see Op for GrpID)
-
-    // 			vector<Expr*> * SubExprs=null;
-    // 			vector<Expr*> * SubExprs1=null;
-
-    // 			// If the MExpr has no input
-    // 			if (MExpr.getArity()==0) 
-    // 				Exprs.push_back(new Expr(op.Copy()));
-
-    // 			// Get the expressions from the first input group,
-    // 			// if the M_Expr has at least one input group
-    // 			// Derive the expressions, when the M_Expr has one input group
-    // 			if (MExpr.getArity()){ 
-    // 				SubGroup = Ssp . GetGroup(MExpr.GetInput(0));
-    // 				if (forLogical) // For logical expressions
-    // 					SubExprs= Ssp.AllExprs(SubGroup.GetGroupID(), 0, true);
-    // 				else { // For physical plans
-    // 					SubProp = ((PhysicalOp *)op).InputReqdProp(PhysProp, SubGroup.getLogProp(), 0, possible);
-    // 					if (possible)
-    // 						SubExprs= Ssp.AllExprs(SubGroup.GetGroupID(), SubProp, false);
-    // 				}
-    // 			}
-
-    // 			// Derive the expressions, when the M_Expr has one input group
-    // 			if (MExpr.getArity()==1 && SubExprs) { // If it has one input groups
-    // 				for (int i = 0; i<SubExprs.size(); i++)
-    // 					Exprs.push_back(new Expr(op.Copy(), 
-    // 						   (*SubExprs)[i]));
-    // 			}
-
-    // 			// Derive the expressions , when the M_Expr has two input group
-    // 			if (MExpr.getArity()==2 && SubExprs) {
-    // 				SubGroup = Ssp . GetGroup(MExpr.GetInput(1));
-    // 				if (forLogical)
-    // 					SubExprs1= Ssp.AllExprs(SubGroup.GetGroupID(), 0, true);
-    // 				else {
-    // 					SubProp = ((PhysicalOp *)op).InputReqdProp(PhysProp, SubGroup.getLogProp(), 1, possible);
-    // 					if (possible)
-    // 						SubExprs1 = Ssp.AllExprs(SubGroup.GetGroupID(), SubProp, false);
-    // 				}
-    // 				if (SubExprs && SubExprs1){
-    // 					for (int i = 0; i<SubExprs.size(); i++)
-    // 						for (int j = 0; j <SubExprs1.size(); j++)
-    // 							Exprs.push_back(new Expr(op.Copy(), (*SubExprs)[i], (*SubExprs1)[j]));
-    // 				}
-    // 			}
-    // 			MExpr = MExpr.GetNextMExpr();
-    // 		}
-    // 		return Exprs;
-    // 	} //AllExprs()
-
-    public void optimize() {
         // Compute the global epsilon bound if we have to
-        getGlobalEpsBound();
+        getGlobalEpsBound(expr);
 
         if (FIRSTPLAN)
-            GetGroup(0).setfirstplan(false);
+            getGroup(0).setfirstplan(false);
 
         //Create initial context, with no requested properties, infinite upper bound,
         // zero lower bound, not yet done.  Later this may be specified by user.
         Context InitCont =
-            new Context(new PhysicalProperty(ORDER.newAny()), new Cost(-1), false);
+            new Context(
+                new PhysicalProperty(Order.newAny()),
+                new Cost(-1),
+                false);
         //Make this the first context
         vc.add(InitCont);
 
@@ -611,7 +661,6 @@ public class SSP {
                     eps_bound));
         } else
             ptasks.push(new O_GROUP(this, (Group) Groups.get(RootGID), 0));
-
         // main loop of optimization
         // while there are tasks undone, do one
         while (!ptasks.empty()) {
@@ -621,25 +670,16 @@ public class SSP {
             tracer.performingTask(NextTask);
             NextTask.perform();
         }
-
-        //PTRACE("Optimizing completed: %d tasks\r\n", TaskNo);
+        tracer.endingOptimization();
     }
 
     public Rule getRule(int ruleID) {
-        return (Rule) rules.get(ruleID);
+        return (Rule) ruleSet.get(ruleID);
     }
 
     public void addTask(Task t) {
         getTracer().addingTask(t);
         ptasks.push(t);
-    }
-
-    /**
-     * Returns the pending tasks.
-     * @return PendingTasks
-     */
-    public PendingTasks getPTasks() {
-        return ptasks;
     }
 
     /**
@@ -652,6 +692,14 @@ public class SSP {
 
     public Context getVc(int contextID) {
         return (Context) vc.get(contextID);
+    }
+
+    public void addVc(Context c) {
+        vc.add(c);
+    }
+
+    public int getVcSize() {
+        return vc.size();
     }
 
     /**
@@ -670,7 +718,7 @@ public class SSP {
     }
 
     //   Obtain the cost for globalEpsPrunning
-    void getGlobalEpsBound() {
+    void getGlobalEpsBound(Expr expr) {
         PhysicalProperty PhysProp;
 
         // if GlobepsPruning, run optimizer without globepsPruning
@@ -678,15 +726,14 @@ public class SSP {
         if (GlobepsPruning) {
             GlobepsPruning = false;
 
-            optimize();
+            optimize(expr);
             PhysProp = getVc(0).getPhysProp();
             Cost HeuristicCost = new Cost(0);
-            HeuristicCost = (GetGroup(0).getWinner(PhysProp).getCost());
-            assert(GetGroup(0).getWinner(PhysProp).getDone());
+            HeuristicCost = (getGroup(0).getWinner(PhysProp).getCost());
+            assert(getGroup(0).getWinner(PhysProp).getDone());
             GlobalEpsBound = HeuristicCost.times(GLOBAL_EPS);
             clear();
             GlobepsPruning = true;
         }
     }
-
 }

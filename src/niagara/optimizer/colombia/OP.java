@@ -7,15 +7,15 @@ public abstract class Op {
      * as clone() - updateable fields of an operator such as 
      * predicates attached to <code>join</code>s should be deep cloned.
      */
-//    public abstract Op copy();
+    public abstract Op copy();
 
     public abstract String getName(); 
     
     /** number of inputs */
     public abstract int getArity();
 
-//    public abstract boolean equals(Object other);
-//    public abstract int hashCode();
+    public abstract boolean equals(Object other);
+    public abstract int hashCode();
 
     public int getNumberOfOutputs() { return 1;}
     
@@ -32,7 +32,7 @@ public abstract class Op {
      * @return boolean
      */
     public boolean matches(Op other) {
-            return (getClass() == other.getClass());
+            return (getArity() == other.getArity() && getClass() == other.getClass());
     }
 }
 

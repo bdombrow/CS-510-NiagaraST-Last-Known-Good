@@ -17,11 +17,11 @@ public class PhysicalProperty {
     // Physical properties are immutable objects
        
     /** A physical property that guarantees nothing at all */
-    public static PhysicalProperty ANY = new PhysicalProperty(ORDER.newAny());
+    public static PhysicalProperty ANY = new PhysicalProperty(Order.newAny());
 
-    private ORDER order;
+    private Order order;
 
-    public PhysicalProperty(ORDER order) {
+    public PhysicalProperty(Order order) {
         this.order = order;
     }
 
@@ -37,7 +37,7 @@ public class PhysicalProperty {
         return (other.getOrder().equals(order));
     }
 
-    ORDER.KIND getOrderKind() {
+    Order.Kind getOrderKind() {
         return order.getKind();
     }
 
@@ -53,7 +53,7 @@ public class PhysicalProperty {
         return order.toString();
     }
 
-    public ORDER getOrder() {
+    public Order getOrder() {
         return order;
     }
 }

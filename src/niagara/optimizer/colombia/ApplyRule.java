@@ -25,7 +25,6 @@ public class ApplyRule extends Task {
         MExpr mexpr,
         boolean explore,
         int ContextID,
-        int parent_task_no,
         boolean last,
         Cost bound) {
         super(ssp, ContextID);
@@ -43,9 +42,8 @@ public class ApplyRule extends Task {
         MExpr mexpr,
         boolean explore,
         int ContextID,
-        int parent_task_no,
         boolean last) {
-        this(ssp, rule, mexpr, explore, ContextID, parent_task_no, last, null);
+        this(ssp, rule, mexpr, explore, ContextID, last, null);
     }
 
     // XXX vpapad: was destructor
@@ -67,9 +65,9 @@ public class ApplyRule extends Task {
                 }
                 // this's still the last applied rule in the group, 
                 // so mark the group with completed optimization or exploration
-                ssp.GetGroup(mexpr.getGrpID()).set_optimized(true);
+                Group.setOptimized(true);
             } else
-                ssp.GetGroup(mexpr.getGrpID()).setExplored(true);
+                Group.setExplored(true);
         }
     }
 
@@ -86,9 +84,7 @@ public class ApplyRule extends Task {
         //if this context is done, stop
         if (!ssp.GEN_LOG) {
             //Check that this context is not done
-            if (Context.is_done()) {
-                //            PTRACE0("Context: " + Context.GetPhysProp().Dump() 
-                //                    + " is done");
+            if (Context.isFinished()) {
                 delete();
                 return;
             }
@@ -96,21 +92,16 @@ public class ApplyRule extends Task {
             //if not stop generating logical expression when epsilon prune is applied
             //if this context is done and the substitute is physical, if the substitute
             //is logical continue
-            if (Context.is_done() && rule.is_log_to_phys()) {
-                //            PTRACE("Context: %s is done", 
-                //                Context.GetPhysProp().Dump());
+            if (Context.isFinished() && rule.is_log_to_phys()) {
                 delete();
                 return;
             }
         }
-        if (ssp.UNIQ) {
-            //Check again to see that the rule has not been fired since this was put on the stack
-            if (!(mexpr.can_fire(rule.get_index()))) {
-                // tasks must destroy themselves
-                //            PTRACE("Rejected rule %d, being masked ", rule.get_index());
-                delete();
-                return;
-            }
+        //Check again to see that the rule has not been fired since this was put on the stack
+        if (!rule.canFire(mexpr)) {
+            ssp.getTracer().ruleMasked(rule, mexpr);
+            delete();
+            return;
         }
 
         // main variables for the loop over all possible bindings
@@ -167,7 +158,7 @@ public class ApplyRule extends Task {
                 // rule will actually be fired, rule_is_fired is useful later for setting before_mask 
                 rule_fired++;
 
-                //            PTRACE0("Binding SATISFIES condition function.  Mexpr: " + mexpr.Dump());
+                //PTRACE0("Binding SATISFIES condition function.  Mexpr: " + mexpr.Dump());
 
                 //#ifdef _DEBUG
                 //            Conditions[rule.get_index()]++;
@@ -177,7 +168,7 @@ public class ApplyRule extends Task {
 
                 assert after != null;
 
-                //            PTRACE0("substitute expr is : " + after.Dump());
+                //            PTRAClE0("substitute expr is : " + after.Dump());
 
                 // include substitute in MEMO, find duplicates, etc.
                 int group_no = mexpr.getGrpID();
@@ -185,15 +176,15 @@ public class ApplyRule extends Task {
                 if (ssp.NO_PHYS_IN_GROUP) {
                     // don't include physical mexprs into group
                     if (after.getOp().is_logical())
-                        NewMExpr = ssp.CopyIn(after, group_no);
+                        NewMExpr = ssp.copyIn(after, group_no);
                     else
                         NewMExpr = new MExpr(after, group_no, ssp);
                 } else //include physical mexpr into group
-                    NewMExpr = ssp.CopyIn(after, group_no);
+                    NewMExpr = ssp.copyIn(after, group_no);
 
                 // If substitute was already known 
                 if (NewMExpr == null) {
-                    //                            PTRACE0("duplicate substitute " + after.Dump());
+                    // PTRACE0("duplicate substitute " + after.Dump());
 
                     after = null; // "after" no longer used
 
@@ -205,7 +196,7 @@ public class ApplyRule extends Task {
                 after = null; // "after" no longer used
 
                 //Give this expression the rule's mask
-                NewMExpr.set_rule_mask(rule.get_mask());
+                NewMExpr.setRuleMask(rule.getMask());
 
                 //We need to handle this case for rules like project.null,
                 //by merging groups
@@ -363,11 +354,11 @@ public class ApplyRule extends Task {
                 if (ssp.NO_PHYS_IN_GROUP) {
                     // don't include physical mexprs into group
                     if (after.getOp().is_logical())
-                        NewMExpr = ssp.CopyIn(after, group_no);
+                        NewMExpr = ssp.copyIn(after, group_no);
                     else
                         NewMExpr = new MExpr(after, group_no, ssp);
                 } else //include physcial mexpr into group
-                    NewMExpr = ssp.CopyIn(after, group_no);
+                    NewMExpr = ssp.copyIn(after, group_no);
 
                 // If substitute was already known 
                 if (NewMExpr == null) {
@@ -383,7 +374,7 @@ public class ApplyRule extends Task {
                 after = null; // "after" no longer used
 
                 //Give this expression the rule's mask
-                NewMExpr.set_rule_mask(rule.get_mask());
+                NewMExpr.setRuleMask(rule.getMask());
 
                 AFTERS element = new AFTERS();
                 element.m_expr = NewMExpr;
@@ -398,21 +389,18 @@ public class ApplyRule extends Task {
                     InputLogProp = new LogicalProperty[arity];
                     int input;
                     for (input = 0; input < arity; input++) {
-                        int IGNo; //Input Group Number
-                        Group IG;
-                        IGNo = NewMExpr.getInput(input).getGroupID();
-                        IG = ssp.GetGroup(IGNo); //Group of current input
+                        Group IG = NewMExpr.getInput(input);
                         InputCost[input] = IG.getLowerBd();
                         InputLogProp[input] = IG.getLogProp();
                     }
                 }
-                LogicalProperty LogProp = ssp.GetGroup(group_no).getLogProp();
+                LogicalProperty LogProp = ssp.getGroup(group_no).getLogProp();
 
                 // if it is physical operator, plus the local cost
                 if (NewMExpr.getOp().is_physical())
                     LocalCost =
-                        ((PhysicalOp) NewMExpr.getOp()).FindLocalCost(ssp.getCatalog(),
-                            LogProp,
+                        ((PhysicalOp) NewMExpr.getOp()).FindLocalCost(
+                            ssp.getCatalog(),
                             InputLogProp);
                 else
                     LocalCost = new Cost(0);
@@ -438,19 +426,19 @@ public class ApplyRule extends Task {
                     ((AFTERS) AfterArray.get(array_index)).cost;
             }
             if (num_afters > 1) {
-            // order tasks by descending cost
-            Arrays.sort(Afters, 0, num_afters, new Comparator() {
-                public int compare(Object o1, Object o2) {
-                    AFTERS m1 = (AFTERS) o1;
-                    AFTERS m2 = (AFTERS) o2;
-                    return -m1.compareTo(m2);
-                }   
-            });
+                // order tasks by descending cost
+                Arrays.sort(Afters, 0, num_afters, new Comparator() {
+                    public int compare(Object o1, Object o2) {
+                        AFTERS m1 = (AFTERS) o1;
+                        AFTERS m2 = (AFTERS) o2;
+                        return -m1.compareTo(m2);
+                    }
+                });
             }
             // push tasks in the order of estimate cost, most expensive first
             while (--num_afters >= 0) {
                 //Give this expression the rule's mask
-                Afters[num_afters].m_expr.set_rule_mask(rule.get_mask());
+                Afters[num_afters].m_expr.setRuleMask(rule.getMask());
 
                 //We need to handle this case for rules like project.null,
                 //by merging groups
@@ -469,11 +457,16 @@ public class ApplyRule extends Task {
                 // follow-on tasks
                 if (explore) // optimizer is exploring, the new mexpr must be logical expr
                     {
-                    assert(((AFTERS) AfterArray.get(num_afters)).m_expr.getOp().is_logical());
+                    assert(
+                        ((AFTERS) AfterArray.get(num_afters))
+                            .m_expr
+                            .getOp()
+                            .is_logical());
                     //PTRACE ("new task to explore new expression, \
                     //  pushing O_EXPR exploring expr: %s", Afters[num_afters].m_expr.Dump());
                     ssp.addTask(
-                        new O_EXPR(ssp,
+                        new O_EXPR(
+                            ssp,
                             Afters[num_afters].m_expr,
                             true,
                             ContextID,
@@ -527,7 +520,7 @@ public class ApplyRule extends Task {
         // This seems to be the only place you need to modify to deactivate or activate 
         // before_mask.    (Added 5/2000 Quan Wang)
         if (rule_fired > 0) {
-            mexpr.add_rule_mask(rule.get_before_mask());
+            mexpr.addRuleMask(rule.getBeforeMask());
         }
 
         //Mark rule vector to show that this rule has fired
@@ -567,10 +560,11 @@ public class ApplyRule extends Task {
 class AFTERS {
     public MExpr m_expr;
     public Cost cost;
-    
+
     public int compareTo(Object o) {
         if (!(o instanceof AFTERS))
-            throw new ClassCastException("Expected AFTERS, got: " + o.getClass());
+            throw new ClassCastException(
+                "Expected AFTERS, got: " + o.getClass());
         AFTERS other = (AFTERS) o;
         if (cost.greaterThan(other.cost))
             return 1;
@@ -579,4 +573,3 @@ class AFTERS {
         return -1;
     }
 }
-

@@ -41,7 +41,7 @@ public class Cost {
         }
     }
 
-    double getValue() {
+    public double getValue() {
         return value;
     }
 

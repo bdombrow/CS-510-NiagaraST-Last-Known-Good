@@ -13,8 +13,6 @@ import java.util.Comparator;
 */
 public class O_EXPR extends Task {
 
-    private static final boolean DEBUG = false;
-
     private MExpr MExpr; //Which expression to optimize
     private boolean explore;
     // if this task is for exploring  Should not happen - see E_GROUP
@@ -26,9 +24,9 @@ public class O_EXPR extends Task {
     // XXX vpapad: was destructor
     public void delete() {
         if (Last) {
-            Group Group = ssp.GetGroup(MExpr.getGrpID());
+            Group Group = MExpr.getGroup();
             if (!explore) {
-                if (ssp.IRPROP) {
+                if (!ssp.IRPROP) {
                     Context localContext = ssp.getVc(ContextID);
                     //What prop is required of
                     PhysicalProperty LocalReqdProp = localContext.getPhysProp();
@@ -42,7 +40,7 @@ public class O_EXPR extends Task {
                 }
                 // this's still the last applied rule in the group, 
                 // so mark the group with completed optimizing
-                Group.set_optimized(true);
+                Group.setOptimized(true);
             } else
                 Group.setExplored(true);
         }
@@ -115,11 +113,10 @@ public class O_EXPR extends Task {
 
             assert Rule != null;
 
-            if (ssp.UNIQ)
-                if (!(MExpr.can_fire(Rule.get_index()))) {
-                    //PTRACE("Rejected rule %d, being masked ", Rule.get_index());
-                    continue; // rule has already fired
-                }
+            if (!Rule.canFire(MExpr)) {
+                ssp.getTracer().ruleMasked(Rule, MExpr);
+                continue; // rule has already fired
+            }
 
             if (explore && Rule.GetSubstitute().getOp().is_physical()) {
                 //            PTRACE(
@@ -190,19 +187,11 @@ public class O_EXPR extends Task {
                         MExpr,
                         explore,
                         ContextID,
-                        ssp.TaskNo,
                         Flag,
                         eps_bound));
             } else
                 ssp.addTask(
-                    new ApplyRule(
-                        ssp,
-                        Rule,
-                        MExpr,
-                        explore,
-                        ContextID,
-                        ssp.TaskNo,
-                        Flag));
+                    new ApplyRule(ssp, Rule, MExpr, explore, ContextID, Flag));
 
             // for enforcer and expansion rules, don't explore patterns
             Expr pattern = Rule.GetPattern();
@@ -215,7 +204,7 @@ public class O_EXPR extends Task {
                 if (pattern.getInput(input_no).getArity() > 0) {
                     // If not yet explored, schedule a task with new context
                     Group g = MExpr.getInput(input_no);
-                    if (!g.is_exploring()) {
+                    if (!g.isExploring()) {
                         //E_GROUP can not be the last task for the group
                         if (ssp.GlobepsPruning) {
                             Cost eps_bound = new Cost(EpsBound);
@@ -251,15 +240,15 @@ A Move is a pair of rule and promise, used to sort rules according to their prom
 class Move implements Comparable {
     // An uninteresting move
     public static Move NO_PROMISE = new Move(0, null);
-    
+
     public int promise;
     Rule rule;
-    
+
     public Move(int promise, Rule rule) {
         this.promise = promise;
         this.rule = rule;
     }
-    
+
     public int compareTo(Object o) {
         if (!(o instanceof Move))
             throw new ClassCastException("Expected Move, got: " + o.getClass());

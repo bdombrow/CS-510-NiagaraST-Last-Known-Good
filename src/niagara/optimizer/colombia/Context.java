@@ -37,10 +37,10 @@ public class Context {
 
     // set the flag if the context is done, means we completed the search,
     // may got a final winner, or found out optimal plan for this context not exist
-    public void done() {
+    public void setFinished() {
         finished = true;
     }
-    public boolean is_done() {
+    public boolean isFinished() {
         return finished;
     }
 

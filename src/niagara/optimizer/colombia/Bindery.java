@@ -1,5 +1,6 @@
 package niagara.optimizer.colombia;
 
+
 /*
     Bindery
     ========
@@ -68,7 +69,7 @@ public class Bindery {
 
     private boolean one_expr; // Is this an expression bindery?
 
-    private int group_no; // group no of the cur_expr
+    private Group group; // group  of the cur_expr
 
     public static class BINDERY_STATE {
         private BINDERY_STATE() {
@@ -95,13 +96,13 @@ public class Bindery {
     }
 
     Bindery(Bindery other) {
-        this(other.group_no, other.pattern, other.ssp);
+        this(other.group, other.pattern, other.ssp);
     }
 
     // Create a Group bindery
-    Bindery(int group_no, Expr pattern, SSP ssp) {
+    Bindery(Group group, Expr pattern, SSP ssp) {
         state = BINDERY_STATE.START;
-        this.group_no = group_no;
+        this.group = group;
         cur_expr = null;
         this.pattern = pattern;
         input = null;
@@ -118,7 +119,7 @@ public class Bindery {
         input = null;
         one_expr = true; // restricted to this log expr           
 
-        group_no = expr.getGrpID();
+        group = expr.getGroup();
         assert pattern != null;
         this.ssp = ssp;
     }
@@ -144,7 +145,7 @@ public class Bindery {
                 new Expr(
                     new LEAF_OP(
                         ((LEAF_OP) patt_op).getIndex(),
-                        ssp.GetGroup(group_no)));
+                        group));
         } // create leaf marked with group index
         else // general invocation of new Expr
             {
@@ -236,12 +237,12 @@ public class Bindery {
                 } else {
                     assert false;
                 }
-            } // if (patt_op . is_leaf ())
+            } 
 
             if (!one_expr
                 && state == BINDERY_STATE.START) // begin the group binding
                 { //Search entire group for bindings
-                cur_expr = ssp.GetGroup(group_no).getFirstLogMExpr();
+                cur_expr = group.getFirstLogMExpr();
                 // get the first mexpr
             }
 
@@ -271,7 +272,7 @@ public class Bindery {
                         for (input_no = 0; input_no < arity; input_no++) {
                             input[input_no] =
                                 new Bindery(
-                                    cur_expr.getInput(input_no).getGroupID(),
+                                    cur_expr.getInput(input_no),
                                     pattern.getInput(input_no),
                                     ssp);
                             //						if ( ! input[input_no].advance() )
@@ -290,12 +291,6 @@ public class Bindery {
                             return true;
                         } // successful bindings for new expression
                         else { // otherwise, failure! -- dealloc inputs
-                            /*
-                            						for (input_no = arity;  -- input_no >= 0; )
-                            //						for (;  -- input_no >= 0; )
-                            							delete input[input_no];
-                            						delete [] input;  input = null;
-                            */
                             input = null;
                             state = BINDERY_STATE.FINISHED;
                         }
@@ -417,7 +412,7 @@ public class Bindery {
             if (!one_expr
                 && state == BINDERY_STATE.START) // begin the group binding
                 { //Search entire group for bindings
-                cur_expr = ssp.GetGroup(group_no).getFirstLogMExpr();
+                cur_expr = group.getFirstLogMExpr();
                 // get the first mexpr
             }
 
@@ -434,8 +429,7 @@ public class Bindery {
 
                 if (state == BINDERY_STATE.START) {
                     // is this expression unusable?
-                    if (arity != patt_op.getArity()
-                        || !(patt_op.matches(op_arg))) {
+                    if (!(patt_op.matches(op_arg))) {
                         state = BINDERY_STATE.FINISHED; // try next expression
                     } else if (arity == 0) // only the Operator, matched
                         {
@@ -448,7 +442,7 @@ public class Bindery {
                         for (input_no = 0; input_no < arity; input_no++)
                             input[input_no] =
                                 new Bindery(
-                                    cur_expr.getInput(input_no).getGroupID(),
+                                    cur_expr.getInput(input_no),
                                     pattern.getInput(input_no),
                                     ssp);
 
@@ -488,8 +482,7 @@ public class Bindery {
                                 ) {
                                 input[other_input_no] =
                                     (new Bindery(cur_expr
-                                        .getInput(other_input_no)
-                                        .getGroupID(),
+                                        .getInput(other_input_no),
                                         pattern.getInput(other_input_no),
                                         ssp));
 

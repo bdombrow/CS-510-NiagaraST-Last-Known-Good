@@ -182,15 +182,6 @@ public class O_INPUTS extends Task {
     */
 
     public void perform() {
-        //        PTRACE2(
-        //            "O_INPUT performing Input %d, expr: %s",
-        //            InputNo,
-        //            (const char *) MExpr.Dump());
-        //        PTRACE2(
-        //            "Context ID: %d , %s",
-        //            ContextID,
-        //            (const char *) Context : : vc[ContextID].Dump());
-        //        PTRACE("Last flag is %d", Last);
         //Cache local properties of G and the expression being optimized
 
         assert MExpr.getOp().is_physical() 
@@ -198,18 +189,18 @@ public class O_INPUTS extends Task {
         PhysicalOp Op = (PhysicalOp) MExpr.getOp(); //the op of the expr
 
         Group LocalGroup = MExpr.getGroup();
-        //Group of the MExpr
 
-        PhysicalProperty LocalReqdProp = ((Context) ssp.vc.get(ContextID)).getPhysProp();
+        Context context = ssp.getVc(ContextID);
+        PhysicalProperty LocalReqdProp = context.getPhysProp();
         //What prop is required
-        Cost LocalUB = ((Context) ssp.vc.get(ContextID)).getUpperBd();
+        Cost LocalUB = context.getUpperBd();
 
         //if global eps pruning happened, terminate this task
-        if (ssp.GlobepsPruning && ((Context) ssp.vc.get(ContextID)).is_done()) {
+        if (ssp.GlobepsPruning && context.isFinished()) {
             //PTRACE("%s", "Task terminated due to global eps pruning");
             if (Last)
                 // this's the last task for the group, so mark the group with completed optimizing
-                LocalGroup.set_optimized(true);
+                LocalGroup.setOptimized(true);
             return;
         }
 
@@ -235,7 +226,6 @@ public class O_INPUTS extends Task {
             LocalCost =
                 Op.FindLocalCost(
                     ssp.getCatalog(),
-                    LocalGroup.getLogProp(),
                     InputLogProp);
 
             //For each input group IG
@@ -429,9 +419,9 @@ public class O_INPUTS extends Task {
                 PhysicalProperty InputProp = new PhysicalProperty(ReqProp);
                 // update the bound in multiwinner to InputBd
                 Context InputContext = new Context(InputProp, InputBd, false);
-                ssp.vc.add(InputContext);
+                ssp.addVc(InputContext);
                 //Push O_GROUP
-                int ContID = ssp.vc.size() - 1;
+                int ContID = ssp.getVcSize() - 1;
                 //                PTRACE2(
                 //                    "push O_GROUP %d, %s",
                 //                    IGNo,
@@ -514,8 +504,8 @@ public class O_INPUTS extends Task {
                 //Cost WinCost(CostSoFar);
                 LocalGroup.newWinner(LocalReqdProp, MExpr, WinCost, true);
                 // update the upperbound of the current context
-                 ((Context) ssp.vc.get(ContextID)).setUpperBound(CostSoFar);
-                ((Context) ssp.vc.get(ContextID)).done();
+                 ssp.getVc(ContextID).setUpperBound(CostSoFar);
+                ssp.getVc(ContextID).setFinished();
                 TerminateThisTask(LocalWinner);
                 return;
             }
@@ -555,13 +545,13 @@ public class O_INPUTS extends Task {
             LocalGroup.newWinner(LocalReqdProp, MExpr, WinCost, Last);
 
             // update the upperbound of the current context
-             ((Context) ssp.vc.get(ContextID)).setUpperBound(CostSoFar);
+             ssp.getVc(ContextID).setUpperBound(CostSoFar);
 
             //PTRACE0("New winner, update upperBd : " + CostSoFar.Dump());
 
             if (Last)
                 // this's the last task for the group, so mark the group with completed optimizing
-                MExpr.getGroup().set_optimized(true);
+                MExpr.getGroup().setOptimized(true);
 
             return;
         }
@@ -586,7 +576,7 @@ public class O_INPUTS extends Task {
 
         if (Last)
             // this's the last task for the group, so mark the group with completed optimizing
-            ssp.GetGroup(MExpr.getGrpID()).set_optimized(true);
+            MExpr.getGroup().setOptimized(true);
 
         if (ssp.NO_PHYS_IN_GROUP)
             // delete this physical mexpr to save memory; it may not be used again.

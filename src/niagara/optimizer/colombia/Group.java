@@ -111,9 +111,14 @@ public class Group {
     }
 
     //Find first and last (in some sense) MExpression in this Group
-    MExpr getFirstLogMExpr() {
+    public MExpr getFirstLogMExpr() {
         return firstLogMExpr;
     }
+    
+    public MExpr getLastLogMExpr() {
+        return lastLogMExpr;
+    }
+
     MExpr getFirstPhysMExpr() {
         return firstPhysMExpr;
     }
@@ -146,14 +151,14 @@ public class Group {
     public boolean isOptimized() {
         return optimized;
     }
-    public void set_optimized(boolean is_optimized) {
+    public void setOptimized(boolean is_optimized) {
         optimized = is_optimized;
     }
 
-    boolean is_exploring() {
+    boolean isExploring() {
         return exploring;
     }
-    void set_exploring(boolean is_exploring) {
+    void setExploring(boolean is_exploring) {
         exploring = is_exploring;
     }
 
@@ -167,10 +172,6 @@ public class Group {
 
     Cost getLowerBd() {
         return lowerBd;
-    }
-
-    double getEstiGrpSize() {
-        return estiGrpSize;
     }
 
     int getCount() {
@@ -202,10 +203,6 @@ public class Group {
 
     // Winner's circle
     private ArrayList winners;
-
-    // if operator is EQJOIN, estimate the group size, else estimate
-    // group size = 0 used for halt option
-    private double estiGrpSize;
 
     private int count;
 
@@ -364,9 +361,10 @@ public class Group {
         // PTRACE new winner here
         changed = true;
 
-        Winner win = null;
         //construct a new winner
-        win = new Winner(mexpr, reqdProp, totalCost, done);
+        Winner win = new Winner(mexpr, reqdProp, totalCost, done);
+
+        ssp.getTracer().newWinner(this, win);
 
         //Find it in the winner's circle
         //Look for a winner with that property in the winner's circle
@@ -374,7 +372,7 @@ public class Group {
             PhysicalProperty winPhysProp = ((Winner) winners.get(i)).getPhysProp();
 
             if (winPhysProp.equals(reqdProp)) {
-                winners.add(i, win);
+                winners.set(i, win);
                 //the count is set to 0 when a not null new winner is found
                 if (mexpr != null && totalCost.nonZero())
                     count = 0;
@@ -387,6 +385,7 @@ public class Group {
 
         // set count for this property
         count = -1;
+        ssp.getTracer().newWinner(this, win);
     }
 
     //check if there is at least one winner done in this group
