@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.4 2000/08/28 22:08:33 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.5 2000/10/31 23:12:34 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,7 +44,7 @@ import niagara.client.dtdTree.DTD;
 public class ConnectionManager implements QueryExecutionIF
 {
 	// constants
-    public static final int SERVER_PORT = 9020;
+	public static final int SERVER_PORT = 9036;
 
 	public static final String REQUEST_MESSAGE = "requestMessage";
 	public static final String REQUEST_DATA = "requestData";
