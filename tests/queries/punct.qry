@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 
-<!-- This query tests the timer -->
-<plan top="punct">
+<!-- This query tests the punctuate operator -->
+<plan top="cons">
 <timer id="timer" period="1 minute" warp="60" delay="5 minutes" 
 		slack="5 seconds" granularity="5 seconds" relative="October 27, 1973 11:00:00 PM EET"/>
 
@@ -12,6 +12,8 @@
 
 <unnest id="packets" regexp="PS.P" input="data"/>
 
+<unnest id="ts" regexp="TS" input="packets"/>
+
 <!--
 Punctuate operator parameters:
    datainput  ==> which input (0 or 1) contains the data.
@@ -19,10 +21,25 @@ Punctuate operator parameters:
    timer      ==> which attribute to read timer values from
    dataattr   ==> which data attribute to correspond to timer values
                   regular expression
-   dataroot   ==> the root for the data input
 -->
+
+<!-- punctuate on the generated TIMESTAMP attribute-->
 <punctuate id="punct" datainput="1"
-           dataattr="TS" dataroot="$packets" timer="$timer"
-           input="prefix packets"/>
+           dataattr="$TIMESTAMP" timer="$timer" input="prefix ts"/>
+
+<!--
+if instead we want punctuations on the TS element in the
+packet stream, we would use this:
+<punctuate id="punct" datainput="1"
+           dataattr="$ts" timer="$timer" input="prefix ts"/>
+-->
+
+<construct id="cons" input="punct">
+<![CDATA[
+<res>
+<P>$packets</P><TS>$TIMESTAMP</TS>
+</res>
+]]>
+</construct>
 
 </plan>
