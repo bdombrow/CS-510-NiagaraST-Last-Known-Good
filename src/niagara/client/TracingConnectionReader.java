@@ -46,6 +46,7 @@ public class TracingConnectionReader extends AbstractConnectionReader {
 
     public void run() {
         try {
+            ((SimpleClient) ui).setConnectionReader(this);
             if (writer != null) {
                 // put the data to a file
                 char[] buf = new char[4096];

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.10 2002/09/14 04:54:14 vpapad Exp $
+  $Id: SimpleConnectionReader.java,v 1.11 2002/09/27 02:58:54 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -67,6 +67,7 @@ class SimpleConnectionReader extends AbstractConnectionReader
 	// Read the connection and throw the callbacks
 	
 	try {
+            ((SimpleClient) ui).setConnectionReader(this);
 	    BufferedReader br = new BufferedReader(cReader);
 	    String line;
 	    RE re = new RE("<responseMessage localID\\s*=\\s*\"([0-9]*)\"\\s*serverID\\s*=\\s*\"([0-9]*)\"\\s*responseType\\s*=\\s*\"server_query_id\"");

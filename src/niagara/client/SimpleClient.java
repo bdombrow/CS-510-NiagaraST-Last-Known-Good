@@ -43,8 +43,7 @@ public class SimpleClient implements UIDriverIF {
     }
 
     public void notifyNew(int id) {
-        String results =
-            ((SimpleConnectionReader) cm.getConnectionReader()).getResults();
+        String results = ((SimpleConnectionReader) acr).getResults();
         if (resultListeners.size() == 0) {
             System.out.println(results);
         } else {
@@ -55,10 +54,14 @@ public class SimpleClient implements UIDriverIF {
         }
     }
 
+    public void setConnectionReader(AbstractConnectionReader acr) {
+        this.acr = acr;
+    }
+    
     public synchronized void queryDone() {
       m_stop = System.currentTimeMillis();
       notify();
-      System.out.println("Total time: " + (m_stop - m_start) + "ms.");
+      System.err.println("Total time: " + (m_stop - m_start) + "ms.");
     }
     
     public void notifyFinalResult(int id) {
