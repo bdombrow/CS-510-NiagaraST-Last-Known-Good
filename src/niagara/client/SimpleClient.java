@@ -102,7 +102,8 @@ public class SimpleClient implements UIDriverIF {
     protected static void usage() {
         System.err.println(
             "Usage: SimpleClient [-h host] [-t timeout] [-p port] [-qf QueryFileName]\n"
-            + "[-x repetitions] [-d delay] [-w wait] [-o outputFileName]");
+            + "[-x repetitions] [-d delay] [-w wait] [-o outputFileName]\n"
+            + "[-quiet] [-explain] [-ch client host] [-cp client port]");
         System.exit(-1);
     }
 
@@ -113,8 +114,13 @@ public class SimpleClient implements UIDriverIF {
     protected static boolean queryfile = false;
     protected static String host;
     protected static int port;
+    protected static boolean explain;
     // XXX vpapad: ugly... SimpleClient can't do this yet
     protected static String outputFileName;
+    // XXX vpapad: even uglier... these only apply to MQPClient
+    protected static boolean quiet;
+    protected static String clientHost = "localhost";
+    protected static int clientPort = 3020;
     
     protected static void parseArguments(String args[]) {
         // get the arguments
@@ -155,6 +161,18 @@ public class SimpleClient implements UIDriverIF {
                 i += 2;
             } else if (args[i].equals("-o")) {
                 outputFileName = args[i + 1];
+                i += 2;
+            } else if (args[i].equals("-quiet")) {
+                quiet = true;
+                i++;
+            } else if (args[i].equals("-explain")) {
+                explain= true;
+                i++;
+            } else if (args[i].equals("-ch")) {
+                clientHost = args[i + 1];
+                i += 2;
+            } else if (args[i].equals("-cp")) {
+                clientPort = Integer.parseInt(args[i + 1]);
                 i += 2;
             } else {
                 usage();
@@ -270,10 +288,13 @@ public class SimpleClient implements UIDriverIF {
         }
 
         m_start = System.currentTimeMillis();
+        Query q = null;
+        if (explain) 
+            q = new ExplainQPQuery(queryText);
+        else
+            q = QueryFactory.makeQuery(queryText);
         final int id =
-            cm.executeQuery(
-                QueryFactory.makeQuery(queryText),
-                Integer.MAX_VALUE);
+            cm.executeQuery(q, Integer.MAX_VALUE);
         if (timeout > 0) {
             // Create a new timer thread as a daemon thread
             timer = new Timer(true);

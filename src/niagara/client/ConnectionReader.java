@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: ConnectionReader.java,v 1.3 2002/05/07 03:10:13 tufte Exp $
+  $Id: ConnectionReader.java,v 1.4 2002/10/29 01:56:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -47,9 +46,6 @@ class ConnectionReader extends AbstractConnectionReader implements Runnable
 {
     // member variables
     
-    /**
-     * This is the parser
-     */
     private XmlParser parser;
     
     /**

@@ -30,10 +30,8 @@ public class TracingClient extends SimpleClient {
 					    new DTDCache(), outputFileName));
 
         m_start = System.currentTimeMillis();
-        final int id =
-            cm.executeQuery(
-                new SynchronousQPQuery(queryText),
-                Integer.MAX_VALUE);
+        cm.executeQuery(new SynchronousQPQuery(queryText),
+                        Integer.MAX_VALUE);
     }
 
     public void notifyFinalResult(int id) {
