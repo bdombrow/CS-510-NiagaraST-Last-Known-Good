@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.23 2003/02/23 05:00:26 tufte Exp $
+ * $Id: StreamThread.java,v 1.24 2003/02/25 06:14:21 vpapad Exp $
  */
 
 package niagara.data_manager;
@@ -12,12 +12,8 @@ package niagara.data_manager;
  * document into the output stream
  */
 
-import org.w3c.dom.*;
 import java.io.*;
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-import java.net.Socket;
-import java.lang.reflect.Array;
 
 import niagara.logical.StreamOp;
 import niagara.ndom.*;

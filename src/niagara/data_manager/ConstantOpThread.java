@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOpThread.java,v 1.7 2002/10/31 03:26:48 vpapad Exp $
+ * $Id: ConstantOpThread.java,v 1.8 2003/02/25 06:14:21 vpapad Exp $
  *
  */
 
@@ -19,7 +19,6 @@ import org.xml.sax.*;
 import niagara.query_engine.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.ConstantOp;
-import niagara.connection_server.NiagraServer;
 import niagara.ndom.*;
 import niagara.optimizer.colombia.*;
 
@@ -71,8 +70,6 @@ public class ConstantOpThread extends SourceThread {
 			       ioe.getMessage());
 	    ioe.printStackTrace();
 	}
-
-	return;
     }
 
     /** process the incoming message which was just put in the message
