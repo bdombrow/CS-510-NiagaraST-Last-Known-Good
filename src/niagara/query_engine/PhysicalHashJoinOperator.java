@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.8 2002/10/31 03:54:39 vpapad Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.9 2002/12/10 01:17:45 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -47,14 +47,16 @@ import niagara.xmlql_parser.syntax_tree.*;
  *
  */
 
-public class PhysicalHashJoinOperator extends PhysicalOperator {
+public class PhysicalHashJoinOperator extends PhysicalJoin {
     // No blocking input streams
     private static final boolean[] blockingSourceStreams = { false, false };
 
-    private PredicateImpl pred;
-    private Predicate joinPredicate;
+    // Optimization time structures
+    /** Equijoin predicates */
     private EquiJoinPredicateList eqjoinPreds;
-    
+    /** Runtime implementation of joinPredicate */
+    private PredicateImpl pred;
+
     private Hasher[] hashers;
     private String[] rgstPValues;
     private String[] rgstTValues;
@@ -74,17 +76,14 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
     
-    public void initFrom(LogicalOp logicalOperator) {
-	// Type cast the logical operator to a join operator
-	joinOp logicalJoinOperator = (joinOp) logicalOperator;
-
+    public void initJoin(joinOp join) {
         // In hash join, we hope that most tuples that hash the same
         // do indeed pass the equijoin predicates, so we put them last
-        joinPredicate = And.conjunction(logicalJoinOperator.getNonEquiJoinPredicate(), 
-                                         logicalJoinOperator.getEquiJoinPredicates().toPredicate());
+        joinPredicate = And.conjunction(join.getNonEquiJoinPredicate(), 
+                                        join.getEquiJoinPredicates().toPredicate());
         pred = joinPredicate.getImplementation();
         
-        eqjoinPreds = logicalJoinOperator.getEquiJoinPredicates();
+        eqjoinPreds = join.getEquiJoinPredicates();
     }
 		     
 
@@ -186,7 +185,7 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
      * @param otherStreamTuples The tuples to be joined with tupleElement
      */
 
-    private void constructJoinResult (StreamTupleElement tupleElement,
+    private void constructJoinResult(StreamTupleElement tupleElement,
 				      int streamId,
 				      String hashKey,
 				      DuplicateHashtable otherStreamTuples) 
@@ -227,24 +226,8 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 	    }
 
 	    // Check whether the predicate is satisfied
-	    //
-	    if (pred.evaluate(leftTuple, rightTuple)) {
-
-		// Yes, it is satisfied - so create a result. The result is
-		// potentially partial if either of the tuples is potentially
-		// partial
-		//
-		StreamTupleElement resultTuple = 
-		    new StreamTupleElement(leftTuple.isPartial() ||
-					   rightTuple.isPartial(),
-					   leftTuple.size() + rightTuple.size());
-
-		resultTuple.appendAttributes(leftTuple);
-		resultTuple.appendAttributes(rightTuple);
-
-		// Add the result to the output
-		putTuple(resultTuple, 0);
-	    }
+	    if (pred.evaluate(leftTuple, rightTuple))
+                produceTuple(leftTuple, rightTuple);
 	}
     }
 
@@ -320,7 +303,7 @@ public Cost findLocalCost(
     double cost = 0;
     cost += (LeftCard + RightCard) * catalog.getDouble("tuple_reading_cost");
     cost += (LeftCard + RightCard) * catalog.getDouble("tuple_hashing_cost");
-    cost += OutputCard * catalog.getDouble("tuple_construction_cost");
+    cost += OutputCard * constructTupleCost(catalog);
     Cost c = new Cost(cost);
     // XXX vpapad: We must compute the predicate on all the tuple combinations
     // that pass the equality predicates we're hashing on; but how do we
@@ -383,18 +366,6 @@ public Cost findLocalCost(
         op.joinPredicate = joinPredicate;
         op.eqjoinPreds = eqjoinPreds;
         return op;
-    }
-
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalHashJoinOperator))
-            return false;
-        if (o.getClass() != PhysicalHashJoinOperator.class)
-            return o.equals(this);
-        return joinPredicate.equals(((PhysicalHashJoinOperator) o).joinPredicate);
-    }
-    
-    public int hashCode() {
-        return joinPredicate.hashCode();
     }
 }
 

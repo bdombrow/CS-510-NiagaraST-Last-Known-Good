@@ -1,4 +1,4 @@
-/* $Id: AtomicEvaluator.java,v 1.6 2002/10/27 02:43:50 vpapad Exp $ */
+/* $Id: AtomicEvaluator.java,v 1.7 2002/12/10 01:17:45 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -34,6 +34,7 @@ public class AtomicEvaluator {
         // for optimization since it avoids an extra unnest
         // alternatively using PathExprEvaluator just to get the
         // tuple attribute itself is overkill
+        // - use SimpleAtomicEvaluator where possible
         this.path = path;
     }
     
@@ -80,9 +81,13 @@ public class AtomicEvaluator {
         else
             tuple = t2;
 
+        getAtomicValues(tuple.getAttribute(attributeId), values);
+    }
+    
+    public final void getAtomicValues(Node n, ArrayList values) {
         // Invoke the path expression evaluator to get the nodes reachable
         // using the path expression
-        pev.getMatches(tuple.getAttribute(attributeId), reachableNodes);
+        pev.getMatches(n, reachableNodes);
 
         // For each reachable node, get the atomic value associated with it
         int numReachableNodes = reachableNodes.size();
@@ -105,12 +110,12 @@ public class AtomicEvaluator {
             }
         }
         reachableNodes.clear();
-    }
-    
-    // XXX vpapad: for compatibility with CVS version
-    public void getAtomicValues(
+        
+    } 
+ 
+     public void getAtomicValues(
         StreamTupleElement t1,
         ArrayList values) {
-        getAtomicValues(t1, null, values);               
+        getAtomicValues(t1.getAttribute(attributeId), values);
     }
 }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.20 2002/10/31 06:09:03 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.21 2002/12/10 01:17:45 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,6 +36,7 @@ package niagara.query_engine;
  */
 
 import niagara.optimizer.colombia.Attrs;
+import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.PhysicalOp;
 import niagara.optimizer.rules.Initializable;
 
@@ -804,6 +805,13 @@ implements SchemaProducer, SerializableToXML, Initializable {
         // use logical properties to construct output schema
         inputTupleSchemas = inputSchemas;
         outputTupleSchema = new TupleSchema();
+        // By default, we assume attributes keep the order
+        // they had in our logical property, which is the 
+        // logical property of the first logical operator 
+        // of the group. This will *not* be true in cases
+        // where transformations produce equivalent logical
+        // operators in the same group while changing the 
+        // attribute order (e.g., joins).
         Attrs attrs = logProp.getAttrs();
         for (int i = 0; i < attrs.size(); i++) {
             outputTupleSchema.addMapping(attrs.get(i));
@@ -816,6 +824,15 @@ implements SchemaProducer, SerializableToXML, Initializable {
         // exceptions all over the place every time we run XML-QL queries
         inputTupleSchemas = inputSchemas;
         outputTupleSchema = new TupleSchema();
+    }
+    
+    /** Compute the cost of constructing a tuple for the output schema
+     * of this operator */
+    protected double constructTupleCost(ICatalog catalog) {
+        // We model this as a fixed base cost per tuple, plus a 
+        // per-field overhead
+        return catalog.getDouble("tuple_construction_cost") + 
+                catalog.getDouble("field_overhead") * getLogProp().getAttrs().size();
     }
     
     /**
@@ -979,8 +996,14 @@ implements SchemaProducer, SerializableToXML, Initializable {
         return NiagraServer.getCatalog().getOperatorName(getClass());
     }
 
-    public void dumpAttributesInXML(StringBuffer sb) {}
-    
+    public void dumpAttributesInXML(StringBuffer sb) {
+        dumpSchema(sb);
+    }
+
+    protected void dumpSchema(StringBuffer sb) {
+        sb.append(" schema='").append(getLogProp().getAttrs().toString()).append("'");
+    }
+        
     /** Close the element tag, append the children of this operator 
      * to the string buffer, append the end element tag if necessary */
     public void dumpChildrenInXML(StringBuffer sb) {

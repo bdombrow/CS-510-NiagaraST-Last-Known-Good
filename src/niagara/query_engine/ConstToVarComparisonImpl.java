@@ -4,6 +4,8 @@ package niagara.query_engine;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.w3c.dom.Node;
+
 import niagara.logical.ConstToVarComparison;
 import niagara.logical.Constant;
 import niagara.optimizer.colombia.Cost;
@@ -47,6 +49,11 @@ public class ConstToVarComparisonImpl extends ComparisonImpl {
         return false;
     }
 
+    public boolean evaluate(Node n) {
+        String av = SimpleAtomicEvaluator.getAtomicValue(n);
+        return compareAtomicValues(leftValue, av);
+    }
+    
     public void resolveVariables(TupleSchema ts, int streamId) {
         rightAV.resolveVariables(ts, streamId);
     }

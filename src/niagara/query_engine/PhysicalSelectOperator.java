@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.9 2002/10/31 03:54:38 vpapad Exp $
+  $Id: PhysicalSelectOperator.java,v 1.10 2002/12/10 01:17:45 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -156,6 +156,15 @@ public class PhysicalSelectOperator extends PhysicalOperator {
      */
     protected void opInitialize() {
         predEval.resolveVariables(inputTupleSchemas[0], 0);
+    }
+    
+    /**
+     * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
+     */
+    public void dumpChildrenInXML(StringBuffer sb) {
+        sb.append(">");
+        pred.toXML(sb);
+        sb.append("</").append(getName()).append(">");
     }
 }
 

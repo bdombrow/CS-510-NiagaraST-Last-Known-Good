@@ -1,4 +1,4 @@
-/* $Id: TupleSchema.java,v 1.2 2002/10/24 03:53:43 vpapad Exp $ */
+/* $Id: TupleSchema.java,v 1.3 2002/12/10 01:17:45 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.*;
@@ -43,6 +43,40 @@ public class TupleSchema {
         }
     }
     
+    /** Create a new tuple schema that contains all the attributes in attrs, 
+     * with the attributes shared between attrs and this schema appearing 
+     * first **/
+    public TupleSchema project(Attrs attrs) {
+        // Current attributes
+        Attrs currentAttrs = getAttrs();
+        
+        // Attributes that appear in both attrs and the current schema
+        Attrs keptAttrs = currentAttrs.project(attrs);
+        
+        // Attributes that appear in attrs but not in this schema
+        Attrs addedAttrs = attrs.minus(currentAttrs);
+
+        TupleSchema ts = new TupleSchema();
+
+        ts.addMappings(keptAttrs);
+        ts.addMappings(addedAttrs);
+        
+        return ts;
+    }
+
+    /** Returns an array where the i-th element contains the position 
+     * of the i-th variable of ts in this schema */    
+    public int[] mapPositions(TupleSchema ts) {
+        // How many attributes are shared with ts
+        int shared = ts.getAttrs().project(getAttrs()).size();
+        int[] map = new int[shared];
+        
+        for (int i = 0; i < shared; i++)
+            map[i] = getPosition(ts.getVariableName(i));
+
+        return map;
+    }
+    
     /** Map a name to a new field */
     public void addMapping(Attribute var) {
         String name = var.getName();
@@ -80,5 +114,9 @@ public class TupleSchema {
             al.add(getVariable(i));
         }
         return al;
+    }
+    
+    public Attrs getAttrs() {
+        return new Attrs(getVariables());
     }
 }

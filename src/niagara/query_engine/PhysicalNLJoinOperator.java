@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.8 2002/11/01 01:56:59 vpapad Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.9 2002/12/10 01:17:45 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,13 +38,10 @@ import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 /** Naive nested-loops join */
-public class PhysicalNLJoinOperator extends PhysicalOperator {
+public class PhysicalNLJoinOperator extends PhysicalJoin {
     // This is the array having information about blocking and non-blocking
     // streams
     private static final boolean[] blockingSourceStreams = { false, false };
-
-    // The predicate used for joining
-    private Predicate joinPredicate;
 
     private PredicateImpl predEval;
 
@@ -62,16 +59,13 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
     
-    public void initFrom(LogicalOp logicalOperator) {
-        // Type cast the logical operator to a join operator
-        joinOp logicalJoinOperator = (joinOp) logicalOperator;
-
+    public void initJoin(joinOp join) {
         // In NL join, we hope that most tuples do not satisfy 
         // the equijoin predicates, so we check them first
         joinPredicate =
             And.conjunction(
-                logicalJoinOperator.getEquiJoinPredicates().toPredicate(),
-                logicalJoinOperator.getNonEquiJoinPredicate());
+                join.getEquiJoinPredicates().toPredicate(),
+                join.getNonEquiJoinPredicate());
 
         predEval = joinPredicate.getImplementation();
     }
@@ -172,22 +166,10 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
                 leftTuple = otherTupleElement;
                 rightTuple = tupleElement;
             }
+
             // Check whether the predicate is satisfied
-            if (predEval.evaluate(leftTuple, rightTuple)) {
-                // Yes, it is satisfied - so create a result. The result is
-                // potentially partial if either of the tuples is potentially
-                // partial
-                StreamTupleElement resultTuple =
-                    new StreamTupleElement(
-                        leftTuple.isPartial() || rightTuple.isPartial(),
-                        leftTuple.size() + rightTuple.size());
-
-                resultTuple.appendAttributes(leftTuple);
-                resultTuple.appendAttributes(rightTuple);
-
-                // Add the result to the output
-                putTuple(resultTuple, 0);
-            }
+            if (predEval.evaluate(leftTuple, rightTuple))
+                produceTuple(leftTuple, rightTuple);
         }
     }
 
@@ -203,7 +185,7 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
         // we have to evaluate the predicate for every tuple combination
         Cost cost = predEval.getCost(catalog).times(leftCard * rightCard);
         cost.add(new Cost((leftCard + rightCard) + catalog.getDouble("tuple_reading_cost")));
-        cost.add(new Cost(outputCard * catalog.getDouble("tuple_construction_cost")));
+        cost.add(new Cost(constructTupleCost(catalog)));
         return cost;
     } 
 
@@ -236,18 +218,6 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
         return op;
     }
 
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalNLJoinOperator))
-            return false;
-        if (o.getClass() != PhysicalNLJoinOperator.class)
-            return o.equals(this);
-        return joinPredicate.equals(((PhysicalNLJoinOperator) o).joinPredicate);
-    }
-    
-    public int hashCode() {
-        return joinPredicate.hashCode();
-    }
-    
     /**
      * @see niagara.query_engine.PhysicalOperator#opInitialize()
      */
@@ -260,14 +230,5 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
 
         predEval.resolveVariables(inputTupleSchemas[0], 0);
         predEval.resolveVariables(inputTupleSchemas[1], 1);
-    }
-    
-    /**
-     * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
-     */
-    public void dumpChildrenInXML(StringBuffer sb) {
-        sb.append(">");
-        joinPredicate.toXML(sb);
-        sb.append("</").append(getName()).append(">");
     }
 }

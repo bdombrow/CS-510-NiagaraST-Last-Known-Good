@@ -4,6 +4,8 @@ package niagara.query_engine;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.w3c.dom.Node;
+
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.utils.StreamTupleElement;
@@ -13,12 +15,14 @@ import niagara.logical.Variable;
 import niagara.logical.Constant;
 
 public class VarToConstComparisonImpl extends ComparisonImpl {
-    private AtomicEvaluator leftAV;
+    // XXX vpapad: Changed it to use SimpleAtomicEvaluator instead of
+    // full blown AtomicEvaluator (which also unnests paths)
+    // Original code in PathToConstComparisonImpl.java
+    
+    private SimpleAtomicEvaluator leftAV;
     private String rightValue;
     private double sel;
     
-    private ArrayList leftValues;
-
     public VarToConstComparisonImpl(VarToConstComparison pred) {
         super(pred.getOperator());
         Variable left = (Variable) pred.getLeft();
@@ -26,30 +30,22 @@ public class VarToConstComparisonImpl extends ComparisonImpl {
         sel = pred.selectivity();
         
         rightValue = right.getValue();
-        leftAV = left.getEvaluator();
-        leftValues = new ArrayList();
+        leftAV = left.getSimpleEvaluator();
     }
 
     public boolean evaluate(StreamTupleElement t1, StreamTupleElement t2) {
-        // Get the vector of atomic values to be compared
-        leftValues.clear();
+        String av = leftAV.getAtomicValue(t1, t2);
+        
+        if (av == null) return false;
 
-        leftAV.getAtomicValues(t1, t2, leftValues);
-
-        // Loop over every combination of values and check whether
-        // predicate holds
-        //
-        int numLeft = leftValues.size();
-
-        for (int left = 0; left < numLeft; ++left) {
-            if (compareAtomicValues((String) leftValues.get(left), rightValue))
-                return true;
-        }
-
-        // The comparison failed - return false
-        return false;
+        return compareAtomicValues(av, rightValue);
     }
 
+    public boolean evaluate(Node n) {
+        String av = SimpleAtomicEvaluator.getAtomicValue(n);
+        return compareAtomicValues(av, rightValue);
+    }
+    
     public void resolveVariables(TupleSchema ts, int streamId) {
         leftAV.resolveVariables(ts, streamId);
     }

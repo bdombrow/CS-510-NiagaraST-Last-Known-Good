@@ -1,7 +1,9 @@
-/* $Id: FalseImpl.java,v 1.1 2002/10/06 23:56:41 vpapad Exp $ */
+/* $Id: FalseImpl.java,v 1.2 2002/12/10 01:17:45 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.HashMap;
+
+import org.w3c.dom.Node;
 
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
@@ -18,6 +20,10 @@ public class FalseImpl implements PredicateImpl {
     }
     
     public boolean evaluate(StreamTupleElement t1, StreamTupleElement t2) {
+        return false;
+    }
+
+     public boolean evaluate(Node n) {
         return false;
     }
     

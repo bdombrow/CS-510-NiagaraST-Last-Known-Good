@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.14 2002/10/31 03:54:38 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.15 2002/12/10 01:17:45 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -24,7 +24,6 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -46,8 +45,13 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     // No blocking inputs
     private static final boolean[] blockingSourceStreams = { false };
 
+    /** Output variable */
     private Attribute variable;
-    
+    /** Are we projecting attributes away? */
+    private boolean projecting;
+    /** Maps shared attribute positions between incoming and outgoing tuples */
+    private int[] attributeMap;
+
     // The result template to construct from
     private constructBaseNode resultTemplate;
 
@@ -57,20 +61,19 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 
     // temporary result list storage place
     private NodeVector resultList;
-    
 
     public PhysicalConstructOperator() {
         setBlockingSourceStreams(blockingSourceStreams);
         resultList = new NodeVector();
     }
-    
-    public void initFrom(LogicalOp logicalOperator) {
-	// Typecast to a construct logical operator
-	constructOp constructLogicalOp = (constructOp) logicalOperator;
 
-	// Initialize the result template 
-	this.resultTemplate = constructLogicalOp.getResTemp();
-    
+    public void initFrom(LogicalOp logicalOperator) {
+        // Typecast to a construct logical operator
+        constructOp constructLogicalOp = (constructOp) logicalOperator;
+
+        // Initialize the result template 
+        this.resultTemplate = constructLogicalOp.getResTemp();
+
         this.variable = constructLogicalOp.getVariable();
     }
 
@@ -85,37 +88,36 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected void nonblockingProcessSourceTupleElement (
-					     StreamTupleElement tupleElement,
-						 int streamId) 
-    throws InterruptedException, ShutdownException {
-	// Recurse down the result template to construct result
-	resultList.quickReset(); // just for safety
-	constructResult(tupleElement, resultTemplate, resultList);
+    protected void nonblockingProcessSourceTupleElement(
+        StreamTupleElement tupleElement,
+        int streamId)
+        throws InterruptedException, ShutdownException {
+        // Recurse down the result template to construct result
+        resultList.quickReset(); // just for safety
+        constructResult(tupleElement, resultTemplate, resultList);
 
-	// Add all the results in the result list as result tuples
-	//
-	int numResults = resultList.size();
+        // Add all the results in the result list as result tuples
+        int numResults = resultList.size();
 
-	for (int res = 0; res < numResults; ++res) {
+        int outSize = outputTupleSchema.getLength();
+        for (int res = 0; res < numResults; ++res) {
+            // Clone the input tuple 
+            StreamTupleElement outputTuple;
 
-	    // Clone the input tuple element to create a new output tuple
-	    //element
-	    //
-	    StreamTupleElement outputTuple;
+            if (projecting) // We can project some attributes away
+                outputTuple = tupleElement.copy(outSize, attributeMap);
+            else // Just clone
+                outputTuple = tupleElement.copy(outSize);
+            
+            // Append the constructed result to end of newly created tuple
+            outputTuple.appendAttribute(resultList.get(res));
 
-		outputTuple = (StreamTupleElement) tupleElement.clone();
-
-	    // Append the constructed result to end of newly created tuple
-	    outputTuple.appendAttribute(resultList.get(res));
-
-	    // Add the new tuple to the result
+            // Add the new tuple to the result
             putTuple(outputTuple, 0);
-	}
+        }
 
-	resultList.clear();
+        resultList.clear();
     }
-
 
     /**
      * This function constructs results given a tuple and a result template
@@ -126,26 +128,28 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return a list of nodes constructed as per the template
      */
 
-    public void constructResult (StreamTupleElement tupleElement,
-				 constructBaseNode templateRoot,
-				 NodeVector result) {
+    public void constructResult(
+        StreamTupleElement tupleElement,
+        constructBaseNode templateRoot,
+        NodeVector result) {
 
-	// Check if the template root is an internal node or a leaf node
-	// and process accordingly
-	//
-	if (templateRoot instanceof constructLeafNode) {
-	    processLeafNode(tupleElement,
-			    (constructLeafNode) templateRoot,
-			    result);
-	} else if (templateRoot instanceof constructInternalNode) {
-	    processInternalNode(tupleElement,
-				(constructInternalNode) templateRoot,
-				result);
-	} else {
-	    throw new PEException("Error: Unknown construct node type!");
-	}
+        // Check if the template root is an internal node or a leaf node
+        // and process accordingly
+        //
+        if (templateRoot instanceof constructLeafNode) {
+            processLeafNode(
+                tupleElement,
+                (constructLeafNode) templateRoot,
+                result);
+        } else if (templateRoot instanceof constructInternalNode) {
+            processInternalNode(
+                tupleElement,
+                (constructInternalNode) templateRoot,
+                result);
+        } else {
+            throw new PEException("Error: Unknown construct node type!");
+        }
     }
-
 
     /**
      * This function processes a leaf node during the construction process
@@ -156,60 +160,59 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return The list of results constructed
      */
 
-    private void processLeafNode (StreamTupleElement tupleElement,
-				  constructLeafNode leafNode,
-				  NodeVector result) {
-	// Get the data of the leaf node
-	data leafData = leafNode.getData();
+    private void processLeafNode(
+        StreamTupleElement tupleElement,
+        constructLeafNode leafNode,
+        NodeVector result) {
+        // Get the data of the leaf node
+        data leafData = leafNode.getData();
 
-	// Check the type of the data
-	int type = leafData.getType();
+        // Check the type of the data
+        int type = leafData.getType();
 
-	if (type == dataType.STRING) {
-	    // Add the string value to the result
-	    result.add(doc.createTextNode((String) leafData.getValue()));
-	}
-	else if (type == dataType.ATTR) {
-	    // First get the schema attribute
-	    schemaAttribute schema = (schemaAttribute) leafData.getValue();
+        if (type == dataType.STRING) {
+            // Add the string value to the result
+            result.add(doc.createTextNode((String) leafData.getValue()));
+        } else if (type == dataType.ATTR) {
+            // First get the schema attribute
+            schemaAttribute schema = (schemaAttribute) leafData.getValue();
 
-	    // Now construct result based on whether it is to be interpreted
-	    // as an element or a parent
-	    if (schema.getType() == varType.ELEMENT_VAR) {
+            // Now construct result based on whether it is to be interpreted
+            // as an element or a parent
+            if (schema.getType() == varType.ELEMENT_VAR) {
 
-		// The value of the leafData is a schema attribute - from it
-		// get the attribute id in the tuple to construct from
-		int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
+                // The value of the leafData is a schema attribute - from it
+                // get the attribute id in the tuple to construct from
+                int attributeId =
+                    ((schemaAttribute) leafData.getValue()).getAttrId();
 
-		// Add the attribute as the result
-		result.add(tupleElement.getAttribute(attributeId));
-	    }
-	    else if (schema.getType() == varType.CONTENT_VAR) {
+                // Add the attribute as the result
+                result.add(tupleElement.getAttribute(attributeId));
+            } else if (schema.getType() == varType.CONTENT_VAR) {
 
-		// The value of the leafData is a schema attribute - from it
-		// get the attribute id in the tuple to construct from
-		int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
+                // The value of the leafData is a schema attribute - from it
+                // get the attribute id in the tuple to construct from
+                int attributeId =
+                    ((schemaAttribute) leafData.getValue()).getAttrId();
 
-		// Get the children of the attribute
-		NodeList nodeList =
-		    tupleElement.getAttribute(attributeId).getChildNodes();
+                // Get the children of the attribute
+                NodeList nodeList =
+                    tupleElement.getAttribute(attributeId).getChildNodes();
 
-		// Add all the children to the result
-		int numChildren = nodeList.getLength();
+                // Add all the children to the result
+                int numChildren = nodeList.getLength();
 
-		for (int child = 0; child < numChildren; ++child) {
-		    result.add(nodeList.item(child));
-		}
-	    }
-	    else {
-		throw new PEException("Unknown schema attribute type in construct leaf node");
-	    }
-	} else {
-	    throw new PEException("Unknown type in construct leaf node");
-	}
+                for (int child = 0; child < numChildren; ++child) {
+                    result.add(nodeList.item(child));
+                }
+            } else {
+                throw new PEException("Unknown schema attribute type in construct leaf node");
+            }
+        } else {
+            throw new PEException("Unknown type in construct leaf node");
+        }
     }
 
-    
     /**
      * This function processes a internal node during the construction process
      *
@@ -219,96 +222,99 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return The list of results constructed
      */
 
-    private void processInternalNode (StreamTupleElement tupleElement,
-				      constructInternalNode internalNode,
-				      NodeVector result) {
+    private void processInternalNode(
+        StreamTupleElement tupleElement,
+        constructInternalNode internalNode,
+        NodeVector result) {
 
-	// Create a new element node with the required tag name
-	// taking care of tagvariables
-	data tagData = internalNode.getStartTag().getSdata();
-	String tagName;
+        // Create a new element node with the required tag name
+        // taking care of tagvariables
+        data tagData = internalNode.getStartTag().getSdata();
+        String tagName;
 
-	if(tagData.getType() == dataType.ATTR) {
-	   schemaAttribute sattr = (schemaAttribute)tagData.getValue();
-	   int attrId = sattr.getAttrId();
-	   tagName = tupleElement.getAttribute(attrId).getNodeName();
-	}
-	else
-	   tagName = (String)tagData.getValue();
+        if (tagData.getType() == dataType.ATTR) {
+            schemaAttribute sattr = (schemaAttribute) tagData.getValue();
+            int attrId = sattr.getAttrId();
+            tagName = tupleElement.getAttribute(attrId).getNodeName();
+        } else
+            tagName = (String) tagData.getValue();
 
-	Element resultElement = doc.createElement(tagName);
+        Element resultElement = doc.createElement(tagName);
 
-	Vector attrs = internalNode.getStartTag().getAttrList();
+        Vector attrs = internalNode.getStartTag().getAttrList();
 
-	for (int i = 0; i < attrs.size(); i++) {
-	    attr attribute = (attr) attrs.get(i);
-	    String name = attribute.getName();
-	    data attrData = attribute.getValue();
-	    int type = attrData.getType();
-	    if (type == dataType.STRING) {
-		// Add the string value to the result
-		resultElement.setAttribute(name, (String) attrData.getValue());
-	    } else if (type == dataType.ATTR) {
-		// First get the schema attribute
-		schemaAttribute schema = (schemaAttribute) attrData.getValue();
-		
-		// Now construct result based on whether it is to be interpreted
-		// as an element or a parent
-		if (schema.getType() == varType.ELEMENT_VAR) {
-		    // The value of the leafData is a schema attribute - from it
-		    // get the attribute id in the tuple to construct from
-		    int attributeId = ((schemaAttribute) attrData.getValue()).getAttrId();
-		    
-		    // Add the attribute as the result
-		    // This better BE an attribute!
-		    Attr a = (Attr) tupleElement.getAttribute(attributeId);
-		    System.err.println("XXX adding attribute: " + name + "=" + a.getValue());
-		    resultElement.setAttribute(name, a.getValue());
-		}
-		else if (schema.getType() == varType.CONTENT_VAR) {
-		    int attributeId = ((schemaAttribute) attrData.getValue()).getAttrId();
-		    
-		    // This better BE an element
-		    Element elt = (Element) tupleElement.getAttribute(attributeId);
-		    
-		    // Concatenate the node values of the element's children
-		    StringBuffer attrValue = new StringBuffer("");
-		    Node n = elt.getFirstChild();
-		    while (n != null) 
-			attrValue.append(n.getNodeValue());
-		    resultElement.setAttribute(name, attrValue.toString());
-		}
-		else 
-		    throw new PEException("Unknown type in attribute constructor");
-	    }
-	}
+        for (int i = 0; i < attrs.size(); i++) {
+            attr attribute = (attr) attrs.get(i);
+            String name = attribute.getName();
+            data attrData = attribute.getValue();
+            int type = attrData.getType();
+            if (type == dataType.STRING) {
+                // Add the string value to the result
+                resultElement.setAttribute(name, (String) attrData.getValue());
+            } else if (type == dataType.ATTR) {
+                // First get the schema attribute
+                schemaAttribute schema = (schemaAttribute) attrData.getValue();
 
-	// Recurse on all children and construct result
-	//
-	Vector children = internalNode.getChildren();
+                // Now construct result based on whether it is to be interpreted
+                // as an element or a parent
+                if (schema.getType() == varType.ELEMENT_VAR) {
+                    // The value of the leafData is a schema attribute - from it
+                    // get the attribute id in the tuple to construct from
+                    int attributeId =
+                        ((schemaAttribute) attrData.getValue()).getAttrId();
 
-	int numChildren = children.size();
+                    // Add the attribute as the result
+                    // This better BE an attribute!
+                    Attr a = (Attr) tupleElement.getAttribute(attributeId);
+                    System.err.println(
+                        "XXX adding attribute: " + name + "=" + a.getValue());
+                    resultElement.setAttribute(name, a.getValue());
+                } else if (schema.getType() == varType.CONTENT_VAR) {
+                    int attributeId =
+                        ((schemaAttribute) attrData.getValue()).getAttrId();
 
-	for (int child = 0; child < numChildren; ++child) {
-	    // Get constructed results from child
-	    int prevSize = resultList.size();
-	    constructResult(tupleElement,
-			    (constructBaseNode) children.get(child),
-			    resultList);
+                    // This better BE an element
+                    Element elt =
+                        (Element) tupleElement.getAttribute(attributeId);
 
-	    // Add each constructed result to the result element
-	    int numResults = resultList.size() - prevSize;
+                    // Concatenate the node values of the element's children
+                    StringBuffer attrValue = new StringBuffer("");
+                    Node n = elt.getFirstChild();
+                    while (n != null)
+                        attrValue.append(n.getNodeValue());
+                    resultElement.setAttribute(name, attrValue.toString());
+                } else
+                    throw new PEException("Unknown type in attribute constructor");
+            }
+        }
 
-	    for (int res = 0; res < numResults; ++res) {
+        // Recurse on all children and construct result
+        //
+        Vector children = internalNode.getChildren();
+
+        int numChildren = children.size();
+
+        for (int child = 0; child < numChildren; ++child) {
+            // Get constructed results from child
+            int prevSize = resultList.size();
+            constructResult(
+                tupleElement,
+                (constructBaseNode) children.get(child),
+                resultList);
+
+            // Add each constructed result to the result element
+            int numResults = resultList.size() - prevSize;
+
+            for (int res = 0; res < numResults; ++res) {
                 Node n;
-                n = DOMFactory.importNode(doc, resultList.get(prevSize+res));
+                n = DOMFactory.importNode(doc, resultList.get(prevSize + res));
                 resultElement.appendChild(n);
-	    }
-	    resultList.setSize(prevSize);
-	}
+            }
+            resultList.setSize(prevSize);
+        }
 
-	// Construct the result array list
-	result.add(resultElement);
+        // Construct the result array list
+        result.add(resultElement);
     }
 
     public void setResultDocument(Document doc) {
@@ -316,13 +322,15 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     }
 
     public boolean isStateful() {
-	return false;
+        return false;
     }
-    
+
     public int hashCode() {
-        return resultTemplate.hashCode() ^ variable.hashCode();
+        return resultTemplate.hashCode()
+            ^ variable.hashCode()
+            ^ hashCodeNullsAllowed(getLogProp());
     }
-    
+
     public boolean equals(Object o) {
         if (o == null || !(o instanceof PhysicalConstructOperator))
             return false;
@@ -331,7 +339,8 @@ public class PhysicalConstructOperator extends PhysicalOperator {
         PhysicalConstructOperator other = (PhysicalConstructOperator) o;
         // XXX vpapad TODO constructBaseNode doesn't override equals
         return resultTemplate.equals(other.resultTemplate)
-                        && variable.equals(other.variable);
+            && variable.equals(other.variable)
+            && equalsNullsAllowed(getLogProp(), other.getLogProp());
     }
 
     /**
@@ -344,30 +353,25 @@ public class PhysicalConstructOperator extends PhysicalOperator {
         op.variable = variable;
         return op;
     }
-    
+
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
      */
     public Cost findLocalCost(
         ICatalog catalog,
-        LogicalProperty[] InputLogProp) {
+        LogicalProperty[] inputLogProp) {
         // XXX vpapad: Absolutely no connection to reality!
-        // We consider only a fixed cost per incoming tuple
-        // XXX vpapad: it should be: touch input tuples + construction cost
-        // + output tuples (?)
+        // We consider only a fixed cost per output tuple
         return new Cost(
-            catalog.getDouble("tuple_construction_cost")
-                * InputLogProp[0].getCardinality());
+            constructTupleCost(catalog) * getLogProp().getCardinality());
     }
 
-    /**
-     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
-     */
     public void constructTupleSchema(TupleSchema[] inputSchemas) {
-        this.inputTupleSchemas = inputSchemas;
-        resultTemplate.replaceVar(new varTbl(inputSchemas[0]));
-        outputTupleSchema = inputSchemas[0].copy();
-        outputTupleSchema.addMapping(variable);
+        super.constructTupleSchema(inputSchemas);
+        resultTemplate.replaceVar(new varTbl(inputSchemas[0]));        
+        // Without projection, (length of output tuple) = (length of input tuple + 1)
+        projecting = (inputSchemas[0].getLength() + 1 != outputTupleSchema.getLength());
+        if (projecting)
+            attributeMap = inputSchemas[0].mapPositions(outputTupleSchema);
     }
 }
-

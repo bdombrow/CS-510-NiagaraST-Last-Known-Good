@@ -1,8 +1,10 @@
-/* $Id: NotImpl.java,v 1.1 2002/10/06 23:56:41 vpapad Exp $ */
+/* $Id: NotImpl.java,v 1.2 2002/12/10 01:17:45 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import org.w3c.dom.Node;
 
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
@@ -17,6 +19,10 @@ public class NotImpl implements PredicateImpl {
 
     public boolean evaluate(StreamTupleElement t1, StreamTupleElement t2) {
         return !p.evaluate(t1, t2);
+    }
+
+    public boolean evaluate(Node n) {
+        return !p.evaluate(n);
     }
 
     public void resolveVariables(TupleSchema ts, int streamId) {

@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.5 2002/12/10 01:17:45 vpapad Exp $ */
+/* $Id: PhysicalPredicatedUnnest.java,v 1.1 2002/12/10 01:17:45 vpapad Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -7,10 +7,12 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
+import niagara.logical.Predicate;
 import niagara.logical.Unnest;
 import niagara.optimizer.colombia.*;
 
-public class PhysicalUnnest extends PhysicalOperator {
+/** A physical operator for predicated unnest */
+public class PhysicalPredicatedUnnest extends PhysicalOperator {
     // No blocking inputs
     private static final boolean[] blockingSourceStreams = { false };
 
@@ -25,13 +27,17 @@ public class PhysicalUnnest extends PhysicalOperator {
     private boolean projecting;
     /** Maps shared attribute positions between incoming and outgoing tuples */
     private int[] attributeMap;
+    /** Predicate we apply to unnested node */
+    private Predicate pred;
 
     // Runtime attributes
     private PathExprEvaluator pev;
     private NodeVector elementList;
     private int scanField;
+    /** Runtime predicate implementation */
+    private PredicateImpl predEval;
 
-    public PhysicalUnnest() {
+    public PhysicalPredicatedUnnest() {
         setBlockingSourceStreams(blockingSourceStreams);
     }
 
@@ -41,10 +47,23 @@ public class PhysicalUnnest extends PhysicalOperator {
      * @param logicalOperator The logical operator that this operator implements
      */
     public void initFrom(LogicalOp logicalOperator) {
-        Unnest logicalUnnest = (Unnest) logicalOperator;
-        this.path = logicalUnnest.getPath();
-        this.root = logicalUnnest.getRoot();
-        this.variable = logicalUnnest.getVariable();
+        if (logicalOperator instanceof Unnest) {
+            Unnest logicalUnnest = (Unnest) logicalOperator;
+            this.path = logicalUnnest.getPath();
+            this.root = logicalUnnest.getRoot();
+            this.variable = logicalUnnest.getVariable();
+        } else {
+            assert logicalOperator instanceof selectOp;
+            selectOp logicalSelectOperator = (selectOp) logicalOperator;
+            pred = logicalSelectOperator.getPredicate();
+            // Make sure that the only referenced variable is 
+            // the one we're unnesting
+            ArrayList al = new ArrayList();
+            pred.getReferencedVariables(al);
+            if (al.size() != 1 || !al.get(0).equals(variable))
+                throw new PEException("PredicatedUnnest can only evaluate predicates on the variable it's unnesting");
+            predEval = pred.getImplementation();
+        }
     }
 
     /**
@@ -76,26 +95,27 @@ public class PhysicalUnnest extends PhysicalOperator {
 
         int outSize = outputTupleSchema.getLength();
 
-        // Prototype for output tuples
-        StreamTupleElement protoTuple;
-
-        if (projecting) // We can project some attributes away
-            protoTuple = inputTuple.copy(outSize, attributeMap);
-        else // Just clone
-            protoTuple = inputTuple.copy(outSize);
-
         for (int node = 0; node < numNodes; ++node) {
+            Node n = elementList.get(node);
+            if (!predEval.evaluate(n))
+                continue;
+
             StreamTupleElement tuple;
-            // For all tuples except the last one, don't modify
-            // the prototype, but make a copy first
-            if (node != numNodes - 1)
-                tuple = protoTuple.copy(outSize);
-            else
-                tuple = protoTuple;
+
+            if (projecting) // We can project some attributes away
+                tuple = inputTuple.copy(outSize, attributeMap);
+            else // Just clone
+                tuple = inputTuple.copy(outSize);
+
+            // XXX vpapad: bug (or feature): Since PredicatedUnnest is 
+            // a physical operator, projection pushing will not remove
+            // attributes that are needed in the predicate, but not in
+            // any operator above us.
 
             // Append a reachable node to the output tuple
             // and put the tuple in the output stream
-            tuple.appendAttribute(elementList.get(node));
+            tuple.setAttribute(outSize - 1, n);
+
             putTuple(tuple, 0);
         }
 
@@ -107,21 +127,25 @@ public class PhysicalUnnest extends PhysicalOperator {
     }
 
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalUnnest))
+        if (o == null || !(o instanceof PhysicalPredicatedUnnest))
             return false;
         if (o.getClass() != getClass())
             return o.equals(this);
 
-        PhysicalUnnest op = (PhysicalUnnest) o;
-        return (path.equals(op.path) && variable.equals(op.variable))
-            && equalsNullsAllowed(getLogProp(), op.getLogProp());
+        PhysicalPredicatedUnnest op = (PhysicalPredicatedUnnest) o;
+        return (
+            path.equals(op.path)
+                && variable.equals(op.variable)
+                && equalsNullsAllowed(getLogProp(), op.getLogProp())
+                && pred.equals(op.pred));
     }
 
     public int hashCode() {
         // XXX vpapad: regExp.hashCode is Object.hashCode
         return path.hashCode()
             ^ variable.hashCode()
-            ^ hashCodeNullsAllowed(getLogProp());
+            ^ hashCodeNullsAllowed(getLogProp())
+            ^ pred.hashCode();
     }
 
     /**
@@ -132,20 +156,25 @@ public class PhysicalUnnest extends PhysicalOperator {
         LogicalProperty[] InputLogProp) {
         double inputCard = InputLogProp[0].getCardinality();
         double outputCard = logProp.getCardinality();
-        return new Cost(
-            inputCard * catalog.getDouble("tuple_reading_cost")
-                + outputCard * catalog.getDouble("dom_unnesting_cost")
-                + outputCard * constructTupleCost(catalog));
+        Cost cost =
+            new Cost(
+                inputCard * catalog.getDouble("tuple_reading_cost")
+                    + outputCard * catalog.getDouble("dom_unnesting_cost")
+                    + outputCard * constructTupleCost(catalog));
+        cost.add(predEval.getCost(catalog).times(inputCard));
+        return cost;
     }
 
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
     public Op copy() {
-        PhysicalUnnest op = new PhysicalUnnest();
+        PhysicalPredicatedUnnest op = new PhysicalPredicatedUnnest();
         op.path = path;
         op.root = root;
         op.variable = variable;
+        op.pred = pred;
+        op.predEval = predEval;
         return op;
     }
 
@@ -154,6 +183,8 @@ public class PhysicalUnnest extends PhysicalOperator {
      */
     protected void opInitialize() {
         scanField = inputTupleSchemas[0].getPosition(root.getName());
+        predEval.resolveVariables(outputTupleSchema, 0);
+
         pev = new PathExprEvaluator(path);
         elementList = new NodeVector();
     }
@@ -175,7 +206,7 @@ public class PhysicalUnnest extends PhysicalOperator {
         int streamId)
         throws ShutdownException, InterruptedException {
         // XXX vpapad: Pete, I don't know how to modify this
-        // to handle projections - HELP
+        // to handle the extra predicate and projections - HELP!!!
         try {
             // Get the attribute to scan on
             Node attribute = inputTuple.getAttribute(scanField);
@@ -213,8 +244,18 @@ public class PhysicalUnnest extends PhysicalOperator {
     public void constructTupleSchema(TupleSchema[] inputSchemas) {
         super.constructTupleSchema(inputSchemas);
         // Without projection, (length of output tuple) = (length of input tuple + 1)
-        projecting = (inputSchemas[0].getLength() + 1 != outputTupleSchema.getLength());
+        projecting =
+            (inputSchemas[0].getLength() + 1 != outputTupleSchema.getLength());
         if (projecting)
             attributeMap = inputSchemas[0].mapPositions(outputTupleSchema);
+    }
+
+    /**
+     * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
+     */
+    public void dumpChildrenInXML(StringBuffer sb) {
+        sb.append(">");
+        pred.toXML(sb);
+        sb.append("</").append(getName()).append(">");
     }
 }

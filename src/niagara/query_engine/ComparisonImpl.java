@@ -33,13 +33,7 @@ abstract public class ComparisonImpl implements PredicateImpl {
      */
 
     boolean stringGreaterThan(String leftValue, String rightValue) {
-
-        // Now check greater than using string comparison
-        if (leftValue.compareTo(rightValue) > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return (leftValue.compareTo(rightValue) > 0);
     }
 
     /**
@@ -52,13 +46,7 @@ abstract public class ComparisonImpl implements PredicateImpl {
      */
 
     boolean stringLessThan(String leftValue, String rightValue) {
-
-        // Now check greater than using string comparison
-        if (leftValue.compareTo(rightValue) < 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return (leftValue.compareTo(rightValue) < 0);
     }
 
     /**
@@ -129,7 +117,6 @@ abstract public class ComparisonImpl implements PredicateImpl {
         leftDouble = new Double(leftVal).doubleValue();
 
         switch (operator) {
-
             case opType.EQ :
                 return (leftDouble == rightDouble);
             case opType.NEQ :

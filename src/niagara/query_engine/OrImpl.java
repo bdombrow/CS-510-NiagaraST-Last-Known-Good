@@ -1,8 +1,10 @@
-/* $Id: OrImpl.java,v 1.1 2002/10/06 23:56:41 vpapad Exp $ */
+/* $Id: OrImpl.java,v 1.2 2002/12/10 01:17:45 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import org.w3c.dom.Node;
 
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
@@ -22,6 +24,10 @@ public class OrImpl implements PredicateImpl {
         return left.evaluate(t1, t2) || right.evaluate(t1, t2);
     }
 
+    public boolean evaluate(Node n) {
+        return left.evaluate(n) || right.evaluate(n);
+    }
+    
     public void resolveVariables(TupleSchema ts, int streamId) {
         left.resolveVariables(ts, streamId);
         right.resolveVariables(ts, streamId);
