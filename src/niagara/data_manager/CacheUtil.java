@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheUtil.java,v 1.7 2003/09/13 03:46:15 vpapad Exp $
+  $Id: CacheUtil.java,v 1.8 2003/09/26 20:17:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -216,33 +216,6 @@ public class CacheUtil {
         }
     }
 
-    public static Vector getVecSince(Vector v, long since, long to) {
-        Vector ret = new Vector();
-	System.out.println("CU::getVecSince " + since + " size " + v.size());
-        for(int i=0; i<v.size(); i++) {
-            Object n = v.elementAt(i);
-            if(n instanceof Element) {
-                // System.err.println("getVecSince. converting ... " + n);
-                Element next = (Element)v.elementAt(i);
-                String ts = next.getAttribute("TIMESTAMP");
-                long tst = Long.parseLong(ts);
-                // System.err.println("timestamp " + tst + " since " + since);
-                if(since < tst) {
-                    ret.addElement(new StreamTupleElement(next));
-                }
-            }
-            else if(n instanceof StreamTupleElement) {
-                StreamTupleElement nste = (StreamTupleElement) n;
-                long tst = nste.getTimeStamp();
-                if(since < tst) {
-                    // System.out.println("timestamp " + tst + " since " + since);
-                    ret.addElement(nste);
-                }
-            }
-        }
-        System.out.println("%%%%%% CU::getVecSince: pushing " + ret.size());
-        return ret;
-    }
     public static void flushVec(String fname, long timespan, Vector vec) {
         Document doc = DOMFactory.newDocument();
         Element root = doc.createElement("ROOT");
@@ -255,66 +228,5 @@ public class CacheUtil {
         }
         doc.appendChild(root);
         flushXML(fname, doc);
-    }
-    public static boolean shrinkVec(long ttimespan, Vector vec) {
-	System.err.println("ShrinkVec: timeSpan : " + ttimespan + " " + vec.size());
-	long timespan = ttimespan;
-        if(ttimespan==0) timespan = 30000; 
-        boolean ret = false;
-        long threshold = System.currentTimeMillis() - timespan;
-        while(true) {
-            if(vec.size()==0) break;
-            StreamTupleElement tmp = (StreamTupleElement)vec.elementAt(0);
-            if(tmp==null) break;
-            if(tmp.getTimeStamp() > threshold) break;
-	    System.out.println("Shrinking 1");
-            vec.removeElement(tmp);
-            ret = true;
-        }
-        return ret;
-    }
-    public static boolean isPush(String fileName) {
-        if(TrigTmpRex.isMatch(fileName)) return true;
-        return false;
-    }
-    public static void setTimeStamp(Vector v, long ts) {
-        for(int i=0; i<v.size(); i++) {
-            StreamTupleElement ste = (StreamTupleElement)v.elementAt(i);
-            if(ste.getTimeStamp()==0) {
-                // System.out.println("#### setTimeStamp for vec " + ts);
-                ste.setTimeStamp(ts);
-            }
-            else  {
-                // System.out.println("#### Vect Time Stamp: already SET");
-            }
-        }
-    }
-
-    public static boolean debugTitle(String place, Element ele) {
-        String title = "Bridges of Madison County";
-        NodeList nnll = ele.getElementsByTagName("Title");
-        Element ttll = (Element)nnll.item(0);
-        String t = ((Text)ttll.getFirstChild()).getData();
-        if(title.equals(t)) {
-            // System.out.println(place + " Got Title " + title);
-            return true;
-        }
-        return false;
-    }
-
-    public static void main(String args[]) {
-        String test = "aa345.xml&222";
-        String test2 = "CACHE/TRIG_34_a.xml";
-        String test3 = "this.is.bad&bad";
-        String test4 = "../../trigger/src/data.xml";
-
-        if(isTrigTmp(test2)) {
-            System.err.println("Test trigTmp OK");
-        }
-        else {
-            System.err.println("Test TrigTmp BAD");
-        }
-
-        System.exit(0);
     }
 }

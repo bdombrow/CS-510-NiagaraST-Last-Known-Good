@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCacheEntry.java,v 1.3 2003/03/08 01:01:53 vpapad Exp $
+  $Id: MemCacheEntry.java,v 1.4 2003/09/26 20:17:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,12 +25,14 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.data_manager;
 
 /** Niagra. DataManager. MemCacheEntry
   */
 import java.util.*;
+
+import niagara.utils.PEException;
+
 import org.w3c.dom.*;
 
 class MemCacheEntry {
@@ -78,25 +80,22 @@ class MemCacheEntry {
     }
     public void shrink() {
         System.out.println("Shrinking .... ");
-        if(val == null) {
+        if (val == null) {
             // System.err.println("Trying to shink null vec");
             return;
         }
-        if(val instanceof Vector) {
-            Vector v = (Vector)val;
-            // System.err.println("before shrink size " + v.size());
-            dirty = CacheUtil.shrinkVec(timespan, (Vector)val) || dirty;
-            // System.err.println("After shrink size " + v.size());
+        if (val instanceof Vector) {
+            throw new PEException("XXX vpapad: should never get here with the trigger code removed");
         }
     }
     public void flush() {
-        if(dirty) {
+        if (dirty) {
             // System.err.println("Flushing a MemCacheEntry");
-            if(key instanceof String && val instanceof Document)
-                CacheUtil.flushXML((String)key, (Document)val);
-            else if(key instanceof String && val instanceof Vector) {
+            if (key instanceof String && val instanceof Document)
+                CacheUtil.flushXML((String) key, (Document) val);
+            else if (key instanceof String && val instanceof Vector) {
                 shrink();
-                CacheUtil.flushVec((String)key, timespan, (Vector)val);
+                CacheUtil.flushVec((String) key, timespan, (Vector) val);
             }
         }
     }
@@ -104,28 +103,32 @@ class MemCacheEntry {
         once = o;
     }
     public boolean isOnce() {
-        return(once!=0);
+        return (once != 0);
     }
     public boolean minusOnce() {
         once--;
-        if(once==0) return true;
+        if (once == 0)
+            return true;
         return false;
     }
     public int getOnce() {
         return once;
     }
     public String getType() {
-        if(val == null) return(new String("Type is NULL"));
-        if(val instanceof Document) return(new String("Type is Doc"));
-        if(val instanceof Vector) {
+        if (val == null)
+            return (new String("Type is NULL"));
+        if (val instanceof Document)
+            return (new String("Type is Doc"));
+        if (val instanceof Vector) {
             Vector v = (Vector) val;
-            return(new String("Type is Vec: size " + v.size()));
+            return (new String("Type is Vec: size " + v.size()));
         }
-        return(new String("Unsupported Type in MemCacheEntry"));
+        return (new String("Unsupported Type in MemCacheEntry"));
     }
     public void setDirty(boolean d) {
         dirty = d;
-        if(d) timeStamp = System.currentTimeMillis();
+        if (d)
+            timeStamp = System.currentTimeMillis();
     }
     public boolean isDirty() {
         return dirty;
@@ -145,14 +148,15 @@ class MemCacheEntry {
         pinCount++;
     }
     public synchronized int minusPinCount() {
-        if(pinCount>0) pinCount--;
+        if (pinCount > 0)
+            pinCount--;
         return pinCount;
     }
     public synchronized void setCache(MemCache toset) {
         cache = toset;
     }
     public synchronized boolean isCacheNull() {
-        return(cache==null);
+        return (cache == null);
     }
     public void _initWaiting() {
         waitingThreads = new Vector();
@@ -162,15 +166,16 @@ class MemCacheEntry {
     }
     public synchronized boolean _removeWaitingThread(FetchThread fth) {
         waitingThreads.removeElement(fth);
-        if(waitingThreads.size()==0) return true;
+        if (waitingThreads.size() == 0)
+            return true;
         return false;
     }
     public synchronized boolean _notifyWaitingThreads() {
-        if(waitingThreads.size()==0) return false;
-        for(int i=0; i<waitingThreads.size(); i++) {
-            ((FetchThread)waitingThreads.elementAt(i))._notify();
+        if (waitingThreads.size() == 0)
+            return false;
+        for (int i = 0; i < waitingThreads.size(); i++) {
+            ((FetchThread) waitingThreads.elementAt(i))._notify();
         }
         return true;
     }
 }
-

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCache.java,v 1.7 2003/09/22 02:00:11 vpapad Exp $
+  $Id: MemCache.java,v 1.8 2003/09/26 20:17:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,7 +35,6 @@ package niagara.data_manager;
  */
 
 import java.util.*;
-import java.io.*;
 import org.w3c.dom.*;
 
 import niagara.ndom.*;
@@ -69,60 +68,6 @@ abstract class MemCache implements DMCache {
             entry.flush();
         }
         _mutex.unlock();
-    }
-
-    /** replace old k=>oldval to k=>val */
-    public void remap(Object key, Object val) {
-        remap(key, val, 0);
-    }
-    public void remap(Object key, Object val, long vc) {
-        // System.err.println("Remapping " + key + " to " + val);
-        String k = CacheUtil.normalizePath(key);
-        boolean isVec = false;
-        if(val == null || val instanceof Vector) {
-            isVec = true;
-        }
-        _mutex.lock();
-        MemCacheEntry me = (MemCacheEntry)_entryHash.get(k);
-        if(me!=null) {
-            // System.err.println(" %%%% remapping in_mem " + k + " to " + val);
-            me.setval(val);
-            me.setDirty(true);
-            if(vc!=0) {
-                // System.err.println("%%%%% MemC::remap: setTimeStamp " + vc);
-                me.setTimeStamp(vc);
-            }
-            if(isVec) { 
-		System.out.println("Calling me.shrink()");
-		me.shrink();
-	    }
-            _mutex.unlock();
-        } else {
-            _mutex.unlock();
-            // System.err.println(" %%%% remapping a not in_mem " + k);
-            if(!isVec) {
-                MemCacheEntry mme = new MemCacheEntry(k, val);
-                if(vc!=0) mme.setTimeStamp(vc);
-                _entryHash.put(k, mme);
-                addentry(mme);
-            }
-            else {
-                // This is extremely unlikely to happen since remap is
-                // only used in a controlled way by DM.  If this DOES
-                // happen, it is expensive -- since we had to preserv
-                // the timespan of the Vec file.
-                //try {
-                    // System.err.println("Once Vec should never be here");
-                    MemCacheEntry mme = new MemCacheEntry(k, val);
-                    mme.setDirty(true);
-                    if(vc!=0) mme.setTimeStamp(vc);
-                    _entryHash.put(k, mme);
-                    addentry(mme);
-		    //} catch(Exception cpe) { 
-                    // System.err.println("remap: failed adding a new vec entry to cache.");
-		    //}
-            }
-        }
     }
 
     public boolean _add(Object obj, FetchThread fth) {
