@@ -74,7 +74,7 @@ APPLET_DIR = /p/niagara/public/html
 #  list and it will be built using 'make all'
 #
 ##############################################################################
-all:	se_server ndom ql_parser con_server qe client mqpclient dm applet type_system
+all:	se_server ndom ql_parser con_server qe trigger client mqpclient dm applet type_system
 
 #client: 
 #	$(JAVAC) $(JAVAFLAGS) `find niagara/client -name \*.java`
