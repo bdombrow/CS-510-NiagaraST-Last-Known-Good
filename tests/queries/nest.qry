@@ -10,14 +10,13 @@ of the operator tree -->
 
 <unnest id="student" regexp="Students.Student" input="data"/>
 
-<unnest id="class" regexp="Class" input = "student"/>
+<unnest id="class" regexp="Class" input = "student"
+        type="content"/>
 
-<unnest id="name" regexp="Name" root="student" input="class"/>
+<unnest id="name" regexp="Name" root="student" input="class" />
 
-<nest id="nest" groupby="$class" input="name">
-<class id = "$class">
-<name>$name</name>
-</class>
+<nest id="nest" neston="$class" input="name">
+<![CDATA[ <class num=$class> $name </class> ]]>
 </nest> 
 
 </plan>
