@@ -1,0 +1,7 @@
+rate:0
+datatype:auction_stream
+num_gen_calls:30000
+streaming:yes
+num_tl_elts:1
+prettyprint:yes
+quiet:yes

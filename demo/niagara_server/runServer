@@ -1,4 +1,4 @@
 rm -rf CACHE/*
 rm -rf SYS/*
-# $Id: runServer,v 1.11 2002/09/24 00:51:26 vpapad Exp $
-java -server -Xmx192m -classpath `cat ../classpath` niagara.connection_server.NiagraServer $*
+# $Id: runServer,v 1.12 2002/09/25 19:00:15 tufte Exp $
+java -server -Xmx192m -classpath `cat ../classpath` niagara.connection_server.NiagraServer $* -without-se

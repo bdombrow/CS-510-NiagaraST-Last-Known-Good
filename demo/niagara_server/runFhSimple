@@ -1,0 +1,3 @@
+rm -rf CACHE/*
+rm -rf SYS/*
+java -classpath `cat ../classpath` niagara.firehose.SimpleClient $*

@@ -198,7 +198,7 @@
 	  host	         CDATA   #REQUIRED
 	  port	         CDATA   #REQUIRED
 	  rate	         CDATA   #REQUIRED 
-	  datatype  (xmlb | subfile | temp | auction | dtd | packet) "auction"
+	  datatype  (xmlb | subfile | temp | auction | dtd |auction_stream | file | packet) "auction"
 	  num_gen_calls  CDATA   #REQUIRED  
 	  streaming      (yes | no)  "yes"
 	  desc           CDATA   ""
@@ -232,6 +232,9 @@
            auction: desc, num_tl_elts, desc2 
 	 	desc is startFileName, desc2 specifies type of data
            dtd:     desc          (no num_tl_elts)
+	   auction_stream: desc is not necessary, num_tl_elts not
+	      currently used
+	   file:    desc is filename, num_tl_elts not used
 
     also note, streaming is used to indicate to query engine that
     data should be processed in streaming fashion and also used to
