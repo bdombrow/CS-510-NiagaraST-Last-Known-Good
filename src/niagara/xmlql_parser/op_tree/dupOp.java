@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: dupOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
+  $Id: dupOp.java,v 1.5 2002/10/26 04:30:28 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,12 @@
  */
 package niagara.xmlql_parser.op_tree;
 
+import java.util.ArrayList;
+
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
+
 public class dupOp extends unryOp {
 
     private int numDestinationStreams;
@@ -58,5 +64,23 @@ public class dupOp extends unryOp {
     public int getNumberOfOutputStreams() {
 	return numDestinationStreams;
     }
+    
+    public Op copy() {
+        dupOp op = new dupOp();
+        op.numDestinationStreams = numDestinationStreams;
+        return op;
+    }
+    
+    public int getNumberOfOutputs() {
+        return numDestinationStreams;
+    }
+    
+    /**
+     * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, ArrayList)
+     */
+    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+        return input[0].copy();
+    }
+
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.17 2002/08/17 16:03:19 tufte Exp $
+ * $Id: StreamThread.java,v 1.18 2002/10/26 04:26:23 vpapad Exp $
  */
 
 package niagara.data_manager;
@@ -20,12 +20,14 @@ import java.net.Socket;
 import java.lang.reflect.Array;
 
 import niagara.ndom.*;
+import niagara.optimizer.colombia.*;
+import niagara.query_engine.TupleSchema;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.firehose.*;
 import niagara.connection_server.NiagraServer;
 
-public class StreamThread implements Runnable {
+public class StreamThread extends SourceThread {
     private StreamSpec spec;
     private InputStream inputStream;
     private SinkTupleStream outputStream;
@@ -34,21 +36,42 @@ public class StreamThread implements Runnable {
     private BufferedReader bufferedInput = null;
     private MyArray buffer; 
 
-    public StreamThread(StreamSpec spec, SinkTupleStream outStream) {
+    // Optimization-time attributes
+    private Attribute variable;
 
-	this.spec = spec;
-	outputStream = outStream;
-	if (NiagraServer.usingSAXDOM()) 
-	    parser = DOMFactory.newParser("saxdom");
-	else
-	    parser = DOMFactory.newParser();
+    public void initFrom(LogicalOp lop) {
+        // XXX vpapad: this is so ugh-lee
+        if (lop instanceof FirehoseScanOp) {
+            spec = ((FirehoseScanOp) lop).getSpec();
+        }
+        else if (lop instanceof FileScanOp) {
+            spec = ((FileScanOp) lop).getSpec();
+        }
+        else
+            throw new PEException("Unknown logical operator passed to StreamThread");
     }
+
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        ;
+    }
+
+    public TupleSchema getTupleSchema() {
+        TupleSchema ts = new TupleSchema();
+        ts.addMapping(variable);
+        return ts;
+    }
+
 
     /**
      * Thread run method
      *
      */
     public void run() {
+        if (NiagraServer.usingSAXDOM()) 
+            parser = DOMFactory.newParser("saxdom");
+        else
+            parser = DOMFactory.newParser();
+
 	boolean sourcecreated = false;
 
 	try {
@@ -344,6 +367,47 @@ public class StreamThread implements Runnable {
 	    String s = new String(buffer, 0, len);
 	    return s;
 	}
+    }
+    
+    public void plugIn(SinkTupleStream outputStream, DataManager dm) {
+        this.outputStream = outputStream;
+    }
+    
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
+     */
+    public Cost FindLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] InputLogProp) {
+        // XXX vpapad: totally bogus flat cost for stream scans
+        return new Cost(catalog.getDouble("stream_scan_cost"));
+    }
+
+    /**
+     * @see java.lang.Object#equals(Object)
+     */
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof StreamThread)) return false;
+        if (o.getClass() != getClass()) return o.equals(this);
+        // XXX vpapad: spec's equals is Object.equals()
+        return spec.equals(((StreamThread) o).spec);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+        // XXX vpapad: spec's hashCode is Object.hashCode()
+        return spec.hashCode();
+    }
+    
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+        StreamThread st = new StreamThread();
+        st.spec = spec;
+        return st;
     }
 }
 

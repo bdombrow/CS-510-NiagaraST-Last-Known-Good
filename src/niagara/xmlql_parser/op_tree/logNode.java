@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: logNode.java,v 1.7 2002/05/23 06:32:03 vpapad Exp $
+  $Id: logNode.java,v 1.8 2002/10/26 04:30:28 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,12 +34,18 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 import java.io.*;
-import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.connection_server.NiagraServer;
+import niagara.data_manager.*;
+import niagara.optimizer.colombia.Op;
+import niagara.query_engine.PhysicalOperator;
+import niagara.query_engine.SchedulablePlan;
 import niagara.utils.*;
 
-public class logNode implements java.io.Serializable {
+public class logNode implements SchedulablePlan, java.io.Serializable {
    protected op operator;	// operator
 
    protected Schema tupleDes;	// describes the tuple
@@ -54,10 +59,6 @@ public class logNode implements java.io.Serializable {
    
    protected int[] inputsId;    // For Trigger ONLY!
    protected int Id;            // for trig use.  Not trig system Id = -1
-
-    private String location;
-
-    private String name;
 
     protected boolean isHead;
 
@@ -145,7 +146,7 @@ public class logNode implements java.io.Serializable {
     * @return The number of inputs to this logical node
     */
 
-   public int numInputs () {
+   public int getArity() {
         return inputs.length;
    }
 
@@ -187,7 +188,7 @@ public class logNode implements java.io.Serializable {
     * @param the position of this child
     */
    public void setInput(logNode newChild, int index) {
-	if (index>=Array.getLength(inputs))
+	if (index >= inputs.length)
 		System.err.println("index out of range");
 	inputs[index]=newChild;
         if(inputsId==null) return;
@@ -299,92 +300,11 @@ public class logNode implements java.io.Serializable {
     }
 
 
-    // A node is schedulable if none of its
-    // inputs depends on an abstract resource
-    public boolean isSchedulable() {
-        if (inputs.length == 0 && operator instanceof ResourceOp)
-            return false;
-        for (int i = 0; i < inputs.length; i++) {
-            if (!inputs[i].isSchedulable())
-                return false;
-        }
-        return true;
-    }
-
-    /**
-     * XML representation of this node
-     *
-     * @return a <code>String</code> with the XML 
-     * representation of this operator
-     */
-    public String toXML() {
-        // XXX convert to StringBuffer
-        String eltname = operator.getName();
-        String ret = "<" + eltname;
-        // id = last variable in the variable table
-        ret += " id='" + getName() + "'";
-        // location
-        if (location != null) 
-            ret += " location='" + location + "'";
-        // inputs
-        if (inputs.length != 0) {
-            ret += " input='";
-            for (int i = 0; i < inputs.length; i++) {
-                ret += inputs[i].getName() + " ";
-            }
-            ret = ret.substring(0, ret.length()-1);
-            ret += "'";
-        }
-        // other attributes for operator
-        ret += operator.dumpAttributesInXML();
-        String children = operator.dumpChildrenInXML();
-        if (children.length() != 0)
-            ret += ">" + children + "</" + eltname + ">";
-        else
-            ret += "/>";
-        return ret;
-    }
-
-    public String planToXML() {
-        StringBuffer buf = new StringBuffer("<plan top='");
-        buf.append(getName());
-        buf.append("'>");
-        subplanToXML(new Hashtable(), buf);
-        buf.append("</plan>");
-        return buf.toString();
-    }
-
-    public String subplanToXML() {
-        StringBuffer buf = new StringBuffer("<plan top='send'><send id='send' input='" + getName() + "'/>");
-        subplanToXML(new Hashtable(), buf);
-        buf.append("</plan>");
-        return buf.toString();
-    }
-
-    public void subplanToXML(Hashtable seen, StringBuffer buf) {
-        if (seen.containsKey(name)) 
-            return;
-        buf.append(toXML());
-        seen.put(name, name);
-        for (int i = 0; i < inputs.length; i++) {
-            inputs[i].subplanToXML(seen, buf);
-        }
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    public boolean isSchedulable() { return true; }
 
     public String getName() {
-        return name;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
+        // return an artificial name for this operator instance
+        return operator.getName() + "#" + operator.hashCode();
     }
 
     public boolean isAccumulateOp() {
@@ -398,6 +318,7 @@ public class logNode implements java.io.Serializable {
 	return ((AccumulateOp)operator).getAccumFileName();
     }
 
+
     public boolean isHead() {
 	return isHead;
     }
@@ -406,6 +327,92 @@ public class logNode implements java.io.Serializable {
 	isHead = true;
     }
 
+    /** Instantiate the selected physical operator algorithm */
+    public PhysicalOperator getPhysicalOperator() {
+        Class physicalOperatorClass = operator.getSelectedAlgo();
+        // If there is no selected algo, error
+        if (physicalOperatorClass == null) {
+            throw new PEException("No algorithm selected");
+        }
+
+        PhysicalOperator physicalOperator;
+        try {
+        // Get the zero-argument constructor        
+        Constructor constructor =
+            physicalOperatorClass.getConstructor(new Class[] {
+        });
+
+        // Create a new physical operator object
+        physicalOperator =
+            (PhysicalOperator) constructor.newInstance(new Object[] {
+        });
+        } catch (NoSuchMethodException nsme) {
+            throw new PEException("Could not find a zero-argument constructor for: " + physicalOperatorClass);
+        } catch (InstantiationException e) {
+            throw new PEException(
+                "Error in Instantiating Physical Operator" + e.getMessage());
+        } catch (IllegalAccessException e) {
+            throw new PEException(
+                "Error in Instantiating Physical Operator" + e.getMessage());
+        } catch (InvocationTargetException e) {
+            throw new PEException(
+                "Error in Instantiating Physical Operator" + e.getMessage());
+        }
+
+        physicalOperator.initFrom(operator);
+        return physicalOperator;
+    }
+    
+    public SchedulablePlan getInput(int i) {
+        return input(i);
+    }
+    
+    public  boolean isSource() {
+        return operator.isSourceOp();
+    }
+    
+    public void setInputs(SchedulablePlan[] inputs) {
+        setInputs((logNode[]) inputs);
+    }
+    
+    public int getNumberOfOutputs() {
+        return operator.getNumberOfOutputs();
+    }
+
+    public void processSource(SinkTupleStream sinkStream, DataManager dm) 
+    throws ShutdownException {
+        if (!isSource())
+            throw new PEException("Not a source op");
+        op sourceOp = operator;
+
+        if (sourceOp instanceof dtdScanOp) {
+            dtdScanOp dop = (dtdScanOp) sourceOp;
+            // Ask the data manager to start filling the output stream with
+            // the parsed XML documents
+            boolean scan = dm.getDocuments(dop.getDocs(), null, sinkStream);
+            if (!scan)
+                System.err.println(
+                    "dtdScan FAILURE! " + dop.getDocs().elementAt(0));
+        } else { 
+            // XXX vpapad: stopgap
+            // After merge is complete, logNodes will only handle
+            // XML-QL plans, that use only dtdscan as a source op
+            StreamThread st = new StreamThread();
+            st.initFrom(sourceOp);
+            st.plugIn(sinkStream, dm);
+            (new Thread(st)).start();
+        }
+    }
+    
+    public void setOperator(Op operator) {
+        this.operator = (op) operator;
+    }
+    
+    // XXX vpapad: temporary hack to get CVS to compile
+    public String getLocation() {return null;}
+    public void setLocation(String location) {}
+    public String planToXML() {return null;}
+    public void setName(String name) {}
 }
 
 
