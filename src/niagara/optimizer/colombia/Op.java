@@ -1,27 +1,38 @@
-/* $Id: Op.java,v 1.7 2002/10/23 22:53:06 vpapad Exp $ */
+/* $Id: Op.java,v 1.8 2002/10/31 04:23:00 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 /** Abstract superclass for all operators, logical or physical */
 public abstract class Op {
     
     /** Create a copy of this operator. <em>Not</em> (always) the same 
-     * as clone() - updateable fields of an operator such as 
-     * predicates attached to <code>join</code>s should be deep cloned.
+     * as clone() - updatable fields of an operator should be deep cloned.
+     * On the other hand it's OK to share pointers to immutable objects,
+     * like strings or predicates.
      */
-    // XXX vpapad temporary hack
-    /* public abstract Op copy(); */
-    public Op copy() { return null; }
+    public abstract Op copy();
 
     public abstract String getName(); 
     
     /** number of inputs */
     public abstract int getArity();
 
-    // XXX vpapad temporary hack
-    /*
+    /* We require logical and physical operators to redefine 
+     * equals and hashCode, in the context of the optimizer.
+     * We don't  worry too much about data structures that
+     * are used afterwards in query execution.
+     * 
+     * If there is any way that we can produce a duplicate of an operator
+     * using optimizer transformations (e.g. in joins), equals()
+     * MUST not be plain pointer equality. The amount of things
+     * we must check in equals() depends (as in copy()) on what
+     * the optimizer transformations can do. 
+     * x.equals(x) and x.copy().equals(x) should always be true.
+     * 
+     * If we change equals() we must also change hashCode() so 
+     * that x.equals(y) => x.hashCode() == y.hashCode() remains true.
+     */
     public abstract boolean equals(Object other);
     public abstract int hashCode();
-    */
 
     public int getNumberOfOutputs() { return 1;}
     

@@ -650,7 +650,7 @@ public class Group {
                             Cm.io());                 // i/o cost of reading from disk
             }
         */
-        for (int i = 0; i < logProp.GetAttrs().size(); i++) {
+        for (int i = 0; i < logProp.getAttrs().size(); i++) {
             // XXX vpapad: we don't support attr props any more
             //            float CuCard =
             //                logProp.GetAttrProp(logProp.GetAttr(i).GetName()).getCuCard();

@@ -260,8 +260,7 @@ public class Bindery {
                 // state analysis and transitions
                 if (state == BINDERY_STATE.START) {
                     // is this expression unusable?
-                    if (arity != patt_op.getArity()
-                        || !(patt_op.matches(op_arg))) {
+                    if (!patt_op.matches(op_arg)) {
                         state = BINDERY_STATE.FINISHED; // try next expression
                     } else if (arity == 0) { // only the Operator, matched
                         state = BINDERY_STATE.VALID_BINDING;

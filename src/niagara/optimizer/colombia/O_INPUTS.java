@@ -224,7 +224,7 @@ public class O_INPUTS extends Task {
 
             // get the localcost of the mexpr being optimized in G
             LocalCost =
-                Op.FindLocalCost(
+                Op.findLocalCost(
                     ssp.getCatalog(),
                     InputLogProp);
 
@@ -248,7 +248,7 @@ public class O_INPUTS extends Task {
                 if (Op.is_physical()) {
                     // Determine property required of that input
                     properties =
-                        ((PhysicalOp) Op).InputReqdProp(
+                        ((PhysicalOp) Op).inputReqdProp(
                             LocalReqdProp,
                             InputLogProp[input],
                             input);
@@ -331,7 +331,7 @@ public class O_INPUTS extends Task {
             if (Op.is_physical()) {
                 // Determine property required of that input
                 properties =
-                    ((PhysicalOp) Op).InputReqdProp(
+                    ((PhysicalOp) Op).inputReqdProp(
                         LocalReqdProp,
                         InputLogProp[input],
                         input);
@@ -465,7 +465,7 @@ public class O_INPUTS extends Task {
         if (arity == 0
             && !LocalReqdProp.getOrder().isAny()
             && Op.is_physical()) {
-            PhysicalProperty OutputPhysProp = ((PhysicalOp) Op).FindPhysProp(PhysicalOp.NO_INPUTS);
+            PhysicalProperty OutputPhysProp = ((PhysicalOp) Op).findPhysProp(PhysicalOp.NO_INPUTS);
             if (!(LocalReqdProp == OutputPhysProp)) {
                 //                PTRACE2(
                 //                    "physical epxr: %s does not satisfy required phys_prop: %s",

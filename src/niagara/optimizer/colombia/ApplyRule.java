@@ -399,7 +399,7 @@ public class ApplyRule extends Task {
                 // if it is physical operator, plus the local cost
                 if (NewMExpr.getOp().is_physical())
                     LocalCost =
-                        ((PhysicalOp) NewMExpr.getOp()).FindLocalCost(
+                        ((PhysicalOp) NewMExpr.getOp()).findLocalCost(
                             ssp.getCatalog(),
                             InputLogProp);
                 else

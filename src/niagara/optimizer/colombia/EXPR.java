@@ -91,7 +91,7 @@ public class Expr {
         for (int i = 0; i < arity; i++) {
             inputLogProps[i] = ((PhysicalOp) getInput(i).getOp()).getLogProp();
         }
-        cost = ((PhysicalOp) getOp()).FindLocalCost(catalog, inputLogProps);
+        cost = ((PhysicalOp) getOp()).findLocalCost(catalog, inputLogProps);
 
         for (int i = 0; i < arity; i++) {
             cost.add(getInput(i).getCost(catalog));

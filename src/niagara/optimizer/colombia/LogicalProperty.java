@@ -40,8 +40,8 @@ public class LogicalProperty {
         assert cardinality >= 0;
 
         Attrs = new Attrs();
-        for (int i = 0; i < other.GetAttrs().size(); i++)
-            Attrs.add(other.GetAttrs().GetAt(i).copy());
+        for (int i = 0; i < other.getAttrs().size(); i++)
+            Attrs.add(other.getAttrs().GetAt(i).copy());
 
         hasLocal = other.hasLocal;
         hasRemote = other.hasRemote;
@@ -56,7 +56,7 @@ public class LogicalProperty {
         return cardinality;
     }
 
-    public Attrs GetAttrs() {
+    public Attrs getAttrs() {
         return Attrs;
     }
     
@@ -109,7 +109,7 @@ public class LogicalProperty {
         return Attrs.get(i);
     }
 
-    public Attribute GetAttr(String attrname) {
+    public Attribute getAttr(String attrname) {
         return Attrs.GetAttr(attrname);
     }
 

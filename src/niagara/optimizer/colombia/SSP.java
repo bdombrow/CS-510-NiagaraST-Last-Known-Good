@@ -1,4 +1,4 @@
-/* $Id: SSP.java,v 1.3 2002/10/07 00:35:12 vpapad Exp $ */
+/* $Id: SSP.java,v 1.4 2002/10/31 04:23:00 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 import java.util.ArrayList;
@@ -160,7 +160,7 @@ public class SSP {
     public int getNumberOfGroups() {
         return Groups.size();
     }
-    
+
     //     void  ShrinkGroup(int group_no);	//shrink the group marked completed
     //     void  Shrink();			//shrink the ssp
 
@@ -301,7 +301,7 @@ public class SSP {
 
         //XXX vpapad: We can't handle group merging yet;
 
-        assert !ruleSet.isUnique(): "Duplicates detected in unique rule set";
+        assert !ruleSet.isUnique() : "Duplicates detected in unique rule set";
         int ToGid = group_no1;
         int FromGid = group_no2;
 
@@ -326,7 +326,7 @@ public class SSP {
     public MExpr copyIn(Expr Expr, int GrpID) {
         return copyIn(Expr, GrpID, false);
     }
-    
+
     public MExpr copyIn(Expr Expr, int GrpID, boolean returnDuplicate) {
         Group Group;
 
@@ -344,7 +344,7 @@ public class SSP {
                 if (GrpID == DupMExpr.getGrpID()) {
                     if (returnDuplicate)
                         return DupMExpr;
-                    else 
+                    else
                         return null;
                 }
 
@@ -358,7 +358,7 @@ public class SSP {
                         return DupMExpr;
                     else
                         return null;
-                    
+
                 } else {
                     // otherwise, i.e., GrpID != DupMExpr.GrpID
                     // need do the merge
@@ -435,7 +435,7 @@ public class SSP {
 
     /** Return the optimal expression that satisfies this property, 
      * null otherwise */
-    public Expr CopyOut(Group group, PhysicalProperty PhysProp) {
+    public Expr CopyOut(Group group, PhysicalProperty PhysProp, HashMap seen) {
         Winner ThisWinner;
 
         MExpr WinnerMExpr;
@@ -461,10 +461,19 @@ public class SSP {
 
             Expr[] inputs = new Expr[WinnerMExpr.getArity()];
             for (int i = 0; i < WinnerMExpr.getArity(); i++) {
-                inputs[i] =
-                    CopyOut(WinnerMExpr.getInput(i), PhysicalProperty.ANY);
+                Group inputGroup = WinnerMExpr.getInput(i);
+                if (seen.containsKey(inputGroup))
+                    inputs[i] = (Expr) seen.get(inputGroup);
+                else
+                    inputs[i] =
+                        CopyOut(
+                            WinnerMExpr.getInput(i),
+                            PhysicalProperty.ANY,
+                            seen);
             }
-            return new Expr(WinnerOp, inputs);
+            Expr e = new Expr(WinnerOp, inputs);
+            seen.put(group, e);
+            return e;
         } else { // normal case
             if (!IRPROP) {
                 ThisWinner = group.getWinner(PhysProp);
@@ -490,8 +499,13 @@ public class SSP {
             for (int i = 0; i < Arity; i++) {
                 Group inputGroup = WinnerMExpr.getInput(i);
 
+                if (seen.containsKey(inputGroup)) {
+                    inputs[i] = (Expr) seen.get(inputGroup);
+                    continue;
+                }
+                
                 PhysicalProperty[] properties =
-                    ((PhysicalOp) WinnerOp).InputReqdProp(
+                    ((PhysicalOp) WinnerOp).inputReqdProp(
                         PhysProp,
                         inputGroup.getLogProp(),
                         i);
@@ -505,9 +519,11 @@ public class SSP {
                 else
                     ReqProp = PhysicalProperty.ANY;
 
-                inputs[i] = CopyOut(inputGroup, ReqProp);
+                inputs[i] = CopyOut(inputGroup, ReqProp, seen);
             }
-            return new Expr(WinnerOp, inputs);
+            Expr e = new Expr(WinnerOp, inputs);
+            seen.put(group, e);
+            return e;
         }
     }
 
@@ -533,96 +549,96 @@ public class SSP {
     // 		return AllExprs(GrpID, new PhysicalProperty(new Order(any)), false);
     // 	}
 
-//    // Return all the logical expressions or physical plans with no pruning.
-//    //	Logical expressions if forLogical == true
-//    //	Physical plans if forLogical == false
-//    ArrayList AllExprs(
-//        Group group,
-//        PhysicalProperty PhysProp,
-//        boolean forLogical) {
-//        ArrayList Exprs = new ArrayList();
-//        Group ThisGroup = group;
-//        MExpr MExpr;
-//
-//        if (forLogical)
-//            MExpr = ThisGroup.GetFirstLogMExpr();
-//        else
-//            MExpr = ThisGroup.GetFirstPhysMExpr();
-//
-//        while (MExpr != null) { // Traverse the MExpr list
-//            boolean possible;
-//            Group SubGroup;
-//            PhysicalProperty SubProp;
-//            Op op = MExpr.getOp();
-//
-//            if (!forLogical)
-//                ((PhysicalOp) op).SetGrpID(GrpID);
-//            // Set the GrpID for this operator (see Op for GrpID)
-//
-//            ArrayList SubExprs = null;
-//            ArrayList SubExprs1 = null;
-//
-//            // If the MExpr has no input
-//            if (MExpr.getArity() == 0)
-//                Exprs.add(new Expr(op.copy()));
-//
-//            // Get the expressions from the first input group,
-//            // if the M_Expr has at least one input group
-//            // Derive the expressions, when the M_Expr has one input group
-//            else {
-//                SubGroup = MExpr.GetInput(0);
-//                if (forLogical) // For logical expressions
-//                    SubExprs = Ssp.AllExprs(SubGroup.GetGroupID(), 0, true);
-//                else { // For physical plans
-//                    SubProp =
-//                        ((PhysicalOp *) op).InputReqdProp(
-//                            PhysProp,
-//                            SubGroup.getLogProp(),
-//                            0,
-//                            possible);
-//                    if (possible)
-//                        SubExprs =
-//                            Ssp.AllExprs(SubGroup, SubProp, false);
-//                }
-//            }
-//
-//            // Derive the expressions, when the M_Expr has one input group
-//            if (MExpr.getArity() == 1
-//                && SubExprs) { // If it has one input groups
-//                for (int i = 0; i < SubExprs.size(); i++)
-//                    Exprs.push_back(new Expr(op.Copy(), (* SubExprs)[i]));
-//            }
-//
-//            // Derive the expressions , when the M_Expr has two input group
-//            if (MExpr.getArity() == 2 && SubExprs) {
-//                SubGroup = Ssp.GetGroup(MExpr.GetInput(1));
-//                if (forLogical)
-//                    SubExprs1 = Ssp.AllExprs(SubGroup.GetGroupID(), 0, true);
-//                else {
-//                    SubProp =
-//                        ((PhysicalOp *) op).InputReqdProp(
-//                            PhysProp,
-//                            SubGroup.getLogProp(),
-//                            1,
-//                            possible);
-//                    if (possible)
-//                        SubExprs1 =
-//                            Ssp.AllExprs(SubGroup.GetGroupID(), SubProp, false);
-//                }
-//                if (SubExprs && SubExprs1) {
-//                    for (int i = 0; i < SubExprs.size(); i++)
-//                        for (int j = 0; j < SubExprs1.size(); j++)
-//                            Exprs.push_back(
-//                                new Expr(
-//                                    op.Copy(),
-//                                    (* SubExprs)[i],
-//                                    (* SubExprs1)[j]));
-//                }
-//            }
-//            MExpr = MExpr.GetNextMExpr();
-//        }
-//        return Exprs;
-//    } //AllExprs()
+    //    // Return all the logical expressions or physical plans with no pruning.
+    //    //	Logical expressions if forLogical == true
+    //    //	Physical plans if forLogical == false
+    //    ArrayList AllExprs(
+    //        Group group,
+    //        PhysicalProperty PhysProp,
+    //        boolean forLogical) {
+    //        ArrayList Exprs = new ArrayList();
+    //        Group ThisGroup = group;
+    //        MExpr MExpr;
+    //
+    //        if (forLogical)
+    //            MExpr = ThisGroup.GetFirstLogMExpr();
+    //        else
+    //            MExpr = ThisGroup.GetFirstPhysMExpr();
+    //
+    //        while (MExpr != null) { // Traverse the MExpr list
+    //            boolean possible;
+    //            Group SubGroup;
+    //            PhysicalProperty SubProp;
+    //            Op op = MExpr.getOp();
+    //
+    //            if (!forLogical)
+    //                ((PhysicalOp) op).SetGrpID(GrpID);
+    //            // Set the GrpID for this operator (see Op for GrpID)
+    //
+    //            ArrayList SubExprs = null;
+    //            ArrayList SubExprs1 = null;
+    //
+    //            // If the MExpr has no input
+    //            if (MExpr.getArity() == 0)
+    //                Exprs.add(new Expr(op.copy()));
+    //
+    //            // Get the expressions from the first input group,
+    //            // if the M_Expr has at least one input group
+    //            // Derive the expressions, when the M_Expr has one input group
+    //            else {
+    //                SubGroup = MExpr.GetInput(0);
+    //                if (forLogical) // For logical expressions
+    //                    SubExprs = Ssp.AllExprs(SubGroup.GetGroupID(), 0, true);
+    //                else { // For physical plans
+    //                    SubProp =
+    //                        ((PhysicalOp *) op).InputReqdProp(
+    //                            PhysProp,
+    //                            SubGroup.getLogProp(),
+    //                            0,
+    //                            possible);
+    //                    if (possible)
+    //                        SubExprs =
+    //                            Ssp.AllExprs(SubGroup, SubProp, false);
+    //                }
+    //            }
+    //
+    //            // Derive the expressions, when the M_Expr has one input group
+    //            if (MExpr.getArity() == 1
+    //                && SubExprs) { // If it has one input groups
+    //                for (int i = 0; i < SubExprs.size(); i++)
+    //                    Exprs.push_back(new Expr(op.Copy(), (* SubExprs)[i]));
+    //            }
+    //
+    //            // Derive the expressions , when the M_Expr has two input group
+    //            if (MExpr.getArity() == 2 && SubExprs) {
+    //                SubGroup = Ssp.GetGroup(MExpr.GetInput(1));
+    //                if (forLogical)
+    //                    SubExprs1 = Ssp.AllExprs(SubGroup.GetGroupID(), 0, true);
+    //                else {
+    //                    SubProp =
+    //                        ((PhysicalOp *) op).InputReqdProp(
+    //                            PhysProp,
+    //                            SubGroup.getLogProp(),
+    //                            1,
+    //                            possible);
+    //                    if (possible)
+    //                        SubExprs1 =
+    //                            Ssp.AllExprs(SubGroup.GetGroupID(), SubProp, false);
+    //                }
+    //                if (SubExprs && SubExprs1) {
+    //                    for (int i = 0; i < SubExprs.size(); i++)
+    //                        for (int j = 0; j < SubExprs1.size(); j++)
+    //                            Exprs.push_back(
+    //                                new Expr(
+    //                                    op.Copy(),
+    //                                    (* SubExprs)[i],
+    //                                    (* SubExprs1)[j]));
+    //                }
+    //            }
+    //            MExpr = MExpr.GetNextMExpr();
+    //        }
+    //        return Exprs;
+    //    } //AllExprs()
 
     public void optimize(Expr expr) {
         tracer.startingOptimization();
