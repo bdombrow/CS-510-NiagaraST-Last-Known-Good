@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: GroupQueryOptimizer.java,v 1.4 2002/10/24 00:41:55 vpapad Exp $
+  $Id: GroupQueryOptimizer.java,v 1.5 2002/10/27 01:01:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,6 +40,14 @@ package niagara.trigger_engine;
 import org.w3c.dom.*;
 import java.io.*;
 import java.util.*;
+
+import niagara.logical.And;
+import niagara.logical.Atom;
+import niagara.logical.Comparison;
+import niagara.logical.OldVariable;
+import niagara.logical.Predicate;
+import niagara.logical.Variable;
+import niagara.optimizer.colombia.Attrs;
 import niagara.query_engine.*;
 import niagara.data_manager.*;
 import niagara.utils.*;
@@ -223,7 +231,7 @@ public class GroupQueryOptimizer {
 
         else if (currOp instanceof selectOp) {
 
-            predicate pred=((selectOp)currOp).getPredicate();
+            Predicate pred=((selectOp)currOp).getPredicate();
 	    
 	    int size=childPlanStrings.size();
 	    String tmp=(String)childPlanStrings.elementAt(size-1);
@@ -245,8 +253,8 @@ public class GroupQueryOptimizer {
         }
         else if (currOp instanceof joinOp) {
 
-	    Vector lv=((joinOp)currOp).getLeftEqJoinAttr();
-	    Vector rv=((joinOp)currOp).getRightEqJoinAttr();
+	    Attrs lv=((joinOp)currOp).getLeftEqJoinAttr();
+	    Attrs rv=((joinOp)currOp).getRightEqJoinAttr();
 
 	    if ((lv.size()!=1)||(rv.size()!=1))
 		System.err.println("Join predicate not supported");
@@ -254,13 +262,13 @@ public class GroupQueryOptimizer {
 	    Schema schema = node.getSchema();
 
 	    //get the left join attribute name, 
-	    int lAttrId=((schemaAttribute)(lv.elementAt(0))).getAttrId();
+	    int lAttrId=((OldVariable)(lv.get(0))).getSA().getAttrId();
 	    //only return the regExp of last level: lastname
 	    regExp lExp=schema.getSchemaUnit(lAttrId).getRegExp();
 	    String lJoinAttrName=lExp.toString();
             
 	    //get the right join attribute name, 
-	    int rAttrId=((schemaAttribute)(rv.elementAt(0))).getAttrId();
+	    int rAttrId=((OldVariable)(rv.get(0))).getSA().getAttrId();
 	    //only return the regExp of last level: lastname
 	    regExp rExp=schema.getSchemaUnit(rAttrId).getRegExp();
 	    String rJoinAttrName=rExp.toString();
@@ -333,8 +341,8 @@ public class GroupQueryOptimizer {
 	    //int trigId = tm.getNextId(); 
 	    //idV.addElement(new Integer(trigId));
 	    if (currOp instanceof selectOp) {
-		predicate pred = ((selectOp)currOp).getPredicate();
-		if (pred instanceof predLogOpNode) {
+		Predicate pred = ((selectOp)currOp).getPredicate();
+		if (!(pred instanceof Comparison)) {
 		    Vector tmpV = new Vector();
 		    //tmpV.addElement(((predLogOpNode)pred).getRightChild());
 		    getPreds(pred,tmpV);
@@ -412,9 +420,9 @@ public class GroupQueryOptimizer {
 	if(sig!=null) { // sig FOUND 
 		debug.mesg("!!! A Group is matched!!!");
 		if (tmpOp instanceof selectOp) {
-		    predicate pred=((selectOp)tmpOp).getPredicate();
+		    Predicate pred=((selectOp)tmpOp).getPredicate();
 		    
-		    if (pred instanceof predLogOpNode) {
+		    if (!(pred instanceof Comparison)) {
 			try {
 			    pred=getLeftMostConjunct(pred);
 			}
@@ -423,7 +431,7 @@ public class GroupQueryOptimizer {
 			}			
 		    }	 
 		    
-		    tmpFileName = ((SelectSig)sig).addMember((predArithOpNode)pred, this);
+		    tmpFileName = ((SelectSig)sig).addMember((Comparison)pred, this);
 		}		
 		if (tmpOp instanceof joinOp) {
 		    //there are two vectors for the two sources of the join
@@ -438,9 +446,9 @@ public class GroupQueryOptimizer {
 		debug.mesg("!!! A new SelectOp Group!!!");
 		sig = new SelectSig(node, subPlan, tm, this);
 		SYSGroupTbl.addSignature(sig);
-		predicate pred=((selectOp)tmpOp).getPredicate();
+		Predicate pred=((selectOp)tmpOp).getPredicate();
 		
-		if (pred instanceof predLogOpNode) {
+		if (!(pred instanceof Comparison)) {
 		    try {
 			pred=getLeftMostConjunct(pred);
 		    }
@@ -449,7 +457,7 @@ public class GroupQueryOptimizer {
 		    }		
 		    
 		}	 
-		tmpFileName = ((SelectSig)sig).addMember((predArithOpNode)pred, this);
+		tmpFileName = ((SelectSig)sig).addMember((Comparison)pred, this);
 	    }
 	    else if (tmpOp instanceof joinOp) {
 		debug.mesg("!!! A new JoinOp Group!!!");
@@ -482,41 +490,35 @@ public class GroupQueryOptimizer {
     //this function returns the left most conjunt of a predicate
     //in the form of p1 AND p2 AND...AND Pm. If the predicate 
     //contains OR or NOT, it throws a TRIGPredNotSuppException.
-    predicate getLeftMostConjunct(predicate pred)
-	throws TRIGPredNotSuppException {
-	//If it is in the form of p1 AND p2 AND ..., we will
-	//choose p1 as the signature. If it contains NOT or OR,
-	//an exception will be thrown. Future work!!!
-	while (true) {
-	    if (pred instanceof predArithOpNode)
-		return pred;
-	    else {
-		switch(pred.getOperator()){
-		case opType.AND: 
-		    debug.mesg("AND");
-		    pred=((predLogOpNode)pred).getLeftChild();
-		    break;
-		case opType.NOT: 
-		    debug.mesg("NOT"); 
-		case opType.OR: 
-		    debug.mesg("OR");
-		throw new TRIGPredNotSuppException();
-		} 
-	    }
-	}
+    Predicate getLeftMostConjunct(Predicate pred)
+        throws TRIGPredNotSuppException {
+        //If it is in the form of p1 AND p2 AND ..., we will
+        //choose p1 as the signature. If it contains NOT or OR,
+        //an exception will be thrown. Future work!!!
+        while (true) {
+            if (pred instanceof Comparison)
+                return pred;
+            else {
+                if (pred instanceof And) {
+                    pred = ((And) pred).getLeft();
+                    continue;
+                }
+                throw new TRIGPredNotSuppException();
+            }
+        }
     }
 
     //this function returns a vector which contains all conjuncts 
     //of a predicate in the format of p1 AND p2 AND ..pm
-    private void getPreds(predicate pred, Vector preds) {
-	if (pred instanceof predArithOpNode) {
+    private void getPreds(Predicate pred, Vector preds) {
+	if (pred instanceof Comparison) {
 	    preds.addElement(pred);
 	}
 	else {
 	//recursively get predicates on its left child
-	getPreds(((predLogOpNode)pred).getLeftChild(), preds);
+	getPreds(((And)pred).getLeft(), preds);
 	//recursively get predicates on its right child
-	getPreds(((predLogOpNode)pred).getRightChild(),preds);
+	getPreds(((And)pred).getRight(),preds);
 	}
     }
 
@@ -531,10 +533,10 @@ public class GroupQueryOptimizer {
      * @param predicate
      * @return string representation of predicate
      **/
-    private String compSigForPred(Schema schema, predicate pred)
+    private String compSigForPred(Schema schema, Predicate pred)
         throws TRIGPredNotSuppException {
 
-	if (pred instanceof predLogOpNode) {
+	if (!(pred instanceof Comparison)) {
 	    //If it is in the form of p1 AND p2 AND ..., we will
 	    //choose p1 as the signature. If it contains NOT or OR,
 	    //an exception will be thrown. Future work!!!
@@ -542,12 +544,12 @@ public class GroupQueryOptimizer {
 	}	
 	//else {
 	
-	data lexpr=((predArithOpNode)pred).getLeftExp();
-	data rexpr=((predArithOpNode)pred).getRightExp();
+	Atom lexpr=((Comparison)pred).getLeft();
+	Atom rexpr=((Comparison)pred).getRight();
 	
 	//our signature is in the form "attr op constant"
-	if ((lexpr.getType() == dataType.ATTR) && (rexpr.getValue() instanceof String)) {
-	    int attrId=((schemaAttribute)(lexpr.getValue())).getAttrId();
+	if ((lexpr.isVariable()) && (rexpr.isConstant())) {
+	    int attrId=((schemaAttribute)(((OldVariable) lexpr).getSA())).getAttrId();
 	    
 	    //only return the regExp of last level: firstname
 	    regExp tmp=schema.getSchemaUnit(attrId).getRegExp();

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SelectSig.java,v 1.3 2002/05/23 06:31:59 vpapad Exp $
+  $Id: SelectSig.java,v 1.4 2002/10/27 01:01:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,11 +39,18 @@ package niagara.trigger_engine;
  */
 
 import java.io.*;
-import java.lang.*;
 import java.util.*;
 import org.w3c.dom.*;
+
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.logical.And;
+import niagara.logical.Atom;
+import niagara.logical.Comparison;
+import niagara.logical.Constant;
+import niagara.logical.OldVariable;
+import niagara.logical.Predicate;
+import niagara.logical.Variable;
 import niagara.utils.*;
 
 public class SelectSig extends Signature {
@@ -70,7 +77,7 @@ public class SelectSig extends Signature {
         v.addElement("SYS/constTbl"+groupId+".xml");
         // v.addElement(constTblName);
         String s = new String("selectConstTbl.dtd");
-        op1.setDtdScan(v,s);
+        ((dtdScanOp)op1).setDtdScan(v,s);
         curnode1 = new logNode(op1);
         //curnode1.Id = tmpint;
         
@@ -149,27 +156,25 @@ public class SelectSig extends Signature {
         ((joinOp)op1).setJoin((predicate)null,lv,rv);
         */
 	
-        predicate tmp = ((selectOp)node.getOperator()).getPredicate();
-        if (tmp instanceof predLogOpNode) {
+        Predicate tmp = ((selectOp)node.getOperator()).getPredicate();
+        if (!(tmp instanceof Comparison)) {
             try {
                 tmp=gOpt.getLeftMostConjunct(tmp);
             }
             catch (Exception ex) {
                 //never reach here
             }
-        }	 
-        d=((predArithOpNode)tmp).getLeftExp();	
+        }	
+         
+        Atom a1, a2;
         
-        d2=new data(dataType.ATTR, attr2);
+        a1=((Comparison)tmp).getLeft();	
         
-        predicate pred=new predArithOpNode(tmp.getOperator(), d, d2);
+        a2 = new OldVariable(attr2);
         
-        //useless allocation
-        //this is because setJoin code does not allow left predicate vecotor
-        //to be null
-        Vector fooV=new Vector();
+        Predicate pred= Comparison.newComparison(((Comparison) tmp).getOperator(), a1, a2);
         
-        ((joinOp)op1).setJoin(pred,fooV,null);
+        ((joinOp)op1).setCartesian(pred);
         
         curnode1 = new logNode(op1,prevnode1,prevnode2);
         //curnode1.Id = tm.getNextId();
@@ -188,7 +193,7 @@ public class SelectSig extends Signature {
      * @param pred the predicate used for grouping
      * @return the tmp file for this trigger
      **/
-    public String addMember(predArithOpNode pred, GroupQueryOptimizer gOpt) {
+    public String addMember(Comparison pred, GroupQueryOptimizer gOpt) {
 
         //get the const value of the predicate in this trigger 
 
@@ -196,7 +201,7 @@ public class SelectSig extends Signature {
         //debug.var(sop, 1);
         //predArithOpNode pred = (predArithOpNode)sop.getPredicate();
         //debug.var(pred, 1);
-        String value = (String)pred.getRightExp().getValue();
+        String value = ((Constant)pred.getRight()).getValue();
         debug.var(value, 1);
 
         //store the value and cid pair into const table
