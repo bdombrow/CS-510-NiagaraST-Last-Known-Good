@@ -1,145 +1,157 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.21 2003/12/16 02:50:29 vpapad Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.22 2003/12/24 02:30:15 vpapad Exp $ -->
 <catalog>
+  <configuration>
+    <!-- General configuration parameters -->
+    <!-- Directory name where locally available data will be stored.
+            Name is relative to the directory where the server starts up,
+            the data manager will attempt to create it if it doesn't already exist. -->
+    <param name="local data directory" value="data"/>
+  </configuration>
+  
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
   	     logical-to-physical mappings for unoptimized query plans. -->
     <logical name="dtdscan" 
-      class="niagara.xmlql_parser.op_tree.dtdScanOp">
+      class="niagara.logical.DTDScan">
             <physical name="DTDThread" class="niagara.data_manager.DTDThread"/>
     </logical>
     <logical name="firehosescan" 
-      class="niagara.xmlql_parser.op_tree.FirehoseScanOp">
+      class="niagara.logical.FirehoseScan">
             <physical name="StreamThread" class="niagara.data_manager.StreamThread"/>
     </logical>
     <logical name="filescan"
-      class="niagara.xmlql_parser.op_tree.FileScanOp">
+      class="niagara.logical.FileScan">
             <physical name="StreamThread" class="niagara.data_manager.StreamThread"/>      
     </logical>      
     <logical name="timer"
       class="niagara.logical.Timer">
       <physical name="TimerThread" class="niagara.data_manager.TimerThread"/>
     </logical>
+    <logical name="load"
+      class="niagara.logical.Load">
+      <physical name="LoadThread" class="niagara.data_manager.LoadThread"/>
+    </logical>
     <logical name="prefix"
       class="niagara.logical.Prefix">
-      <physical name="PhysicalPrefix" class="niagara.query_engine.PhysicalPrefix"/>
+      <physical name="PhysicalPrefix" class="niagara.physical.PhysicalPrefix"/>
     </logical>
     <logical name="constant"
-      class="niagara.xmlql_parser.op_tree.ConstantOp">
+      class="niagara.logical.ConstantScan">
       <physical name="ConstantThread" class="niagara.data_manager.ConstantOpThread"/>
     </logical>
     <logical name="resource"
-      class="niagara.xmlql_parser.op_tree.ResourceOp"/>
+      class="niagara.logical.Resource"/>
     <logical name="unnest"
       class="niagara.logical.Unnest">
-      <physical name="PhysicalUnnest" class="niagara.query_engine.PhysicalUnnest"/>
+      <physical name="PhysicalUnnest" class="niagara.physical.PhysicalUnnest"/>
     </logical>
     <logical name="select"
       class="niagara.logical.Select">
-      <physical name="PhysicalSelect" class="niagara.query_engine.PhysicalSelectOperator"/>
+      <physical name="PhysicalSelect" class="niagara.physical.PhysicalSelect"/>
     </logical>
     <logical name="join"
-      class="niagara.xmlql_parser.op_tree.joinOp">
-      <physical name="NestedLoopsJoin" class="niagara.query_engine.PhysicalNLJoinOperator"/>
-      <physical name="HashJoin" class="niagara.query_engine.PhysicalHashJoinOperator"/>
+      class="niagara.logical.Join">
+      <physical name="NestedLoopsJoin" class="niagara.physical.PhysicalNLJoin"/>
+      <physical name="HashJoin" class="niagara.physical.PhysicalHashJoin"/>
     </logical>
     <logical name="construct"
-      class="niagara.xmlql_parser.op_tree.constructOp">
-      <physical name="PhysicalConstruct" class="niagara.query_engine.PhysicalConstructOperator"/>
+      class="niagara.logical.Construct">
+      <physical name="PhysicalConstruct" class="niagara.physical.PhysicalConstruct"/>
     </logical>
     <logical name="avg"
-      class="niagara.xmlql_parser.op_tree.averageOp">
-      <physical name="PhysicalAverage" class="niagara.query_engine.PhysicalAverageOperator"/>
+      class="niagara.logical.Average">
+      <physical name="PhysicalAverage" class="niagara.physical.PhysicalAverage"/>
     </logical>
     <logical name="slidingAvg"
-      class="niagara.xmlql_parser.op_tree.SlidingAverageOp">
-      <physical name="PhysicalSlidingAverage" class="niagara.query_engine.PhysicalSlidingAverageOperator"/>
+      class="niagara.logical.SlidingAverage">
+      <physical name="PhysicalSlidingAverage" class="niagara.physical.PhysicalSlidingAverage"/>
     </logical>
     <logical name="accumulate"
-      class="niagara.xmlql_parser.op_tree.AccumulateOp">
-      <physical name="PhysicalAccumulate" class="niagara.query_engine.PhysicalAccumulateOperator"/>
+      class="niagara.logical.Accumulate">
+      <physical name="PhysicalAccumulate" class="niagara.physical.PhysicalAccumulate"/>
     </logical>
     <logical name="expression"
-      class="niagara.xmlql_parser.op_tree.ExpressionOp">
-      <physical name="PhysicalExpression" class="niagara.query_engine.PhysicalExpressionOperator"/>
+      class="niagara.logical.Expression">
+      <physical name="PhysicalExpression" class="niagara.physical.PhysicalExpression"/>
     </logical>
     <logical name="sort"
-      class="niagara.xmlql_parser.op_tree.SortOp">
-      <physical name="PhysicalSort" class="niagara.query_engine.PhysicalSortOperator"/>
+      class="niagara.logical.Sort">
+      <physical name="PhysicalSort" class="niagara.physical.PhysicalSort"/>
     </logical>
     <logical name="union"
-      class="niagara.xmlql_parser.op_tree.UnionOp">
-      <physical name="PhysicalUnion" class="niagara.query_engine.PhysicalUnionOperator"/>
+      class="niagara.logical.Union">
+      <physical name="PhysicalUnion" class="niagara.physical.PhysicalUnion"/>
     </logical>
     <logical name="display"
-      class="niagara.xmlql_parser.op_tree.DisplayOp">
-      <physical name="PhysicalDisplay" class="niagara.query_engine.PhysicalDisplayOperator"/>
+      class="niagara.logical.Display">
+      <physical name="PhysicalDisplay" class="niagara.physical.PhysicalDisplay"/>
     </logical>
     <logical name="send"
-      class="niagara.xmlql_parser.op_tree.SendOp">
-      <physical name="PhysicalSend" class="niagara.query_engine.PhysicalSendOperator"/>
+      class="niagara.logical.Send">
+      <physical name="PhysicalSend" class="niagara.physical.PhysicalSend"/>
     </logical>
     <logical name="receive"
-      class="niagara.xmlql_parser.op_tree.ReceiveOp"/>
+      class="niagara.logical.Receive"/>
     <logical name="sum"
-      class="niagara.xmlql_parser.op_tree.SumOp">
-      <physical name="PhysicalSum" class="niagara.query_engine.PhysicalSumOperator"/>
+      class="niagara.logical.Sum">
+      <physical name="PhysicalSum" class="niagara.physical.PhysicalSum"/>
     </logical>
     <logical name="slidingSum"
-      class="niagara.xmlql_parser.op_tree.SlidingSumOp">
-      <physical name="PhysicalSlidingSum" class="niagara.query_engine.PhysicalSlidingSumOperator"/>
+      class="niagara.logical.SlidingSum">
+      <physical name="PhysicalSlidingSum" class="niagara.physical.PhysicalSlidingSum"/>
     </logical>
     <logical name="min"
-      class="niagara.xmlql_parser.op_tree.MinOp">
-      <physical name="PhysicalMin" class="niagara.query_engine.PhysicalMinOperator"/>
+      class="niagara.logical.Min">
+      <physical name="PhysicalMin" class="niagara.physical.PhysicalMin"/>
     </logical>
      <logical name="max"
-      class="niagara.xmlql_parser.op_tree.MaxOp">
-      <physical name="PhysicalMax" class="niagara.query_engine.PhysicalMaxOperator"/>
+      class="niagara.logical.Max">
+      <physical name="PhysicalMax" class="niagara.physical.PhysicalMax"/>
     </logical>
     <logical name="slidingMax"
-      class="niagara.xmlql_parser.op_tree.SlidingMaxOp">
-      <physical name="PhysicalSlidingMax" class="niagara.query_engine.PhysicalSlidingMaxOperator"/>
+      class="niagara.logical.SlidingMax">
+      <physical name="PhysicalSlidingMax" class="niagara.physical.PhysicalSlidingMax"/>
     </logical>
     <logical name="count"
-      class="niagara.xmlql_parser.op_tree.CountOp">
-      <physical name="PhysicalCount" class="niagara.query_engine.PhysicalCountOperator"/>
+      class="niagara.logical.Count">
+      <physical name="PhysicalCount" class="niagara.physical.PhysicalCount"/>
     </logical>
     <logical name="windowCount"
-      class="niagara.xmlql_parser.op_tree.windowCountOp">
-      <physical name="PhysicalWindowCount" class="niagara.query_engine.PhysicalWindowCountOperator"/>
+      class="niagara.logical.WindowCount">
+      <physical name="PhysicalWindowCount" class="niagara.physical.PhysicalWindowCount"/>
     </logical>
     <logical name="windowMax"
-      class="niagara.xmlql_parser.op_tree.windowMaxOp">
-      <physical name="PhysicalWindowMax" class="niagara.query_engine.PhysicalWindowMaxOperator"/>
+      class="niagara.logical.WindowMax">
+      <physical name="PhysicalWindowMax" class="niagara.physical.PhysicalWindowMax"/>
     </logical>
     <logical name="windowAverage"
-      class="niagara.xmlql_parser.op_tree.windowAverageOp">
-      <physical name="PhysicalWindowAverage" class="niagara.query_engine.PhysicalWindowAverageOperator"/>
+      class="niagara.logical.WindowAverage">
+      <physical name="PhysicalWindowAverage" class="niagara.physical.PhysicalWindowAverage"/>
     </logical>
     <logical name="slidingCount"
-      class="niagara.xmlql_parser.op_tree.SlidingCountOp">
-      <physical name="PhysicalSlidingCount" class="niagara.query_engine.PhysicalSlidingCountOperator"/>
+      class="niagara.logical.SlidingCount">
+      <physical name="PhysicalSlidingCount" class="niagara.physical.PhysicalSlidingCount"/>
     </logical>
     <logical name="dup"
-      class="niagara.xmlql_parser.op_tree.dupOp">
-      <physical name="PhysicalDup" class="niagara.query_engine.PhysicalDuplicateOperator"/>
+      class="niagara.logical.Duplicate">
+      <physical name="PhysicalDup" class="niagara.physical.PhysicalDuplicate"/>
     </logical>
     <logical name="incrmax"
       class="niagara.logical.IncrementalMax">
-      <physical name="PhysicalIncrementalMax" class="niagara.query_engine.PhysicalIncrementalMax"/>
+      <physical name="PhysicalIncrementalMax" class="niagara.physical.PhysicalIncrementalMax"/>
     </logical>
     <logical name="incravg"
       class="niagara.logical.IncrementalAverage">
-      <physical name="PhysicalIncrementalAverage" class="niagara.query_engine.PhysicalIncrementalAverage"/>
+      <physical name="PhysicalIncrementalAverage" class="niagara.physical.PhysicalIncrementalAverage"/>
     </logical>
     <logical name="partitionavg"
       class="niagara.logical.PartitionAvg">
-      <physical name="PhysicalPartitionAvg" class="niagara.query_engine.PhysicalPartitionAvg"/>
+      <physical name="PhysicalPartitionAvg" class="niagara.physical.PhysicalPartitionAvg"/>
     </logical>
     <logical name="partitionmax"
       class="niagara.logical.PartitionMax">
-      <physical name="PhysicalPartitionMax" class="niagara.query_engine.PhysicalPartitionMax"/>
+      <physical name="PhysicalPartitionMax" class="niagara.physical.PhysicalPartitionMax"/>
     </logical>
     <logical name="project" class="niagara.logical.Project"/>
     <logical name="noop"
@@ -147,27 +159,31 @@
       <physical name="PhysicalNoOp" class="niagara.optimizer.PhysicalNoOp"/>
     </logical>
     <logical name="punctuate"
-       class="niagara.xmlql_parser.op_tree.punctuateOp">
+       class="niagara.logical.Punctuate">
        <physical name="PhysicalPunctuate"
-                class="niagara.query_engine.PhysicalPunctuateOperator"/>
+                class="niagara.physical.PhysicalPunctuate"/>
     </logical>
     <logical name="bucket"
-       class="niagara.xmlql_parser.op_tree.BucketOp">
+       class="niagara.logical.Bucket">
        <physical name="PhysicalBucket"
-       		class="niagara.query_engine.PhysicalBucketOperator"/>
+       		class="niagara.physical.PhysicalBucket"/>
     </logical>
     <logical name="nest"
       class="niagara.logical.Nest">
-      <physical name="PhysicalNest" class="niagara.query_engine.PhysicalNestOperator"/>
+      <physical name="PhysicalNest" class="niagara.physical.PhysicalNest"/>
+    </logical>
+    <logical name="store"
+      class="niagara.logical.Store">
+      <physical name="PhysicalStore" class="niagara.physical.PhysicalStore"/>
     </logical>
     <logical name="scanOp"
-      class="niagara.xmlql_parser.op_tree.scanOp">
-      <physical name="PhysicalScan" class="niagara.query_engine.PhysicalScanOperator"/>
+      class="niagara.logical.ScanOp">
+      <physical name="PhysicalScan" class="niagara.physical.PhysicalScan"/>
     </logical>
     <physical name="PhysicalPredicatedUnnest"
-    	class ="niagara.query_engine.PhysicalPredicatedUnnest"/>
+    	class ="niagara.physical.PhysicalPredicatedUnnest"/>
     <physical name="PhysicalHead"
-        class ="niagara.query_engine.PhysicalHeadOperator"/>
+        class ="niagara.physical.PhysicalHead"/>
   </operators>
 
   <ruleset name="normal ruleset">
@@ -318,9 +334,17 @@
 		<after><op name="PhysicalBucket"/></after>
 	</rule>
 	<rule type="simple" name="nest to PhysicalNest">
-	        <before><logical name="nest"/></before>
+        <before><logical name="nest"/></before>
 		<after><op name="PhysicalNest"/></after>
-        </rule>
+    </rule>
+	<rule type="simple" name="store to PhysicalStore">
+        <before><logical name="store"/></before>
+		<after><op name="PhysicalStore"/></after>
+    </rule>
+	<rule type="simple" name="load to LoadThread">
+        <before><logical name="load"/></before>
+		<after><op name="LoadThread"/></after>
+    </rule>
   	<rule type="constructed" name="select-unnest to PhysicalPredicatedUnnest"
   		condition="isPushableInto" argument="unn">
   		<before>
@@ -392,6 +416,8 @@
       <document_parsing_cost value="1"/>
       <!-- Cost of reading a tuple -->
       <tuple_reading_cost value="0.01"/>
+      <!-- Cost of storing a document -->
+      <document_storage_cost value="100"/>
       <!-- Cost of unnesting per match -->
       <dom_unnesting_cost value="0.05"/>
       <!-- Cost of evaluating a predicate on one tuple -->
@@ -420,38 +446,9 @@
       <restrictivity value="10"/>
     </config>
   
-  	<!-- Resources: urn to url, or urn to server mappings -->
-    <resource name="urn:niagara:comedies">
-    <url location="http://king.cse.ogi.edu/xml/all_well.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/as_you.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/com_err.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/cymbelin.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/dream.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/lll.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/m_for_m.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/m_wives.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/merchant.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/much_ado.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/pericles.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/t_night.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/taming.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/tempest.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/troilus.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/win_tale.xml"/>
-  </resource>
-
-  <resource name="urn:niagara:tragedies">
-    <resolver location="king.cse.ogi.edu:9090"/>
-  </resource>
-  
-  <resource name="urn:niagara:numbers">
-    <url location="http://king.cse.ogi.edu/xml/numbers.xml"/>
-  </resource>
-
-  <resource name="urn:niagara:morenumbers">
-    <url location="http://king.cse.ogi.edu/xml/numbers.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/numbers.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/numbers.xml"/>
-  </resource>
-
+<!-- The resource list contains mappings from resources (URNs) to
+        local files, URLs, or resolver addresses (servers that can resolve
+        the URN). This element is reconstructed on every server shutdown,
+        manual edits while the server is running will be lost! -->
+<resources/>
 </catalog>
