@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: varTbl.java,v 1.5 2001/07/17 06:53:29 vpapad Exp $
+  $Id: varTbl.java,v 1.6 2002/10/24 03:24:52 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +33,8 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
+import niagara.logical.NodeDomain;
+import niagara.query_engine.TupleSchema;
 import org.w3c.dom.*;
 
 public class varTbl {
@@ -43,6 +44,15 @@ public class varTbl {
 		varList = new Vector();
 	}
 
+        public varTbl(TupleSchema ts) {
+            varList = new Vector();
+            for (int i = 0; i < ts.getLength(); i++) {
+                int varType = ((NodeDomain) ts.getVariable(i).getDomain()).getType();
+                String varName = ts.getVariableName(i);
+                varList.add(new varToAttr(varName, new schemaAttribute(i, varType)));
+            }
+        }
+        
 	/**
 	 * Constructor
 	 *
