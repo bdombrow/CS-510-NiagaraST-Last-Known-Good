@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Lexer.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: Lexer.java,v 1.2 2003/09/22 00:06:58 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,8 +28,7 @@
 
 package niagara.xmlql_parser.syntax_tree;
 
-/* implements the Lexer interface */
-
+/** Abstract interface for lexers */
 public interface Lexer {
-	public java_cup.runtime.Symbol yylex() throws java.io.IOException;
+	public java_cup.runtime.Symbol next_token() throws java.io.IOException;
 }

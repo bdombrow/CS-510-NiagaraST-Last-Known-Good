@@ -1,4 +1,4 @@
-// $Id: xmlql.cup,v 1.10 2003/03/08 02:24:34 vpapad Exp $
+// $Id: xmlql.cup,v 1.11 2003/09/22 00:06:58 vpapad Exp $
 ////////////////////////////////////////////////////////////////////////
 //
 //  xmlql.cup
@@ -19,13 +19,6 @@ import java.util.*;
 import java_cup.runtime.*;
 
 parser code {:
-
-  Lexer lexer;
-  
-  public QueryParser(Lexer lexer) {
-	this.lexer = lexer;
-  }
-
   public void report_error(String message, Object info) 
   {
  	StringBuffer m = new StringBuffer("Error");
@@ -57,8 +50,6 @@ parser code {:
    }
 
 :};
-
-scan with {: return lexer.yylex(); :};
 
 terminal LT;
 terminal GT;
