@@ -1,3 +1,4 @@
+/* $Id: PhysicalIncrementalAverage.java,v 1.2 2002/10/24 23:15:15 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -17,16 +18,6 @@ public class PhysicalIncrementalAverage extends PhysicalIncrementalGroup {
     class GroupStatistics {
 	int count;
 	double sum;
-    }
-
-    public PhysicalIncrementalAverage(
-        op logicalOperator,
-        SourceTupleStream[] sourceStreams,
-        SinkTupleStream[] sinkStreams,
-        Integer responsiveness) {
-
-        // Call the constructor of the super class
-        super(logicalOperator, sourceStreams, sinkStreams, responsiveness);
     }
 
     public void opInitialize() {

@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalHeadOperator.java,v 1.2 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalHeadOperator.java,v 1.3 2002/10/24 23:17:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -56,10 +55,6 @@ public class PhysicalHeadOperator extends PhysicalOperator {
     QueryInfo queryInfo;
     
 
-    ///////////////////////////////////////////////////
-    //   Methods of the PhysicalSelectOperator Class
-    ///////////////////////////////////////////////////
-
     /**
      * This is the constructor for the PhysicalSelectOperator class that
      * initializes it with the appropriate query info, source streams,
@@ -72,21 +67,17 @@ public class PhysicalHeadOperator extends PhysicalOperator {
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
      */
-     
     public PhysicalHeadOperator (QueryInfo queryInfo,
 				 SourceTupleStream[] sourceStreams,
 				 SinkTupleStream[] sinkStreams,
 				 Integer responsiveness) {
-
-	// Call the constructor of the super class
-	//
-	super(sourceStreams,
+	plugInStreams(sourceStreams,
 	      sinkStreams,
-	      blockingSourceStreams,
 	      responsiveness);
 
+        setBlockingSourceStreams(blockingSourceStreams);
+
 	// Store the query information
-	//
 	this.queryInfo = queryInfo;
     }
 		     
@@ -131,7 +122,6 @@ public class PhysicalHeadOperator extends PhysicalOperator {
      */
 
     protected void cleanUp () {
-
 	// Remove the query info object from the active query list
 	// Hack added so client server queries are not removed
 	// from their respective connections activeQuery list

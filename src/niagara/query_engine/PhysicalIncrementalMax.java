@@ -1,3 +1,4 @@
+/* $Id: PhysicalIncrementalMax.java,v 1.2 2002/10/24 23:13:13 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -14,16 +15,6 @@ public class PhysicalIncrementalMax extends PhysicalIncrementalGroup {
     private AtomicEvaluator ae;
     private ArrayList values;
     private Double emptyGroupValue;
-
-    public PhysicalIncrementalMax(
-        op logicalOperator,
-        SourceTupleStream[] sourceStreams,
-        SinkTupleStream[] sinkStreams,
-        Integer responsiveness) {
-
-        // Call the constructor of the super class
-        super(logicalOperator, sourceStreams, sinkStreams, responsiveness);
-    }
 
     public void opInitialize() {
         super.opInitialize();
