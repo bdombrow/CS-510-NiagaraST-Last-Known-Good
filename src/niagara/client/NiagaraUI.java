@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagaraUI.java,v 1.1 2000/05/30 21:03:24 tufte Exp $
+  $Id: NiagaraUI.java,v 1.2 2000/06/12 01:13:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -135,6 +135,10 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
 
     // Internal padding used by the components in the panels - used for alignment and placement
     public static final int PAD = 10;
+
+    //Ask server for a list of DTDs?
+    private static boolean requestDTDList = true;
+    
     
 	// Constructor 1
 	// Use this constructor only if the client is not run as an applet
@@ -190,7 +194,11 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
 
 	// Connect to the connection manager and get the DTD list for QBE
 	qeIF = new ConnectionManager(serverHostName,port,this);
-	dtdList = qeIF.getDTDList();
+
+	if (requestDTDList) 
+	    dtdList = qeIF.getDTDList();
+	else 
+	    dtdList = new Vector();
 	
 	expandTreeRootNode = null;
 	xmlqbe = null;
@@ -202,8 +210,11 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
     // Main if UI run as an application
     public static void main(String[] argv) {
 	// Check for correct number of arguments
-	if(argv.length != 1){
-	    System.out.println("Usage: Javarun client.NiagaraUI <server hostname>");
+	if (argv.length == 2 && argv[1].equals("-noDTDList")) {
+	    requestDTDList = false;
+	}
+	else if(argv.length != 1){
+	    System.out.println("Usage: Javarun client.NiagaraUI <server hostname> [-noDTDList]");
 	    System.exit(0);
 	}
 
