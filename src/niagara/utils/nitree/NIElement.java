@@ -320,7 +320,7 @@ public class NIElement extends NINode {
      *
      * @param replacementElt Element that should replace this element
      */
-    private void replaceYourself(NIElement replacementElt) 
+    public void replaceYourself(NIElement replacementElt) 
 	throws NITreeException {
 	getParentNode().replaceChild(replacementElt, this);
     }
