@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: logNode.java,v 1.15 2003/07/09 04:59:38 tufte Exp $
+  $Id: logNode.java,v 1.16 2003/09/22 00:10:30 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,6 +41,7 @@ import java.util.Vector;
 import niagara.data_manager.DataManager;
 import niagara.optimizer.colombia.Op;
 import niagara.query_engine.PhysicalOperator;
+import niagara.query_engine.PhysicalOperatorQueue;
 import niagara.query_engine.SchedulablePlan;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.PEException;
@@ -367,7 +368,7 @@ public class logNode implements SchedulablePlan, java.io.Serializable {
         return operator.getNumberOfOutputs();
     }
 
-    public void processSource(SinkTupleStream sinkStream, DataManager dm)
+    public void processSource(SinkTupleStream sinkStream, DataManager dm, PhysicalOperatorQueue opQueue)
         throws ShutdownException {
         if (!isSource())
             throw new PEException("Not a source op");
