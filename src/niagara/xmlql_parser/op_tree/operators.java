@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: operators.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: operators.java,v 1.2 2000/06/26 21:59:52 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,6 +44,7 @@ import java.lang.*;
 public class operators {
 	public static dbScanOp DbScan;     // to read a database (not used)
 	public static dtdScanOp DtdScan;   // to read the XML data sources
+    public static FirehoseScanOp FirehoseScan;   // to read from a firehose
         public static tupleScanOp TupleScan; //Trigger
 	public static scanOp Scan;         // to read the elements
 	public static selectOp Select;     // Selection
@@ -59,6 +60,7 @@ public class operators {
 
 	private static String[] dbScanAlgo = {"niagara.query_engine.PhysicalScanOperator"};
 	private static String[] dtdScanAlgo = {};
+    private static String[] firehoseScanAlgo = {}; 
         private static String[] tupleScanAlgo = {};
 	private static String[] scanAlgo = {"niagara.query_engine.PhysicalScanOperator"};
 	private static String[] selectAlgo = {"niagara.query_engine.PhysicalSelectOperator"};
@@ -90,6 +92,13 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(dtdScanAlgo[i]);
 		DtdScan = new dtdScanOp(algoClasses);
+
+		// FirehoseScan
+		numOfAlgo = firehoseScanAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(firehoseScanAlgo[i]);
+		FirehoseScan = new FirehoseScanOp(algoClasses);
 
 		// TupleScan
 		numOfAlgo = tupleScanAlgo.length;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logNode.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: logNode.java,v 1.2 2000/06/26 21:59:52 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -125,7 +125,7 @@ public class logNode implements java.io.Serializable {
     */
 
    public int numInputs () {
-       return Array.getLength(inputs);
+        return inputs.length;
    }
 
    /**
