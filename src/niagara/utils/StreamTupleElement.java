@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.2 2001/07/17 06:45:56 vpapad Exp $
+  $Id: StreamTupleElement.java,v 1.3 2001/08/08 21:30:32 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,7 +38,6 @@ package niagara.utils;
  */
 
 import java.util.Vector;
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 
 public final class StreamTupleElement extends StreamElement {
@@ -172,7 +171,6 @@ public final class StreamTupleElement extends StreamElement {
 	return partial;
     }
 
-
     public long getTimeStamp() {
         return timeStamp;
     }
@@ -296,14 +294,14 @@ public final class StreamTupleElement extends StreamElement {
         }
     }
 
-    public Element toEle() {
-        TXElement ret = new TXElement("StreamTupleElement");
+    public Element toEle(Document doc) {
+        Element ret = doc.createElement("StreamTupleElement");
         if(partial) ret.setAttribute("PARTIAL", "TRUE");
         else ret.setAttribute("PARTIAL", "FALSE");
         ret.setAttribute("TIMESTAMP", ""+timeStamp);
         
         for(int i=0; i<tuple.size(); i++) {
-            TXElement tele = new TXElement("Entry");
+            Element tele = doc.createElement("Entry");
             Object tmp = tuple.elementAt(i);
             if(tmp instanceof Element) {
                 tele.setAttribute("Type", "Element");
@@ -314,7 +312,7 @@ public final class StreamTupleElement extends StreamElement {
             }
             else if(tmp instanceof String) {
                 tele.setAttribute("Type", "String");
-                tele.appendChild(new TXText((String)tmp));
+                tele.appendChild(doc.createTextNode((String)tmp));
             } 
             else {
                 System.err.println("Non Elemen/String Attr in TupleElement");

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DuplicateHashtable.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: DuplicateHashtable.java,v 1.2 2001/08/08 21:30:32 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CUtil.java,v 1.4 2001/07/17 06:45:56 vpapad Exp $
+  $Id: CUtil.java,v 1.5 2001/08/08 21:30:32 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,13 +28,11 @@
 
 package niagara.utils;
 
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import java.lang.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import com.ibm.xml.parser.util.*;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -71,13 +69,14 @@ public class CUtil {
      *  Parse and return a DTD given a filename
      *
      */
-    public static DTD parseDTD(String dtdURL) 
+     /* KT - ??? need something to parse a DTD
+    public static DocumentType parseDTD(String dtdURL) 
 	throws ParseException, FileNotFoundException, IOException, MalformedURLException {
 	
 	// Set up a parser
 	// 
         Parser p  = new Parser(dtdURL);
-	DTD dtd = null;
+	DocumentType dtd = null;
 
 	// Parse the DTD
 	//
@@ -105,7 +104,7 @@ public class CUtil {
 	}
 	return dtd;
     }
-    
+   */ 
 
 
     /**
@@ -164,7 +163,6 @@ public class CUtil {
 	if (nodeType == Node.TEXT_NODE) return PCDATA;
 	if (nodeType != Node.ELEMENT_NODE) return null;
 
-	//TXElement node=(TXElement)n;
 	Node node = n;
 
 	String name = node.getNodeName();
@@ -198,9 +196,12 @@ public class CUtil {
 	
 	if( node.getNodeType() == Node.TEXT_NODE) {
 	    String Value=node.getNodeValue();
-	    if (Value==null || TXText.trim(Value).length()==0) {
-		empty=true;
-	    }
+	    System.err.println("WARNING - CANT TRIM TEXT");
+	    /* KT - ??? removed - no TXText element now
+	    * if (Value==null || TXText.trim(Value).length()==0) {
+            *	empty=true;
+	    * }
+	    */
 	}
         
 	// Make recursive calls on children
@@ -245,11 +246,10 @@ public class CUtil {
      *  @param url the document to parse
      *  @return the parsed XML document or null
      */
-    public static Document parseXML(String url)
-    throws FileNotFoundException, MalformedURLException, 
-        IOException, ParseException {
-        DOMParser parser = DOMFactory.newParser();
-        boolean exceptionsThrown = false;
+    public static Document parseXML(String url) 
+	throws ParseException {
+        niagara.ndom.DOMParser parser = DOMFactory.newParser();
+        boolean exceptionCaught = false;
 
         try {
             // Parse from a file stream
@@ -266,20 +266,31 @@ public class CUtil {
                 InputStream inStream = aurl.openStream();
                 parser.parse(new InputSource(inStream));
             }
-        }
-        catch (SAXException se) {
-            System.err.println("A SAXException occured during parsing: " + se.getMessage());
-            exceptionsThrown = true;
-        }
-
+        } catch (SAXException se) {
+            System.err.println("A SAXException occured during parsing of " + url + " Message was" + se.getMessage());
+            exceptionCaught = true;
+        } catch (FileNotFoundException fnfe) {
+	    System.err.println("File not found exception: " + url + "Message: " + fnfe.getMessage());
+	    exceptionCaught = true;
+	} catch (MalformedURLException mue) {
+	    System.err.println("MalformedURLException: " + url + "Message: " + mue.getMessage());
+	    exceptionCaught = true;
+	} catch (IOException ioe) {
+	    System.err.println("IOException: " + url + "Message: " + ioe.getMessage());
+	    exceptionCaught = true;
+	} 
 
 	// Throw exception if parse failed
 	//
-	if (parser.hasErrors() || parser.hasWarnings() || exceptionsThrown) {
+	if (parser.hasErrors() || parser.hasWarnings() || exceptionCaught) {
 	    throw new ParseException("Error parsing xml file: " + url);
 	}
 
-        return parser.getDocument();
+	Document d = parser.getDocument();
+	if(d ==  null) {
+          System.err.println("Got null doc in CUtil:parseXML");
+	}
+        return d;
     }
 
     
