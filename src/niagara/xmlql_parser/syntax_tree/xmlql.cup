@@ -1,4 +1,4 @@
-// $Id: xmlql.cup,v 1.6 2002/10/31 04:36:43 vpapad Exp $
+// $Id: xmlql.cup,v 1.7 2003/02/07 07:02:15 vpapad Exp $
 ////////////////////////////////////////////////////////////////////////
 //
 //  xmlql.cup
@@ -465,6 +465,10 @@ RegularExpression ::= RegularExpression:r STAR
 			  {: RESULT = r; :}
 		    | IDEN:i   
 			  {: RESULT = new regExpDataNode(new data(dataType.IDEN,i)); :}
+		    | START
+			  {: RESULT = new regExpDataNode(new data(dataType.IDEN,"start")); :}
+		    | END
+			  {: RESULT = new regExpDataNode(new data(dataType.IDEN,"end")); :}
 		    | ID   
 		          {: RESULT = new regExpDataNode(new data(dataType.IDEN,"id")); :}
 		    | DOLLAR 
