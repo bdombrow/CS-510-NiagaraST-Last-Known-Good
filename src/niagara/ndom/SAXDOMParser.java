@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.3 2002/03/27 10:12:06 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.4 2002/03/27 23:36:59 vpapad Exp $
  *
  */
 
@@ -74,6 +74,8 @@ class SAXDOMHandler extends DefaultHandler {
     private Page page;
     private int offset;
 
+    private StringBuffer sb;
+
     public SAXDOMHandler() {
         reset();
     }
@@ -85,7 +87,7 @@ class SAXDOMHandler extends DefaultHandler {
     // Event handling
     
     public void startDocument() throws SAXException {
-        if (page == null) {
+        if (page == null || page.isFull()) {
             page = BufferManager.getFreePage();
         }
         
@@ -95,12 +97,14 @@ class SAXDOMHandler extends DefaultHandler {
     }
 
     public void endDocument() throws SAXException {
+        handleText();
         page.addEvent(doc, SAXEvent.END_DOCUMENT, null);
     }
 
     public void startElement(String namespaceURI, String localName, 
                              String qName, Attributes attrs) 
         throws SAXException {
+        handleText();
         // XXX vpapad: not doing anything about namespaces yet
         page.addEvent(doc, SAXEvent.START_ELEMENT, qName);
 
@@ -112,6 +116,7 @@ class SAXDOMHandler extends DefaultHandler {
 
     public void endElement(String namespaceURI, String localName, String qName)
         throws SAXException {
+        handleText();
         page.addEvent(doc, SAXEvent.END_ELEMENT, null);
     }
 
@@ -128,10 +133,14 @@ class SAXDOMHandler extends DefaultHandler {
     }
     public void characters(char[] ch, int start,int length) 
         throws SAXException {
-        // XXX vpapad: here we should probably normalize consecutive
-        // TEXT elements into one
-        page.addEvent(doc, SAXEvent.TEXT, new String(ch, start, length));
+        sb.append(ch, start, length);
     }
+    
+    public void handleText() {
+        page.addEvent(doc, SAXEvent.TEXT, sb.toString());
+        sb.setLength(0);
+    }
+    
     // Error handling
     private boolean hasErrors, hasWarnings;
 
@@ -146,6 +155,7 @@ class SAXDOMHandler extends DefaultHandler {
     public void reset() {
         doc = null;
         hasErrors = hasWarnings = false;
+        sb = new StringBuffer();
     }
 
     public void error(SAXParseException e) throws SAXException {

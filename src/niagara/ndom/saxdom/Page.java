@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
+ * $Id: Page.java,v 1.3 2002/03/27 23:37:03 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -43,7 +43,7 @@ public class Page {
 
     /** Prepare page for reuse 
      */
-    private void clear() {
+    private synchronized void clear() {
         for (int i = 0; i < event_type.length; i++) {
             event_type[i] = SAXEvent.EMPTY;
             event_string[i] = null;
@@ -70,7 +70,6 @@ public class Page {
         if (pin_count == 0) {
             clear();
             BufferManager.addFreePage(this);
-            System.err.println("XXX vpapad: freeing page " + this);
         }
     }
 
@@ -130,7 +129,30 @@ public class Page {
         return event_type.length;
     }
 
+    public boolean isFull() {
+        return (current_offset == event_type.length);
+    }
+
     public int getNumber() {
         return number;
+    }
+    
+    public void show() {
+        show(0, event_type.length);
+    }
+
+    public void show(int start, int end) {
+        if (start < 0)
+            start = 0;
+        if (end >= event_type.length)
+            end = event_type.length;
+
+        for (int i = start; i < end; i++) {
+            System.err.print("" + i + ": " + event_type[i] + "/");
+            if (event_string[i] == null) 
+                System.err.println();
+            else 
+                System.err.println(event_string[i]);
+        }
     }
 }

@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
+ * $Id: BufferManager.java,v 1.3 2002/03/27 23:37:03 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -63,12 +63,11 @@ public class BufferManager {
     }
     
 
-
-    protected static Page getPage(int index) {
+    public static Page getPage(int index) {
         return pages[index / page_size];
     }
 
-    protected static int getOffset(int index) {
+    public static int getOffset(int index) {
         return index % page_size;
     }
 
