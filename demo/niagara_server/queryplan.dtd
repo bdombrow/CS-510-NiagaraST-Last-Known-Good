@@ -124,3 +124,12 @@
           id       ID           #REQUIRED
 	  input   IDREF         #REQUIRED
           physical CDATA        #IMPLIED>
+
+<!ELEMENT accumulate EMPTY>
+<!ATTLIST accumulate
+	  id       ID		#REQUIRED
+	  index	   CDATA	#REQUIRED
+	  mergeTemplate CDATA	#REQUIRED
+	  accumFileName CDATA	#REQUIRED
+	  physical      CDATA   ""
+	  input         IDREF   #REQUIRED>
