@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.19 2003/01/25 20:56:39 tufte Exp $
+  $Id: RequestHandler.java,v 1.20 2003/02/25 06:16:28 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -130,7 +130,7 @@ public class RequestHandler {
     public void handleRequest(RequestMessage request)
         throws
             InvalidQueryIDException,
-            XMLQueryPlanParser.InvalidPlanException,
+            InvalidPlanException,
             QueryResult.ResultsAlreadyReturnedException,
             QueryResult.AlreadyReturningPartialException,
             ShutdownException,
@@ -146,7 +146,7 @@ public class RequestHandler {
                 // Optimize the plan
                 optimizedPlan = null;
                 try {
-                    optimizedPlan = optimizer.optimize(plan.toEXPR());
+                    optimizedPlan = optimizer.optimize(plan.toExpr());
                 } catch (Exception e) {
                     System.err.println(
                         "XXX vpapad: exception occured during optimization");
@@ -361,7 +361,7 @@ public class RequestHandler {
                 // Optimize the plan
                 optimizedPlan = null;
                 try {
-                    optimizedPlan = optimizer.optimize(plan.toEXPR());
+                    optimizedPlan = optimizer.optimize(plan.toExpr());
                 } catch (Exception e) {
                     System.err.println("exception occured during optimization");
                     e.printStackTrace();
@@ -379,7 +379,7 @@ public class RequestHandler {
                 // Optimize the plan
                 optimizedPlan = null;
                 try {
-                    optimizedPlan = optimizer.optimize(plan.toEXPR());
+                    optimizedPlan = optimizer.optimize(plan.toExpr());
                 } catch (Exception e) {
                     System.err.println("exception occured during optimization");
                     e.printStackTrace();
@@ -413,7 +413,7 @@ public class RequestHandler {
     }
 
     private void processQPQuery(Plan plan, RequestMessage request)
-        throws XMLQueryPlanParser.InvalidPlanException, ShutdownException {
+        throws InvalidPlanException, ShutdownException {
         // XXX vpapad: commenting out code is a horrible sin
         //            if (type.equals("submit_subplan")) {
         //                //                // The top operator better be a send...

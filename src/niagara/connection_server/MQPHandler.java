@@ -1,5 +1,5 @@
 /**
- * $Id: MQPHandler.java,v 1.5 2002/10/31 04:20:30 vpapad Exp $
+ * $Id: MQPHandler.java,v 1.6 2003/02/25 06:16:28 vpapad Exp $
  *
  */
 
@@ -39,7 +39,7 @@ public class MQPHandler {
         schedulableRoots = new ArrayList();
         resources = new ArrayList();
 
-        root = optimizer.consolidate(root.toEXPR());
+        root = optimizer.consolidate(root.toExpr());
 
         try {
             root.getRootsAndResources(
@@ -52,7 +52,7 @@ public class MQPHandler {
             if (schedulableRoots.size() == 1
                 && root == schedulableRoots.get(0)) {
                 Plan optimizedPlan =
-                    optimizer.optimize(root.toEXPR());
+                    optimizer.optimize(root.toExpr());
                 es.scheduleSubPlan(optimizedPlan);
                 return;
             }
@@ -67,7 +67,7 @@ public class MQPHandler {
             for (int i = 0; i < subplans.length; i++) {
                 Plan optimizedPlan =
                     optimizer.optimize(
-                        ((Plan) schedulableRoots.get(i)).toEXPR());
+                        ((Plan) schedulableRoots.get(i)).toExpr());
 
                 ((Plan) schedulableRoots.get(i)).replaceWith(optimizedPlan);
                 PageStream is = es.scheduleSubPlan(optimizedPlan);

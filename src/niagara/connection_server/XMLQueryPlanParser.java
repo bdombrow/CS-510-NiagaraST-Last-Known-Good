@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.38 2003/02/23 05:00:08 tufte Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.39 2003/02/25 06:16:28 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -99,13 +99,14 @@ public class XMLQueryPlanParser {
         }
         parseOperator(e);
 
-        Plan p =  (Plan) ids2plans.get(top);
+        Plan p = (Plan) ids2plans.get(top);
         // Put an appropriate project in front of the user's top operator,
         // projecting on the last output attribute for the top operator
-        Attrs outputSchema = ((LogicalProperty) ids2logprops.get(top)).getAttrs();
+        Attrs outputSchema =
+            ((LogicalProperty) ids2logprops.get(top)).getAttrs();
         if (outputSchema.size() != 0)
             outputSchema = new Attrs(outputSchema.get(outputSchema.size() - 1));
-        return new Plan(new Project(outputSchema), p);        
+        return new Plan(new Project(outputSchema), p);
     }
 
     /**
@@ -154,19 +155,19 @@ public class XMLQueryPlanParser {
         } else if (nodeName.equals("avg")) {
             handleAvg(e);
         } else if (nodeName.equals("slidingAvg")) {
-	    	handleSlidingAvg(e);
-	} else if (nodeName.equals("sum")) {
-            handleSum(e); 
-	} else if (nodeName.equals("slidingSum")) {
-	    handleSlidingSum(e);
-	} else if (nodeName.equals("max")) {
-	    handleMax(e);
-	} else if (nodeName.equals("slidingMax")) {
-	    handleSlidingMax(e);
+            handleSlidingAvg(e);
+        } else if (nodeName.equals("sum")) {
+            handleSum(e);
+        } else if (nodeName.equals("slidingSum")) {
+            handleSlidingSum(e);
+        } else if (nodeName.equals("max")) {
+            handleMax(e);
+        } else if (nodeName.equals("slidingMax")) {
+            handleSlidingMax(e);
         } else if (nodeName.equals("count")) {
             handleCount(e);
-	} else if (nodeName.equals("slidingCount")) {
-	    handleSlidingCount(e);
+        } else if (nodeName.equals("slidingCount")) {
+            handleSlidingCount(e);
         } else if (nodeName.equals("dtdscan")) {
             handleDtdScan(e);
         } else if (nodeName.equals("constant")) {
@@ -196,7 +197,39 @@ public class XMLQueryPlanParser {
         } else if (nodeName.equals("incravg")) {
             handleIncrAvg(e);
         } else {
-            throw new InvalidPlanException("Unknown operator: " + nodeName);
+            Class opClass = catalog.getOperatorClass(nodeName);
+            if (opClass == null)
+            throw new InvalidPlanException(
+                            "Unknown operator: " + nodeName);            
+            op operator;
+            try {
+                operator = (op) opClass.newInstance();
+            } catch (ClassCastException cce) {
+                throw new InvalidPlanException(
+                    nodeName + " is not a logical operator");
+            } catch (InstantiationException ie) {
+                throw new InvalidPlanException(
+                    "Could not instantiate an "
+                        + opClass
+                        + " object for "
+                        + nodeName);
+            } catch (IllegalAccessException iae) {
+                throw new InvalidPlanException(
+                    "Illegal access exception while instantiating "
+                        + opClass
+                        + " for "
+                        + nodeName);
+            }
+            int arity = operator.getArity();
+            LogicalProperty[] inputProperties = new LogicalProperty[arity];
+            for (int i = 0; i < arity; i++)
+                inputProperties[i]  = (LogicalProperty) ids2logprops.get(inputs.get(i));
+            operator.loadFromXML(e, inputProperties); 
+            Plan[] inputPlans = new Plan[arity];
+            for (int i = 0; i < arity; i++)
+                inputPlans[i] = (Plan) ids2plans.get(inputs.get(i));
+            ids2plans.put(nodeName, new Plan(operator, inputPlans));
+            ids2logprops.put(nodeName, operator.findLogProp(catalog, inputProperties));
         }
 
         String location = e.getAttribute("location");
@@ -464,8 +497,10 @@ public class XMLQueryPlanParser {
                 REMatch[] all_left = re.getAllMatches(leftattrs);
                 REMatch[] all_right = re.getAllMatches(rightattrs);
                 for (int i = 0; i < all_left.length; i++) {
-                    Attribute leftAttr = findVariable(leftLogProp, all_left[i].toString());
-                    Attribute rightAttr = findVariable(rightLogProp, all_right[i].toString());
+                    Attribute leftAttr =
+                        findVariable(leftLogProp, all_left[i].toString());
+                    Attribute rightAttr =
+                        findVariable(rightLogProp, all_right[i].toString());
                     leftVars.add(leftAttr);
                     rightVars.add(rightAttr);
                 }
@@ -520,35 +555,32 @@ public class XMLQueryPlanParser {
 
     void handleSlidingAvg(Element e) throws InvalidPlanException {
         SlidingAverageOp op = new SlidingAverageOp();
-	op.setSelectedAlgoIndex(0);
+        op.setSelectedAlgoIndex(0);
 
-	String id = e.getAttribute("id");
-	String groupby = e.getAttribute("groupby");
-	String avgattr = e.getAttribute("avgattr");
-	String inputAttr = e.getAttribute("input");
-	String range = e.getAttribute("range");
-	String every = e.getAttribute("every");
-	
-	// set the range and every parameter for the sliding window;
-	//
-	Integer rangeValue;
-	Integer everyValue;
-	if (range != "") {
-		rangeValue = new Integer (range);
-		if (rangeValue.intValue() <= 0)
-			throw new InvalidPlanException("range must greater than zero");
-	}
-	else
-		throw new InvalidPlanException("range ???");
-	if (every != "") {
-		everyValue = new Integer (every);
-		if (everyValue.intValue() <= 0)
-			throw new InvalidPlanException("every must greater than zero");
-	}
-	else
-		throw new InvalidPlanException("every ???");
-		
-	
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String avgattr = e.getAttribute("avgattr");
+        String inputAttr = e.getAttribute("input");
+        String range = e.getAttribute("range");
+        String every = e.getAttribute("every");
+
+        // set the range and every parameter for the sliding window;
+        //
+        Integer rangeValue;
+        Integer everyValue;
+        if (range != "") {
+            rangeValue = new Integer(range);
+            if (rangeValue.intValue() <= 0)
+                throw new InvalidPlanException("range must greater than zero");
+        } else
+            throw new InvalidPlanException("range ???");
+        if (every != "") {
+            everyValue = new Integer(every);
+            if (everyValue.intValue() <= 0)
+                throw new InvalidPlanException("every must greater than zero");
+        } else
+            throw new InvalidPlanException("every ???");
+
         Plan input = (Plan) ids2plans.get(inputAttr);
         LogicalProperty inputLogProp =
             (LogicalProperty) ids2logprops.get(inputAttr);
@@ -564,14 +596,14 @@ public class XMLQueryPlanParser {
 
         Attribute averagingAttribute = findVariable(inputLogProp, avgattr);
         op.setAverageInfo(new skolem(id, groupbyAttrs), averagingAttribute);
-       	op.setWindowInfo (rangeValue.intValue(), everyValue.intValue());
+        op.setWindowInfo(rangeValue.intValue(), everyValue.intValue());
 
         Plan avgNode = new Plan(op, input);
         ids2plans.put(id, avgNode);
         ids2logprops.put(
             id,
             op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
-	}
+    }
 
     void handleSum(Element e) throws InvalidPlanException {
         SumOp op = new SumOp();
@@ -604,38 +636,36 @@ public class XMLQueryPlanParser {
             op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
-    void handleSlidingSum (Element e) throws InvalidPlanException {
-	SlidingSumOp op = new SlidingSumOp();
-	op.setSelectedAlgoIndex(0);
+    void handleSlidingSum(Element e) throws InvalidPlanException {
+        SlidingSumOp op = new SlidingSumOp();
+        op.setSelectedAlgoIndex(0);
 
-	String id = e.getAttribute("id");
-	String groupby = e.getAttribute("groupby");
-	String sumattr = e.getAttribute("sumattr");
-	String inputAttr = e.getAttribute("input");
-	String range = e.getAttribute("range");
-	String every = e.getAttribute("every");
-    
-	// set the range and every parameter for the sliding window;
-	//
-	Integer rangeValue;
-	Integer everyValue;
-	if (range != "") {
-		rangeValue = new Integer (range);
-		if (rangeValue.intValue() <= 0)
-			throw new InvalidPlanException("range must greater than zero");
-	}
-	else
-		throw new InvalidPlanException("range ???");
-	if (every != "") {
-		everyValue = new Integer (every);
-		if (everyValue.intValue() <= 0)
-			throw new InvalidPlanException("every must greater than zero");
-	}
-	else
-		throw new InvalidPlanException("every ???");
-		
-	op.setWindowInfo (rangeValue.intValue(), everyValue.intValue());
-		
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String sumattr = e.getAttribute("sumattr");
+        String inputAttr = e.getAttribute("input");
+        String range = e.getAttribute("range");
+        String every = e.getAttribute("every");
+
+        // set the range and every parameter for the sliding window;
+        //
+        Integer rangeValue;
+        Integer everyValue;
+        if (range != "") {
+            rangeValue = new Integer(range);
+            if (rangeValue.intValue() <= 0)
+                throw new InvalidPlanException("range must greater than zero");
+        } else
+            throw new InvalidPlanException("range ???");
+        if (every != "") {
+            everyValue = new Integer(every);
+            if (everyValue.intValue() <= 0)
+                throw new InvalidPlanException("every must greater than zero");
+        } else
+            throw new InvalidPlanException("every ???");
+
+        op.setWindowInfo(rangeValue.intValue(), everyValue.intValue());
+
         Plan input = (Plan) ids2plans.get(inputAttr);
         LogicalProperty inputLogProp =
             (LogicalProperty) ids2logprops.get(inputAttr);
@@ -657,7 +687,7 @@ public class XMLQueryPlanParser {
         ids2logprops.put(
             id,
             op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
-	}
+    }
 
     void handleMax(Element e) throws InvalidPlanException {
         MaxOp op = new MaxOp();
@@ -691,37 +721,35 @@ public class XMLQueryPlanParser {
     }
 
     void handleSlidingMax(Element e) throws InvalidPlanException {
-	SlidingMaxOp op = new SlidingMaxOp();
-	op.setSelectedAlgoIndex(0);
+        SlidingMaxOp op = new SlidingMaxOp();
+        op.setSelectedAlgoIndex(0);
 
-	String id = e.getAttribute("id");
-	String groupby = e.getAttribute("groupby");
-	String maxattr = e.getAttribute("maxattr");
-	String inputAttr = e.getAttribute("input");
-	String range = e.getAttribute("range");
-	String every = e.getAttribute("every");
-    
-	// set the range and every parameter for the sliding window;
-	//
-	Integer rangeValue;
-	Integer everyValue;
-	if (range != "") {
-		rangeValue = new Integer (range);
-		if (rangeValue.intValue() <= 0)
-			throw new InvalidPlanException("range must greater than zero");
-	}
-	else
-		throw new InvalidPlanException("range ???");
-	if (every != "") {
-		everyValue = new Integer (every);
-		if (everyValue.intValue() <= 0)
-			throw new InvalidPlanException("every must greater than zero");
-	}
-	else
-		throw new InvalidPlanException("every ???");
-		
-	op.setWindowInfo (rangeValue.intValue(), everyValue.intValue());
-		
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String maxattr = e.getAttribute("maxattr");
+        String inputAttr = e.getAttribute("input");
+        String range = e.getAttribute("range");
+        String every = e.getAttribute("every");
+
+        // set the range and every parameter for the sliding window;
+        //
+        Integer rangeValue;
+        Integer everyValue;
+        if (range != "") {
+            rangeValue = new Integer(range);
+            if (rangeValue.intValue() <= 0)
+                throw new InvalidPlanException("range must greater than zero");
+        } else
+            throw new InvalidPlanException("range ???");
+        if (every != "") {
+            everyValue = new Integer(every);
+            if (everyValue.intValue() <= 0)
+                throw new InvalidPlanException("every must greater than zero");
+        } else
+            throw new InvalidPlanException("every ???");
+
+        op.setWindowInfo(rangeValue.intValue(), everyValue.intValue());
+
         Plan input = (Plan) ids2plans.get(inputAttr);
         LogicalProperty inputLogProp =
             (LogicalProperty) ids2logprops.get(inputAttr);
@@ -777,37 +805,35 @@ public class XMLQueryPlanParser {
     }
 
     void handleSlidingCount(Element e) throws InvalidPlanException {
-	SlidingCountOp op = new SlidingCountOp();
-	op.setSelectedAlgoIndex(0);
+        SlidingCountOp op = new SlidingCountOp();
+        op.setSelectedAlgoIndex(0);
 
-	String id = e.getAttribute("id");
-	String groupby = e.getAttribute("groupby");
-	String countattr = e.getAttribute("countattr");
-	String inputAttr = e.getAttribute("input");
-	String range = e.getAttribute("range");
-	String every = e.getAttribute("every");
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String countattr = e.getAttribute("countattr");
+        String inputAttr = e.getAttribute("input");
+        String range = e.getAttribute("range");
+        String every = e.getAttribute("every");
 
-	// set the range and every parameter for the sliding window;
-	//
-	Integer rangeValue;
-	Integer everyValue;
-	if (range != "") {
-		rangeValue = new Integer (range);
-		if (rangeValue.intValue() <= 0)
-			throw new InvalidPlanException("range must greater than zero");
-	}
-	else
-		throw new InvalidPlanException("range ???");
-	if (every != "") {
-		everyValue = new Integer (every);
-		if (everyValue.intValue() <= 0)
-			throw new InvalidPlanException("every must greater than zero");
-	}
-	else
-		throw new InvalidPlanException("every ???");
-		
-	op.setWindowInfo (rangeValue.intValue(), everyValue.intValue());		
-	
+        // set the range and every parameter for the sliding window;
+        //
+        Integer rangeValue;
+        Integer everyValue;
+        if (range != "") {
+            rangeValue = new Integer(range);
+            if (rangeValue.intValue() <= 0)
+                throw new InvalidPlanException("range must greater than zero");
+        } else
+            throw new InvalidPlanException("range ???");
+        if (every != "") {
+            everyValue = new Integer(every);
+            if (everyValue.intValue() <= 0)
+                throw new InvalidPlanException("every must greater than zero");
+        } else
+            throw new InvalidPlanException("every ???");
+
+        op.setWindowInfo(rangeValue.intValue(), everyValue.intValue());
+
         Plan input = (Plan) ids2plans.get(inputAttr);
         LogicalProperty inputLogProp =
             (LogicalProperty) ids2logprops.get(inputAttr);
@@ -907,7 +933,7 @@ public class XMLQueryPlanParser {
 
         SendOp op = new SendOp();
 
-  	op.setSelectedAlgoIndex(0);
+        op.setSelectedAlgoIndex(0);
 
         String inputAttr = e.getAttribute("input");
         Plan input = (Plan) ids2plans.get(inputAttr);
@@ -929,7 +955,7 @@ public class XMLQueryPlanParser {
         op.setQueryId(e.getAttribute("query_id"));
         op.setClientLocation(e.getAttribute("client_location"));
 
-	String inputAttr = e.getAttribute("input");
+        String inputAttr = e.getAttribute("input");
         Plan input = (Plan) ids2plans.get(inputAttr);
         LogicalProperty inputLogProp =
             (LogicalProperty) ids2logprops.get(inputAttr);
@@ -969,7 +995,7 @@ public class XMLQueryPlanParser {
             throw new InvalidPlanException(
                 "Invalid type - typeStr: " + dataTypeStr);
 
-	boolean useStreamFormat = NiagraServer.usingSAXDOM();
+        boolean useStreamFormat = NiagraServer.usingSAXDOM();
 
         FirehoseSpec fhSpec =
             new FirehoseSpec(
@@ -981,7 +1007,7 @@ public class XMLQueryPlanParser {
                 numGenCalls,
                 numTLElts,
                 rate,
-		useStreamFormat,
+                useStreamFormat,
                 prettyPrint,
                 trace);
 
@@ -996,8 +1022,7 @@ public class XMLQueryPlanParser {
 
     void handleFileScan(Element e) throws InvalidPlanException {
         String id = e.getAttribute("id");
-	boolean isStream =
-            e.getAttribute("isStream").equalsIgnoreCase("yes");
+        boolean isStream = e.getAttribute("isStream").equalsIgnoreCase("yes");
         FileScanSpec fsSpec =
             new FileScanSpec(e.getAttribute("fileName"), isStream);
 
@@ -1020,8 +1045,8 @@ public class XMLQueryPlanParser {
             int nodeType = children.item(i).getNodeType();
             if (nodeType == Node.ELEMENT_NODE)
                 content += XMLUtils.explosiveFlatten(children.item(i));
-	    else if (nodeType == Node.CDATA_SECTION_NODE)
-		content += children.item(i).getNodeValue();
+            else if (nodeType == Node.CDATA_SECTION_NODE)
+                content += children.item(i).getNodeValue();
         }
         String inputAttr = e.getAttribute("input");
 
@@ -1258,17 +1283,9 @@ public class XMLQueryPlanParser {
                 v = (Variable) right.getAttr(varname);
             if (v != null)
                 return v;
-            else throw new InvalidPlanException(
+            else
+                throw new InvalidPlanException(
                     "Unknown variable name: " + varname);
-        }
-    }
-
-    public class InvalidPlanException extends Exception {
-        public InvalidPlanException() {
-            super("Invalid Plan Exception: ");
-        }
-        public InvalidPlanException(String msg) {
-            super("Invalid Plan Exception: " + msg + " ");
         }
     }
 
@@ -1276,7 +1293,7 @@ public class XMLQueryPlanParser {
         return remotePlans;
     }
 
-    public Attribute findVariable(LogicalProperty logProp, String varName) 
+    public Attribute findVariable(LogicalProperty logProp, String varName)
         throws InvalidPlanException {
         Attribute attr = logProp.getAttr(getVarName(varName));
         if (attr == null)
