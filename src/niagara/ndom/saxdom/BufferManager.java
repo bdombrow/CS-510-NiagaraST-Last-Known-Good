@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.20 2003/02/25 06:18:51 vpapad Exp $
+ * $Id: BufferManager.java,v 1.21 2003/12/24 01:59:51 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -195,7 +195,7 @@ public class BufferManager {
         return index % page_size;
     }
 
-    public static int getIndex(Page page, int offset) {
+    private static int getIndex(Page page, int offset) {
         return page.getNumber() * page_size + offset;
     }
 
@@ -213,10 +213,8 @@ public class BufferManager {
         Page page = getPage(index);
         int offset = getOffset(index);
 
-        int pageSize = page.getSize();
-
         while (true) {
-            if (offset == pageSize - 1) {
+            if (offset == page_size - 1) {
                 page = page.getNext();
                 offset = 0;
             } else
@@ -268,7 +266,7 @@ public class BufferManager {
     public static String getAttributeValue(int index) {
         Page page = getPage(index);
         int offset = getOffset(index);
-        if (offset == page.getSize() - 1) {
+        if (offset == page_size - 1) {
             page = page.getNext();
             offset = 0;
         } else
@@ -284,12 +282,10 @@ public class BufferManager {
         Page page = getPage(elementIndex);
         int offset = getOffset(elementIndex);
 
-        int pageSize = page.getSize();
-
         boolean found = false;
 
         loop : while (true) {
-            if (offset == pageSize - 1) {
+            if (offset == page_size - 1) {
                 page = page.getNext();
                 offset = 0;
             } else
@@ -350,10 +346,8 @@ public class BufferManager {
         Page page = getPage(elementIndex);
         int offset = getOffset(elementIndex);
 
-        int pageSize = page.getSize();
-
         loop : while (true) {
-            if (offset == pageSize - 1) {
+            if (offset == page_size - 1) {
                 page = page.getNext();
                 offset = 0;
             } else
@@ -391,10 +385,8 @@ public class BufferManager {
         Page page = getPage(elementIndex);
         int offset = getOffset(elementIndex);
 
-        int pageSize = page.getSize();
-
         loop : while (true) {
-            if (offset == pageSize - 1) {
+            if (offset == page_size - 1) {
                 page = page.getNext();
                 offset = 0;
             } else
@@ -431,10 +423,8 @@ public class BufferManager {
         Page page = getPage(elementIndex);
         int offset = getOffset(elementIndex);
 
-        int pageSize = page.getSize();
-
         loop : while (true) {
-            if (offset == pageSize - 1) {
+            if (offset == page_size - 1) {
                 page = page.getNext();
                 offset = 0;
             } else
@@ -460,7 +450,7 @@ public class BufferManager {
 
         while (child >= 0) {
             al.add(makeNode(doc, child));
-            child = getNextSiblingIndex(doc, child);
+            child = getNextSiblingIndex(child);
         }
 
         return new NodeListImpl(al);
@@ -496,7 +486,7 @@ public class BufferManager {
         // so we have to fake that here.
         Page page = getPage(index);
         int offset = getOffset(index);
-        if (offset == page.getSize() - 1) {
+        if (offset == page_size - 1) {
             page = page.getNext();
             offset = 0;
         } else
@@ -518,14 +508,12 @@ public class BufferManager {
         return makeNode(doc, firstChildIndex);
     }
 
-    public static int getFirstChildIndex(int index) {
+    private static int getFirstChildIndex(int index) {
         Page page = getPage(index);
         int offset = getOffset(index);
 
-        int pageSize = page.getSize();
-
         while (true) {
-            if (offset == pageSize - 1) {
+            if (offset == page_size - 1) {
                 page = page.getNext();
                 offset = 0;
             } else
@@ -555,14 +543,12 @@ public class BufferManager {
         return makeNode(doc, lastChildIndex);
     }
 
-    public static int getLastChildIndex(int index) {
+    private static int getLastChildIndex(int index) {
         Page page = getPage(index);
         int offset = getOffset(index);
 
-        int pageSize = page.getSize();
-
         while (true) {
-            if (offset == pageSize - 1) {
+            if (offset == page_size - 1) {
                 page = page.getNext();
                 offset = 0;
             } else
@@ -598,7 +584,7 @@ public class BufferManager {
             return makeNode(doc, sibling);
     }
 
-    public static int getNextSiblingIndex(DocumentImpl doc, int index) {
+    public static int getNextSiblingIndex(int index) {
         return getPage(index).getNextSibling(getOffset(index));
     }
 
@@ -610,10 +596,8 @@ public class BufferManager {
         Page page = getPage(index);
         int offset = getOffset(index);
 
-        int pageSize = page.getSize();
-
         while (true) {
-            if (offset == pageSize - 1) {
+            if (offset == page_size - 1) {
                 page = page.getNext();
                 offset = 0;
             } else
@@ -646,7 +630,7 @@ public class BufferManager {
 
         if (offset == 0) {
             page = page.getPrevious();
-            offset = page.getSize() - 1;
+            offset = page_size - 1;
         } else
             offset--;
 
@@ -684,7 +668,7 @@ public class BufferManager {
     public static String getNamespaceURI(int index) {
         Page page = getPage(index);
         int offset = getOffset(index);
-        if (offset == page.getSize() - 1) {
+        if (offset == page_size - 1) {
             page = page.getNext();
             offset = 0;
         } else
@@ -747,8 +731,8 @@ public class BufferManager {
             case SAXEvent.TEXT :
                 sb.append(getEventString(index));
                 break;
-            default :
-                throw new PEException("Unexpected event type");
+            default : 
+                throw new PEException("Unexpected event type: " + getEventType(index));
         }
     }
 
@@ -759,7 +743,6 @@ public class BufferManager {
     private static void flattenElement(int index, StringBuffer sb, boolean prettyprint) {
         Page page = getPage(index);
         int offset = getOffset(index);
-        int pageSize = page.getSize();
 
         int depth = -1;
         boolean[] closedStartTag = new boolean[1025];
@@ -819,14 +802,21 @@ public class BufferManager {
 		    prevWasStartEl = false; 
                     break;
                 default :
-                    throw new PEException("Unexpected event type");
+                    throw new PEException("Unexpected event type: " + page.getEventType(offset));
             }
 
-            if (offset == pageSize - 1) {
+            if (offset == page_size - 1) {
                 page = page.getNext();
                 offset = 0;
             } else
                 offset++;
         }
+    }
+
+    /**
+     * @return Returns the page size.
+     */
+    public static int getPageSize() {
+        return page_size;
     }
 }

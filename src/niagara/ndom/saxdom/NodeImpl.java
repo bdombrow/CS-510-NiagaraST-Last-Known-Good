@@ -1,5 +1,5 @@
 /**
- * $Id: NodeImpl.java,v 1.5 2003/01/13 05:07:44 tufte Exp $
+ * $Id: NodeImpl.java,v 1.6 2003/12/24 01:59:51 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -74,16 +74,8 @@ public abstract class NodeImpl implements Node {
         return BufferManager.getLastChild(doc, index);
     }
 
-    public int getLastChildIndex() {
-        return BufferManager.getLastChildIndex(index);
-    }
-
     public Node getPreviousSibling() {
         return BufferManager.getPreviousSibling(doc, index);
-    }
-
-    public int getPreviousSiblingIndex() {
-        return BufferManager.getPreviousSiblingIndex(index);
     }
 
     public Node getNextSibling() {
