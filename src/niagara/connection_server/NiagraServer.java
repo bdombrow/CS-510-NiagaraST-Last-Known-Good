@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.2 2000/06/12 01:14:53 vpapad Exp $
+  $Id: NiagraServer.java,v 1.3 2000/08/07 01:41:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -72,6 +72,8 @@ public class NiagraServer
     private static int CONNECTION_PORT = 9020;
     
 
+    private static boolean dtd_hack = false;
+
     public NiagraServer() {
 		try {
 			// Create the query engine
@@ -89,8 +91,7 @@ public class NiagraServer
 	    
 			// Create and start the connection manager
 			connectionManager =
-				new ConnectionManager (CONNECTION_PORT,
-									   this);
+				new ConnectionManager (CONNECTION_PORT, this, dtd_hack);
 	    
 			if (connectToSE)
 			    seClient = new SEClient(SEHOST);
@@ -224,12 +225,6 @@ public class NiagraServer
 				usage(1);
 				return;
 			}
-			else if (args.length == 1 && args[0].equals("-without-se")) {
-			        connectToSE = false;
-				NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS; // hard wired defaults
-				NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
-				return;
-			}
 			// Bypass the config file and specify host directly
 			else if(args.length == 2 && args[0].equals("-se")){
 				// bypass config. Config cannot be read in NT
@@ -238,6 +233,22 @@ public class NiagraServer
 				NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS; // hard wired defaults
 				NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
 				return;
+			}
+			else {
+			    boolean valid_args = false;
+			    for (int i=0; i < args.length; i++) {
+				if (args[i].equals("-without-se")) {
+				    connectToSE = false;
+				    NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS; // hard wired defaults
+				    NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
+				    valid_args = true;
+				}
+				else if (args[i].equals("-dtd-hack")) {
+				    dtd_hack = true;
+				    valid_args = true;
+				}
+			    }
+			    if (valid_args) return;
 			}
 
 			// Open the config file if it exists and use it to init params

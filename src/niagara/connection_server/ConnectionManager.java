@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: ConnectionManager.java,v 1.2 2000/08/07 01:41:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -93,7 +93,14 @@ public class ConnectionManager implements Runnable
 
 	return;
     }
-		     
+
+    public ConnectionManager(int queryEngineWellKnownPort,
+			     NiagraServer server, boolean dtd_hack) {
+	this(queryEngineWellKnownPort, server);
+	this.dtd_hack = dtd_hack;
+    }
+
+    private boolean dtd_hack = false;
 
     /**
      *  This is the run method invoked by the Java thread - it simply waits
@@ -119,7 +126,7 @@ public class ConnectionManager implements Runnable
 		// which will handle all the further requests
 		System.out.println("Processing Request....");
 		    RequestHandler newHandler = 
-			new RequestHandler(clientSocket,server);
+			new RequestHandler(clientSocket,server, dtd_hack);
 	    
 		
 	    }while(true);

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.2 2000/06/26 22:14:55 vpapad Exp $
+  $Id: RequestHandler.java,v 1.3 2000/08/07 01:41:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -62,7 +62,8 @@ public class RequestHandler {
        @param server The server that has access to other modules
     */
 
-    public RequestHandler(Socket sock,NiagraServer server) throws IOException{
+    public RequestHandler(Socket sock, NiagraServer server, boolean dtd_hack) throws IOException{
+	this.dtd_hack = dtd_hack;
 	// A hashtable of queries with qid as key
 	System.out.println("request handler started...");
 	this.queryList = new QueryList();
@@ -74,13 +75,21 @@ public class RequestHandler {
 	this.requestParser = new RequestParser(connectionSocket.getInputStream(),this);
 	this.requestParser.startParsing();
     }
-    
+
+    private boolean dtd_hack; // True if we want to add HTML entities to the result
+
+    public RequestHandler(Socket sock, NiagraServer server) throws IOException {
+	    this(sock, server, true);
+    }
+
     // Send the initial string to the client
     private void sendBeginDocument() throws IOException { // DTD is hack for sigmod record
-	String header = 
-	    "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n" +
-		EntitySupplement.returnEntityDefs("CarSet.cfg") +  // added to support the SigmodRecord Entities
-	    "<response>\n";
+	String header =  "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n";
+	if (dtd_hack) {
+	    // added to support the SigmodRecord Entities
+	    header = header + EntitySupplement.returnEntityDefs("CarSet.cfg");
+	}
+	header = header + "<response>\n";
 	outputWriter.write(header);
 	outputWriter.flush();
     }
