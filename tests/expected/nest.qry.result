@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:results>
+
+<class num=" 2 ">
+   <Name> Bob </Name>
+   <Name> Anne </Name>
+</class>
+<class num=" 1 ">
+   <Name> Sue </Name>
+   <Name> Doug </Name>
+</class>
+
+</niagara:results>
