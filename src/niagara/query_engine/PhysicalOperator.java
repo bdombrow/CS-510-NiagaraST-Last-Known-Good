@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.13 2002/09/24 23:18:46 ptucker Exp $
+  $Id: PhysicalOperator.java,v 1.14 2002/10/03 15:33:16 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -77,6 +77,7 @@ public abstract class PhysicalOperator {
 
     // for triggers
     protected static DataManager DM;
+    protected String name = "default";
 
     /**
      * This class is used to store the result of a read operation from
@@ -371,7 +372,8 @@ public abstract class PhysicalOperator {
 		sourceObject.tuple = null;
 		processCtrlMsgFromSource(ctrlFlag, streamId);
 	    } 
-	} while (startReadSourceStream != lastReadSourceStream);
+	} while (startReadSourceStream != lastReadSourceStream &
+		 existsUnClosedSourceStream());
 	
 	// No luck with any source stream, operator can still continue
 	sourceObject.tuple = null;
@@ -964,7 +966,8 @@ public abstract class PhysicalOperator {
 
 	public int get(int idx) {
 	    if(idx >= currSize)
-		throw new PEException("KT in ReadSourceStreams bad get:");	    return streamIds[idx];
+		throw new PEException("KT in ReadSourceStreams bad get. Operator: " + name + " idx is " + idx + " currSize is " + currSize);	   
+	    return streamIds[idx];
 	}
 
 	public void remove(int streamId) {
