@@ -1,0 +1,16 @@
+#!/usr/bin/perl -w
+# $Id: runRemoteDebug,v 1.1 2003/07/26 16:38:22 tufte Exp $
+system("rm -rf SYS/*");
+system("rm -rf CACHE/*");
+
+$classpath = `cat ../classpath`;
+$classpath =~ s/\n/ /g;
+$classpath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
+
+$command = "java -server -ea -Xmx192m -Xdebug -Xnoagent " .
+           " -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001" .
+	   " -classpath " . 
+           $classpath . 
+           " niagara.connection_server.NiagraServer " . 
+	   join(" ", @ARGV) . "\n";
+exec $command;
