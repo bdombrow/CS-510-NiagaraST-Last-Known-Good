@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.5 2003/03/05 19:28:55 tufte Exp $
+  $Id: PageStream.java,v 1.6 2003/03/07 21:02:49 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -108,8 +108,10 @@ public class PageStream {
      */
     public PageStream(String name) {
 	// toProducerQueue is expandable...
-	toConsumerQueue = new PageQueue(STREAM_CAPACITY, false);
-	toProducerQueue = new PageQueue(STREAM_CAPACITY, true);
+	toConsumerQueue = new PageQueue(STREAM_CAPACITY, false, 
+					name + "_toCons");
+	toProducerQueue = new PageQueue(STREAM_CAPACITY, true,
+					name + "_toProd");
 	dataPageBuffer = new TuplePage[STREAM_CAPACITY];
 	extraCtrlPage = null;
 	eos = false;

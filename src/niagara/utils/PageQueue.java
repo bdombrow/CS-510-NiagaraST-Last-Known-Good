@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageQueue.java,v 1.1 2002/04/29 19:54:57 tufte Exp $
+  $Id: PageQueue.java,v 1.2 2003/03/07 21:02:49 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,11 +48,16 @@ public class PageQueue
     // downstream control queues which should never grow large anyway
     private boolean expandable;
 
+    // for debugging
+    private String name;
+    
     /**
-     * Default constructor
-     */
-    public PageQueue() {
-	this(5, false);
+     * This is the constructor for the Queue class
+     *
+     * @param length the length of this queue; 
+     **/
+    public PageQueue(int length, String name) {
+	this(length, false, name);
     }
     
     /**
@@ -60,16 +65,7 @@ public class PageQueue
      *
      * @param length the length of this queue; 
      **/
-    public PageQueue(int length) {
-	this(length, false);
-    }
-    
-    /**
-     * This is the constructor for the Queue class
-     *
-     * @param length the length of this queue; 
-     **/
-    public PageQueue(int len , boolean expandable)
+    public PageQueue(int len , boolean expandable, String name)
     {
 	if(length <= 0)
 	    length = 5;
@@ -77,6 +73,7 @@ public class PageQueue
 	length = len+1;
 	queue = new TuplePage[length]; 
 	this.expandable = expandable;
+	this.name = name;
     }
 
     /**
@@ -132,7 +129,7 @@ public class PageQueue
 	queue = newQueue;
 	length = length*2;
 	if(length > 20) {
-	    throw new PEException("KT help queue just expanded to 20 slots!!");
+	    throw new PEException("KT help queue just expanded to 20 slots!! " + name);
 	}
     }
 
