@@ -1,4 +1,4 @@
-/* $Id: SAXDOMIO.java,v 1.1 2003/12/24 01:59:51 vpapad Exp $ */
+/* $Id: SAXDOMIO.java,v 1.2 2004/02/11 01:11:32 vpapad Exp $ */
 package niagara.ndom.saxdom;
 
 import java.io.IOException;
@@ -13,7 +13,6 @@ import niagara.utils.ShutdownException;
 
 abstract public class SAXDOMIO {
     protected byte[] types;
-    protected String[] strings;
 
     /** The offset of the next event that can be stored in our arrays */
     protected short current_offset;
@@ -31,7 +30,6 @@ abstract public class SAXDOMIO {
     protected ByteBuffer buffer;
     protected SAXDOMIO() {
         types = new byte[MAX_EVENTS];
-        strings = new String[MAX_EVENTS];
         buffer = ByteBuffer.allocateDirect(PAGE_SIZE);
     }
 

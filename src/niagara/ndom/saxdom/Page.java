@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.16 2004/02/10 03:34:30 vpapad Exp $
+ * $Id: Page.java,v 1.17 2004/02/11 01:11:32 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -12,6 +12,8 @@ import java.util.Arrays;
 
 import niagara.ndom.SAXDOMParser;
 import niagara.utils.PEException;
+
+import org.xml.sax.SAXException;
 
 /**
  * Page data describe a sequence of SAX events, using three parallel arrays: an
@@ -66,10 +68,10 @@ public class Page {
         Arrays.fill(next_sibling, NO_NEXT_SIBLING);
 
         if (previous != null)
-            previous.setNext(null);
+            previous.next = null;
 
         if (next != null)
-            next.setPrevious(null);
+            next.previous = null;
 
         previous = next = null;
         pin_count = current_offset = 0;
@@ -89,7 +91,7 @@ public class Page {
         }
     }
 
-    public void addEvent(DocumentImpl doc, byte type, String string) {
+    public void addEvent(byte type, String string) {
         if (current_offset < size) {
             event_type[current_offset] = type;
             event_string[current_offset] = string;
@@ -101,11 +103,11 @@ public class Page {
             page.setParser(parser);
             parser.setPage(page);
 
-            doc.addPage(page);
-            page.setPrevious(this);
-            setNext(page);
+            parser.getDocument().addPage(page);
+            page.previous = this;
+            next = page;
 
-            page.addEvent(doc, type, string);
+            page.addEvent(type, string);
         }
     }
 
@@ -131,14 +133,6 @@ public class Page {
         next_sibling[offset] = index;
     }
 
-    public void setPrevious(Page previous) {
-        this.previous = previous;
-    }
-
-    void setNext(Page next) {
-        this.next = next;
-    }
-
     public Page getNext() {
         return next;
     }
@@ -151,17 +145,15 @@ public class Page {
         this.parser = parser;
     }
 
-    public int getLastIndex() {
-        if (current_offset == 0)
-            throw new PEException("getLastIndex called on empty page");
-
-        return number * size + current_offset - 1;
-    }
-
-    /** If we start a document on this page now, what will its index be? */
     public int getFirstIndex() {
         return number * size + current_offset;
     }
+
+    public int getLastIndex() {
+        assert current_offset > 0 : "getLastIndex called on empty page";
+        return number * size + current_offset - 1;
+    }
+	 
 
     public int getLastOffset() {
         if (current_offset == 0)
@@ -202,23 +194,36 @@ public class Page {
 	 * 
 	 * @return the offset for the END_DOCUMENT if we encountered one, the
 	 *              length of the page if we've reached it without finding
-	 *              END_DOCUMENT, or -1 if we've reached the end of the input buffers
-	 *              before document end.
+	 *              END_DOCUMENT, or -1 if we've reached the end of the input
+	 *              buffers before document end.
 	 */
     public int loadEvents(
         int offset,
         int length,
         byte[] types,
-        String[] strings) {
+        short[] string_indexes,
+        String[] strings,
+        int[] openNodes,
+        SAXDOMReader sr)
+        throws SAXException {
+
+        // Keep the page pinned until fixDocument is done with it
+        if (current_offset == 0 || types[offset] == SAXEvent.START_DOCUMENT)
+            pin();
+
         int i;
         int limit = Math.min(size, current_offset + length);
         int dstBase = offset - current_offset;
         for (i = current_offset; i < limit; i++) {
             event_type[i] = types[dstBase + i];
-            event_string[i] = strings[dstBase + i];
-            if (event_type[i] == SAXEvent.END_DOCUMENT)
+            event_string[i] = strings[string_indexes[dstBase + i]];
+            if (event_type[i] == SAXEvent.END_DOCUMENT) {
+                current_offset = i + 1;
+                sr.sendDocument(fixDocument(i, openNodes, 0));
                 break;
+            }
         }
+
         if (i == current_offset + length && i != size) {
             current_offset = i;
             return -1;
@@ -226,29 +231,33 @@ public class Page {
         current_offset = i;
         if (current_offset < size)
             current_offset++;
+
+        if (current_offset == size)
+            if (event_type[size - 1] == SAXEvent.END_DOCUMENT)
+                sr.setPage(null);
+            else {
+                next = BufferManager.getFreePage();
+                next.previous = this;
+                sr.setPage(next);
+            }
+
         return current_offset;
     }
 
-    public boolean endsWithEndDocument() {
-      return event_type[size - 1] == SAXEvent.END_DOCUMENT;  
-    }
-    
-    public void fixDocument(int[] openNodes) {
-        // Fill out the next_sibling pointers for this document
-        assert event_type[current_offset - 1] == SAXEvent.END_DOCUMENT;
-        fixDocument(current_offset - 1, openNodes, 0);
-    }
-
-    protected void fixDocument(int offset, int[] openNodes, int depth) {
+    /**
+	 * Fill out the <code>next_sibling</code> pointers and create
+	 * a new document
+	 * 
+	 * @return the new document
+	 */
+    DocumentImpl fixDocument(int offset, int[] openNodes, int depth) {
         int i;
         int baseIndex = number * size;
         for (i = offset; i >= 0; i--) {
             // End events save the next sibling (if any) in their next_sibling
-            // slot
-            // and their own index in openNodes[height]
+            // slot and their own index in openNodes[height]
             // Start events grab their next sibling field from their
-            // corresponding end
-            // event, and save their own index there
+            // corresponding end event, and save their own index there
             switch (event_type[i]) {
                 case SAXEvent.END_DOCUMENT :
                     assert depth == 0;
@@ -267,10 +276,83 @@ public class Page {
                 case SAXEvent.START_ELEMENT :
                     depth--;
                     int end_index = openNodes[depth];
-                    next_sibling[i] =
-                        BufferManager.getNextSiblingIndex(end_index);
+                    int diff = end_index - baseIndex;
+                    if (diff < size && diff > 0) {
+                        next_sibling[i] = next_sibling[diff];
+                        next_sibling[diff] = openNodes[depth] = baseIndex + i;
+                    } else {
+                        next_sibling[i] =
+                            BufferManager.getNextSiblingIndex(end_index);
+                        openNodes[depth] = baseIndex + i;
+                        BufferManager.setNextSibling(
+                            end_index,
+                            openNodes[depth]);
+                    }
+                    break;
+                case SAXEvent.START_DOCUMENT :
+                    assert depth == 0;
+                    DocumentImpl d;
+                    d = new DocumentImpl(this, baseIndex + i);
+                    unpin();
+                    return d;
+                case SAXEvent.ATTR_NAME :
+                case SAXEvent.ATTR_VALUE :
+                case SAXEvent.NAMESPACE_URI :
+                    break;
+                default :
+                    assert false : "Unknown SAX event";
+            }
+        }
+        assert i == -1;
+        DocumentImpl doc =
+            previous.fixDocument(size - 1, openNodes, depth);
+        doc.addPage(this);
+        unpin();
+        return doc;
+    }
+
+    /**
+	 * Fill out the <code>next_sibling</code> pointers for an existing
+	 * document
+	 */
+    void fixate(int offset, int[] openNodes, int depth) {
+        int i;
+        int baseIndex = number * size;
+        for (i = offset; i >= 0; i--) {
+            // End events save the next sibling (if any) in their next_sibling
+            // slot and their own index in openNodes[height]
+            // Start events grab their next sibling field from their
+            // corresponding end event, and save their own index there
+            switch (event_type[i]) {
+                case SAXEvent.END_DOCUMENT :
+                    assert depth == 0;
+                    openNodes[depth] = NO_NEXT_SIBLING;
+                    break;
+                case SAXEvent.END_ELEMENT :
+                    next_sibling[i] = openNodes[depth];
                     openNodes[depth] = baseIndex + i;
-                    BufferManager.setNextSibling(end_index, openNodes[depth]);
+                    depth++;
+                    openNodes[depth] = NO_NEXT_SIBLING;
+                    break;
+                case SAXEvent.TEXT :
+                    next_sibling[i] = openNodes[depth];
+                    openNodes[depth] = baseIndex + i;
+                    break;
+                case SAXEvent.START_ELEMENT :
+                    depth--;
+                    int end_index = openNodes[depth];
+                    int diff = end_index - baseIndex;
+                    if (diff < size && diff > 0) {
+                        next_sibling[i] = next_sibling[diff];
+                        next_sibling[diff] = openNodes[depth] = baseIndex + i;
+                    } else {
+                        next_sibling[i] =
+                            BufferManager.getNextSiblingIndex(end_index);
+                        openNodes[depth] = baseIndex + i;
+                        BufferManager.setNextSibling(
+                            end_index,
+                            openNodes[depth]);
+                    }
                     break;
                 case SAXEvent.START_DOCUMENT :
                     assert depth == 0;
@@ -280,13 +362,13 @@ public class Page {
                 case SAXEvent.NAMESPACE_URI :
                     break;
                 default :
-                    throw new PEException("Unknown SAX event");
+                    assert false : "Unknown SAX event";
             }
         }
-        if (i == -1)
-            getPrevious().fixDocument(size - 1, openNodes, depth);
+        assert i == -1;
+        previous.fixate(size - 1, openNodes, depth);
     }
-
+    
     /**
 	 * What is the size, in number of events, of the document that starts at
 	 * <code>offset</code>?

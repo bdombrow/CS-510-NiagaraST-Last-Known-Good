@@ -1,4 +1,4 @@
-/* $Id: SAXDOMReader.java,v 1.2 2004/02/10 03:34:30 vpapad Exp $ */
+/* $Id: SAXDOMReader.java,v 1.3 2004/02/11 01:11:32 vpapad Exp $ */
 package niagara.ndom.saxdom;
 
 import java.io.FileInputStream;
@@ -20,15 +20,8 @@ import org.xml.sax.SAXException;
 public class SAXDOMReader extends SAXDOMIO {
     private Page page;
     private SinkTupleStream outputStream;
-
+    
     private static final boolean producingOutput = true;
-
-    // XXX vpapad: We could make this a container, but creating and
-    // casting Integers back and forth is not a nice thing to do for
-    // each DOM node in a document. A value of 1024 for the size of
-    // open_nodes covers all documents I've seen!
-    private int[] open_nodes;
-    private DocumentImpl doc;
 
     public SAXDOMReader(FileInputStream fis) {
         super();
@@ -44,14 +37,14 @@ public class SAXDOMReader extends SAXDOMIO {
 
         short[] string_indexes = new short[MAX_EVENTS];
         String[] all_strings = new String[MAX_EVENTS];
-        open_nodes = new int[1024];
+        int[] open_nodes = new int[1024];
 
         // UTF-8 decoding apparatus
-        byte[] sb = new byte[Short.MAX_VALUE];
-        ByteBuffer sbuf = ByteBuffer.wrap(sb);
+        ByteBuffer sbuf = buffer.duplicate();
         CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
-        CharBuffer cbuf = ByteBuffer.allocate(Short.MAX_VALUE).asCharBuffer();
-
+        CharBuffer cbuf = CharBuffer.allocate(PAGE_SIZE/2);
+        
+        int pageSize = BufferManager.getPageSize();
         while (true) {
             // Read a page in
             if (channel.read(buffer) < 0 && buffer.position() == 0) {
@@ -69,6 +62,17 @@ public class SAXDOMReader extends SAXDOMIO {
             buffer.position(buffer.position() + 2 * current_offset);
             // Get number of strings
             short nStrings = buffer.getShort();
+            // Get total string size
+            short totalStringsLength = buffer.getShort();
+            // Get string contents
+            int pos = buffer.position();
+            sbuf.limit(pos + totalStringsLength).position(pos);
+            decoder.decode(sbuf, cbuf, true);
+            cbuf.flip();
+            String bigString = cbuf.toString();
+            buffer.position(pos + totalStringsLength);
+            cbuf.clear();
+            int start = 0;
             for (int i = 0; i < nStrings; i++) {
                 // Get string length
                 short sLength = buffer.getShort();
@@ -76,20 +80,11 @@ public class SAXDOMReader extends SAXDOMIO {
                     all_strings[i] = null;
                     continue;
                 }
-                // Get string contents
-                buffer.get(sb, 0, sLength);
-                sbuf.limit(sLength);
-                sbuf.position(0);
-                decoder.decode(sbuf, cbuf, true);
-                cbuf.flip();
-                all_strings[i] = cbuf.toString();
-                cbuf.clear();
+                int end = start + sLength;
+                all_strings[i] = bigString.substring(start, end);
+                start = end;
             }
             buffer.compact();
-
-            // Populate strings
-            for (int i = 0; i < current_offset; i++)
-                strings[i] = all_strings[string_indexes[i]];
 
             int off = 0;
             int last = 0;
@@ -98,39 +93,26 @@ public class SAXDOMReader extends SAXDOMIO {
                     setPage(BufferManager.getFreePage());
                     last = 0;
                 }
-                if (doc == null)
-                    doc = new DocumentImpl(page, page.getFirstIndex());
-                int prevLast = last == BufferManager.getPageSize() ? 0 : last;
+                int prevLast = last == pageSize ? 0 : last;
                 last =
-                    page.loadEvents(off, current_offset - off, types, strings);
-                if (last == BufferManager.getPageSize()) {
-                    // Page ended but did the document end too?
-                    if (page.endsWithEndDocument()) {
-                        sendDocument();
-                        setPage(null);
-                    } else {
-                        Page newPage = BufferManager.getFreePage();
-                        page.setNext(newPage);
-                        newPage.setPrevious(page);
-                        setPage(newPage);
-                        doc.addPage(newPage);
-                    }
-                    off += last - prevLast;
-                } else if (last == -1) {
-                    // Our buffers ended, page and document did not
+                    page.loadEvents(
+                        off,
+                        current_offset - off,
+                        types,
+						string_indexes,
+                        all_strings,
+						open_nodes,
+						this);
+                if (last == -1)
                     break;
-                } else if (last < BufferManager.getPageSize()) {
-                    // Document ended, page did not
+                else 
                     off += last - prevLast;
-                    sendDocument();
-                }
             }
         }
     }
 
-    private void sendDocument() throws SAXException {
+    void sendDocument(DocumentImpl doc) throws SAXException {
         try {
-            page.fixDocument(open_nodes);
             if (producingOutput)
                 outputStream.put(doc);
         } catch (InterruptedException ie) {
@@ -138,10 +120,9 @@ public class SAXDOMReader extends SAXDOMIO {
         } catch (ShutdownException se) {
             throw new SAXException("Query shutdown " + se.getMessage());
         }
-        doc = null;
     }
 
-    private void setPage(Page page) {
+    void setPage(Page page) {
         // Unpin previous page, if any
         if (this.page != null)
             this.page.unpin();
