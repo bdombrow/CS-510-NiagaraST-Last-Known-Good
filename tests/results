@@ -2,7 +2,7 @@
 
 <Average>1.875</Average>
 </niagara:results>
-Total time: 1510ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <newnum>1</newnum>
@@ -14,7 +14,7 @@ Total time: 1510ms.
 <newnum>1</newnum>
 <newnum>1</newnum>
 </niagara:results>
-Total time: 404ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <num>1</num>
@@ -26,12 +26,12 @@ Total time: 404ms.
 <num>1</num>
 <num>1</num>
 </niagara:results>
-Total time: 535ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <Count>8</Count>
 </niagara:results>
-Total time: 302ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <num>1</num>
@@ -59,7 +59,7 @@ Total time: 302ms.
 <num>1</num>
 <num>1</num>
 </niagara:results>
-Total time: 786ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <title><aNumber>100</aNumber></title>
@@ -74,19 +74,19 @@ Total time: 786ms.
 <title><aNumber>100</aNumber></title>
 <title><aNumber>100</aNumber></title>
 </niagara:results>
-Total time: 1414ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <PERSONA>OCTAVIUS CAESAR</PERSONA>
 <PERSONA>M. AEMILIUS LEPIDUS</PERSONA>
 </niagara:results>
-Total time: 734ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <PERSONA>OCTAVIUS CAESAR</PERSONA>
 <PERSONA>M. AEMILIUS LEPIDUS</PERSONA>
 </niagara:results>
-Total time: 422ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <NUM>1</NUM>
@@ -97,7 +97,7 @@ Total time: 422ms.
 <NUM>1</NUM>
 <NUM>1</NUM>
 </niagara:results>
-Total time: 317ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <NUM>1</NUM>
@@ -109,12 +109,12 @@ Total time: 317ms.
 <NUM>4</NUM>
 <NUM>5</NUM>
 </niagara:results>
-Total time: 341ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <sum>15.0</sum>
 </niagara:results>
-Total time: 266ms.
+
 <?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
 
 <GAMEDATA>
@@ -234,4 +234,4 @@ Total time: 266ms.
 </PLAY>
 </GAMEDATA>
 </niagara:results>
-Total time: 1282ms.
+
