@@ -28,6 +28,8 @@ public class FirehoseConstants {
 
     public static final String CLOSE_STREAM = "</niagara:stream>";
 
+    public static final String XML_DECL = "\n<?xml version=\"1.0\"?>\n";
+
     public static int LISTEN_PORT = 5000;
 }
 

@@ -24,7 +24,7 @@ class XMLFirehoseThread extends Thread {
     private long startTime;
 
     private int totalBytes = 0; // count total number of bytes written
-    private int byteDiff = 0;
+    private int byteDiff = 0;	// 
 
     public XMLFirehoseThread(String str, MsgQueue _queue) {
 	super(str);
@@ -39,7 +39,7 @@ class XMLFirehoseThread extends Thread {
 		totalBytes = 0;
 
 		fhSpec = msg.getSpec();
-		boolean useStreamingFormat = fhSpec.isStreaming();
+		boolean useStreamingFormat = fhSpec.useStreamFormat();
 		boolean usePrettyPrint = fhSpec.isPrettyPrint();
 		int numGenCalls = fhSpec.getNumGenCalls();
 

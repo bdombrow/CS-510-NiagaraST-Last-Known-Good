@@ -66,7 +66,6 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 	for(int i = 0; i<50; i++) {
 	    initMyBuf();
 	    generateOpenAuction(myBuf, 1);
-	    //generateOpenAuction(myBuf, ITEMS_PER_PERSON);
 	    writeMyBuf();
 	}
 
@@ -101,6 +100,8 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 
     private void initMyBuf() throws IOException {
 	myBuf.clear();
+	if(!useStreamingFormat)
+	   myBuf.append(FirehoseConstants.XML_DECL);
 	myBuf.append("<site>");
 	myBuf.append(nl);
     }
@@ -192,16 +193,9 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 	    myb.append(auctionId);
 	    myb.append("\">");
 	    myb.append(nl);
-	    
-	    // initial
-	    /* No intial - this is not realistic
-	    myb.append(tab2);
-	    myb.append("<initial>");
-	    myb.append(openAuctions.getCurrPrice(auctionId));
-	    myb.append("</initial>");
-	    myb.append(nl);
-	    */
 
+	    // no initial - does not fit our scenario
+	    
 	    // reserve 
 	    if(rnd.nextBoolean()) {
 		myb.append(tab2);

@@ -26,7 +26,12 @@ public class FirehoseSpec extends StreamSpec {
     private int rate;
     private boolean prettyPrint;
     private String trace;
+    private boolean useStreamFormat;
 
+    public boolean useStreamFormat() {
+	return useStreamFormat;
+    }
+    
     /**
      * Initialize the firehose spec
      *
@@ -40,18 +45,19 @@ public class FirehoseSpec extends StreamSpec {
      * @param descriptor2 An additional descriptor, right now used by auction
      *                      to specify the type of auction data to generate
      * @param numGenCalls Number of times to call the generator
-     * @param numTLElts   Number of top level elements to be included in a document
-     *                      applicable to some data types - including XMLB and Auction
+     * @param numTLElts   Number of top level elements to be included in a 
+     *                    document applicable to some data types 
+     *                    - including XMLB and Auction
      * @param rate        The rate at which the stream should run - currently
      *                      not used.
-     * @param streaming   Should the system expect and generate streaming data -
-     *                      right now this also forces the stream format to be used
+     * @param useStreamFormat   Should the firehose enclose the data using
+     *                          the niagara:stream formatting
      * @param prettyPrint Include newlines or not??
      */
     public FirehoseSpec(int listenerPortNum, String listenerHostName,
 			int dataType, String descriptor, String descriptor2,
 			int numGenCalls,int numTLElts, int rate, 
-			boolean streaming, boolean prettyPrint,
+			boolean useStreamFormat, boolean prettyPrint,
 			String trace) {
 	this.listenerPortNum = listenerPortNum;
 	this.listenerHostName = listenerHostName;
@@ -61,7 +67,7 @@ public class FirehoseSpec extends StreamSpec {
 	this.numGenCalls = numGenCalls;
 	this.numTLElts = numTLElts;
 	this.rate = rate;
-	this.streaming = streaming;
+	this.useStreamFormat = useStreamFormat;
 	this.prettyPrint = prettyPrint;
 	this.trace = trace;
     }
@@ -123,7 +129,7 @@ public class FirehoseSpec extends StreamSpec {
 		   ", NumGenCalls " + String.valueOf(numGenCalls) +
 		   ", NumTopLevelElts " + String.valueOf(numTLElts) +
 		   ", Rate " + String.valueOf(rate) +
-		   ", Streaming " + String.valueOf(streaming) +
+		   ", Stream Format " + String.valueOf(useStreamFormat) +
 		   ", PrettyPrint " + String.valueOf(prettyPrint) +
 		   ", Trace = " + trace);
     }
@@ -152,7 +158,7 @@ public class FirehoseSpec extends StreamSpec {
 	s.append(" ");
 	s.append(rate);
 	s.append(" ");
-	s.append(streaming);
+	s.append(useStreamFormat);
 	s.append(" ");
 	s.append(prettyPrint);
 	s.append(" ");
@@ -222,7 +228,8 @@ public class FirehoseSpec extends StreamSpec {
 	if(ttype != StreamTokenizer.TT_WORD) {
 	    throw new CorruptMsgException("invalid streaming value");
 	}
-	streaming = (Boolean.valueOf(input_stream.sval)).booleanValue();     
+	useStreamFormat 
+	    = (Boolean.valueOf(input_stream.sval)).booleanValue();     
 
 	ttype = input_stream.nextToken();
 	if(ttype != StreamTokenizer.TT_WORD) {
