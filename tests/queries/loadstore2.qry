@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- This is a query to test the load/store mechanism -->
+
+<plan top="load">
+
+<load id="load" variable="load" resource="test-numbers"/>
+
+</plan>

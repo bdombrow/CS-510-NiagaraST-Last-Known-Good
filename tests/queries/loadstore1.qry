@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- This query tests the load/store mechanism -->
+<plan top="store">
+
+<constant id="const1">
+<![CDATA[
+<list>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+</list>
+]]>
+</constant>
+
+<constant id="const2">
+<![CDATA[
+<list>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+<item>0</item><item>1</item><item>2</item><item>3</item>
+</list>
+]]>
+</constant>
+
+<unnest id="c1" regexp="list.item" input="const1"/>
+<unnest id="c2" regexp="list.item" input="const2"/>
+<join id="join" input="c1 c2"/>
+<store id="store" input="join" root="const1" resource="test-numbers"/>
+</plan>
