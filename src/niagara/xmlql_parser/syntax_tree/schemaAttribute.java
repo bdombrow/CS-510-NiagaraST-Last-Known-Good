@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: schemaAttribute.java,v 1.3 2001/08/08 21:33:43 tufte Exp $
+  $Id: schemaAttribute.java,v 1.4 2002/10/26 21:57:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,7 +48,7 @@
 package niagara.xmlql_parser.syntax_tree;
 
 
-import org.w3c.dom.*;
+import niagara.utils.CUtil;
 
 public class schemaAttribute {
         int attrNumber;     // position of the SchemaUnit in the Schema
@@ -190,7 +190,7 @@ public class schemaAttribute {
 	 */
 
 	public void dump(int depth) {
-		Util.genTab(depth);
+		CUtil.genTab(depth);
 		dump();
 	}
 

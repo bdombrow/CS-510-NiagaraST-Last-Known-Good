@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: constructInternalNode.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
+  $Id: constructInternalNode.java,v 1.3 2002/10/26 21:57:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,6 +37,7 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
+import niagara.utils.CUtil;
 import org.w3c.dom.*;
 
 public class constructInternalNode extends constructBaseNode {
@@ -134,7 +135,7 @@ public class constructInternalNode extends constructBaseNode {
 	 */
 
 	public void dump(int depth) {
-		Util.genTab(depth);
+		CUtil.genTab(depth);
 		System.out.println("CHILDREN");
 		(getStartTag()).dump(depth);
 		Object bn;

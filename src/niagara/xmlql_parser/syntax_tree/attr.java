@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: attr.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
+  $Id: attr.java,v 1.3 2002/10/26 21:57:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,6 +31,8 @@
  *
  */
 package niagara.xmlql_parser.syntax_tree;
+
+import niagara.utils.CUtil;
 
 
 public class attr {
@@ -92,9 +94,9 @@ public class attr {
      */
 
     public void dump(int i) {
-	Util.genTab(i);
+	CUtil.genTab(i);
 	System.out.println("ATTR");
-	Util.genTab(i);
+	CUtil.genTab(i);
 	System.out.println(name);
 	value.dump(i);
     }

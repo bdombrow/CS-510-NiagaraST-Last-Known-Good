@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Util.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: Util.java,v 1.2 2002/10/26 21:57:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,18 +35,9 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
+import niagara.logical.*;
+
 public class Util {
-
-	/**
-	 * prints n tabs on the standard output
-	 *
-	 * @param number of tabs to print
-	 */
-
-	public static void genTab(int depth) {
-		for(int i= 0; i<depth; i++)
-			System.out.print("\t");
-	}
 
 	/**
 	 * used to generate regular expression from a set of identifiers
@@ -126,10 +117,10 @@ public class Util {
 	 * @return predicate resulting from ANDing multiple predicates
 	 */
 
-	public static predicate andPredicates(Vector preds) {
-		predicate curpred = (predicate)preds.elementAt(0);	
+	public static Predicate andPredicates(Vector preds) {
+		Predicate curpred = (Predicate) preds.elementAt(0);	
 		for(int i=1;i<preds.size();i++) 
-			curpred = new predLogOpNode(opType.AND,curpred,(predicate)preds.elementAt(i));
+			curpred = new And(curpred,(Predicate) preds.elementAt(i));
 		return curpred;
 	}
 
@@ -209,11 +200,11 @@ public class Util {
 	 * @return predicate that represent this join condition
 	 */
 
-	public static predicate makePredicate(Vector leftJoinAttr, Vector rightJoinAttr) {
+	public static Predicate makePredicate(Vector leftJoinAttr, Vector rightJoinAttr) {
 		
-		predicate newPred, rightChild;
+		Predicate newPred, rightChild;
 		schemaAttribute leftSA, rightSA;
-		data leftData, rightData;
+		Atom leftData, rightData;
 
 		if((leftJoinAttr == null) || (rightJoinAttr == null))
 		   return null;
@@ -226,22 +217,22 @@ public class Util {
 		rightSA = new schemaAttribute((schemaAttribute)rightJoinAttr.elementAt(0));
 		rightSA.setStreamId(1);
 
-		leftData = new data(dataType.ATTR,leftSA);
-		rightData = new data(dataType.ATTR,rightSA);
+		leftData = new OldVariable(leftSA);
+		rightData = new OldVariable(rightSA);
 
-		newPred = new predArithOpNode(opType.EQ,leftData,rightData);
+		newPred = Comparison.newComparison(opType.EQ,leftData,rightData);
 
 		for(int i=1;i<numAttr;i++) {
 			leftSA = new schemaAttribute((schemaAttribute)leftJoinAttr.elementAt(i));
 			rightSA = new schemaAttribute((schemaAttribute)rightJoinAttr.elementAt(i));
 			rightSA.setStreamId(1);
 
-			leftData = new data(dataType.ATTR,leftSA);
-			rightData = new data(dataType.ATTR,rightSA);
+			leftData = new OldVariable(leftSA);
+			rightData = new OldVariable(rightSA);
 			
-			rightChild = new predArithOpNode(opType.EQ,leftData,rightData);
+			rightChild = Comparison.newComparison(opType.EQ,leftData,rightData);
 
-			newPred = new predLogOpNode(opType.AND,newPred,rightChild);
+			newPred = new And(newPred,rightChild);
 		}
 
 		return newPred;

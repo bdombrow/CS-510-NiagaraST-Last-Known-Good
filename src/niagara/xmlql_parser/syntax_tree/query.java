@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: query.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: query.java,v 1.2 2002/10/26 21:57:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,6 +33,8 @@
 package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
+
+import niagara.logical.Predicate;
 
 public class query {
 
@@ -87,17 +89,21 @@ public class query {
 
 		// prints each condition
 		for(int i=0; i<condList.size(); i++){
-			cond = (condition)condList.elementAt(i);
-			if(cond instanceof predicate) {
-				varList = ((predicate)cond).getVarList();
+                        Object oc = condList.elementAt(i);
+			if(oc instanceof Predicate) {
+                                ArrayList al = new ArrayList();
+				((Predicate)oc).getReferencedVariables(al);
 				System.out.print("list of predicate var: ");
-				for(int j=0;j<varList.size();j++) {
-					var = (String)varList.elementAt(j);
+				for(int j=0;j<al.size();j++) {
+					var = (String)al.get(j);
 					System.out.print(var+ " ");
 				}
 				System.out.println();
+                                ((Predicate) oc).dump(0);
 			}
-			cond.dump(0);
+                        else {
+        			((condition) oc).dump(0);
+                        }
 		}
 
 		// prints the construct part

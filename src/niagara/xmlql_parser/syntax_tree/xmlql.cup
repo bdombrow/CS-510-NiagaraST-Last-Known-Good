@@ -1,4 +1,4 @@
-// $Id: xmlql.cup,v 1.4 2002/04/17 03:10:46 vpapad Exp $
+// $Id: xmlql.cup,v 1.5 2002/10/26 21:57:11 vpapad Exp $
 ////////////////////////////////////////////////////////////////////////
 //
 //  xmlql.cup
@@ -13,7 +13,8 @@
 
 package niagara.xmlql_parser.syntax_tree;
 
-import java.lang.*;
+import niagara.logical.*;
+
 import java.util.*;
 import java_cup.runtime.*;
 
@@ -146,12 +147,12 @@ non terminal Vector    InClause;
 non terminal String    ConfirmToClause;
 non terminal pattern   Pattern;
 non terminal Vector    PatternList;
-non terminal predicate Predicate;
+non terminal Predicate Predicate;
 non terminal Vector    Sets;
 non terminal Vector    SetElemList;
 
-non terminal data      Expression;
-non terminal predicate BoolExp;
+non terminal Atom      Expression;
+non terminal Predicate BoolExp;
 non terminal Integer   OpRel;
 non terminal data      BindingAs;
 non terminal stp       StartTagPattern;
@@ -373,11 +374,11 @@ SetElemList ::= SetElemList:sl COMMA IDEN:i
 	      ;
 
 Predicate ::= Predicate:p1 AND Predicate:p2
-		{: RESULT = new predLogOpNode(opType.AND, p1, p2); :}
+		{: RESULT = new And(p1, p2); :}
 	    | Predicate:p1 OR Predicate:p2
-		{: RESULT = new predLogOpNode(opType.OR, p1, p2); :}
+		{: RESULT = new Or(p1, p2); :}
 	    | NOT Predicate:p
-		{: RESULT = new predLogOpNode(opType.NOT, p); :}
+		{: RESULT = new Not(p); :}
 	    | LPAREN Predicate:p RPAREN
 		{: RESULT = p; :}
 	    | BoolExp:b
@@ -385,17 +386,17 @@ Predicate ::= Predicate:p1 AND Predicate:p2
 	    ;
 
 BoolExp ::= Expression:e1 OpRel:o Expression:e2
-		{: RESULT = new predArithOpNode(o.intValue(),e1,e2); :}
+		{:  RESULT = Comparison.newComparison(o.intValue(), e1, e2); :}
           ;
 
 Expression ::= NUMBER:n 
-		  {: RESULT = new data(dataType.NUMBER, n); :}
+		  {: RESULT = new NumericConstant(n); :}
 	     | IDEN:i
-		  {: RESULT = new data(dataType.IDEN, i); :}
+		  {: RESULT = new StringConstant(i); :}
 	     | VAR:v
-		  {: RESULT = new data(dataType.VAR, v); :}
+		  {: RESULT = new Variable(v); :}
 	     | STRING:s
-		  {: RESULT = new data(dataType.STRING, s); :}
+		  {: RESULT = new StringConstant(s); :}
 	     ;
 
 OpRel ::= LT

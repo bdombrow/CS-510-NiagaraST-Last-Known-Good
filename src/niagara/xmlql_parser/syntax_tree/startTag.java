@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: startTag.java,v 1.2 2000/08/21 00:41:05 vpapad Exp $
+  $Id: startTag.java,v 1.3 2002/10/26 21:57:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,7 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
+import niagara.utils.CUtil;
 import org.w3c.dom.*;
 
 public class startTag {
@@ -116,7 +117,7 @@ public class startTag {
 	 */
 
 	public void dump(int depth) {
-		Util.genTab(depth);
+		CUtil.genTab(depth);
 		System.out.println("start_tag:");
 		sdata.dump(depth);
 		if(skolemId != null)

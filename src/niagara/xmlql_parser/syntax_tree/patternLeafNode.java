@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: patternLeafNode.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: patternLeafNode.java,v 1.2 2002/10/26 21:57:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,6 +36,8 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
+import niagara.logical.*;
+
 public class patternLeafNode extends pattern {
 
 	private data expData;  // leaf of the pattern
@@ -65,6 +67,17 @@ public class patternLeafNode extends pattern {
 	public patternLeafNode(regExp re, Vector al, data bd) {
 		super(re,al,bd);
 	}
+
+        /** Constructor that uses the new predicate data structures */
+        public patternLeafNode(regExp re, Vector al, Atom ed, data bd) {
+            super(re,al,bd);
+            if (ed.isVariable()) {
+                expData = new data(dataType.VAR, ((Variable) ed).getName());
+            }
+            else {
+                expData = new data(dataType.IDEN, ((StringConstant) ed).getValue());
+            }
+        }
 
 	/**
 	 * @return leaf data

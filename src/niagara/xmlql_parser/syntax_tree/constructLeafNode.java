@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: constructLeafNode.java,v 1.2 2000/08/21 00:41:04 vpapad Exp $
+  $Id: constructLeafNode.java,v 1.3 2002/10/26 21:57:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,6 +33,9 @@
 */
 package niagara.xmlql_parser.syntax_tree;
 
+
+import niagara.utils.CUtil;
+import niagara.utils.PEException;
 
 import org.w3c.dom.*;
 
@@ -74,8 +77,11 @@ public class constructLeafNode extends constructBaseNode {
 		if(type == dataType.VAR) {
 			String var = (String)leafData.getValue();
 			attr = vt.lookUp(var);
+                        // XXX vpapad: super ugly
+                        if (attr == null && var.charAt(0) == '$')
+                            attr = vt.lookUp(var.substring(1));
 			if(attr == null) 
-				System.out.println("this is not possible");
+				throw new PEException("Could not look up variable" + var);
 			leafData = new data(dataType.ATTR,attr);
 		}
 	}
@@ -87,7 +93,7 @@ public class constructLeafNode extends constructBaseNode {
 	 */
 
 	public void dump(int depth) {
-		Util.genTab(depth);
+		CUtil.genTab(depth);
 		System.out.println("constructLeaf");
 		leafData.dump(depth);
 	}

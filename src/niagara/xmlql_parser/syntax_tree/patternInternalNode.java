@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: patternInternalNode.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: patternInternalNode.java,v 1.2 2002/10/26 21:57:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,6 +37,8 @@ package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
 
+import niagara.utils.CUtil;
+
 public class patternInternalNode extends pattern {
 	
 	private Vector patternList; // list of children (patterns)
@@ -71,7 +73,7 @@ public class patternInternalNode extends pattern {
 	public void dump(int i) {
 		pattern child;
 		super.dump(i);
-		Util.genTab(i);
+		CUtil.genTab(i);
 		System.out.println("sub-pattern");
 		for(int j=0;j<patternList.size();j++) {
 			child = (pattern)patternList.elementAt(j);
