@@ -24,7 +24,6 @@ package niagara.utils.nitree;
 
 import java.util.*;
 import org.w3c.dom.*;
-import com.ibm.xml.parser.TXElement;
 
 import niagara.utils.*;
 import niagara.query_engine.MatchTemplate;
@@ -32,7 +31,7 @@ import niagara.query_engine.MatchTemplate;
 public class NIElement extends NINode {
 
     /* reference to dom element associated with this NIElement */
-    private TXElement domElement; 
+    private Element domElement; 
     /*private BooleanHolder writeable;*/// reference to writeable bit in NIDocument 
     private int writeableIdx;
     private boolean initialized;  // indicates if dom_element ref has been set up 
@@ -66,9 +65,9 @@ public class NIElement extends NINode {
      */
 
     /* FOR CONVERSION FROM DOM */
-    /*void initialize(TXElement _domElement, BooleanHolder _writeable, 
+    /*void initialize(Element _domElement, BooleanHolder _writeable, 
 		    NIDocument _ownerDoc) { */
-    void initialize(TXElement _domElement, int _writeableIdx,
+    void initialize(Element _domElement, int _writeableIdx,
 		    NIDocument _ownerDoc) { 
 
 	domElement = _domElement;
@@ -190,16 +189,16 @@ public class NIElement extends NINode {
     }
 
     /*
-     * TXElement functions
+     * Element functions
      */
     public NIAttribute[] getAttributeArray() {
 	/* oh god, what a nightmare!! this is going to perform just
 	 * like shit
 	 */
-	Attr[] domAttrArray = domElement.getAttributeArray();
+	NamedNodeMap domAttrArray = domElement.getAttributes();
 	NIAttribute[] niAttrArray = null;
-	for(int i = 0; i < domAttrArray.length; i++) {
-	    niAttrArray[i] = toNIAttribute(domAttrArray[i]);
+	for(int i = 0; i < domAttrArray.getLength(); i++) {
+	    niAttrArray[i] = toNIAttribute((Attr) domAttrArray.item(i));
 	}
 	return niAttrArray;
     }

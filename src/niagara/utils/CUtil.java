@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CUtil.java,v 1.3 2000/08/21 00:50:37 vpapad Exp $
+  $Id: CUtil.java,v 1.4 2001/07/17 06:45:56 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,11 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import com.ibm.xml.parser.util.*;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import niagara.ndom.*;
 
 /**
  *  The CUtil class has some static methods for doing utility stuff
@@ -148,73 +153,7 @@ public class CUtil {
 	}
     }
     
-    
-    /**
-     *  NOT TESTED or working??  
-     *
-     *  Result doc creation.  Takes an element, constructs a DTD, generates
-     *  new doc with DTD and element node and returns this new doc.
-     *
-     *  @param root the tree use as the element node for the doc
-     *  @return a newly constructed doc with root as that data element, and a DTD
-     *          for root as the DTD element
-     */
-    public static TXDocument CreateDTD(Node root)
-    {
-
-	// Create a new doc and 
-	//
-	TXDocument doc = new TXDocument();
-	DTD dtd = doc.createDTD(root.getNodeName(),null);
-	doc.appendChild(dtd);
-	doc.appendChild(root);
-	
-	// Collect all children names for each element
-	//
-	Hashtable ht = new Hashtable();
-	traverseTree(root,ht);
-	
-	// Create new tag for this node
-	//
-	Enumeration names = ht.keys();
-	
-	// For each unique element name in the tree, create a content model
-	//
-	while(names.hasMoreElements()) {
-	    String name = (String)names.nextElement();
-	    Hashtable children = (Hashtable)ht.get(name);
-	    if (children.size()==0) continue;   // don't create an entry for empty elements
-	    
-	    // Create content model for element
-	    //
-	    CMNode cmnode = null;
-	    Enumeration e = children.keys();
-	    while(e.hasMoreElements()) {
-		String childName = (String)e.nextElement();
-		if (cmnode==null)
-		    cmnode = new CMLeaf(childName);
-		else
-		    cmnode = new CM2op('|',cmnode,new CMLeaf(childName));
-	    }
-	    
-	    if (children.get(PCDATA) == null || children.size() != 1)
-		cmnode=new CM1op('*',cmnode);
-	    ContentModel cm = null;
-	    if (cmnode != null)
-		cm = new ContentModel(cmnode);
-	    
-	    // Create an element decl and add it to the dtd
-	    //
-	    ElementDecl ed = new ElementDecl(name,cm);
-	    if (cm == null) 
-		ed.setContentType(ElementDecl.EMPTY);
-	    dtd.appendChild(ed);
-	}
-	
-	return doc;
-    }
-    
-    
+        
     //--------------------------------------------------------------------
     // traverse tree
     //--------------------------------------------------------------------
@@ -306,42 +245,41 @@ public class CUtil {
      *  @param url the document to parse
      *  @return the parsed XML document or null
      */
-    public static TXDocument parseXML(String url)
-    throws FileNotFoundException, MalformedURLException, IOException, ParseException{
-	
-	// Set up a parser
-	// 
-        Parser p   = new Parser(url);
-        p.setWarningNoDoctypeDecl(true);
-        p.setWarningNoXMLDecl(true);
-        p.setKeepComment(false);
-        TXDocument doc = new TXDocument();
-        p.setElementFactory(doc);
+    public static Document parseXML(String url)
+    throws FileNotFoundException, MalformedURLException, 
+        IOException, ParseException {
+        DOMParser parser = DOMFactory.newParser();
+        boolean exceptionsThrown = false;
 
-	// Parse
-	//
-	// Parse from a file stream
-	// 
-	if (url.indexOf(":") < 0) {    
-	    FileInputStream inStream = new FileInputStream(url);
-	    p.readStream( inStream );
-	}
-	
-	// Parse from a URL stream
-	//
-	else {
-	    URL aurl = new URL(url);
-	    InputStream inStream = aurl.openStream();
-	    p.readStream( inStream );
-	}
-	
+        try {
+            // Parse from a file stream
+            // 
+            if (url.indexOf(":") < 0) {    
+                FileInputStream inStream = new FileInputStream(url);
+                parser.parse(new InputSource(inStream));
+            }
+            
+            // Parse from a URL stream
+            //
+            else {
+                URL aurl = new URL(url);
+                InputStream inStream = aurl.openStream();
+                parser.parse(new InputSource(inStream));
+            }
+        }
+        catch (SAXException se) {
+            System.err.println("A SAXException occured during parsing: " + se.getMessage());
+            exceptionsThrown = true;
+        }
+
+
 	// Throw exception if parse failed
 	//
-	if (p.getNumberOfWarnings()+p.getNumberOfErrors()>0) {
-		System.out.println("WARNING: Error parsing " + url);
+	if (parser.hasErrors() || parser.hasWarnings() || exceptionsThrown) {
 	    throw new ParseException("Error parsing xml file: " + url);
 	}
-	return doc;
+
+        return parser.getDocument();
     }
 
     

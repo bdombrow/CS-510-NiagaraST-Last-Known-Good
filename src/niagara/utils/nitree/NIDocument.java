@@ -20,6 +20,7 @@ import java.util.*;
 import java.io.*;
 
 import niagara.utils.*;
+import niagara.ndom.*;
 
 public class NIDocument extends NINode {
     
@@ -208,7 +209,7 @@ public class NIDocument extends NINode {
 	/* handle orphan elements */
 	Object o = null;
 	if(_domDoc == null) {
-	    _domDoc = new TXDocument();
+	    _domDoc = DOMFactory.newDocument();
 	} else {
 	    o = _mapTable.lookup(_domDoc);
 	    if(o != null) {
@@ -276,7 +277,7 @@ public class NIDocument extends NINode {
             writeable[wrIndex]=true;
 	}
 
-	niElt.initialize((TXElement)domElement, wrIndex, this);
+	niElt.initialize((Element) domElement, wrIndex, this);
 	wrIndex++;
 	if(wrIndex >= MAX_WR_ARRAY_SIZE) {
            throw new PEException("This SUCKS!! writeable array bigger than " + String.valueOf(MAX_WR_ARRAY_SIZE) + " elements !!");
@@ -389,15 +390,9 @@ public class NIDocument extends NINode {
 	return cloneDoc;
     }
 
-    /** from TXDocument
+    /** from Document
      */
     public void printWithFormat() {
-	try {
-	    ((TXDocument)domDoc).printWithFormat(pw, null, 3);
-	} catch (IOException ioe) {
-	    System.out.println("Error printing accum doc" + ioe.getMessage());
-	} catch (LibraryException le) {
-	    System.out.println("Error printing accum doc" + le.getMessage());
-	}
+        pw.print(XMLUtils.flatten(domDoc));
     }
 }

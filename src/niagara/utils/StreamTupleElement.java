@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: StreamTupleElement.java,v 1.2 2001/07/17 06:45:56 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -229,6 +229,10 @@ public final class StreamTupleElement extends StreamElement {
     }
 
 
+    public void setAttribute(int position, Object value) {
+        tuple.insertElementAt(value, position);
+    }
+
     /**
      * This function returns the old version of the tuple
      *
@@ -336,7 +340,7 @@ public final class StreamTupleElement extends StreamElement {
                 tuple.addElement(e.getFirstChild());
             }
             else { // type.equals("String")
-                tuple.addElement(((TXText)e.getFirstChild()).getText());
+                tuple.addElement(((Text) e.getFirstChild()).getData());
             }
         }
     }
