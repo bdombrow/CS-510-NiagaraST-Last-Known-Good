@@ -1,25 +1,178 @@
+<?xml version="1.0" ?>
 <catalog>
-<resource name="urn:niagara:comedies">
-<url location="http://www.cse.ogi.edu/~vpapad/xml/all_well.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/as_you.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/com_err.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/cymbelin.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/dream.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/lll.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/m_for_m.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/m_wives.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/merchant.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/much_ado.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/pericles.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/t_night.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/taming.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/tempest.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/troilus.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/win_tale.xml"/>
-<url location="http://www.cse.ogi.edu/~vpapad/xml/win_tale.xml"/>
-</resource>
+  <operators>
+    <logical name="dtdscan" 
+      class="niagara.xmlql_parser.op_tree.dtdScanOp"/>
+    <logical name="firehosescan" 
+      class="niagara.xmlql_parser.op_tree.FirehoseScanOp"/>
+    <logical name="streamscan"
+      class="niagara.xmlql_parser.op_tree.StreamScanOp"/>
+    <logical name="constant"
+      class="niagara.xmlql_parser.op_tree.ConstantOp"/>
+    <logical name="resource"
+      class="niagara.xmlql_parser.op_tree.ResourceOp"/>
+    <logical name="scan"
+      class="niagara.xmlql_parser.op_tree.scanOp">
+      <physical class="niagara.query_engine.PhysicalScanOperator"/>
+    </logical>
+    <logical name="select"
+      class="niagara.xmlql_parser.op_tree.selectOp">
+      <physical class="niagara.query_engine.PhysicalSelectOperator"/>
+    </logical>
+    <logical name="join"
+      class="niagara.xmlql_parser.op_tree.joinOp">
+      <physical class="niagara.query_engine.PhysicalNLJoinOperator"/>
+      <physical class="niagara.query_engine.PhysicalHashJoinOperator"/>
+    </logical>
+    <logical name="construct"
+      class="niagara.xmlql_parser.op_tree.constructOp">
+      <physical class="niagara.query_engine.PhysicalConstructOperator"/>
+    </logical>
+    <logical name="avg"
+      class="niagara.xmlql_parser.op_tree.averageOp">
+      <physical class="niagara.query_engine.PhysicalAverageOperator"/>
+    </logical>
+    <logical name="accumulate"
+      class="niagara.xmlql_parser.op_tree.AccumulateOp">
+      <physical class="niagara.query_engine.PhysicalAverageOperator"/>
+    </logical>
+    <logical name="expression"
+      class="niagara.xmlql_parser.op_tree.ExpressionOp">
+      <physical class="niagara.query_engine.PhysicalExpressionOperator"/>
+    </logical>
+    <logical name="sort"
+      class="niagara.xmlql_parser.op_tree.SortOp">
+      <physical class="niagara.query_engine.PhysicalSortOperator"/>
+    </logical>
+    <logical name="union"
+      class="niagara.xmlql_parser.op_tree.UnionOp">
+      <physical class="niagara.query_engine.PhysicalUnionOperator"/>
+    </logical>
+    <logical name="display"
+      class="niagara.xmlql_parser.op_tree.DisplayOp">
+      <physical class="niagara.query_engine.PhysicalDisplayOperator"/>
+    </logical>
+    <logical name="send"
+      class="niagara.xmlql_parser.op_tree.SendOp">
+      <physical class="niagara.query_engine.PhysicalSendOperator"/>
+    </logical>
+    <logical name="receive"
+      class="niagara.xmlql_parser.op_tree.ReceiveOp"/>
+    <logical name="sum"
+      class="niagara.xmlql_parser.op_tree.SumOp">
+      <physical class="niagara.query_engine.PhysicalSumOperator"/>
+    </logical>
+    <logical name="count"
+      class="niagara.xmlql_parser.op_tree.CountOp">
+      <physical class="niagara.query_engine.PhysicalCountOperator"/>
+    </logical>
+    <logical name="dup"
+      class="niagara.xmlql_parser.op_tree.dupOp">
+      <physical class="niagara.query_engine.PhysicalDuplicateOperator"/>
+    </logical>
+    <!-- The following operators cannot be accessed from XML query plans -->
+    <logical name="dbscan"
+      class="niagara.xmlql_parser.op_tree.dbScanOp">
+      <physical class="niagara.query_engine.PhysicalScanOperator"/>
+    </logical>
+    <logical name="tuplescan"
+      class="niagara.xmlql_parser.op_tree.tupleScanOp"/>
+    <logical name="nest"
+      class="niagara.xmlql_parser.op_tree.nestOp">
+      <physical class="niagara.query_engine.PhysicalNestOperator"/>
+    </logical>
+    <logical name="split"
+      class="niagara.xmlql_parser.op_tree.splitOp">
+      <physical class="niagara.query_engine.PhysicalSplitOperator"/>
+    </logical>
+    <logical name="trigaction"
+      class="niagara.xmlql_parser.op_tree.trigActionOp">
+      <physical class="niagara.query_engine.PhysicalTrigActionOperator"/>
+    </logical>
+  </operators>
 
-<resource name="urn:niagara:tragedies">
-	<resolver location="king.cse.ogi.edu:9090"/>
-</resource>
+  <resource name="urn:niagara:comedies">
+    <url location="http://king.cse.ogi.edu/xml/all_well.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/as_you.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/com_err.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/cymbelin.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/dream.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/lll.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/m_for_m.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/m_wives.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/merchant.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/much_ado.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/pericles.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/t_night.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/taming.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/tempest.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/troilus.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/win_tale.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/win_tale.xml"/>
+  </resource>
+
+  <resource name="urn:niagara:tragedies">
+    <resolver location="king.cse.ogi.edu:9090"/>
+  </resource>
+
+  <columbia>
+    <!-- Cost model from Columbia's "config.txt" -->
+    <costmodel>
+      <!-- cpu cost of copying one tuple to the next operator -->
+      <TOUCH_COPY value="0.0000001"/> 
+      <!-- cpu cost of evaluating one predicate -->
+      <CPU_PRED value="0.0000001"/>
+      <!-- cpu cost of evaluating an aggregation -->
+      <CPU_AGG value="0.0000001"/>
+      <!-- cpu cost of constructing CVA -->
+      <CPU_CVA value="0.000001"/>
+      <!-- cpu cost of applying function on one attribute -->
+      <CPU_APPLY value="0.0000001"/>
+      <!-- cpu cost of comparing and moving tuples -->
+      <CPU_COMP_MOVE value="0.0000001"/>
+      <!-- cpu cost of building hash table -->
+      <HASH_COST value="0.000002"/>
+      <!-- cpu cost for each hashjoin entry in hashjoin -->
+      <HASH_COST_JOIN value="0.00002"/>
+      <!-- cpu cost of finding index -->
+      <INDEX_PROBE value="0.000001"/>
+      <!-- block factor of table file -->
+      <BF value="100"/>
+      <!-- block factor of index file -->
+      <INDEX_BF value="1000"/>
+      <!-- i/o cost of reading one block -->
+      <IO value="0.025"/>
+      <!-- block factor of bit index file -->
+      <BIT_BF value="100000"/>
+      <!-- number of buffer pages -->
+      <BUF_SIZE value="40"/>
+      <!-- number of bytes each page -->
+      <PAGE_SIZE value="1024"/>
+      <!-- number of bytes an OID occupies -->
+      <OID_SIZE value="8"/>
+    </costmodel>
+    <!-- Configuration parameters, from Columbia's "config.txt" -->
+    <config>
+      <!-- default fanin for students and emps, also acting as CVACard -->
+      <StdFanin value="10"/>		
+      <!-- default fanin for students and emps, also acting as CVACard -->
+      <EmpFanin value="10"/>
+      <!-- default density -->
+      <Density value="1"/>
+      <!-- Number of catalogs examined, if varyFanin or varyDen is 1 -->
+      <NumCats value="10"/>
+      <!-- Care for "Cost vs. fanin" -->
+      <VaryFanin value="0"/>
+      <!-- Care for "Cost vs. density" -->
+      <VaryDen value="0"/>
+      <!-- fanin interval -->
+      <FaninItrv value="2"/>		
+      <!-- density interval -->
+      <DensityItrv value="0.05"/>
+      <!-- The ESTIMATED selectivity of filter predicate -->
+      <Selectivity value="1.0"/>
+      <!-- The ACTUAL selectivity of filter predicate -->
+      <ActualSelectivity value="0.1"/>
+    </config>
+  </columbia>
 </catalog>

@@ -10,6 +10,7 @@ public class TestCatalog extends TestCase {
     public void testParsing() {
         Catalog c = new Catalog("sample_catalog.xml");
         c.dumpStats();
+        c.dumpCostModel();
     }
 
     public static void main(String args[]) {
