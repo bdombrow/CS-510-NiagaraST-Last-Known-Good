@@ -1,4 +1,4 @@
-/* $Id: Attrs.java,v 1.8 2003/07/03 19:43:38 tufte Exp $    
+/* $Id: Attrs.java,v 1.9 2003/09/16 02:48:21 vpapad Exp $    
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -65,11 +65,6 @@ public class Attrs {
         al.addAll(list);
     }
     
-    Attrs(Attrs other) { // copy constructor
-        this();
-        al.addAll(other.al);
-    }
-
     Strings GetAttrNames() {
         Strings result = new Strings();
 
@@ -109,7 +104,7 @@ public class Attrs {
     boolean Contains(String attrName) {
         // check if the attid is in the vector
         for (int i = 0; i < size(); i++)
-            if (attrName.equals(get(i).getName()))
+            if (get(i).matchesName(attrName))
                 return true;
 
         return false;
@@ -117,9 +112,9 @@ public class Attrs {
 
     // Check if the attribute is in the Attrs
     // Two attributes with the same name are considered the same
-    boolean Contains(Strings AttrNames) {
-        for (int i = 0; i < AttrNames.size(); i++)
-            if (!Contains(AttrNames.get(i)))
+    boolean Contains(Strings attrNames) {
+        for (int i = 0; i < attrNames.size(); i++)
+            if (!Contains(attrNames.get(i)))
                 return false;
 
         return true; // this Attrs is contained in array
@@ -129,15 +124,6 @@ public class Attrs {
         return Contains(Attr.getName());
     }
 
-    public boolean Contains(ArrayList variables) {
-        for (int i = 0; i < variables.size(); i++) {
-            Attribute a = (Attribute) variables.get(i);
-            if (!Contains(a)) return false;
-        }
-        
-        return true;
-    }
-    
     public boolean contains(Attrs other) {
         for (int i = 0; i < other.size(); i++)
             if (!Contains(other.get(i)))

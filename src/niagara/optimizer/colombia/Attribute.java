@@ -1,4 +1,4 @@
-/* $Id: Attribute.java,v 1.4 2003/02/25 06:19:08 vpapad Exp $ 
+/* $Id: Attribute.java,v 1.5 2003/09/16 02:48:21 vpapad Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -31,4 +31,6 @@ public interface Attribute {
     Domain getDomain();
     
     Attribute copy();
+    
+    boolean matchesName(String name);
 } 
