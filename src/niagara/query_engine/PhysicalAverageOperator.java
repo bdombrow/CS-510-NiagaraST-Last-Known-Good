@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.7 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalAverageOperator.java,v 1.8 2002/10/24 02:59:34 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,35 +48,23 @@ import niagara.xmlql_parser.syntax_tree.*;
 
 public class PhysicalAverageOperator extends PhysicalGroupOperator {
 
-    ////////////////////////////////////////////////////////////////////
     // These are private nested classes used internally               //
-    ////////////////////////////////////////////////////////////////////
 
     /**
      * Instances of this class store sufficient statistics for computing
      * the average
      */
-    
     private class AverageSufficientStatistics {
-
-	//////////////////////////////////////////////////////////
 	// These are the private members of the class           //
-	//////////////////////////////////////////////////////////
 
 	// The number and sum of the of values
 	int numValues;
 	double sumOfValues;
 
-
-	//////////////////////////////////////////////////////////
-	// These are the methods of the class                   //
-	//////////////////////////////////////////////////////////
-
 	/**
 	 * This is the constructor that initializes average sufficient
 	 * statistics
 	 */
-
 	public AverageSufficientStatistics () {
 
 	    // No values initially
@@ -152,36 +139,9 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 
     private ArrayList atomicValues;
 
-    ////////////////////////////////////////////////////////////////////
-    // These are the methods of the class                             //
-    ////////////////////////////////////////////////////////////////////
-
-    /**
-     * This is the constructor for the PhysicalAverageOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     */
-
-    public PhysicalAverageOperator(op logicalOperator,
-				   SourceTupleStream[] sourceStreams,
-				   SinkTupleStream[] sinkStreams,
-				   Integer responsiveness) {
-
-	// Call the constructor of the super class
-	super(logicalOperator,
-	      sourceStreams,
-	      sinkStreams,
-	      responsiveness);
-
+    
+    public void initFrom(op logicalOperator) {
 	// Get the averaging attribute of the average logical operator
-	//
 	averageAttribute = ((averageOp) logicalOperator).getAveragingAttribute();
         ae = new AtomicEvaluator(averageAttribute);
         atomicValues = new ArrayList();
@@ -219,8 +179,12 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	// First get the atomic values
 	//
         atomicValues.clear();
+        // XXX vpapad: postpone until checkin of new AtomicEvaluator
         ae.getAtomicValues(tupleElement, atomicValues);
-
+        /*
+        ae.getAtomicValues(tupleElement, null, atomicValues);
+        */
+        
 	// If there is not exactly one atomic value, skip
 	//
 	if (atomicValues.size() != 1) {
@@ -326,48 +290,39 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	if (partialResult != null) {
 
 	    // Type cast partial result to a average sufficient statistics
-	    //
 	    AverageSufficientStatistics partialStats =
 		(AverageSufficientStatistics) partialResult;
 
 	    // Update number of values and the sum of values
-	    //
 	    numValues += partialStats.getNumberOfValues();
 	    sumValues += partialStats.getSumOfValues();
 	}
 	
 	// If the final result is not null, update with final result stats
-	//
 	if (finalResult != null) {
 
 	    // Type cast final result to a average sufficient statistics
-	    //
 	    AverageSufficientStatistics finalStats =
 		(AverageSufficientStatistics) finalResult;
 
 	    // Update number of values and sum of values
-	    //
 	    numValues += finalStats.getNumberOfValues();
 	    sumValues += finalStats.getSumOfValues();
 	}
 
 	// If the number of values is 0, average does not make sense
-	//
 	if (numValues == 0) {
 
 	    return null;
 	}
 
 	// Compute the average
-	//
 	double average = sumValues/numValues;
 
 	// Create an average result element
-	//
 	Element resultElement = doc.createElement("Average");
 
 	// Create a text node having the string representation of average
-	//
 	Text childElement = doc.createTextNode(Double.toString(average));
 
 	// Add the text node as a child of the element node
