@@ -47,6 +47,7 @@ public class LocalKey {
      * NOTE - must be set during initialization!!
      */
     private ArrayStack localKeySpec;
+    private ArrayList reachableNodes;
 
     public static final int TAG_EXISTENCE = 1;
     public static final int CONTENT = 2;
@@ -56,6 +57,7 @@ public class LocalKey {
      */
     LocalKey() {
 	localKeySpec = null;
+	reachableNodes = new ArrayList();
     }
 
     /** 
@@ -202,18 +204,20 @@ public class LocalKey {
 		localKeyVal.pop();
 		localKeyVal.push("NEVER");
 	    } else {
-		Vector reachableNodes = PathExprEvaluator.getReachableNodes(elt, atomicKey.path());
+		reachableNodes.clear();
+		atomicKey.getMatches(elt, reachableNodes);
 		
 		if(reachableNodes.size() == 0) {
 		    DOMHelper.printElt(elt);
-		    throw new OpExecException("Document is not key-complete. Elt tagname " + tagName + " " + elt.getTagName()+ " path " + atomicKey.path().toString());
+		    throw new OpExecException("Document is not key-complete. Elt tagname " + tagName + " " + elt.getTagName());
+		    //" path " + atomicKey.path().toString());
 		} else  if(reachableNodes.size() != 1) {
-		throw new OpExecException("Matches not allowed on set values when path is not singular. tagname " + tagName + " path " + atomicKey.path().toString());
+		throw new OpExecException("Matches not allowed on set values when path is not singular. tagname " + tagName);
+		//+ " path " + atomicKey.path().toString());
 		}
 		
 		localKeyVal.push(getKeyValue(atomicKey, 
-					     (Node)reachableNodes.elementAt(0)));
-		reachableNodes = null;
+					     (Node)reachableNodes.get(0)));
 	    }
 	}
 	return;
@@ -272,11 +276,13 @@ public class LocalKey {
 	if(numPaths == 1) {
 	    /* returns array/stack of array of string refs */
 	    AtomicKey atomicKey = (AtomicKey)localKeySpec.get(0);
-	    Vector reachableNodes = PathExprEvaluator.getReachableNodes(elt,atomicKey.path());
+	    reachableNodes.clear();
+	    atomicKey.getMatches(elt, reachableNodes);
 	    
 	    int numNodes = reachableNodes.size();
 	    if(numNodes == 0) {
-		throw new OpExecException("Document is not key-complete. Elt tagname " + tagName + " path " + atomicKey.path().toString());
+		throw new OpExecException("Document is not key-complete. Elt tagname " + tagName);
+		//+ " path " + atomicKey.path().toString());
 	    }
 	    
 	    for(int i =0; i<numNodes; i++) {
@@ -291,7 +297,7 @@ public class LocalKey {
 		/* the tag is always part of the key */
 		localKeyVal.push(tagName);
 		localKeyVal.push(getKeyValue(atomicKey,
-					 (Node)reachableNodes.elementAt(i)));
+					 (Node)reachableNodes.get(i)));
 		localKeyValList.push(localKeyVal);
 	    }
 	    return;
@@ -316,7 +322,7 @@ public class LocalKey {
 	     * node.getNodeValue()) into an instance
 	     * of the appropriate type
 	     */
-	    return atomicKey.nodeHelper.valueOf(node);
+	    return atomicKey.nodeHelper().valueOf(node);
 	default:
 	    throw new PEException("Invalid merge type");
 	}

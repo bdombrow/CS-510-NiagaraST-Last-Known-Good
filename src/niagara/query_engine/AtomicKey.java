@@ -9,6 +9,8 @@ package niagara.query_engine;
 
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.utils.type_system.*;
+import org.w3c.dom.Node;
+import java.util.ArrayList;
 
 /**
  * Implementation <code> AtomicKey </code> class which 
@@ -20,18 +22,20 @@ import niagara.utils.type_system.*;
 
 class AtomicKey {
 
-    int mergeType; /* must be MatchTemplate.TAG_EXISTENCE or .CONTENT */
-    regExp path;
-    NodeHelper nodeHelper;
+    private int mergeType; /*must be MatchTemplate.TAG_EXISTENCE or .CONTENT */
+    private PathExprEvaluator pathEvaluator;
+    private NodeHelper nodeHelper;
+    private boolean isNever;
 
-    AtomicKey(int _mergeType, regExp _path, NodeHelper _nodeHelper) {
-	mergeType = _mergeType;
-	path = _path;
-	nodeHelper = _nodeHelper;
+    AtomicKey(int mergeType, regExp path, NodeHelper nodeHelper) {
+	this.mergeType = mergeType;
+	pathEvaluator = new PathExprEvaluator(path);
+	this.nodeHelper = nodeHelper;
+	isNever = path.isNever();
     }
 
-    regExp path() {
-	return path;
+    void getMatches(Node n, ArrayList results) {
+	pathEvaluator.getMatches(n, results);
     } 
 
     int mergeType() {
@@ -43,6 +47,6 @@ class AtomicKey {
     }
 
     public boolean isNever() {
-	return path.isNever();
+	return isNever;
     }
 }
