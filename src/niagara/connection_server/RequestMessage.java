@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestMessage.java,v 1.8 2003/08/01 17:28:15 tufte Exp $
+  $Id: RequestMessage.java,v 1.9 2003/09/26 21:25:13 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,14 +38,11 @@ public class RequestMessage {
     //Assigning numbers to request types
     // for "switch"ing purposes
     static final int EXECUTE_QE_QUERY = 0;
-    static final int EXECUTE_SE_QUERY = 1;
     static final int KILL_QUERY =3;
     static final int SUSPEND_QUERY = 4;
     static final int RESUME_QUERY = 5;
     static final int GET_NEXT = 6;
-    static final int GET_DTD_LIST = 7;
     static final int GET_PARTIAL = 8;
-    static final int GET_DTD = 9;
     // Execute a prepared query plan, described in XML
     static final int EXECUTE_QP_QUERY = 10; 
     static final int RUN_GC = 11; // run the garbage collector
@@ -80,14 +77,11 @@ public class RequestMessage {
     public void setRequestType(int intType) throws InvalidRequestTypeException{
 	switch (intType) {
 	case EXECUTE_QE_QUERY: this.requestType = "execute_qe_query";break;
-	case EXECUTE_SE_QUERY: this.requestType = "execute_se_query";break;
 	case KILL_QUERY:this.requestType = "kill_query";break;
 	case SUSPEND_QUERY:this.requestType = "suspend_query";break;
 	case RESUME_QUERY:this.requestType = "resume_query";break;
 	case GET_NEXT:this.requestType = "get_next";break;
-	case GET_DTD_LIST:this.requestType = "get_dtd_list";break;
 	case GET_PARTIAL:this.requestType = "get_partial";break;
-	case GET_DTD:this.requestType = "get_dtd";break;
 	case EXECUTE_QP_QUERY: this.requestType = "execute_qp_query";break;
         case SYNCHRONOUS_QP_QUERY: this.requestType = "synchronous_qp_query";break;
         case EXPLAIN_QP_QUERY: this.requestType = "explain_qp_query";break;
@@ -99,8 +93,6 @@ public class RequestMessage {
     public int getIntRequestType() {
 	if (requestType.equals("execute_qe_query"))
 	    return EXECUTE_QE_QUERY;
-	if (requestType.equals("execute_se_query"))
-	    return EXECUTE_SE_QUERY;
 	if (requestType.equals("kill_query"))
 	    return KILL_QUERY;
 	if (requestType.equals("suspend_query"))
@@ -109,12 +101,8 @@ public class RequestMessage {
 	    return RESUME_QUERY;
 	if (requestType.equals("get_next"))
 	    return GET_NEXT;
-	if (requestType.equals("get_dtd_list"))
-	    return GET_DTD_LIST;
 	if (requestType.equals("get_partial"))
 	    return GET_PARTIAL;
-	if (requestType.equals("get_dtd"))
-	    return GET_DTD;
 	if (requestType.equals("execute_qp_query"))
 	    return EXECUTE_QP_QUERY;
 	if (requestType.equals("gc"))

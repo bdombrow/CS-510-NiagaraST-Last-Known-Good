@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.30 2003/09/22 00:20:29 vpapad Exp $
+  $Id: RequestHandler.java,v 1.31 2003/09/26 21:25:13 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -174,20 +174,6 @@ public class RequestHandler {
                 queryList.put(qid, queryInfo);
                 break;
 
-            case RequestMessage.EXECUTE_SE_QUERY :
-                throw new InvalidPlanException("SE queries no longer supported");
-
-            case RequestMessage.GET_DTD :
-                // Get the next qid
-                qid = getNextConnServerQueryId();
-                request.serverID = qid;
-
-                queryInfo = new ServerQueryInfo(qid, ServerQueryInfo.GetDTD);
-                // start the transmitter thread for sending results back
-                queryInfo.setTransmitter(
-                    new ResultTransmitter(this, queryInfo, request));
-                break;
-
             case RequestMessage.SUSPEND_QUERY :
                 throw new InvalidPlanException("Query suspension no longer allowed");
 
@@ -199,10 +185,6 @@ public class RequestHandler {
                 //-------------------------------------
             case RequestMessage.KILL_QUERY :
                 killQuery(request.serverID);
-                break;
-
-            case RequestMessage.GET_DTD_LIST :
-                sendDTDList(request);
                 break;
 
                 //-------------------------------------
@@ -470,16 +452,6 @@ public class RequestHandler {
         }
     }
 
-    /**
-     *  Get the DTD list from DM (which contacts ther YP if list is not cached)
-     * 
-     */
-    public Vector getDTDList() {
-        Vector ret = null;
-        ret = server.qe.getDTDList();
-        return ret;
-    }
-
     /**Gracefully shutdow the cunnection to this client
        cleans up all the outstanding queryies 
     */
@@ -491,22 +463,6 @@ public class RequestHandler {
             killQuery(info.getQueryId());
         }
         // and we are done!
-    }
-
-    /**Sends the DTD List to the client
-       @param request The client sent this request
-    */
-    public void sendDTDList(RequestMessage request) throws IOException {
-        ResponseMessage resp =
-            new ResponseMessage(request, ResponseMessage.DTD_LIST);
-        Vector dtdlist = getDTDList();
-        if (dtdlist == null)
-            resp.type = ResponseMessage.ERROR;
-        else {
-            for (int i = 0; i < dtdlist.size(); i++)
-                resp.appendData((String) dtdlist.elementAt(i) + "\n");
-        }
-        sendResponse(resp);
     }
 
     /**Send the queryId that has been assigned to this query. This is the first things that

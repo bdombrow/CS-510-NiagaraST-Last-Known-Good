@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.11 2003/08/01 17:28:15 tufte Exp $
+  $Id: ResponseMessage.java,v 1.12 2003/09/26 21:25:13 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -153,12 +153,9 @@ class ResponseMessage
 	switch (type) {
 	case QUERY_RESULT: return "query_result";
 	case END_RESULT: return "end_result";
-	case DTD_LIST : return "dtd_list";
 	case PARSE_ERROR : return "parse_error";
 	case ERROR : return "server_error";
 	case SERVER_QUERY_ID: return "server_query_id";
-	case SE_QUERY_RESULT: return "se_query_result";
-	case DTD: return "dtd";
 	case EXECUTION_ERROR: return "execution_error";
 	default: assert false: "Invalid type " + type;
 	    return "";

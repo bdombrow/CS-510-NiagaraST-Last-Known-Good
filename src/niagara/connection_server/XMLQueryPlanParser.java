@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.46 2003/09/22 00:20:29 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.47 2003/09/26 21:25:13 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -30,14 +30,17 @@ public class XMLQueryPlanParser {
     // Roots of remote plans
     private ArrayList remotePlans;
 
+    private niagara.ndom.DOMParser parser;
+    
     // The server catalog
     private Catalog catalog;
 
-    public void initialize() {
+    public XMLQueryPlanParser() {
         ids2els = new Hashtable();
         ids2plans = new Hashtable();
         ids2logprops = new Hashtable();
         catalog = NiagraServer.getCatalog();
+        parser = DOMFactory.newValidatingParser(); 
     }
 
     public void clear() {
@@ -46,27 +49,21 @@ public class XMLQueryPlanParser {
         ids2logprops.clear();
     }
 
-    public XMLQueryPlanParser() {
-        initialize();
-    }
-
     public Plan parse(String description) throws InvalidPlanException {
         description = description.trim();
         this.remotePlans = new ArrayList();
 
-        niagara.ndom.DOMParser p;
         Document document = null;
         try {
-            p = DOMFactory.newValidatingParser(); 
-            p.parse(
+            parser.parse(
                 new InputSource(
                     new ByteArrayInputStream(description.getBytes())));
-            if (p.hasErrors() || p.hasWarnings()) {
-                String msg = p.getErrorStrings() + p.getWarningStrings();
+            if (parser.hasErrors() || parser.hasWarnings()) {
+                String msg = parser.getErrorStrings() + parser.getWarningStrings();
                 throw new InvalidPlanException(
                     "Error parsing plan string:" + msg);
             }
-            document = p.getDocument();
+            document = parser.getDocument();
             Element root = (Element) document.getDocumentElement();
             return parsePlan(root);
         } catch (org.xml.sax.SAXException se) {
