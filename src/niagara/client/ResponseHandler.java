@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseHandler.java,v 1.2 2002/10/12 20:10:25 tufte Exp $
+  $Id: ResponseHandler.java,v 1.3 2003/03/08 02:20:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -488,15 +488,8 @@ class ResponseHandler extends HandlerBase
 				// notify the listener
 				QueryRegistry.Entry e = reg.getQueryInfo(lid);
 				int queryType = reg.getQueryType(lid);
-				if(e.type != QueryType.TRIG){
-					reg.markFinal(lid);
-					ui.notifyFinalResult(lid);
-				} else {
-					// Just remove the old results
-					// and don't mark the final
-					// set the already fired flasg to true
-					reg.setTriggerFired(lid);
-				}
+    			        reg.markFinal(lid);
+				ui.notifyFinalResult(lid);
 			}
 			else if(rtype.equals(DTD_LIST)){
 				// Construct a DTD_LIST object

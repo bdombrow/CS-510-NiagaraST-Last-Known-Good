@@ -31,7 +31,6 @@ QueryType.java\
 ResponseHandler.java\
 SEInterface.java\
 SEURLContent.java\
-TriggerUI.java\
 UIDriverIF.java\
 DTDCache.java
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagaraUI.java,v 1.6 2002/10/12 20:10:25 tufte Exp $
+  $Id: NiagaraUI.java,v 1.7 2003/03/08 02:20:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -80,7 +80,6 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
     // Buttons
     private JButton     	qbeButton;
     private JButton     	queryExecuteButton;
-    private JButton     	triggerButton;
     private JButton     	getNextButton;
     private JButton     	pauseButton;
     private JButton    		killButton;
@@ -120,8 +119,6 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
 	// the applet context to display search engine results in a browser
 	private AppletContext appletContext = null;
 	
-    private boolean             triggerNow;
-
     private DefaultMutableTreeNode    expandTreeRootNode;
 
     private DefaultListModel          queryResultListModel;
@@ -374,17 +371,6 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
 	GridBagLayout bLayout = new GridBagLayout();
 	GridBagConstraints bC = new GridBagConstraints();
 	bPanel = new JPanel(bLayout);
-
-	// Create and position the trigger button
-        triggerButton = makeButton("Install Trigger",KeyEvent.VK_T,"Install Trigger for Query");
-        bC.gridx = 0;
-        bC.gridy = 0;
-        bC.weightx = 0.5;
-        bC.weighty = 1.0;
-        bC.insets = new Insets(PAD,PAD,PAD,PAD);
-	bC.fill = GridBagConstraints.BOTH;
-        bLayout.setConstraints(triggerButton,bC);
-        bPanel.add(triggerButton);
 
 	// Create and position the execute button
         queryExecuteButton = makeButton("Execute Query",KeyEvent.VK_E,"Execute Query");
@@ -695,19 +681,8 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
 	   queryListBox.addItem(queryType);
 	   queryListBox.setSelectedItem(queryType);
 	   
-	   if ( triggerNow ) {
-	       QueryInfo qType = new QueryInfo();
-	       queryId = qeIF.executeQuery(new TriggerQuery(queryText.getText()), getNResults);
-	       qType.setQueryID(queryId);
-	       qType.setQueryType("XMLQL T");
-	       queryListBox.addItem(qType);
-	       queryListBox.setSelectedItem(qType);
-	   }
-	   
 	   disableQueryInputButtons();
 	   enableQueryResultButtons();
-	   
-	   triggerNow = false;
        }
        else
        /** Kill Query button action
@@ -781,23 +756,6 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
 	       JOptionPane.showMessageDialog(null,"Error: No Active Query","Error",JOptionPane.ERROR_MESSAGE);
 	   }
        } 
-       else
-       /** Trigger button action
-	 */
-       if ( actionCommand.equals(triggerButton.getText()) ) {
-	   TriggerUI trigger = new TriggerUI(null,true);
-
-	   String trigName = trigger.getTriggerName();
-
-	   if ( trigName != null ) {
-	       queryText.insert(trigName,0);
-	       queryText.append(trigger.getTriggerString());
-	       triggerButton.setEnabled(false);
-	   }
-
-	   if ( trigger.isInstallNow() ) triggerNow = true;
-	   trigger.dispose();
-       }
        else
 	   if ( actionCommand.equals(expandButton.getText()) ) {
 	       if ( expandTreeRootNode != null ) {
@@ -942,12 +900,10 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
     }
 
     public void disableQueryInputButtons() {
-	triggerButton.setEnabled(false);
 	queryExecuteButton.setEnabled(false);
     }
 
     public void enableQueryInputButtons() {
-	triggerButton.setEnabled(true);
 	queryExecuteButton.setEnabled(true);
     }
 

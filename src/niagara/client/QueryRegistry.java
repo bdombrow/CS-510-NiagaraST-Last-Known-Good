@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryRegistry.java,v 1.4 2002/10/12 20:10:25 tufte Exp $
+  $Id: QueryRegistry.java,v 1.5 2003/03/08 02:20:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -73,7 +73,7 @@ class QueryRegistry
 	 */
 	private int serverId = -1;
 	
-	// The type of the query (XMLQL,SEQL,Trigger) @see QueryType object
+	// The type of the query (XMLQL,SEQL) @see QueryType object
 	public int type = 0;
 	
 	// This indicates whether no more results are expected

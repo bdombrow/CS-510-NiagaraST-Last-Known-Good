@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.16 2003/01/13 05:04:56 tufte Exp $
+  $Id: ConnectionManager.java,v 1.17 2003/03/08 02:20:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -304,8 +304,6 @@ public class ConnectionManager implements QueryExecutionIF {
 	int queryType = reg.getQueryType(id);
 	if(queryType == QueryType.XMLQL || queryType == QueryType.QP){
 	    writeMessage(id, SUSPEND_QUERY);
-	} else if(queryType == QueryType.TRIG){
-	    reg.pauseTrigger(id);
 	} else {}//se stuff
     }
     
@@ -318,8 +316,6 @@ public class ConnectionManager implements QueryExecutionIF {
 	int queryType = reg.getQueryType(id);
 	if(queryType == QueryType.XMLQL || queryType == QueryType.QP){
 	    writeMessage(id, RESUME_QUERY);
-	} else if(queryType == QueryType.TRIG){
-	    reg.resumeTrigger(id);
 	} else {}//se stuff
     }
     
