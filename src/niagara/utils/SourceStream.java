@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SourceStream.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: SourceStream.java,v 1.2 2002/04/18 23:14:45 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -84,41 +84,33 @@ public class SourceStream {
      */
 
     public boolean steput(StreamTupleElement tuple)
-        throws java.lang.InterruptedException,
-    NullElementException,
-    StreamPreviouslyClosedException {
-        boolean done = false;
+        throws InterruptedException, NullElementException,  
+	StreamPreviouslyClosedException {
         do {
             // Try to put tuple in the stream
-            //
             StreamControlElement controlElement = 
                 stream.putTupleElementUpStream(tuple);
 
-            // If there is a control element, process it
-            //
-            if (controlElement != null) {
+	    if (controlElement == null) return true;
+	    
+	    // Process all the control elements coming our way
+	    loop: do { 
+		// If there is a control element, process it
+		switch (controlElement.type()) {
+		case StreamControlElement.ShutDown:
+		    // A shut down - so quit
+		    return false;
+		case StreamControlElement.SynchronizePartialResult:
+		    // Bounce it right back - all SourceStream tuples are final
+		    controlElement = 
+			stream.putControlElementUpStream(controlElement);
+		    break;
+		default:
+		    throw new PEException("Unexpected control element in source stream");
+		}
+	    } while (controlElement != null);
 
-                if (controlElement.type() == StreamControlElement.ShutDown) {
-
-                    // A shut down - so quit
-                    //
-                    return false;
-                }
-
-                // Ignore other control messages
-                //
-            }
-            else {
-
-                // The put was successful
-                //
-                done = true;
-            }
-        } while (!done);
-
-        // Tuple was successfully put
-        //
-        return true;
+	} while (true);
     }
 
     public boolean put (Object object) 
