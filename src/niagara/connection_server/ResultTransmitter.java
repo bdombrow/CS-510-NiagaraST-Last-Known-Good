@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.4 2000/08/24 04:04:06 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.5 2000/08/28 21:53:10 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -386,8 +386,13 @@ public class ResultTransmitter implements Runnable {
 		 * who knows if this will work or not
 		 */
 		if(count >= 2000 && !alreadyReturningPartial) {
-		    //System.out.println("Accum Mgr requesting partial result");
-		    //queryInfo.queryResult.returnPartialResults();
+		    System.out.println("Accum Mgr requesting partial result");
+		    try {
+		    queryInfo.queryResult.returnPartialResults();
+		    }
+		    catch (QueryResult.AlreadyReturningPartialException arpe) {
+			//
+		    }
 		    count = 0;
 		} 
 		/*}*/
@@ -451,7 +456,7 @@ public class ResultTransmitter implements Runnable {
 
 		case QueryResult.EndOfPartialResult:
 		    /* think I can ignore this */
-		    System.out.println("ResultTransmitter.handleAccumQuery ignoring EndOfPartialResult");
+		    //		    System.out.println("ResultTransmitter.handleAccumQuery ignoring EndOfPartialResult");
 		    break;
 
 		    case QueryResult.NonBlockingResult:

@@ -15,7 +15,7 @@ import niagara.xmlql_parser.syntax_tree.*;
 import niagara.xmlql_parser.syntax_tree.re_parser.*;
 import niagara.xmlql_parser.syntax_tree.construct_parser.*;
 import niagara.query_engine.MTException;
-import niagara.utils.PEException;
+import niagara.utils.*;
 
 public class XMLQueryPlanParser {
 
@@ -194,9 +194,8 @@ public class XMLQueryPlanParser {
 	    rep.done_parsing();
 	}
 	catch (Exception ex) {
-	    System.err.println("Error while parsing: " + regexpAttr);
 	    ex.printStackTrace();
-	    throw new InvalidPlanException();
+	    throw new InvalidPlanException("Error while parsing: " + regexpAttr + " in " + id);
 	}
 	
 	schemaAttribute resultSA = 
@@ -209,10 +208,16 @@ public class XMLQueryPlanParser {
 	// If left blank, we start the regexp from the last
 	// attribute added to the input tuple
 	schemaAttribute sa;
-	if (rootAttr.equals(""))
-	    sa = new schemaAttribute(sc.numAttr() - 1);
-	else
-	    sa = new schemaAttribute(qpVarTbl.lookUp(rootAttr));
+	try {
+	    if (rootAttr.equals(""))
+		sa = new schemaAttribute(sc.numAttr() - 1);
+	    else
+		sa = new schemaAttribute(qpVarTbl.lookUp(rootAttr));
+	}
+	catch (Exception exc) {
+	    throw new InvalidPlanException("Parse error: Unknown variable " + rootAttr + " in " + id);
+
+	}
 
 	op.setScan(sa, redn);
 
@@ -236,7 +241,8 @@ public class XMLQueryPlanParser {
 
 	String inputAttr = e.getAttribute("input");
 	String classAttr = e.getAttribute("class");
-	
+	String expressionAttr = e.getAttribute("expression");
+
 	logNode input = (logNode) ids2nodes.get(inputAttr);
 	
 	// Copy the varTbl and schema from the node downstream, or create 
@@ -260,17 +266,24 @@ public class XMLQueryPlanParser {
 	
 	// Register variable -> resultSA
 	qpVarTbl.addVar("$" + id, resultSA);
-	
-	try {
-	    op.setExpressionClass(Class.forName(classAttr));
+
+	op.setVarTable(qpVarTbl.getMapping());
+
+	if (!classAttr.equals("")) {
+	    try {
+		op.setExpressionClass(Class.forName(classAttr));
+	    }
+	    catch (ClassNotFoundException cnfe) {
+		throw new InvalidPlanException("Class " + classAttr + " could not be found");
+	    }
 	}
-	catch (ClassNotFoundException cnfe) {
-	    throw new InvalidPlanException("Class " + classAttr + " could not be found");
+	else if (!expressionAttr.equals("")) {
+	    op.setExpression(expressionAttr);
 	}
+	else 
+	    throw new InvalidPlanException("Either a class, or an expression to be interpreted must be defined for an expression operator");
 
 	sc.addSchemaUnit(new SchemaUnit(null, sc.numAttr()));
-
-	
 	logNode expressionNode = new logNode(op, input);
 	
 	ids2nodes.put(id, expressionNode);
@@ -412,8 +425,7 @@ public class XMLQueryPlanParser {
 	    op.setSelectedAlgorithm(className);
 	}
 	catch (Exception ex) {
-	    System.err.println("Invalid algorithm: " + className);
-	    throw new InvalidPlanException();
+	    throw new InvalidPlanException("Invalid algorithm: " + className);
 	}
 	
 	logNode left = (logNode) ids2nodes.get(inputs.elementAt(0));
@@ -631,6 +643,24 @@ public class XMLQueryPlanParser {
 	op.setDocs(urls);
 	logNode node = new logNode(op);
 	ids2nodes.put(id, node);
+
+	// Create new varTbl and schema
+	varTbl qpVarTbl = new varTbl();
+	
+	schemaAttribute resultSA = 
+	    new schemaAttribute(0, varType.ELEMENT_VAR);
+	
+	// Register variable -> resultSA
+	qpVarTbl.addVar("$" + id, resultSA);
+
+	// Create a new, empty, schema
+	Schema sc = new Schema();
+	sc.addSchemaUnit(new SchemaUnit(null, 0));
+
+	// Register schema and variable table for the
+	// nodes above
+	node.setSchema(sc);
+	node.setVarTbl(qpVarTbl);
     }
 
     void handleFirehoseScan(Element e) 
@@ -671,7 +701,7 @@ public class XMLQueryPlanParser {
 	for (int i=0; i < children.getLength(); i++) {
 	    if (children.item(i).getNodeType() != Node.ELEMENT_NODE)
 		continue;
-	    content = content + flatten(children.item(i));
+	    content = content + XMLUtils.flatten(children.item(i));
 	}
 	String inputAttr = e.getAttribute("input");
 	
@@ -686,8 +716,7 @@ public class XMLQueryPlanParser {
 	    cep.done_parsing();
 	}
 	catch (Exception ex) {
-	    System.err.println("Error while parsing: "+ content);
-	    throw new InvalidPlanException();
+	    throw new InvalidPlanException("Error while parsing: "+ content);
 	}
 
 	varTbl qpVarTbl = null; 
@@ -774,17 +803,14 @@ public class XMLQueryPlanParser {
 		cl = true;
 	    }
 
-	    /* Copy the varTbl and schema from the node downstream, or create 
-	     * empty ones if they don't exist
-	     */
-	
-	    varTbl qpVarTbl; 
+	    varTbl qpVarTbl = null; 
 	    logNode inputNode = (logNode) ids2nodes.get(inputAttr);
 	    
 	    if (inputNode.getVarTbl() != null) {
 		qpVarTbl = new varTbl(inputNode.getVarTbl());
 	    } else {
-		qpVarTbl = new varTbl();
+		throw new InvalidPlanException("Accumulate needs variable " + mergeAttr 
+					       + "but input variable table is null");
 	    }
 	    
 	    schemaAttribute mergeSA;
@@ -795,6 +821,24 @@ public class XMLQueryPlanParser {
 	    logNode accumNode = new logNode(op, inputNode);
 	    ids2nodes.put(id, accumNode);	   
 
+	    // PhysicalAccumulateOperator outputs single-element StreamTuplElements
+	    // Create a new varTbl, containing a single variable for this element
+	    qpVarTbl = new varTbl();
+
+	    schemaAttribute resultSA = 
+		new schemaAttribute(0, varType.ELEMENT_VAR);
+	
+	    // Register variable -> resultSA
+	    qpVarTbl.addVar("$" + id, resultSA);
+
+	    // Create a new, empty, schema
+	    Schema sc = new Schema();
+	    sc.addSchemaUnit(new SchemaUnit(null, 0));
+
+	    // Register schema and variable table for the
+	    // nodes above
+	    accumNode.setSchema(sc);
+	    accumNode.setVarTbl(qpVarTbl);
 	} catch (MTException mte) {
 	    throw new InvalidPlanException("Invalid Merge Template" + 
 					   mte.getMessage());
@@ -877,22 +921,6 @@ public class XMLQueryPlanParser {
 
     }
 
-    String flatten(Node n) {
-	short type = n.getNodeType();
-	if (type == Node.ELEMENT_NODE) {
-	    String ret =  "<" + n.getNodeName() + ">";
-	    NodeList nl = n.getChildNodes();
-	    for (int i=0; i < nl.getLength(); i++) {
-		ret = ret + flatten(nl.item(i));
-	    }
-	    return ret + "</" + n.getNodeName() + ">";
-	}
-	else if (type == Node.TEXT_NODE) {
-	    return n.getNodeValue();
-	}
-	else 
-	    return "";
-    }
 
     public class InvalidPlanException extends Exception {
 	public InvalidPlanException() {

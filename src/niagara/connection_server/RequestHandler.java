@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.4 2000/08/09 23:53:47 tufte Exp $
+  $Id: RequestHandler.java,v 1.5 2000/08/28 21:53:10 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -334,6 +334,7 @@ public class RequestHandler {
 	    sendResponse(errMesg);
 	} catch (XMLQueryPlanParser.InvalidPlanException ipe) {
 	    System.out.println("Invalid Plan: " + ipe.getMessage());
+	    sendResponse(new ResponseMessage(request, ResponseMessage.PARSE_ERROR));
 	} catch(Exception e){
 	    System.out.println("Error Message" + e.getMessage());
 	    e.printStackTrace();
