@@ -10,10 +10,10 @@
 #-------------------------------------
 # Specify all relative path info here
 #-------------------------------------
-export NIAGROOT    = /home/projects/disc/niagara/kristin/niagara_1_0
+export NIAGROOT    = /home/projects/disc/niagara/vpapad/cvs/niagara_1_0
 export JAVA_HOME   = 
 export LIBDIR      = $(NIAGROOT)/lib
-export FIREHOSEDIR = /home/projects/disc/niagara/kristin/firehose_1_0
+export FIREHOSEDIR = //home/projects/disc/niagara/vpapad/cvs/firehose_1_0
 
 #------------------------------------
 # programs used
@@ -35,6 +35,7 @@ export DIFF	      	= $(LIBDIR)/diff.jar
 export JFLEX		= $(LIBDIR)/JFlex.zip:$(LIBDIR)/JLex.jar
 export FHOSE            = $(FIREHOSEDIR)
 export DIVA	    = $(LIBDIR)/diva.jar
+export JUNIT	    = $(LIBDIR)/junit.jar
 export DJAVA	    = $(LIBDIR)/djava.jar
 export HTMLLAYOUT   = $(LIBDIR)/htmllayout.jar
 export JETTY	    = $(LIBDIR)/com.mortbay.jetty.jar
@@ -57,7 +58,7 @@ export NIAGSRC     = $(NIAGROOT)/src
 #export TRIGLIB	      = $(LIBDIR)/trig.jar
 #export QBELIB2	      = $(LIBDIR)/qbe2.jar
 
-export CLASSPATH     = .:$(XERCES2):$(SAX):$(REGEXPLIB):$(CUPLIB):$(XML4J):$(DIFF):$(FHOSE):$(DIVA):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET):$(JFLEX):$(NIAGSRC)
+export CLASSPATH     = .:$(XERCES2):$(SAX):$(REGEXPLIB):$(CUPLIB):$(XML4J):$(DIFF):$(FHOSE):$(DIVA):$(JUNIT):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET):$(JFLEX):$(NIAGSRC)
 
 export DEBUG = -O
 
