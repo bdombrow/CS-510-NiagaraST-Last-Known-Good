@@ -1,6 +1,7 @@
 
+
 /**********************************************************************
-  $Id: WordReaderException.java,v 1.1 2000/05/30 21:03:28 tufte Exp $
+  $Id: WordReaderException.java,v 1.2 2002/08/17 18:29:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
