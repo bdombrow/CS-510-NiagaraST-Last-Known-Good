@@ -1,5 +1,5 @@
 /**
- * $Id: DOMFactory.java,v 1.4 2002/10/31 04:29:27 vpapad Exp $
+ * $Id: DOMFactory.java,v 1.5 2003/01/25 20:59:46 tufte Exp $
  *
  */
 
@@ -31,7 +31,7 @@ public class DOMFactory {
 	name2impl.put("xerces2", new XercesJ2());
         name2impl.put("saxdom", new SAXDOM()); 
 	
-	// new xerces parser is the default
+	// new xerces parser is the default 
 	impl = (DOMImplementation) name2impl.get("xerces2");
     }
 
@@ -55,6 +55,16 @@ public class DOMFactory {
      */
     public static Document newDocument() {
         return impl.newDocument();
+    }
+
+    /**
+     * <code>newDocument</code> creates a new Document with the 
+     * requestd implementation.
+     *
+     * @return a <code>Document</code> value
+     */
+    public static Document newDocument(String implementation) {
+        return ((DOMImplementation) name2impl.get(implementation)).newDocument();
     }
 
 
