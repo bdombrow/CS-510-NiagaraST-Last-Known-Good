@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.21 2002/04/30 22:22:31 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.22 2002/05/07 03:10:34 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -233,11 +233,10 @@ public class XMLQueryPlanParser {
 	    REParser rep = new REParser(scanner);
 	    redn = (regExp) rep.parse().value;
 	    rep.done_parsing();
-	}
-	catch (Exception ex) {
+	} catch (Exception ex) { // ugh cup throws "Exception!!!"
 	    ex.printStackTrace();
 	    throw new InvalidPlanException("Error while parsing: " 
-                                           + regexpAttr + " in " + id);
+					   + regexpAttr + " in " + id);
 	}
 	
 	schemaAttribute resultSA = 
@@ -250,16 +249,16 @@ public class XMLQueryPlanParser {
 	// If left blank, we start the regexp from the last
 	// attribute added to the input tuple
 	schemaAttribute sa;
-	try {
+    //try {
 	    if (rootAttr.equals(""))
 		sa = new schemaAttribute(sc.numAttr() - 1);
 	    else
 		sa = new schemaAttribute(qpVarTbl.lookUp(rootAttr));
-	}
-	catch (Exception exc) {
-	    throw new InvalidPlanException("Parse error: Unknown variable " + rootAttr + " in " + id);
+    //}
+    //catch (Exception exc) {
+    //    throw new InvalidPlanException("Parse error: Unknown variable " + rootAttr + " in " + id);
 
-	}
+    //	}
 
 	op.setScan(sa, redn);
 
@@ -482,9 +481,12 @@ public class XMLQueryPlanParser {
 	String className = e.getAttributeNode("physical").getValue();
 	try {
 	    op.setSelectedAlgorithm(className);
-	}
-	catch (Exception ex) {
-	    throw new InvalidPlanException("Invalid algorithm: " + className);
+	} catch (ClassNotFoundException ex) {
+	    throw new InvalidPlanException("Invalid algorithm: " + className
+					   + "  " + ex.getMessage());
+	} catch (niagara.xmlql_parser.op_tree.op.InvalidAlgorithmException x) {
+	    throw new InvalidPlanException("Invalid algorithm: " + className
+					   + "  " + x.getMessage());
 	}
 	
 	logNode left = (logNode) ids2nodes.get(inputs.get(0));

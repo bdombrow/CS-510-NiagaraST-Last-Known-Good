@@ -1,5 +1,5 @@
 /*
- * $Id: CommunicationServlet.java,v 1.1 2001/07/17 07:06:06 vpapad Exp $
+ * $Id: CommunicationServlet.java,v 1.2 2002/05/07 03:10:34 tufte Exp $
  *
  */
 
@@ -12,6 +12,7 @@ import java.util.*;
 
 import niagara.query_engine.*;
 import niagara.xmlql_parser.op_tree.*;
+import niagara.utils.*;
 
 public class CommunicationServlet extends HttpServlet {
     private NiagraServer server;
@@ -37,7 +38,8 @@ public class CommunicationServlet extends HttpServlet {
         xqpp = new XMLQueryPlanParser();
     }
 
-    public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    public void doGet(HttpServletRequest req, HttpServletResponse res) 
+	throws IOException {
         try {
             String type = req.getParameter("type");
             debug("handling GET request");
@@ -62,10 +64,8 @@ public class CommunicationServlet extends HttpServlet {
 
             debug("request handled");
 
-        }
-        catch (Exception e) {
-            cerr("An exception occured:");
-            e.printStackTrace();
+	} catch (InterruptedException e) {
+	    throw new UnrecoverableException("Interrupted exception - what should I do???? HELP - KT");
         }
     }
 
@@ -127,12 +127,11 @@ public class CommunicationServlet extends HttpServlet {
             es.scheduleSubPlan(top);
 
             debug("request handled");
-        }
-
-        catch (Exception e) {
-            cerr("An exception occured:");
-            e.printStackTrace();
-        }
+	}
+	catch (ShutdownException e) {
+	    cerr("ShutdownException occurred durong doPost:");
+	    e.printStackTrace();
+	}
     }
 
     public void setSend(String query_string, PhysicalSendOperator send) {

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.11 2002/04/29 19:47:51 tufte Exp $
+  $Id: RequestHandler.java,v 1.12 2002/05/07 03:10:34 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -124,7 +124,7 @@ public class RequestHandler {
 	    case RequestMessage.EXECUTE_QP_QUERY:
 		{
 		    // assign a new query id to this request
-		    int qid = getNextQueryId();
+		    int qid = getNextConnServerQueryId();
 
 		    XMLQueryPlanParser xp = new XMLQueryPlanParser();
 		    logNode topNode = xp.parse(request.requestData);
@@ -144,23 +144,23 @@ public class RequestHandler {
 		     * deal with a real query?? Modify queryInfo after
 		     * the fact?? Ugly!!!
 		     */
-		    ServerQueryInfo queryInfo;
+		    ServerQueryInfo serverQueryInfo;
 		    if(topNode.isAccumulateOp()) {
 			System.out.println("top node is accumulate: " +
 					   topNode.getAccumFileName());
-			queryInfo = new ServerQueryInfo(qid,
+			serverQueryInfo = new ServerQueryInfo(qid,
 					ServerQueryInfo.AccumFile);
-			queryInfo.accumFileName = topNode.getAccumFileName();
+			serverQueryInfo.accumFileName = topNode.getAccumFileName();
 		    } else {
-			queryInfo = new ServerQueryInfo(qid,
+			serverQueryInfo = new ServerQueryInfo(qid,
 				       ServerQueryInfo.QueryEngine);
 		    }
-		    queryInfo.queryResult = qr;
-		    queryList.put(qid,queryInfo);
+		    serverQueryInfo.queryResult = qr;
+		    queryList.put(qid,serverQueryInfo);
 
 		    // start the transmitter thread for sending results back
-		    queryInfo.transmitter = 
-			new ResultTransmitter(this,queryInfo,request);
+		    serverQueryInfo.transmitter = 
+			new ResultTransmitter(this,serverQueryInfo,request);
 
 		
 		    //send the query ID out
@@ -171,7 +171,7 @@ public class RequestHandler {
 	    case RequestMessage.EXECUTE_QE_QUERY:
 		
 		// assign a new query id to this request
-		int qid = getNextQueryId();
+		int qid = getNextConnServerQueryId();
 		
 		// now give the query to the query engine
 		QueryResult qr = server.qe.executeQuery(request.requestData);
@@ -196,7 +196,7 @@ public class RequestHandler {
 	    case RequestMessage.EXECUTE_TRIGGER_QUERY:
 			
 		// Get the next qid
-		qid = getNextQueryId();
+		qid = getNextConnServerQueryId();
 		
 		request.serverID = qid;
 
@@ -230,7 +230,7 @@ public class RequestHandler {
 	 case RequestMessage.EXECUTE_SE_QUERY:
 			
 		// Get the next qid
-		qid = getNextQueryId();
+		qid = getNextConnServerQueryId();
 		request.serverID = qid;
 		
 		// Create a query info object
@@ -248,7 +248,7 @@ public class RequestHandler {
 	
 	    case RequestMessage.GET_DTD:
 		// Get the next qid
-		qid = getNextQueryId();
+		qid = getNextConnServerQueryId();
 		request.serverID = qid;
 		
 		queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.GetDTD);
@@ -357,17 +357,24 @@ public class RequestHandler {
 		break;		
 	    }
 
-	}
-	catch(InvalidQueryIDException e) {
+	} catch(InvalidQueryIDException e) {
 	    ResponseMessage errMesg = 
 		new ResponseMessage(request,ResponseMessage.INVALID_SERVER_ID);
 	    sendResponse(errMesg);
 	} catch (XMLQueryPlanParser.InvalidPlanException ipe) {
+	    // KT THIS and other exceptions should be sent back
+	    // to client instead of being handled here...!!!
 	    System.out.println("Invalid Plan: " + ipe.getMessage());
 	    sendResponse(new ResponseMessage(request, ResponseMessage.PARSE_ERROR));
-	} catch(Exception e){
-	    System.out.println("Errors while handling request: " + e.getMessage());
-	    e.printStackTrace();
+	} catch(niagara.query_engine.QueryResult.ResultsAlreadyReturnedException re) {
+	    System.err.println("RequestHandler: ResultsAlready Returned " + re.getMessage());
+	    re.printStackTrace();
+	} catch (niagara.query_engine.QueryResult.AlreadyReturningPartialException arpe) {
+	    System.err.println("RequestHandler: AlreadyReturningPartial: " 
+			       + arpe.getMessage());
+	    arpe.printStackTrace();
+	} catch(niagara.utils.ShutdownException se) {
+	    System.err.println("Shutdown exception received in RequestHandler.handleRequest " + se.getMessage());
 	}
     }    
     
@@ -382,7 +389,7 @@ public class RequestHandler {
 	catch (IOException e) {
 	    //looks like connection stream got disconnected
 	    //gracefully shutdown the whole client connection
-            System.out.println("XXX sendResponse got an IOException");
+            System.out.println("XXX sendResponse got an IOException - closing client connection (KT)");
 	    closeConnection();
 	}
     }
@@ -399,7 +406,7 @@ public class RequestHandler {
 	
 	// Respond to an invalid queryID
 	if (queryInfo == null) {
-            throw new PEException("Trying to remove a nonexisting query!");
+            throw new InvalidQueryIDException();
 	}
 
 	// Process Kill message
@@ -425,13 +432,7 @@ public class RequestHandler {
     public Vector getDTDList()
     {
 	Vector ret = null;
-	try{
-	    ret = server.qe.getDTDList();
-	}
-	catch(Exception dmce){
-	    System.out.println("The data manager has been previously shutdown, re-start the system");
-	    return null;
-	}
+	ret = server.qe.getDTDList();
 	return ret;
     }
 
@@ -443,13 +444,10 @@ public class RequestHandler {
 	Enumeration e = queryList.elements();
 	while (e.hasMoreElements()) {
 	    try {
-		//System.out.println("Killing query...");
 		ServerQueryInfo info = (ServerQueryInfo) e.nextElement();
 		killQuery(info.getQueryId());
-	    }
-	    catch (Exception ex) {
-		System.err.println("Errors in shutting down connection");
-		ex.printStackTrace();
+	    } catch(InvalidQueryIDException iqe) {
+		System.err.println("RequestHandler - invalid query id during closeConnection " + iqe.getMessage());
 	    }
 	}
 	// and we are done!
@@ -482,7 +480,7 @@ public class RequestHandler {
     /**Get a new query id
        @return new query id
     */
-    public synchronized int getNextQueryId()
+    public synchronized int getNextConnServerQueryId()
     { 
 	return (lastQueryId++); 
     }
@@ -509,6 +507,8 @@ public class RequestHandler {
 	}
 
 	public ServerQueryInfo remove(int qid) {
+	    System.out.println("KT: Query with ServerQueryId " + qid +
+			       " removed from RequestHandler.QueryList");
 	    return (ServerQueryInfo) queryList.remove(new Integer(qid));
 	}
 

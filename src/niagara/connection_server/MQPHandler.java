@@ -1,5 +1,5 @@
 /**
- * $Id: MQPHandler.java,v 1.2 2002/04/29 19:47:51 tufte Exp $
+ * $Id: MQPHandler.java,v 1.3 2002/05/07 03:10:34 tufte Exp $
  *
  */
 
@@ -30,88 +30,97 @@ public class MQPHandler extends Thread {
     }
 
     public void run() {
-        catalog = NiagraServer.getCatalog();
-
-        // Replace all resource nodes we know about with
-        // dtdscans
-        resources = new Vector();
-        Vector allNodes = new Vector();
-        Vector traverse = new Vector();
-
-        traverse.add(root);
-
-        while (!traverse.isEmpty()) {
-            logNode n = (logNode) traverse.remove(0);
-            if (allNodes.contains(n))
-                continue;
-            if (n.getOperator() instanceof ResourceOp) {
-                resources.add(n);
-            }
-            else {
-                logNode[] inputs = n.getInputs();
-                for (int i = 0; i < inputs.length; i++) {
-                    traverse.add(inputs[i]);
-                }
-            }
-            allNodes.add(n);
-        }
-        
-        for (int i = 0; i < resources.size(); i++) {
-            logNode node = (logNode) resources.get(i);
-            ResourceOp rop = (ResourceOp) node.getOperator();
-            String urn = rop.getURN();
-            if (catalog.isLocallyResolvable(urn)) {
-                dtdScanOp op = null;
-                try {
-                op = (dtdScanOp) operators.DtdScan.clone();
-                } catch (Exception e) { ; }
-                op.setDocs(catalog.getURL(urn));
-                node.setOperator(op);
-                resources.remove(node);
-            }
-        }
-
-        // Maybe now the root is schedulable?
-        if (root.isSchedulable()) {
-            es.scheduleSubPlan(root);
-            return;
-        }
+	try {
+	    catalog = NiagraServer.getCatalog();
+	    
+	    // Replace all resource nodes we know about with
+	    // dtdscans
+	    resources = new Vector();
+	    Vector allNodes = new Vector();
+	    Vector traverse = new Vector();
+	    
+	    traverse.add(root);
+	    
+	    while (!traverse.isEmpty()) {
+		logNode n = (logNode) traverse.remove(0);
+		if (allNodes.contains(n))
+		    continue;
+		if (n.getOperator() instanceof ResourceOp) {
+		    resources.add(n);
+		}
+		else {
+		    logNode[] inputs = n.getInputs();
+		    for (int i = 0; i < inputs.length; i++) {
+			traverse.add(inputs[i]);
+		    }
+		}
+		allNodes.add(n);
+	    }
+	    
+	    for (int i = 0; i < resources.size(); i++) {
+		logNode node = (logNode) resources.get(i);
+		ResourceOp rop = (ResourceOp) node.getOperator();
+		String urn = rop.getURN();
+		if (catalog.isLocallyResolvable(urn)) {
+		    dtdScanOp op = null;
+		    try {
+			op = (dtdScanOp) operators.DtdScan.clone();
+		    } catch (CloneNotSupportedException e) {
+			throw new PEException("Unable to clone DTDScan " +
+					      e.getMessage()); 
+		    }
+		    op.setDocs(catalog.getURL(urn));
+		    node.setOperator(op);
+		    resources.remove(node);
+		}
+	    }
+	    
+	    // Maybe now the root is schedulable?
+	    if (root.isSchedulable()) {
+		es.scheduleSubPlan(root);
+		return;
+	    }
             
-        // Find roots of subgraphs that are schedulable
-        schedulableRoots = new Vector(); 
-
-        // non-schedulable nodes to check
-        Vector toCheck = new Vector(); 
-
-        toCheck.add(root);
-
-        // Do a depth first traversal of the query graph
-        // trying to find the roots of schedulable subgraphs
-        while (!toCheck.isEmpty()) {
-            logNode n = (logNode) toCheck.remove(0);
-            logNode[] inputs = n.getInputs();
-            for (int i = 0; i < inputs.length; i++) {
-                logNode m = inputs[i];
-                if (m.isSchedulable())
-                    schedulableRoots.add(m);
-                else
-                    toCheck.add(m);
-            }
-        }
-
-        subplans =  new StreamMaterializer[schedulableRoots.size()];
-        results = new String[schedulableRoots.size()];
-
-        for (int i = 0; i < subplans.length; i++) {
-            PageStream is = 
-		es.scheduleSubPlan((logNode) schedulableRoots.get(i));
-            subplans[i] = new StreamMaterializer(i, this, 
-						 new SourceTupleStream(is));
-            subplans[i].start();
-        }
-
-        if (subplans.length == 0)
-            route();
+	    // Find roots of subgraphs that are schedulable
+	    schedulableRoots = new Vector(); 
+	    
+	    // non-schedulable nodes to check
+	    Vector toCheck = new Vector(); 
+	    
+	    toCheck.add(root);
+	    
+	    // Do a depth first traversal of the query graph
+	    // trying to find the roots of schedulable subgraphs
+	    while (!toCheck.isEmpty()) {
+		logNode n = (logNode) toCheck.remove(0);
+		logNode[] inputs = n.getInputs();
+		for (int i = 0; i < inputs.length; i++) {
+		    logNode m = inputs[i];
+		    if (m.isSchedulable())
+			schedulableRoots.add(m);
+		    else
+			toCheck.add(m);
+		}
+	    }
+	    
+	    subplans =  new StreamMaterializer[schedulableRoots.size()];
+	    results = new String[schedulableRoots.size()];
+	    
+	    for (int i = 0; i < subplans.length; i++) {
+		PageStream is = 
+		    es.scheduleSubPlan((logNode) schedulableRoots.get(i));
+		subplans[i] = new StreamMaterializer(i, this, 
+						     new SourceTupleStream(is));
+		subplans[i].start();
+	    }
+	    
+	    if (subplans.length == 0)
+		route();
+	} catch (ShutdownException se) {
+	    // nothing to do but print a warning and return
+	    System.err.println("MQPHandler got shutdown "+se.getMessage());
+	    return;
+	}
     }
 
     public synchronized void subPlanDone(int number, String result) {
@@ -126,7 +135,9 @@ public class MQPHandler extends Thread {
             ConstantOp cop = null;
             try {
                 cop = (ConstantOp) operators.constantOp.clone();
-            } catch (Exception ex) { ; }
+	    } catch (CloneNotSupportedException ex) { 
+		throw new PEException("cant clone constant op " + ex.getMessage());
+	    }
             cop.setContent(results[number]);
             cop.setVars(n.getVarTbl().getVars());
             n.setOperator(cop);

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestParser.java,v 1.4 2002/04/29 19:47:51 tufte Exp $
+  $Id: RequestParser.java,v 1.5 2002/05/07 03:10:34 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -108,10 +108,8 @@ public class RequestParser extends HandlerBase implements Runnable {
 	     currentMesg.requestData = "";
 	 }
 	 else if (name.equals(REQUEST_DATA)||name.equals(REQUEST)) {
-	     
+	     // do nothing??? is this right? KT
 	 }
-	 //else
-	 //    throw new SAXException("Unexpected Element:"+currentElement+"appeared in the stream");
      }
 
     //If an element ends

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.10 2002/04/29 19:47:51 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.11 2002/05/07 03:10:34 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -186,7 +186,7 @@ public class ResultTransmitter implements Runnable {
 	}
 	catch  (RequestHandler.InvalidQueryIDException e) {
 	    // do nothing
-	    // this will never happen by the way
+	    // this will never happen by the way - are you sure? KT
 	}
 	return;
     }
@@ -219,13 +219,13 @@ public class ResultTransmitter implements Runnable {
 	    while (checkSuspension())
 		doWait();
 	    
-				// if this thread is scheduled for killing
+	    // if this thread is scheduled for killing
 	    if (killThread)
 		return;
 	    
 	    QueryResult.ResultObject resultObject;
 	    
-				//get the next result (KT: gets one result)
+	    //get the next result (KT: gets one result)
 	    try {
 		resultObject = queryResult.getNext(2000);
 	    } catch (QueryResult.ResultsAlreadyReturnedException e) {
@@ -243,11 +243,16 @@ public class ResultTransmitter implements Runnable {
 		    new ResponseMessage(request,
 					ResponseMessage.END_RESULT);
 		handler.sendResponse(response);
-		
+
 		//everything done! kill the query		
-		/* KT this gives a "trying to remove nonexisting query
-		 * message if called */
-		//handler.killQuery(request.serverID);		
+		try {
+		    handler.killQuery(request.serverID);		
+		} catch (RequestHandler.InvalidQueryIDException iqide) {
+		    // ignore this error - this simply means
+		    // that the RequestParser has closed the connection
+		    // and killed all associated queries before we got here
+		    // KT
+		}
 		return;
 		
 		// If it is just a regular query result save it
@@ -438,9 +443,14 @@ public class ResultTransmitter implements Runnable {
 		    handler.sendResponse(response);
 		
 		    /* everything done! kill the query */
-		    /* KT this gives a "trying to remove nonexisting query
-		     * message if called */
-		    //handler.killQuery(request.serverID);
+		    try {
+			handler.killQuery(request.serverID);
+		    } catch (RequestHandler.InvalidQueryIDException e) {
+			// ignore this error - this simply means
+			// that the RequestParser has closed the connection
+			// and killed all associated queries before we got here
+			// KT
+		    }
 		    return;
 
 		case QueryResult.EndOfPartialResult:

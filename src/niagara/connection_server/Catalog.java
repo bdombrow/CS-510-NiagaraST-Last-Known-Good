@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.3 2002/03/26 22:04:28 vpapad Exp $
+ * $Id: Catalog.java,v 1.4 2002/05/07 03:10:34 tufte Exp $
  *
  */
 
@@ -11,6 +11,7 @@ import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 
 import niagara.ndom.*;
+import niagara.utils.*;
 
 public class Catalog {
 
@@ -82,22 +83,8 @@ public class Catalog {
         InputSource is = null;
         try {
             is = new InputSource(new FileInputStream(filename));
-        }
-        catch (Exception e) {
-            cerr("Could not open file: " + filename);
-            System.exit(-1);
-        }
-
-        try {
             parser.parse(is);
-        }
-        catch (Exception e) {
-            cerr("Exception while parsing catalog: ");
-            e.printStackTrace();
-            System.exit(-1);
-        }
 
-        try {
             // Get document
             Document d = parser.getDocument();
             
@@ -132,11 +119,16 @@ public class Catalog {
                 }
             }
         }
-        catch (Exception e) {
-            cerr("Exception while loading catalog:");
+        catch (FileNotFoundException e) {
+            cerr("Catalog: FileNotFound " + e.getMessage());
             e.printStackTrace();
             System.exit(-1);
-        }
+	} catch(org.xml.sax.SAXException se) {
+	    throw new PEException("Error parsing catalog file " + se.getMessage());
+	} catch(IOException ioe) {
+	    throw new PEException("Error getting catalog file " +
+				  ioe.getMessage());
+	}
     }
     
     public static void cerr(String msg) {

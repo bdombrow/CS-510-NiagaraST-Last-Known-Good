@@ -24,8 +24,12 @@ public class Console extends Thread {
 	while (true) {
 	    try {
 		command = br.readLine();
+		}
+	    catch (java.io.IOException e) {
+		// ignored in previous code - KT
+		System.err.println("IO exception reading from ??? " +
+				   e.getMessage());
 	    }
-	    catch (Exception e) {}
 	    if (command.equals("exit")) {
 		System.out.println("... server exiting.");
                 server.shutdown();

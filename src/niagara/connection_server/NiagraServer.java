@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.13 2002/04/30 22:22:31 vpapad Exp $
+  $Id: NiagraServer.java,v 1.14 2002/05/07 03:10:34 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,6 +38,7 @@ import niagara.search_engine.server.SEClient;
 import niagara.trigger_engine.TriggerManager;
 import niagara.query_engine.QueryEngine;
 import niagara.ndom.DOMFactory;
+import niagara.utils.*;
 
 import niagara.ndom.saxdom.BufferManager;
 
@@ -101,7 +102,7 @@ public class NiagraServer
     public static boolean KT_PERFORMANCE = false;
 
     public NiagraServer() {
-        try {
+	try {
             // Create the query engine
             //
             qe = new QueryEngine(this, NUM_QUERY_THREADS,
@@ -147,11 +148,9 @@ public class NiagraServer
 		  Context context = sh.getContext();
 		  context.setAttribute("server", this);
 	      } 
-        }
-        catch (Exception ex) {
-            cerr("Could not start server because of ");
-            ex.printStackTrace();
-        }
+	} catch(IOException ioe) {
+	    throw new UnrecoverableException("IO Error Unable to start server: " + ioe.getMessage());
+	}
     }
     
     
@@ -370,7 +369,7 @@ public class NiagraServer
         //
         if(configInfoFile.exists()){
             
-            try{
+	    try{
                 FileInputStream fin = new FileInputStream(configInfoFile);
                 byte[] inbuff = new byte[512];
                 String curParam = null;
@@ -402,9 +401,12 @@ public class NiagraServer
                 curParam = curParam.substring(curParam.indexOf(":")+1);
                 NUM_OP_THREADS = Integer.parseInt(curParam);
                 
-            }catch(Exception e){
-                
-            }
+	    }catch(java.io.FileNotFoundException e){
+		throw new UnrecoverableException("Unable to retrieve config file " + e.getMessage());
+	    } catch (IOException ioe) {
+		throw new UnrecoverableException("Unable to read config file " 
+						 + ioe.getMessage());
+	    }
             return;
         }
         
@@ -419,34 +421,32 @@ public class NiagraServer
     private static boolean isInteger(String intValue)
 		{
 
-			try{
+		    //try{
 
 				// Convert String to int
 				//
 				int tmpInt = Integer.parseInt(intValue);
 				return true;
-			}catch(Exception e){
-				System.err.println("* Invalid integer value *");
-				return false;
-			}
+				//}catch(Exception e){
+				//System.err.println("* Invalid integer value *");
+				//return false;
+				//}
 		}
 
     /**
      *  see if host is valid
      */
     private static boolean hostIsValid(String host)
-		{
-			try{
-
-				// Try to lookup the host
-				//
-				InetAddress ip = InetAddress.getByName(host);
-				return true;
-			}catch(Exception e){
-				cerr("* Host '"+host+"' not found *");
-				return false;
-			}
-		}
+    {
+	try{
+	    // Try to lookup the host
+	    InetAddress ip = InetAddress.getByName(host);
+	    return true;
+	}catch(java.net.UnknownHostException e){
+	    cerr("* Host '"+host+"' not found *");
+	    return false;
+	}
+    }
 
     private static int parseIntArgument(String args[], int pos) {
 	if ((pos+1) >= args.length) {
