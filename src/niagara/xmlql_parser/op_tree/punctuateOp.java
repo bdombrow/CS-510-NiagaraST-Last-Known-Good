@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: punctuateOp.java,v 1.3 2003/07/08 02:11:06 tufte Exp $
+  $Id: punctuateOp.java,v 1.4 2003/07/10 22:14:47 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,6 +41,9 @@ import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
 public class punctuateOp extends binOp {
 
+    //The global timestamp attribute
+    public final static String STTIMESTAMPATTR = "TIMESTAMP";
+
     regExp re = null;
 
     //Track which input keeps the timer, and which keeps the data.
@@ -49,21 +52,15 @@ public class punctuateOp extends binOp {
     //The timer value attribute
     private Attribute attrTimer;
     //The data value corresponding to the timer value
-    private String stDataTimer;
-    //The data root attribute
-    private Attribute attrDataRoot;
-
-    private Attrs projectedAttrs;
+    private Attribute attrDataTimer;
 
     public punctuateOp() {
     }
 
-    public punctuateOp(int iDI, Attribute aTimer, String stDT,
-                       Attribute aDRoot) {
+    public punctuateOp(int iDI, Attribute aTimer,Attribute aDT) { 
 	this.iDataInput = iDI;
 	this.attrTimer = aTimer;
-	this.stDataTimer = stDT;
-	this.attrDataRoot = aDRoot;
+	this.attrDataTimer = aDT;
     }
 
     /**
@@ -93,12 +90,8 @@ public class punctuateOp extends binOp {
 	return attrTimer;
     }
 
-    public String getDataTimer() {
-	return stDataTimer;
-    }
-
-    public Attribute getDataRoot() {
-        return attrDataRoot;
+    public Attribute getDataTimer() {
+	return attrDataTimer;
     }
 
     public void dumpAttributesInXML(StringBuffer sb) {
@@ -122,15 +115,19 @@ public class punctuateOp extends binOp {
         LogicalProperty result = data.copy();
 
         result.setHasLocal(timer.hasLocal() || data.hasLocal());
-        result.setHasRemote(data.hasRemote() || data.hasRemote());
+        result.setHasRemote(timer.hasRemote() || data.hasRemote());
 
         // The output schema is exactly the schema of the data input
+	//  plus the TIMESTAMP attribute
+
+	result.addAttr(new Variable(STTIMESTAMPATTR, varType.CONTENT_VAR));
+	
         return result;
     }
 
     public Op opCopy() {
         return new punctuateOp(this.iDataInput, this.attrTimer,
-			       this.stDataTimer, this.attrDataRoot);
+			       this.attrDataTimer);
     }
 
     public boolean equals(Object obj) {
@@ -161,12 +158,14 @@ public class punctuateOp extends binOp {
 	attrTimer = Variable.findVariable(inputProperties[1 - iDataInput],
 					  stAttr);
 
-	stDataTimer = e.getAttribute("dataattr");
-
-	stAttr = e.getAttribute("dataroot");
+	stAttr = e.getAttribute("dataattr");
 	if (stAttr.length() == 0)
-	   throw new InvalidPlanException("Invalid root for :" + id);
-	   attrDataRoot = Variable.findVariable(inputProperties[iDataInput],
-						stAttr);
+	    throw new InvalidPlanException("Invalid datattr: " + id);
+	//If they want the system timestamp to be punctuated,
+	// leave this null
+	if (stAttr.endsWith(STTIMESTAMPATTR) == false)
+    	    attrDataTimer =
+	        Variable.findVariable(inputProperties[iDataInput], stAttr);
+
     }
 }
