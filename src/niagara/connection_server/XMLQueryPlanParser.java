@@ -534,15 +534,34 @@ public class XMLQueryPlanParser {
 	    System.err.println("Error while parsing: "+ content);
 	    throw new InvalidPlanException();
 	}
+
+	varTbl qpVarTbl; Schema sc;
 	
-	varTbl qpVarTbl = input.getVarTbl();
+	if (input.getVarTbl() != null) {
+	    qpVarTbl = new varTbl(input.getVarTbl());
+	    sc = new Schema(input.getSchema()); 
+	}
+	else {
+	    qpVarTbl = new varTbl();
+	    sc = new Schema();
+	    sc.addSchemaUnit(new SchemaUnit(null, -1));
+	}
+	
+	// varTbl qpVarTbl = input.getVarTbl();
 	
 	cn.replaceVar(qpVarTbl);
 	op.setConstruct(cn);
 	
 	logNode node = new logNode(op, (logNode) ids2nodes.get(inputAttr));
+
+	schemaAttribute resultSA = 
+	    new schemaAttribute(sc.numAttr());
+	
+	// Register variable -> resultSA
+	qpVarTbl.addVar("$" + id, resultSA);
 	
 	ids2nodes.put(id, node);
+	node.setSchema(sc);
 	node.setVarTbl(qpVarTbl);
 
     }
