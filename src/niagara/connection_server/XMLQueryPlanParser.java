@@ -35,10 +35,10 @@ public class XMLQueryPlanParser {
     }
 
     public logNode parse(String description) throws InvalidPlanException {
-	RevalidatingDOMParser p;
+	DOMParser p;
 	Document document = null;
 	try {
-	    p = new RevalidatingDOMParser();
+	    p = new DOMParser();
 	    p.parse(new InputSource(new ByteArrayInputStream(description.getBytes())));
 	    document = p.getDocument();
 	    Element root = (Element) document.getDocumentElement();
@@ -106,6 +106,9 @@ public class XMLQueryPlanParser {
 	else if (nodeName.equals("select")) {
 	    handleSelect(e);
 	}
+	else if (nodeName.equals("sort")) {
+	    handleSort(e);
+	}
 	else if (nodeName.equals("join")) {
 	    handleJoin(e, inputs);
 	}
@@ -126,8 +129,18 @@ public class XMLQueryPlanParser {
 	}
 	else if (nodeName.equals("firehosescan")) {
 	    handleFirehoseScan(e);
-	} else if (e.getNodeName().equals("accumulate")) {
+	} 
+	else if (e.getNodeName().equals("accumulate")) {
 	    handleAccumulate(e);
+	}
+	else if (e.getNodeName().equals("expression")) {
+	    handleExpression(e);
+	}
+	else if (e.getNodeName().equals("dup")) {
+	    handleDup(e);
+	}
+	else if (e.getNodeName().equals("union")) {
+	    handleUnion(e, inputs);
 	}
     }
 
@@ -197,7 +210,7 @@ public class XMLQueryPlanParser {
 	// attribute added to the input tuple
 	schemaAttribute sa;
 	if (rootAttr.equals(""))
-	    sa = new schemaAttribute(sc.numAttr()-1);
+	    sa = new schemaAttribute(sc.numAttr() - 1);
 	else
 	    sa = new schemaAttribute(qpVarTbl.lookUp(rootAttr));
 
@@ -212,6 +225,58 @@ public class XMLQueryPlanParser {
 	
 	scanNode.setSchema(sc);
 	scanNode.setVarTbl(qpVarTbl);
+    }
+
+    void handleExpression(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	ExpressionOp op = (ExpressionOp) operators.expression.clone();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+
+	String inputAttr = e.getAttribute("input");
+	String classAttr = e.getAttribute("class");
+	
+	logNode input = (logNode) ids2nodes.get(inputAttr);
+	
+	// Copy the varTbl and schema from the node downstream, or create 
+	// empty ones if they don't exist
+	
+	varTbl qpVarTbl; Schema sc;
+	
+	if (input.getVarTbl() != null) {
+	    qpVarTbl = new varTbl(input.getVarTbl());
+	    sc = new Schema(input.getSchema()); 
+	}
+	else {
+	    qpVarTbl = new varTbl();
+	    sc = new Schema();
+	    sc.addSchemaUnit(new SchemaUnit(null, -1));
+	}
+	
+		
+	schemaAttribute resultSA = 
+	    new schemaAttribute(sc.numAttr(), varType.ELEMENT_VAR);
+	
+	// Register variable -> resultSA
+	qpVarTbl.addVar("$" + id, resultSA);
+	
+	try {
+	    op.setExpressionClass(Class.forName(classAttr));
+	}
+	catch (ClassNotFoundException cnfe) {
+	    throw new InvalidPlanException("Class " + classAttr + " could not be found");
+	}
+
+	sc.addSchemaUnit(new SchemaUnit(null, sc.numAttr()));
+
+	
+	logNode expressionNode = new logNode(op, input);
+	
+	ids2nodes.put(id, expressionNode);
+	
+	expressionNode.setSchema(sc);
+	expressionNode.setVarTbl(qpVarTbl);
     }
 
     void handleSelect(Element e) 
@@ -248,6 +313,93 @@ public class XMLQueryPlanParser {
 	// Just use whatever variable table the node downstream has
 	selectNode.setSchema(input.getSchema());
 	selectNode.setVarTbl(qpVarTbl);
+    }
+
+    void handleUnion(Element e, Vector inputs) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	String id = e.getAttribute("id");
+
+	UnionOp op = (UnionOp) operators.union.clone();
+	op.setSelectedAlgoIndex(0);
+	
+	String inputAttr = e.getAttribute("input");
+	
+	logNode[] input_arr = new logNode[inputs.size()];
+	for (int i=0; i < input_arr.length; i++) {
+	    input_arr[i] = (logNode) ids2nodes.get(inputs.elementAt(i));
+	}
+
+	logNode node = new logNode(op, input_arr);
+	ids2nodes.put(id, node);
+
+	// Just keep the schema and variable table of the first input
+	logNode first_input =  (logNode) input_arr[0];
+	
+	node.setSchema(first_input.getSchema());
+	node.setVarTbl(first_input.getVarTbl());
+    }
+
+    void handleDup(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	String id = e.getAttribute("id");
+
+	dupOp op = (dupOp) operators.Duplicate.clone();
+	op.setSelectedAlgoIndex(0);
+	
+	String inputAttr = e.getAttribute("input");
+	logNode input = (logNode) ids2nodes.get(inputAttr);
+
+	String branchAttr = e.getAttribute("branch");
+	int branch = Integer.parseInt(branchAttr);
+	op.setDup(branch);
+
+	logNode node = new logNode(op, input);
+	ids2nodes.put(id, node);
+
+	// Nothing changes for the variables
+	// Just use whatever variable table the node downstream has
+	node.setSchema(input.getSchema());
+	node.setVarTbl(input.getVarTbl());
+    }
+
+    void handleSort(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	String id = e.getAttribute("id");
+
+	SortOp op = (SortOp) operators.sort.clone();
+	op.setSelectedAlgoIndex(0);
+	
+	String inputAttr = e.getAttribute("input");
+	NodeList children = e.getChildNodes();
+	
+	logNode input =  (logNode) ids2nodes.get(inputAttr);
+	varTbl qpVarTbl = input.getVarTbl();
+
+	String sortbyAttr = e.getAttribute("sort_by");
+	schemaAttribute sa = new schemaAttribute(qpVarTbl.lookUp(sortbyAttr));
+
+	short comparisonMethod;
+	String comparisonAttr = e.getAttribute("comparison");
+	if (comparisonAttr.equals("alphabetic"))
+	    comparisonMethod = SortOp.ALPHABETIC_COMPARISON;
+	else
+	    comparisonMethod = SortOp.NUMERIC_COMPARISON;
+
+	boolean ascending;
+	String orderAttr = e.getAttribute("order");
+	if (orderAttr.equals("descending"))
+	    ascending = false;
+	else
+	    ascending = true;
+	op.setSort(sa, comparisonMethod, ascending);
+	
+	logNode sortNode = new logNode(op, input);
+	ids2nodes.put(id, sortNode);
+	
+	// Nothing changes for the variables
+	// Just use whatever variable table the node downstream has
+	sortNode.setSchema(input.getSchema());
+	sortNode.setVarTbl(qpVarTbl);
     }
 
     void handleJoin(Element e, Vector inputs) 
@@ -357,6 +509,7 @@ public class XMLQueryPlanParser {
 	
 	// Register variable -> resultSA
 	qpVarTbl.addVar("$" + id, resultSA);
+	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
 	
 	logNode avgNode = new logNode(op, input);
 	
@@ -403,7 +556,8 @@ public class XMLQueryPlanParser {
 	
 	// Register variable -> resultSA
 	qpVarTbl.addVar("$" + id, resultSA);
-	
+	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
+
 	logNode sumNode = new logNode(op, input);
 	
 	ids2nodes.put(id, sumNode);
@@ -449,6 +603,7 @@ public class XMLQueryPlanParser {
 	
 	// Register variable -> resultSA
 	qpVarTbl.addVar("$" + id, resultSA);
+	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
 	
 	logNode countNode = new logNode(op, input);
 	
@@ -535,35 +690,51 @@ public class XMLQueryPlanParser {
 	    throw new InvalidPlanException();
 	}
 
-	varTbl qpVarTbl; Schema sc;
+	varTbl qpVarTbl = null; 
+	Schema sc = null;
+
+	boolean clear = false;
+	if (e.getAttribute("clear").equals("yes"))
+	    clear = true;
 	
 	if (input.getVarTbl() != null) {
 	    qpVarTbl = new varTbl(input.getVarTbl());
 	    sc = new Schema(input.getSchema()); 
+	    cn.replaceVar(qpVarTbl);
 	}
-	else {
+
+	if (input.getVarTbl() == null || clear) {
 	    qpVarTbl = new varTbl();
 	    sc = new Schema();
-	    sc.addSchemaUnit(new SchemaUnit(null, -1));
 	}
-	
-	// varTbl qpVarTbl = input.getVarTbl();
-	
-	cn.replaceVar(qpVarTbl);
-	op.setConstruct(cn);
+
+	op.setConstruct(cn, clear);
 	
 	logNode node = new logNode(op, (logNode) ids2nodes.get(inputAttr));
 
+	int nextVar;
+	if (input.getVarTbl() == null || clear) {
+	    nextVar = 0;
+	}
+	else {
+	    nextVar = sc.numAttr();
+	}
+
 	schemaAttribute resultSA = 
-	    new schemaAttribute(sc.numAttr(), varType.ELEMENT_VAR);
+	    new schemaAttribute(nextVar, varType.ELEMENT_VAR);
 	
 	// Register variable -> resultSA
 	qpVarTbl.addVar("$" + id, resultSA);
+
+	// Update the schema
+	sc.addSchemaUnit(new SchemaUnit(null, nextVar));
 	
 	ids2nodes.put(id, node);
+
+	// Register schema and variable table for the
+	// nodes above
 	node.setSchema(sc);
 	node.setVarTbl(qpVarTbl);
-
     }
 
     private void handleAccumulate(Element e) 
