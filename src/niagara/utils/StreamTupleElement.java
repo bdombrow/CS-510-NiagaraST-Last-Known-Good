@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.9 2003/03/08 02:23:23 vpapad Exp $
+  $Id: StreamTupleElement.java,v 1.10 2003/07/03 19:31:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,6 +40,7 @@ package niagara.utils;
 import java.util.Vector;
 import org.w3c.dom.*;
 import java.lang.reflect.Array;
+import niagara.magic.MagicBaseNode;
 
 public class StreamTupleElement {
 
@@ -172,6 +173,8 @@ public class StreamTupleElement {
      */
 
     public Node getAttribute (int position) {
+	assert position < tupleSize : "Invalid position " +
+	    position + " tuple size is " + tupleSize;
 	return tuple[position];
     }
 
@@ -184,18 +187,6 @@ public class StreamTupleElement {
             
         tuple[position] = value;
     }
-
-    /**
-     * This function returns the old version of the tuple
-     *
-     * @return Old version of the tuple; If no old version, returns null.
-     */
-    /*
-    public StreamTupleElement getOldVersion () {
-
-	return oldVersion;
-    }
-    */
 
     /**
      * This function clones a stream tuple element and returns the clone
@@ -273,14 +264,15 @@ public class StreamTupleElement {
         for(int i=0; i<tupleSize; i++) {
             Element tele = doc.createElement("Entry");
             Node tmp = tuple[i];
+	    assert tmp instanceof Element || tmp instanceof Text :
+		"KT non elem/string attr in TupleElement";
+	    
             if(tmp instanceof Element) {
                 tele.setAttribute("Type", "Element");
                 tele.appendChild(tmp);
             } else if(tmp instanceof Text) {
                 tele.setAttribute("Type", "Text");
 		tele.appendChild(tmp); //KT -added this, think it is needed
-            }  else {
-		throw new PEException("Non Elem/String Attr in TupleElement");
             }
             ret.appendChild(tele);
         }
@@ -301,11 +293,9 @@ public class StreamTupleElement {
         for(Node c = ele.getFirstChild(); c!=null; c=c.getNextSibling()) {
             Element e = (Element)c;
             String type = e.getAttribute("Type");
-            if(type.equals("Element") || type.equals("Text")) {
-                appendAttribute(e.getFirstChild());
-            } else {
-                throw new PEException("KT this shouldn't happen!");
-	    }
+	    assert type.equals("Element") || type.equals("Text"):
+		"KT invalid type " + type;
+	    appendAttribute(e.getFirstChild());
         }
     }
 
@@ -322,6 +312,14 @@ public class StreamTupleElement {
 	}
 	tuple = newTuple;
 	allocSize = newAllocSize;
+    }
+    
+    public void setMagicTuple() {
+	for(int i = 0; i<tupleSize; i++) {
+	    if(tuple[i] instanceof MagicBaseNode) {
+		((MagicBaseNode)tuple[i]).setTuple(this);
+	    } 
+	}
     }
 
 }

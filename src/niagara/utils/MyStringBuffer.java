@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MyStringBuffer.java,v 1.1 2003/02/22 08:09:24 tufte Exp $
+  $Id: MyStringBuffer.java,v 1.2 2003/07/03 19:31:47 tufte Exp $
 */
 
 
@@ -16,17 +16,21 @@ public class MyStringBuffer {
     private int length;
     private int capacity;
     private char[] buffer;
+    private int hashCode;
+    private boolean hcvalid;
     
     public MyStringBuffer() {
 	length = 0;
 	capacity = 0;
 	ensureCapacity(16); // default initial capacity
+	hcvalid = false;
     }
 
     public MyStringBuffer(int initial_capacity) {
 	length = 0;
 	capacity = 0;
 	ensureCapacity(initial_capacity);
+	hcvalid = false;
     }
 
     public MyStringBuffer append(String str) {
@@ -36,6 +40,7 @@ public class MyStringBuffer {
 	// chars copied are index srcBegin -> srcEnd -1
 	str.getChars(0, slen, buffer, length);
 	length += slen;
+	hcvalid = false;
 	return this;
     }
 
@@ -44,6 +49,7 @@ public class MyStringBuffer {
 	for(int i = 0; i<sb.length; i++)
 	    buffer[length+i] = sb.buffer[i];
 	length += sb.length;
+	hcvalid = false;
 	return this;
     }
 
@@ -71,12 +77,16 @@ public class MyStringBuffer {
     }
 
     public int hashCode() {
-	// copied from java.lang.String
-	int hashCode = 0;
+	if(hcvalid)
+	    return hashCode;
 
+	// copied from java.lang.String
+	//int hashCode = 0;
+	hashCode = 0;
 	for(int i = 0; i<length; i++) {
 	    hashCode = 31*hashCode + buffer[i];
 	}
+	hcvalid = true;
 	return hashCode;
 	
 	// hash code from java String class

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageQueue.java,v 1.2 2003/03/07 21:02:49 tufte Exp $
+  $Id: PageQueue.java,v 1.3 2003/07/03 19:31:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -111,14 +111,15 @@ public class PageQueue
      *
      **/
     public void put(TuplePage page) {
+	assert !isFull() || expandable : 
+	    "KT putting into full un-expandable PageQueue not allowed";
 	if(!isFull()) {
 	    tail = (tail + 1) % length;
 	    queue[tail] = page;
 	} else if (expandable) {
 	    expandQueue();
 	    put(page);
-	} else
-	    throw new PEException("KT putting into full un-expandable PageQueue not allowed");
+	} 
     }
     
     private void expandQueue() {
@@ -128,9 +129,8 @@ public class PageQueue
 	}
 	queue = newQueue;
 	length = length*2;
-	if(length > 20) {
-	    throw new PEException("KT help queue just expanded to 20 slots!! " + name);
-	}
+	assert length <= 20 : 
+	    "KT help queue just expanded to 20 slots!! " + name;
     }
 
     public String toString(){

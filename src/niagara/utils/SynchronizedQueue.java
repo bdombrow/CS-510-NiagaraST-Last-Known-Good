@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SynchronizedQueue.java,v 1.2 2002/05/07 03:11:13 tufte Exp $
+  $Id: SynchronizedQueue.java,v 1.3 2003/07/03 19:31:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -85,7 +85,8 @@ public class SynchronizedQueue extends Queue
 	    return o;
 	} catch (InterruptedException ie) {
 	    // think really this method should  throw interrupted exception
-	    throw new PEException("Interrupted during synchqueue.get");
+	    assert false : "Interrupted during synchqueue.get - what??" ;
+	    return null;
 	}
     }
     

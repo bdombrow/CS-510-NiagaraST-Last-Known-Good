@@ -188,7 +188,7 @@ public class DOMHelper {
 	    } else if (child.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
 		printElt((Element)child, indentLevel);
 	    } else {
-		throw new PEException("Unexpected node type");
+		assert false : "Unexpected node type " + child.getNodeType();
 	    }
 	    child = child.getNextSibling();
 	}

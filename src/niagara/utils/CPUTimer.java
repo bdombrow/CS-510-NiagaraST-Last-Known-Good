@@ -1,6 +1,13 @@
 package niagara.utils;
 
+import java.text.DecimalFormat;
+
 public class CPUTimer {
+
+    static double nspmin = StrictMath.pow(10,9)*60;
+    static double nspsec = StrictMath.pow(10,9);
+    static double nspms = StrictMath.pow(10,6);
+    static double nspus = StrictMath.pow(10,3);
 
     // differences
     long start_time;
@@ -15,23 +22,21 @@ public class CPUTimer {
     }
     
     public void start() {
-	if(timerRunning)
-	    throw new PEException("Attempt to start timer when it is already running");
+	assert !timerRunning : 
+	    "Attempt to start timer when it is already running";
 	start_time = jprof.getCurrentThreadCpuTime();
 	timerRunning = true;
     }
 
     public void stop() {
-	if(!timerRunning)
-	    throw new PEException("Attempt to stop timer that is not running");
+	assert timerRunning : "Attempt to stop timer that is not running";
 	stop_time = jprof.getCurrentThreadCpuTime();
 	timerRunning = false;
 	calculateTimeUsed();
     }
 
     public long getTimeNSec() {
-	if(timerRunning)
-	    throw new PEException("Can't get time while timer is running");
+	assert !timerRunning : "Can't get time while timer is running";
 	return used_time;
     }
 
@@ -40,10 +45,28 @@ public class CPUTimer {
     }
 
     public void print(String msg) {
-	if(timerRunning)
-	    throw new PEException("Can't print while timer is running");
-	System.out.println(msg);
-	System.out.println("Time (nsec) " + used_time);
+	assert !timerRunning : "Can't print while timer is running";
+	System.out.print(msg);
+	double time = used_time;
+	long min;
+	long sec;
+	long ms;
+	long us;
+	long ns;
+	
+	min = (long)StrictMath.floor(time/nspmin);
+	time -= min*nspmin;
+	sec = (long)StrictMath.floor(time/nspsec);
+	time -= sec*nspsec;
+	ms = (long)StrictMath.floor(time/nspms);
+	time -= ms*nspms;
+	us = (long)StrictMath.floor(time/nspus);
+	time -= us*nspus;
+	ns = (long)time;
+
+	DecimalFormat df = new DecimalFormat("#.000");
+	System.out.println(" Time: " + min + ":" + sec + df.format(ms/1000.0));
+	//+ us/1000000.0 + ns/1000000000.0);
     }
 
     /*

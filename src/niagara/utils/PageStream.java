@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.6 2003/03/07 21:02:49 tufte Exp $
+  $Id: PageStream.java,v 1.7 2003/07/03 19:31:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -214,12 +214,10 @@ public class PageStream {
 	TuplePage ret = toConsumerQueue.get();
 
 	// KT - DEL after functions - just for checking
-	if(ret.getFlag() == CtrlFlags.SHUTDOWN) {
-	    throw new PEException("KT shouldn't get here. Thread: " +
-				  Thread.currentThread().getName() + 
-				  " Stream name: " +
-				  name);
-	}
+	assert ret.getFlag() != CtrlFlags.SHUTDOWN:
+	    "KT shouldn't get here. Thread: " +
+	    Thread.currentThread().getName() + 
+	    " Stream name: " + name;
 
 	if(notifyProducer) {
 	    if(VERBOSE)
@@ -326,9 +324,7 @@ public class PageStream {
 	    throw new ShutdownException(shutdownMsg);
 
 	// Check for end of stream and raise exception if necessary
-	if (eos) {
-	    throw new PEException("KT Reading after end of stream");
-	}
+	assert !eos : "KT Reading after end of stream";
 	
 	// Get first element, if any, in the down stream buffer
 	if (toProducerQueue.isEmpty()) {
@@ -371,8 +367,7 @@ public class PageStream {
 	if(shutdown)
 	    throw new ShutdownException(shutdownMsg);
 
-	if (eos) 
-	    throw new PEException("KT Writing after end of stream");
+	assert !eos : "KT Writing after end of stream";
 
 	// Wait until either the up stream tuple buffer is not full 
 	// (so that the outputElement can be put) or the down stream 
@@ -392,8 +387,15 @@ public class PageStream {
 	if (!toProducerQueue.isEmpty()) {
 	    TuplePage ctrlPage = toProducerQueue.get();
 	    int ctrlFlag = ctrlPage.getFlag();
-	    returnCtrlPage(ctrlPage);
-	    return ctrlFlag;
+	    if(ctrlFlag == CtrlFlags.SHUTDOWN) {
+		assert shutdown : "@*#$!#*$";
+		String msg = ctrlPage.getCtrlMsg();
+		returnCtrlPage(ctrlPage);
+		throw new ShutdownException(msg);
+	    } else {
+		returnCtrlPage(ctrlPage);
+		return ctrlFlag;
+	    }
 	} else {
 	    // do SHUTDOWN check on put to make propagation of SHUTDOWN
 	    // as fast as possible - you may find it strange to
@@ -434,8 +436,7 @@ public class PageStream {
     // To be called by SinkTupleStream ONLY
     public synchronized void endOfStream() {
 	// If the stream was previously closed, throw an exception
-	if (eos) 
-	    throw new PEException("KT end of stream received twice");
+	assert !eos : "KT end of stream received twice";
 	eos = true;
 	if(VERBOSE) {
 	    System.out.println("PageStream: " + name + " results.");

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TuplePage.java,v 1.4 2003/03/05 19:28:55 tufte Exp $
+  $Id: TuplePage.java,v 1.5 2003/07/03 19:31:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -97,9 +97,8 @@ public class TuplePage {
     }
 
     public void setFlag(int flag) {
-	if(flag < CtrlFlags.NULLFLAG || flag > CtrlFlags.REQUEST_BUF_FLUSH) {
-	    throw new PEException("KT invalid control flag in createControlPage");
-	}
+	assert flag >= CtrlFlags.NULLFLAG && flag <= CtrlFlags.TIMED_OUT:
+	    "KT invalid control flag in createControlPage " + flag;
 	this.flag = flag;
     }
 
@@ -132,12 +131,8 @@ public class TuplePage {
      *
      */
     public void put(StreamTupleElement tuple) {
-	if(currentPos == PAGE_SIZE || getMode) {
-	    if(getMode)
-		throw new PEException("KT Can't put tuples in getMode");
-	    else
-		throw new PEException("KT Reading tuples into a full page");
-	}
+	assert !getMode : "KT Can't put tuples in getMode";
+	assert currentPos < PAGE_SIZE : "KT Reading tuples into a full page";
 
 	tuples[currentPos] = tuple;
 	currentPos++;
@@ -164,12 +159,8 @@ public class TuplePage {
      *
      */
     public StreamTupleElement get() {
-	if(currentPos == bufSize || !getMode) {
-	    if(!getMode)
-		throw new PEException("KT Can't get tuples in putMode");
-	    else
-		throw new PEException("KT Reading tuple from empty page");
-	}
+	assert getMode : "KT Can't get tuples in putMode";
+	assert currentPos < bufSize : "KT Reading tuple from empty page";
 	
 	StreamTupleElement ret = tuples[currentPos];
 	tuples[currentPos] = null;

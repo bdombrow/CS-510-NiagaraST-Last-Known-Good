@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.7 2003/03/05 19:28:55 tufte Exp $
+  $Id: SinkTupleStream.java,v 1.8 2003/07/03 19:31:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -100,9 +100,9 @@ public final class SinkTupleStream {
 	if(ctrlFlag == CtrlFlags.GET_PARTIAL ||
 	   ctrlFlag == CtrlFlags.REQUEST_BUF_FLUSH) {
 	    // ignore since we just sent eos
-	} else if (ctrlFlag != CtrlFlags.NULLFLAG) {
-	    throw new PEException("Unexpected ctrl flag " 
-				  + CtrlFlags.name[ctrlFlag]);
+	} else {
+	    assert ctrlFlag == CtrlFlags.NULLFLAG :
+	       "KT Unexpected ctrl flag " + CtrlFlags.name[ctrlFlag];
 	}
 	pageStream.endOfStream();
     }
@@ -151,8 +151,7 @@ public final class SinkTupleStream {
 	// flush it - leave an empty buffer for next call
 	
 	// check eos and shutdown here - catch these more quickly this way
-	if(status == Closed)
-	    throw new PEException("KT writing after end of stream");
+	assert status != Closed : "KT writing after end of stream";
 	if(pageStream.shutdownReceived()) {
 	    throw new ShutdownException(pageStream.getShutdownMsg());
 	}
@@ -171,8 +170,8 @@ public final class SinkTupleStream {
 	// flush it - leave an empty buffer for next call
 	
 	int ctrlFlag = putTuple(tuple);
-	if(ctrlFlag != CtrlFlags.NULLFLAG)
-	    throw new PEException("unexpected control message");
+	assert ctrlFlag == CtrlFlags.NULLFLAG : 
+	    "KT unexpected control message " + CtrlFlags.name[ctrlFlag];
 	return;
     }	
 
@@ -204,20 +203,18 @@ public final class SinkTupleStream {
         tuple.appendAttribute(node);
         int ctrlFlag = putTuple(tuple);
 
-	if(ctrlFlag == CtrlFlags.GET_PARTIAL) {
-	    // stream above an operator using this put should
-	    // always reflect partials
-	    throw new PEException("KT unexpected get partial request");
-	}
+	// stream above an operator using this put should
+	// always reflect partials
+	assert ctrlFlag != CtrlFlags.GET_PARTIAL: 
+	    "KT unexpected get partial request";
 
 	// handle a flush buffer request
 	ctrlFlag = processCtrlFlag(ctrlFlag);
 
-	if(ctrlFlag != CtrlFlags.NULLFLAG) {
-	    // stream above an operator using this put should
-	    // always reflect partials
-	    throw new PEException("KT unexpected control flag");
-	}
+	// stream above an operator using this put should
+	// always reflect partials
+	assert ctrlFlag == CtrlFlags.NULLFLAG : 
+	       "KT Unexpected ctrl flag " + CtrlFlags.name[ctrlFlag];
     }
 
     /**
@@ -237,8 +234,8 @@ public final class SinkTupleStream {
 	throws java.lang.InterruptedException, ShutdownException {
 	// KT control element put should cause partially full page to be 
 	// sent 
-	if(buffer.getFlag() != CtrlFlags.NULLFLAG)
-	    throw new PEException("KT buffer already has a flag!");
+	assert buffer.getFlag() == CtrlFlags.NULLFLAG :
+	    "KT buffer already has a flag!";
 	buffer.setFlag(controlMsgId);
 	buffer.setCtrlMsg(ctrlMsg);
 	int ctrlFlag = flushBuffer();
@@ -272,9 +269,9 @@ public final class SinkTupleStream {
 	    } else {
 		ctrlFlag = processCtrlFlag(ctrlFlag);
 	    }
-	    if(ctrlFlag != CtrlFlags.NULLFLAG &&
-	       ctrlFlag != CtrlFlags.GET_PARTIAL)
-		throw new PEException("Bad ctrl flag");
+	    assert ctrlFlag == CtrlFlags.NULLFLAG ||
+		ctrlFlag == CtrlFlags.GET_PARTIAL : 
+	       "KT Unexpected ctrl flag " + CtrlFlags.name[ctrlFlag];
 	    return ctrlFlag;
 	}
     }
@@ -311,7 +308,9 @@ public final class SinkTupleStream {
 	    return CtrlFlags.NULLFLAG;
 	    
 	default:
-	    throw new PEException("Unexpected control flag");
+	    assert false : "KT Unexpected control flag" 
+		+ CtrlFlags.name[ctrlFlag];
+	    return CtrlFlags.NULLFLAG;
 	}
     }
 
@@ -335,8 +334,8 @@ public final class SinkTupleStream {
 	// if reflectPartial is true - flushBuffer and therefore 
 	// putCtrlMsg will always return NULLFLAG
 	int ctrlFlag = putCtrlMsg(CtrlFlags.SYNCH_PARTIAL, null);
-	if(ctrlFlag != CtrlFlags.NULLFLAG)
-	    throw new PEException("KT unexpected control flag");
+	assert ctrlFlag == CtrlFlags.NULLFLAG : 
+	       "KT Unexpected ctrl flag " + CtrlFlags.name[ctrlFlag];
     }
 
     /**
