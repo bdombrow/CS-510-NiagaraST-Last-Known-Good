@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: tupleScanOp.java,v 1.3 2000/08/21 00:38:39 vpapad Exp $
+  $Id: ExpressionOp.java,v 1.1 2000/08/21 00:38:37 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,46 +27,54 @@
 
 
 /**
- * The class <code>tupleScanOp</code> is used to read the tmp files written
- * out in tuple format.  It is very similar to dtdScanOp.
- * 
- * @version 1.0
+ * This operator is used to compute an arbitrary expression 
+ * over each input tuple.
  *
- * @see dtdScanOp
  */
+
 package niagara.xmlql_parser.op_tree;
 
-import java.util.*;
+public class ExpressionOp extends unryOp {
 
-import org.w3c.dom.*;
-
-public class tupleScanOp extends unryOp {
-
-   private Vector docs;
-
-   public tupleScanOp(Class[] al) {
-	super(new String("TupleScan"), al);
-   }
-
-   public Vector getDocs() {
-	return docs;
-   }
+    private Class expressionClass;
 
     /**
-     * This function sets the vector of documents associated with the
-     * dtd scan operator
+     * Constructor
      *
-     * @param docVector The set of documents associated with the operator
+     * @param list of algorithms to implement this operator
      */
-
-    public void setDocs (Vector docVector) {
-
-	docs = docVector;
+    public ExpressionOp(Class[] al) {
+	super(new String("Expression"), al);
     }
 
+    /**
+     * print the operator to the standard output
+     */
     public void dump() {
-	System.out.println("TupleScanOp");
+       System.out.println("Expression:" + expressionClass);
     }
 
-   
+    /**
+     * dummy toString method
+     *
+     * @return String representation of the operator
+     */
+    public String toString() {
+       return "Expression: " + expressionClass;
+    }
+
+    /**
+     * Provide a class that computes the expression
+     *
+     * @param expressionClass 
+     */
+    public void setExpressionClass(Class expressionClass) {
+	this.expressionClass = expressionClass;
+    }
+
+    public Class getExpressionClass() {
+	return expressionClass;
+    }
+
 }
+

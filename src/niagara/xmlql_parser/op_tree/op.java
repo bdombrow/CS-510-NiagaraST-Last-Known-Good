@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: op.java,v 1.3 2000/08/09 23:54:19 tufte Exp $
+  $Id: op.java,v 1.4 2000/08/21 00:38:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -193,6 +193,14 @@ public abstract class op implements Cloneable{
      */
 
     public abstract void dump();
+
+
+    /**
+     * @return number of output streams of this operator
+     */
+    public int getNumberOfOutputStreams() {
+	return 1;
+    }
 }
 
 

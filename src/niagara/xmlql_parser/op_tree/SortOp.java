@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: tupleScanOp.java,v 1.3 2000/08/21 00:38:39 vpapad Exp $
+  $Id: SortOp.java,v 1.1 2000/08/21 00:38:37 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,46 +27,87 @@
 
 
 /**
- * The class <code>tupleScanOp</code> is used to read the tmp files written
- * out in tuple format.  It is very similar to dtdScanOp.
- * 
- * @version 1.0
+ * This class is used to represent the Sort operator
  *
- * @see dtdScanOp
  */
 package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
+import niagara.xmlql_parser.syntax_tree.*;
 
-import org.w3c.dom.*;
+public class SortOp extends unryOp {
+    // Constants used for comparison method
+    public final static short ALPHABETIC_COMPARISON = 0;
+    public final static short  NUMERIC_COMPARISON = 1;
 
-public class tupleScanOp extends unryOp {
+    /**
+     * Compare as numbers or strings
+     */
+    private short comparisonMethod;
 
-   private Vector docs;
+    private boolean ascending;
 
-   public tupleScanOp(Class[] al) {
-	super(new String("TupleScan"), al);
+
+    /**
+     * The attribute we are sorting on
+     */
+    private schemaAttribute attr;
+
+   /**
+    * Constructor
+    *
+    * @param list of algorithm to implement this operator
+    */
+   public SortOp(Class[] al) {
+	super("Sort", al);
    }
 
-   public Vector getDocs() {
-	return docs;
+   /**
+    * @return the comparison method
+    */
+   public short getComparisonMethod() {
+	return comparisonMethod;
+   }
+
+   /**
+    * @return if the sort is ascending
+    */
+   public boolean getAscending() {
+       return ascending;
    }
 
     /**
-     * This function sets the vector of documents associated with the
-     * dtd scan operator
-     *
-     * @param docVector The set of documents associated with the operator
+     * 
+     * @return the attribute we are sorting on
      */
-
-    public void setDocs (Vector docVector) {
-
-	docs = docVector;
+    public schemaAttribute getAttr() {
+	return attr;
     }
 
-    public void dump() {
-	System.out.println("TupleScanOp");
-    }
+   /**
+    * used to configure the comparison method, and whether the
+    * sort is ascending or not
+    */
+   public void setSort(schemaAttribute attr, short comparisonMethod, boolean ascending) {
+       this.attr = attr;
+       this.comparisonMethod = comparisonMethod;
+       this.ascending = ascending;
+   }
 
-   
+   /**
+    * print the operator to the standard output
+    */
+   public void dump() {
+      System.out.println("Sort");
+   }
+
+   /**
+    * dummy toString method
+    *
+    * @return String representation of this operator
+    */
+   public String toString() {
+       return "Sort";
+   }
 }
+

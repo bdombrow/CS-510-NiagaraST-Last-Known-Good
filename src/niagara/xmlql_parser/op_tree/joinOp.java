@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: joinOp.java,v 1.2 2000/07/08 05:15:47 vpapad Exp $
+  $Id: joinOp.java,v 1.3 2000/08/21 00:38:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -45,7 +45,7 @@ public class joinOp extends binOp {
 	private Vector equiJoinAttr_Rrel;    // in the query engine
 
    /**
-    * Constructot
+    * Constructor
     *
     * @param list of algorithm to implement this operator
     */
@@ -88,7 +88,7 @@ public class joinOp extends binOp {
 	equiJoinAttr_Rrel = rre;
 
 	// creates a predicate for the equi-join
-	predicate equiJoinPred = niagara.xmlql_parser.syntax_tree.Util.makePredicate(lre,rre);
+	predicate equiJoinPred = Util.makePredicate(lre,rre);
 
 	if(equiJoinPred != null)
 		if(p!=null)

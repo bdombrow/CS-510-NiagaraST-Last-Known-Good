@@ -27,7 +27,7 @@ COMMONLIB    = $(LIBDIR)/common.jar
 CUPLIB	     = $(LIBDIR)/cup_all.jar
 ASTLIB	     = $(LIBDIR)/ast.jar
 
-CLASSPATH  = .:$(NIAGROOT)/src:$(PARSELIB):$(BASELIB):$(CUPLIB):$(ASTLIB):$(COMMONLIB)
+CLASSPATH  = .:$(NIAGROOT)/src:$(PARSELIB):$(BASELIB):$(CUPLIB):$(ASTLIB):$(COMMONLIB):$(NIAGROOT)/src/$(FHOSE)
 JAVAFLAGS  = -classpath $(CLASSPATH)
 
 

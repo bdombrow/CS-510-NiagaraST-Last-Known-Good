@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logNode.java,v 1.3 2000/08/09 23:54:19 tufte Exp $
+  $Id: logNode.java,v 1.4 2000/08/21 00:38:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -103,6 +103,12 @@ public class logNode implements java.io.Serializable {
 	inputs[1] = rightin;
 	operator = _op;
    }
+
+    public logNode(op operator, logNode[] inputs) {
+	this.operator = operator;
+	Id = -1;
+	this.inputs = inputs;
+    }
 
    public int getId() {
         return Id;
@@ -259,16 +265,20 @@ public class logNode implements java.io.Serializable {
     * prints this node to the standard output
     */
    public void dump() {
-	System.out.println("Dumping log node");
-	operator.dump();
-	//if(varList != null)
-	//varList.dump();
-	//if(tupleDes != null)
-	//tupleDes.dump();
-	if(inputs != null)
-	   for(int i=0;i<inputs.length;i++)
-		input(i).dump();
+       dump(new Hashtable());
    }
+
+    protected void dump(Hashtable nodesDumped) {
+	if (nodesDumped.containsKey(this))
+	    return;
+	nodesDumped.put(this, this);
+
+	operator.dump();
+
+	if(inputs != null)
+	   for(int i=0; i<inputs.length; i++)
+		input(i).dump(nodesDumped);
+    }
 
     public boolean isAccumulateOp() {
 	return (operator instanceof AccumulateOp);

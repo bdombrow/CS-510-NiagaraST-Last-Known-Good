@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: dupOp.java,v 1.2 2000/08/09 23:54:19 tufte Exp $
+  $Id: dupOp.java,v 1.3 2000/08/21 00:38:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,23 +35,22 @@
  */
 package niagara.xmlql_parser.op_tree;
 
-import java.util.*;
-
-import com.ibm.xml.parser.*;
-import org.w3c.dom.*;
-
 public class dupOp extends unryOp {
 
     private int numDestinationStreams;
 
-
     public dupOp(Class [] al) {
-	super(new String("Duplicate"), al);
-	numDestinationStreams=0;
+	super("Duplicate", al);
+	numDestinationStreams = 0;
     }
+
     public void addDestinationStreams(){
         numDestinationStreams++;
     };
+
+    public void setDup(int numDestinationStreams) {
+	this.numDestinationStreams = numDestinationStreams;
+    }
 
     public int getNumDestinationStreams(){
         return numDestinationStreams;
@@ -59,6 +58,10 @@ public class dupOp extends unryOp {
 
     public void dump() {
 	System.out.println("dupOp");
+    }
+
+    public int getNumberOfOutputStreams() {
+	return numDestinationStreams;
     }
 }
 

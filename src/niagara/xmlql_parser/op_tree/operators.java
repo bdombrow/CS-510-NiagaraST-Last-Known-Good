@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: operators.java,v 1.4 2000/08/09 23:54:19 tufte Exp $
+  $Id: operators.java,v 1.5 2000/08/21 00:38:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -58,6 +58,9 @@ public class operators {
         public static splitOp Split; //Trigger
         public static trigActionOp TrigAct; //Trigger
     public static AccumulateOp Accumulate; // To accumulate a stream
+    public static ExpressionOp expression; // To calculate an arbitrary expression
+    public static SortOp sort; // Sorting
+    public static UnionOp union; // Union of streams
 
 // Names of the classes that implement the algorithms for different operators
 
@@ -67,11 +70,15 @@ public class operators {
         private static String[] tupleScanAlgo = {};
 	private static String[] scanAlgo = {"niagara.query_engine.PhysicalScanOperator"};
 	private static String[] selectAlgo = {"niagara.query_engine.PhysicalSelectOperator"};
-	private static String[] joinAlgo = {"niagara.query_engine.PhysicalNLJoinOperator", "niagara.query_engine.PhysicalHashJoinOperator"};
+	private static String[] joinAlgo = {"niagara.query_engine.PhysicalNLJoinOperator", 
+					    "niagara.query_engine.PhysicalHashJoinOperator"};
 	private static String[] constructAlgo = {"niagara.query_engine.PhysicalConstructOperator"};
 	private static String[] nestAlgo = {"niagara.query_engine.PhysicalNestOperator"};
         private static String[] averageAlgo = {"niagara.query_engine.PhysicalAverageOperator"};
     private static String[] accumulateAlgo = {"niagara.query_engine.PhysicalAccumulateOperator"}; 
+    private static String[] expressionAlgo = {"niagara.query_engine.PhysicalExpressionOperator"}; 
+    private static String[] sortAlgo = {"niagara.query_engine.PhysicalSortOperator"}; 
+    private static String[] unionAlgo = {"niagara.query_engine.PhysicalUnionOperator"}; 
         private static String[] sumAlgo = {"niagara.query_engine.PhysicalSumOperator"};
         private static String[] countAlgo = {"niagara.query_engine.PhysicalCountOperator"};
         private static String[] duplicateAlgo = {"niagara.query_engine.PhysicalDuplicateOperator"};
@@ -161,6 +168,27 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(accumulateAlgo[i]);
 		Accumulate = new AccumulateOp(algoClasses);
+
+		// Expression
+		numOfAlgo = expressionAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(expressionAlgo[i]);
+		expression = new ExpressionOp(algoClasses);
+
+		// Sort
+		numOfAlgo = sortAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(sortAlgo[i]);
+		sort = new SortOp(algoClasses);
+
+		// Union
+		numOfAlgo = unionAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(unionAlgo[i]);
+		union = new UnionOp(algoClasses);
 
 		// Sum
 		numOfAlgo = sumAlgo.length;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: constructOp.java,v 1.2 2000/07/08 05:15:47 vpapad Exp $
+  $Id: constructOp.java,v 1.3 2000/08/21 00:38:37 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,6 +43,12 @@ public class constructOp extends unryOp {
 					  // all its children are leaf node that
 					  // represents the schemaAttributes
 
+    /**
+     * If <code>clear</code> is set to true, the operator will
+     * not pass attributes from incoming tuples to the outgoing stream.
+     */
+    boolean clear;
+
         /**
 	 * Constructor
 	 *
@@ -65,9 +71,14 @@ public class constructOp extends unryOp {
 	 *
 	 * @param the construct part (tag names and children if any)
 	 */
-	public void setConstruct(constructBaseNode temp) {
+	public void setConstruct(constructBaseNode temp, boolean clear) {
 		resultTemplate = temp;
+		this.clear = clear;
 	}
+
+    public boolean isClear() {
+	return clear;
+    }
 
     /**
      * print the operator to the standard output

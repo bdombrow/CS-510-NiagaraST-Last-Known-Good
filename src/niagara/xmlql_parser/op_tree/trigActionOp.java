@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: trigActionOp.java,v 1.2 2000/08/09 23:54:20 tufte Exp $
+  $Id: trigActionOp.java,v 1.3 2000/08/21 00:38:39 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,7 +35,7 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 
-import com.ibm.xml.parser.*;
+
 import org.w3c.dom.*;
 
 public class trigActionOp extends unryOp {

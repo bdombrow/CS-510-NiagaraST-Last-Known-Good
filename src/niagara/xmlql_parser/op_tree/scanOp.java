@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: scanOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: scanOp.java,v 1.2 2000/08/21 00:38:39 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -74,6 +74,7 @@ public class scanOp extends unryOp {
      */
     public void dump() {
        System.out.println("Scan:");
+       attrId.dump(1);
        regExpToScan.dump(1);
     }
 

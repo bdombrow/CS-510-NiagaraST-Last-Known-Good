@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TypeChk.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: TypeChk.java,v 1.2 2000/08/21 00:38:37 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,7 +55,7 @@
 ////
 package niagara.xmlql_parser.op_tree;
 
-import com.ibm.xml.parser.*;
+
 import org.w3c.dom.*;
 import java.io.*;
 import java.net.*;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: averageOp.java,v 1.2 2000/08/09 23:54:19 tufte Exp $
+  $Id: averageOp.java,v 1.3 2000/08/21 00:38:37 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,7 +36,7 @@
 
 package niagara.xmlql_parser.op_tree;
 
-import com.ibm.xml.parser.*;
+
 import org.w3c.dom.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
