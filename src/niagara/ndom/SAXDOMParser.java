@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.16 2003/12/24 02:28:41 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.17 2004/02/10 03:30:21 vpapad Exp $
  *
  */
 
@@ -116,7 +116,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
     public void setPage(Page page) {
         // Unpin previous page, if any
         if (this.page != null)
-            this.page.unpin(1);
+            this.page.unpin();
 
 	this.page = page;
 
