@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: MagicShellElement.java,v 1.1 2003/07/03 19:47:03 tufte Exp $
+  $Id: MagicShellElement.java,v 1.2 2003/12/24 02:00:54 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,7 +27,7 @@
 package niagara.magic;
 
 import org.w3c.dom.*;
-import niagara.utils.StreamTupleElement;
+import niagara.utils.Tuple;
 
 /**
  * <code>MagicRoot</code> DOM element - but has a pointer to
@@ -56,7 +56,7 @@ public class MagicShellElement extends MagicBaseNode
 	nextSibling = next;
     }
 
-    public void setYourNode(StreamTupleElement cTuple) {
+    public void setYourNode(Tuple cTuple) {
 	for(int i = 0; i<numChildren; i++)
 	    children[i].setYourNode(cTuple);
 	for(int i = 0; i<attrs.getLength(); i++)

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: MagicBaseNode.java,v 1.1 2003/07/03 19:47:02 tufte Exp $
+  $Id: MagicBaseNode.java,v 1.2 2003/12/24 02:00:54 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,7 +27,7 @@
 package niagara.magic;
 
 import org.w3c.dom.*;
-import niagara.utils.StreamTupleElement;
+import niagara.utils.Tuple;
 import niagara.utils.PEException;
 
 /**
@@ -53,11 +53,11 @@ public abstract class MagicBaseNode implements Node {
 	return doc;
     }
 
-    public void setTuple(StreamTupleElement cTuple) {
+    public void setTuple(Tuple cTuple) {
 	root.setYourNode(cTuple);
     }
 
-    public abstract void setYourNode(StreamTupleElement cTuple);
+    public abstract void setYourNode(Tuple cTuple);
 
     /*
     public StreamTupleElement getCurrentTuple() {

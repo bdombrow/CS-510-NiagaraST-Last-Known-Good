@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: MagicContentAttr.java,v 1.2 2003/07/09 04:59:39 tufte Exp $
+  $Id: MagicContentAttr.java,v 1.3 2003/12/24 02:00:54 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -26,7 +26,7 @@
 
 package niagara.magic;
 
-import niagara.utils.StreamTupleElement;
+import niagara.utils.Tuple;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
@@ -62,7 +62,7 @@ public class MagicContentAttr extends MagicNode {
     private static StringBuffer attrValue = new StringBuffer();
     private boolean hasTextChild = false;
 
-    public void setYourNode(StreamTupleElement cTuple) {
+    public void setYourNode(Tuple cTuple) {
 	myNode = (Attr)cTuple.getAttribute(attrIdx);
 	nodeValue = null;
 
