@@ -36,7 +36,8 @@ class OpenAuctions {
     private int scrambler[] = new int[ITEM_DISTR_SIZE];
 
     // distributions to be used
-    protected ZipfDistr openAuctionZipf = new ZipfDistr(ITEM_EXP, ITEM_DISTR_SIZE,
+    protected ZipfDistr openAuctionZipf = new ZipfDistr(ITEM_EXP, 
+							ITEM_DISTR_SIZE,
 							"open_auctions");
     private Random rnd = new Random(18394);
     private SimpleCalendar cal;

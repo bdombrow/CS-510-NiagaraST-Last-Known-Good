@@ -70,6 +70,7 @@ public class FirehoseSpec extends StreamSpec {
 	this.useStreamFormat = useStreamFormat;
 	this.prettyPrint = prettyPrint;
 	this.trace = trace;
+	this.isStream = true;
     }
 
     // for use with unmarshall

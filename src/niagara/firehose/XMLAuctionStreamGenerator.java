@@ -238,6 +238,15 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 	    
 	    // skip annotation - too hard to generate - need to just get this done KT
 
+	    // KT - add category id XMark items can be in 1-10 categories
+	    // we allow an item to be in one category
+	    myb.append(tab2);
+	    myb.append("<category>");
+	    int catid = rnd.nextInt(303);
+	    myb.append(catid);
+	    myb.append("</category>");
+	    myb.append(nl);
+
 	    // quantity
 	    myb.append(tab2);
 	    myb.append("<quantity>");
