@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: runFirehose,v 1.4 2003/03/14 19:58:53 ptucker Exp $
+# $Id: runFirehose,v 1.5 2003/07/03 19:24:57 tufte Exp $
 system("rm -rf SYS/*");
 system("rm -rf CACHE/*");
 
@@ -7,7 +7,7 @@ $classpath = `cat ../classpath`;
 $classpath =~ s/\n/ /g;
 $classpath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
 
-$command = "java -server -Xmx192m -classpath " . $classpath . 
+$command = "java -ea -server -Xmx192m -classpath " . $classpath . 
            " niagara.firehose.XMLFirehose " . join(" ", @ARGV) ."\n"; 
 #print $command;
 exec $command;

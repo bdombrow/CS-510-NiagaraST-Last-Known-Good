@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.30 2003/03/19 22:40:53 tufte Exp $
+<!-- $Id: queryplan.dtd,v 1.31 2003/07/03 19:24:57 tufte Exp $
      DTD for query plans -->
 
 <!-- 
@@ -8,13 +8,15 @@
 <!ENTITY % PositionAttributes "x CDATA #IMPLIED
           y CDATA #IMPLIED">
 
-<!ELEMENT plan     (unnest | select | join | avg | construct | 
-                    dtdscan | filescan | constant | resource | 
-		    firehosescan | accumulate | 
-                    expression | send | display | topn |
-	            incrmax | incravg | count |
-		    sort | dup | union | nest)+>
-
+<!ELEMENT plan     (unnest | sort | expression | avg |
+		    slidingAvg | sum | slidingSum | max |
+		    slidingMax | count | slidingCount | incrmax |
+		    incravg | select | dup | union | join |
+		    dtdscan | resource | constant | timer |
+		    prefix | punct | send | display | topn |
+		    firehosescan | filescan | construct |
+		    accumulate | nest | magic_construct )+>
+		    
 <!ATTLIST plan top IDREF        #REQUIRED
           %PositionAttributes;>
 
@@ -53,11 +55,12 @@
      The "variables" attribute is a list of variables the expression
      uses; for the default ("*"), the expression needs every variable
      in the input schema -->
+<!-- KT - believe you need either an expression or a class -->
 <!ELEMENT expression     EMPTY>
 <!ATTLIST expression 
 
-	  class   CDATA           #REQUIRED
-	  expression CDATA	      ""
+	  class   CDATA           ""
+	  expression CDATA	  ""
 	  variables CDATA         "*"
 	  %StandardAttributes;>
 
@@ -69,9 +72,11 @@
 	  %StandardAttributes;>
 
 <!ELEMENT slidingAvg     EMPTY>
-<!ATTLIST slidingavg 
+<!ATTLIST slidingAvg 
 	  groupby  CDATA	       #REQUIRED
 	  avgattr  CDATA	       #REQUIRED
+	  range    CDATA               #REQUIRED
+	  every    CDATA               #REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT sum     EMPTY>
@@ -81,9 +86,11 @@
 	  %StandardAttributes;>
 
 <!ELEMENT slidingSum     EMPTY>
-<!ATTLIST slidingsum 
+<!ATTLIST slidingSum 
 	  groupby  CDATA	       #REQUIRED
 	  sumattr  CDATA	       #REQUIRED
+	  every    CDATA	       #REQUIRED
+	  range    CDATA               #REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT max     EMPTY>
@@ -93,9 +100,11 @@
 	  %StandardAttributes;>
 
 <!ELEMENT slidingMax     EMPTY>
-<!ATTLIST slidingmax 
+<!ATTLIST slidingMax 
 	  groupby  CDATA	       #REQUIRED
 	  maxattr  CDATA	       #REQUIRED
+	  every    CDATA	       #REQUIRED
+	  range    CDATA               #REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT count     EMPTY>
@@ -105,9 +114,11 @@
 	  %StandardAttributes;>
 
 <!ELEMENT slidingCount     EMPTY>
-<!ATTLIST slidingcount 
+<!ATTLIST slidingCount 
 	  groupby  CDATA	       #REQUIRED
 	  countattr  CDATA	       #REQUIRED
+	  every    CDATA	       #REQUIRED
+	  range    CDATA               #REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT incrmax     EMPTY>
@@ -132,11 +143,22 @@
           branch   CDATA    #REQUIRED 
 	  %StandardAttributes;>
 
-<!ELEMENT union  EMPTY>
+<!ELEMENT union  (mapping*)>
 <!ATTLIST union
          id ID                         #REQUIRED
          input    IDREFS               #REQUIRED
 	 %StandardAttributes;>
+
+<!-- outputattr is the name of the output attr to be
+     created from the associated inputattrs. inputattrs
+     is a space or comma separated list of input attr
+     names. There must be one input attr name for each
+     input and the names must appear in the same order
+     as their associated inputs -->
+<!ELEMENT mapping EMPTY>
+<!ATTLIST mapping
+	outputattr    CDATA 	#REQUIRED
+	inputattrs    CDATA 	#REQUIRED>
 
 
 <!--
@@ -260,6 +282,7 @@
 
 <!ELEMENT firehosescan  EMPTY>
 <!ATTLIST firehosescan 
+          id             ID           #REQUIRED
 	  host	         CDATA   #REQUIRED
 	  port	         CDATA   #REQUIRED
 	  rate	         CDATA   #REQUIRED 
@@ -270,7 +293,7 @@
 	  num_tl_elts    CDATA   "1"   
 	  prettyprint   (yes | no)  "no"
 	  trace          CDATA   ""
-	  %StandardAttributes;>
+	  %PositionAttributes;>
 
 <!-- NOTE: num_gen_calls is the number of times the generator will be called 
            to generate data. if num_gen_calls is 0, the generator will be
@@ -318,12 +341,12 @@
 <!ATTLIST url
           value    CDATA        #REQUIRED>
 
-<!-- If the clear attribute is set to "yes", construct will not keep
-     any old attributes in the outgoing version of each tuple -->
-
 <!ELEMENT construct  ANY>
 <!ATTLIST construct  
-          clear    (yes|no)     "no"
+          %StandardAttributes;>
+
+<!ELEMENT magic_construct  ANY>
+<!ATTLIST magic_construct  
           %StandardAttributes;>
 
 <!ELEMENT accumulate EMPTY>

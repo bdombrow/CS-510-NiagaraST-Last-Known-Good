@@ -1,5 +1,20 @@
-# $Id: runServerTimeOps,v 1.1 2003/01/13 05:03:37 tufte Exp $
-rm -rf SYS/*
-rm -rf CACHE/*
-setenv LD_LIBRARY_PATH ../../lib
-java -server -Xmx192m -Xrunprofni:profile=no -classpath `cat ../classpath` niagara.connection_server.NiagraServer $* -without-se -time-operators
+#!/usr/bin/perl -w
+# $Id: runServerTimeOps,v 1.2 2003/07/03 19:24:57 tufte Exp $
+
+system("rm -rf SYS/*");
+system("rm -rf CACHE/*");
+
+$classpath = `cat ../classpath`;
+$classpath =~ s/\n/ /g;
+$classpath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
+
+$command = "java -ea -server -Xmx192m -Xrunprofni:profile=no " .
+           "-classpath " . $classpath .
+           "niagara.connection_server.NiagraServer ".
+	   join(" ", @ARGV) . " -without-se -time-operators\n";
+
+$ENV{"LD_LIBRARY_PATH"} = "../../lib";
+
+exec $command;
+
+#java -server -Xmx192m -Xrunprofni:profile=no -classpath `cat ../classpath` niagara.connection_server.NiagraServer $* -without-se -time-operators
