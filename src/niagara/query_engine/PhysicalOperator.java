@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.6 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.7 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -344,10 +344,14 @@ public abstract class PhysicalOperator {
      * control messages are handled here.
      */
 
-    public final void execute () {
+    public final void execute () 
+	throws OpExecException {
 	// Flag that indicates whether the operator is to proceed or quit
 	//
 	boolean proceed = false;
+	boolean timerstarted = false;
+	long starttime = 0;
+	long stoptime = 0;
 
 	// Storage for tuples to be put in destination streams
 	//
@@ -384,6 +388,10 @@ public abstract class PhysicalOperator {
 
 		if (proceed && sourceObject.element != null) {
 		   
+		    if(!timerstarted) {
+			starttime = System.currentTimeMillis();
+			timerstarted = true;
+		    }
 		    // There was some tuple element read, so process it and get
 		    // the output elements to be sent
 		    //
@@ -437,6 +445,11 @@ public abstract class PhysicalOperator {
 		if (proceed) {
 		    proceed = checkDestinationControlElements();
 		}
+	    } // end of while loop
+	    if(timerstarted) {
+		stoptime = System.currentTimeMillis();
+		long executetime=stoptime-starttime;
+		//System.out.println(this.getClass().getName()+":"+starttime+":"+stoptime+":"+executetime);
 	    }
 
 	    // If the thread was interrupted, throw an interrupted exception
@@ -1784,7 +1797,8 @@ public abstract class PhysicalOperator {
 
     protected boolean blockingProcessSourceTupleElement (
 						 StreamTupleElement tupleElement,
-						 int streamId) {
+						 int streamId) 
+	throws OpExecException {
 
 	// By default does nothing and asks the operator to continue
 	//

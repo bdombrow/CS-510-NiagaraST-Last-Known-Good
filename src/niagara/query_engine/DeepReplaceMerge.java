@@ -17,9 +17,9 @@ package niagara.query_engine;
  * @author Kristin Tufte
  */
 
+import org.w3c.dom.*;
 import java.io.*;
 
-import niagara.utils.nitree.*;
 import niagara.utils.*;
 
 class DeepReplaceMerge extends MergeObject {
@@ -55,8 +55,8 @@ class DeepReplaceMerge extends MergeObject {
      * @return Returns nothing.
      * @exception OpExecException Thrown if exact match criteria isn't met
      */
-    void accumulate(NIElement accumElt, NIElement fragElt) 
-	throws OpExecException, NITreeException {
+    void accumulate(Element accumElt, Element fragElt) 
+	throws OpExecException {
 
 	/* convention - accumulator is always left */
 
@@ -69,11 +69,25 @@ class DeepReplaceMerge extends MergeObject {
 	 * there is nothing to do
 	 */
 	if(!keepLeft) {
-	    accumElt.replaceYourself(fragElt);
+	    replaceElement(accumElt, fragElt);
+	    // old - del when new working: accumElt.replaceYourself(fragElt); 
 	} 
 	return;
     }
 
+    /** 
+     * replaces one element with another
+     *
+     * @param old element to be replaced
+     * @param new element to be put in place of "old"
+     *
+     */
+    void replaceElement(Element oldElt, Element newElt)
+	throws DOMException {
+	oldElt.getParentNode().replaceChild(newElt, oldElt);
+	return;
+    }
+    
     /**
      * merges the two elements into the result element
      *
@@ -82,10 +96,10 @@ class DeepReplaceMerge extends MergeObject {
      *
      * @return Returns the result element
      */
-    NIElement merge(NIElement rElt, NIElement lElt, NIDocument resDoc,
-		    String tagName) 
-	throws OpExecException, NITreeException {
-	NIElement resElt = null;
+    Element merge(Element rElt, Element lElt, Document resDoc,
+		  String tagName) 
+	throws OpExecException {
+	Element resElt = null;
 	if(keepLeft) {
 	    resElt = lElt;
 	} else {

@@ -20,7 +20,7 @@ package niagara.query_engine;
 
 import java.io.*;
 
-import niagara.utils.nitree.*;
+import org.w3c.dom.*;
 
 class DoNotCareMerge extends MergeObject {
 
@@ -39,7 +39,7 @@ class DoNotCareMerge extends MergeObject {
      * @return Returns nothing.
      * @exception OpExecException Thrown if exact match criteria isn't met
      */
-    void accumulate(NIElement accumElt, NIElement fragElt) 
+    void accumulate(Element accumElt, Element fragElt) 
 	throws OpExecException {
 	/* Return without doing anything.  Since this is a DoNotCare,
 	 * means there are no attributes or content to deal with
@@ -57,10 +57,10 @@ class DoNotCareMerge extends MergeObject {
      *
      * @return Returns the result element
      */
-    NIElement merge(NIElement rElt, NIElement lElt, NIDocument resDoc,
+    Element merge(Element rElt, Element lElt, Document resDoc,
 		    String tagName) 
-	throws OpExecException, NITreeException {
-	NIElement resElt = resDoc.createNIElement(tagName);
+	throws OpExecException {
+	Element resElt = resDoc.createElement(tagName);
 	return resElt;
     }
 

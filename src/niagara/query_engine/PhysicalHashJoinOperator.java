@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.2 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -74,7 +74,8 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
     //
     DuplicateHashtable[] finalSourceTuples;
 
-    
+    private int count = 0;
+
     ///////////////////////////////////////////////////
     // Methods of the PhysicalHashJoinOperator Class
     ///////////////////////////////////////////////////
@@ -135,6 +136,7 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 
 	finalSourceTuples[0] = new DuplicateHashtable();
 	finalSourceTuples[1] = new DuplicateHashtable();
+
     }
 		     
 
@@ -152,14 +154,19 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
      */
 
     protected boolean nonblockingProcessSourceTupleElement (
-						 StreamTupleElement tupleElement,
+				     StreamTupleElement tupleElement,
 						 int streamId,
 						 ResultTuples result) {
-
+	count++;
+	if(count%1000 == 0) {
+	    long mem = Runtime.getRuntime().freeMemory();
+	    System.out.println(count + "tuples: free mem " + mem);
+	}
+	
 	// Get the hash code corresponding to the tuple element
 	//
 	String hashCode = PredicateEvaluator.hashCode(tupleElement,
-						      equalityJoinAttributes[streamId]);
+				   equalityJoinAttributes[streamId]);
 
 	// Proceed only if this is a valid hash code
 	//
@@ -326,5 +333,4 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 	return true;
     }
 }
-
 

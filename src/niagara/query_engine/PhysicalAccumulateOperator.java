@@ -8,10 +8,10 @@ import niagara.ndom.*;
 import org.xml.sax.*;
 import java.io.*;
 
+import niagara.ndom.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
-import niagara.utils.nitree.*;
 import niagara.data_manager.*;
 
 /**
@@ -42,14 +42,14 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     private int mergeIndex;
     
     /* The object into which things are being accumulated */
-    private NIDocument accumDoc;
+    private Document accumDoc;
     
     /* map table to use for accumDoc */
-    private MapTable mapTable;
+    /* MTND private MapTable mapTable; */
 
     private boolean recdData;
 
-    private int count;
+    private int count = 0;
     /*
      * Methods of the PhysicalMergeOperator Class
      */ 
@@ -98,7 +98,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	 * operator seems too ugly), I will do this and punt on the
 	 * problem
 	 */
-	mapTable = new MapTable(); 
+	/* MTND mapTable = new MapTable();  */
 
 	String initialAccumFile 
 	    = logicalAccumulateOperator.getInitialAccumFile();
@@ -125,9 +125,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	}
 
 	recdData = false;
-
-	count = 0;
-	//System.out.println("PhysicalAccumulateOperator created");
     }
 		     
 
@@ -145,32 +142,28 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     protected boolean blockingProcessSourceTupleElement (StreamTupleElement tupleElement,
 							 int streamId) {
 	count++;
-	if(count%100 == 0) {
-	    System.out.print("#");
+	if(count%1000 == 0) {
+	    long mem = Runtime.getRuntime().freeMemory();
+	    System.out.println(count + "tuples: free mem " + mem);
 	}
 	//System.out.println("PhysAccumOp: blkProcSTE called");
 	/* get the fragment to be merged from the tuple, convert it
 	 * to an element if necessary, then pass the work off to the merge tree
 	 */
 	try {
-	    NIElement fragment = convertAttrToNIElement(tupleElement);
+	    Element fragment = convertAttrToElement(tupleElement);
 	    
 	    // merge the fragment into the accumulated document
 	    mergeTree.accumulate(accumDoc, fragment);
 	    
 	    recdData = true;
-	    
 	    return true;
 	} catch (OpExecException e) {
 	    System.out.println("WARNING: Operator Execution Error " +
 			       e.getMessage());
 	    e.printStackTrace();
 	    return false; /* I think there's nothing better to do!! yeuch!!! */
-	} catch (NITreeException nite) {
-	    System.out.println("WARNING: NITree Error " + nite.getMessage());
-	    nite.printStackTrace();
-	    return false;
-	}
+	} 
     }
 
     
@@ -204,7 +197,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     protected boolean getCurrentOutput (ResultTuples resultTuples, 
 					boolean partial) {
-
 	if(recdData == false) {
 	    System.out.println("PhysAccumOp: WARNING - OUTPUTTING BEFORE DATA RECEIVED");
 	}
@@ -216,27 +208,25 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	 * to pass on the write permissions - but there are problems
 	 * with this - see notes in cloneNode
 	 */
-	accumDoc.globalSetWriteableFalse();
+	// MTND - DELETED: accumDoc.globalSetWriteableFalse();
 
 	/* now need to clone document so that I can work on it -
 	 * but use a shallow clone - only clone the document - 
 	 * none of the elements - new doc's children are the
 	 * same as the clonee's children
 	 */
-	accumDoc = accumDoc.cloneDocRefDocElt(false);
+	// MTND - Deleted: accumDoc = accumDoc.cloneDocRefDocElt(false);
 
 	/* finally, put the accumulated tree into the results */
 	StreamTupleElement result = new StreamTupleElement(partial);
-	result.appendAttribute(accumDoc.getDomDoc().getDocumentElement());
-
+	result.appendAttribute(accumDoc.getDocumentElement());
 	resultTuples.add(result, 0);
-
 
 	return true;
     }
 
 
-    private NIElement convertAttrToNIElement(StreamTupleElement tupleElement) 
+    private Element convertAttrToElement(StreamTupleElement tupleElement) 
 	throws OpExecException {
 	Object attr = tupleElement.getAttribute(mergeIndex);
 
@@ -244,10 +234,9 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	Document domDoc;
 	if(attr instanceof Element) {
 	    domElt = (Element)attr;
-	    domDoc = ((Element)attr).getOwnerDocument();
 	} else if (attr instanceof Document) {
 	    domElt = ((Document)attr).getDocumentElement();
-	    domDoc = (Document)attr;
+
 	    /* Ok, this is really stupid, if there is a parsing problem,
 	     * I just get a null document element here (basically an
 	     * empty document). This is due to some brilliance in
@@ -263,74 +252,71 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	    throw new OpExecException("Invalid instance type");
 	}
 	
-	if(domElt == null) {
-
-	}
-
-	NIDocument niDoc = NIDocument.getAssocNIDocument(domDoc, mapTable);
-	return niDoc.getAssocNIElement(domElt);
+	return domElt;
     }
 
     private void createEmptyAccumulator()  {
-	accumDoc = new NIDocument();
-	Document domDoc = DOMFactory.newDocument();
-	accumDoc.initialize(mapTable, domDoc);
+	accumDoc = DOMFactory.newDocument();
+	/* MTND Document domDoc = DOMFactory.newDocument(); 
+	 * accumDoc.initialize(mapTable, domDoc); 
+	 */
 	return;
     }
 
     private void createAccumulatorFromDoc(String afName) {
-	Document accumDomDoc 
-	    = (Document)DataManager.AccumFileDir.get(afName);
-	accumDoc = new NIDocument();
-	accumDoc.initialize(mapTable, accumDomDoc);
+	accumDoc = (Document)DataManager.AccumFileDir.get(afName);
 
-	/* now clone the accum doc itself so I can write to it 
+	if(accumDoc == null) {
+	    throw new PEException("AccumFileDir.get returned null in createAccumulatorFromDoc");
+	}
+
+	/* MTND - don't think I need any of this
+	 *	accumDoc = DOMFactory.newDocument();
+	 * accumDoc.initialize(mapTable, accumDomDoc);
+
+	* now clone the accum doc itself so I can write to it 
 	 * code always assumes that document itself has been
 	 * cloned - this clone is not deep - just clones
 	 * the document and references the document element
+	 *
+
+	 *accumDoc = accumDoc.cloneDocRefDocElt(false);
 	 */
-	accumDoc = accumDoc.cloneDocRefDocElt(false);
+
 	return;
     }
 
     private void createAccumulatorFromDisk(String initialAF) {
 
 	try {
-	    DOMParser p;
-	    // System.out.println("Creating parser");
-	    p = DOMFactory.newParser();
+	    niagara.ndom.DOMParser p = DOMFactory.newParser();
 	    
 	    /* Parse the initial accumulate	file */
 	    if(initialAF.startsWith("<?xml")) {
 		p.parse(new InputSource(new ByteArrayInputStream(initialAF.getBytes())));
 	    } else { 
-		// System.out.println("Creating File");
 		FileInputStream f = new FileInputStream(initialAF);
-		// System.out.println("Calling Parse");
 		p.parse(new InputSource(f));
-		// System.out.println("parse done");
 	    } 
 	
-	    // System.out.println("calling getdocument");
-	    Document accumDomDoc = p.getDocument(); 
-	    // System.out.println("get document done");
-	    if(accumDomDoc.getDocumentElement() == null) {
+	    accumDoc = p.getDocument(); 
+	    if(accumDoc.getDocumentElement() == null) {
 		System.out.println("Doc elt null");
-	    } else {
-		// System.out.println("Doc elt ok");
-	    }
+	    } 
 
-	    accumDoc = new NIDocument();
-	    accumDoc.initialize(mapTable, accumDomDoc);
-	    
-	    /* now clone the accum doc itself so I can write to it 
+	    /* MTND - dont need 
+	     * accumDoc = DOMFactory.newDocument();
+	     * accumDoc.initialize(mapTable, accumDomDoc);
+	     *
+	     * now clone the accum doc itself so I can write to it 
 	     * code always assumes that document itself has been
 	     * cloned - this clone is not deep - just clones
 	     * the document and references the document element
-	     */
-	    // System.out.println("calling clone");
-	    accumDoc = accumDoc.cloneDocRefDocElt(false);
-	    // System.out.println("createAccum done");
+	     *
+	     * accumDoc = accumDoc.cloneDocRefDocElt(false);
+	     * System.out.println("createAccum done");
+	    */
+
 	    return;
 	} catch (java.io.IOException e) {
 	    System.err.println("Initial Accumulate File Corrupt - creating empty accumulator " + e.getMessage());

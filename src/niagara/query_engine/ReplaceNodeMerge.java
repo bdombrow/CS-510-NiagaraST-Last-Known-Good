@@ -23,9 +23,10 @@ import java.lang.*;
 import java.lang.reflect.*;
 import java.io.*;
 
+import org.w3c.dom.*;
+
 import niagara.utils.*;
 import niagara.utils.type_system.*;
-import niagara.utils.nitree.*;
 
 class ReplaceNodeMerge extends NodeMerge {
 
@@ -71,11 +72,11 @@ class ReplaceNodeMerge extends NodeMerge {
      *         no updates need to be made based on this merge
      */
 
-    boolean merge(NINode lNode, NINode rNode, NINode resultNode) 
-	throws OpExecException, NITreeException {
+    boolean merge(Node lNode, Node rNode, Node resultNode) 
+	throws OpExecException {
 
-	NINode dominantNode = null;
-	NINode submissiveNode = null;
+	Node dominantNode = null;
+	Node submissiveNode = null;
 	if(leftIsDominant) {
 	    dominantNode = lNode;
 	    submissiveNode = rNode;
@@ -89,7 +90,7 @@ class ReplaceNodeMerge extends NodeMerge {
 	     * have to
 	     */
 	    if(!comparator.nodeEquals(dominantNode, resultNode)) { 
-		resultNode.mySetNodeValue(dominantNode.myGetNodeValue());
+		resultNode.setNodeValue(dominantNode.getNodeValue());
 	    }
 	    return true;
 	} else { 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalUnionOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalUnionOperator.java,v 1.3 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,6 +48,8 @@ public class PhysicalUnionOperator extends PhysicalOperator {
     // These are the private data members of the PhysicalUnionOperator class //
     //////////////////////////////////////////////////////////////////////////
 
+    //private int count;
+
     /**
      * This is the constructor for the PhysicalUnionOperator class that
      * initializes it with the appropriate logical operator, source streams,
@@ -74,6 +76,8 @@ public class PhysicalUnionOperator extends PhysicalOperator {
 	      destinationStreams,
 	      new boolean[sourceStreams.length],
 	      responsiveness);
+
+	//count = 0;
     }
 
     int counter = 0;
@@ -97,7 +101,10 @@ public class PhysicalUnionOperator extends PhysicalOperator {
 						 ResultTuples result) {
         counter++;
 	    result.add(inputTuple, 0);
-
+	    /*count++;
+	    if(count%100 == 0) {
+		System.out.print("U("+String.valueOf(count/100)+")");
+	    }*/
 	    return true;
 	}
 }

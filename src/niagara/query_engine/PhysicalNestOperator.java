@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalNestOperator.java,v 1.3 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,8 +30,6 @@ package niagara.query_engine;
 
 import java.util.Vector;
 import java.util.ArrayList;
-
-import com.ibm.xml.parser.TXElement;
 
 import org.w3c.dom.*;
 import niagara.utils.*;
@@ -66,6 +64,10 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
     //
     int numGroupingAttributes;
 
+    // The result document - all result elements of nest
+    // will be a part of this document. Need this document
+    // since we can longer create an element without a parent document
+    Document resultDoc;
 
     ////////////////////////////////////////////////////////////////////
     // These are the methods of the class                             //
@@ -99,6 +101,9 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 	// Get the result template of the nest logical operator
 	//
 	resultTemplate = ((nestOp) logicalOperator).getResTemp();
+
+	// construct the result document 
+	resultDoc = DOMFactory.newDocument();
     }
 
 
@@ -213,9 +218,9 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 	//
 	if (numGroupingAttributes == 0) {
 
-	    // Just create and return a TXElement with the root tag
+	    // Just create and return a Element with the root tag
 	    //
-	    TXElement temp = new TXElement(rootTag);
+	    Element temp = resultDoc.createElement(rootTag);
 	    
 	    return temp;
 	}
@@ -244,7 +249,7 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
 	// Create a result element with root tag
 	//
-	TXElement resultElement = new TXElement(rootTag);
+	Element resultElement = resultDoc.createElement(rootTag);
 
 	// If the partial result is not null, add all elements of the partial result
 	//
@@ -285,11 +290,12 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
     /**
      * This function add the elements of a node vector to the result element
      *
-     * @param resultElement The result TXElement
+     * @param resultElement The result Element
      * @param nodeVector The vector of nodes to be added
      */
 
-    private void addNodesToResult (TXElement resultElement, Vector nodeVector) {
+    private void addNodesToResult (Element resultElement, 
+				   Vector nodeVector) {
 
 	// Loop over all elements and add a clone to the result element
 	//
@@ -298,7 +304,7 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 	for (int node = 0; node < numNodes; ++node) {
 
 	    resultElement.appendChild(((Node)
-				       nodeVector.elementAt(node)).cloneNode(true));
+			 nodeVector.elementAt(node)).cloneNode(true));
 	}
     }
 

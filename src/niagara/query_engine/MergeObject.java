@@ -22,7 +22,7 @@ package niagara.query_engine;
 
 import java.io.*;
 
-import niagara.utils.nitree.*;
+import org.w3c.dom.*;
 
 abstract class MergeObject {
 
@@ -37,8 +37,8 @@ abstract class MergeObject {
      *
      * @return Returns nothing 
      */
-    abstract void accumulate(NIElement accumElt, NIElement fragElt) 
-	throws OpExecException, NITreeException;
+    abstract void accumulate(Element accumElt, Element fragElt) 
+	throws OpExecException;
 
     /** 
      * merges two fragments together
@@ -50,9 +50,9 @@ abstract class MergeObject {
      *
      * @return Returns a pointer to the result element
      */
-    abstract NIElement merge(NIElement lElt, NIElement rElt, 
-			     NIDocument resDoc, String tagName)
-	throws OpExecException, NITreeException;
+    abstract Element merge(Element lElt, Element rElt, 
+			     Document resDoc, String tagName)
+	throws OpExecException;
 
 
     /**

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSumOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalSumOperator.java,v 1.3 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -212,7 +212,9 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
      *         null
      */
 
-    protected final Object constructUngroupedResult (StreamTupleElement tupleElement) {
+    protected final Object constructUngroupedResult (StreamTupleElement 
+						          tupleElement) 
+	throws OpExecException {
 
 	// First get the atomic values
 	//
@@ -222,6 +224,7 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 	// If there is not exactly one atomic value, skip
 	//
 	if (atomicValues.size() != 1) {
+	    System.out.println("Warning: not exactly one atomic value");
 	    return null;
 	}
 	else {
@@ -243,9 +246,7 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 		return doubleValue;
 	    }
 	    catch (java.lang.NumberFormatException e) {
-		// Cannot convert to double
-		//
-		return null;
+		throw new OpExecException("Unable to convert atomicValue to double in PhysicalSumOperator");
 	    }
 	}
     }
@@ -278,6 +279,12 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 
 	// Add effects of ungrouped result (which is a Double)
 	//
+	if(finalResult == null) {
+           System.out.println("aha, finalResult is null");
+	} 
+	if(ungroupedResult ==  null) {
+           System.out.println("aha, ungroupedResult is null");
+	}
 	finalResult.updateStatistics(((Double) ungroupedResult).doubleValue());
 
 	// Return the grouped result

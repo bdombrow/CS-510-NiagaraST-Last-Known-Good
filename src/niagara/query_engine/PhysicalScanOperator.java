@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.5 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalScanOperator.java,v 1.6 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -137,17 +137,15 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	//
         
         if(attribute instanceof Document) {
-            // System.err.println( ((TXDocument)attribute).getText());
             String rootName = ((Document) attribute).getDocumentElement().getTagName();
             if(rootName==null) {
                 System.err.println("Got you!, NULL Root of DOC");
             }
         }
         else if(attribute instanceof Element) {
-            // System.err.println( ((TXElement)attribute).getText());
+	      // KT: Is this OK - can we delete this else if??
         }
-	//System.out.println("SCAN:Node scanned is " + ((Node)attribute).getNodeName());
-		
+	
 	Vector elementList = PathExprEvaluator.getReachableNodes(attribute,this.rExp);
 		
 		
@@ -156,7 +154,6 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	// to the result
 	//
 	int numNodes = elementList.size();	
-
 	for(int node = 0; node < numNodes; ++node) {
 
 	    // Clone the input tuple to create an output tuple

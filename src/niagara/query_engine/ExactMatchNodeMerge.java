@@ -21,8 +21,9 @@ import java.lang.*;
 import java.lang.reflect.*;
 import java.io.*;
 
+import org.w3c.dom.*;
+
 import niagara.utils.type_system.*;
-import niagara.utils.nitree.*;
 
 class ExactMatchNodeMerge extends NodeMerge {
 
@@ -45,7 +46,7 @@ class ExactMatchNodeMerge extends NodeMerge {
      * @return Returns true if resultNode changed, false if
      *         no updates need to be made based on this merge
      */
-    boolean merge(NINode lNode, NINode rNode, NINode resultNode) 
+    boolean merge(Node lNode, Node rNode, Node resultNode) 
 	throws OpExecException {
 
 	if(!comparator.nodeEquals(lNode, rNode)) {

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalTrigActionOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalTrigActionOperator.java,v 1.3 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,6 +36,7 @@ import java.lang.reflect.Array;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.ndom.*;
 
 
 // XXX vpapad: Document does not have printWithFormat - this code
@@ -140,7 +141,7 @@ public class PhysicalTrigActionOperator extends PhysicalOperator {
 	    mailDoc = (Document)tupleElement.getAttribute(0);
 	else {
 	    if(mailDoc==null) { 
-		mailDoc = new TXDocument();
+		mailDoc = DOMFactory.newDocument(); 
 		Element root = mailDoc.createElement("Results");
 		mailDoc.appendChild(root);
 	    }
@@ -149,7 +150,7 @@ public class PhysicalTrigActionOperator extends PhysicalOperator {
 		Node n = null;
 		Object o = tupleElement.getAttribute(i);
 		if(o instanceof String)
-		    n = new TXText((String)o);
+		    n = mailDoc.createTextNode((String)o);
 		else
 		    n = (Node)o;
 		tele.appendChild(n.cloneNode(true));
@@ -160,16 +161,24 @@ public class PhysicalTrigActionOperator extends PhysicalOperator {
     }
     protected void shutdownTrigOp() {
 	if(mailto!=null) {
-	    try {
-		String fn = ".TrigMailto" + System.currentTimeMillis();
-		File tmpF = new File(fn);
-		FileWriter fw = new FileWriter(tmpF);
-		((TXDocument)mailDoc).printWithFormat(fw);
-		fw.flush();
-		Runtime rt = Runtime.getRuntime();
-		rt.exec("M " + mailto + " " + fn);
-	    } catch (Exception ioe) {
-		ioe.printStackTrace();
+
+	    if(mailDoc instanceof TXDocument) {
+		// KT - works only with old version of XML4J -
+		// printWithFormat is not part of the Document interface.
+		try {
+		    String fn = ".TrigMailto" + System.currentTimeMillis();
+		    File tmpF = new File(fn);
+		    FileWriter fw = new FileWriter(tmpF);
+		
+		    ((TXDocument)mailDoc).printWithFormat(fw);
+		    fw.flush();
+		    Runtime rt = Runtime.getRuntime();
+		    rt.exec("M " + mailto + " " + fn);
+		} catch (Exception ioe) {
+		    ioe.printStackTrace();
+		}
+              } else {
+	    System.err.println("Trigger Send Mail did not complete - works only with old version of XML4J");
 	    }
 	}
     }

@@ -23,9 +23,10 @@ import java.lang.*;
 import java.lang.reflect.*;
 import java.io.*;
 
+import org.w3c.dom.*;
+
 import niagara.utils.*;
 import niagara.utils.type_system.*;
-import niagara.utils.nitree.*;
 
 /** Base class for three types of node merges - 
  * 1) take the dominant content
@@ -82,8 +83,8 @@ abstract class NodeMerge {
      * @return Returns true if resultNode changed, false if
      *         no updates need to be made based on this merge
      */
-    abstract boolean merge(NINode lNode, NINode rNode, NINode resultNode)
-	throws OpExecException, NITreeException;
+    abstract boolean merge(Node lNode, Node rNode, Node resultNode)
+	throws OpExecException;
 
     /**
      * Function to set name for this node merge object

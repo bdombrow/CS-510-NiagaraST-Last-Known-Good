@@ -24,7 +24,6 @@ import java.util.*;
 import org.w3c.dom.*;
 import java.io.*;
 
-import niagara.utils.nitree.*;
 import niagara.utils.*;
 import niagara.utils.type_system.*;
 
@@ -35,9 +34,9 @@ class ShallowContentMerge extends MergeObject {
     NodeMerge   contentMerge;
 
     /* used during merge processing */
-    private NIElement leftElt;
-    private NIElement rightElt;
-    private NIElement resultElt;
+    private Element leftElt;
+    private Element rightElt;
+    private Element resultElt;
     private boolean leftIsResult;
     private boolean rightIsResult;
 
@@ -65,16 +64,16 @@ class ShallowContentMerge extends MergeObject {
 	Element attrShallowContElt;
 
 	Element attrMergeElt = 
-	    ElementAssistant.getFirstElementChild(shallowContElt);
+	    DOMHelper.getFirstChildElement(shallowContElt);
 	while(attrMergeElt != null) {
 	    attrName = attrMergeElt.getAttribute("AttrName");
 	    attrShallowContElt = 
-		ElementAssistant.getFirstElementChild(attrMergeElt);
+		DOMHelper.getFirstChildElement(attrMergeElt);
 	    if(attrShallowContElt != null) {
 		attrNodeMerge=createNodeMerge(attrShallowContElt, 
 					      treeDomSide, treeMergeType);
 		/* just for safety */
-		if(ElementAssistant.getNextElementSibling(attrMergeElt)
+		if(DOMHelper.getNextSiblingElement(attrMergeElt)
 		   != null) {
 		    throw new PEException("Unexpected sibling");
 		}
@@ -89,7 +88,7 @@ class ShallowContentMerge extends MergeObject {
 	    attrNodeMerge.setName(attrName);
 	    attrMergesMap.put(attrName, attrNodeMerge);
 	    attrMergeElt =
-		ElementAssistant.getNextElementSibling(attrMergeElt);
+		DOMHelper.getNextSiblingElement(attrMergeElt);
 	}
 
 	return;
@@ -184,8 +183,8 @@ class ShallowContentMerge extends MergeObject {
      * @return Returns nothing.
      * @exception OpExecException Thrown if exact match criteria isn't met
      */
-    void accumulate(NIElement accumElt, NIElement fragElt) 
-	throws OpExecException, NITreeException {
+    void accumulate(Element accumElt, Element fragElt) 
+	throws OpExecException {
 	/* traverse through all attributes and content - if an attribute 
 	 * value (or node content) matches, no action.  If a new 
 	 * attribute/content is found in fragElt, it is inserted into 
@@ -196,8 +195,8 @@ class ShallowContentMerge extends MergeObject {
 	/* Handle the case with an empty accumElt here.
 	 * This may occur when we start with a null accumulator
 	 */
-	if (accumElt.myGetNodeValue() == null) {
-	    accumElt.mySetNodeValue(fragElt.myGetNodeValue());
+	if (accumElt.getNodeValue() == null) {
+	    accumElt.setNodeValue(fragElt.getNodeValue());
 	    return;
 	}
 
@@ -215,11 +214,11 @@ class ShallowContentMerge extends MergeObject {
      *
      * @return Returns new result element
      */
-    NIElement merge(NIElement lElt, NIElement rElt, NIDocument resDoc,
+    Element merge(Element lElt, Element rElt, Document resDoc,
 		    String tagName) 
-	throws OpExecException, NITreeException {
+	throws OpExecException {
 
-	NIElement resElt = resDoc.createNIElement(tagName);
+	Element resElt = resDoc.createElement(tagName);
 	
 	internal_merge(rElt, lElt, resElt);
 
@@ -241,9 +240,9 @@ class ShallowContentMerge extends MergeObject {
      *
      * @return True to indicate that recursion should continue
      */
-    private void internal_merge(NIElement lElt, NIElement rElt, 
-				NIElement resElt) 
-	throws OpExecException, NITreeException {
+    private void internal_merge(Element lElt, Element rElt, 
+				Element resElt) 
+	throws OpExecException {
 
 	/* first some setup */
 	leftElt = lElt;
@@ -257,7 +256,7 @@ class ShallowContentMerge extends MergeObject {
 	rightIsResult = (resultElt == rightElt);
 
 	/* merge the attributes */
-	hashMergeAttributes();
+	mergeAttributes();
 
 	/* now deal with the content 
 	 */
@@ -279,8 +278,8 @@ class ShallowContentMerge extends MergeObject {
      *
      * Maybe should turn this into a HashJoin class...
      */
-    private void hashMergeAttributes() 
-	throws OpExecException, NITreeException {
+    private void mergeAttributes() 
+	throws OpExecException {
 	/* create hash maps from the attributes - I don't use
 	 * NamedNodeMap because I don't want attributes with
 	 * default values to be replaced, and because I don't
@@ -288,12 +287,17 @@ class ShallowContentMerge extends MergeObject {
 	 * Questionable - would like to leave accumAttrsMap
 	 * around in accum case...
 	 */
-	HashMap lAttrsMap = createAttrsHashMap(leftElt.getAttributeArray());
-	HashMap rAttrsMap = createAttrsHashMap(rightElt.getAttributeArray());
+	NamedNodeMap lAttrsMap = leftElt.getAttributes();
+	NamedNodeMap rAttrsMap = rightElt.getAttributes();
 
-	/* array of attributes to be added to the result element */
-	ArrayList resultAttrs = new ArrayList(); 
-	ArrayList changedAttrs = new ArrayList();
+	/* array of attributes to be added to, changed in and
+	 * delete from the result element */
+	ArrayList addAttrs = new ArrayList(); 
+	ArrayList changeAttrs = new ArrayList();
+	ArrayList delAttrs = new ArrayList();
+
+	/* left attrs which have been processed */
+	HashMap procLeftAttrs = new HashMap(); 
 
 	if(lAttrsMap == null && rAttrsMap == null) {
 	    /* nothing to do - there are no attributes */
@@ -301,12 +305,11 @@ class ShallowContentMerge extends MergeObject {
 	} else if (lAttrsMap == null) {
 	    /* only attributes on "right" */
 	    processAttrsAsOuter(rAttrsMap, false, rightIsResult,
-				resultAttrs, rightElt);
+				addAttrs, delAttrs);
 	} else if (rAttrsMap == null) {
 	    processAttrsAsOuter(lAttrsMap, true, leftIsResult,
-				resultAttrs, leftElt);
+				addAttrs, delAttrs);
 	} else {
-
 	    /* join the attrMaps - join condition is equality of 
 	     * attribute names look for matches in the maps - if a match 
 	     * found - then proceed to merge the matching attributes - if no
@@ -314,9 +317,9 @@ class ShallowContentMerge extends MergeObject {
 	     */
 	    /* iterate through right(fragment) and probe left (accum)
 	     */
-	    Iterator rIterator = rAttrsMap.values().iterator();
-	    while(rIterator.hasNext()) {
-		NIAttribute rAttr = (NIAttribute)(rIterator.next());
+	    int rLen = rAttrsMap.getLength();
+	    for(int i=0; i<rLen; i++) {
+		Attr rAttr = (Attr)(rAttrsMap.item(i));
 		
 		/* Ignore all attributes without any merge information  -
 		 * by removing them from the appropriate attrsMap
@@ -334,67 +337,87 @@ class ShallowContentMerge extends MergeObject {
 		}
 		
 		if(nodeMerge == null) {
-		    rIterator.remove();
+		    if(rightIsResult) {
+			delAttrs.add(rAttr);
+		    } /* else do nothing, attr wont end up in result */
 		} else {
 		    /* get a matching left attribute */
-		    NIAttribute lAttr = null;
-		    lAttr = (NIAttribute)
-			(lAttrsMap.get(rAttr.getName()));
+		    Attr lAttr = null;
+		    lAttr = (Attr)
+			(lAttrsMap.getNamedItem(rAttr.getName()));
 		    
 		    if(lAttr != null) {
 			/* attribute names are the same, so we have the same
 			 * attribute, so merge the matching attributes 
 			 */
-			NIAttribute tempResultAttr = new NIAttribute();
+			Attr tempResultAttr = 
+			    resultElt.getOwnerDocument().createAttribute("JUNK");
 			boolean new_result;
 			new_result = nodeMerge.merge(lAttr, rAttr, 
 						     tempResultAttr);
 			
 			if((rightIsResult || leftIsResult) && new_result) {
-			    changedAttrs.add(tempResultAttr);
+			    changeAttrs.add(tempResultAttr);
 			} else {
-			    resultAttrs.add(tempResultAttr);
+			    addAttrs.add(tempResultAttr);
 			}
 		    
-			/* remove the leftAttr from the hash map
-			 * to indicate it has already been processed
-			 */
-			lAttrsMap.remove(lAttr.getName());
+			/* keep a list of the left attrs that have been
+			 * processed
+			 */ 
+			procLeftAttrs.put(lAttr.getName(), lAttr);
 		    } else {
 			/* lAttr is null-means rAttr is a 
 			 * "Right Outer" attribute */
 			processOuterAttr(rAttr, nodeMerge.includeRightOuter(), 
-					 rightIsResult, resultAttrs, rightElt);
+					 rightIsResult, addAttrs, delAttrs); 
 		    }
 		}
 	    }
 
-	    /* Process remaining attributes from the left side */
-	    processAttrsAsOuter(lAttrsMap, true,
-				leftIsResult, resultAttrs, leftElt);
+	    /* Process remaining attributes from the left side 
+	     * an attribute is "remaining" if it hasn't already
+	     * been processed and put in the procLeftAttrs list
+	     */
+	    int len = lAttrsMap.getLength();
+	    for(int i=0; i < len; i++) {
+		Attr attr = (Attr)lAttrsMap.item(i);
+
+		/* Ignore all attributes without any merge information  -
+		 * by not doing anything
+		 */
+		NodeMerge nodeMerge = (NodeMerge)
+		    (attrMergesMap.get(attr.getName()));
+		if(nodeMerge != null) {
+		    if(procLeftAttrs.get(attr.getName()) == null) {
+			processOuterAttr(attr, nodeMerge.includeLeftOuter(), 
+					 leftIsResult, addAttrs, delAttrs);
+		    }
+		}
+	    }
 	}
 
 	/* add the new result attributes to the result Elemement */
-	int rLength = resultAttrs.size();
-	for(int i=0; i< rLength; i++) {
-	    resultElt.setAttributeNode((NIAttribute)(resultAttrs.get(i)));
+	int len = addAttrs.size();
+	for(int i=0; i < len; i++) {
+	    resultElt.setAttributeNode((Attr)(addAttrs.get(i)));
 	}
 
-	rLength = changedAttrs.size();
-	if(rightIsResult || leftIsResult) {
-	    for(int i=0; i<rLength; i++) {
-		NIAttribute chgdAttr = (NIAttribute)changedAttrs.get(i);
-		NIAttribute a;
-		a = resultElt.getAttributeNode(chgdAttr.getName());
-		/* a wont be null, since to change, we know we
-		 * had attr values from both sides
-		 */
-		a.setValue(chgdAttr.getValue());
-	    }
-	} else {
-	    for(int i=0; i< rLength; i++) {
-		resultElt.setAttributeNode((NIAttribute)(changedAttrs.get(i)));
-	    }
+	/* delete the deleted attributes from the result Element */
+	len = delAttrs.size();
+	for(int i=0; i < len; i++) {
+	    resultElt.removeAttributeNode((Attr)(delAttrs.get(i)));
+	}
+
+	len = changeAttrs.size();
+	for(int i=0; i<len; i++) {
+	    Attr chgdAttr = (Attr)changeAttrs.get(i);
+	    Attr a;
+	    a = resultElt.getAttributeNode(chgdAttr.getName());
+	    /* a wont be null, since to change, we know we
+	     * had attr values from both sides
+	     */
+	    a.setValue(chgdAttr.getValue());
 	}
 
 	return;
@@ -408,40 +431,39 @@ class ShallowContentMerge extends MergeObject {
      *
      * @param attrsMap The hash map of the attributes to be processed
      */
-    private void processAttrsAsOuter(HashMap attrsMap, boolean isLeft,
-				     boolean isResult, ArrayList resultAttrs,
-				     NIElement elt) 
-	throws NITreeException {
+    private void processAttrsAsOuter(NamedNodeMap attrsMap, boolean isLeft,
+				     boolean isResult, 
+				     ArrayList resultAttrs, 
+				     ArrayList deletedAttrs) {
 	/* Process remaining attributes from the given side */
-	Iterator iterator = attrsMap.values().iterator();	
-	    while(iterator.hasNext()) {
-		NIAttribute attr = (NIAttribute)(iterator.next());
+	int numAttrs = attrsMap.getLength();
+	int i=0;
+	while(i < numAttrs) {
+	    Attr attr = (Attr)(attrsMap.item(i));
 		
-		/* Ignore all attributes without any merge information  -
-		 * by removing them from the appropriate attrsMap
-		 */
-		NodeMerge nodeMerge = (NodeMerge)
-		    (attrMergesMap.get(attr.getName()));
-		if(nodeMerge == null) {
-		    iterator.remove();
+	    /* Ignore all attributes without any merge information  -
+	     * by not doing anything
+	     */
+	    NodeMerge nodeMerge = (NodeMerge)
+		(attrMergesMap.get(attr.getName()));
+	    if(nodeMerge != null) {
+		boolean includeOuter;
+		if(isLeft) {
+		    includeOuter =  nodeMerge.includeLeftOuter();
 		} else {
-		    boolean includeOuter;
-		    if(isLeft) {
-			includeOuter =  nodeMerge.includeLeftOuter();
-		    } else {
-			includeOuter = nodeMerge.includeRightOuter();
-		    }
-		    /* lAttr is null-means attr is a 
-		     * "1Outer" attribute */
-		    processOuterAttr(attr, includeOuter, isResult,
-				     resultAttrs, elt);
+		    includeOuter = nodeMerge.includeRightOuter();
 		}
+		/* lAttr is null-means attr is a 
+		 * "1Outer" attribute */
+		processOuterAttr(attr, includeOuter, isResult,
+				 resultAttrs, deletedAttrs);
 	    }
 	}
-
+    }
+    
 
     private void mergeContent() 
-	throws OpExecException, NITreeException {
+	throws OpExecException {
 	contentMerge.merge(leftElt, rightElt, resultElt);
 	return;
     }
@@ -454,7 +476,7 @@ class ShallowContentMerge extends MergeObject {
      *
      * @return The newly-created hash map for the attributes.
      */
-    private HashMap createAttrsHashMap(NIAttribute[] attributeArray) {
+    private HashMap createAttrsHashMap(Attr[] attributeArray) {
 	if(attributeArray == null) {
 	    return null;
 	}
@@ -483,10 +505,9 @@ class ShallowContentMerge extends MergeObject {
      * @param elt          The element associated with this attr
      *
      */
-    private void processOuterAttr(NIAttribute attr, boolean includeOuter,
+    private void processOuterAttr(Attr attr, boolean includeOuter,
 				  boolean isResult, ArrayList resultAttrs,
-				  NIElement elt) 
-	throws NITreeException {
+				  ArrayList deletedAttrs) {
 	/* isResult  && inclOuter - nothing to do - attr already in result
 	 * isResult  && !inclOuter - remove attr from result
 	 * !isResult && inclOuter - add attr to result
@@ -496,7 +517,7 @@ class ShallowContentMerge extends MergeObject {
 	if(!isResult && includeOuter) {
 	    resultAttrs.add(attr);
 	} else if (isResult && !includeOuter) {
-	    elt.removeAttributeNode(attr);
+	    deletedAttrs.add(attr);
 	}
 	return;
     }

@@ -24,7 +24,6 @@ import org.xml.sax.*;
 import java.io.*;
 
 import niagara.utils.*;
-import niagara.utils.nitree.*;
 
 
 class MergeTreeNode {
@@ -82,17 +81,17 @@ class MergeTreeNode {
 	 * the merge itself (ShallowContent, DeepReplace, etc.)
 	 */
 	Element contentMerge = null;
-	if(ElementAssistant.getFirstElementChild(eMElt).getNodeName().equals("MatchTemplate")) {
+	if(DOMHelper.getFirstChildElement(eMElt).getNodeName().equals("MatchTemplate")) {
 	    /* we have a match template */
-	    Element matchTempl = ElementAssistant.getFirstElementChild(eMElt);
+	    Element matchTempl = DOMHelper.getFirstChildElement(eMElt);
 	    matcher = new MatchTemplate();
 	    matcher.readXMLTemplate(resultTagName, matchTempl);
 	    hasMatchTemplate = true;
-	    contentMerge = ElementAssistant.getNextElementSibling(matchTempl);
+	    contentMerge = DOMHelper.getNextSiblingElement(matchTempl);
 	} else {
 	    hasMatchTemplate = false;
 	    matcher = null;
-	    contentMerge = ElementAssistant.getFirstElementChild(eMElt);
+	    contentMerge = DOMHelper.getFirstChildElement(eMElt);
 	}
 
 	/* the ElementMerge element always contains an
@@ -121,7 +120,7 @@ class MergeTreeNode {
 	  
 	/* create the children!! */
 	Element childEMElt = 
-	    ElementAssistant.getNextElementSibling(contentMerge);
+	    DOMHelper.getNextSiblingElement(contentMerge);
 	while(childEMElt != null) {
 	    /* put a new MergeTreeNode in the children list */
 	    MergeTreeNode temp = new MergeTreeNode(childEMElt,
@@ -131,7 +130,7 @@ class MergeTreeNode {
 	    children.add(temp);
 
 	    /* and continue on */
-	    childEMElt = ElementAssistant.getNextElementSibling(childEMElt);
+	    childEMElt = DOMHelper.getNextSiblingElement(childEMElt);
 	}	  
 
 	return;
@@ -248,7 +247,7 @@ class MergeTreeNode {
     }
 
     /**
-     * Merges two NIElements together using the merger member object.
+     * Merges two Elements together using the merger member object.
      *
      * @param lElt "left" element to be merged
      * @param rElt "right" element to be merged
@@ -256,41 +255,64 @@ class MergeTreeNode {
      *
      * @return returns new result element 
      */
-    NIElement merge(NIElement lElt, NIElement rElt, NIDocument doc) 
-	throws OpExecException, NITreeException {
+    Element merge(Element lElt, Element rElt, Document doc) 
+	throws OpExecException {
 	return merger.merge(lElt, rElt, doc, resultTagName);
     }
 
     /**
-     * Function to accumulate one NIElement into another. Will use
+     * Function to accumulate one Element into another. Will use
      * the merger member object to do the accumulate.
      *
-     * @param accumElt NIElement to be accumulated into (accumulator)
-     * @param fragElt NIElement to be accumulated into accumElt (accumulatee)
+     * @param accumElt Element to be accumulated into (accumulator)
+     * @param fragElt Element to be accumulated into accumElt (accumulatee)
      *
      * @return Returns true or false to indicate whether recursion 
      *         should continue or not 
      */
-    void accumulate(NIElement accumElt, NIElement fragElt) 
-	throws OpExecException, NITreeException {
+    void accumulate(Element accumElt, Element fragElt) 
+	throws OpExecException {
 	merger.accumulate(accumElt, fragElt);
     }
 
     /**
-     * Finds the only child of accumElt which "matches" nextFragElt - uses
-     * the matcher member to do this. If there are multiple matches
-     * in accumElt, this is an error.
+     * Creates a key value given a parent key value. Will search the
+     * element for key values as described by local key spec in
+     * matcher and will append that local key to parent key value
      *
-     * @param accumElt Accumulator element - look for matches among this 
-     * element's children
-     * @param nextFragElt Fragment element - matching this fragment with
-     * accumElt's kids
+     * @param parentKey The parent key value to use in rooted key value 
+     *           creation
+     * @param elt The element whose local key should be appended to parent
+     *          key value
      *
-     * @return Returns matching element which is a child of accumElt. 
+     * @return 
      */
-    NIElement findUniqueMatch(NIElement accumElt, NIElement nextFragElt,
-			      boolean parentChanged) {
-	return matcher.findUniqueMatch(accumElt, nextFragElt, parentChanged);
+    public RootedKeyValue createRootedKeyValue(RootedKeyValue parentKey, 
+					       Element elt) 
+	throws OpExecException {
+	return matcher.createRootedKeyValue(parentKey, elt);
+    }
+
+    /**
+     * Creates a key value given a parent key value. Will search the
+     * element for key values as described by local key spec in
+     * matcher and will append that local key to parent key value
+     *
+     * @param parentKey The parent key value to use in rooted key value 
+     *           creation
+     * @param elt The element whose local key should be appended to parent
+     *          key value
+     * @param tagName The tag name to annotate the local key value with,
+     *                due to support for renaming, this sometimes
+     *                is not the same as the tag name of the element
+     *                 uugh, this is UGLY - I don't like it
+     *
+     * @return 
+     */
+    RootedKeyValue createRootedKeyValue(RootedKeyValue parentKey, Element elt,
+					String tagName) 
+	throws OpExecException {
+	return matcher.createRootedKeyValue(parentKey, elt, tagName);
     }
 
     public void dump(PrintStream os) {

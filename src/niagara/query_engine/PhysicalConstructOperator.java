@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.7 2001/07/17 11:11:30 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.8 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -132,19 +132,22 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 						 StreamTupleElement tupleElement,
 						 int streamId,
 						 ResultTuples result) {
-
-        if (!checkedInputTuples) {
-            Document inputDoc = null;
-            for (int i = 0; i < tupleElement.size(); i++) {
-                Node n = (Node) tupleElement.getAttribute(i);
-                if (n != null && n.getOwnerDocument() != null) {
-                    System.out.println("XXX found another document owner!!!");
-                    doc = n.getOwnerDocument();
-                    break;
-                }
-            }
-            checkedInputTuples = true;
-        }
+	/* KT - what was the point of this?? - it causes problems -
+	 * scan followed by construct does not work properly when
+	 * this code is in
+	 * if (!checkedInputTuples) {
+	 *    Document inputDoc = null;
+	 *  for (int i = 0; i < tupleElement.size(); i++) {
+	 *      Node n = (Node) tupleElement.getAttribute(i);
+	 *      if (n != null && n.getOwnerDocument() != null) {
+	 *          System.out.println("XXX found another document owner!!!");
+	 *          doc = n.getOwnerDocument();
+	 *          break;
+	 *      }
+	 *  }
+	 *  checkedInputTuples = true;
+	 * }
+	 */
 
 	// Recurse down the result template to construct result
 	//

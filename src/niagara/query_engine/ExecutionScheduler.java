@@ -1,6 +1,6 @@
  
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.8 2001/07/17 07:03:46 vpapad Exp $
+  $Id: ExecutionScheduler.java,v 1.9 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -323,6 +323,7 @@ public class ExecutionScheduler {
 				return;
 			}
 
+			//System.out.println("Algorithm Name = " + physicalOperatorClass);
 
 			// Create a new instance of the class with the logical operator,
 			// input, output streams and responsiveness. First get the
@@ -444,7 +445,7 @@ public class ExecutionScheduler {
 	 * firehose and start reading documents from that firehose and
 	 * putting them into the output stream
 	 */
-	System.err.println("Attempting to start firehose ");
+	//System.err.println("Attempting to start firehose ");
 
 	FirehoseThread firehose = new FirehoseThread(fhScanOp.getSpec(),
 				      new SourceStream(inputStreams[0]));

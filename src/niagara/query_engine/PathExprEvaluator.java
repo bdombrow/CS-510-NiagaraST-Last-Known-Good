@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.4 2001/07/17 07:03:46 vpapad Exp $
+  $Id: PathExprEvaluator.java,v 1.5 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -214,9 +214,9 @@ public class PathExprEvaluator
 								   re.getRightChild());
 					
 					/*
-					  if(leftNodes.elementAt(i) instanceof TXDocument){
+					  if(leftNodes.elementAt(i) instanceof Document){
 					  rightNodes = getReachableNodes(
-					  ((TXDocument)leftNodes.elementAt(i)).getDocumentElement(),
+					  ((Document)leftNodes.elementAt(i)).getDocumentElement(),
 					  re.getRightChild());
 					  } else {
 					  rightNodes = getReachableNodes((Element)leftNodes.elementAt(i), 
@@ -281,8 +281,8 @@ public class PathExprEvaluator
 				//Vector [] all;
 				
 				nodesReached.addElement(inNode);
-				/*if(inNode instanceof TXDocument){
-					nodesReached.addElement(((TXDocument)inNode).getDocumentElement()); 
+				/*if(inNode instanceof Document){
+					nodesReached.addElement(((Document)inNode).getDocumentElement()); 
 				} else { 
 					nodesReached.addElement(inNode); 
 					}*/

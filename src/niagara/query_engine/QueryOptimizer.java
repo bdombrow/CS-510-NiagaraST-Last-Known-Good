@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryOptimizer.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: QueryOptimizer.java,v 1.2 2001/08/08 21:27:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -84,7 +84,8 @@ public class QueryOptimizer {
      *         return null.
      */
 
-    public logNode optimize (logNode unoptimizedPlan) throws NoDataSourceException {
+    public logNode optimize (logNode unoptimizedPlan) 
+	throws NoDataSourceException {
 
 	// Walk the unoptimized plan and get statistics and list of URLs to
 	// be queries
