@@ -191,6 +191,7 @@
 	  desc2          CDATA   "bidperson"
 	  num_tl_elts    CDATA   "1"   
 	  prettyprint   (yes | no)  "no"
+	  trace         (yes | no)  "no"
 	  %StandardAttributes;>
 
 <!-- NOTE: num_gen_calls is the number of times the generator will be called 
@@ -205,6 +206,8 @@
 
            comments on attributes:
            id, host, port, rate, datatype, num_gen_calls, streaming   - required for all types
+
+	   rate is in KB/sec
                                                                       (or use defaults)
 
            desc and num_tl_elts are applicable as follows:
