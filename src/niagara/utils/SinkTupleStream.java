@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.3 2002/09/24 23:19:37 ptucker Exp $
+  $Id: SinkTupleStream.java,v 1.4 2002/09/25 20:21:24 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -139,6 +139,7 @@ public final class SinkTupleStream {
      * @exception java.lang.InterruptedException The thread is interrupted in
      *                                           the middle of execution.
      */
+
     public int putTuple(StreamTupleElement tuple)
 	throws java.lang.InterruptedException, ShutdownException {
 	// try to put the tuple in the buffer, if the buffer is full
@@ -184,8 +185,9 @@ public final class SinkTupleStream {
 	Node child = node.getFirstChild();
 	if (child != null) {
 	    //It will be a punctuation if it prefixed with "punct:"
-	    if (child.getPrefix() != null &&
-		child.getPrefix().equals(StreamPunctuationElement.STPUNCTNS))
+	    String uri = child.getNamespaceURI();
+	    if (uri != null &&
+		uri.equals(StreamPunctuationElement.STPUNCTNS))
 		tuple = new StreamPunctuationElement(false, 1);
 	}
 
