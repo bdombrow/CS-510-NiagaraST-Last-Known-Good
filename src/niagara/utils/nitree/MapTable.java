@@ -44,7 +44,7 @@ class WeakRefWithKey extends WeakReference {
 public class MapTable {
 
     /* MEMBERS */
-    Hashtable hashtable;
+    HashMap hashtable;
     ReferenceQueue refQueue;
 
     /* METHODS */
@@ -53,7 +53,7 @@ public class MapTable {
      * Constructor - allocates a new HashTable and ReferenceQueue
      */
     public MapTable() {
-	hashtable = new Hashtable();
+	hashtable = new HashMap(50000);
 	refQueue = new ReferenceQueue();
     }
 
@@ -132,7 +132,7 @@ public class MapTable {
      */
     private Object remove(Object key) {
 	/* first do cleanup if necessary */
-	checkWeakRefQueue();
+	/* nope gets us in a loop checkWeakRefQueue(); */
 
 	return hashtable.remove(key);
     }
