@@ -1,4 +1,4 @@
-/* $Id: O_EXPR.java,v 1.6 2003/06/03 07:56:51 vpapad Exp $
+/* $Id: O_EXPR.java,v 1.7 2003/09/12 23:52:50 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -256,7 +256,7 @@ public class O_EXPR extends Task {
                 if (pattern.getInput(input_no).getArity() > 0) {
                     // If not yet explored, schedule a task with new context
                     Group g = MExpr.getInput(input_no);
-                    if (!g.isExploring()) {
+                    if (g.needsExploring()) {
                         //E_GROUP can not be the last task for the group
                         if (ssp.GlobepsPruning) {
                             Cost eps_bound = new Cost(EpsBound);

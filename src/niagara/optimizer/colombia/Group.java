@@ -1,4 +1,4 @@
-/* $Id: Group.java,v 1.8 2003/07/27 02:32:28 tufte Exp $ 
+/* $Id: Group.java,v 1.9 2003/09/12 23:52:50 vpapad Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -663,5 +663,9 @@ public class Group {
 
     public String toString() {
         return "group " + getGroupID();
+    }
+
+    public boolean needsExploring() {
+	return !(exploring || explored || optimized);
     }
 }
