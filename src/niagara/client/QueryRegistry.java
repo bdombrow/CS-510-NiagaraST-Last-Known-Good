@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: QueryRegistry.java,v 1.2 2000/07/09 05:39:46 vpapad Exp $
+  $Id: QueryRegistry.java,v 1.3 2002/04/21 04:11:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -78,7 +77,7 @@ class QueryRegistry
 			 * used on the server side to route control msgs.
 			 * It is -1 initially. A value <0 denotes a dont care id
 			 */
-			public int serverId = -1;
+			private int serverId = -1;
 
 			/**
 			 * The type of the query (XMLQL,SEQL,Trigger) @see QueryType object
@@ -122,6 +121,24 @@ class QueryRegistry
 				new JTreeShowThread(resultTree);
 				return ".";
 			}
+
+		    /**
+		     * @return a valid server id for this query,
+		     * wait()ing for the server response if necessary
+		     */
+		    public synchronized int getServerId() {
+			try {
+			    if (serverId == -1) wait();
+			} catch (InterruptedException ie) {
+			    ;
+			}
+			return serverId;
+		    }
+		    
+		    public synchronized void setServerId(int serverId) {
+			this.serverId = serverId;
+			notifyAll();
+		    }
 		}
 	
 	/**
@@ -223,7 +240,7 @@ class QueryRegistry
 			}
 			Entry e = (Entry)(queryMap.get(rid));
 			
-			e.serverId = serverId;
+			e.setServerId(serverId);
 		}
 
 	/**

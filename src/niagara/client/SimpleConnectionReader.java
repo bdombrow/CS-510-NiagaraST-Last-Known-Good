@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.6 2002/04/12 20:57:22 vpapad Exp $
+  $Id: SimpleConnectionReader.java,v 1.7 2002/04/21 04:11:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -74,7 +73,8 @@ class SimpleConnectionReader extends AbstractConnectionReader
 	    boolean registered = false;
 	    do {
 		line = br.readLine();
-		if (line.indexOf("<response") == 0  || line.indexOf("</response") == 0) {
+		if (line.indexOf("<response") == 0  || 
+		    line.indexOf("</response") == 0) {
 		    if (line.indexOf("\"parse_error\"") != -1) {
 			ui.errorMessage("Syntax error in query!\n");
 		    }
@@ -91,7 +91,6 @@ class SimpleConnectionReader extends AbstractConnectionReader
 		    addResult(line);
                     ui.notifyNew(local_id);
 		}
-		//System.out.println("XXX " + line);
 	    } while (line != null);
 	}
 	catch(Exception e){

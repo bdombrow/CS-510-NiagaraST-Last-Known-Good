@@ -8,6 +8,10 @@ public class SimpleClient implements UIDriverIF {
     static final int MAX_QUERY_LEN = 10000;
     static String queryFilePath = "/disk/hopper/projects/disc/niagara/query_files/";
 
+    // For partial result requests
+    static int timeout;
+    static Timer timer;
+
     public SimpleClient(String host, int port) {
 	cm = new ConnectionManager(host, port, this, true);
     }
@@ -33,12 +37,13 @@ public class SimpleClient implements UIDriverIF {
     }
 
     public void notifyNew(int id) {
-	String results = ((SimpleConnectionReader) cm.getConnectionReader()).getResults();
+	String results = 
+	    ((SimpleConnectionReader) cm.getConnectionReader()).getResults();
 	if (resultListeners.size() == 0) 
 	    System.out.println(results);
 	else {
 	    for (int i=0; i < resultListeners.size(); i++) {
-		((ResultsListener) resultListeners.elementAt(i)).notifyNewResults(results);
+		((ResultsListener) resultListeners.get(i)).notifyNewResults(results);
 	    }
 	}
     }
@@ -48,7 +53,7 @@ public class SimpleClient implements UIDriverIF {
 	    System.exit(0);
 	else {
 	    for (int i=0; i < resultListeners.size(); i++) {
-		((ResultsListener) resultListeners.elementAt(i)).notifyFinal();
+		((ResultsListener) resultListeners.get(i)).notifyFinal();
 	    }
 	}
     }
@@ -58,13 +63,13 @@ public class SimpleClient implements UIDriverIF {
 	    System.err.println("SimpleClient error:" + err);
 	else {
 	    for (int i=0; i < resultListeners.size(); i++) {
-		((ResultsListener) resultListeners.elementAt(i)).notifyError(err);
+		((ResultsListener) resultListeners.get(i)).notifyError(err);
 	    }
 	}
     }
     
     private static void usage() {
-	System.err.println("Usage: SimpleClient [-h host] [-p port] [-qf QueryFileName]");
+	System.err.println("Usage: SimpleClient [-h host] [-t timeout] [-p port] [-qf QueryFileName]");
 	System.exit(-1);
     }
 
@@ -85,6 +90,9 @@ public class SimpleClient implements UIDriverIF {
 		i+=2;
 	    } else if (args[i].equals("-p")) {
 		port = Integer.parseInt(args[i+1]);
+		i+=2;
+	    } else if (args[i].equals("-t")) {
+		timeout = Integer.parseInt(args[i+1]);
 		i+=2;
 	    } else if (args[i].equals("--help")) {
 		usage();
@@ -107,7 +115,8 @@ public class SimpleClient implements UIDriverIF {
 		query = "";
 		String line = "";
 		
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader br = new BufferedReader(
+		    new InputStreamReader(System.in));
 		do {
 		    query = query + line;
 		    line = br.readLine();
@@ -196,9 +205,18 @@ public class SimpleClient implements UIDriverIF {
 	}
 
 
-	int id = cm.executeQuery(QueryFactory.makeQuery(queryText), 
-				    Integer.MAX_VALUE);
-	return;
+	final int id = cm.executeQuery(QueryFactory.makeQuery(queryText), 
+				 Integer.MAX_VALUE);
+	if (timeout > 0) {
+	    // Create a new timer thread as a daemon thread
+	    timer = new Timer(true);
+	    // Request partial results after timeout milliseconds
+	    timer.schedule(new TimerTask() {
+		    public void run() {
+			cm.requestPartial(id);
+		    }
+		}, timeout);
+	}
     }
     
     private static String getQueryFileName(StreamTokenizer stdIn) {
@@ -222,7 +240,4 @@ public class SimpleClient implements UIDriverIF {
     }
 	
 }
-
-
-
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.9 2002/03/26 23:50:30 tufte Exp $
+  $Id: ConnectionManager.java,v 1.10 2002/04/21 04:11:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -260,8 +260,9 @@ public class ConnectionManager implements QueryExecutionIF
 	    e.type = queryType;
 	    
 	    synchronized(writer){
-				// Send the query to the server
-		writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" + id +"\" "+ SERVER_ID +"=\"-1\""
+                // Send the query to the server
+		writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" + id 
+                               + "\" "+ SERVER_ID +"=\"-1\""
 			       + " " + REQUEST_TYPE +"= \"" + attr + "\">");
 		writer.println("<" + REQUEST_DATA + ">");
 		writer.println("<![CDATA[");
@@ -286,33 +287,10 @@ public class ConnectionManager implements QueryExecutionIF
                 }
 	    }
 	    
-	    // TODO wait for server qid to come accross.
-	    
-	    //this.getNext(id, nResults);
-	    if(queryType == QueryType.XMLQL || queryType == QueryType.QP){
-		final ConnectionManager cm = this;
-		final int nRes = nResults;
-		final int qid = id;
-		Thread t = new Thread(){
-			public void run(){
-			    synchronized(this){
-				while(e.serverId == -1){
-				    try{
-					this.wait(500);
-				    }
-				    catch(InterruptedException ee){
-					ee.printStackTrace();
-				    }
-				}
-				cm.getNext(qid, nRes);
-			    }
-			}
-		    };
-				// Start up the thread to send the getNext.
-		t.start();
+	    if(queryType == QueryType.XMLQL || queryType == QueryType.QP) {
+                getNext(id, nResults);
 	    }
-	    
-	    
+
 	    return id;
 	}
 
@@ -325,7 +303,7 @@ public class ConnectionManager implements QueryExecutionIF
 			QueryRegistry.Entry e =
 				reg.getQueryInfo(id);
 			
-			int sid = e.serverId;
+			int sid = e.getServerId();
 			if(e.type == QueryType.SEQL){
 				// Kill action has nothing to do.
 				return;
@@ -376,11 +354,9 @@ public class ConnectionManager implements QueryExecutionIF
 	 * Request partial
 	 * @param id the query id to kill
 	 */
-	
-	public void requestPartial(int id)
-		{
-			writeMessage(id, GET_PARTIAL);
-		}
+	public void requestPartial(int id) {
+	    writeMessage(id, GET_PARTIAL);
+	}
 
          /**
 	  * run the garbage collector
@@ -428,7 +404,7 @@ public class ConnectionManager implements QueryExecutionIF
 				ui.errorMessage("Select a query first");
 				return;
 			}
-			int sid = e.serverId;
+			int sid = e.getServerId();
 			
 			synchronized(writer){
 				// Send the request to the server
@@ -527,10 +503,9 @@ public class ConnectionManager implements QueryExecutionIF
 	/**
 	 * Return a session unique qid
 	 */
-	private int getID()
-		{
-			return qid++;
-		}
+	private int getID() {
+            return qid++;
+        }
 
 	/**
 	 * This sends a dtd request to the server
@@ -546,32 +521,22 @@ public class ConnectionManager implements QueryExecutionIF
 			}
 		}
 
-	/**
-	 * this class is used for the simple messages without request data
-	 */
-	private void writeMessage(int id, String msg)
-		{
-			QueryRegistry.Entry e =
-				reg.getQueryInfo(id);
+    /**
+     * this class is used for the simple messages without request data
+     */
+    private void writeMessage(int id, String msg) {
+	QueryRegistry.Entry e =	reg.getQueryInfo(id);
 
-			int sid = e.serverId;
+	int sid = e.getServerId();
 			
-			synchronized(writer){
-				// Send the request to the server
-				writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" + id +"\" "
-							   + SERVER_ID +"=\"" + sid +"\""
-							   + " " + REQUEST_TYPE +"= \"" + msg + "\">");
-				writer.println("</" + REQUEST_MESSAGE + ">");
-			}
-		}
-
-	/////////////////////////////////////////////////////////////
-	// DEBUG MAIN
-	/////////////////////////////////////////////////////////////
-	public static void main(String argv[])
-		{
-			
-		}	
+	synchronized(writer){
+	    // Send the request to the server
+	    writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" 
+			   + id +"\" " + SERVER_ID +"=\"" + sid +"\""
+			   + " " + REQUEST_TYPE +"= \"" + msg + "\">");
+	    writer.println("</" + REQUEST_MESSAGE + ">");
+	}
+    }
 }
 
 
