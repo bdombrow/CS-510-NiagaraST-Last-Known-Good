@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.25 2003/07/09 04:59:40 tufte Exp $
+  $Id: RequestHandler.java,v 1.26 2003/07/18 01:03:10 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -431,7 +431,7 @@ public class RequestHandler {
         request.serverID = qid;
 
         boolean isSynchronous =
-            (request.getIntRequestType() == request.SYNCHRONOUS_QP_QUERY);
+            (request.getIntRequestType() == RequestMessage.SYNCHRONOUS_QP_QUERY);
 
         /* create and populate the query info
          * We assume that if the top node is Accumulate
