@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.5 2002/03/31 15:56:43 tufte Exp $
+ * $Id: Page.java,v 1.6 2002/04/02 21:53:10 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -8,10 +8,14 @@
 
 package niagara.ndom.saxdom;
 
+import niagara.ndom.SAXDOMParser;
+import niagara.utils.PEException;
+
 /**
- * Page data describe a sequence of SAX events, using two parallel arrays:
- * an array of bytes, describing the type of each event, and an array of
- * (pointers to) String objects.
+ * Page data describe a sequence of SAX events, using three parallel arrays:
+ * an array of bytes, describing the type of each event, an array of
+ * (pointers to) String objects, and an array of pointers to each event's
+ * next sibling.
  *
  * SAXDOM documents contain a sequence of pages. Pages are linked together
  * in a doubly-linked list. Pages are reference counted. Documents that use 
@@ -20,6 +24,8 @@ package niagara.ndom.saxdom;
 public class Page {
     private byte[] event_type;
     private String[] event_string;
+
+    private int[] next_sibling;
 
     private Page previous;
     private Page next;
@@ -30,15 +36,17 @@ public class Page {
 
     private int current_offset;
 
+    // Parser that is currently adding events to this page
+    private SAXDOMParser parser; 
+
     public Page(int size, int number) {
         event_type = new byte[size];
         event_string = new String[size];
+        next_sibling = new int[size];
 
-        previous = next = null;
-        pin_count = 0;
-        current_offset = 0;
-        
         this.number = number;
+
+        clear();
     }
 
     /** Prepare page for reuse 
@@ -47,6 +55,7 @@ public class Page {
         for (int i = 0; i < event_type.length; i++) {
             event_type[i] = SAXEvent.EMPTY;
             event_string[i] = null;
+            next_sibling[i] = -1;
         }
 
         if (previous != null)
@@ -58,6 +67,7 @@ public class Page {
         previous = next = null;
         pin_count = 0;
         current_offset = 0;
+        parser = null;
     }
 
     public void pin() {
@@ -73,25 +83,24 @@ public class Page {
         }
     }
 
-    public Page addEvent(DocumentImpl doc, byte type, String string) {
+    public void addEvent(DocumentImpl doc, byte type, String string) {
         if (current_offset < event_type.length) {
             event_type[current_offset] = type;
             event_string[current_offset] = string;
 
             current_offset++;
-	    return this;
-        } else if (next == null) { // last page of document
+        } else { // page full
             Page page = BufferManager.getFreePage();
+            // XXX vpapad: Page, this is parser. Parser, page!
+            page.setParser(parser);
+	    parser.setPage(page);
+
             doc.addPage(page);
             page.setPrevious(this);
             setNext(page);
 
             page.addEvent(doc, type, string);
-	    return page;
-        } else { // there is a next page
-	    System.out.println("KT: traversing");
-            return next.addEvent(doc, type, string);
-        }
+	}
     }
 
     public byte getEventType(int offset) {
@@ -110,6 +119,17 @@ public class Page {
         return event_string[offset];
     }
 
+    public int getNextSibling(int offset) {
+        if (pin_count <= 0) { // XXX vpapad
+            System.out.println("XXX vpapad: accessing freed page");
+        }
+        return next_sibling[offset];
+    }
+
+    public void setNextSibling(int offset, int index) {
+        next_sibling[offset] = index;
+    }
+
     public void setPrevious(Page previous) {
         this.previous = previous;
     }
@@ -122,8 +142,22 @@ public class Page {
         return next;
     }
 
-    public int getCurrentOffset() {
-        return current_offset;
+    public void setParser(SAXDOMParser parser) {
+        this.parser = parser;
+    }
+
+    public int getLastIndex() {
+        if (current_offset == 0) 
+            throw new PEException("getLastIndex called on empty page");
+
+        return number * event_type.length + current_offset - 1;
+    }
+
+    public int getLastOffset() {
+        if (current_offset == 0) 
+            throw new PEException("getLastIndex called on empty page");
+        
+        return current_offset - 1;
     }
 
     public int getSize() {

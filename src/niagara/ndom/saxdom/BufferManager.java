@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.5 2002/03/31 15:56:43 tufte Exp $
+ * $Id: BufferManager.java,v 1.6 2002/04/02 21:53:10 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -90,9 +90,10 @@ public class BufferManager {
             }
             if (event_type == SAXEvent.END_ELEMENT || 
                 event_type == SAXEvent.END_DOCUMENT) {
-                System.out.println("XXX vpapad getFEC returns null " +
-                    " for doc:" + doc + " at: " + index);
-                return null;
+                getPage(index).show();
+
+                throw new PEException("XXX vpapad getFEC returns null " +
+                    " for doc:" + doc + " at: " + getOffset(index));
             }
         } while (true);
     }
@@ -119,8 +120,17 @@ public class BufferManager {
         throw new PEException("Not Implemented Yet!");
     }
 
-    public static Attr getAttribute(int index, String name) {
-        throw new PEException("Not Implemented Yet!");
+    public static String getAttribute(int index, String name) {
+        EventIterator ei = new EventIterator(index);
+        do  {
+            byte et = ei.nextEventType();
+            if (et == SAXEvent.ATTR_NAME && ei.getEventString().equals(name)) 
+                return ei.nextEventString();
+            else if (et == SAXEvent.ATTR_NAME || et == SAXEvent.ATTR_VALUE) 
+                continue;
+            else break;
+        } while (true);
+        return "";
     }
 
     public static boolean hasAttribute(int index, String name) {
@@ -142,8 +152,18 @@ public class BufferManager {
         throw new PEException("Not Implemented Yet!");
     }
 
-    public static Attr getAttributeNode(int index, String name) {
-        throw new PEException("Not Implemented Yet!");
+    public static Attr getAttributeNode(DocumentImpl doc, 
+                                        int index, String name) {
+        EventIterator ei = new EventIterator(index);
+        do  {
+            byte et = ei.nextEventType();
+            if (et == SAXEvent.ATTR_NAME && ei.getEventString().equals(name)) 
+                return (Attr) makeNode(doc, ei.getIndex());
+            else if (et == SAXEvent.ATTR_NAME || et == SAXEvent.ATTR_VALUE) 
+                continue;
+            else break;
+        } while (true);
+        return null;
     }
 
     public static NodeList getChildNodes(DocumentImpl doc, int index) {
@@ -187,7 +207,8 @@ public class BufferManager {
         case SAXEvent.TEXT:
             return new TextImpl(doc, index);
         default:
-            throw new PEException("makeNode() can't handle this event.");
+            throw new PEException("makeNode() can't handle this event type:"
+                + et);
         }
         
     }
@@ -210,13 +231,9 @@ public class BufferManager {
     }
 
     public static Node getNextSibling(DocumentImpl doc, int index) {
-        EventIterator ei = new EventIterator(index);
-        ei.forwardSibling();
-        int nextIndex = ei.getIndex();
-        if (nextIndex == index)
-            return null;
-        else
-            return makeNode(doc, nextIndex);
+        int sibling = getPage(index).getNextSibling(getOffset(index));
+        if (sibling == -1) return null;
+        else return makeNode(doc, sibling);
     }
 
     public static NamedNodeMap getAttributes(DocumentImpl doc, int index) {
@@ -348,44 +365,15 @@ class EventIterator {
      * of the current event (do nothing if there is no such event)
      */
     public void forwardSibling() {
-        // Save current location, in case our search is unsuccessful
-        Page orgPage = page; 
-        int orgOffset = offset;
-
-        byte et = getEventType();
-        if (et == SAXEvent.TEXT) {
-            forwardEvent();
-
-            if (getEventType() == SAXEvent.END_ELEMENT) {
-                // No next sibling
-                page = orgPage;
-                offset = orgOffset;
+        byte et = page.getEventType(offset);
+        if (et == SAXEvent.TEXT || et == SAXEvent.START_ELEMENT) {
+            int next = page.getNextSibling(offset);
+            if (next !=  -1) {
+                page = BufferManager.getPage(next);
+                offset = BufferManager.getOffset(next);
             }
-            return;
-        } else if (et == SAXEvent.START_ELEMENT) {
-            int depth = 0;
-            
-            do {
-                forwardEvent();
-                et = getEventType();
-                
-                if (depth == -1) { // We're in the enclosing level
-                    if (et == SAXEvent.END_ELEMENT || 
-                        et == SAXEvent.END_DOCUMENT) {
-                        // Search was unsuccessful - go back 
-                        page = orgPage;
-                        offset = orgOffset;
-                        return;
-                } else  // Search was successful
-                    return;
-                } else {
-                    if (et == SAXEvent.START_ELEMENT)
-                        depth++;
-                    else if (et == SAXEvent.END_ELEMENT)
-                        depth--;
-                }
-            } while(true);
-        } else 
+        }
+         else 
             throw new PEException("forwardSimpling can't handle this event.");
     }
 
@@ -396,6 +384,11 @@ class EventIterator {
     public byte nextEventType() {
         forwardEvent();
         return getEventType();
+    }
+
+    public String nextEventString() {
+        forwardEvent();
+        return getEventString();
     }
 
     public String getEventString() {

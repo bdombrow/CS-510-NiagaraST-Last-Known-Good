@@ -1,5 +1,5 @@
 /**
- * $Id: ElementImpl.java,v 1.3 2002/03/31 15:56:43 tufte Exp $
+ * $Id: ElementImpl.java,v 1.4 2002/04/02 21:53:10 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -35,7 +35,7 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     public String getAttribute(String name) {
-        return BufferManager.getAttribute(index, name).getValue();
+        return BufferManager.getAttribute(index, name);
     }
 
     public void setAttribute(String name, String value)
@@ -51,7 +51,7 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     public Attr getAttributeNode(String name) {
-        return BufferManager.getAttributeNode(index, name);
+        return BufferManager.getAttributeNode(doc, index, name);
     }
 
     public Attr setAttributeNode(Attr newAttr)
