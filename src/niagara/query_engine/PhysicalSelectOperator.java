@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.11 2003/02/25 06:10:26 vpapad Exp $
+  $Id: PhysicalSelectOperator.java,v 1.12 2003/03/07 21:02:00 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,6 +31,7 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 
 import niagara.logical.Predicate;
+import niagara.logical.Select;
 import niagara.optimizer.colombia.*;
 
 /**
@@ -52,7 +53,7 @@ public class PhysicalSelectOperator extends PhysicalOperator {
     
     public void initFrom(LogicalOp logicalOperator) {
 	// Type cast logical operator to a select operator
-	selectOp logicalSelectOperator = (selectOp) logicalOperator;
+	Select logicalSelectOperator = (Select) logicalOperator;
         pred = logicalSelectOperator.getPredicate();	
         predEval =  pred.getImplementation();
     }

@@ -1,10 +1,10 @@
-/* $Id: SelectIntoJoin.java,v 1.1 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: SelectIntoJoin.java,v 1.2 2003/03/07 21:00:32 tufte Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.Predicate;
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.op_tree.joinOp;
-import niagara.xmlql_parser.op_tree.selectOp;
+import niagara.logical.Select;
 
 public class SelectIntoJoin extends CustomRule {
     public SelectIntoJoin(String name) {
@@ -12,7 +12,7 @@ public class SelectIntoJoin extends CustomRule {
             name,
             2,
             new Expr(
-                new selectOp(),
+                new Select(),
                 new Expr(
                     new joinOp(),
                     new Expr(new LeafOp(0)),
@@ -28,7 +28,7 @@ public class SelectIntoJoin extends CustomRule {
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {
-        selectOp s = (selectOp) before.getOp();
+        Select s = (Select) before.getOp();
         Predicate sPred = s.getPredicate();
         
         Expr joinExpr = before.getInput(0);

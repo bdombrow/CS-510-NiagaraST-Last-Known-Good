@@ -1,4 +1,4 @@
-/* $Id: PhysicalPredicatedUnnest.java,v 1.2 2003/02/28 05:27:34 vpapad Exp $ */
+/* $Id: PhysicalPredicatedUnnest.java,v 1.3 2003/03/07 21:02:00 tufte Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -9,6 +9,7 @@ import niagara.xmlql_parser.syntax_tree.*;
 
 import niagara.logical.Predicate;
 import niagara.logical.Unnest;
+import niagara.logical.Select;
 import niagara.optimizer.colombia.*;
 
 /** A physical operator for predicated unnest */
@@ -53,8 +54,8 @@ public class PhysicalPredicatedUnnest extends PhysicalOperator {
             this.root = logicalUnnest.getRoot();
             this.variable = logicalUnnest.getVariable();
         } else {
-            assert logicalOperator instanceof selectOp;
-            selectOp logicalSelectOperator = (selectOp) logicalOperator;
+            assert logicalOperator instanceof Select;
+            Select logicalSelectOperator = (Select) logicalOperator;
             pred = logicalSelectOperator.getPredicate();
             // Make sure that the only referenced variable is 
             // the one we're unnesting

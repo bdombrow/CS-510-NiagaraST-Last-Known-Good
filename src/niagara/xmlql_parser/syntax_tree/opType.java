@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: opType.java,v 1.3 2002/09/09 16:44:00 ptucker Exp $
+  $Id: opType.java,v 1.4 2003/03/07 21:03:11 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -110,7 +110,11 @@ public class opType {
     }
     
     public static int getCode(String name) {
-        return ((Integer) name2code.get(name)).intValue();
+	Object o = name2code.get(name);
+	if(o == null)
+	    return UNDEF;
+	else
+	    return ((Integer) name2code.get(name)).intValue();
     }
 };
 

@@ -1,4 +1,4 @@
-/* $Id: PushJoinPredicates.java,v 1.2 2003/03/03 08:25:29 tufte Exp $ */
+/* $Id: PushJoinPredicates.java,v 1.3 2003/03/07 21:00:32 tufte Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.And;
@@ -7,7 +7,7 @@ import niagara.logical.Predicate;
 import niagara.logical.True;
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.op_tree.joinOp;
-import niagara.xmlql_parser.op_tree.selectOp;
+import niagara.logical.Select;
 
 /** Push as many of the non-equijoin predicates of a join operator
  * to its inputs */
@@ -24,9 +24,9 @@ public class PushJoinPredicates extends CustomRule {
                 // to push predicates down only to one of the leaves
             new Expr(
                 new joinOp(),
-                new Expr(new selectOp(),
+                new Expr(new Select(),
                     new Expr(new LeafOp(0)),
-                new Expr(new selectOp(),
+                new Expr(new Select(),
                     new Expr(new LeafOp(1))))));
     }
 
@@ -54,10 +54,10 @@ public class PushJoinPredicates extends CustomRule {
 
         Expr left = leftLeaf;
         if (!pushLeft.equals(True.getTrue()))        
-            left = new Expr(new selectOp(pushLeft), left);
+            left = new Expr(new Select(pushLeft), left);
         Expr right = rightLeaf;
         if (!pushRight.equals(True.getTrue()))        
-            right = new Expr(new selectOp(pushRight), right);
+            right = new Expr(new Select(pushRight), right);
 
         EquiJoinPredicateList eq = j.getEquiJoinPredicates();
         joinOp newJ = new joinOp(remJoin, eq, j.getProjectedAttrs(),

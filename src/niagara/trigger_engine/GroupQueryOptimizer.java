@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: GroupQueryOptimizer.java,v 1.5 2002/10/27 01:01:11 vpapad Exp $
+  $Id: GroupQueryOptimizer.java,v 1.6 2003/03/07 21:02:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -53,6 +53,7 @@ import niagara.data_manager.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.logical.*;
 
 
 public class GroupQueryOptimizer {
@@ -229,9 +230,9 @@ public class GroupQueryOptimizer {
             childPlanStrings.addElement("Scan "+scanRegExp.toString()+" "+tmp);
         }	
 
-        else if (currOp instanceof selectOp) {
+        else if (currOp instanceof Select) {
 
-            Predicate pred=((selectOp)currOp).getPredicate();
+            Predicate pred=((Select)currOp).getPredicate();
 	    
 	    int size=childPlanStrings.size();
 	    String tmp=(String)childPlanStrings.elementAt(size-1);
@@ -321,7 +322,7 @@ public class GroupQueryOptimizer {
 
 	//now we do matching signature while we 
 	//calculating the signature. One pass traversal.
-	if ((currOp instanceof selectOp)||(currOp instanceof joinOp)) {
+	if ((currOp instanceof Select)||(currOp instanceof joinOp)) {
 	    matchSignatures(node, /* hashValue,*/ subPlan, idV, nodeV, srcV);
 
 
@@ -340,14 +341,14 @@ public class GroupQueryOptimizer {
 	    //this is the id for the upper level trigger
 	    //int trigId = tm.getNextId(); 
 	    //idV.addElement(new Integer(trigId));
-	    if (currOp instanceof selectOp) {
-		Predicate pred = ((selectOp)currOp).getPredicate();
+	    if (currOp instanceof Select) {
+		Predicate pred = ((Select)currOp).getPredicate();
 		if (!(pred instanceof Comparison)) {
 		    Vector tmpV = new Vector();
 		    //tmpV.addElement(((predLogOpNode)pred).getRightChild());
 		    getPreds(pred,tmpV);
 		    tmpV.removeElementAt(0);
-		    ((selectOp)currOp).setSelect(tmpV);
+		    ((Select)currOp).setSelect(tmpV);
 		    splitPlan(node, 0, tmpFileName);
 		    return;
 		}
@@ -419,8 +420,8 @@ public class GroupQueryOptimizer {
 	
 	if(sig!=null) { // sig FOUND 
 		debug.mesg("!!! A Group is matched!!!");
-		if (tmpOp instanceof selectOp) {
-		    Predicate pred=((selectOp)tmpOp).getPredicate();
+		if (tmpOp instanceof Select) {
+		    Predicate pred=((Select)tmpOp).getPredicate();
 		    
 		    if (!(pred instanceof Comparison)) {
 			try {
@@ -442,11 +443,11 @@ public class GroupQueryOptimizer {
 		//mergePlan(sigNode, index, sig);
 	}	
 	else { // A new Group.
-	    if (tmpOp instanceof selectOp) {
+	    if (tmpOp instanceof Select) {
 		debug.mesg("!!! A new SelectOp Group!!!");
 		sig = new SelectSig(node, subPlan, tm, this);
 		SYSGroupTbl.addSignature(sig);
-		Predicate pred=((selectOp)tmpOp).getPredicate();
+		Predicate pred=((Select)tmpOp).getPredicate();
 		
 		if (!(pred instanceof Comparison)) {
 		    try {

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logPlanGenerator.java,v 1.5 2003/03/03 08:26:41 tufte Exp $
+  $Id: logPlanGenerator.java,v 1.6 2003/03/07 21:03:00 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,6 +48,7 @@ import niagara.logical.OldVariable;
 import niagara.logical.Predicate;
 import niagara.logical.StringConstant;
 import niagara.logical.Variable;
+import niagara.logical.Select;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class logPlanGenerator {
@@ -310,7 +311,7 @@ public class logPlanGenerator {
 		logNode curlogNode, childlogNode;
 		Predicate curpredicate;
 		Vector variables;
-		selectOp select;
+		Select select;
 		varTbl tableofvar;
                 
 		// for each partial tree, collect the predicates whose variables
@@ -339,7 +340,7 @@ public class logPlanGenerator {
 			// then add a Select operator to the top of the
 			// partial tree
 			if(preds.size()!=0) {
-				select = new selectOp();
+				select = new Select();
 				select.setSelect(preds);
 				curlogNode = new logNode(select,childlogNode);
 				curlogNode.setVarTbl(childlogNode.getVarTbl());

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SelectSig.java,v 1.4 2002/10/27 01:01:11 vpapad Exp $
+  $Id: SelectSig.java,v 1.5 2003/03/07 21:02:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -51,6 +51,7 @@ import niagara.logical.Constant;
 import niagara.logical.OldVariable;
 import niagara.logical.Predicate;
 import niagara.logical.Variable;
+import niagara.logical.Select;
 import niagara.utils.*;
 
 public class SelectSig extends Signature {
@@ -143,7 +144,7 @@ public class SelectSig extends Signature {
         /* code for generating join which be picked up for Hash join algorithm
         //left attribute vector
         Vector lv=new Vector();
-        d=((predArithOpNode)((selectOp)sigNode.getOperator()).getPredicate()).getLeftExp();
+        d=((predArithOpNode)((Select)sigNode.getOperator()).getPredicate()).getLeftExp();
         debug.mesg("*****************dumping schemaAttribute.....");
         ((schemaAttribute)d.getValue()).dump();
         lv.addElement(d.getValue()); //get the schemaAttribute
@@ -156,7 +157,7 @@ public class SelectSig extends Signature {
         ((joinOp)op1).setJoin((predicate)null,lv,rv);
         */
 	
-        Predicate tmp = ((selectOp)node.getOperator()).getPredicate();
+        Predicate tmp = ((Select)node.getOperator()).getPredicate();
         if (!(tmp instanceof Comparison)) {
             try {
                 tmp=gOpt.getLeftMostConjunct(tmp);
@@ -197,7 +198,7 @@ public class SelectSig extends Signature {
 
         //get the const value of the predicate in this trigger 
 
-        //selectOp sop = (selectOp)node.getOperator();
+        //Select sop = (Select)node.getOperator();
         //debug.var(sop, 1);
         //predArithOpNode pred = (predArithOpNode)sop.getPredicate();
         //debug.var(pred, 1);

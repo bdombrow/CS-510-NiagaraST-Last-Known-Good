@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SEQueryExtractor.java,v 1.2 2002/10/27 02:23:04 vpapad Exp $
+  $Id: SEQueryExtractor.java,v 1.3 2003/03/07 21:02:00 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -56,6 +56,7 @@ import niagara.logical.OldVariable;
 import niagara.logical.Or;
 import niagara.logical.Predicate;
 import niagara.logical.Variable;
+import niagara.logical.Select;
 import niagara.utils.PEException;
 import niagara.xmlql_parser.op_tree.*;
 
@@ -236,7 +237,7 @@ public class SEQueryExtractor {
 		logNode selectNode, Vector containUnits) {
 
 		op operator = selectNode.getOperator();
-		Predicate pred = ((selectOp)operator).getPredicate();
+		Predicate pred = ((Select)operator).getPredicate();
 
 		Boolean[] hasNegation = new Boolean[1];
 		ContainTreeNode tree = makeContainmentTree (

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryOptimizer.java,v 1.4 2003/02/25 06:10:26 vpapad Exp $
+  $Id: QueryOptimizer.java,v 1.5 2003/03/07 21:02:00 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,6 +32,7 @@ import java.util.Vector;
 import niagara.data_manager.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.logical.*;
 
 /**
  * This class is used to optimize a logical plan and return an optimized logical
@@ -246,7 +247,7 @@ public class QueryOptimizer {
 	    boolean proceed = true;
 
 	    // collect select node
-	    if (operator instanceof selectOp) {
+	    if (operator instanceof Select) {
 		selectNodes.addElement (logPlanRoot);
 	    }
 
