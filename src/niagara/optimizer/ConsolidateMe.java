@@ -31,7 +31,7 @@ public class ConsolidateMe extends PhysicalOp {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         return this;
     }
 

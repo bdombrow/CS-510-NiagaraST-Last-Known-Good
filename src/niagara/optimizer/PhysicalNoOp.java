@@ -12,7 +12,7 @@ public class PhysicalNoOp extends PhysicalOp implements Initializable {
         return new Cost(0);
     }
 
-    public Op copy() {
+    public Op opCopy() {
         return this;
     }
 
@@ -32,5 +32,5 @@ public class PhysicalNoOp extends PhysicalOp implements Initializable {
         return 0;
     }
     
-    public void initFrom(LogicalOp lop) {}
+    public final void initFrom(LogicalOp lop) {}
 }

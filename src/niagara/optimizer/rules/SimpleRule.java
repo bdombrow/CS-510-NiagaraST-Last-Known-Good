@@ -1,4 +1,4 @@
-/* $Id: SimpleRule.java,v 1.4 2003/06/03 07:56:53 vpapad Exp $ */
+/* $Id: SimpleRule.java,v 1.5 2003/07/03 19:43:43 tufte Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.Constructor;

@@ -24,7 +24,7 @@ public class AnyLogicalOp extends LogicalOp {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         return new AnyLogicalOp();
     }
 

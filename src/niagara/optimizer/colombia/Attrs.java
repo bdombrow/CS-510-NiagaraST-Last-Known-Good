@@ -1,4 +1,4 @@
-/* $Id: Attrs.java,v 1.7 2003/06/03 07:56:51 vpapad Exp $    
+/* $Id: Attrs.java,v 1.8 2003/07/03 19:43:38 tufte Exp $    
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -89,7 +89,7 @@ public class Attrs {
         return al.size();
     }
 
-    Attribute GetAt(int i) {
+    public Attribute GetAt(int i) {
         return (Attribute) al.get(i);
     }
 

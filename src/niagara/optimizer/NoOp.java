@@ -1,4 +1,4 @@
-/* $Id: NoOp.java,v 1.1 2002/12/10 01:18:27 vpapad Exp $ */
+/* $Id: NoOp.java,v 1.2 2003/07/03 19:42:46 tufte Exp $ */
 package niagara.optimizer;
 
 import niagara.optimizer.colombia.*;
@@ -7,7 +7,7 @@ import niagara.xmlql_parser.op_tree.unryOp;
 
 /** Do nothing operator */
 public class NoOp extends unryOp implements Initializable {
-    public Op copy() {
+    public Op opCopy() {
         return this;
     }
 

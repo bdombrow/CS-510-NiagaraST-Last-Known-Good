@@ -1,4 +1,4 @@
-/* $Id: Domain.java,v 1.3 2003/02/25 06:19:08 vpapad Exp $ 
+/* $Id: Domain.java,v 1.4 2003/07/03 19:43:39 tufte Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -33,5 +33,13 @@ abstract public class Domain {
 
     public String getName() {
         return name;
+    }
+
+    public boolean equals(Object obj) {
+	//KT - is this correct?
+        if (obj == null || !(obj instanceof Domain)) return false;
+	// can't handle inheritance in this abstract class
+        if (obj.getClass() != this.getClass()) return false; 
+	return name.equals(((Domain)obj).name);
     }
 } 

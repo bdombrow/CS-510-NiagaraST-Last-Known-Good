@@ -1,4 +1,4 @@
-/* $Id: Op.java,v 1.11 2003/02/25 06:19:08 vpapad Exp $
+/* $Id: Op.java,v 1.12 2003/07/03 19:43:39 tufte Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -27,13 +27,22 @@ package niagara.optimizer.colombia;
 
 /** Abstract superclass for all operators, logical or physical */
 public abstract class Op {
+
+    protected String id; // for debugging/profiling output
     
     /** Create a copy of this operator. <em>Not</em> (always) the same 
      * as clone() - updatable fields of an operator should be deep cloned.
      * On the other hand it's OK to share pointers to immutable objects,
      * like strings or predicates.
      */
-    public abstract Op copy();
+    public final Op copy() {
+	Op op = opCopy();
+	op.id = id;
+	return op;
+    }
+
+    // local copy function
+    public abstract Op opCopy();
 
     public abstract String getName(); 
     
@@ -93,6 +102,14 @@ public abstract class Op {
      */
     public boolean matches(Op other) {
             return (getArity() == other.getArity() && getClass() == other.getClass());
+    }
+
+    public void setId(String id) {
+	this.id = id;
+    }
+
+    public String getId() {
+	return id;
     }
 }
 

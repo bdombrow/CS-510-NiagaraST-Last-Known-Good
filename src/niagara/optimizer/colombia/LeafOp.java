@@ -1,4 +1,4 @@
-/* $Id: LeafOp.java,v 1.2 2003/02/25 06:19:08 vpapad Exp $ 
+/* $Id: LeafOp.java,v 1.3 2003/07/03 19:43:39 tufte Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -67,7 +67,7 @@ public class LeafOp extends Op {
         this.group = Op.group;
     }
 
-    public Op copy() {
+    public Op opCopy() {
         return new LeafOp(this);
     }
 
