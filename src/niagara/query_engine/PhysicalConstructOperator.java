@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.17 2003/02/21 07:01:52 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.18 2003/02/23 05:02:51 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -252,8 +252,8 @@ public class PhysicalConstructOperator extends PhysicalOperator {
                 // First get the schema attribute
                 schemaAttribute schema = (schemaAttribute) attrData.getValue();
 
-                // Now construct result based on whether it is to be interpreted
-                // as an element or a parent
+                // Now construct result based on whether it is to be 
+		// interpreted as an element or a parent
                 if (schema.getType() == varType.ELEMENT_VAR) {
                     // The value of the leafData is a schema attribute - from it
                     // get the attribute id in the tuple to construct from
@@ -268,16 +268,25 @@ public class PhysicalConstructOperator extends PhysicalOperator {
                     int attributeId =
                         ((schemaAttribute) attrData.getValue()).getAttrId();
 
-                    // This better BE an element
-                    Element elt =
-                        (Element) tupleElement.getAttribute(attributeId);
-
-                    // Concatenate the node values of the element's children
-                    StringBuffer attrValue = new StringBuffer("");
-                    Node n = elt.getFirstChild();
-                    while (n != null)
-                        attrValue.append(n.getNodeValue());
-                    resultElement.setAttribute(name, attrValue.toString());
+		    Node attr = tupleElement.getAttribute(attributeId);
+		    if(attr instanceof Element) {
+			Element elt = (Element)attr;
+			
+			// Concatenate the node values of 
+			// the element's children
+			StringBuffer attrValue = new StringBuffer("");
+			Node n = elt.getFirstChild();
+			while (n != null)
+			    attrValue.append(n.getNodeValue());
+			resultElement.setAttribute(name, attrValue.toString());
+		    } else if (attr instanceof Attr) {
+			// KT used to require that this be an element,
+			// but I think attribute is valid also
+			resultElement.setAttribute(name, 
+						   ((Attr)attr).getValue());
+		    } else {
+			throw new PEException("KT: what did I get here??");
+		    }
                 } else
                     throw new PEException("Unknown type in attribute constructor");
             }
@@ -300,10 +309,11 @@ public class PhysicalConstructOperator extends PhysicalOperator {
             // Add each constructed result to the result element
             int numResults = resultList.size() - prevSize;
 
-            for (int res = 0; res < numResults; ++res) {
-                Node n;
-                n = DOMFactory.importNode(doc, resultList.get(prevSize + res));
-                resultElement.appendChild(n);
+	    Node res;
+            for (int i = 0; i < numResults; i++) {
+		res = resultList.get(prevSize + i);
+		Node n = DOMFactory.importNode(doc, res);
+		resultElement.appendChild(n);
             }
             resultList.setSize(prevSize);
         }
