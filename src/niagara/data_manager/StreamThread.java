@@ -51,7 +51,11 @@ public class StreamThread implements Runnable {
 	    this.spec = spec;
 	    outputStream = outStream;
 	    //parser = new com.microstar.xml.SAXDriver();
-	    parser = DOMFactory.newParser("saxdom");
+            if (NiagraServer.usingSAXDOM())
+                parser = DOMFactory.newParser("saxdom");
+            else
+                parser = DOMFactory.newParser();
+
 	    //parser = SAXParserFactory.newInstance().newSAXParser();
 	    firehoseSocket = null;
 	    //handler = new StreamSimpleHandler();
