@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: startTag.java,v 1.5 2003/02/21 07:03:08 vpapad Exp $
+  $Id: startTag.java,v 1.6 2003/07/08 02:11:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,8 +38,6 @@ import niagara.logical.Variable;
 import niagara.optimizer.colombia.Attrs;
 import niagara.utils.CUtil;
 import niagara.utils.PEException;
-
-import org.w3c.dom.*;
 
 public class startTag {
 	private data sdata;      // tag name (identifier or variable)

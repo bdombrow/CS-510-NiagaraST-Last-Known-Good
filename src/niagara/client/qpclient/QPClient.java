@@ -1,29 +1,51 @@
 package niagara.client.qpclient;
 
-import niagara.client.SimpleClient;
+import htmllayout.HtmlLayout;
 
-import javax.swing.*;
-import javax.swing.filechooser.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.geom.*;
-
-import diva.canvas.toolbox.*;
-import diva.canvas.*;
-import diva.graph.*;
-import diva.graph.model.*;
-
-import niagara.ndom.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import java.io.*;
-
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Iterator;
-import htmllayout.*;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 
 import niagara.client.ClientException;
+import niagara.client.SimpleClient;
+import niagara.ndom.DOMFactory;
+import niagara.ndom.DOMParser;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import diva.canvas.Figure;
+import diva.graph.GraphPane;
+import diva.graph.NodeRenderer;
+import diva.graph.model.GraphModel;
 
 public class QPClient extends JFrame 
     implements ActionListener, SimpleClient.ResultsListener {

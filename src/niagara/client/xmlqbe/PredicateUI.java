@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PredicateUI.java,v 1.1 2000/05/30 21:03:25 tufte Exp $
+  $Id: PredicateUI.java,v 1.2 2003/07/08 02:10:01 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,19 +28,29 @@
 
 package niagara.client.xmlqbe;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.io.*;
-import java.lang.StringBuffer;
-import java.util.Vector;
-import java.util.*;
-import java.net.URL;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
-import niagara.client.dtdTree.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.StringTokenizer;
+
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import niagara.client.dtdTree.DTDXMLQLTreeNode;
 
 public class PredicateUI extends JDialog {
     private JCheckBox check; 

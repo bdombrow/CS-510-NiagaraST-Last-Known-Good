@@ -1,5 +1,5 @@
 /**
- * $Id: ReceiveOp.java,v 1.5 2003/07/03 19:29:59 tufte Exp $
+ * $Id: ReceiveOp.java,v 1.6 2003/07/08 02:11:06 tufte Exp $
  *
  */
 
@@ -10,13 +10,9 @@
  */
 package niagara.xmlql_parser.op_tree;
 
-import java.io.OutputStream;
-import java.util.ArrayList;
-
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
-import niagara.xmlql_parser.syntax_tree.*;
 
 public class ReceiveOp extends unryOp {
     String location;

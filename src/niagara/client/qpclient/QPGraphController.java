@@ -1,46 +1,35 @@
 /*
- * $Id: QPGraphController.java,v 1.3 2000/11/01 00:32:04 vpapad Exp $
+ * $Id: QPGraphController.java,v 1.4 2003/07/08 02:09:48 tufte Exp $
  *
  * Copyright (c) 1998 The Regents of the University of California.
  * All rights reserved.  See the file COPYRIGHT for details.
  */
 package niagara.client.qpclient;
-import diva.graph.*;
-
-import diva.graph.model.*;
+import java.awt.event.InputEvent;
 
 import diva.canvas.Figure;
 import diva.canvas.FigureLayer;
 import diva.canvas.GraphicsPane;
 import diva.canvas.Site;
-
 import diva.canvas.connector.AutonomousSite;
-import diva.canvas.connector.CenterSite;
-import diva.canvas.connector.PerimeterSite;
-import diva.canvas.connector.PerimeterTarget;
 import diva.canvas.connector.Connector;
-import diva.canvas.connector.ConnectorManipulator;
 import diva.canvas.connector.ConnectorEvent;
 import diva.canvas.connector.ConnectorListener;
-import diva.canvas.connector.ConnectorTarget;
-
-import diva.canvas.event.LayerAdapter;
+import diva.canvas.connector.ConnectorManipulator;
+import diva.canvas.connector.PerimeterTarget;
 import diva.canvas.event.LayerEvent;
 import diva.canvas.event.MouseFilter;
-
-import diva.canvas.interactor.Interactor;
 import diva.canvas.interactor.AbstractInteractor;
-
 import diva.canvas.manipulator.GrabHandle;
-
-import diva.canvas.selection.SelectionInteractor;
-import diva.canvas.selection.SelectionModel;
 import diva.canvas.selection.SelectionDragger;
-
-import diva.util.Filter;
-
-import java.awt.event.InputEvent;
-import java.util.HashMap;
+import diva.canvas.selection.SelectionModel;
+import diva.graph.AbstractGraphController;
+import diva.graph.EdgeInteractor;
+import diva.graph.GraphView;
+import diva.graph.NodeInteractor;
+import diva.graph.model.Edge;
+import diva.graph.model.GraphModel;
+import diva.graph.model.Node;
 
 /**
  * A basic implementation of GraphController, which works with
@@ -48,7 +37,7 @@ import java.util.HashMap;
  * sets up some simple interaction on its view's pane.
  *
  * @author 	Michael Shilman (michaels@eecs.berkeley.edu)
- * @version	$Revision: 1.3 $
+ * @version	$Revision: 1.4 $
  * @rating      Red
  */
 public class QPGraphController extends AbstractGraphController {

@@ -6,7 +6,6 @@ package niagara.xmlql_parser.op_tree;
  */
 
 import java.io.*;
-import niagara.utils.*;
 
 public class FileScanSpec extends StreamSpec{
     private String file_name;

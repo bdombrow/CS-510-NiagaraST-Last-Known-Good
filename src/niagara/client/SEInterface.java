@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SEInterface.java,v 1.2 2002/10/12 20:10:25 tufte Exp $
+  $Id: SEInterface.java,v 1.3 2003/07/08 02:10:37 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,7 +31,6 @@ package niagara.client;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.Toolkit;
-import java.io.*;
 import java.util.Vector;
 import java.util.*;
 import java.net.URL;

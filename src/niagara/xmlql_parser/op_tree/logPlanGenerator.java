@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logPlanGenerator.java,v 1.8 2003/03/19 00:35:26 tufte Exp $
+  $Id: logPlanGenerator.java,v 1.9 2003/07/08 02:11:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,7 +42,6 @@ package niagara.xmlql_parser.op_tree;
 import java.util.*;
 import java.io.*;
 
-import niagara.logical.And;
 import niagara.logical.Comparison;
 import niagara.logical.OldVariable;
 import niagara.logical.Predicate;

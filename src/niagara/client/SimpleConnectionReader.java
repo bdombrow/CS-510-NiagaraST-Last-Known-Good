@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.14 2003/01/25 20:54:55 tufte Exp $
+  $Id: SimpleConnectionReader.java,v 1.15 2003/07/08 02:10:37 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,11 +27,11 @@
 
 package niagara.client;
 
-import java.net.*;
 import java.io.*;
 
 import gnu.regexp.*;
 import niagara.utils.PEException;
+
 class SimpleConnectionReader extends AbstractConnectionReader 
     implements Runnable {
     UIDriverIF ui;

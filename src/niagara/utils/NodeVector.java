@@ -16,7 +16,6 @@ package niagara.utils;
  * @author Kristin Tufte
  */
 
-import java.util.*;
 import org.w3c.dom.Node;
 
 public class NodeVector {

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: varTbl.java,v 1.7 2002/12/10 00:53:29 vpapad Exp $
+  $Id: varTbl.java,v 1.8 2003/07/08 02:11:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,7 +35,6 @@ import java.util.*;
 
 import niagara.logical.NodeDomain;
 import niagara.query_engine.TupleSchema;
-import org.w3c.dom.*;
 
 public class varTbl {
 	private Vector varList;   // of varToAttr

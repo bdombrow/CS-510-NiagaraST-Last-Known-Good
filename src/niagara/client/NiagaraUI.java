@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagaraUI.java,v 1.7 2003/03/08 02:20:09 vpapad Exp $
+  $Id: NiagaraUI.java,v 1.8 2003/07/08 02:10:37 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,7 +39,6 @@ import java.awt.event.*;
 import java.awt.Toolkit;
 import java.io.*;
 import java.util.Vector;
-import java.util.Date;
 import java.net.URL;
 import java.applet.*;
 import javax.swing.*;

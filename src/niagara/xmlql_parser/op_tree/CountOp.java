@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: CountOp.java,v 1.9 2003/03/19 00:35:26 tufte Exp $
+  $Id: CountOp.java,v 1.10 2003/07/08 02:11:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,18 +36,10 @@
 package niagara.xmlql_parser.op_tree;
 
 
-import java.util.*;
-
 import org.w3c.dom.*;
 
 import niagara.connection_server.InvalidPlanException;
-import niagara.logical.Variable;
-import niagara.optimizer.colombia.Attribute;
-import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
-import niagara.optimizer.colombia.Op;
-import niagara.utils.PEException;
-import niagara.xmlql_parser.syntax_tree.*;
 
 public class CountOp extends AggregateOp {
 

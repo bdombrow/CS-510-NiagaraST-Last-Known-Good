@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: scanOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
+  $Id: scanOp.java,v 1.6 2003/07/08 02:11:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,7 +33,6 @@
  */
 package niagara.xmlql_parser.op_tree;
 
-import java.util.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class scanOp extends UnoptimizableLogicalOperator {

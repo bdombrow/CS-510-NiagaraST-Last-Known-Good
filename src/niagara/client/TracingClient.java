@@ -1,17 +1,5 @@
 package niagara.client;
 
-import java.io.*;
-import java.util.*;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
-
 public class TracingClient extends SimpleClient {
     boolean firstTime;
     public TracingClient(String host, int port, String outputFileName) {

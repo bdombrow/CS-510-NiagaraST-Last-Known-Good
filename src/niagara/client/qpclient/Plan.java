@@ -9,7 +9,6 @@ import java.awt.geom.*;
 import java.io.*;
 import java.util.*;
 import diva.graph.*;
-import diva.graph.model.*;
 
 public class Plan extends QPNode {
 

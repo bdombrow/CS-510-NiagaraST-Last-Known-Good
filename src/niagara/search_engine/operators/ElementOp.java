@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ElementOp.java,v 1.1 2000/05/30 21:03:28 tufte Exp $
+  $Id: ElementOp.java,v 1.2 2003/07/08 02:12:08 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,6 @@
 package niagara.search_engine.operators;
 
 import java.util.*;
-import java.io.*;
 import niagara.search_engine.indexmgr.*;
 
 /**

@@ -14,9 +14,6 @@ package niagara.utils.nitree;
  */
 
 import org.w3c.dom.*;
-import com.ibm.xml.parser.*;
-import java.lang.ref.*;
-import java.util.*;
 import java.io.*;
 
 import niagara.utils.*;

@@ -8,17 +8,6 @@
 
 package niagara.utils.nitree;
 
-/**
- * Niagara implementation of DOM Node interface
- * Eventually NINode should probably
- * be an interface, but for now write the class NINode
- * and convert to interface later
- */
-
-import org.w3c.dom.*;
-
-import niagara.utils.PEException;
-
 public abstract class NINode {
 
     /* functions to get and set the "value" of a node, for attributes,

@@ -5,8 +5,6 @@ import diva.graph.model.*;
 import java.util.Iterator;
 import java.awt.geom.Rectangle2D;
 
-import org.w3c.dom.Element;
-
 /**
  * <code>QPLayout</code> is a global layout that places nodes at the positions
  * specified by their respective DOM element.

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: binOp.java,v 1.3 2002/06/28 01:28:32 vpapad Exp $
+  $Id: binOp.java,v 1.4 2003/07/08 02:11:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,8 +31,6 @@
  *
  */
 package niagara.xmlql_parser.op_tree;
-
-import java.util.*;
 
 abstract public class binOp extends op {
    /**

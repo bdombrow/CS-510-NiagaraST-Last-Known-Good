@@ -1,5 +1,5 @@
 /**
- * $Id: MQPClient.java,v 1.6 2003/01/13 05:04:56 tufte Exp $
+ * $Id: MQPClient.java,v 1.7 2003/07/08 02:10:37 tufte Exp $
  */
 
 package niagara.client;
@@ -15,7 +15,6 @@ import java.io.StringReader;
 // For Jetty Servlet engine
 import com.mortbay.HTTP.*;
 import com.mortbay.Util.*;
-import com.mortbay.HTTP.Handler.*;
 import com.mortbay.HTTP.Handler.Servlet.*;
 
 public class MQPClient extends SimpleClient {

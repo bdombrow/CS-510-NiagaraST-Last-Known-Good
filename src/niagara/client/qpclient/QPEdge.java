@@ -1,5 +1,5 @@
 /*
- * $Id: QPEdge.java,v 1.1 2000/08/28 22:25:57 vpapad Exp $
+ * $Id: QPEdge.java,v 1.2 2003/07/08 02:09:48 tufte Exp $
  *
  * Copyright (c) 1998 The Regents of the University of California.
  * All rights reserved.  See the file COPYRIGHT for details.
@@ -8,14 +8,13 @@ package niagara.client.qpclient;
 
 import diva.graph.model.*;
 import diva.util.BasicPropertyContainer;
-import java.util.*;
 import java.io.Serializable;
 
 /**
  * A basic implementation of the Edge interface.
  *
  * @author Michael Shilman (michaels@eecs.berkeley.edu)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @rating Yellow
  */
 public class QPEdge extends BasicPropertyContainer implements Edge, Serializable {

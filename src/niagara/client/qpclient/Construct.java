@@ -1,15 +1,15 @@
 package niagara.client.qpclient;
 
-import diva.graph.*;
-import diva.graph.model.*;
-import diva.util.*;
+import java.awt.Graphics2D;
+import java.io.PrintWriter;
 
-import java.util.*;
-import java.io.*;
-import java.awt.*;
-
-import org.w3c.dom.*;
 import niagara.utils.XMLUtils;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import diva.graph.GraphView;
+import diva.graph.model.GraphModel;
 
 public class Construct extends Operator {
     public Construct() {

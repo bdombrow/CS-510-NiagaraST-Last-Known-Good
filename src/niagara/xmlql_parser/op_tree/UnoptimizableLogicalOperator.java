@@ -1,11 +1,8 @@
 /* $Id$ */
 package niagara.xmlql_parser.op_tree;
 
-import java.util.ArrayList;
-
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
-import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.Op;
 import niagara.utils.PEException;
 

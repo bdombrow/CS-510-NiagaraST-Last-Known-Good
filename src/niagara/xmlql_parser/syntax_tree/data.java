@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: data.java,v 1.3 2001/07/17 06:53:29 vpapad Exp $
+  $Id: data.java,v 1.4 2003/07/08 02:11:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,9 +32,6 @@
  *
  */
 package niagara.xmlql_parser.syntax_tree;
-
-
-import org.w3c.dom.*;
 
 public class data {
     

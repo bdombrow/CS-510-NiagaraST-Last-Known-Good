@@ -1,14 +1,14 @@
 package niagara.client.qpclient;
 
-import diva.graph.*;
-import diva.graph.model.*;
-import diva.util.*;
+import java.io.PrintWriter;
 
-import java.util.*;
-import java.io.*;
-
-import org.w3c.dom.*;
 import niagara.utils.XMLUtils;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import diva.graph.GraphView;
+import diva.graph.model.GraphModel;
 
 public class Join extends Operator {
     String content = "";

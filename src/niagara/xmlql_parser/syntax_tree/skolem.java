@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: skolem.java,v 1.3 2003/03/19 00:33:55 tufte Exp $
+  $Id: skolem.java,v 1.4 2003/07/08 02:11:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,8 +33,6 @@
 package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
-
-import org.w3c.dom.*;
 
 public class skolem {
 	private String name;     // name of the skolem function

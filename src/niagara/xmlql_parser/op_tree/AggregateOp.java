@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: AggregateOp.java,v 1.3 2003/07/03 19:29:59 tufte Exp $
+  $Id: AggregateOp.java,v 1.4 2003/07/08 02:11:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,7 +31,6 @@ import org.w3c.dom.*;
 import niagara.connection_server.InvalidPlanException;
 import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.syntax_tree.*;
 
 /**
  * This is the class for the logical group operator. This is an abstract

@@ -1,12 +1,10 @@
 package niagara.client.qpclient;
-import diva.graph.model.Node;
-import diva.graph.model.Graph;
-import diva.util.SemanticObjectContainer;
-import diva.util.PropertyContainer;
-import java.util.Iterator;
-import diva.util.BasicPropertyContainer;
-import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Iterator;
+
+import diva.graph.model.Graph;
+import diva.graph.model.Node;
+import diva.util.BasicPropertyContainer;
 
 
 public class QPGraph implements Graph  {

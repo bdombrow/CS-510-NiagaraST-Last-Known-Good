@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Schema.java,v 1.3 2000/08/21 00:41:03 vpapad Exp $
+  $Id: Schema.java,v 1.4 2003/07/08 02:11:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,8 +37,6 @@
 package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
-
-import org.w3c.dom.*;
 
 public class Schema {
 	private Vector tupleDes;  //  Vector of SchemaUnits

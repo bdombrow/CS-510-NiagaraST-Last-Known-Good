@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: regExp.java,v 1.3 2002/03/26 23:54:12 tufte Exp $
+  $Id: regExp.java,v 1.4 2003/07/08 02:11:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,9 +35,6 @@
  *
  */
 package niagara.xmlql_parser.syntax_tree;
-
-
-import org.w3c.dom.*;
 
 public abstract class regExp {
 

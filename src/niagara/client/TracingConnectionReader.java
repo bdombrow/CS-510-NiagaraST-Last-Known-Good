@@ -1,14 +1,8 @@
 package niagara.client;
 
-import gnu.regexp.RE;
-import gnu.regexp.REMatch;
-
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.FilterReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.Writer;
 
 import javax.xml.parsers.SAXParser;

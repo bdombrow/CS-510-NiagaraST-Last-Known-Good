@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: stp.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: stp.java,v 1.2 2003/07/08 02:11:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,7 +34,6 @@
 package niagara.xmlql_parser.syntax_tree;
 
 import java.util.*;
-import java.io.*;
 
 public class stp {
 

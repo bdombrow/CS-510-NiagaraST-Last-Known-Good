@@ -3,7 +3,6 @@ package niagara.client.qpclient;
   import diva.graph.*;
   import diva.graph.model.*;
 
-import java.util.*;
 import java.io.*;
 
 import org.w3c.dom.*;

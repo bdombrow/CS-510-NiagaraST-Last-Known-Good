@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: op.java,v 1.14 2003/03/07 23:36:42 vpapad Exp $
+  $Id: op.java,v 1.15 2003/07/08 02:11:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,16 +32,11 @@
 
 package niagara.xmlql_parser.op_tree;
 
-import java.util.*;
-
 import org.w3c.dom.Element;
 
 import niagara.utils.SerializableToXML;
-import niagara.xmlql_parser.syntax_tree.*;
 import niagara.connection_server.InvalidPlanException;
 import niagara.connection_server.NiagraServer;
-import niagara.connection_server.XMLQueryPlanParser;
-
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.LogicalProperty;

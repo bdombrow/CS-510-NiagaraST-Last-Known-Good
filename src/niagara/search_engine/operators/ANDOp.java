@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ANDOp.java,v 1.1 2000/05/30 21:03:28 tufte Exp $
+  $Id: ANDOp.java,v 1.2 2003/07/08 02:12:08 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,6 @@
 // ANDOp.java
 package niagara.search_engine.operators;
 
-import java.io.*;
 import java.util.*;
 import niagara.search_engine.indexmgr.*;
 

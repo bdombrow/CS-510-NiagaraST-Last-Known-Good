@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SchemaUnit.java,v 1.2 2000/08/21 00:41:03 vpapad Exp $
+  $Id: SchemaUnit.java,v 1.3 2003/07/08 02:11:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,12 +33,6 @@
  *
  */
 package niagara.xmlql_parser.syntax_tree;
-
-
-import org.w3c.dom.*;
-import java.io.*;
-import java.lang.*;
-import java.util.*;
 
 public class SchemaUnit {
     private regExp regexp=null;    // Describes Tags

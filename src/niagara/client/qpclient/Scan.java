@@ -1,13 +1,7 @@
 package niagara.client.qpclient;
 
-import java.awt.*;
-import java.awt.geom.*;
-
-import diva.graph.*;
-import diva.graph.model.*;
-import diva.util.*;
-
-import java.util.*;
+import java.awt.Font;
+import java.awt.Graphics2D;
 
 public class Scan extends Operator {
 

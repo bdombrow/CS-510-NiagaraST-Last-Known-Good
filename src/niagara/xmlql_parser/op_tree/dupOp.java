@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: dupOp.java,v 1.8 2003/07/03 19:29:59 tufte Exp $
+  $Id: dupOp.java,v 1.9 2003/07/08 02:11:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,8 +33,6 @@
  * @see op 
  */
 package niagara.xmlql_parser.op_tree;
-
-import java.util.ArrayList;
 
 import org.w3c.dom.Element;
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TestOps.java,v 1.1 2000/05/30 21:03:28 tufte Exp $
+  $Id: TestOps.java,v 1.2 2003/07/08 02:12:09 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,11 +29,8 @@
 //TestOps.java
 package niagara.search_engine.operators;
 
-import java.io.*;
 import java.util.*;
 import niagara.search_engine.indexmgr.*;
-import niagara.search_engine.util.*;
-
 
 /**
  * test driver for various opreators 

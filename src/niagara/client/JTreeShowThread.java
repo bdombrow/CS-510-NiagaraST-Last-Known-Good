@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: JTreeShowThread.java,v 1.1 2000/05/30 21:03:24 tufte Exp $
+  $Id: JTreeShowThread.java,v 1.2 2003/07/08 02:10:37 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,17 +31,10 @@ package niagara.client;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.tree.TreeSelectionModel;
-import java.net.URL;
-import java.io.IOException;
-import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JFrame;
 import java.awt.*;
-import java.awt.event.*;
+
 
 // lgalanis
 

@@ -11,7 +11,6 @@ package niagara.client.qpclient;
 import java.util.HashMap;
 import org.w3c.dom.*;
 import diva.graph.model.*;
-import diva.graph.*;
 
 public class QPNodeFactory { 
     

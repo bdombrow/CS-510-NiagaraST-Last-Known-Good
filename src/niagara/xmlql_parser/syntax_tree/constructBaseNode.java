@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: constructBaseNode.java,v 1.3 2002/12/10 00:53:29 vpapad Exp $
+  $Id: constructBaseNode.java,v 1.4 2003/07/08 02:11:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,10 +32,7 @@
 */
 package niagara.xmlql_parser.syntax_tree;
 
-import java.util.*;
-
 import niagara.optimizer.colombia.Attrs;
-import org.w3c.dom.*;
 
 public abstract class constructBaseNode {
     // replace the occurences of variables with their corresponding 

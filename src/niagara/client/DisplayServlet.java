@@ -1,13 +1,12 @@
 /**
- * $Id: DisplayServlet.java,v 1.4 2002/10/29 01:56:22 vpapad Exp $
+ * $Id: DisplayServlet.java,v 1.5 2003/07/08 02:10:37 tufte Exp $
  */
 
 package niagara.client;
 
-import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.*;
-import java.util.*;
+
 
 public class DisplayServlet extends HttpServlet {
 

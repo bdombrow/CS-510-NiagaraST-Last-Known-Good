@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: constructLeafNode.java,v 1.4 2002/12/10 00:53:29 vpapad Exp $
+  $Id: constructLeafNode.java,v 1.5 2003/07/08 02:11:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,8 +35,6 @@ import niagara.logical.Variable;
 import niagara.optimizer.colombia.Attrs;
 import niagara.utils.CUtil;
 import niagara.utils.PEException;
-
-import org.w3c.dom.*;
 
 public class constructLeafNode extends constructBaseNode {
     private data leafData;

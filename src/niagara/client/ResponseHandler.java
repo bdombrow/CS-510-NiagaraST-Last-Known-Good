@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseHandler.java,v 1.3 2003/03/08 02:20:09 vpapad Exp $
+  $Id: ResponseHandler.java,v 1.4 2003/07/08 02:10:37 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,6 @@
 package niagara.client;
 
 import com.microstar.xml.HandlerBase;
-import com.microstar.xml.XmlParser;
 import java.util.*;
 import javax.swing.tree.*;
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SEURLContent.java,v 1.1 2000/05/30 21:03:25 tufte Exp $
+  $Id: SEURLContent.java,v 1.2 2003/07/08 02:10:37 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,13 +32,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.Toolkit;
 import java.io.*;
-import java.util.Vector;
-import java.util.Date;
 import java.net.URL;
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
 
 /**
  * Display a url

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CUtil.java,v 1.7 2002/10/06 23:57:38 vpapad Exp $
+  $Id: CUtil.java,v 1.8 2003/07/08 02:11:29 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,6 @@
 package niagara.utils;
 
 import org.w3c.dom.*;
-import java.lang.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
