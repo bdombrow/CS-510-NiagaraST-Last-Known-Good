@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: skolem.java,v 1.2 2000/08/21 00:41:05 vpapad Exp $
+  $Id: skolem.java,v 1.3 2003/03/19 00:33:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -98,4 +98,11 @@ public class skolem {
 		}
 	}
 
+    public boolean equals(Object obj) {
+	if(obj == null || !(obj instanceof skolem))
+	    return false;
+	skolem other = (skolem)obj;
+	return name.equals(other.name) &&
+	    varList.equals(other.varList);
+    }
 }
