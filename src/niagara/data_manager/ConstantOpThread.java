@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOpThread.java,v 1.5 2002/05/23 06:31:00 vpapad Exp $
+ * $Id: ConstantOpThread.java,v 1.6 2002/09/27 01:25:28 vpapad Exp $
  *
  */
 
@@ -70,7 +70,12 @@ public class ConstantOpThread implements Runnable {
     private void processDocument() 
 	throws SAXException, ShutdownException, IOException {
 	try {
-            niagara.ndom.DOMParser parser = DOMFactory.newParser();
+	    niagara.ndom.DOMParser parser;
+	    if (niagara.connection_server.NiagraServer.usingSAXDOM()) 
+		parser = DOMFactory.newParser("saxdom");
+	    else
+		parser = DOMFactory.newParser();
+
 	    parser.parse(new InputSource(new ByteArrayInputStream(content.getBytes())));
 	    Document doc = parser.getDocument();
 
