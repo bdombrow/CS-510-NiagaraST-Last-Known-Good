@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: CountOp.java,v 1.6 2002/10/31 04:17:05 vpapad Exp $
+  $Id: CountOp.java,v 1.7 2003/02/25 06:05:48 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -75,10 +75,6 @@ public class CountOp extends groupOp {
      */
     public Attribute getCountingAttribute () {
 	return countingAttribute;
-    }
-
-    public void dump() {
-	System.out.println("CountOp");
     }
 
     /**
