@@ -1,4 +1,4 @@
-/* $Id: PhysicalIncrementalMax.java,v 1.4 2002/10/31 06:09:03 vpapad Exp $ */
+/* $Id: PhysicalIncrementalMax.java,v 1.5 2002/11/01 01:56:59 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -18,14 +18,15 @@ public class PhysicalIncrementalMax extends PhysicalIncrementalGroup {
 
     public void initFrom(LogicalOp logicalOperator) {
         super.initFrom(logicalOperator);
-        // Get the counting attribute of the Count logical operator
+        // Get the max attribute 
         maxAttribute = ((IncrementalMax) logicalOperator).getMaxAttribute();
+        emptyGroupValue = ((IncrementalMax) logicalOperator).getEmptyGroupValue();
     }
 
     public void opInitialize() {
         super.opInitialize();
         ae = new AtomicEvaluator(maxAttribute.getName());
-	emptyGroupValue = ((IncrementalMax) logicalGroupOperator).getEmptyGroupValue();
+        ae.resolveVariables(inputTupleSchemas[0], 0);
         values = new ArrayList();
     }
 
@@ -57,10 +58,6 @@ public class PhysicalIncrementalMax extends PhysicalIncrementalGroup {
      */
     public Object emptyGroupValue() {
         return emptyGroupValue;
-    }
-
-    public boolean outputOldValue() {
-	return true;
     }
 
     /**

@@ -1,4 +1,4 @@
-/* $Id: PhysicalIncrementalAverage.java,v 1.4 2002/10/31 06:09:03 vpapad Exp $ */
+/* $Id: PhysicalIncrementalAverage.java,v 1.5 2002/11/01 01:56:59 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -33,6 +33,7 @@ public class PhysicalIncrementalAverage extends PhysicalIncrementalGroup {
     public void opInitialize() {
         super.opInitialize();
         ae = new AtomicEvaluator(avgAttribute.getName());
+        ae.resolveVariables(inputTupleSchemas[0], 0);
         values = new ArrayList();
     }
 

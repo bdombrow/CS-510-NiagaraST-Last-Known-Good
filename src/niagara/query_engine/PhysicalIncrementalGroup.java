@@ -1,4 +1,4 @@
-/* $Id: PhysicalIncrementalGroup.java,v 1.3 2002/10/31 03:54:39 vpapad Exp $ */
+/* $Id: PhysicalIncrementalGroup.java,v 1.4 2002/11/01 01:56:59 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.*;
@@ -6,8 +6,7 @@ import java.util.*;
 import niagara.logical.IncrementalGroup;
 import niagara.optimizer.colombia.*;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.xmlql_parser.syntax_tree.skolem;
 
 import org.w3c.dom.*;
 
@@ -20,7 +19,7 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
     protected IncrementalGroup logicalGroupOperator;
 
     // The list of attributes to group by
-    private Vector groupAttrs;
+    private int[] groupAttrs;
 
     private Hasher hasher;
 
@@ -52,9 +51,15 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
         // Get the grouping attributes
         skolem grouping = logicalGroupOperator.getSkolemAttributes();
 
-        groupAttrs = grouping.getVarList();
-
-        hasher = new Hasher(groupAttrs);
+        Vector groupVars = grouping.getVarList();
+        hasher = new Hasher(groupVars);
+        
+        groupAttrs = new int[groupVars.size()];
+        for (int i = 0; i < groupAttrs.length; i++) {
+            groupAttrs[i] = inputTupleSchemas[0].getPosition(((Attribute) groupVars.get(i)).getName());
+        }
+        
+        hasher.resolveVariables(inputTupleSchemas[0]);
 
         // Initialize the hash tables
         hash2final = new HashMap();
@@ -78,12 +83,11 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
             // Output tuples contain the groupby attributes plus
             // two more fields: previous and current group info
             representativeTuple =
-                new StreamTupleElement(true, groupAttrs.size() + 2);
+                new StreamTupleElement(true, groupAttrs.length + 2);
             // Copy the groupby attributes
-            for (int i = 0; i < groupAttrs.size(); i++) {
-                schemaAttribute sa = (schemaAttribute) groupAttrs.get(i);
+            for (int i = 0; i < groupAttrs.length; i++) {
                 representativeTuple.appendAttribute(
-                    tuple.getAttribute(sa.getAttrId()));
+                    tuple.getAttribute(groupAttrs[i]));
             }
             // Initialize the group hashtable entries
             hash2partial.put(hash, emptyGroupValue());
@@ -93,14 +97,14 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
 
         StreamTupleElement newTuple = 
 	    new StreamTupleElement(tuple.isPartial(),
-				   groupAttrs.size() + 2);
+				   groupAttrs.length + 2);
 	newTuple.appendAttributes(representativeTuple);
 
         Node oldResult = null;
 	Node newResult;
         // partial tuples only affect partial results
 	Object oldGroupInfo = hash2partial.get(hash);
-	if (outputOldValue())
+	if (logicalGroupOperator.outputOldValue())
 	    oldResult = constructOutput(oldGroupInfo);
         Object newGroupInfo = processTuple(tuple, oldGroupInfo);
         newResult = constructOutput(newGroupInfo);
@@ -109,7 +113,7 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
         if (!tuple.isPartial()) {
             // final tuples affect both final and partial results
 	    oldGroupInfo = hash2final.get(hash);
-	    if (outputOldValue())
+	    if (logicalGroupOperator.outputOldValue())
 		oldResult = constructOutput(oldGroupInfo);
             newGroupInfo = processTuple(tuple, hash2final.get(hash));
             newResult = constructOutput(newGroupInfo);
@@ -120,7 +124,7 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
             // do not output a tuple
 	    return;
 	}
-	if (outputOldValue())
+	if (logicalGroupOperator.outputOldValue())
 	    newTuple.appendAttribute(oldResult);
         newTuple.appendAttribute(newResult);
 	putTuple(newTuple, 0);
@@ -150,10 +154,6 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
         cost += inpCard * catalog.getDouble("tuple_hashing_cost");
         cost += outputCard * catalog.getDouble("tuple_construction_cost");
         return new Cost(cost);
-    }
-
-    protected boolean outputOldValue() {
-	return false;
     }
 
     public abstract Object processTuple(

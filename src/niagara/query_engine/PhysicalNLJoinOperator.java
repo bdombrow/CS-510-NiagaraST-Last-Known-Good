@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.7 2002/10/31 03:54:39 vpapad Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.8 2002/11/01 01:56:59 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
