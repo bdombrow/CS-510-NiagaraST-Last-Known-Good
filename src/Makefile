@@ -72,7 +72,7 @@ all:	ql_parser client se_server dm qe trigger con_server applet nitree type_syst
 #client: 
 #	$(JAVAC) $(JAVAFLAGS) `find niagara/client -name \*.java`
 client:
-	$(JAVAC) $(JAVAFLAGS) niagara/client/NiagaraUI.java
+	$(JAVAC) $(JAVAFLAGS) niagara/client/NiagaraUI.java niagara/client/SimpleClient.java
 
 con_server:
 	$(JAVAC) $(JAVAFLAGS) niagara/connection_server/*.java
