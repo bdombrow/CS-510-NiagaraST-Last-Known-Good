@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "../niagara_server/queryplan.dtd">
+
+<plan top="cons">
+
+<firehosescan id="fhAuction" rate="0"
+        host="localhost" port="5000" datatype="auction_stream" desc="" num_gen_calls="10"
+        num_tl_elts="10" trace="no"/>
+
+<dup id="dup" branch="2" input="fhAuction"/>
+
+<!-- get the auction's seller, expiration time, and auction id -->
+<unnest id="auct" regexp="site.open_auctions.open_auction" input="dup"/>
+<unnest id="aseller" regexp="seller.person" input="auct"/>
+<unnest id="aexpires" regexp="interval.end" root="auct" input="aseller"/>
+<unnest id="aid" regexp="id" root="auct" input="aexpires"/>
+
+<!-- get the bid's price, generated time, and bid id -->
+<unnest id="bids" regexp="site.open_auctions.open_auction" input="dup"/>
+<unnest id="bprice" regexp="bidder.bid" input="bids"/>
+<unnest id="btime" regexp="bidder.time" input="bprice" root="bids"/>
+<unnest id="bid" regexp="id" input="btime" root="bids"/>
+
+<!-- Now, join on aid == bid, and bid.time < auction.expiredTime -->
+<join id="join" left="$aid" right="$bid" input="aid bid" extensionjoin="right">
+<pred op="le">
+	<var value="$btime"></var> <var value="$aexpires"></var>
+</pred>
+</join>
+
+<!-- get the closing price for each auction item, we put the seller as a grouping attribute, because we want to use it as a grouping attribute in partitionavg -->
+<max id="max" groupby="$aid $aseller" maxattr="$bprice" input="join"/>
+
+<!-- get the average price of the the last 10 items sold for each seller -->
+<partitionavg id="avg" groupby="$aseller" landmark="false" range="10" avgattr="$max" input="max"/>
+
+<!--Finally, output the result-->
+<construct id="cons" input="avg">
+  <![CDATA[<seller id=$aseller>
+ <AVERAGE_PRICE> $avg </AVERAGE_PRICE>
+  </seller>]]>
+</construct>
+
+</plan>
