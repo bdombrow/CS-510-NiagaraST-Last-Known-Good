@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.15 2003/03/07 23:45:30 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.16 2003/12/24 02:28:41 vpapad Exp $
  *
  */
 
@@ -29,7 +29,7 @@ import niagara.utils.*;
  * from a SAX source
  */
 
-public class SAXDOMParser extends DefaultHandler implements DOMParser {
+public class SAXDOMParser extends DefaultHandler implements DOMParser{
     private SAXParser parser;
 
     private DocumentImpl doc;
