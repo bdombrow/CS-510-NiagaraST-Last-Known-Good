@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.4 2002/03/28 03:05:33 vpapad Exp $
+ * $Id: Page.java,v 1.5 2002/03/31 15:56:43 tufte Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -73,12 +73,13 @@ public class Page {
         }
     }
 
-    public void addEvent(DocumentImpl doc, byte type, String string) {
+    public Page addEvent(DocumentImpl doc, byte type, String string) {
         if (current_offset < event_type.length) {
             event_type[current_offset] = type;
             event_string[current_offset] = string;
 
             current_offset++;
+	    return this;
         } else if (next == null) { // last page of document
             Page page = BufferManager.getFreePage();
             doc.addPage(page);
@@ -86,8 +87,10 @@ public class Page {
             setNext(page);
 
             page.addEvent(doc, type, string);
+	    return page;
         } else { // there is a next page
-            next.addEvent(doc, type, string);
+	    System.out.println("KT: traversing");
+            return next.addEvent(doc, type, string);
         }
     }
 

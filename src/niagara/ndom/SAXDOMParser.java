@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.4 2002/03/27 23:36:59 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.5 2002/03/31 15:56:38 tufte Exp $
  *
  */
 
@@ -20,6 +20,8 @@ import org.xml.sax.SAXParseException;
 
 
 import niagara.ndom.saxdom.*;
+import niagara.utils.*;
+import niagara.connection_server.NiagraServer; // for STREAM variable
 
 /**
  * <code>SAXDOMParser</code> constructs read-only SAXDOM documents
@@ -67,14 +69,23 @@ public class SAXDOMParser implements niagara.ndom.DOMParser {
     public boolean supportsStreaming() {
 	return false;
     }
+
+    // for streaming, a place to put top-level elements
+    public void setOutputStream(SourceStream outputStream) {
+	sh.setOutputStream(outputStream);
+    }
 }
 
 class SAXDOMHandler extends DefaultHandler {
     private DocumentImpl doc;
     private Page page;
-    private int offset;
 
     private StringBuffer sb;
+
+    // for streaming support - KT
+    private int level;
+    private SourceStream outputStream;
+    private int levelOneStartIdx;
 
     public SAXDOMHandler() {
         reset();
@@ -87,37 +98,65 @@ class SAXDOMHandler extends DefaultHandler {
     // Event handling
     
     public void startDocument() throws SAXException {
+	level = 0;
         if (page == null || page.isFull()) {
             page = BufferManager.getFreePage();
         }
-        
-        offset = page.getCurrentOffset();
-
-        doc = new DocumentImpl(page, offset);
+        doc = new DocumentImpl(page, page.getCurrentOffset());
     }
 
     public void endDocument() throws SAXException {
         handleText();
-        page.addEvent(doc, SAXEvent.END_DOCUMENT, null);
+        page = page.addEvent(doc, SAXEvent.END_DOCUMENT, null);
     }
 
     public void startElement(String namespaceURI, String localName, 
                              String qName, Attributes attrs) 
         throws SAXException {
+
         handleText();
         // XXX vpapad: not doing anything about namespaces yet
-        page.addEvent(doc, SAXEvent.START_ELEMENT, qName);
+
+	page = page.addEvent(doc, SAXEvent.START_ELEMENT, qName);
+	if(NiagraServer.STREAM) {
+	    if(level == 1) {
+		levelOneStartIdx = BufferManager.getIndex(page,
+							  page.getCurrentOffset()-1);
+	    }
+	    level++;
+	}
 
         for (int i = 0; i < attrs.getLength(); i++) {
-            page.addEvent(doc, SAXEvent.ATTR_NAME, attrs.getLocalName(i));
-            page.addEvent(doc, SAXEvent.ATTR_VALUE, attrs.getValue(i));
+	    page = page.addEvent(doc, SAXEvent.ATTR_NAME, 
+				 attrs.getLocalName(i));
+            page = page.addEvent(doc, SAXEvent.ATTR_VALUE, attrs.getValue(i));
         }
     }
 
     public void endElement(String namespaceURI, String localName, String qName)
         throws SAXException {
+	level--;
         handleText();
-        page.addEvent(doc, SAXEvent.END_ELEMENT, null);
+        page = page.addEvent(doc, SAXEvent.END_ELEMENT, null);
+
+	if(NiagraServer.STREAM) {
+	    if(level == 1 && outputStream !=  null) {
+		// for now throw fatal errors on these exceptions, if
+		// they happen, I'll have to figure out what the right
+		// thing is to do - KT
+		// I don't want to do a lot of work until I know this
+		// actually works
+		try {
+		    outputStream.put(new ElementImpl(doc, levelOneStartIdx));
+		} catch (java.lang.InterruptedException ie) {
+		    throw new PEException("KT - InterruptedException in SAXDOMParser");
+		} catch (niagara.utils.NullElementException ne) {
+		    throw new PEException("KT - NullElementException in SAXDOMParser");
+		} catch (niagara.utils.StreamPreviouslyClosedException spce) {
+		    throw new PEException("KT - StreamPreviouslyClosedException in SAXDOMParser");
+		}
+	    }
+	}
     }
 
     public void startPrefixMapping(String prefix, String uri) 
@@ -137,10 +176,10 @@ class SAXDOMHandler extends DefaultHandler {
     }
     
     public void handleText() {
-        page.addEvent(doc, SAXEvent.TEXT, sb.toString());
+        page = page.addEvent(doc, SAXEvent.TEXT, sb.toString());
         sb.setLength(0);
     }
-    
+
     // Error handling
     private boolean hasErrors, hasWarnings;
 
@@ -167,6 +206,11 @@ class SAXDOMHandler extends DefaultHandler {
 
     public void warning(SAXParseException e) throws SAXException {
         hasWarnings = true;
+    }
+
+    // for streaming, a place to put top-level elements
+    public void setOutputStream(SourceStream outputStream) {
+	this.outputStream = outputStream;
     }
 
 }
