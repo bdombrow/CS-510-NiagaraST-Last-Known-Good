@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.13 2003/02/25 06:10:25 vpapad Exp $
+  $Id: PhysicalCountOperator.java,v 1.14 2003/03/19 00:36:09 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,61 +44,25 @@ import niagara.optimizer.colombia.*;
  *
  */
 
-public class PhysicalCountOperator extends PhysicalGroupOperator {
-    ////////////////////////////////////////////////////////////////////
-    // These are private nested classes used internally               //
-    ////////////////////////////////////////////////////////////////////
+public class PhysicalCountOperator extends PhysicalAggregateOperator {
+
 
     /**
-     * Instances of this class store sufficient statistics for computing
-     * the Count
+     * This function updates the statistics with a value
+     *
+     * @param newValue The value by which the statistics are to be
+     *                 updated
      */
-    
-    private class CountingSufficientStatistics {
-
-	// The number of values
-	int numValues;
-
-
-	/**
-	 * This is the constructor that initializes Count sufficient
-	 * statistics
-	 */
-
-	public CountingSufficientStatistics () {
-
-	    // No values initially
-	    //
-	    this.numValues = 0;
-	}
-
-
-	/**
-	 * This function updates the statistics with a value
-	 *
-	 * @param newValue The value by which the statistics are to be
-	 *                 updated
-	 */
-
-	public void updateStatistics (int newValue) {
-	    // Increment the number of values
-	    //
-	    ++numValues;
-	}
-
-
-	/**
-	 * This function returns the number of values
-	 *
-	 * @return Returns the number of values in the statistics
-	 */
-
-	public int getNumberOfValues () {
-
-	    // Return the number of values
-	    //
-	    return numValues;
-	}
+    public void updateAggrResult (PhysicalAggregateOperator.AggrResult result, 
+				  Object ungroupedResult) {
+	// Increment the number of values
+	// KT - is this correct??
+	// code from old mrege results:
+	//finalResult.updateStatistics(((Integer) ungroupedResult).intValue());
+	    
+	assert ((Integer)ungroupedResult).intValue() == 1 :
+	    "KT BAD BAD BAD";
+	result.count++;
     }
 
 
@@ -107,35 +71,14 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
     ////////////////////////////////////////////////////////////////////
 
     // This is the aggregating attribute for the Count operator
-    Attribute countingAttribute;
-
-
-    AtomicEvaluator ae;
-
-    ArrayList atomicValues;
-
+    //Attribute countingAttribute;
     
-    public void initFrom(LogicalOp logicalOperator) {
-        super.initFrom(logicalOperator);
-	// Get the counting attribute of the Count logical operator
-	countingAttribute = ((CountOp) logicalOperator).getCountingAttribute();
-    }
+    
     
     /////////////////////////////////////////////////////////////////////////
     // These functions are the hooks that are used to implement specific   //
     // Count operator (specializing the group operator)                  //
     /////////////////////////////////////////////////////////////////////////
-
-    /**
-     * This function is called to initialize a grouping operator for execution
-     * by setting up relevant structures etc.
-     */
-
-    protected final void initializeForExecution () {
-        ae = new AtomicEvaluator(countingAttribute.getName());
-        ae.resolveVariables(inputTupleSchemas[0], 0);
-        atomicValues = new ArrayList();
-    }
 
 
     /**
@@ -147,58 +90,16 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
      *         null
      */
 
-    protected final Object constructUngroupedResult (StreamTupleElement tupleElement) {
+    protected final Object constructUngroupedResult (StreamTupleElement 
+						     tupleElement) {
 
 	// First get the atomic values
-	//
         atomicValues.clear();
         ae.getAtomicValues(tupleElement, atomicValues);
 
-	// If there is not exactly one atomic value, skip
-	//
-	if (atomicValues.size() != 1) {
-	    return null;
-	}
-	else {
-	    return new Integer(1);
-	}
+	assert atomicValues.size() == 1 : "Must have exactly one atomic value";
+	return new Integer(1);
     }
-
-
-    /**
-     * This function merges a grouped result with an ungrouped result
-     *
-     * @param groupedResult The grouped result that is to be modified (this can
-     *                      be null)
-     * @param ungroupedResult The ungrouped result that is to be grouped with
-     *                        groupedResult (this can never be null)
-     *
-     * @return The new grouped result
-     */
-
-    protected final Object mergeResults (Object groupedResult,
-					 Object ungroupedResult) {
-
-	// Set up the final result - if the groupedResult is null, then
-	// create holder for final result, else just use groupedResult
-	//
-	CountingSufficientStatistics finalResult = null;
-	if (groupedResult == null) {
-	    finalResult = new CountingSufficientStatistics();
-	}
-	else {
-	    finalResult = (CountingSufficientStatistics) groupedResult;
-	}
-
-	// Add effects of ungrouped result (which is an Integer)
-	//
-	finalResult.updateStatistics(((Integer) ungroupedResult).intValue());
-
-	// Return the grouped result
-	//
-	return finalResult;
-    }
-
 
     /**
      * This function returns an empty result in case there are no groups
@@ -230,72 +131,27 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
      *         returns null
      */
 
-    protected final Node constructResult (Object partialResult,
-					  Object finalResult) {
+    protected final Node constructAggrResult (
+                   PhysicalAggregateOperator.AggrResult partialResult,
+		   PhysicalAggregateOperator.AggrResult finalResult) {
 	int numValues = 0;
 
-	// If the partial result is not null, update with partial result stats
-	//
 	if (partialResult != null) {
-
-	    // Type cast partial result to a Count sufficient statistics
-	    //
-	    CountingSufficientStatistics partialStats =
-		(CountingSufficientStatistics) partialResult;
-
-	    // Update number of values
-	    //
-	    numValues += partialStats.getNumberOfValues();
+	    numValues += partialResult.count;
 	}
 	
-	// If the final result is not null, update with final result stats
-	//
 	if (finalResult != null) {
-	    // Type cast final result to a Count sufficient statistics
-	    //
-	    CountingSufficientStatistics finalStats =
-		(CountingSufficientStatistics) finalResult;
-
-	    // Update number of values
-	    //
-	    numValues += finalStats.getNumberOfValues();
+	    numValues += finalResult.count;
 	}
 
 	// Create an Count result element
-	//
 	Element resultElement = doc.createElement("Count");
-
-	// Create a text node having the string representation of Count
-	//
 	Text childElement = doc.createTextNode(Integer.toString(numValues));
-
-	// Add the text node as a child of the element node
-	//
 	resultElement.appendChild(childElement);
-	
-	// Return the result element
-	//
 	return resultElement;
     }
-    
-    public Op copy() {
-        PhysicalCountOperator op = new PhysicalCountOperator();
-        if (logicalGroupOperator != null)
-            op.initFrom(logicalGroupOperator);
-        return op;
-    }
-    
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalCountOperator))
-            return false;
-        if (o.getClass() != PhysicalCountOperator.class)
-            return o.equals(this);
-        PhysicalCountOperator other = (PhysicalCountOperator) o;
-        return logicalGroupOperator.equals(other.logicalGroupOperator) &&
-        countingAttribute.equals(other.countingAttribute);
-    }
 
-    public int hashCode() {
-        return logicalGroupOperator.hashCode() ^ countingAttribute.hashCode();
+    protected PhysicalOperator getInstance() {
+	return new PhysicalCountOperator();
     }
 }

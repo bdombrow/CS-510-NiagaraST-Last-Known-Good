@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.21 2003/03/03 08:20:13 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.22 2003/03/19 00:36:09 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -45,7 +45,7 @@ import org.w3c.dom.*;
  */
 
 public abstract class PhysicalGroupOperator extends PhysicalOperator {
-    // These are private nested classes used within the operator           //
+    // These are private nested classes used within the operator         
 
     /**
      * This is the class that stores the information in an entry of the hash
@@ -169,7 +169,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     private Hasher hasher;
 
     // This is the hash table for performing grouping efficiently
-    //
     protected Hashtable hashtable;
 
     // Store the values that make up a hash key
@@ -200,7 +199,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     protected void opInitialize() {
         // Get the grouping attributes
         skolem grouping = logicalGroupOperator.getSkolemAttributes();
-
         groupAttributeList = grouping.getVarList();
 
         hasher = new Hasher(groupAttributeList);
@@ -208,11 +206,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
         rgstPValues = new String[groupAttributeList.size()];
         rgstTValues = new String[groupAttributeList.size()];
-
-        // Initialize the hash table
         hashtable = new Hashtable();
-
-        // Initialize the current partial id to 0
         currPartialResultId = 0;
 
         // Ask subclasses to initialize
@@ -229,17 +223,13 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    protected void blockingProcessSourceTupleElement(
-        StreamTupleElement tupleElement,
+    protected void blockingProcessSourceTupleElement(     
+	StreamTupleElement tupleElement,
         int streamId)
         throws ShutdownException {
 
         // First get the hash code for the grouping attributes
         String hashKey = hasher.hashKey(tupleElement);
-
-        // If this is not a valid hash code, then nothing to do
-
-        // First construct ungrouped result
         Object ungroupedResult = this.constructUngroupedResult(tupleElement);
 
         // Probe hash table to see whether result for this hashcode
@@ -274,7 +264,8 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
             // Merge the final result so far with current ungrouped result
             Object newFinalResult =
-                this.mergeResults(prevResult.getFinalResult(), ungroupedResult);
+                this.mergeResults(prevResult.getFinalResult(), 
+				  ungroupedResult);
 
             // Update the final result
             prevResult.setFinalResult(newFinalResult);
@@ -305,7 +296,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
             // If there is a non- empty result, then create tuple and add to
             // result
             if (emptyResult != null) {
-
                 // Create tuple
                     StreamTupleElement tupleElement =
                         createTuple(
@@ -529,7 +519,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *         null
      */
 
-    protected abstract Object constructUngroupedResult(StreamTupleElement tupleElement);
+    protected abstract Object constructUngroupedResult(StreamTupleElement tupleElement) throws ShutdownException;
 
     /**
      * This function merges a grouped result with an ungrouped result

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.9 2003/03/08 02:23:04 vpapad Exp $
+  $Id: QueryEngine.java,v 1.10 2003/03/19 00:36:09 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -234,7 +234,7 @@ public class QueryEngine
 
     public synchronized QueryResult executeOptimizedQuery(SchedulablePlan planRoot)
     throws ShutdownException {
-        
+
 	// Get the next qid
 	int qid = CUtil.getNextQueryId();
 	

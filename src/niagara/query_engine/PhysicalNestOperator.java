@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.10 2002/10/31 03:54:38 vpapad Exp $
+  $Id: PhysicalNestOperator.java,v 1.11 2003/03/19 00:36:09 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 import org.w3c.dom.*;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
+import niagara.logical.Nest;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
 import niagara.optimizer.colombia.*;
@@ -48,21 +48,17 @@ import niagara.optimizer.colombia.*;
 
 public class PhysicalNestOperator extends PhysicalGroupOperator {
 
-    ////////////////////////////////////////////////////////////////////
-    // These are the private variables of the class                   //
-    ////////////////////////////////////////////////////////////////////
+    // KT is this correct?? no blocking inputs
+    private static final boolean[] blockingSourceStreams = { false };
 
     // This has the result template for the nest operator
-    //
-    constructBaseNode resultTemplate;
+    private constructBaseNode resultTemplate;
 
     // The root tag of the constructed results
-    //
-    String rootTag;
+    private String rootTag;
 
     // The number of grouping attributes
-    //
-    int numGroupingAttributes;
+    private int numGroupingAttributes;
 
     // The result document - all result elements of nest
     // will be a part of this document. Need this document
@@ -81,19 +77,17 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
      */
-
-    public PhysicalNestOperator(op logicalOperator,
-				SourceTupleStream[] sourceStreams,
-				SinkTupleStream[] sinkStreams,
-				Integer responsiveness) {
-        plugInStreams(sourceStreams, sinkStreams, responsiveness);
-
-	// Get the result template of the nest logical operator
-	//
-	resultTemplate = ((nestOp) logicalOperator).getResTemp();
-
-	// construct the result document 
+    public PhysicalNestOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
 	resultDoc = DOMFactory.newDocument();
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
+     */
+    public void initFrom(LogicalOp logicalOp) {
+        super.initFrom(logicalOp);
+	this.resultTemplate = ((Nest)logicalOp).getResTemp();
     }
 
 
@@ -105,19 +99,17 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
     /**
      * This function is called to initialize a grouping operator for execution
      * by setting up relevant structures etc.
+     * PhysicalGroupOperator calls this function...
      */
 
     protected final void initializeForExecution () {
 
         // Get the root tag of the constructed results
-	//
 	rootTag = (String) ((constructInternalNode)
 			    resultTemplate).getStartTag().getSdata().getValue();
 
 	// Get the number of grouping attributes
-	//
 	skolem grouping = ((constructInternalNode) resultTemplate).getSkolem();
-
 	numGroupingAttributes = grouping.getVarList().size();
     }
 
@@ -130,21 +122,15 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      * @return The constructed object; If no object is constructed, returns
      *         null
      */
-
     protected final Object constructUngroupedResult (StreamTupleElement tupleElement) {
 	
 	// Construct the result as per the template for the tuple
-	//
 	ArrayList resultList =
 	    physConstructResult(tupleElement, resultTemplate);
 
 	// The list can have a size of only one, get that result
-	//
-	Node ungroupedResult = (Node) resultList.get(0);
-
-	// Return the list of children
-	//
-	return ungroupedResult.getChildNodes();
+	// and return its children
+	return ((Node)resultList.get(0)).getChildNodes();
     }
 
 
@@ -164,31 +150,25 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
 	// Set up the final result - if the groupedResult is null, then
 	// create holder for final result, else just use groupedResult
-	//
 	Vector finalResult;
 
 	if (groupedResult == null) {
 	    finalResult = new Vector();
-	}
-	else {
+	} else {
 	    finalResult = (Vector) groupedResult;
 	}
 
 	// The ungrouped result is a node list
-	//
 	NodeList ungroupedNodes = (NodeList) ungroupedResult;
 
 	// Add all items in ungrouped result
-	//
 	int numNodes = ungroupedNodes.getLength();
 
 	for (int node = 0; node < numNodes; ++node) {
-
 	    finalResult.add(ungroupedNodes.item(node));
 	}
 
 	// Return the grouped result
-	//
 	return finalResult;
     }
 
@@ -204,19 +184,10 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
 	// If the number of grouping attributes is 0, then construct result,
 	// else return null
-	//
 	if (numGroupingAttributes == 0) {
-
 	    // Just create and return a Element with the root tag
-	    //
-	    Element temp = resultDoc.createElement(rootTag);
-	    
-	    return temp;
-	}
-	else {
-
-	    // Return null
-	    //
+	    return resultDoc.createElement(rootTag);
+	} else {
 	    return null;
 	}
     }
@@ -235,46 +206,31 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
     protected final Node constructResult (Object partialResult,
 					  Object finalResult) {
-
 	// Create a result element with root tag
-	//
 	Element resultElement = resultDoc.createElement(rootTag);
 
 	// If the partial result is not null, add all elements of the partial result
-	//
 	if (partialResult != null) {
 
 	    // Type cast to a vector
-	    //
 	    Vector vecPartialResult = (Vector) partialResult;
 
 	    // Add nodes in vector to result
-	    //
 	    addNodesToResult(resultElement, vecPartialResult);
 	}
 	
 	// If the final result is not null, add all element of the final result
-	//
 	if (finalResult != null) {
 
 	    // Type cast to a vector
-	    //
 	    Vector vecFinalResult = (Vector) finalResult;
 
 	    // Add nodes in vector to result
-	    //
 	    addNodesToResult(resultElement, vecFinalResult);
 	}
-
-	// Return the result element
-	//
 	return resultElement;
     }
 
-
-    ///////////////////////////////////////////////////////////////////////////
-    // These are private methods used in the class                           //
-    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * This function add the elements of a node vector to the result element
@@ -287,7 +243,6 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 				   Vector nodeVector) {
 
 	// Loop over all elements and add a clone to the result element
-	//
 	int numNodes = nodeVector.size();
 
 	for (int node = 0; node < numNodes; ++node) {
@@ -298,25 +253,19 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
     // vpapad: Brought these over from PhysicalConstruct operator,
     // because constructResult is no longer a static method
-    private Document txd = DOMFactory.newDocument();
     public ArrayList physConstructResult (
 				       StreamTupleElement tupleElement,
 				       constructBaseNode templateRoot) {
 
 	// Check if the template root is an internal node or a leaf node
 	// and process accordingly
-	//
 	if (templateRoot instanceof constructLeafNode) {
-
 	    return processLeafNode(tupleElement,
 				   (constructLeafNode) templateRoot);
-	}
-	else if (templateRoot instanceof constructInternalNode) {
-
+	} else if (templateRoot instanceof constructInternalNode) {
 	    return processInternalNode(tupleElement,
 				       (constructInternalNode) templateRoot);
-	}
-	else {
+	} else {
 	    System.err.println("Error: Unknown construct node type!");
 	    return null;
 	}
@@ -333,82 +282,66 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      */
 
     private ArrayList processLeafNode (StreamTupleElement tupleElement,
-					      constructLeafNode leafNode) {
-
+				       constructLeafNode leafNode) {
+	
 	// Create a place holder for the result
-	//
 	ArrayList result = new ArrayList();
-
+	
 	// Get the data of the leaf node
-	//
 	data leafData = leafNode.getData();
-
-	// Check the type of the data
-	//
-	int type = leafData.getType();
-
-	if (type == dataType.STRING) {
-
+	
+	switch(leafData.getType()) {
+	case dataType.STRING: 
 	    // Add the string value to the result
-	    //
-	    result.add(txd.createTextNode((String) leafData.getValue()));
-	}
-	else if (type == dataType.ATTR) {
-
+	    result.add(resultDoc.createTextNode((String) leafData.getValue()));
+	    break;
+	    
+	case dataType.ATTR:
 	    // First get the schema attribute
-	    //
 	    schemaAttribute schema = (schemaAttribute) leafData.getValue();
 
 	    // Now construct result based on whether it is to be interpreted
 	    // as an element or a parent
-	    //
-	    if (schema.getType() == varType.ELEMENT_VAR) {
-
+	    int attrId;
+	    switch(schema.getType()) {
+	    case varType.ELEMENT_VAR:
 		// The value of the leafData is a schema attribute - from it
 		// get the attribute id in the tuple to construct from
-		//
-		int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
+		attrId = ((schemaAttribute) leafData.getValue()).getAttrId();
 
 		// Add the attribute as the result
-		//
-		result.add(tupleElement.getAttribute(attributeId));
-	    }
-	    else if (schema.getType() == varType.CONTENT_VAR) {
+		result.add(tupleElement.getAttribute(attrId));
+		break;
 
+	    case varType.CONTENT_VAR:
 		// The value of the leafData is a schema attribute - from it
 		// get the attribute id in the tuple to construct from
-		//
-		int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
+		attrId = ((schemaAttribute) leafData.getValue()).getAttrId();
 
 		// Get the children of the attribute
-		//
 		NodeList nodeList =
-		    ((Node) tupleElement.getAttribute(attributeId)).getChildNodes();
+		    ((Node) tupleElement.getAttribute(attrId)).getChildNodes();
 
 		// Add all the children to the result
-		//
 		int numChildren = nodeList.getLength();
 
 		for (int child = 0; child < numChildren; ++child) {
-
 		    result.add(nodeList.item(child));
 		}
+		break;
+
+	    default:
+		assert false: "Unknown schema attribute type in construct leaf node";
 	    }
-	    else {
-
-		System.err.println("Unknown schema attribute type in construct leaf node");
-	    }
+	    
+	default:
+	    assert false: "Unknown type in construct leaf node";
 	}
-	else {
-
-	    System.err.println("Unknown type in construct leaf node");
-	}
-
+	
 	// Return the constructed result
-	//
 	return result;
     }
-
+    
     
     /**
      * This function processes a internal node during the construction process
@@ -425,7 +358,6 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
 	// Create a new element node with the required tag name
 	// taking care of tagvariables
-
 	data tagData = internalNode.getStartTag().getSdata();
 	String tagName;
 
@@ -433,54 +365,40 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 	   schemaAttribute sattr = (schemaAttribute)tagData.getValue();
 	   int attrId = sattr.getAttrId();
 	   tagName = ((Node)tupleElement.getAttribute(attrId)).getNodeName();
-	}
-	else
+	} else {
 	   tagName = (String)tagData.getValue();
+	}
 
-	Element resultElement = txd.createElement(tagName);
+	Element resultElement = resultDoc.createElement(tagName);
 
 	// Recurse on all children and construct result
-	//
 	Vector children = internalNode.getChildren();
-
 	int numChildren = children.size();
 
-	for (int child = 0; child < numChildren; ++child) {
+	for (int child = 0; child < numChildren; child++) {
 
 	    // Get constructed results from child
-	    //
 	    ArrayList childResult = 
 		physConstructResult(tupleElement,
 				(constructBaseNode) children.get(child));
 
 	    // Add each constructed result to the result element
-	    //
 	    int numResults = childResult.size();
-
 	    for (int res = 0; res < numResults; ++res) {
                 Node n = ((Node) childResult.get(res)).cloneNode(true);
-                DOMFactory.importNode(txd, n);
+                DOMFactory.importNode(resultDoc, n);
                 resultElement.appendChild(n);
 	    }
 	}
 
 	// Construct the result array list
-	//
 	ArrayList result = new ArrayList(1);
-
 	result.add(resultElement);
 
 	// Return the result
-	//
 	return result;
     }
 
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
-     */
-    public final void initFrom(LogicalOp op) {
-        super.initFrom(op);
-    }
 
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])

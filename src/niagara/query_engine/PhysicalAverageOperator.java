@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.14 2003/02/25 06:10:25 vpapad Exp $
+  $Id: PhysicalAverageOperator.java,v 1.15 2003/03/19 00:36:09 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,99 +46,25 @@ import niagara.xmlql_parser.op_tree.*;
  *
  */
 
-public class PhysicalAverageOperator extends PhysicalGroupOperator {
-    // These are private nested classes used internally
+public class PhysicalAverageOperator extends PhysicalAggregateOperator { 
 
     /**
-     * Sufficient statistics for computing the average
+     * This function updates the statistics with a value
+     *
+     * @param newValue The value by which the statistics are to be
+     *                 updated
      */
-    private class AverageSufficientStatistics {
-	// These are the private members of the class
-
-	// The number and sum of the of values
-	int numValues;
-	double sumOfValues;
-
-	/**
-	 * This is the constructor that initializes average sufficient
-	 * statistics
-	 */
-	public AverageSufficientStatistics () {
-	    this.numValues = 0;
-	    this.sumOfValues = 0;
-	}
-
-
-	/**
-	 * This function updates the statistics with a value
-	 *
-	 * @param newValue The value by which the statistics are to be
-	 *                 updated
-	 */
-	public void updateStatistics (double newValue) {
-	    ++numValues;
-	    sumOfValues += newValue;
-	}
-
-
-	/**
-	 * This function returns the number of values
-	 *
-	 * @return Returns the number of values in the statistics
-	 */
-	public double getNumberOfValues () {
-	    return numValues;
-	}
-
-
-	/**
-	 * This function return the sum of the values in the sufficient
-	 * statistics
-	 *
-	 * @return The sum of the values in the sufficient statistics
-	 */
-	public double getSumOfValues () {
-	    return sumOfValues;
-	}
+    public void updateAggrResult (PhysicalAggregateOperator.AggrResult result, 
+				  Object ungroupedResult) {
+	result.count++;
+	result.doubleVal += ((Double) ungroupedResult).doubleValue(); // sum
     }
-
-
-    ////////////////////////////////////////////////////////////////////
-    // These are the private variables of the class                   //
-    ////////////////////////////////////////////////////////////////////
-
-    // This is the aggregating attribute for the average operator
-    Attribute averageAttribute;
-
-    private AtomicEvaluator ae;
-
-    private Document doc;
-
-    private ArrayList atomicValues;
-
-    
-    public void initFrom(LogicalOp logicalOperator) {
-        super.initFrom(logicalOperator);
-	// Get the averaging attribute of the average logical operator
-	averageAttribute = ((averageOp) logicalOperator).getAveragingAttribute();
-    }
-    
-
+   
 
     /////////////////////////////////////////////////////////////////////////
     // These functions are the hooks that are used to implement specific   //
     // average operator (specializing the group operator)                  //
     /////////////////////////////////////////////////////////////////////////
-
-    /**
-     * This function is called to initialize a grouping operator for execution
-     * by setting up relevant structures etc.
-     */
-    protected final void initializeForExecution () {
-        ae = new AtomicEvaluator(averageAttribute.getName());
-        ae.resolveVariables(inputTupleSchemas[0], 0);
-        atomicValues = new ArrayList();
-    }
 
 
     /**
@@ -150,78 +76,11 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
      *         null
      */
 
-    protected final Object constructUngroupedResult (StreamTupleElement tupleElement) {
-
-	// First get the atomic values
-	//
-        atomicValues.clear();
-        ae.getAtomicValues(tupleElement, atomicValues);
-        
-	// If there is not exactly one atomic value, skip
-	//
-	if (atomicValues.size() != 1) {
-	    return null;
-	}
-	else {
-	    // Get the string atomic value
-	    //
-	    String atomicValue = (String) atomicValues.get(0);
-
-	    // Try to convert to double - if that fails, just return null
-	    //
-	    try {
-
-		// Get the double value
-		//
-		Double doubleValue = new Double(atomicValue);
-
-		// Return the double value
-		//
-		return doubleValue;
-	    }
-	    catch (java.lang.NumberFormatException e) {
-		// Cannot convert to double
-		//
-		return null;
-	    }
-	}
+    protected final Object constructUngroupedResult (StreamTupleElement 
+						     tupleElement) 
+	throws ShutdownException {
+	return getDoubleValue(tupleElement);
     }
-
-
-    /**
-     * This function merges a grouped result with an ungrouped result
-     *
-     * @param groupedResult The grouped result that is to be modified (this can
-     *                      be null)
-     * @param ungroupedResult The ungrouped result that is to be grouped with
-     *                        groupedResult (this can never be null)
-     *
-     * @return The new grouped result
-     */
-
-    protected final Object mergeResults (Object groupedResult,
-					 Object ungroupedResult) {
-
-	// Set up the final result - if the groupedResult is null, then
-	// create holder for final result, else just use groupedResult
-	//
-	AverageSufficientStatistics finalResult = null;
-	if (groupedResult == null) {
-	    finalResult = new AverageSufficientStatistics();
-	}
-	else {
-	    finalResult = (AverageSufficientStatistics) groupedResult;
-	}
-
-	// Add effects of ungrouped result (which is a Double)
-	//
-	finalResult.updateStatistics(((Double) ungroupedResult).doubleValue());
-
-	// Return the grouped result
-	//
-	return finalResult;
-    }
-
 
     /**
      * This function returns an empty result in case there are no groups
@@ -229,12 +88,9 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
      * @return The result when there are no groups. Returns null if no
      *         result is to be constructed
      */
-
     protected final Node constructEmptyResult () {
-	// Always return null
 	return null;
     }
-
 
     /**
      * This function constructs a result from the grouped partial and final
@@ -246,84 +102,37 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
      * @return A results merging partial and final results; If no such result,
      *         returns null
      */
-
-    protected final Node constructResult (Object partialResult,
-					  Object finalResult) {
+    protected final Node constructAggrResult (
+		  PhysicalAggregateOperator.AggrResult partialResult,
+		  PhysicalAggregateOperator.AggrResult finalResult) {
 
 	// Create number of values and sum of values variables
-	//
 	int numValues = 0;
-	double sumValues = 0;
+	double sum = 0;
 
-	// If the partial result is not null, update with partial result stats
-	//
 	if (partialResult != null) {
-
-	    // Type cast partial result to a average sufficient statistics
-	    AverageSufficientStatistics partialStats =
-		(AverageSufficientStatistics) partialResult;
-
-	    // Update number of values and the sum of values
-	    numValues += partialStats.getNumberOfValues();
-	    sumValues += partialStats.getSumOfValues();
+	    numValues += partialResult.count;
+	    sum += partialResult.doubleVal;
 	}
-	
-	// If the final result is not null, update with final result stats
 	if (finalResult != null) {
-
-	    // Type cast final result to a average sufficient statistics
-	    AverageSufficientStatistics finalStats =
-		(AverageSufficientStatistics) finalResult;
-
-	    // Update number of values and sum of values
-	    numValues += finalStats.getNumberOfValues();
-	    sumValues += finalStats.getSumOfValues();
+	    numValues += finalResult.count;
+	    sum += finalResult.doubleVal;
 	}
 
 	// If the number of values is 0, average does not make sense
 	if (numValues == 0) {
-
-	    return null;
+	    assert false : "KT don't think returning null is ok";
+	    //return null;
 	}
 
-	// Compute the average
-	double average = sumValues/numValues;
-
-	// Create an average result element
+	// Create an average result element and return it
 	Element resultElement = doc.createElement("Average");
-
-	// Create a text node having the string representation of average
-	Text childElement = doc.createTextNode(Double.toString(average));
-
-	// Add the text node as a child of the element node
+	Text childElement = doc.createTextNode(Double.toString(sum/numValues));
 	resultElement.appendChild(childElement);
-	
-	// Return the result element
 	return resultElement;
     }
 
-    public void setResultDocument(Document doc) {
-        this.doc = doc;
-    }
-    
-    public Op copy() {
-        PhysicalAverageOperator op = new PhysicalAverageOperator();
-        if (logicalGroupOperator != null)
-            op.initFrom(logicalGroupOperator);
-        return op;
-    }
-    
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalAverageOperator))
-            return false;
-        if (o.getClass() != PhysicalAverageOperator.class)
-            return o.equals(this);
-        PhysicalAverageOperator other = (PhysicalAverageOperator) o;
-        return logicalGroupOperator.equals(other.logicalGroupOperator) &&
-        averageAttribute.equals(other.averageAttribute);
-    }
-
-    public int hashCode() {
-        return logicalGroupOperator.hashCode() ^ averageAttribute.hashCode();
+    protected PhysicalOperator getInstance() {
+	return new PhysicalAverageOperator();
     }
 }
