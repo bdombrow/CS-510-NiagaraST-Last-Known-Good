@@ -10,4 +10,7 @@ public class StreamSpec {
        public boolean isStreaming() {
             return streaming;
        }
+       public void dump(java.io.PrintStream ps) {
+
+       }
 }
