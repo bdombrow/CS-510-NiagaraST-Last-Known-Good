@@ -157,8 +157,9 @@
 
 <!ELEMENT accumulate EMPTY>
 <!ATTLIST accumulate
-	  index	   CDATA	#REQUIRED
+	  mergeAttr   CDATA	#REQUIRED
 	  mergeTemplate CDATA	#REQUIRED
 	  accumFileName CDATA	#REQUIRED
+	  initialAccumFile CDATA #IMPLIED
 	  clear     (true | false) "false"
 	  %StandardAttributes;>
