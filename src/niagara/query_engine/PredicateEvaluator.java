@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PredicateEvaluator.java,v 1.7 2002/04/17 03:10:03 vpapad Exp $
+  $Id: PredicateEvaluator.java,v 1.8 2002/04/19 20:49:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -272,17 +272,15 @@ class Comparison extends Predicate {
 
 	for (int left = 0; left < numLeft; ++left) {
                for (int right = 0; right < numRight; ++right) {
-		if (compareAtomicValues(leftValues.get(left),
-					rightValues.get(right))) {
+		if (compareAtomicValues((String)leftValues.get(left),
+					(String)rightValues.get(right))) {
 		    // The comparison succeeds - return true
-		    //
 		    return true;
 		}
 	    }
 	}
 
 	// The comparison failed - return false
-	//
 	return false;
     }
 
@@ -295,52 +293,10 @@ class Comparison extends Predicate {
      *  @return True if the two objects are equal, false otherwise
      */
 
-    boolean equals (Object leftValue, Object rightValue) {
-
-	// Only string comparisons supported currently
-	//
-	if (!(leftValue instanceof String && rightValue instanceof String)) {
-
-	    System.err.println("Non-string comparison attempted");
-	    return false;
-	}
-	  
-	// Typecast values to strings
-	//
-	String leftString = (String) leftValue;
-	String rightString = (String) rightValue;
-
-	// First try numeric comparison
-	//
-	if (numericCompare(leftString, rightString)) {
-	    return true;
-	}
-
-	// If that fails, check if string are equal using string comparison
-	//
-	return leftString.equals(rightString);
+    boolean stringEquals (String leftValue, String rightValue) {
+	return leftValue.equals(rightValue);
     }
     
-
-    /**
-     *  The deep equality operator.  Compares different types of 
-     *  objects for deep equality.  For instance, test if book a = 
-     *  book b where book is a complex element.
-     *
-     *  @param leftValue The left value for the equality comparison
-     *  @param rightValue The right value for the equality comparison
-     *
-     *  @return True if the two objects are equal, false otherwise
-     */
-
-    boolean deepEquals (Object leftValue, Object rightValue) {
-
-	// Currently not implemented - just returns false
-	//
-	return false;
-    }
-
-
     /**
      *  The greater than operator. ">"
      *
@@ -350,33 +306,12 @@ class Comparison extends Predicate {
      *  @return True if left object > right object, false otherwise
      */
 
-    boolean greaterThan (Object leftValue, Object rightValue) {
-
-	// Only string comparisons supported currently
-	//
-	if (!(leftValue instanceof String && rightValue instanceof String)) {
-
-	    System.err.println("Non-string comparison attempted");
-	    return false;
-	}
-	  
-	// Typecast values to strings
-	//
-	String leftString = (String) leftValue;
-	String rightString = (String) rightValue;
-
-	// First try numeric comparison
-	//
-	if (numericCompare(leftString, rightString)) {
-	    return true;
-	}
+    boolean stringGreaterThan (String leftValue, String rightValue) {
 
 	// Now check greater than using string comparison
-	//
-	if (leftString.compareTo(rightString) > 0) {
+	if (leftValue.compareTo(rightValue) > 0) {
 	    return true;
-	}
-	else {
+	} else {
 	    return false;
 	}
     }
@@ -391,35 +326,12 @@ class Comparison extends Predicate {
      *  @return True if left object < right object, false otherwise
      */
 
-    boolean lessThan (Object leftValue, Object rightValue) {
-
-	// Only string comparisons supported currently
-	//
-	if (!(leftValue instanceof String && rightValue instanceof String)) {
-
-	    System.err.println("Non-string comparison attempted");
-	    return false;
-	}
-	  
-	// Typecast values to strings
-	//
-	String leftString = (String) leftValue;
-	String rightString = (String) rightValue;
-
-        // XXX vpapad: According to this, "10 < 9" is true...
-
-	// First try numeric comparison
-	//
-	if (numericCompare(leftString, rightString)) {
-	    return true;
-	}
+    boolean stringLessThan (String leftValue, String rightValue) {
 
 	// Now check greater than using string comparison
-	//
-	if (leftString.compareTo(rightString) < 0) {
+	if (leftValue.compareTo(rightValue) < 0) {
 	    return true;
-	}
-	else {
+	} else {
 	    return false;
 	}
     }
@@ -434,12 +346,11 @@ class Comparison extends Predicate {
      *  @return True if left object >= right object, false otherwise
      */
 
-    boolean greaterThanEquals (Object leftValue, Object rightValue) {
+    boolean stringGreaterThanEquals (String leftValue, String rightValue) {
 
 	// Either greater than or equal
-	//
-	return (equals(leftValue, rightValue) ||
-		greaterThan(leftValue, rightValue));
+	return (stringEquals(leftValue, rightValue) ||
+		stringGreaterThan(leftValue, rightValue));
     }
 
 
@@ -452,32 +363,13 @@ class Comparison extends Predicate {
      *  @return True if left object <= right object, false otherwise
      */
 
-    boolean lessThanEquals (Object leftValue, Object rightValue) {
+    boolean stringLessThanEquals (String leftValue, String rightValue) {
 
 	// Either less than or equal
-	//
-	return (equals(leftValue, rightValue) ||
-		lessThan(leftValue, rightValue));
+	return (stringEquals(leftValue, rightValue) ||
+		stringLessThan(leftValue, rightValue));
     }
-
     
-    /**
-     *  The not equal operator. "!="
-     *
-     *  @param leftValue The left value for the equality comparison
-     *  @param rightValue The right value for the equality comparison
-     *
-     *  @return True if left object != right object, false otherwise
-     */
-
-    boolean notEquals (Object leftValue, Object rightValue) {
-
-	// The negation of equal
-	//
-	return (!equals(leftValue, rightValue));
-    }
-
-
     /**
      *  The numeric compare function is used to attempt to compare two strings
      *  as numeric double values
@@ -489,19 +381,16 @@ class Comparison extends Predicate {
      *  @return boolean value, true if comparison succeeds
      */
 
-    private boolean numericCompare (String leftVal, String rightVal) {	
+    private boolean numericCompare (String leftVal, String rightVal) 
+	throws java.lang.NumberFormatException {
+	
 	double rightDouble = -1;
 	double leftDouble  = -1;
 
-	// Convert to doubles if possible, if this fails, return false
-	//
-	try{
-	    rightDouble = new Double(rightVal).doubleValue();
-	    leftDouble  = new Double(leftVal).doubleValue();
-	}
-	catch(java.lang.NumberFormatException e){
-	    return false;
-	}
+	// Convert to doubles if possible, if this fails, an
+	// exception will be thrown
+	rightDouble = new Double(rightVal).doubleValue();
+	leftDouble  = new Double(leftVal).doubleValue();
 	
 	switch (operator) { 
 	    
@@ -517,7 +406,8 @@ class Comparison extends Predicate {
     }
 
     /**
-     * This function compares two atomic values
+     * This function compares two atomic values. KT - atomic values
+     * are always strings.
      *
      * @param leftValue The left value in the comparison
      * @param rightValue The right value in the comparison
@@ -526,31 +416,36 @@ class Comparison extends Predicate {
      * @return True if the comparison succeeds and false otherwise
      */
 
-    private boolean compareAtomicValues (Object leftValue, 
-                                         Object rightValue) {
+    private boolean compareAtomicValues (String leftValue, 
+                                         String rightValue) {
 	// Check to see whether values exist
-	//
 	if (leftValue == null || rightValue == null)
 	    throw new PEException("A null value passed for Comparison");
 
-	// Do the comparison  based on the operator type
-	//
-	switch (operator) {
-	    
-	case opType.NEQ: return notEquals(leftValue, rightValue);
- 
-	case opType.EQ: return equals(leftValue, rightValue);
- 
-	case opType.GT: return greaterThan(leftValue, rightValue);
- 
-	case opType.LT: return lessThan(leftValue, rightValue); 
-
-	case opType.LEQ: return lessThanEquals(leftValue, rightValue); 
-
-	case opType.GEQ: return greaterThanEquals(leftValue, rightValue); 
-	    
-	default: 
-	    throw new PEException("ERROR: invalid opType for arithOpNode");
+	// first try a numeric comparison, if the conversion to
+	// numbers fail, we try a string comparison
+	try {
+	    return numericCompare(leftValue, rightValue);
+	} catch (java.lang.NumberFormatException e) {
+	    switch (operator) {
+		
+	    case opType.NEQ: return !stringEquals(leftValue, rightValue);
+		
+	    case opType.EQ: return stringEquals(leftValue, rightValue);
+			
+	    case opType.GT: return stringGreaterThan(leftValue, rightValue);
+		
+	    case opType.LT: return stringLessThan(leftValue, rightValue); 
+		
+	    case opType.LEQ: 
+		return stringLessThanEquals(leftValue,rightValue); 
+		
+	    case opType.GEQ: 
+		return stringGreaterThanEquals(leftValue, rightValue); 
+		
+	    default: 
+		throw new PEException("ERROR: invalid opType for arithOpNode");
+	    }
 	}
     }
 }

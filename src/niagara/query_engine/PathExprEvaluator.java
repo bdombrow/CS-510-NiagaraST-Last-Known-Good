@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.10 2002/04/17 03:10:03 vpapad Exp $
+  $Id: PathExprEvaluator.java,v 1.11 2002/04/19 20:49:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,7 +38,7 @@ import niagara.utils.*;
 
 public class PathExprEvaluator {
     private DFA dfa;
-    private ArrayList nodes;
+    private NodeVector nodes;
     private ArrayList states;
     private ArrayList prevStates;
     private int top;
@@ -60,13 +60,13 @@ public class PathExprEvaluator {
         // Create the DFA
         dfa = nfa.getDFA();
 
-        nodes = new ArrayList();
+        nodes = new NodeVector();
         states = new ArrayList();
         prevStates = new ArrayList();
         matches = new HashSet();
     }
 
-    public void getMatches(Node n, ArrayList results) {
+    public void getMatches(Node n, NodeVector results) {
         DFAState s = dfa.startState;
         DFAState ps = null;
 
@@ -76,7 +76,7 @@ public class PathExprEvaluator {
 
         while (top >= 0 || n != null) {
             if (n == null) {
-                n = (Node) nodes.get(top);
+                n = nodes.get(top);
                 s = (DFAState) states.get(top);
                 ps = (DFAState) prevStates.get(top);
                 top--;
@@ -209,18 +209,6 @@ public class PathExprEvaluator {
         states.clear();
         prevStates.clear();
         matches.clear();
-    }
-
-
-    // XXX vpapad: this method is here just to get old code that called
-    // getReachableNodes to compile. EXTREMELY INEFFICIENT.
-    public static Vector getReachableNodes(Object o, regExp r) {
-        PathExprEvaluator pev = new PathExprEvaluator(r);
-        ArrayList results = new ArrayList();
-        pev.getMatches((Node) o, results);
-        Vector v = new Vector(results.size());
-        v.addAll(results);
-        return v;
     }
 
     private static RE regExp2RE(regExp r) {

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.8 2002/04/08 19:03:09 vpapad Exp $
+  $Id: PhysicalGroupOperator.java,v 1.9 2002/04/19 20:49:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,7 +36,7 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
-import org.w3c.dom.Document;
+import org.w3c.dom.*;
 
 /**
  * This is the <code>PhysicalGroupOperator</code> that extends
@@ -420,7 +420,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
 	    // Get the result object
 	    //
-	    Object emptyResult = this.constructEmptyResult();
+	    Node emptyResult = this.constructEmptyResult();
 
 	    // If there is a non- empty result, then create tuple and add to
 	    // result
@@ -462,22 +462,21 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	    Object partialResult = hashEntry.getPartialResult();
 	    Object finalResult = hashEntry.getFinalResult();
 
-	    Object resultObject = null;
+	    Node resultNode = null;
 
 	    if (partialResult != null || finalResult != null) {
-	    
-		resultObject = this.constructResult(partialResult, finalResult);
+		resultNode = this.constructResult(partialResult, finalResult);
 	    }
 
 	    // If there is a non- empty result, then create tuple and add to
 	    // result
 	    //
-	    if (resultObject != null) {
+	    if (resultNode != null) {
 
 		// Create tuple
 		//
 		StreamTupleElement tupleElement = 
-		    createTuple(resultObject,
+		    createTuple(resultNode,
 				hashEntry.getRepresentativeTuple(),
 				partial);
 
@@ -526,7 +525,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * @return A tuple with the grouped result
      */
 
-    private StreamTupleElement createTuple (Object groupedResult,
+    private StreamTupleElement createTuple (Node groupedResult,
 					    StreamTupleElement representativeTuple,
 					    boolean partial) {
 
@@ -620,7 +619,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *         result is to be constructed
      */
 
-    protected abstract Object constructEmptyResult ();
+    protected abstract Node constructEmptyResult ();
 
 
     /**
@@ -634,6 +633,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *         returns null
      */
 
-    protected abstract Object constructResult (Object partialResult,
-					       Object finalResult);
+    protected abstract Node constructResult (Object partialResult,
+					     Object finalResult);
 }

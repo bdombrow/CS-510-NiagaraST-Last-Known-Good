@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.3 2001/08/08 21:27:57 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.4 2002/04/19 20:49:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -211,7 +211,7 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      *         result is to be constructed
      */
 
-    protected final Object constructEmptyResult () {
+    protected final Node constructEmptyResult () {
 
 	// If the number of grouping attributes is 0, then construct result,
 	// else return null
@@ -244,8 +244,8 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      *         returns null
      */
 
-    protected final Object constructResult (Object partialResult,
-					    Object finalResult) {
+    protected final Node constructResult (Object partialResult,
+					  Object finalResult) {
 
 	// Create a result element with root tag
 	//

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.5 2002/04/08 19:03:09 vpapad Exp $
+  $Id: PhysicalCountOperator.java,v 1.6 2002/04/19 20:49:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -249,7 +249,7 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
      *         result is to be constructed
      */
 
-    protected final Object constructEmptyResult () {
+    protected final Node constructEmptyResult () {
 	// Create an Count result element
 	Element resultElement = doc.createElement("Count");
 
@@ -272,8 +272,8 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
      *         returns null
      */
 
-    protected final Object constructResult (Object partialResult,
-					    Object finalResult) {
+    protected final Node constructResult (Object partialResult,
+					  Object finalResult) {
 	int numValues = 0;
 
 	// If the partial result is not null, update with partial result stats

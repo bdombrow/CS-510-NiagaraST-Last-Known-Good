@@ -15,7 +15,7 @@ public class AtomicEvaluator {
     PathExprEvaluator pev;
 
     StreamTupleElement[] oneTuple;
-    ArrayList reachableNodes;
+    NodeVector reachableNodes;
 
     AtomicEvaluator(Object value) {
         if (value instanceof String) {
@@ -31,7 +31,7 @@ public class AtomicEvaluator {
         }
         
         oneTuple = new StreamTupleElement[1];
-        reachableNodes = new ArrayList();
+        reachableNodes = new NodeVector();
     }
     
     /**
@@ -53,9 +53,8 @@ public class AtomicEvaluator {
 	else {
 	    // Invoke the path expression evaluator to get the nodes reachable
 	    // using the path expression
-	    //
-            pev.getMatches((Node) tuples[streamId].
-                                      getAttribute(attributeId),
+            pev.getMatches(tuples[streamId].
+			   getAttribute(attributeId),
                            reachableNodes);
 
 	    // For each reachable node, get the atomic value associated with
@@ -66,7 +65,7 @@ public class AtomicEvaluator {
 
 		// First get the node
 		//
-		Node node = (Node) reachableNodes.get(nodeid);
+		Node node = reachableNodes.get(nodeid);
 
 		if (node.getNodeType() == Node.ATTRIBUTE_NODE) {
 		    values.add(node.getNodeValue());

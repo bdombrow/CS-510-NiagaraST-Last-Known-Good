@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.5 2002/03/31 15:57:31 tufte Exp $
+  $Id: QueryResult.java,v 1.6 2002/04/19 20:49:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -589,22 +589,16 @@ public class QueryResult {
 
 		// First get the last attribute of the tuple
 		//
-		Object lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
+		Node lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
 	
 		if(lastAttribute instanceof Document) {
 		    return (Document)lastAttribute;
 		} else {
-		    // Create a Document and add add the result to the Document
-		    //
-		    Document resultDocument;
-		    
-		    resultDocument = DOMFactory.newDocument();
-		    Node n = DOMFactory.importNode(resultDocument, (Node) lastAttribute);
-		    
+		    // Create a Document and add add the result to the Doc
+		    Document resultDocument = DOMFactory.newDocument();
+		    Node n = DOMFactory.importNode(resultDocument, 
+						   lastAttribute);
 		    resultDocument.appendChild(n);
-		    
-		    // Return the result document
-		    //
 		    return resultDocument;
 		}
     }

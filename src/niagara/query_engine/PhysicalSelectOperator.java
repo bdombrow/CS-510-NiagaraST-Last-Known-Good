@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.4 2002/04/08 19:03:09 vpapad Exp $
+  $Id: PhysicalSelectOperator.java,v 1.5 2002/04/19 20:49:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -119,7 +119,6 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 		ResultTuples result) {
 		    
 	// Evaluate the predicate on the desired attribute of the tuple
-	//
 	if (predEval.eval(tupleElement)) {
 	    // If the predicate is satisfied, add the tuple to the result
 	    //

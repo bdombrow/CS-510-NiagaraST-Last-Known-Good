@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.10 2002/04/06 02:16:00 vpapad Exp $
+  $Id: PhysicalScanOperator.java,v 1.11 2002/04/19 20:49:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -62,7 +62,7 @@ public class PhysicalScanOperator extends PhysicalOperator {
     private int scanField;
 
     private PathExprEvaluator pev;
-    private ArrayList elementList;
+    private NodeVector elementList;
 
     ///////////////////////////////////////////////////////////////////////////
     // These are the methods of the PhysicalScanOperatorClass                //
@@ -108,7 +108,7 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	this.scanField = logicalScanOperator.getParent().getAttrId();
 
         pev = new PathExprEvaluator(rExp);
-        elementList = new ArrayList();
+        elementList = new NodeVector();
 	}
 
 
@@ -132,7 +132,7 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	
 	// Get the attribute to scan on
 	//
-	Object attribute = inputTuple.getAttribute(scanField);
+	Node attribute = inputTuple.getAttribute(scanField);
 	
 	// Get the nodes reachable using the path expression scanned
 	//
@@ -141,11 +141,11 @@ public class PhysicalScanOperator extends PhysicalOperator {
         if(attribute instanceof Document) {
             String rootName = ((Document) attribute).getDocumentElement().getTagName();
             if(rootName==null) {
-                System.err.println("Got you!, NULL Root of DOC");
+                throw new PEException("Got you!, NULL Root of DOC");
             }
         }
 
-	pev.getMatches((Node) attribute, elementList);	
+	pev.getMatches(attribute, elementList);	
 		
 	// Append all the nodes returned to the inputTuple and add these
 	// to the result
@@ -156,15 +156,13 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	for(int node = 0; node < numNodes; ++node) {
 
 	    // Clone the input tuple to create an output tuple
-	    //
 	    StreamTupleElement outputTuple = 
 		                   (StreamTupleElement) inputTuple.clone();
 
 	    // Append a reachable node to the output tuple
-	    //
 	    outputTuple.appendAttribute(elementList.get(node));
+
 	    // Add the output tuple to the result
-	    //
 	    result.add(outputTuple, 0);
 	}
 

@@ -8,6 +8,7 @@ package niagara.query_engine;
  */
 
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.utils.*;
 import niagara.utils.type_system.*;
 import org.w3c.dom.Node;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ class AtomicKey {
 	isNever = path.isNever();
     }
 
-    void getMatches(Node n, ArrayList results) {
+    void getMatches(Node n, NodeVector results) {
 	pathEvaluator.getMatches(n, results);
     } 
 

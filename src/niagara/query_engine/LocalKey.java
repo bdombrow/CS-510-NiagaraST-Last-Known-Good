@@ -47,7 +47,7 @@ public class LocalKey {
      * NOTE - must be set during initialization!!
      */
     private ArrayStack localKeySpec;
-    private ArrayList reachableNodes;
+    private NodeVector reachableNodes;
 
     public static final int TAG_EXISTENCE = 1;
     public static final int CONTENT = 2;
@@ -57,7 +57,7 @@ public class LocalKey {
      */
     LocalKey() {
 	localKeySpec = null;
-	reachableNodes = new ArrayList();
+	reachableNodes = new NodeVector();
     }
 
     /** 

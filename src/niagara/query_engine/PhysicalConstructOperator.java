@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.10 2002/04/17 03:10:03 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.11 2002/04/19 20:49:15 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -69,6 +69,9 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     // We will use this Document as the "owner" of all the DOM nodes
     // we create
     private Document doc;
+
+    // temporary result list storage place
+    private NodeVector resultList;
     
     ///////////////////////////////////////////////////////////////////////////
     // These are the methods of the PhysicalConstructOperator class          //
@@ -107,6 +110,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	// Initialize the result template and the "clear" flag
 	this.resultTemplate = constructLogicalOp.getResTemp();
 	this.clear = constructLogicalOp.isClear();
+	resultList = new NodeVector();
     }
     
 
@@ -129,7 +133,8 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 						 ResultTuples result) {
 	// Recurse down the result template to construct result
 	//
-	ArrayList resultList = constructResult(tupleElement, resultTemplate);
+	resultList.quickReset(); // just for safety
+	constructResult(tupleElement, resultTemplate, resultList);
 
 	// Add all the results in the result list as result tuples
 	//
@@ -158,6 +163,9 @@ public class PhysicalConstructOperator extends PhysicalOperator {
             
 	    result.add(outputTuple, 0);
 	}
+
+	resultList.clear();
+
 	// The operator can continue
 	//
 	return true;
@@ -173,26 +181,23 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return a list of nodes constructed as per the template
      */
 
-    public ArrayList constructResult (
-				       StreamTupleElement tupleElement,
-				       constructBaseNode templateRoot) {
+    public void constructResult (StreamTupleElement tupleElement,
+				 constructBaseNode templateRoot,
+				 NodeVector result) {
 
 	// Check if the template root is an internal node or a leaf node
 	// and process accordingly
 	//
 	if (templateRoot instanceof constructLeafNode) {
-
-	    return processLeafNode(tupleElement,
-				   (constructLeafNode) templateRoot);
-	}
-	else if (templateRoot instanceof constructInternalNode) {
-
-	    return processInternalNode(tupleElement,
-				       (constructInternalNode) templateRoot);
-	}
-	else {
-	    System.err.println("Error: Unknown construct node type!");
-	    return null;
+	    processLeafNode(tupleElement,
+			    (constructLeafNode) templateRoot,
+			    result);
+	} else if (templateRoot instanceof constructInternalNode) {
+	    processInternalNode(tupleElement,
+				(constructInternalNode) templateRoot,
+				result);
+	} else {
+	    throw new PEException("Error: Unknown construct node type!");
 	}
     }
 
@@ -206,25 +211,17 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return The list of results constructed
      */
 
-    private ArrayList processLeafNode (StreamTupleElement tupleElement,
-					      constructLeafNode leafNode) {
-
-	// Create a place holder for the result
-	//
-	ArrayList result = new ArrayList();
-
+    private void processLeafNode (StreamTupleElement tupleElement,
+				  constructLeafNode leafNode,
+				  NodeVector result) {
 	// Get the data of the leaf node
-	//
 	data leafData = leafNode.getData();
 
 	// Check the type of the data
-	//
 	int type = leafData.getType();
 
 	if (type == dataType.STRING) {
-
 	    // Add the string value to the result
-	    //
 	    result.add(doc.createTextNode((String) leafData.getValue()));
 	}
 	else if (type == dataType.ATTR) {
@@ -234,6 +231,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	    // Now construct result based on whether it is to be interpreted
 	    // as an element or a parent
 	    if (schema.getType() == varType.ELEMENT_VAR) {
+
 		// The value of the leafData is a schema attribute - from it
 		// get the attribute id in the tuple to construct from
 		int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
@@ -245,36 +243,26 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 
 		// The value of the leafData is a schema attribute - from it
 		// get the attribute id in the tuple to construct from
-		//
 		int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
 
 		// Get the children of the attribute
-		//
 		NodeList nodeList =
-		    ((Node) tupleElement.getAttribute(attributeId)).getChildNodes();
+		    tupleElement.getAttribute(attributeId).getChildNodes();
 
 		// Add all the children to the result
-		//
 		int numChildren = nodeList.getLength();
 
 		for (int child = 0; child < numChildren; ++child) {
-
 		    result.add(nodeList.item(child));
 		}
 	    }
 	    else {
-
-		System.err.println("Unknown schema attribute type in construct leaf node");
+		throw new PEException("Unknown schema attribute type in construct leaf node");
 	    }
+	} else {
+	    throw new PEException("Unknown type in construct leaf node");
 	}
-	else {
-
-	    System.err.println("Unknown type in construct leaf node");
-	}
-
-	// Return the constructed result
-	//
-	return result;
+	return;
     }
 
     
@@ -287,20 +275,19 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return The list of results constructed
      */
 
-    private ArrayList processInternalNode (
-					 StreamTupleElement tupleElement,
-					 constructInternalNode internalNode) {
+    private void processInternalNode (StreamTupleElement tupleElement,
+				      constructInternalNode internalNode,
+				      NodeVector result) {
 
 	// Create a new element node with the required tag name
 	// taking care of tagvariables
-
 	data tagData = internalNode.getStartTag().getSdata();
 	String tagName;
 
 	if(tagData.getType() == dataType.ATTR) {
 	   schemaAttribute sattr = (schemaAttribute)tagData.getValue();
 	   int attrId = sattr.getAttrId();
-	   tagName = ((Node)tupleElement.getAttribute(attrId)).getNodeName();
+	   tagName = tupleElement.getAttribute(attrId).getNodeName();
 	}
 	else
 	   tagName = (String)tagData.getValue();
@@ -308,6 +295,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	Element resultElement = doc.createElement(tagName);
 
 	Vector attrs = internalNode.getStartTag().getAttrList();
+
 	for (int i = 0; i < attrs.size(); i++) {
 	    attr attribute = (attr) attrs.get(i);
 	    String name = attribute.getName();
@@ -316,8 +304,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	    if (type == dataType.STRING) {
 		// Add the string value to the result
 		resultElement.setAttribute(name, (String) attrData.getValue());
-	    }
-	    else if (type == dataType.ATTR) {
+	    } else if (type == dataType.ATTR) {
 		// First get the schema attribute
 		schemaAttribute schema = (schemaAttribute) attrData.getValue();
 		
@@ -361,31 +348,26 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	for (int child = 0; child < numChildren; ++child) {
 
 	    // Get constructed results from child
-	    //
-	    ArrayList childResult = 
-		constructResult(tupleElement,
-				(constructBaseNode) children.get(child));
+	    int prevSize = resultList.size();
+	    constructResult(tupleElement,
+			    (constructBaseNode) children.get(child),
+			    resultList);
 
 	    // Add each constructed result to the result element
-	    //
-	    int numResults = childResult.size();
+	    int numResults = resultList.size() - prevSize;
 
 	    for (int res = 0; res < numResults; ++res) {
-                Node n = ((Node) childResult.get(res));
-                n = DOMFactory.importNode(doc, n);
+                Node n;
+                n = DOMFactory.importNode(doc, resultList.get(prevSize+res));
                 resultElement.appendChild(n);
 	    }
+	    resultList.setSize(prevSize);
 	}
 
 	// Construct the result array list
 	//
-	ArrayList result = new ArrayList(1);
-
 	result.add(resultElement);
-
-	// Return the result
-	//
-	return result;
+	return; 
     }
 
     public void setResultDocument(Document doc) {
