@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- Testing a construct that produces a constant value -->
+
+<plan top="cons">
+<dtdscan id="dtd">
+<url value="http://www.cse.ogi.edu/~vpapad/xml/a_and_c.xml"/>
+</dtdscan>
+<scan id="scan" regexp="PLAY.PERSONAE.PERSONA" input="dtd"/>
+<construct id="cons" input="scan">
+<help>1</help>
+</construct>
+</plan>
