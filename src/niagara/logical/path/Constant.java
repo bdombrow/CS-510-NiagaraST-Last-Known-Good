@@ -1,4 +1,4 @@
-/* $Id: Constant.java,v 1.1 2003/10/01 04:42:21 vpapad Exp $ */
+/* $Id: Constant.java,v 1.2 2003/12/24 02:05:48 vpapad Exp $ */
 package niagara.logical.path;
 
 public class Constant implements RE {
@@ -25,5 +25,9 @@ public class Constant implements RE {
 
     public int hashCode() {
         return label.hashCode();
+    }
+
+    public boolean generatesDuplicates() {
+        return false;
     }
 }

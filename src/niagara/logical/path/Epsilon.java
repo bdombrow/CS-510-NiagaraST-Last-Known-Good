@@ -1,4 +1,4 @@
-/* $Id: Epsilon.java,v 1.1 2003/10/01 04:42:21 vpapad Exp $ */
+/* $Id: Epsilon.java,v 1.2 2003/12/24 02:05:48 vpapad Exp $ */
 package niagara.logical.path;
 
 public class Epsilon implements RE {
@@ -16,5 +16,9 @@ public class Epsilon implements RE {
 
     public int hashCode() {
         return 0;
+    }
+    
+    public boolean generatesDuplicates() {
+        return true;
     }    
 }
