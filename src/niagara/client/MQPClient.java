@@ -1,3 +1,7 @@
+/**
+ * $Id: MQPClient.java,v 1.4 2002/05/23 06:30:14 vpapad Exp $
+ */
+
 package niagara.client;
 
 import niagara.utils.XMLUtils;
@@ -24,8 +28,9 @@ public class MQPClient {
     private String qfname;
 
     static boolean serverUp;
-
+    
     static boolean quiet = false;
+    static boolean optimize = false;
 
     private int query_id = 0;
 
@@ -33,7 +38,8 @@ public class MQPClient {
         return String.valueOf(++query_id);
     }
 
-    public MQPClient(String client_host, int client_port, String server_host, int server_port, String qfname) {
+    public MQPClient(String client_host, int client_port, 
+                     String server_host, int server_port, String qfname) {
         this.client_host = client_host;
         this.client_port = client_port;
         this.server_host = server_host;
@@ -121,7 +127,12 @@ public class MQPClient {
             URLConnection connection = url.openConnection();
             connection.setDoOutput(true);
             PrintWriter out = new PrintWriter(connection.getOutputStream());
-            out.println("type=submit_plan&query=" + encodedQuery);
+            out.print("type=");
+            if (optimize) 
+                out.print("optimize_plan");
+            else
+                out.print("submit_plan");
+            out.println("&query=" + encodedQuery);
             out.close();
             
             connection.getInputStream().close();
@@ -138,32 +149,32 @@ public class MQPClient {
         String client_host= null, server_host = null, qfname = null;
 
         int opt = 0;
-        if (args[0].equals("-q")) {
-            quiet = true;
-            opt = 1;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-q"))
+                quiet = true;
+            else if (args[i].equals("-o"))
+                optimize = true;
+            else break;
+            opt++;
         }
 	if ((args.length - opt) != 5) {
-	    cerr("Usage: MQPClient [-q] <client_host> <client port> <server host>" +  
+	    cerr("Usage: MQPClient [-q] [-o] <client host> <client port> <server host>" +  
                  " <server port> <query file name>");
 	    System.exit(-1);
 	}
         
 
-        //try {
-            client_host = args[opt];
-            client_port = Integer.parseInt(args[opt+1]);
-            server_host = args[opt+2];
-            server_port = Integer.parseInt(args[opt+3]);
-            qfname = args[opt+4];
-	    //}
-	    //catch (Exception e) {
-            //cerr("Error parsing arguments.");
-	    //}
-
-       MQPClient c = new MQPClient(client_host, client_port, server_host, server_port, qfname);
-       c.run();
+        client_host = args[opt];
+        client_port = Integer.parseInt(args[opt+1]);
+        server_host = args[opt+2];
+        server_port = Integer.parseInt(args[opt+3]);
+        qfname = args[opt+4];
+        
+        MQPClient c = new MQPClient(client_host, client_port, 
+                                    server_host, server_port, qfname);
+        c.run();
     }
-
+    
     void startHTTPServer() {
         try {
             // Start HTTP server for interserver communication
