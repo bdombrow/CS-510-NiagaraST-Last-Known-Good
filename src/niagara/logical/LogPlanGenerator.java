@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: LogPlanGenerator.java,v 1.1 2003/12/24 02:08:28 vpapad Exp $
+  $Id: LogPlanGenerator.java,v 1.2 2004/02/10 03:20:16 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,7 +39,8 @@
 */
 package niagara.logical;
 
-import java.util.*;
+import java.util.Vector;
+import java.util.ArrayList;
 import java.io.*;
 
 import niagara.logical.predicates.*;
