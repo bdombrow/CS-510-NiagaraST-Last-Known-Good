@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.17 2002/10/24 02:31:51 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.18 2002/10/26 21:26:45 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -51,14 +51,14 @@ implements SchemaProducer, SerializableToXML, Initializable {
     // blocking indicates if the operator blocks on that source stream or not
     private SourceTupleStream[] sourceStreams;
     private boolean[] blockingSourceStreams;
-    int numSourceStreams;
+    protected int numSourceStreams;
 
     // Sink streams and information about them
     // partial result count is the counts of the duplicated
     // partial result request message expected for each stream
     private SinkTupleStream[] sinkStreams;
     private int[] sinkStreamsPartialResultCount;
-    int numSinkStreams;
+    protected int numSinkStreams;
 
     //The required responsiveness to control messages
     private int responsiveness;
@@ -236,8 +236,8 @@ implements SchemaProducer, SerializableToXML, Initializable {
         for (idx = 0; idx < sinkStreams.length; idx++)
             if (sinkStreams[idx] == null)
                 break;
-        if (idx == sinkStreams.length)
-            throw new PEException("Attempt to add output stream to an operator that's already full");
+        if (idx == sinkStreams.length) 
+            throw new PEException("Attempt to add output stream to an " + getClass() + " operator that's already full" + "(" + idx +"/" + sinkStreams.length + ")");
         sinkStreams[idx] = newStream;
     }
     

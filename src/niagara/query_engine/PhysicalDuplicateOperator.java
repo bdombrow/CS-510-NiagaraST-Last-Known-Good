@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalDuplicateOperator.java,v 1.5 2002/10/24 03:10:52 vpapad Exp $
+  $Id: PhysicalDuplicateOperator.java,v 1.6 2002/10/26 21:26:45 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,16 +46,12 @@ public class PhysicalDuplicateOperator extends PhysicalOperator {
     // No blocking input streams
     private static final boolean[] blockingSourceStreams = { false };
 
-    // The number of sink streams for the operator
-    int numSinkStreams;
-    
     public PhysicalDuplicateOperator() {
         setBlockingSourceStreams(blockingSourceStreams);
     }
     
-    public void initFrom(LogicalOp logicalOperator) { }
-
-
+    public void initFrom(LogicalOp logicalOperator) {}
+    
     /**
      * This function processes a tuple element read from a source stream
      * when the operator is non-blocking. This over-rides the corresponding
@@ -79,20 +75,5 @@ public class PhysicalDuplicateOperator extends PhysicalOperator {
 
     public boolean isStateful() {
 	return false;
-    }
-    
-    /**
-     * @see niagara.query_engine.PhysicalOperator#plugInStreams(SourceTupleStream[], SinkTupleStream[], boolean[], Integer)
-     */
-    public void plugInStreams(
-        SourceTupleStream[] sourceStreams,
-        SinkTupleStream[] sinkStreams,
-        boolean[] blockingSourceStreams,
-        Integer responsiveness) {
-        super.plugInStreams(
-            sourceStreams,
-            sinkStreams,
-            responsiveness);
-            this.numSinkStreams = sinkStreams.length;
     }
 }

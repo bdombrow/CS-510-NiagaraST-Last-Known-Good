@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.14 2002/10/24 02:53:06 vpapad Exp $
+  $Id: PhysicalScanOperator.java,v 1.15 2002/10/26 21:25:10 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,6 +30,8 @@ package niagara.query_engine;
 
 import org.w3c.dom.*;
 import java.util.ArrayList;
+
+import niagara.optimizer.colombia.LogicalOp;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -43,11 +45,6 @@ import niagara.xmlql_parser.syntax_tree.*;
  */
 
 public class PhysicalScanOperator extends UnoptimizablePhysicalOperator {
-
-    //////////////////////////////////////////////////////////////////////////
-    // These are the private data members of the PhysicalScanOperator class //
-    //////////////////////////////////////////////////////////////////////////
-
     // This is the array having information about blocking and non-blocking
     // streams
     private static final boolean[] blockingSourceStreams = { false };
@@ -61,36 +58,7 @@ public class PhysicalScanOperator extends UnoptimizablePhysicalOperator {
     private PathExprEvaluator pev;
     private NodeVector elementList;
 
-    ///////////////////////////////////////////////////////////////////////////
-    // These are the methods of the PhysicalScanOperatorClass                //
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * This is the constructor for the PhysicalScanOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param blocking True if the operator is blocking and false if it is
-     *                 non-blocking
-     * @param responsiveness The responsiveness, in milliseconds, to control
-     *                       messages
-     * @param rExp the path expression to evaluate for this scan
-     * @param scanField the tuple field to begin the scan at
-     */
-
-    public PhysicalScanOperator (op logicalOperator,
-				 SourceTupleStream[] sourceStreams,
-				 SinkTupleStream[] sinkStreams,
-				 Integer responsiveness) {
-
-	// Call the constructor on the super class
-	super(sourceStreams, sinkStreams, 
-              blockingSourceStreams, responsiveness);
-
+    public void initFrom(LogicalOp logicalOperator) {
 	// Type cast the logical operator to a scan operator
 	scanOp logicalScanOperator = (scanOp) logicalOperator;
  
@@ -104,7 +72,11 @@ public class PhysicalScanOperator extends UnoptimizablePhysicalOperator {
         elementList = new NodeVector();
     }
 
-
+    // The required zero-argument constructor
+    public PhysicalScanOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
+    }
+    
     /**
      * This function processes a tuple element read from a source stream
      * when the operator is non-blocking. This over-rides the corresponding

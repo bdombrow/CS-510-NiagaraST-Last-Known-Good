@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalUnionOperator.java,v 1.6 2002/10/24 01:06:35 vpapad Exp $
+  $Id: PhysicalUnionOperator.java,v 1.7 2002/10/26 21:25:10 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,6 +64,8 @@ public class PhysicalUnionOperator extends PhysicalOperator {
     }
 
     public void opInitialize() {
+        // XXX vpapad: really ugly...
+        setBlockingSourceStreams(new boolean[numSourceStreams]);
         rgPunct = new ArrayList[getArity()];
         for (int i=0; i<rgPunct.length; i++)
             rgPunct[i] = new ArrayList();

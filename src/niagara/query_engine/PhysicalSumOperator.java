@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSumOperator.java,v 1.10 2002/10/24 01:13:43 vpapad Exp $
+  $Id: PhysicalSumOperator.java,v 1.11 2002/10/26 21:25:10 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -156,6 +156,7 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
     ArrayList atomicValues;
 
     public void initFrom(LogicalOp logicalOperator) {
+        super.initFrom(logicalOperator);
 	// Get the summing attribute of the sum logical operator
 	//
 	summingAttribute = ((SumOp) logicalOperator).getSummingAttribute();
@@ -338,19 +339,15 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 	double sum = sumValues;
 
 	// Create a sum result element
-	//
 	Element resultElement = doc.createElement("Sum");
 
 	// Create a text node having the string representation of sum
-	//
 	Text childElement = doc.createTextNode(Double.toString(sum));
 
 	// Add the text node as a child of the element node
-	//
 	resultElement.appendChild(childElement);
 	
 	// Return the result element
-	//
 	return resultElement;
     }
 
