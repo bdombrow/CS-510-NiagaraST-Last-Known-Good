@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.33 2003/01/13 05:05:43 tufte Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.34 2003/02/05 21:50:09 jinli Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -153,10 +153,20 @@ public class XMLQueryPlanParser {
             handleJoin(e, inputs);
         } else if (nodeName.equals("avg")) {
             handleAvg(e);
-        } else if (nodeName.equals("sum")) {
-            handleSum(e);
+        } else if (nodeName.equals("slidingAvg")) {
+	    	handleSlidingAvg(e);
+	} else if (nodeName.equals("sum")) {
+            handleSum(e); 
+	} else if (nodeName.equals("slidingSum")) {
+	    handleSlidingSum(e);
+	} else if (nodeName.equals("max")) {
+	    handleMax(e);
+	} else if (nodeName.equals("slidingMax")) {
+	    handleSlidingMax(e);
         } else if (nodeName.equals("count")) {
             handleCount(e);
+	} else if (nodeName.equals("slidingCount")) {
+	    handleSlidingCount(e);
         } else if (nodeName.equals("dtdscan")) {
             handleDtdScan(e);
         } else if (nodeName.equals("constant")) {
@@ -510,6 +520,126 @@ public class XMLQueryPlanParser {
             op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
+    void handleSlidingAvg(Element e) throws InvalidPlanException {
+        SlidingAverageOp op = new SlidingAverageOp();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+	String groupby = e.getAttribute("groupby");
+	String avgattr = e.getAttribute("avgattr");
+	String inputAttr = e.getAttribute("input");
+	String range = e.getAttribute("range");
+	String every = e.getAttribute("every");
+	
+	// set the range and every parameter for the sliding window;
+	//
+	Integer rangeValue;
+	Integer everyValue;
+	if (range != "") {
+		rangeValue = new Integer (range);
+		if (rangeValue.intValue() <= 0)
+			throw new InvalidPlanException("range must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("range ???");
+	if (every != "") {
+		everyValue = new Integer (every);
+		if (everyValue.intValue() <= 0)
+			throw new InvalidPlanException("every must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("every ???");
+		
+	
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        Attribute averagingAttribute = findVariable(inputLogProp, avgattr);
+        op.setAverageInfo(new skolem(id, groupbyAttrs), averagingAttribute);
+       	op.setWindowInfo (rangeValue.intValue(), everyValue.intValue());
+
+        Plan avgNode = new Plan(op, input);
+        ids2plans.put(id, avgNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
+    
+/*	logNode input = (logNode) ids2nodes.get(inputAttr);
+	varTbl oldVarTbl = input.getVarTbl();
+
+	varTbl qpVarTbl = new varTbl();
+	Schema sc = new Schema();
+
+	// Parse the groupby attribute to see what to group on
+	Vector groupbySAs = new Vector();
+	StringTokenizer st = new StringTokenizer(groupby);
+	while (st.hasMoreTokens()) {
+	    String varName = st.nextToken();
+
+	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
+	    groupbySAs.addElement(oldAttr);
+	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
+	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
+	}
+
+	schemaAttribute averagingAttribute = oldVarTbl.lookUp(avgattr);
+
+	op.setAverageInfo(new skolem("avg", groupbySAs), averagingAttribute);
+
+	// set the range and every parameter for the sliding window;
+	//
+	Integer rangeValue;
+	Integer everyValue;
+	if (range != "") {
+		rangeValue = new Integer (range);
+		if (rangeValue.intValue() <= 0)
+			throw new InvalidPlanException("range must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("range ???");
+	if (every != "") {
+		everyValue = new Integer (every);
+		if (everyValue.intValue() <= 0)
+			throw new InvalidPlanException("every must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("every ???");
+		
+	op.setWindowInfo (rangeValue.intValue(), everyValue.intValue());
+		
+	//The attribute we're going to add to the result
+	schemaAttribute resultSA = new schemaAttribute(groupbySAs.size());
+	
+	// Register variable -> resultSA
+	qpVarTbl.addVar("$" + id, resultSA);
+	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
+	
+	schemaAttribute indexSA = new schemaAttribute(groupbySAs.size()+1, 
+							varType.ELEMENT_VAR);
+							
+	qpVarTbl.addVar("$index", indexSA);
+	
+	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size() + 1));
+
+	logNode sumNode = new logNode(op, input);
+	
+	ids2nodes.put(id, sumNode);
+	
+	sumNode.setSchema(sc);
+	sumNode.setVarTbl(qpVarTbl);
+*/		
+	}
+
     void handleSum(Element e) throws InvalidPlanException {
         SumOp op = new SumOp();
 
@@ -541,6 +671,222 @@ public class XMLQueryPlanParser {
             op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
     }
 
+    void handleSlidingSum (Element e) throws InvalidPlanException {
+	SlidingSumOp op = new SlidingSumOp();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+	String groupby = e.getAttribute("groupby");
+	String sumattr = e.getAttribute("sumattr");
+	String inputAttr = e.getAttribute("input");
+	String range = e.getAttribute("range");
+	String every = e.getAttribute("every");
+    
+	// set the range and every parameter for the sliding window;
+	//
+	Integer rangeValue;
+	Integer everyValue;
+	if (range != "") {
+		rangeValue = new Integer (range);
+		if (rangeValue.intValue() <= 0)
+			throw new InvalidPlanException("range must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("range ???");
+	if (every != "") {
+		everyValue = new Integer (every);
+		if (everyValue.intValue() <= 0)
+			throw new InvalidPlanException("every must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("every ???");
+		
+	op.setWindowInfo (rangeValue.intValue(), everyValue.intValue());
+		
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        Attribute summingAttribute = findVariable(inputLogProp, sumattr);
+        op.setSummingInfo(new skolem(id, groupbyAttrs), summingAttribute);
+
+        Plan sumNode = new Plan(op, input);
+        ids2plans.put(id, sumNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
+	}
+
+    void handleMax(Element e) throws InvalidPlanException {
+        MaxOp op = new MaxOp();
+
+        String id = e.getAttribute("id");
+        String groupby = e.getAttribute("groupby");
+        String maxattr = e.getAttribute("maxattr");
+        String inputAttr = e.getAttribute("input");
+
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        Attribute maxingAttribute = findVariable(inputLogProp, maxattr);
+        op.setMaxingInfo(new skolem(id, groupbyAttrs), maxingAttribute);
+
+        Plan maxNode = new Plan(op, input);
+        ids2plans.put(id, maxNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
+    }
+
+    void handleSlidingMax(Element e) throws InvalidPlanException {
+	SlidingMaxOp op = new SlidingMaxOp();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+	String groupby = e.getAttribute("groupby");
+	String maxattr = e.getAttribute("maxattr");
+	String inputAttr = e.getAttribute("input");
+	String range = e.getAttribute("range");
+	String every = e.getAttribute("every");
+    
+	// set the range and every parameter for the sliding window;
+	//
+	Integer rangeValue;
+	Integer everyValue;
+	if (range != "") {
+		rangeValue = new Integer (range);
+		if (rangeValue.intValue() <= 0)
+			throw new InvalidPlanException("range must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("range ???");
+	if (every != "") {
+		everyValue = new Integer (every);
+		if (everyValue.intValue() <= 0)
+			throw new InvalidPlanException("every must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("every ???");
+		
+	op.setWindowInfo (rangeValue.intValue(), everyValue.intValue());
+		
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        Attribute maxingAttribute = findVariable(inputLogProp, maxattr);
+        op.setMaxingInfo(new skolem(id, groupbyAttrs), maxingAttribute);
+
+        Plan maxNode = new Plan(op, input);
+        ids2plans.put(id, maxNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
+    }
+/*    void handleSlidingMax(Element e) throws InvalidPlanException {
+	SlidingMaxOp op = new SlidingMaxOp();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+	String groupby = e.getAttribute("groupby");
+	String maxattr = e.getAttribute("maxattr");
+	String inputAttr = e.getAttribute("input");
+	String range = e.getAttribute("range");
+	String every = e.getAttribute("every");
+    
+	logNode input = (logNode) ids2nodes.get(inputAttr);
+	varTbl oldVarTbl = input.getVarTbl();
+
+	varTbl qpVarTbl = new varTbl();
+	Schema sc = new Schema();
+
+	// Parse the groupby attribute to see what to group on
+	Vector groupbySAs = new Vector();
+	StringTokenizer st = new StringTokenizer(groupby);
+	while (st.hasMoreTokens()) {
+	    String varName = st.nextToken();
+
+	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
+	    groupbySAs.addElement(oldAttr);
+	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
+	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
+	}
+
+	schemaAttribute maxingAttribute = oldVarTbl.lookUp(maxattr);
+
+	op.setMaxingInfo(new skolem("max", groupbySAs), maxingAttribute);
+
+	// set the range and every parameter for the sliding window;
+	//
+	Integer rangeValue;
+	Integer everyValue;
+	if (range != "") {
+		rangeValue = new Integer (range);
+		if (rangeValue.intValue() <= 0)
+			throw new InvalidPlanException("range must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("range ???");
+	if (every != "") {
+		everyValue = new Integer (every);
+		if (everyValue.intValue() <= 0)
+			throw new InvalidPlanException("every must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("every ???");
+		
+	op.setWindowInfo (rangeValue.intValue(), everyValue.intValue());
+		
+	//The attribute we're going to add to the result
+	schemaAttribute resultSA = new schemaAttribute(groupbySAs.size());
+	
+	// Register variable -> resultSA
+	qpVarTbl.addVar("$" + id, resultSA);
+	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
+	
+	schemaAttribute indexSA = new schemaAttribute(groupbySAs.size()+1, 
+							varType.ELEMENT_VAR);
+							
+	qpVarTbl.addVar("$index", indexSA);
+	
+	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size() + 1));
+
+	logNode sumNode = new logNode(op, input);
+	
+	ids2nodes.put(id, sumNode);
+	
+	sumNode.setSchema(sc);
+	sumNode.setVarTbl(qpVarTbl);
+    }*/
+
     void handleCount(Element e) throws InvalidPlanException {
         CountOp op = new CountOp();
 
@@ -549,6 +895,61 @@ public class XMLQueryPlanParser {
         String countattr = e.getAttribute("countattr");
         String inputAttr = e.getAttribute("input");
 
+        Plan input = (Plan) ids2plans.get(inputAttr);
+        LogicalProperty inputLogProp =
+            (LogicalProperty) ids2logprops.get(inputAttr);
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupby);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+
+        Attribute countingAttribute = findVariable(inputLogProp, countattr);
+        op.setCountingInfo(new skolem(id, groupbyAttrs), countingAttribute);
+
+        Plan countNode = new Plan(op, input);
+        ids2plans.put(id, countNode);
+        ids2logprops.put(
+            id,
+            op.findLogProp(catalog, new LogicalProperty[] { inputLogProp }));
+    }
+
+    void handleSlidingCount(Element e) throws InvalidPlanException {
+	SlidingCountOp op = new SlidingCountOp();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+	String groupby = e.getAttribute("groupby");
+	String countattr = e.getAttribute("countattr");
+	String inputAttr = e.getAttribute("input");
+	String range = e.getAttribute("range");
+	String every = e.getAttribute("every");
+
+	// set the range and every parameter for the sliding window;
+	//
+	Integer rangeValue;
+	Integer everyValue;
+	if (range != "") {
+		rangeValue = new Integer (range);
+		if (rangeValue.intValue() <= 0)
+			throw new InvalidPlanException("range must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("range ???");
+	if (every != "") {
+		everyValue = new Integer (every);
+		if (everyValue.intValue() <= 0)
+			throw new InvalidPlanException("every must greater than zero");
+	}
+	else
+		throw new InvalidPlanException("every ???");
+		
+	op.setWindowInfo (rangeValue.intValue(), everyValue.intValue());		
+	
         Plan input = (Plan) ids2plans.get(inputAttr);
         LogicalProperty inputLogProp =
             (LogicalProperty) ids2logprops.get(inputAttr);
