@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestMessage.java,v 1.4 2002/09/14 04:56:46 vpapad Exp $
+  $Id: RequestMessage.java,v 1.5 2002/10/29 01:28:34 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -52,6 +52,10 @@ public class RequestMessage {
     // assuming this is the only outstanding query for this client
     // (EXECUTE_QP_QUERY and GET_NEXT in one step)
     static final int SYNCHRONOUS_QP_QUERY = 13;
+    // Just show the optimized plan
+    static final int EXPLAIN_QP_QUERY = 14;
+    // A mutant query
+    static final int MQP_QUERY = 15;
 
     String requestType;
     int serverID;
@@ -84,43 +88,46 @@ public class RequestMessage {
 	case GET_DTD:this.requestType = "get_dtd";break;
 	case EXECUTE_QP_QUERY: this.requestType = "execute_qp_query";break;
         case SYNCHRONOUS_QP_QUERY: this.requestType = "synchronous_qp_query";break;
+        case EXPLAIN_QP_QUERY: this.requestType = "explain_qp_query";break;
 	default: throw new InvalidRequestTypeException();
 	}
     }
 
     // get the request type of this Message as an integer
     public int getIntRequestType() {
-	int intRequestType=-1;
-
 	if (requestType.equals("execute_qe_query"))
-	    intRequestType = EXECUTE_QE_QUERY;
+	    return EXECUTE_QE_QUERY;
 	if (requestType.equals("execute_se_query"))
-	    intRequestType = EXECUTE_SE_QUERY;
+	    return EXECUTE_SE_QUERY;
 	if (requestType.equals("execute_trigger_query"))
-	    intRequestType = EXECUTE_TRIGGER_QUERY;
+	    return EXECUTE_TRIGGER_QUERY;
 	if (requestType.equals("kill_query"))
-	    intRequestType = KILL_QUERY;
+	    return KILL_QUERY;
 	if (requestType.equals("suspend_query"))
-	    intRequestType = SUSPEND_QUERY;
+	    return SUSPEND_QUERY;
 	if (requestType.equals("resume_query"))
-	    intRequestType = RESUME_QUERY;
+	    return RESUME_QUERY;
 	if (requestType.equals("get_next"))
-	    intRequestType = GET_NEXT;
+	    return GET_NEXT;
 	if (requestType.equals("get_dtd_list"))
-	    intRequestType = GET_DTD_LIST;
+	    return GET_DTD_LIST;
 	if (requestType.equals("get_partial"))
-	    intRequestType = GET_PARTIAL;
+	    return GET_PARTIAL;
 	if (requestType.equals("get_dtd"))
-	    intRequestType = GET_DTD;
+	    return GET_DTD;
 	if (requestType.equals("execute_qp_query"))
-	    intRequestType = EXECUTE_QP_QUERY;
+	    return EXECUTE_QP_QUERY;
 	if (requestType.equals("gc"))
-	    intRequestType = RUN_GC;
+	    return RUN_GC;
         if (requestType.equals("shutdown"))
-	    intRequestType = SHUTDOWN;
+	    return SHUTDOWN;
         if (requestType.equals("synchronous_qp_query"))
-            intRequestType = SYNCHRONOUS_QP_QUERY;
-	return intRequestType;
+            return SYNCHRONOUS_QP_QUERY;
+        if (requestType.equals("explain_qp_query"))
+            return EXPLAIN_QP_QUERY;
+        if (requestType.equals("mqp_query"))
+            return MQP_QUERY;
+	return -1;
     }
 
     class InvalidRequestTypeException extends Exception {
