@@ -15,7 +15,7 @@ import java_cup.runtime.*;
 %column
 
 %cup
-
+ 
 %{
   StringBuffer string = new StringBuffer();
   String s = new String();
@@ -65,16 +65,6 @@ IdEq = "id"{Space}*"="
   "function" 	{ return symbol(sym.FUNCTION); }
   "end" 	{ return symbol(sym.END); }
   
-  "create"      { return symbol(sym.CREATE); }
-  "delete"	{ return symbol(sym.DELETE); }
-  "trigger"     { return symbol(sym.TRIGGER); }
-  "once"	{ return symbol(sym.ONCE); }
-  "multiple"    { return symbol(sym.MULTIPLE); }
-  "start"	{ return symbol(sym.START); }
-  "every"	{ return symbol(sym.EVERY); }
-  "expire"	{ return symbol(sym.EXPIRE); }
-  "do"		{ return symbol(sym.DO); }
-
   "or"		{ return symbol(sym.OR); }
   "and"		{ return symbol(sym.AND); }
   "not"		{ return symbol(sym.NOT); }

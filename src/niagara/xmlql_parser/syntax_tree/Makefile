@@ -72,10 +72,10 @@ Scanner.java: xmlql.flex sym.class
 
 #Specialized parsers for paths and constructs
 re.cup: xmlql.cup
-	sed -e 's!start with XmlqlExt!start with RegularExpression!' -e 's!QueryParser!REParser!g' < xmlql.cup > re.cup
+	sed -e 's!start with Xmlql!start with RegularExpression!' -e 's!QueryParser!REParser!g' < xmlql.cup > re.cup
 
 construct.cup: xmlql.cup
-	sed -e 's!start with XmlqlExt!start with QueryInConstruct!' -e 's!QueryParser!ConstructParser!g' < xmlql.cup > construct.cup
+	sed -e 's!start with Xmlql!start with QueryInConstruct!' -e 's!QueryParser!ConstructParser!g' < xmlql.cup > construct.cup
 
 # Generate REParser.java 
 REParser.java: re.cup

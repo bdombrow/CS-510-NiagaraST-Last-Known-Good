@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: opType.java,v 1.4 2003/03/07 21:03:11 tufte Exp $
+  $Id: opType.java,v 1.5 2003/03/08 02:24:34 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -56,11 +56,6 @@ public class opType {
      public static final int AND = 15;
      public static final int NOT = 16;
 
-     public static final int ONCE = 17;
-     public static final int MULTIPLE = 18;
-
-     public static final int CREATE_TRIG = 19;
-     public static final int DELETE_TRIG = 20;
      public static final int XMLQL = 21;
 
      public static final int CONTAIN = 30;

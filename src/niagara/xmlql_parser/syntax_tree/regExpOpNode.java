@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: regExpOpNode.java,v 1.4 2002/03/26 23:54:13 tufte Exp $
+  $Id: regExpOpNode.java,v 1.5 2003/03/08 02:24:34 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -135,10 +135,6 @@ public class regExpOpNode extends regExp {
 	 case opType.OR:System.out.println("OR"); break;
 	 case opType.AND:System.out.println("AND"); break;
 	 case opType.NOT:System.out.println("NOT"); break;
-	 case opType.ONCE:System.out.println("ONCE"); break;
-	 case opType.MULTIPLE:System.out.println("MULTIPLE"); break;
-	 case opType.CREATE_TRIG:System.out.println("CREATE_TRIG"); break;
-	 case opType.DELETE_TRIG:System.out.println("DELETE_TRIG"); break;
 	 case opType.XMLQL:System.out.println("XMLQL"); break;
 	 default: System.out.println("Invalid op type"); break;
 	 }

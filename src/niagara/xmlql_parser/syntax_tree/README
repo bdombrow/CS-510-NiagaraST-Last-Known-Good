@@ -8,16 +8,6 @@ Parser for XML-Ql
 
 Generation of Parsed Tree
 
-	XqlExt
-        |
-	|-- triggerName
-        |
-        |-- times (ONCE/MULTIPLE)
-	|
-	|-- expire 
-        |
-        |-- List of Actions
-        |
         |-- query
               |
               |-- List of Conditions (WHERE part)

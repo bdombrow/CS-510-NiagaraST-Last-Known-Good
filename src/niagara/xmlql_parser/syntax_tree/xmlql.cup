@@ -1,4 +1,4 @@
-// $Id: xmlql.cup,v 1.9 2003/02/28 04:40:04 vpapad Exp $
+// $Id: xmlql.cup,v 1.10 2003/03/08 02:24:34 vpapad Exp $
 ////////////////////////////////////////////////////////////////////////
 //
 //  xmlql.cup
@@ -14,7 +14,7 @@
 package niagara.xmlql_parser.syntax_tree;
 
 import niagara.logical.*;
-
+ 
 import java.util.*;
 import java_cup.runtime.*;
 
@@ -96,16 +96,6 @@ terminal CONFORM_TO;
 terminal FUNCTION;
 terminal END;
 
-terminal CREATE;
-terminal DELETE;
-terminal TRIGGER;
-terminal ONCE;
-terminal MULTIPLE;
-terminal START;
-terminal EVERY;
-terminal EXPIRE;
-terminal DO;
-
 terminal ID;
 terminal IDEQ;
 
@@ -115,15 +105,7 @@ terminal String NUMBER;
 
 terminal String STRING;
 
-non terminal xqlExt XmlqlExt;
 non terminal query  Xmlql;
-
-non terminal Integer  OptTimes;
-non terminal String  OptStart;
-non terminal String  OptInterval;
-non terminal String   OptExpire;
-non terminal Vector   ActionList;
-non terminal String   Action;
 
 non terminal        FuncList;
 non terminal        Func;
@@ -178,51 +160,7 @@ precedence left BAR;
 precedence left DOT;
 precedence left QMARK, STAR, PLUS;
 
-start with XmlqlExt;
-
-XmlqlExt ::= CREATE TRIGGER IDEN:i Xmlql:q OptTimes:t OptStart:s OptInterval:v OptExpire:e DO ActionList:al
-		{: RESULT = new xqlExt(i, q, t.intValue(), s, v, e, al); :}
-	   | DELETE TRIGGER IDEN:i
-		{: RESULT = new xqlExt(i); :}
-	   | Xmlql:q
-		{: RESULT = new xqlExt(q); :}
-	   ;
-
-OptTimes ::= ONCE
-		{: RESULT = new Integer(opType.ONCE); :}
-	   | MULTIPLE
-		{: RESULT = new Integer(opType.MULTIPLE); :}
-	   |
-		{: RESULT = new Integer(opType.UNDEF); :}
-	   ;
-
-OptStart ::= START STRING:s
-		{: RESULT = s; :}
-	    |
-		{: RESULT = null; :}
-	    ;
-
-OptInterval ::= EVERY STRING:s
-		{: RESULT = s; :}
-	    |
-		{: RESULT = null; :}
-	    ;
-
-OptExpire ::= EXPIRE STRING:s
-		{: RESULT = s; :}
-	    |
-		{: RESULT = null; :}
-	    ;
-
-ActionList ::= ActionList:al COMMA Action:a
-		   {: al.addElement(a); RESULT=al; :}
-	     | Action:a
-		   {: RESULT = new Vector(); RESULT.addElement(a); :}
-	     ;
-
-Action ::= STRING:s
-		{: RESULT = s; :}
-	 ;
+start with Xmlql;
 
 Xmlql ::= FuncList QueryBlock:q
 		{: RESULT = q; :}
@@ -470,8 +408,6 @@ RegularExpression ::= RegularExpression:r STAR
 			  {: RESULT = r; :}
 		    | IDEN:i   
 			  {: RESULT = new regExpDataNode(new data(dataType.IDEN,i)); :}
-		    | START
-			  {: RESULT = new regExpDataNode(new data(dataType.IDEN,"start")); :}
 		    | END
 			  {: RESULT = new regExpDataNode(new data(dataType.IDEN,"end")); :}
 		    | ID   
