@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.1 2001/07/17 07:06:06 vpapad Exp $
+ * $Id: Catalog.java,v 1.2 2001/08/08 21:25:05 tufte Exp $
  *
  */
 
@@ -77,7 +77,7 @@ public class Catalog {
         this();
 
         // parse the catalog file
-        DOMParser parser = DOMFactory.newParser();
+        niagara.ndom.DOMParser parser = DOMFactory.newParser();
 
         InputSource is = null;
         try {

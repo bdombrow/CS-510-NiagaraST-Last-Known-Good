@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestMessage.java,v 1.2 2000/06/26 22:14:55 vpapad Exp $
+  $Id: RequestMessage.java,v 1.3 2001/08/08 21:25:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,6 +46,8 @@ public class RequestMessage {
     static final int GET_DTD = 9;
     // Execute a prepared query plan, described in XML
     static final int EXECUTE_QP_QUERY = 10; 
+    static final int RUN_GC = 11; // run the garbage collector
+    static final int SHUTDOWN = 12;
 
     String requestType;
     int serverID;
@@ -108,6 +110,10 @@ public class RequestMessage {
 	    intRequestType = GET_DTD;
 	if (requestType.equals("execute_qp_query"))
 	    intRequestType = EXECUTE_QP_QUERY;
+	if (requestType.equals("gc"))
+	    intRequestType = RUN_GC;
+        if (requestType.equals("shutdown"))
+	    intRequestType = SHUTDOWN;
 	return intRequestType;
     }
 

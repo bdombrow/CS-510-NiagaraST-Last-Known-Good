@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.6 2001/07/17 07:06:06 vpapad Exp $
+  $Id: RequestHandler.java,v 1.7 2001/08/08 21:25:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -330,7 +330,29 @@ public class RequestHandler {
 		// 		catch (StreamPreviouslyClosedException e) { /* OK */ }
 		    
 		break;
+            
+            case RequestMessage.RUN_GC:
+	    	    System.out.println("Starting Garbage Collection");
+		    long startime = System.currentTimeMillis();
+                    System.gc();
+		    long stoptime = System.currentTimeMillis();
+		    double executetime = (stoptime-startime)/1000.0;
+		    System.out.println("Garbage Collection Completed." +
+		    " Time: " + executetime + " seconds.");
+	            ResponseMessage doneMesg = 
+		         new ResponseMessage(request,
+			               ResponseMessage.END_RESULT);
+	            sendResponse(doneMesg);
+                    break;
 
+            case RequestMessage.SHUTDOWN:
+	            ResponseMessage shutMesg = 
+		         new ResponseMessage(request,
+			               ResponseMessage.END_RESULT);
+	            sendResponse(shutMesg);
+		    // boy this is ugly
+		    System.exit(0);
+		    break;
 		//-------------------------------------
 		//   Ooops 
 		//-------------------------------------

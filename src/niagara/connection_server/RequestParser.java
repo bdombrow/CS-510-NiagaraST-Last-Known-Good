@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestParser.java,v 1.2 2001/07/17 07:06:06 vpapad Exp $
+  $Id: RequestParser.java,v 1.3 2001/08/08 21:25:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,11 +33,9 @@ import java.util.*;
 
 import gnu.regexp.*;
 
-import com.ibm.xml.framework.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
-import com.ibm.xml.parsers.SAXParser;
 import com.microstar.xml.SAXDriver;
 
 /** This class is responsible for creating a SAX Parser for parsing incoming
@@ -89,12 +87,12 @@ public class RequestParser extends HandlerBase implements Runnable {
 
     public void run() {
 	try {
-	    System.out.println("request parser started...");
+	    //System.out.println("request parser started...");
 	    parser.setDocumentHandler(this);
 	    parser.parse(source);
 	}
 	catch (Exception e) {
-	    System.out.println("Parser closed. Shutting down service to this client");
+	    //System.out.println("Parser closed. Shutting down service to this client");
 	    reqHandler.closeConnection();
 	}
 	return;

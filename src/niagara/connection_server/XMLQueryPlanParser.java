@@ -38,7 +38,7 @@ public class XMLQueryPlanParser {
     public logNode parse(String description) throws InvalidPlanException {
         description = description.trim();
 
-	DOMParser p;
+	niagara.ndom.DOMParser p;
 	Document document = null;
 	try {
 	    p = DOMFactory.newParser();
@@ -512,8 +512,14 @@ public class XMLQueryPlanParser {
 		REMatch[] all_left = re.getAllMatches(leftattrs);
 		REMatch[] all_right = re.getAllMatches(rightattrs);
 		for (int i = 0; i < all_left.length; i++) {
+		    System.out.println("i"+i);
+		    System.out.println(all_left[i].toString());
 		    leftvect.addElement(leftv.lookUp(all_left[i].toString()));
 		    rightvect.addElement(rightv.lookUp(all_right[i].toString()));
+		    schemaAttribute sa = (schemaAttribute)leftvect.elementAt(0);
+		    if(sa == null) {
+                       System.out.println("null sa");
+		    }
 		}
 		op.setJoin(pred, leftvect, rightvect);
 	    }
@@ -828,6 +834,7 @@ public class XMLQueryPlanParser {
 	int port = Integer.parseInt(e.getAttribute("port"));
 	int rate = Integer.parseInt(e.getAttribute("rate"));
 	int iters = Integer.parseInt(e.getAttribute("iters"));
+	int docCount = Integer.parseInt(e.getAttribute("doccount"));
 	String typeStr = e.getAttribute("type");
 	int type;
 	// XXX FIXME we should import FirehoseClient to get to these values
@@ -837,7 +844,8 @@ public class XMLQueryPlanParser {
 	    type = 2;
 	String desc = e.getAttribute("desc");
 	FirehoseSpec fhspec = 
-	    new FirehoseSpec(port, host, rate, type, desc, iters);
+	    new FirehoseSpec(port, host, rate, type, desc, 
+	                     iters, docCount);
 	
 	FirehoseScanOp op = 
 	    (FirehoseScanOp) operators.FirehoseScan.clone();

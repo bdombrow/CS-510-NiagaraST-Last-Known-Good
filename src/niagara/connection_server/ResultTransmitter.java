@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.6 2001/07/17 07:06:06 vpapad Exp $
+  $Id: ResultTransmitter.java,v 1.7 2001/08/08 21:25:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,7 @@
 package niagara.connection_server;
 
 import org.w3c.dom.*;
-import com.ibm.xml.parser.*;
+//VPAPAD - deleted: import com.ibm.xml.parser.*;
 import java.io.*;
 import niagara.query_engine.*;
 import java.net.*;
@@ -410,23 +410,19 @@ public class ResultTransmitter implements Runnable {
 		    alreadyReturningPartial = false; 
 		    switch (resultObject.status) {
 		    case QueryResult.PartialQueryResult:
-			/* In this case, resultObject.result is a TXDocument 
+			/* In this case, resultObject.result is a Document 
 			 * AccumFileDir stores standard DOM Docs, since that
 			 * is what the system uses now 
 			 */
-			System.out.println("Updating Accumulate File " +
-					   queryInfo.accumFileName);
 			DataManager.AccumFileDir.put(queryInfo.accumFileName, 
 						     resultObject.result);
 			break;
 			
 		    case QueryResult.FinalQueryResult:
-			/* In this case, resultObject.result is a TXDocument 
+			/* In this case, resultObject.result is a Document 
 			 * AccumFileDir stores standard DOM Docs, since that
 			 * is what the system uses now 
 			 */
-			//System.out.println("Updating Accumulate File " +
-			//		       queryInfo.accumFileName);
 			DataManager.AccumFileDir.put(queryInfo.accumFileName, 
 						     resultObject.result);
 			
