@@ -11,7 +11,8 @@
           y CDATA #IMPLIED">
 
 <!ELEMENT plan     (scan | select | join | avg | construct | 
-                    dtdscan | firehosescan | accumulate | expression | 
+                    dtdscan | constant | resource | firehosescan | accumulate | 
+                    expression | send | display | topn |
 		    sort | dup | union)+>
 
 <!ATTLIST plan top IDREF        #REQUIRED
@@ -26,6 +27,7 @@
 <!ENTITY % StandardAttributes "id ID   #REQUIRED
          physical  CDATA               #IMPLIED
 	 input     IDREF               #REQUIRED
+         location  CDATA               #IMPLIED                        
 	 %PositionAttributes;">
 
 <!-- 
@@ -131,6 +133,50 @@
           id       ID           #REQUIRED
           physical CDATA        #IMPLIED
 	  %PositionAttributes;>
+
+<!ELEMENT resource EMPTY>
+<!ATTLIST resource 
+          id       ID           #REQUIRED
+          urn      CDATA        #REQUIRED
+          physical CDATA        #IMPLIED
+	  %PositionAttributes;>
+
+<!-- Constant is a pseudo-operator for including a document verbatim 
+     as a source in a query plan. The document should be included 
+     as a CDATA section, to avoid costly parse phases. Important
+     caveat: CDATA sections cannot nest! -->
+  
+<!ELEMENT constant  (#PCDATA)>
+<!ATTLIST constant 
+          id       ID           #REQUIRED
+          physical CDATA        #IMPLIED
+	  %PositionAttributes;>
+
+
+<!ELEMENT send EMPTY>
+<!ATTLIST send 
+          id       ID           #REQUIRED
+          physical CDATA        #IMPLIED
+          query_id CDATA        #REQUIRED
+	  %PositionAttributes;>
+
+<!-- Send results of the query back to the client -->
+<!ELEMENT display EMPTY>
+<!ATTLIST display 
+          id       ID           #REQUIRED
+          physical CDATA        #IMPLIED
+          query_id CDATA        #REQUIRED
+          client_location CDATA #REQUIRED
+	  %PositionAttributes;>
+
+<!-- Top n tuples --> 
+<!ELEMENT topn EMPTY>
+<!ATTLIST topn
+	  order	   (descending|ascending) "descending"
+	  comparison (alphabetic|numeric) "alphabetic"
+	  sort_by  CDATA        #REQUIRED
+          number   CDATA        #REQUIRED        
+	  %StandardAttributes;>
 
 <!ELEMENT firehosescan  EMPTY>
 <!ATTLIST firehosescan 
