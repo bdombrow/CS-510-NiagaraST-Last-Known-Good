@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.5 2002/08/17 16:49:33 tufte Exp $ -->
+<!-- $Id: build.xml,v 1.6 2002/08/18 17:37:33 tufte Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -85,11 +85,11 @@
 
   <!-- Compile everything -->
   <target name="compile" depends="init,create.cups,create.se.cup">
-    <javac srcdir="${src}" destdir="${build}" source="1.4" 
+    <javac srcdir="${src}" destdir="${build}" source="1.4" debug="yes" 
     	excludes="niagara/client/qbe/**,niagara/xmlql_parser/op_tree/TypeChk.java,niagara/utils/nitree/**,niagara/utils/*.java,niagara/search_engine/crawler/YPCrawler.java,niagara/optimizer/colombia/**,niagara/optimizer/rules/**">
       <classpath>
-        <pathelement location="/disk/hopper/projects/disc/niagara/install/xerces-2_0_1/xercesImpl.jar"/>
-        <pathelement location="/disk/hopper/projects/disc/niagara/install/xerces-2_0_1/xmlParserAPIs.jar"/>
+        <pathelement location="${lib}/xercesImpl.xerces-2_0_1.jar"/>
+        <pathelement location="${lib}/xmlParserAPIs.xerces-2_0_1.jar"/>
         <pathelement location="${lib}/xml4j.jar"/>
         <pathelement location="${lib}/aelfred.jar"/>
         <pathelement location="${lib}/gnu-regexp.jar"/>
