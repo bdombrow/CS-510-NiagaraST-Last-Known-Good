@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.16 2002/10/04 04:14:05 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.17 2002/10/24 02:31:51 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,15 +35,17 @@ package niagara.query_engine;
  * @version 1.0
  */
 
-import java.lang.reflect.Array;
-import java.io.*;
+import niagara.optimizer.colombia.PhysicalOp;
+import niagara.optimizer.rules.Initializable;
 
 import niagara.utils.*;
+import niagara.connection_server.NiagraServer;
 import niagara.data_manager.*;
 
 import org.w3c.dom.Document;
 
-public abstract class PhysicalOperator {
+public abstract class PhysicalOperator extends PhysicalOp 
+implements SchemaProducer, SerializableToXML, Initializable {
 
     // Source streams and information about them
     // blocking indicates if the operator blocks on that source stream or not
@@ -75,6 +76,12 @@ public abstract class PhysicalOperator {
     private boolean isHeadOperator;
     private QueryInfo queryInfo;
 
+    /** Schema for the tuples this operator is producing */
+    protected TupleSchema outputTupleSchema;
+
+    /** Schemas for incoming tuples */
+    protected TupleSchema[] inputTupleSchemas;
+        
     // for triggers
     protected static DataManager DM;
 
@@ -93,9 +100,9 @@ public abstract class PhysicalOperator {
     }
 
     /**
-     * This is the constructor for the Operator class that initializes
-     * it with the appropriate logical operator, source streams,
-     * sink streams, whether the operator is blocking or non-blocking
+     * Initialize the PhysicalOperator 
+     * with the appropriate source streams, sink streams, 
+     * whether the operator is blocking or non-blocking
      * and the responsiveness of the operator to control information.
      *
      * @param sourceStreams The Source Streams associated with the operator
@@ -106,18 +113,14 @@ public abstract class PhysicalOperator {
      * @param responsiveness The responsiveness, in milliseconds, to control
      *                       messages
      */
-     
-    public PhysicalOperator (SourceTupleStream[] sourceStreams,
+    public void plugInStreams(SourceTupleStream[] sourceStreams,
 			     SinkTupleStream[] sinkStreams,
-			     boolean[] blockingSourceStreams,
 			     Integer responsiveness) {
 	this.sourceStreams = sourceStreams;
 	numSourceStreams = sourceStreams.length;
 	this.sinkStreams = sinkStreams;
 	numSinkStreams = sinkStreams.length;
 
-	// Initialize which source streams the operator blocks on
-	this.blockingSourceStreams = blockingSourceStreams;
 
 	// Set the number of duplicate partial request messages in each
 	// sink stream to 0
@@ -137,6 +140,11 @@ public abstract class PhysicalOperator {
 
 	// Start reading from the first input stream
 	lastReadSourceStream = 0;
+    }
+
+    protected void setBlockingSourceStreams(boolean[] blockingSourceStreams) {
+        // Initialize which source streams the operator blocks on
+        this.blockingSourceStreams = blockingSourceStreams;
     }
 
     /**
@@ -223,14 +231,16 @@ public abstract class PhysicalOperator {
 	internalCleanUp();
     }
 
-    /** 
-     * get stream at index idx - yeuch, I hate this function and
-     * the one below KT
-     */
-    public final SinkTupleStream getSinkStream(int idx) {
-	return sinkStreams[idx];
+    public void addSinkStream(SinkTupleStream newStream) {
+        int idx;
+        for (idx = 0; idx < sinkStreams.length; idx++)
+            if (sinkStreams[idx] == null)
+                break;
+        if (idx == sinkStreams.length)
+            throw new PEException("Attempt to add output stream to an operator that's already full");
+        sinkStreams[idx] = newStream;
     }
-
+    
     /** 
      * add this stream to sink streams at index i - boy, I do not
      * like this function or its use in ExecutionScheduler, but
@@ -763,12 +773,6 @@ public abstract class PhysicalOperator {
 	}
     }
 
-    ////////////////////////////////////////////////////////////////////
-    // The following functions provide the hooks to write actual      //
-    // operator classes. This is done by deriving from this class and //
-    // over-riding the following operators.                           //
-    ////////////////////////////////////////////////////////////////////
-
     /**
      * This function initializes the data structures for an operator
      *
@@ -781,13 +785,32 @@ public abstract class PhysicalOperator {
 	return;
     }
 
+    /** Get the schema for tuples produced by this operator */    
+    public TupleSchema getTupleSchema() {
+        return outputTupleSchema;
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    // The following functions provide the hooks to write actual      //
+    // operator classes. This is done by deriving from this class and //
+    // over-riding the following operators.                           //
+    ////////////////////////////////////////////////////////////////////
+
+
+    /** Operators should implement this method to construct their output
+     * tuple schema, given the schemas for their inputs */
+    // XXX vpapad: commenting out to get CVS to compile
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+    }
+    /*
+    public abstract void constructTupleSchema(TupleSchema[] inputSchemas);
+    */
+    
     /**
      * if an operator needs to do initialization, it should override
      * this function
      */
-    protected void opInitialize() {
-	return;
-    }
+    protected void opInitialize() {}
 
     /**
      * does operator keep state??
@@ -910,6 +933,11 @@ public abstract class PhysicalOperator {
 	isHeadOperator = true;
     }
 
+    // XXX vpapad: will this work? Do we initialize this early enough?
+    public int getArity() {
+        return blockingSourceStreams.length;
+    }
+    
     /**
      * <code>setResultDocument</code> provides an
      * owner Document for XML nodes that are newly
@@ -930,6 +958,21 @@ public abstract class PhysicalOperator {
 
     public static void setDataManager(DataManager d) {
 	DM = d;
+    }
+
+    /**
+     * @return name of the operator
+     */
+    public String getName() {
+        return NiagraServer.getCatalog().getOperatorName(getClass());
+    }
+
+    public void dumpAttributesInXML(StringBuffer sb) {}
+    
+    /** Close the element tag, append the children of this operator 
+     * to the string buffer, append the end element tag if necessary */
+    public void dumpChildrenInXML(StringBuffer sb) {
+        sb.append("/>");
     }
 
     /**
