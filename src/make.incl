@@ -1,5 +1,5 @@
 #######################################################################
-#  $Id: make.incl,v 1.3 2002/04/26 02:37:44 vpapad Exp $
+#  $Id: make.incl,v 1.4 2002/05/07 03:09:47 tufte Exp $
 #
 #  Make include file - for common constant info
 #  Added 1-17-02 by Kristin Tufte - remove the fact that some 
@@ -11,10 +11,10 @@
 #-------------------------------------
 # Specify all relative path info here
 #-------------------------------------
-export NIAGROOT    = /home/projects/disc/niagara/vpapad/cvs/niagara_1_0
+export NIAGROOT    = /home/projects/disc/niagara/kristin/niagara_1_0
 export JAVA_HOME   = 
 export LIBDIR      = $(NIAGROOT)/lib
-export FIREHOSEDIR = //home/projects/disc/niagara/vpapad/cvs/firehose_1_0
+export FIREHOSEDIR = //home/projects/disc/niagara/kristin/firehose_1_0
 
 #------------------------------------
 # programs used
@@ -59,7 +59,7 @@ export NIAGSRC     = $(NIAGROOT)/src
 #export TRIGLIB	      = $(LIBDIR)/trig.jar
 #export QBELIB2	      = $(LIBDIR)/qbe2.jar
 
-export CLASSPATH     = .:$(XERCES2):$(SAX):$(REGEXPLIB):$(CUPLIB):$(XML4J):$(DIFF):$(FHOSE):$(DIVA):$(JUNIT):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET):$(JFLEX):$(NIAGSRC)
+export CLASSPATH     = .:$(XERCES2):$(XML4J):$(SAX):$(REGEXPLIB):$(CUPLIB):$(DIFF):$(FHOSE):$(DIVA):$(JUNIT):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET):$(JFLEX):$(NIAGSRC)
 
 export DEBUG = -O
 
