@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.10 2002/03/31 15:53:57 tufte Exp $
+  $Id: NiagraServer.java,v 1.11 2002/04/06 02:13:07 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -69,6 +69,9 @@ public class NiagraServer
     // Defaults
     private static int DEFAULT_QUERY_THREADS = 10;
     private static int DEFAULT_OPERATOR_THREADS = 50;
+
+    private static int DEFAULT_NUMBER_OF_PAGES = 1024;
+    private static int DEFAULT_PAGE_SIZE = 1024;
 
     // The port for client communication 
     private static int client_port = 9020;
@@ -351,7 +354,8 @@ public class NiagraServer
                 else if (args[i].equals("-saxdom")) {
                     // XXX vpapad: number of pages and page size
                     // should be a user-settable parameter
-                    BufferManager.createBufferManager(1024, 1024);
+                    BufferManager.createBufferManager(DEFAULT_NUMBER_OF_PAGES,
+                                                      DEFAULT_PAGE_SIZE);
                     useSAXDOM = true;
 
                     valid_args = true;
