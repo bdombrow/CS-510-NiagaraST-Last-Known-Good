@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.7 2003/03/08 00:57:05 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.8 2003/08/01 16:56:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,61 +43,51 @@ import java.io.*;
  */
 public class ConnectionManager implements Runnable 
 {
-    
     // The thread associated with the class
-    //
     private Thread thread;
 
     // the server that instantiated this connection manager
     private NiagraServer server;
-
 
     // doStop == true means Do not accept any more requests, and shutdown
     private boolean doStop;
 
     // The socket bound to a well know port that all clients 
     // connect to the query engine on
-    //
     private ServerSocket queryEngineSocket;
     
     /**
      *server is passed because it is used for getting access to 
      * dataManager and queryQueues
      */  
-    public ConnectionManager(int queryEngineWellKnownPort,NiagraServer server)
-			      
-    {
+    public ConnectionManager(int queryEngineWellKnownPort,NiagraServer server) {
 
-	// Init our ref to the NiagraServer
-	this.server = server;
+		// Init our ref to the NiagraServer
+		this.server = server;
 	
-	// Create the main connection communication socket
-	//
-	try {
-	    queryEngineSocket = new ServerSocket(queryEngineWellKnownPort);
-	}
-	catch (IOException e) {
-	    System.out.println("Failed to bind socket to port: "
-			       +queryEngineWellKnownPort+"\n"+e);
-	    System.exit(1);
-	}
+		// Create the main connection communication socket
+		try {
+	    	queryEngineSocket = new ServerSocket(queryEngineWellKnownPort);
+		}
+		catch (IOException e) {
+	    	System.out.println("Failed to bind socket to port: "
+				       +queryEngineWellKnownPort+"\n"+e);
+	    	System.exit(1);
+		}
 
+		// Create a new java thread for running an instance of this object
+		thread = new Thread (this,"Connection Manager");
 
-	// Create a new java thread for running an instance of this object
-	//
-	thread = new Thread (this,"Connection Manager");
+		// Call the query thread run method
+		thread.start();	
 
-	// Call the query thread run method
-	//
-	thread.start();	
-
-	return;
+		return;
     }
 
     public ConnectionManager(int queryEngineWellKnownPort,
 			     NiagraServer server, boolean dtd_hack) {
-	this(queryEngineWellKnownPort, server);
-	this.dtd_hack = dtd_hack;
+		this(queryEngineWellKnownPort, server);
+		this.dtd_hack = dtd_hack;
     }
 
     private boolean dtd_hack = false;
@@ -108,53 +98,43 @@ public class ConnectionManager implements Runnable
      */
     public void run () 
     {
-	System.out.println("KT: Connection Manager up, listening on socket: "+
+		System.out.println("KT: Connection Manager up, listening on socket: "+
 			    queryEngineSocket);
 
-	try {
-
+		try {
             // Calls to accept unblock every 500 msecs
             // to check for stop requests
-	    try {
-                queryEngineSocket.setSoTimeout(500);
-            }
-            catch (SocketException e) {
-                System.err.println("Could not set socket timeout!");
-                return;
-            }
-
+            queryEngineSocket.setSoTimeout(500);
+		} catch (SocketException e) {
+			System.err.println("Could not set socket timeout!");
+		}
+	    
 	    do{
-		
-		// Listen for the next client request
-		//
+	    	try{
+				// Listen for the next client request
                 Socket clientSocket = null;
                 while (true) {
-                    try {
-                        clientSocket = queryEngineSocket.accept();
-                        break;
-                    }
-                    catch (InterruptedIOException e) {
-                        if (doStop)
-                            return;
-                        else
-                            continue;
-                    }
+                    clientSocket = queryEngineSocket.accept();
+                    break;
                 }
 
-		System.err.println("Query received: " + new Date() + ", client socket = "+clientSocket);
+				System.err.println("Query received: " + new Date() + ", client socket = "+clientSocket);
 		
-		// Process the request
-		// Hand over this socket to the Request handler 
-		// which will handle all the further requests
-		    RequestHandler newHandler = 
-			new RequestHandler(clientSocket,server, dtd_hack);
-	    
-		
-	    }while(true);
-	}
-	catch (IOException e) {
-	    System.out.println("Exception thrown while listening on QE server socket: "+e);
-	}
+				// Process the request
+				// Hand over this socket to the Request handler 
+				// which will handle all the further requests
+		    	RequestHandler newHandler = 
+					new RequestHandler(clientSocket,server, dtd_hack);
+			} catch (InterruptedIOException e) {
+				if (doStop)
+					return;
+				else
+					continue;
+			} catch (IOException e) {
+				System.out.println("Exception thrown while listening on QE server socket: "+e);
+				return;
+			}
+		}while(true);
     }
 
 
