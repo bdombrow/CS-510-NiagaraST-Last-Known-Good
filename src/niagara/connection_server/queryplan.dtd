@@ -1,8 +1,8 @@
 <!-- DTD for query plans -->
-<!ENTITY NLJoin "niagara.query_engine.PhysicalNLJoinOperator">
-<!ENTITY HashJoin "niagara.query_engine.PhysicalHashJoinOperator">
+<!ENTITY % NLJoin '"niagara.query_engine.PhysicalNLJoinOperator"'>
+<!ENTITY % HashJoin '"niagara.query_engine.PhysicalHashJoinOperator"'>
 
-<!ELEMENT plan     (scan | select | construct | dtdscan | firehosescan)+>
+<!ELEMENT plan     (scan | select | join | construct | dtdscan | firehosescan)+>
 <!ATTLIST plan top IDREF        #REQUIRED>
 
 <!ELEMENT scan     EMPTY>
@@ -14,15 +14,22 @@
 
 	  regexp   CDATA                 #REQUIRED
 
-          physical CDATA                 "" 
+          physical CDATA               #IMPLIED
           input   IDREF                #REQUIRED>
 
 <!ELEMENT select  (and | or | not | pred)>
 <!ATTLIST select 
           id       ID                    #REQUIRED
 
-          physical CDATA                 "" 
-          input   IDREF                #REQUIRED>
+          physical CDATA                #IMPLIED
+          input    IDREF                #REQUIRED>
+
+<!ELEMENT join     (pred)? >
+<!ATTLIST join
+          id       ID                   #REQUIRED
+	  physical CDATA		""
+          input    IDREFS               #REQUIRED>
+
 
 <!ELEMENT and     (and | or | not | pred)+>
 <!ELEMENT or      (and | or | not | pred)+>
@@ -46,14 +53,14 @@
 <!ELEMENT dtdscan  (url)+>
 <!ATTLIST dtdscan 
           id       ID           #REQUIRED
-          physical CDATA        "">
+          physical CDATA        #IMPLIED>
 
 <!ELEMENT firehosescan  EMPTY>
 <!ATTLIST firehosescan 
           id       ID           #REQUIRED
 	  host	   CDATA	#REQUIRED
 	  port	   CDATA	#REQUIRED
-	  rate	   CDATA	""
+	  rate	   CDATA	#REQUIRED
 	  type	   (gen | file) gen
 	  desc     CDATA        #REQUIRED
 	  iters    CDATA        #REQUIRED>
@@ -66,6 +73,9 @@
 <!ELEMENT construct  ANY>
 <!ATTLIST construct 
           id       ID           #REQUIRED
-	  input   IDREF        #REQUIRED
-          physical CDATA        "">
+	  input   IDREF         #REQUIRED
+          physical CDATA        #IMPLIED>
+
+
+
 
