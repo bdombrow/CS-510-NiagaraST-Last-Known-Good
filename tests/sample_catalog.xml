@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.7 2002/12/10 01:05:47 vpapad Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.8 2003/01/13 05:17:37 tufte Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -113,6 +113,8 @@
     </logical>
     <physical name="PhysicalPredicatedUnnest"
     	class ="niagara.query_engine.PhysicalPredicatedUnnest"/>
+    <physical name="PhysicalHead"
+        class ="niagara.query_engine.PhysicalHeadOperator"/>
   </operators>
 
   <ruleset name="normal ruleset">
