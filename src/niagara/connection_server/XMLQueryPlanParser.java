@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.24 2002/08/16 17:55:53 tufte Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.25 2002/08/18 17:37:48 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -819,9 +819,11 @@ public class XMLQueryPlanParser {
 	int rate = Integer.parseInt(e.getAttribute("rate"));
 	String dataTypeStr = e.getAttribute("datatype");
 	String descriptor = e.getAttribute("desc");
+	String descriptor2 = e.getAttribute("desc2");
 	int numGenCalls = Integer.parseInt(e.getAttribute("num_gen_calls"));
 	int numTLElts = Integer.parseInt(e.getAttribute("num_tl_elts"));
-        boolean streaming = e.getAttribute("streaming").equals("yes");
+        boolean streaming = e.getAttribute("streaming").equalsIgnoreCase("yes");
+        boolean prettyPrint = e.getAttribute("prettyprint").equalsIgnoreCase("yes");
 
 	int dataType = -1;
 	boolean found = false;
@@ -837,8 +839,9 @@ public class XMLQueryPlanParser {
 					   dataTypeStr);
 		 
 	FirehoseSpec fhspec = 
-	    new FirehoseSpec(port, host, dataType, descriptor, 
-	                     numGenCalls, numTLElts, rate, streaming);
+	    new FirehoseSpec(port, host, dataType, descriptor, descriptor2,
+	                     numGenCalls, numTLElts, rate, streaming,
+			     prettyPrint);
 	
 	FirehoseScanOp op = new FirehoseScanOp();
 	op.setSelectedAlgoIndex(0);
