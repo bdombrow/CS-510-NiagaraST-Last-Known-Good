@@ -1,4 +1,4 @@
-/* $Id: Variable.java,v 1.1 2002/09/20 23:14:20 vpapad Exp $ */
+/* $Id: Variable.java,v 1.2 2002/10/06 23:40:13 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.ArrayList;
@@ -33,9 +33,7 @@ public class Variable implements Atom, ATTR {
     }
 
     public void toXML(StringBuffer sb) {
-        sb.append("<var value='$");
-        sb.append(name);
-        sb.append("'/>");
+        sb.append("<var value='$").append(name).append("'/>");
     }
 
     public boolean isConstant() {

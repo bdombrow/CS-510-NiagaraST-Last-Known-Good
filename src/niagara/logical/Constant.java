@@ -15,5 +15,5 @@ public abstract class Constant implements Atom {
     
     public boolean isConstant() { return true; }
     public boolean isVariable() { return false; }
-    public int hashCode() { return toString().hashCode(); }
+    public int hashCode() { return getValue().hashCode(); }
 }
