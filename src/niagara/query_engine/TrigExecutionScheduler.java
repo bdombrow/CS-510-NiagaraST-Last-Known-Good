@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: TrigExecutionScheduler.java,v 1.5 2002/05/07 03:10:55 tufte Exp $
+  $Id: TrigExecutionScheduler.java,v 1.6 2002/10/24 02:39:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -195,7 +194,7 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 	// If this is a DTD Scan operator, then process accordingly
 	if (operator instanceof dtdScanOp) {
 	    SinkTupleStream sinkStream = new SinkTupleStream(outputPageStream);
-	    processDTDScanOperator((dtdScanOp) operator, sinkStream);
+	    rootLogicalNode.processSource(sinkStream, dataManager);
 	} else {
 	    // This is a regular operator node ... Create the output streams
 	    // array
@@ -248,7 +247,7 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 	    
 	    // Recurse over all children and create input streams array
 	    //
-	    int numInputs = rootLogicalNode.numInputs();
+	    int numInputs = rootLogicalNode.getArity();
 
 	    SourceTupleStream[] inputStreams = 
 		new SourceTupleStream[numInputs];
