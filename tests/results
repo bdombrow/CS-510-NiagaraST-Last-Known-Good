@@ -1,0 +1,128 @@
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY" input="dtd"/><scan id="scan1" regexp="NUM" input="scan"/><avg id="avg" groupby="$scan" avgattr="$scan1" input="scan1"/> <construct id="cons" input="avg"><Average>$avg</Average></construct></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<Average>1.875</Average>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><!-- This query tests having a construct operator in the middleof the operator tree --><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/><construct id="cons" input="scan"><newnum>$scan</newnum></construct> </plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<newnum>1</newnum>
+<newnum>4</newnum>
+<newnum>1</newnum>
+<newnum>1</newnum>
+<newnum>5</newnum>
+<newnum>1</newnum>
+<newnum>1</newnum>
+<newnum>1</newnum>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><!-- This query tests having a construct operator in the middleof the operator tree --><plan top="select"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/><construct id="cons" input="scan"><num>$scan</num></construct> <select id="select" input="cons"><pred op="ne"><var value="$scan"/><string value="xx"/></pred></select></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<num>1</num>
+<num>4</num>
+<num>1</num>
+<num>1</num>
+<num>5</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY" input="dtd"/><scan id="scan1" regexp="NUM" input="scan"/><count id="count" groupby="$scan" countattr="$scan1" input="scan1"/><construct id="cons" input="count"><Count>$count</Count></construct></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<Count>8</Count>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan1" regexp="PLAY.NUM" input = "dtd" type="content"/><dup id="dup" branch="3" input="scan1"/><union id="union" input="dup dup dup"/><construct id="cons" input="union"><num>$scan1</num></construct></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>4</num>
+<num>4</num>
+<num>4</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>5</num>
+<num>5</num>
+<num>5</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+<num>1</num>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"/></dtdscan><scan id="scan" regexp="PLAY.(PERSONAE.PERSONA|TITLE)" input="dtd"/><expression id="expr" class="niagara.query_engine.TestExpression" input="scan"/><construct id="cons" input="expr"><title>$expr</title></construct></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<title><aNumber>100</aNumber></title>
+<title><aNumber>100</aNumber></title>
+<title><aNumber>100</aNumber></title>
+<title><aNumber>100</aNumber></title>
+<title><aNumber>100</aNumber></title>
+<title><aNumber>100</aNumber></title>
+<title><aNumber>100</aNumber></title>
+<title><aNumber>100</aNumber></title>
+<title><aNumber>100</aNumber></title>
+<title><aNumber>100</aNumber></title>
+<title><aNumber>100</aNumber></title>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="acdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"></url></dtdscan><dtdscan id="jcdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml"></url></dtdscan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 	  id="acscan"           input="acdtdscan"></scan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA"           id="jcscan"           input="jcdtdscan"></scan><join id="join" left="$acscan" right="$jcscan"           physical="niagara.query_engine.PhysicalHashJoinOperator"           input="acscan jcscan"></join><construct clear="no" id="cons" input="join"><PERSONA>$acscan</PERSONA></construct></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<PERSONA>OCTAVIUS CAESAR</PERSONA>
+<PERSONA>M. AEMILIUS LEPIDUS</PERSONA>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="acdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"></url></dtdscan><dtdscan id="jcdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml"></url></dtdscan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 	  id="acscan"           input="acdtdscan"></scan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA"           id="jcscan"           input="jcdtdscan"></scan><join physical="niagara.query_engine.PhysicalNLJoinOperator"               id="join" input="acscan jcscan"><pred op="eq">       <var value="$acscan"></var><var value ="$jcscan"></var></pred></join><construct clear="no" id="cons" input="join"><PERSONA>$acscan</PERSONA></construct></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<PERSONA>OCTAVIUS CAESAR</PERSONA>
+<PERSONA>M. AEMILIUS LEPIDUS</PERSONA>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><!-- This query tests having a construct operator in the middleof the operator tree --><plan top="select"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/><select id="select" input="scan"><pred op="ne"><var value="$scan"/><string value="5"/></pred></select></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<NUM>1</NUM>
+<NUM>4</NUM>
+<NUM>1</NUM>
+<NUM>1</NUM>
+<NUM>1</NUM>
+<NUM>1</NUM>
+<NUM>1</NUM>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="sort"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" input="dtd"/><sort id="sort" input="scan" comparison="numeric" order="ascending" sort_by="$scan"/></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<NUM>1</NUM>
+<NUM>1</NUM>
+<NUM>1</NUM>
+<NUM>1</NUM>
+<NUM>1</NUM>
+<NUM>1</NUM>
+<NUM>4</NUM>
+<NUM>5</NUM>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY" input="dtd"/><scan id="scan1" regexp="NUM" input="scan"/><sum id="sum" groupby="$scan" sumattr="$scan1" input="scan1"/><construct id="cons" input="sum"><sum>$sum</sum></construct></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+Query executing...
+
+<sum>15.0</sum>
