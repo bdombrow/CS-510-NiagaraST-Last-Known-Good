@@ -5,8 +5,8 @@
 <dtdscan id="dtd">
 <url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/>
 </dtdscan>
-<scan id="scan" regexp="PLAY" input="dtd"/>
-<scan id="scan1" regexp="NUM" input="scan"/>
+<unnest id="scan" regexp="PLAY" input="dtd"/>
+<unnest id="scan1" regexp="NUM" input="scan"/>
 <avg id="avg" groupby="$scan" avgattr="$scan1" input="scan1"/> 
 <construct id="cons" input="avg">
 <Average>$avg</Average>

@@ -9,7 +9,7 @@
 <url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/>
 </dtdscan>
 
-<scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/>
+<unnest id="scan" regexp="PLAY.NUM" type="content" input="dtd"/>
 
 <select id="select" input="scan">
 <pred op="ne"><var value="$scan"/><string value="5"/></pred>

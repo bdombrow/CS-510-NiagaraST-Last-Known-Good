@@ -4,7 +4,7 @@
 <dtdscan id="dtd">
 <url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/>
 </dtdscan>
-<scan id="scan1" regexp="PLAY.NUM" input = "dtd" type="content"/>
+<unnest id="scan1" regexp="PLAY.NUM" input = "dtd" type="content"/>
 <dup id="dup" branch="3" input="scan1"/>
 <union id="union" input="dup dup dup"/>
 <construct id="cons" input="union">

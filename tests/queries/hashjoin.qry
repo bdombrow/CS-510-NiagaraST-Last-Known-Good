@@ -11,17 +11,17 @@
 <url value="http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml"></url>
 </dtdscan>
 
-<scan root="" type="content" 
+<unnest root="" type="content" 
         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 
 	  id="acscan" 
           input="acdtdscan">
-</scan>
+</unnest>
 
-<scan root="" type="content" 
+<unnest root="" type="content" 
         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 
           id="jcscan" 
           input="jcdtdscan">
-</scan>
+</unnest>
 
 <join id="join" left="$acscan" right="$jcscan" 
           physical="niagara.query_engine.PhysicalHashJoinOperator" 

@@ -5,6 +5,6 @@
 <dtdscan id="dtd">
 <url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/>
 </dtdscan>
-<scan id="scan" regexp="PLAY.NUM" input="dtd"/>
+<unnest id="scan" regexp="PLAY.NUM" input="dtd"/>
 <sort id="sort" input="scan" comparison="numeric" order="ascending" sort_by="$scan"/>
 </plan>

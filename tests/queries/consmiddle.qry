@@ -10,7 +10,7 @@ of the operator tree -->
 <url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/>
 </dtdscan>
 
-<scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/>
+<unnest id="scan" regexp="PLAY.NUM" type="content" input="dtd"/>
 
 <construct id="cons" input="scan">
 <num>$scan</num>
