@@ -16,27 +16,17 @@ public class ConsolidateMe extends PhysicalOp {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
      */
-    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+    public PhysicalProperty findPhysProp(PhysicalProperty[] input_phys_props) {
         return PhysicalProperty.ANY;
     }
 
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty[])
      */
-    public Cost FindLocalCost(
+    public Cost findLocalCost(
         ICatalog catalog,
         LogicalProperty[] InputLogProp) {
         return new Cost(100);
-    }
-
-    /**
-     * @see niagara.optimizer.colombia.PhysicalOp#InputReqdProp(PhysicalProperty, LogicalProperty, int)
-     */
-    public PhysicalProperty[] InputReqdProp(
-        PhysicalProperty PhysProp,
-        LogicalProperty InputLogProp,
-        int InputNo) {
-        return new PhysicalProperty[] {};
     }
 
     /**

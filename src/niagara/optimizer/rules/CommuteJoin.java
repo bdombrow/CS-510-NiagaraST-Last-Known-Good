@@ -2,6 +2,7 @@
 package niagara.optimizer.rules;
 
 //import niagara.logical.EquiJoinPredicateList;
+import niagara.logical.EquiJoinPredicateList;
 import niagara.logical.Predicate;
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.op_tree.joinOp;
@@ -34,16 +35,6 @@ public class CommuteJoin extends Rule {
         maskRule("CommuteJoin");
     }
     
-// XXX vpapad hack 
-    public Expr next_substitute(
-        Expr before,
-        MExpr mexpr,
-        PhysicalProperty ReqdProp) {
-            return null;
-        }
-
-/*
-
     public Expr next_substitute(
         Expr before,
         MExpr mexpr,
@@ -57,5 +48,4 @@ public class CommuteJoin extends Rule {
             new Expr((before.getInput(1))),
             new Expr((before.getInput(0))));
     }
-*/    
 }

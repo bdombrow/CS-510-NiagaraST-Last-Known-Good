@@ -42,14 +42,6 @@ public class AssociateJoinRtoL extends Rule {
     public void initialize() {
     }
 
-//XXX vpapad hack
-    public Expr next_substitute(
-        Expr before,
-        MExpr mexpr,
-        PhysicalProperty ReqdProp) {
-            return null;
-        }
-/*
 
     public Expr next_substitute(
         Expr before,
@@ -58,15 +50,15 @@ public class AssociateJoinRtoL extends Rule {
         // Get schema for B 
         Expr BC = before.getInput(1);
         LEAF_OP B = (LEAF_OP) (BC.getInput(0).getOp());
-        Attrs bAttrs = B.getGroup().getLogProp().GetAttrs();
+        Attrs bAttrs = B.getGroup().getLogProp().getAttrs();
 
         // Get C's schema
         LEAF_OP C = (LEAF_OP) (BC.getInput(1).getOp());
-        Attrs cAttrs = C.getGroup().getLogProp().GetAttrs();
+        Attrs cAttrs = C.getGroup().getLogProp().getAttrs();
 
         // Get A's schema
         LEAF_OP A = (LEAF_OP) (before.getInput(0).getOp());
-        Attrs aAttrs = A.getGroup().getLogProp().GetAttrs();
+        Attrs aAttrs = A.getGroup().getLogProp().getAttrs();
 
          // Join numbering convention:
          //         2  1               1  2		
@@ -97,8 +89,8 @@ public class AssociateJoinRtoL extends Rule {
         // and if we can find an A attribute A.z equivalent 
         // to C.y, we also add A.z = B.x to (1)
         forallpreds : for (int i = 0; i < leftAttrs.size(); i++) {
-            ATTR la = leftAttrs.get(i);
-            ATTR ra = rightAttrs.get(i);
+            Attribute la = leftAttrs.get(i);
+            Attribute ra = rightAttrs.get(i);
             if (aAttrs.Contains(la)) {
                 if (bAttrs.Contains(ra))
                     newPreds1.add(la, ra);
@@ -112,7 +104,7 @@ public class AssociateJoinRtoL extends Rule {
                 HashSet eqClass = (HashSet) attr2class.get(ra);
                 Iterator it = eqClass.iterator();
                 while (it.hasNext()) {
-                    ATTR az = (ATTR) it.next();
+                    Attribute az = (Attribute) it.next();
                     if (aAttrs.Contains(az)) { // Bingo!
                         newPreds1.add(az, la);
                         continue forallpreds;
@@ -163,15 +155,15 @@ public class AssociateJoinRtoL extends Rule {
             // Get schema for B 
             Expr BC = before.getInput(1);
             LEAF_OP B = (LEAF_OP) (BC.getInput(0).getOp());
-            Attrs bAttrs = B.getGroup().getLogProp().GetAttrs();
+            Attrs bAttrs = B.getGroup().getLogProp().getAttrs();
 
             // Get C's schema
             LEAF_OP C = (LEAF_OP) (BC.getInput(1).getOp());
-            Attrs cAttrs = C.getGroup().getLogProp().GetAttrs();
+            Attrs cAttrs = C.getGroup().getLogProp().getAttrs();
 
             // Get A's schema
             LEAF_OP A = (LEAF_OP) (before.getInput(0).getOp());
-            Attrs aAttrs = A.getGroup().getLogProp().GetAttrs();
+            Attrs aAttrs = A.getGroup().getLogProp().getAttrs();
 
             EquiJoinPredicateList allPreds = op2.getEquiJoinPredicates().copy();
             allPreds.addAll(op1.getEquiJoinPredicates());
@@ -181,17 +173,17 @@ public class AssociateJoinRtoL extends Rule {
 
             // We only need to check that join (1) is not cartesian
             for (int i = 0; i < allPreds.size(); i++) {
-                ATTR la = left.get(i);
+                Attribute la = left.get(i);
                 if (!aAttrs.Contains(la))
                     continue;
-                ATTR ra = right.get(i);
+                Attribute ra = right.get(i);
                 if (bAttrs.Contains(ra))
                     return true;
                 assert cAttrs.Contains(ra);
                 HashSet eqclass = (HashSet) attr2class.get(ra);
                 Iterator iter = eqclass.iterator();
                 while (iter.hasNext()) {
-                    ATTR eq = (ATTR) iter.next();
+                    Attribute eq = (Attribute) iter.next();
                     if (bAttrs.Contains(eq))
                         return true;
                 }
@@ -203,5 +195,4 @@ public class AssociateJoinRtoL extends Rule {
         // otherwise just return true
         return true;
     }
-*/    
 }

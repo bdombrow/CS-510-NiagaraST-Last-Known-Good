@@ -8,8 +8,6 @@ import niagara.xmlql_parser.op_tree.joinOp;
 
 /** Commute a remote subplan on the left ith a local subplan on the right */
 public class CommuteRL extends CommuteJoin {
-// XXX vpapad hack
-/*    
     public CommuteRL() {
         super("CommuteRL");
     }
@@ -25,5 +23,4 @@ public class CommuteRL extends CommuteJoin {
         return mexpr.getInput(0).getLogProp().isRemote()
             && mexpr.getInput(1).getLogProp().isLocal();
     }
-*/    
 }
