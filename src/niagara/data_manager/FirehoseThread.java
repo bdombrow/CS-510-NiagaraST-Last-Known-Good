@@ -15,7 +15,7 @@ package niagara.data_manager;
   */
 
 import com.ibm.xml.parser.*;
-import com.ibm.xml.parsers.TXDOMParser;
+import com.ibm.xml.parsers.*;
 import org.w3c.dom.*;
 import java.io.*;
 import org.xml.sax.*;
@@ -113,12 +113,14 @@ public class FirehoseThread implements Runnable {
 	return succeed;
     }
 
+    // We are trusting the firehose to return valid documents
+    NonValidatingTXDOMParser parser;
+
     /**
      * parse the messageBuffer 
      *
      * @return returns the parsed Document
      */
-
     private TXDocument parseMessageBuffer() {
 	/* parse the messageBuffer 
 	 * Note: messageBuffer may be longer than actual message 
@@ -136,7 +138,9 @@ public class FirehoseThread implements Runnable {
   	if (messageBuffer.indexOf(0) != -1)
  	    messageBuffer = messageBuffer.substring(0, messageBuffer.indexOf(0));	
 	try {
-	    TXDOMParser parser = new TXDOMParser();
+	    if (parser == null) {
+  		parser = new NonValidatingTXDOMParser();
+	    }
 	    parser.parse(new InputSource(new ByteArrayInputStream(messageBuffer.getBytes())));
 	    TXDocument doc = (TXDocument) parser.getDocument();
 	    return doc;
