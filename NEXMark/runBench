@@ -1,0 +1,27 @@
+#!/usr/bin/perl -w
+# $Id: runBench,v 1.1 2003/02/22 08:01:22 tufte Exp $
+
+$temp = "tempresults";
+if(-e $temp) {
+   system("/bin/rm $temp");
+}
+
+@queries = <queries/*.qry>;
+for $f (@queries) {
+    #Remove "queries/" prefix 
+    $f =~ s@[^/]*/@@;
+    # Don't run the test if we don't know the expected results!
+    next unless (-e "expected/$f.result");
+    print "$f", (' ' x (32 - length($f)));
+
+    #Ugly! But how do you redirect stderr in a way that works
+    #for both tcsh and bash? 
+    `/bin/sh -c "./runSimple -silent -qf queries/$f 2>&1 >$temp"`;
+    $diffs = system "cmp -s expected/$f.result $temp";
+    if ($diffs != 0) {
+	print " FAILED\n";
+	system "diff expected/$f.result $temp";
+    } else {
+	print " OK\n";
+    }
+}
