@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.5 2000/08/28 21:53:10 vpapad Exp $
+  $Id: RequestHandler.java,v 1.6 2001/07/17 07:06:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,7 +49,6 @@ public class RequestHandler {
 
     // The Writer to which all the results have to go
     BufferedWriter outputWriter;
-    Socket connectionSocket;
 
     // The server which instantiated this RequestHandler
     NiagraServer server;
@@ -62,18 +61,31 @@ public class RequestHandler {
        @param sock The socket to read from 
        @param server The server that has access to other modules
     */
-
     public RequestHandler(Socket sock, NiagraServer server, boolean dtd_hack) throws IOException{
 	this.dtd_hack = dtd_hack;
 	// A hashtable of queries with qid as key
 	System.out.println("request handler started...");
 	this.queryList = new QueryList();
-	this.connectionSocket = sock;
-	this.outputWriter = new BufferedWriter(new OutputStreamWriter(connectionSocket.getOutputStream()));
+	this.outputWriter = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
 	this.server = server;
 	sendBeginDocument();
 
-	this.requestParser = new RequestParser(connectionSocket.getInputStream(),this);
+	this.requestParser = new RequestParser(sock.getInputStream(),this);
+	this.requestParser.startParsing();
+    }
+
+
+    public RequestHandler(InputStream is, OutputStream os, NiagraServer server) 
+        throws IOException{
+	this.dtd_hack = false;
+	// A hashtable of queries with qid as key
+	System.out.println("inter-server request handler started...");
+	this.queryList = new QueryList();
+	this.outputWriter = new BufferedWriter(new OutputStreamWriter(os));
+	this.server = server;
+	sendBeginDocument();
+
+	this.requestParser = new RequestParser(is, this);
 	this.requestParser.startParsing();
     }
 
@@ -336,7 +348,7 @@ public class RequestHandler {
 	    System.out.println("Invalid Plan: " + ipe.getMessage());
 	    sendResponse(new ResponseMessage(request, ResponseMessage.PARSE_ERROR));
 	} catch(Exception e){
-	    System.out.println("Error Message" + e.getMessage());
+	    System.out.println("Errors while handling request: " + e.getMessage());
 	    e.printStackTrace();
 	}
     }    
@@ -346,12 +358,13 @@ public class RequestHandler {
     */
     public synchronized void sendResponse(ResponseMessage mesg) {
 	try {
-	    outputWriter.write(mesg.toXML());
+            outputWriter.write(mesg.toXML());
 	    outputWriter.flush();
 	}
 	catch (IOException e) {
 	    //looks like connection stream got disconnected
 	    //gracefully shutdown the whole client connection
+            System.out.println("XXX sendResponse got an IOException");
 	    closeConnection();
 	}
     }
@@ -370,7 +383,9 @@ public class RequestHandler {
 	// Respond to an invalid queryID
 	//
 	if (queryInfo == null) {
-	    throw new InvalidQueryIDException();
+            System.err.println("Trying to remove a nonexisting query!");
+            return;
+	    // throw new InvalidQueryIDException(); // XXX vpapad commented out
 	}
 	   	
 

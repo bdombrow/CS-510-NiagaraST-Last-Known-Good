@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.2 2000/08/07 02:00:49 vpapad Exp $
+  $Id: PhysicalCountOperator.java,v 1.3 2001/07/17 07:03:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,13 +30,12 @@ package niagara.query_engine;
 
 import java.util.Vector;
 
-import com.ibm.xml.parser.TXElement;
-import com.ibm.xml.parser.TXText;
+import org.w3c.dom.*;
 
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
-
+import niagara.ndom.*;
 
 /**
  * This is the <code>PhysicalCountOperator</code> that extends the
@@ -246,10 +245,10 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
 
     protected final Object constructEmptyResult () {
 	// Create an Count result element
-	TXElement resultElement = new TXElement("Count");
+	Element resultElement = doc.createElement("Count");
 
 	// Add the text node as a child of the element node
-	resultElement.appendChild(new TXText("0"));
+	resultElement.appendChild(doc.createTextNode("0"));
 	
 	// Return the result element
 	return resultElement;
@@ -300,11 +299,11 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
 
 	// Create an Count result element
 	//
-	TXElement resultElement = new TXElement("Count");
+	Element resultElement = doc.createElement("Count");
 
 	// Create a text node having the string representation of Count
 	//
-	TXText childElement = new TXText(Integer.toString(numValues));
+	Text childElement = doc.createTextNode(Integer.toString(numValues));
 
 	// Add the text node as a child of the element node
 	//

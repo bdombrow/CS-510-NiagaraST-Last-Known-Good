@@ -10,7 +10,6 @@ package niagara.query_engine;
 import java.util.*;
 import org.w3c.dom.*;
 import java.io.*;
-import com.ibm.xml.parser.*;
 import java.lang.reflect.*;
 
 import niagara.utils.*;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.2 2000/08/09 23:54:00 tufte Exp $
+  $Id: QueryEngine.java,v 1.3 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,6 +33,8 @@ import java.util.Vector;
 import niagara.data_manager.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
+
+import niagara.connection_server.NiagraServer;
 
 /**
  *  The QueryEngine class executes queries written in XML-QL and returns
@@ -92,17 +94,20 @@ public class QueryEngine
     //
     private int lastQueryId;
     
+
+    private NiagraServer server;
     
     /**
      * Constructor() - Create the query engine.  Initialize all thread queues
      *                 and other query engine data members
      *
+     * @param server the niagara server we're running in
      * @param maxOperators the maximum number of operator threads
      * @param maxQueries the maximum number of query threads
      * @param ypServerHostName the name of the host on which the yp server runs
      * @param useConnectionManager flag to allow connection/no connection mngr
      */    
-    public QueryEngine(int maxQueries, 
+    public QueryEngine(NiagraServer server, int maxQueries, 
 					   int maxOperators, 
 					   String ypServerHostName,
 					   int ypPort,
@@ -121,6 +126,8 @@ public class QueryEngine
 		System.out.println("\t-Use Permanent Connection to Search Engine = "+
 						   useSearchEngine);
 		System.out.println("-----------------------------------------\n");
+
+                this.server = server;
 
 		// Initialize the data manager
 		//
@@ -152,7 +159,7 @@ public class QueryEngine
 
 		// Create the query scheduler
 		//
-		scheduler = new ExecutionScheduler(dataManager, opQueue);
+		scheduler = new ExecutionScheduler(server, dataManager, opQueue);
 
 		// Create the trig query scheduler
 		//
@@ -297,7 +304,8 @@ public class QueryEngine
      */
 
     public synchronized QueryResult executeOptimizedQuery(logNode planRoot){
-
+        System.out.println("XXX executeOptimizedQuery called");
+        
 	//
 	// Get the next qid
 	//		
@@ -487,6 +495,10 @@ public class QueryEngine
     
     public void  enqueueQuery(QueryInfo queryInfo) {
 	queryQueue.addQuery(queryInfo);
+    }
+
+    public ExecutionScheduler getScheduler() {
+        return scheduler;
     }
 }
 

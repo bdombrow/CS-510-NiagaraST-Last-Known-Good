@@ -3,7 +3,6 @@
  */
 package niagara.connection_server;
 
-import com.ibm.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import java.io.*;
@@ -16,6 +15,8 @@ import niagara.xmlql_parser.syntax_tree.re_parser.*;
 import niagara.xmlql_parser.syntax_tree.construct_parser.*;
 import niagara.query_engine.MTException;
 import niagara.utils.*;
+
+import niagara.ndom.*;
 
 public class XMLQueryPlanParser {
 
@@ -35,10 +36,12 @@ public class XMLQueryPlanParser {
     }
 
     public logNode parse(String description) throws InvalidPlanException {
+        description = description.trim();
+
 	DOMParser p;
 	Document document = null;
 	try {
-	    p = new DOMParser();
+	    p = DOMFactory.newParser();
 	    p.parse(new InputSource(new ByteArrayInputStream(description.getBytes())));
 	    document = p.getDocument();
 	    Element root = (Element) document.getDocumentElement();
@@ -69,6 +72,21 @@ public class XMLQueryPlanParser {
 	    throw new InvalidPlanException("Invalid top node");
 	}
 	parseOperator(e);
+
+        // Assign unique names to all nodes
+        // Transfer location attributes
+        Enumeration ids = ids2nodes.keys();
+        while (ids.hasMoreElements()) {
+            String id = (String) ids.nextElement();
+            logNode node = (logNode) ids2nodes.get(id);
+            node.setName(id);
+
+            Element n = (Element) ids2els.get(id);
+            String location = n.getAttribute("location");
+            if (location != null && location.length() > 0)
+                node.setLocation(location);
+        }
+
 	return (logNode) ids2nodes.get(top);
     }
 
@@ -124,6 +142,9 @@ public class XMLQueryPlanParser {
 	else if (nodeName.equals("dtdscan")) {
 	    handleDtdScan(e);
 	}
+	else if (nodeName.equals("constant")) {
+	    handleConstant(e);
+	}
 	else if (nodeName.equals("construct")) {
 	    handleConstruct(e);
 	}
@@ -142,6 +163,18 @@ public class XMLQueryPlanParser {
 	else if (e.getNodeName().equals("union")) {
 	    handleUnion(e, inputs);
 	}
+	else if (e.getNodeName().equals("send")) {
+	    handleSend(e);
+	}
+	else if (e.getNodeName().equals("display")) {
+	    handleDisplay(e);
+	}
+	else if (e.getNodeName().equals("resource")) {
+	    handleResource(e);
+	}
+        else {
+            throw new InvalidPlanException("Unknown operator: " + nodeName);
+        }
     }
 
     void handleScan(Element e) 
@@ -155,6 +188,9 @@ public class XMLQueryPlanParser {
 	String typeAttr = e.getAttribute("type");
 	String rootAttr = e.getAttribute("root");
 	String regexpAttr = e.getAttribute("regexp");
+
+        op.setDumpAttributes(typeAttr, rootAttr);
+
 	
 	int type;
 	if (typeAttr.equals("tag")) {
@@ -313,6 +349,8 @@ public class XMLQueryPlanParser {
 	
 	logNode input =  (logNode) ids2nodes.get(inputAttr);
 	
+
+
 	varTbl qpVarTbl = input.getVarTbl();
 	predicate pred = parsePreds(predElt, qpVarTbl, null);
 	
@@ -321,6 +359,21 @@ public class XMLQueryPlanParser {
 	
 	logNode selectNode = new logNode(op, input);
 	ids2nodes.put(id, selectNode);
+
+        // XXX Hack to null out variables 
+        // XXX that we know won't be used downstream
+        // XXX This process should be automated
+        String clearAttr = e.getAttribute("clear");
+	boolean[] clear = new boolean[qpVarTbl.size()];
+	StringTokenizer st = new StringTokenizer(clearAttr);
+	while (st.hasMoreTokens()) {
+	    String varName = st.nextToken();
+
+	    int varPos = qpVarTbl.lookUp(varName).getPos();
+	    clear[varPos] = true;
+	}
+        op.setClear(clear);
+        op.setClearAttr(clearAttr);
 	
 	// Nothing changes for the variables
 	// Just use whatever variable table the node downstream has
@@ -663,6 +716,110 @@ public class XMLQueryPlanParser {
 	node.setVarTbl(qpVarTbl);
     }
 
+    void handleResource(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	String id = e.getAttribute("id");
+        String urn = e.getAttribute("urn");
+	
+	ResourceOp op = (ResourceOp) operators.resourceOp.clone();
+	op.setURN(urn);
+	logNode node = new logNode(op);
+	ids2nodes.put(id, node);
+
+	// Create new varTbl and schema
+	varTbl qpVarTbl = new varTbl();
+	
+	schemaAttribute resultSA = 
+	    new schemaAttribute(0, varType.ELEMENT_VAR);
+	
+	// Register variable -> resultSA
+	qpVarTbl.addVar("$" + id, resultSA);
+
+	// Create a new, empty, schema
+	Schema sc = new Schema();
+	sc.addSchemaUnit(new SchemaUnit(null, 0));
+
+	// Register schema and variable table for the
+	// nodes above
+	node.setSchema(sc);
+	node.setVarTbl(qpVarTbl);
+    }
+
+    void handleConstant(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	String id = e.getAttribute("id");
+        String content = "";
+        NodeList children = e.getChildNodes();
+	for (int i=0; i < children.getLength(); i++) {
+	    content = content + XMLUtils.flatten(children.item(i));
+	}
+
+	// Create new varTbl and schema
+	varTbl qpVarTbl = new varTbl();
+	
+	Schema sc = new Schema();
+	sc.addSchemaUnit(new SchemaUnit(null, 0));
+
+        String vars = e.getAttribute("vars");
+	// Parse the vars attribute 
+	Vector varsAs = new Vector();
+	StringTokenizer st = new StringTokenizer(vars);
+        int pos = 0;
+	while (st.hasMoreTokens()) {
+	    String varName = st.nextToken();
+
+	    qpVarTbl.addVar(varName, new schemaAttribute(pos));
+	    sc.addSchemaUnit(new SchemaUnit(null, pos));
+            pos++;
+	}
+
+        ConstantOp op = (ConstantOp) operators.constantOp.clone();
+        op.setContent(content);
+
+  	op.setSelectedAlgoIndex(0);
+  	logNode node = new logNode(op);
+  	ids2nodes.put(id, node);	    
+
+
+	// Register schema and variable table for the
+	// nodes above
+	node.setSchema(sc);
+	node.setVarTbl(qpVarTbl);
+
+    }
+
+    void handleSend(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	String id = e.getAttribute("id");
+
+        SendOp op = (SendOp) operators.send.clone();
+
+  	op.setSelectedAlgoIndex(0);
+
+	String inputAttr = e.getAttribute("input");
+	logNode input =  (logNode) ids2nodes.get(inputAttr);
+
+  	logNode node = new logNode(op, input);
+  	ids2nodes.put(id, node);	    
+    }
+
+    void handleDisplay(Element e) 
+	throws CloneNotSupportedException, InvalidPlanException {
+	String id = e.getAttribute("id");
+
+        DisplayOp op = (DisplayOp) operators.display.clone();
+
+  	op.setSelectedAlgoIndex(0);
+        op.setQueryId(e.getAttribute("query_id"));
+        op.setClientLocation(e.getAttribute("client_location"));
+
+	String inputAttr = e.getAttribute("input");
+	logNode input =  (logNode) ids2nodes.get(inputAttr);
+
+  	logNode node = new logNode(op, input);
+  	ids2nodes.put(id, node);	    
+    }
+
     void handleFirehoseScan(Element e) 
 	throws CloneNotSupportedException, InvalidPlanException {
 	String id = e.getAttribute("id");
@@ -848,6 +1005,8 @@ public class XMLQueryPlanParser {
     }
 
 
+    // XXX This code should be rewritten to take advantage of 
+    // XXX getName and getCode in opType
     predicate parsePreds(Element e, varTbl leftv, varTbl rightv) {
 	predicate p;
 
@@ -899,7 +1058,17 @@ public class XMLQueryPlanParser {
 	    else // eq
 		type = opType.EQ;
 
-	    return new predArithOpNode(type, left, right);
+            // XXX horrible hack for toXML()
+            predArithOpNode toReturn = new predArithOpNode(type, left, right);
+            Vector varlist = new Vector();
+            if (left.getType() == dataType.ATTR) {
+                varlist.add(((Element) e.getChildNodes().item(0)).getAttribute("value"));
+            }
+            if (right.getType() == dataType.ATTR) {
+                varlist.add(((Element) e.getChildNodes().item(1)).getAttribute("value"));
+            }
+            toReturn.setVarList(varlist);
+	    return toReturn;
 	}
     }
 
@@ -911,7 +1080,7 @@ public class XMLQueryPlanParser {
 	else { //var 
 	    String varname = e.getAttribute("value");
 	    if (left.lookUp(varname) != null)
-		return new data(dataType.ATTR, left.lookUp(e.getAttribute("value")));	    
+		return new data(dataType.ATTR, left.lookUp(varname));	    
 	    else {
 		schemaAttribute sa = new schemaAttribute(right.lookUp(varname));
 		sa.setStreamId(1);

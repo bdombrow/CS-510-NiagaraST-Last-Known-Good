@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.3 2000/08/21 00:59:19 vpapad Exp $
+  $Id: PathExprEvaluator.java,v 1.4 2001/07/17 07:03:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,6 @@
 
 package niagara.query_engine;
 
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import java.io.*;
 import java.lang.*;
@@ -126,6 +125,9 @@ public class PathExprEvaluator
 					// Add each item from node list to the return vector
 					//		
 					for (i = 0; i < size; i++){
+                                            if (nl.item(i) == null)
+                                                System.out.println("XXX error, node has null child!");
+                                            
 						if( val.equals(nl.item(i).getNodeName()))
 							nodesReached.addElement(nl.item(i));
 					}
@@ -141,8 +143,8 @@ public class PathExprEvaluator
 				// Else if it is the root of the document, get the doc
 				// element if its name == val
 				//
-				else if(inNode instanceof TXDocument){
-					Element docroot = (Element)((TXDocument)inNode).getDocumentElement();
+				else if(inNode instanceof Document){
+					Element docroot = (Element)((Document)inNode).getDocumentElement();
 					if(docroot != null){
 						if(val.equals(docroot.getNodeName()))
 							nodesReached.addElement(docroot);
@@ -234,8 +236,8 @@ public class PathExprEvaluator
 				
 				// If it is the root, insert the document element to reachable
 				//
-				if(inNode instanceof TXDocument){
-					nodesReached.addElement( ((TXDocument)inNode).getDocumentElement() );
+				if(inNode instanceof Document){
+					nodesReached.addElement( ((Document)inNode).getDocumentElement() );
 				}
 				
 				// Otherwise put all child elements in reachable
@@ -267,8 +269,8 @@ public class PathExprEvaluator
 				
 				// Append the inNode to this set and return it
 				//
-				if(inNode instanceof TXDocument)
-					leftNodes.addElement(((TXDocument)inNode).getDocumentElement());
+				if(inNode instanceof Document)
+					leftNodes.addElement(((Document)inNode).getDocumentElement());
 				else
 					leftNodes.addElement(inNode);
 				return leftNodes;		

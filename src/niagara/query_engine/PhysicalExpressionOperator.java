@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.3 2000/10/07 01:08:21 vpapad Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.4 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,8 @@
 
 package niagara.query_engine;
 
-import com.ibm.xml.parser.*;
+import niagara.ndom.*;
+
 import org.w3c.dom.*;
 import java.util.*;
 import java.io.StringReader;
@@ -102,7 +103,7 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
 	    expression = logicalExpressionOperator.getExpression();
 	    try {
 
-		String source = "package; import niagara.utils.XMLUtils; import java.util.*; import com.ibm.xml.parser.*; import org.w3c.dom.*;  public class UserExpression extends XMLUtils implements " 
+		String source = "package; import niagara.utils.XMLUtils; import java.util.*; import niagara.ndom.*; import org.w3c.dom.*;  public class UserExpression extends XMLUtils implements " 
 		    + " niagara.xmlql_parser.op_tree.ExpressionIF {\n"  
 		    + "public void setupVarTable(HashMap hm) {};\n"
 		    + " public org.w3c.dom.Node processTuple(niagara.utils.StreamTupleElement ste) {\n";
@@ -116,7 +117,7 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
 		    source += " int "  + vname + " = XMLUtils.getInt(ste, " + attrpos + ");\n";
 		}
 		source += "int result; " + expression;
-  		source += "return new com.ibm.xml.parser.TXText(Integer.toString(result));\n"
+  		source += "return DOMFactory.newText(Integer.toString(result));\n"
   		    + "}} new UserExpression();";
 
 		// System.out.println("XXX Source is: " + source);

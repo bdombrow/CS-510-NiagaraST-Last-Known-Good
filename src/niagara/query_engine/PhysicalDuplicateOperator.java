@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalDuplicateOperator.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: PhysicalDuplicateOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,6 @@
 
 package niagara.query_engine;
 
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import java.lang.reflect.Array;
 import niagara.utils.*;
@@ -119,8 +118,8 @@ public class PhysicalDuplicateOperator extends PhysicalOperator {
         //        numDestinationStreams + " Streams");
         // System.err.println("The elmenet is " + tupleElement);
         try {
-            TXDocument doc = (TXDocument)tupleElement.getAttribute(0);
-            String rootName = doc.getRootName();
+            Document doc = (Document) tupleElement.getAttribute(0);
+            String rootName = doc.getDocumentElement().getTagName();
             /*
             if(rootName==null) {
                 System.err.println("Got you!, NULL Root of DOC");

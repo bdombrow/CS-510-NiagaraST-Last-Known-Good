@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.2 2000/07/11 21:53:56 vpapad Exp $
+  $Id: PhysicalAverageOperator.java,v 1.3 2001/07/17 07:03:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,8 +30,8 @@ package niagara.query_engine;
 
 import java.util.Vector;
 
-import com.ibm.xml.parser.TXElement;
-import com.ibm.xml.parser.TXText;
+import niagara.ndom.*;
+import org.w3c.dom.*;
 
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
@@ -150,6 +150,7 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
     //
     schemaAttribute averageAttribute;
 
+    private Document doc;
 
     ////////////////////////////////////////////////////////////////////
     // These are the methods of the class                             //
@@ -363,11 +364,11 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 
 	// Create an average result element
 	//
-	TXElement resultElement = new TXElement("Average");
+	Element resultElement = doc.createElement("Average");
 
 	// Create a text node having the string representation of average
 	//
-	TXText childElement = new TXText(Double.toString(average));
+	Text childElement = doc.createTextNode(Double.toString(average));
 
 	// Add the text node as a child of the element node
 	//
@@ -376,5 +377,9 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	// Return the result element
 	//
 	return resultElement;
+    }
+
+    public void setResultDocument(Document doc) {
+        this.doc = doc;
     }
 }

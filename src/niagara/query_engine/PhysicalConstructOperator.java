@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.5 2000/08/28 21:57:54 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.6 2001/07/17 07:03:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,13 +30,13 @@ package niagara.query_engine;
 
 import java.util.ArrayList;
 import java.util.Vector;
-import com.ibm.xml.parser.*;
 
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
+import org.w3c.dom.*;
+
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.ndom.*;
 
 /**
  * This is the <code>PhysicalConstructOperator</code> that extends
@@ -66,9 +66,9 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     // "Clear the output tuple" flag
     boolean clear;
 
-    // We will use this TXDocument as the "owner" of all the DOM nodes
+    // We will use this Document as the "owner" of all the DOM nodes
     // we create
-    private static TXDocument txd = new TXDocument();
+    private Document doc;
 
     ///////////////////////////////////////////////////////////////////////////
     // These are the methods of the PhysicalConstructOperator class          //
@@ -107,8 +107,6 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	// Initialize the result template and the "clear" flag
 	this.resultTemplate = constructLogicalOp.getResTemp();
 	this.clear = constructLogicalOp.isClear();
-
-	txd = new TXDocument();
     }
     
 
@@ -176,7 +174,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return a list of nodes constructed as per the template
      */
 
-    public static ArrayList constructResult (
+    public ArrayList constructResult (
 				       StreamTupleElement tupleElement,
 				       constructBaseNode templateRoot) {
 
@@ -209,7 +207,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return The list of results constructed
      */
 
-    private static ArrayList processLeafNode (StreamTupleElement tupleElement,
+    private ArrayList processLeafNode (StreamTupleElement tupleElement,
 					      constructLeafNode leafNode) {
 
 	// Create a place holder for the result
@@ -228,7 +226,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 
 	    // Add the string value to the result
 	    //
-	    result.add(txd.createTextNode((String) leafData.getValue()));
+	    result.add(doc.createTextNode((String) leafData.getValue()));
 	}
 	else if (type == dataType.ATTR) {
 
@@ -296,7 +294,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return The list of results constructed
      */
 
-    private static ArrayList processInternalNode (
+    private ArrayList processInternalNode (
 					 StreamTupleElement tupleElement,
 					 constructInternalNode internalNode) {
 
@@ -314,7 +312,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	else
 	   tagName = (String)tagData.getValue();
 
-	TXElement resultElement = (TXElement) txd.createElement(tagName);
+	Element resultElement = doc.createElement(tagName);
 
 	// Recurse on all children and construct result
 	//
@@ -335,8 +333,9 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	    int numResults = childResult.size();
 
 	    for (int res = 0; res < numResults; ++res) {
-
-		resultElement.appendChild(((Node) childResult.get(res)).cloneNode(true));
+                Node n = ((Node) childResult.get(res));
+                n = DOMFactory.importNode(doc, n);
+                resultElement.appendChild(n);
 	    }
 	}
 
@@ -350,4 +349,10 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	//
 	return result;
     }
+
+    public void setResultDocument(Document doc) {
+        this.doc = doc;
+    }
+
 }
+

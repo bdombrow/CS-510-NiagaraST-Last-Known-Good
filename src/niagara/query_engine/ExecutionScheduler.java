@@ -1,6 +1,6 @@
-
+ 
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.7 2000/08/23 03:55:57 tufte Exp $
+  $Id: ExecutionScheduler.java,v 1.8 2001/07/17 07:03:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,6 +42,13 @@ import java.util.Hashtable;
 import niagara.data_manager.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
+import niagara.ndom.*;
+
+import niagara.connection_server.NiagraServer;
+import niagara.connection_server.MQPHandler;
+
+import java.io.*;
+import java.net.*;
 
 /**
  * The class <code>ExecutionScheduler</code> schedules optimized queries
@@ -57,6 +64,9 @@ public class ExecutionScheduler {
     // These are private data members for the class                 //
     //////////////////////////////////////////////////////////////////
 
+    // The server we're running in
+    private NiagraServer server;
+
     // This is the data manager that the physical operators interact with
     //
     private DataManager dataManager;
@@ -68,12 +78,13 @@ public class ExecutionScheduler {
 
     // This specifies the capacity of streams
     //
-    private static int streamCapacity = 2500;
+    private static int streamCapacity = 20;
 
     // This specifies the responsiveness of operators
     //
     private static Integer responsiveness = new Integer(100);
 
+    private boolean debug = false;
 
     //////////////////////////////////////////////////////////////////
     // These are the methods of the class                           //
@@ -84,14 +95,18 @@ public class ExecutionScheduler {
      * it with the operator queue in which it is to put operators scheduled
      * for execution.
      *
+     * @param server The Niagara server we're running in
+
      * @param dataManager The data manager associated with the execution
      *                    scheduler to be contacted as necessary
      * @param opQueue The queue in which operators scheduled for execution
      *                are to be put
      */
 
-    public ExecutionScheduler (DataManager dataManager,
+    public ExecutionScheduler (NiagraServer server, DataManager dataManager,
 			       PhysicalOperatorQueue opQueue) {
+
+        this.server = server;
 
 		// Initialize the operator queue
 		//
@@ -138,13 +153,30 @@ public class ExecutionScheduler {
 		// Traverse the optimized tree and schedule the operators for
 		// execution
 		//
-		System.err.println("ES:: optimizedTree is: ");
-		optimizedTree.dump();
+		//System.err.println("ES:: optimizedTree is: ");
+		//optimizedTree.dump();
 
 		scheduleForExecution(optimizedTree, inputStreams[0], 
-				     new Hashtable());
+				     new Hashtable(), DOMFactory.newDocument());
     }
 
+    public Stream scheduleSubPlan(logNode rootNode) {
+        if (debug) {
+            System.err.println("Scheduling: "); 
+            rootNode.dump();
+        }
+        
+        if (rootNode.isSchedulable()) {
+            Stream results = new Stream();
+            scheduleForExecution(rootNode, results, new Hashtable(), DOMFactory.newDocument());
+            return results;
+        }
+        else { // A mutant query plan
+            MQPHandler handler = new MQPHandler(this, rootNode);
+            handler.start();
+            return null;
+        }
+    }
 
     /**
      * This function schedules the DAG rooted at "rootLogicalNode" for
@@ -156,14 +188,71 @@ public class ExecutionScheduler {
      * @param nodesScheduled  A hashtable containing all the logical plan nodes
      *                        that are already scheduled, since 
      *                        the plan is not necessarily a tree.
+     * @param doc             The DOM document that will own any newly created XML nodes
      */
 
     private void scheduleForExecution (logNode rootLogicalNode,
 				       Stream outputStream,
-				       Hashtable nodesScheduled) {
+				       Hashtable nodesScheduled,
+                                       Document doc) {
 
 		// Get the operator corresponding to the logical node
 		//
+
+        // Check if this is the root of a subplan meant to run
+        // on a different engine
+        //System.out.println("XXX Scheduling node: " + rootLogicalNode);
+        
+        String location = rootLogicalNode.getLocation();
+
+        if (location != null && !location.equals(server.getLocation())) {
+
+            String url_location = "http://" + location + "/servlet/communication";
+            rootLogicalNode.setLocation(null);
+            
+            String query_id = "";
+
+            try {
+                String encodedQuery = URLEncoder.encode(
+                    rootLogicalNode.subplanToXML());
+
+                //System.err.println("ES: Getting subplan id...");
+                URL url = new URL(url_location);
+                URLConnection connection = url.openConnection();
+                connection.setDoOutput(true);
+                PrintWriter out = new PrintWriter(connection.getOutputStream());
+                out.println("type=submit_subplan&query=" + encodedQuery);
+                out.flush();
+                out.close();
+
+                BufferedReader in = new BufferedReader(
+                    new InputStreamReader(
+                        connection.getInputStream()));
+                query_id = in.readLine();
+
+                //System.err.println("ES: Id of remote plan is: " + query_id);
+
+                in.close();
+            }
+            catch (Exception e) {
+                System.out.println("ES: Exception while requesting id from remote engine:");
+                e.printStackTrace();
+                System.exit(-1);
+            }
+            
+            // Replace the subplan with a ReceiveOp
+            ReceiveOp recv = null;
+            try {
+                recv = (ReceiveOp) operators.receive.clone();
+            }
+            catch (Exception e) {
+                System.err.println("Could not clone receive op!");
+            }
+            recv.setReceive(location, query_id);
+            logNode rn = new logNode(recv);
+            scheduleForExecution(rn, outputStream, nodesScheduled, doc);
+            return;
+        }
 
 	op operator = rootLogicalNode.getOperator();
 	Object po = operator;		
@@ -187,12 +276,16 @@ public class ExecutionScheduler {
 		// If this is a DTD Scan operator, then process accordingly
 		//
 		if (operator instanceof dtdScanOp) {
-		    
 		    processDTDScanOperator((dtdScanOp) operator, outputStream);
-
 		} else if (operator instanceof FirehoseScanOp) {
 		    processFirehoseScanOperator((FirehoseScanOp) operator, outputStream);
-		} else {
+		} else if (operator instanceof ConstantOp) {
+                    processConstantOp((ConstantOp) operator, outputStream);
+		} else if (operator instanceof ReceiveOp) {
+                    processReceiveOp((ReceiveOp) operator, outputStream);
+                }
+
+                else {
 			// This is a regular operator node ... Create the output streams
 			// array
 			//
@@ -215,7 +308,7 @@ public class ExecutionScheduler {
 				//
 				scheduleForExecution(rootLogicalNode.input(child),
 						     inputStreams[child],
-						     nodesScheduled);
+						     nodesScheduled, doc);
 			}
 
 			// Instantiate operator with input and output streams.
@@ -230,7 +323,6 @@ public class ExecutionScheduler {
 				return;
 			}
 
-			System.out.println("Algorithm Name = " + physicalOperatorClass);
 
 			// Create a new instance of the class with the logical operator,
 			// input, output streams and responsiveness. First get the
@@ -241,12 +333,8 @@ public class ExecutionScheduler {
 			// Now create an object array of the parameters for the
 			// constructor
 			//
-			Object[] parameters = new Object[4];
-
-			parameters[0] = operator;
-			parameters[1] = inputStreams;
-			parameters[2] = outputStreams;
-			parameters[3] = responsiveness;
+			Object[] parameters = new Object[] {operator, inputStreams,
+                                                            outputStreams, responsiveness};
 
 			// Create a new physical operator object
 			//
@@ -268,6 +356,7 @@ public class ExecutionScheduler {
 			}
 
 			if (physicalOperator.isReady()) {
+                            physicalOperator.setResultDocument(doc);
 			    // Put the new created physical operator in the operator queue
 			    opQueue.putOperator(physicalOperator);
 			}
@@ -309,8 +398,8 @@ public class ExecutionScheduler {
 		// the parsed XML documents
 		//
 		try {
-		    System.err.println("Try to scan " +
-				       dtdScanOperator.getDocs().elementAt(0));
+		    System.err.println("XXX Try to scan " +
+                    	       dtdScanOperator.getDocs().elementAt(0));
 		    boolean scan = 
 			dataManager.getDocuments(dtdScanOperator.getDocs(), null,
 						 new SourceStream(inputStreams[0]));
@@ -322,6 +411,7 @@ public class ExecutionScheduler {
 		    e.printStackTrace();
 		    System.err.println("Data Manager Already Closed!!!");
 		}
+                System.out.println("XXX returning from handleDtdScan");
     }
 
     /**
@@ -364,5 +454,59 @@ public class ExecutionScheduler {
 	fhthread.start();
 	return;
     }
+
+    protected void processConstantOp (ConstantOp op,
+						Stream outputStream) {
+	Stream[] outputStreams = new Stream[1];
+	outputStreams[0] = outputStream;
+	
+	Stream[] inputStreams = new Stream[1];
+	inputStreams[0] = new Stream(streamCapacity);
+	
+	PhysicalPartialOperator partialOp = 
+	    new PhysicalPartialOperator(null,inputStreams, 
+					outputStreams, responsiveness);
+	
+	opQueue.putOperator(partialOp);
+	
+	
+	/* Create a ConstantOpThread */
+
+	ConstantOpThread cot = new ConstantOpThread(op.getContent(),
+				      new SourceStream(inputStreams[0]));
+	
+	// start the thread
+	Thread t = new Thread(cot);
+	t.start();
+    }
+
+    protected void processReceiveOp (ReceiveOp op,
+                                     Stream outputStream) {
+	Stream[] outputStreams = new Stream[1];
+	outputStreams[0] = outputStream;
+	
+	Stream[] inputStreams = new Stream[1];
+	inputStreams[0] = new Stream(streamCapacity);
+	
+	PhysicalPartialOperator partialOp = 
+	    new PhysicalPartialOperator(null,inputStreams, 
+					outputStreams, responsiveness);
+	
+	opQueue.putOperator(partialOp);
+	
+	
+	/* Create a ReceiveThread which will connect to the appropriate
+	 * Niagara engine and start reading tuples and putting them 
+         * into the output stream
+	 */
+
+	ReceiveThread rt = new ReceiveThread(op,
+                                             new SourceStream(inputStreams[0]));
+	
+	// start the thread
+	Thread t = new Thread(rt);
+	t.start();
+    }
+
 }
 

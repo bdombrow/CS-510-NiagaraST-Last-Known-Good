@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestParser.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: RequestParser.java,v 1.2 2001/07/17 07:06:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,6 +30,8 @@ package niagara.connection_server;
 
 import java.io.*;
 import java.util.*;
+
+import gnu.regexp.*;
 
 import com.ibm.xml.framework.*;
 import org.w3c.dom.*;
@@ -139,6 +141,8 @@ public class RequestParser extends HandlerBase implements Runnable {
 
 	try {
 	    String dataString = new String(data,start,length);
+            RE re = new RE("ESC]ESC]ESC>");
+            dataString = re.substituteAll(dataString, "]]>");
 	    currentMesg.requestData += dataString;
 	}
 	catch (Exception ex) {

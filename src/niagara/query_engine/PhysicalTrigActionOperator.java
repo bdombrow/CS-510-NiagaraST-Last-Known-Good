@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalTrigActionOperator.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: PhysicalTrigActionOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,6 @@
 package niagara.query_engine;
 
 import java.util.*;
-
 import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import java.io.*;
@@ -37,6 +36,10 @@ import java.lang.reflect.Array;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+
+
+// XXX vpapad: Document does not have printWithFormat - this code
+// will only work with XML4J
 
 /**
  * This is the <code>PhysicalTrigActionOperator</code> that extends

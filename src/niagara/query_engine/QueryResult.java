@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.2 2000/08/09 23:54:00 tufte Exp $
+  $Id: QueryResult.java,v 1.3 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,13 +28,12 @@
 
 package niagara.query_engine;
 
-import com.ibm.xml.parser.TXDocument;
-import com.ibm.xml.parser.TXElement;
-import org.w3c.dom.Node;
+import org.w3c.dom.*;
+
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
-
+import niagara.ndom.*;
 
 /**
  * QueryResult is the class at the client that interacts with the
@@ -127,7 +126,7 @@ public class QueryResult {
 
 		// The value read
 		//
-		public TXDocument result;
+		public Document result;
     }
 
 
@@ -577,19 +576,20 @@ public class QueryResult {
      * @return The extracted XML document
      */
 
-    private TXDocument extractXMLDocument (StreamTupleElement tupleElement) {
+    private Document extractXMLDocument (StreamTupleElement tupleElement) {
 
 		// First get the last attribute of the tuple
 		//
 		Object lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
 	
-		// Create a TXDocument and add add the result to the TXDocument
+		// Create a Document and add add the result to the Document
 		//
-		TXDocument resultDocument;
+		Document resultDocument;
 
-		resultDocument = new TXDocument();
+		resultDocument = DOMFactory.newDocument();
+                Node n = DOMFactory.importNode(resultDocument, (Node) lastAttribute);
 
-		resultDocument.appendChild(((Node) lastAttribute).cloneNode(true));
+                resultDocument.appendChild(n);
 
 		// Return the result document
 		//

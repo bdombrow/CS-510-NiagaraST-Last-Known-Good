@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSumOperator.java,v 1.1 2000/08/03 04:39:28 vpapad Exp $
+  $Id: PhysicalSumOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,12 +30,12 @@ package niagara.query_engine;
 
 import java.util.Vector;
 
-import com.ibm.xml.parser.TXElement;
-import com.ibm.xml.parser.TXText;
+import org.w3c.dom.*;
 
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.ndom.*;
 
 
 /**
@@ -363,11 +363,11 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 
 	// Create a sum result element
 	//
-	TXElement resultElement = new TXElement("Sum");
+	Element resultElement = doc.createElement("Sum");
 
 	// Create a text node having the string representation of sum
 	//
-	TXText childElement = new TXText(Double.toString(sum));
+	Text childElement = doc.createTextNode(Double.toString(sum));
 
 	// Add the text node as a child of the element node
 	//

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.5 2000/08/11 22:29:27 vpapad Exp $
+  $Id: NiagraServer.java,v 1.6 2001/07/17 07:06:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,6 +37,15 @@ import java.net.InetAddress;
 import niagara.search_engine.server.SEClient;
 import niagara.trigger_engine.TriggerManager;
 import niagara.query_engine.QueryEngine;
+import niagara.ndom.DOMFactory;
+
+import java.net.InetAddress;
+
+// For Jetty Servlet engine
+import com.mortbay.HTTP.*;
+import com.mortbay.Util.*;
+import com.mortbay.HTTP.Handler.*;
+import com.mortbay.HTTP.Handler.Servlet.*;
 
 /**The main Niagra Server which receives all the client requests
    It has an instance of query engine and a trigger manager and a SEClient for 
@@ -53,9 +62,15 @@ public class NiagraServer
 
     private static boolean connectToSE = true;
 
-	// Defaults
-	private static int DEFAULT_QUERY_THREADS = 10;
-	private static int DEFAULT_OPERATOR_THREADS = 50;
+    // Defaults
+    private static int DEFAULT_QUERY_THREADS = 10;
+    private static int DEFAULT_OPERATOR_THREADS = 50;
+
+    // The port for client communication 
+    private static int client_port = 9020;
+
+    // The port for server-to-server communication
+    protected static int server_port = 8020;
     
     // For executing QE queries
     QueryEngine qe;
@@ -66,47 +81,66 @@ public class NiagraServer
     // Client for contacting the search engine
     SEClient seClient;
 
-    // The port that all client communication is done on
-    //
-    private static int CONNECTION_PORT = 9020;
-    
-
     private static boolean dtd_hack = false;
 
+    private static boolean startConsole = false;
+
+    private static Catalog catalog = null;
+
     public NiagraServer() {
-		try {
-			// Create the query engine
-			//
-			qe = new QueryEngine(NUM_QUERY_THREADS,
-								 NUM_OP_THREADS, 
-								 SEHOST, 
-								 SEPORT,
-								 true,     // Connection Manager
-								 connectToSE);    // Search Engine
+        try {
+            // Create the query engine
+            //
+            qe = new QueryEngine(this, NUM_QUERY_THREADS,
+                                 NUM_OP_THREADS, 
+                                 SEHOST, 
+                                 SEPORT,
+                                 true,     // Connection Manager
+                                 connectToSE);    // Search Engine
 	    
-			// Create the trigger manager
-			triggerManager = new TriggerManager(qe);
-			new Thread(triggerManager,"TriggerManager").start();
+            // Create the trigger manager
+            triggerManager = new TriggerManager(qe);
+            new Thread(triggerManager,"TriggerManager").start();
 	    
-			// Create and start the connection manager
-			connectionManager =
-				new ConnectionManager (CONNECTION_PORT, this, dtd_hack);
-	    
-			if (connectToSE)
-			    seClient = new SEClient(SEHOST);
-        
-		}
-		catch (Exception ex) {
-			System.err.println("Could not start server becuase of ");
-			ex.printStackTrace();
-		}
+            // Create and start the connection manager
+            connectionManager =
+                new ConnectionManager (client_port, this, dtd_hack);
+
+            if (startConsole) {
+                Console console = new Console(this, System.in);
+                console.start();
+            }
+            
+            if (connectToSE)
+                seClient = new SEClient(SEHOST);
+
+            // Start HTTP server for interserver communication
+            HttpServer hs = new HttpServer();
+            hs.addListener(new InetAddrPort(server_port));
+            HandlerContext hc = hs.addContext(null, "/servlet/*");
+            
+            ServletHandler sh = new ServletHandler();
+            ServletHolder sholder = sh.addServlet("/communication",
+                          "niagara.connection_server.CommunicationServlet");
+            
+
+            hc.addHandler(sh);
+            hs.start();
+
+            Context context = sh.getContext();
+            context.setAttribute("server", this);
+        }
+        catch (Exception ex) {
+            cerr("Could not start server because of ");
+            ex.printStackTrace();
+        }
     }
     
     
-    /** For reading the options from a configuration file and in case the file
-		is not there or the command line argument is -init then takes the options
-		from the user and stores them in the configuration file
-    */
+    /** For reading the options from a configuration file and in case
+		the file is not there or the command line argument is
+		-init then takes the options from the user and stores
+		them in the configuration file */
     public static void main(String[] args)
 		{
 
@@ -118,189 +152,244 @@ public class NiagraServer
 		}
     
     
-    public static void init(String[] args)
-		{
-	
-			File configInfoFile = new File(".niagra_config");
-	
-			// If -init flag is given, create the init file
-			//
-			if(args.length == 1 && args[0].equals("-init")){
+    public static void init(String[] args) {	
+        File configInfoFile = new File(".niagra_config");
+        
+        // If -init flag is given, create the init file
+        //
+        if(args.length == 1 && args[0].equals("-init")){
 	    
-				byte[] input = new byte[512];
-				String inputString = null;
-				int inputLen = 0;	    
-				boolean validInput = false;
-
-				// get user input for parameters
-				try {		
-			
-					FileOutputStream fout = new FileOutputStream(configInfoFile);
+            byte[] input = new byte[512];
+            String inputString = null;
+            int inputLen = 0;	    
+            boolean validInput = false;
+            
+            // get user input for parameters
+            try {		
+                
+                FileOutputStream fout = new FileOutputStream(configInfoFile);
+                
+                // Get the yellow pages host
+                //
+                while(! validInput){
+                    System.out.print("Enter Search Engine Server hostname: ");
+                    inputLen = System.in.read (input);
+                    
+                    validInput = hostIsValid(new String(input, 0, inputLen-1));
+                    
+                    if(validInput){
+                        
+                        // Write to the file
+                        //
+                        fout.write(new String("SEHOST:").getBytes());
+                        fout.write(input, 0, inputLen-1);
+                        fout.write(new String("\n").getBytes());
+                    }
+                }
+                
 		
-					// Get the yellow pages host
-					//
-					while(! validInput){
-						System.out.print("Enter Search Engine Server hostname: ");
-						inputLen = System.in.read (input);
-		    
-						validInput = hostIsValid(new String(input, 0, inputLen-1));
-		    
-						if(validInput){
-
-							// Write to the file
-							//
-							fout.write(new String("SEHOST:").getBytes());
-							fout.write(input, 0, inputLen-1);
-							fout.write(new String("\n").getBytes());
-						}
-					}
-
-		
-					// Get the number of query threads
-					//
-					validInput = false;
-					while(! validInput){
-						System.out.print("Enter the number of query threads (default 10): ");
-						inputLen = System.in.read (input);
-						if(inputLen == 0){
-							System.out.println("read blank line");
-							continue;
-						}
-
-						if (input[0] == '\n') {
-							System.out.println("Setting number of query threads to 10");
-							validInput = true;
-							input = "10".getBytes();
-							inputLen = 3;
-						}
-						else 
-							validInput = isInteger(new String(input, 0, inputLen-1));
-
-						if(validInput){
-							// Write to the file
-							//
-							fout.write(new String("NUM_QUERY_THREADS:").getBytes());
-							fout.write(input, 0, inputLen-1);
-							fout.write(new String("\n").getBytes());
-						}
-					}
-
-					// Get the number of operator threads
-					//
-					validInput = false;
-					while(! validInput){
-						System.out.print("Enter the number of operator threads (default 50): ");
-						inputLen = System.in.read (input);
-						if (input[0] == '\n') {
-							System.out.println("Setting number of operator threads to 50");
-							validInput = true;
-							input = "50".getBytes();
-							inputLen = 3;
-						}
-						else
-							validInput = isInteger(new String(input, 0, inputLen-1));
-		    
-						if(validInput){
-							// Write to the file
-							//
-							fout.write(new String("NUM_OP_THREADS:").getBytes());
-							fout.write(input, 0, inputLen-1);
-							fout.write(new String("\n").getBytes());
-						}
-					}
-		
-					fout.flush();
-					fout.close();
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
-			}
-
-			// Print usage/help info if -help flag is given
-			//
-			else if(args.length == 1 && args[0].equals("-help")){
-				usage(1);
-				return;
-			}
-			// Bypass the config file and specify host directly
-			else if(args.length == 2 && args[0].equals("-se")){
+                // Get the number of query threads
+                //
+                validInput = false;
+                while(! validInput){
+                    System.out.print("Enter the number of query threads (default 10): ");
+                    inputLen = System.in.read (input);
+                    if(inputLen == 0){
+                        System.out.println("read blank line");
+                        continue;
+                    }
+                    
+                    if (input[0] == '\n') {
+                        System.out.println("Setting number of query threads to 10");
+                        validInput = true;
+                        input = "10".getBytes();
+                        inputLen = 3;
+                    }
+                    else 
+                        validInput = isInteger(new String(input, 0, inputLen-1));
+                    
+                    if(validInput){
+                        // Write to the file
+                        //
+                        fout.write(new String("NUM_QUERY_THREADS:").getBytes());
+                        fout.write(input, 0, inputLen-1);
+                        fout.write(new String("\n").getBytes());
+                    }
+                }
+                
+                // Get the number of operator threads
+                //
+                validInput = false;
+                while(! validInput){
+                    System.out.print("Enter the number of operator threads (default 50): ");
+                    inputLen = System.in.read (input);
+                    if (input[0] == '\n') {
+                        System.out.println("Setting number of operator threads to 50");
+                        validInput = true;
+                        input = "50".getBytes();
+                        inputLen = 3;
+                    }
+                    else
+                        validInput = isInteger(new String(input, 0, inputLen-1));
+                    
+                    if(validInput){
+                        // Write to the file
+                        //
+                        fout.write(new String("NUM_OP_THREADS:").getBytes());
+                        fout.write(input, 0, inputLen-1);
+                        fout.write(new String("\n").getBytes());
+                    }
+                }
+                
+                fout.flush();
+                fout.close();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
+        }
+        
+        // Print usage/help info if -help flag is given
+        //
+        else if(args.length == 1 && args[0].equals("-help")){
+            usage();
+            return;
+        }
+        // Bypass the config file and specify host directly
+        else if(args.length == 2 && args[0].equals("-se")){
 				// bypass config. Config cannot be read in NT
-				String host = args[1];
-				SEHOST = host;
-				NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS; // hard wired defaults
-				NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
-				return;
-			}
-			else {
-			    boolean valid_args = false;
-			    for (int i=0; i < args.length; i++) {
-				if (args[i].equals("-without-se")) {
-				    connectToSE = false;
-				    NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS; // hard wired defaults
-				    NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
-				    valid_args = true;
-				}
-				else if (args[i].equals("-dtd-hack")) {
-				    dtd_hack = true;
-				    valid_args = true;
-				}
-				else if (args[i].equals("-console")) {
-				    Console console = new Console(System.in);
-				    console.start();
-				    valid_args = true;
-				}
-			    }
-			    if (valid_args) return;
-			}
+            String host = args[1];
+            SEHOST = host;
+            NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS; // hard wired defaults
+            NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
+            return;
+        }
+        else {
+            boolean valid_args = false;
+            for (int i=0; i < args.length; i++) {
+                if (args[i].equals("-without-se")) {
+                    connectToSE = false;
+                    NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS; // hard wired defaults
+                    NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS; // hard wired defaults
+                    valid_args = true;
+                }
+                else if (args[i].equals("-dtd-hack")) {
+                    dtd_hack = true;
+                    valid_args = true;
+                }
+                else if (args[i].equals("-console")) {
+                    startConsole = true;
+                    valid_args = true;
+                }
+                else if (args[i].equals("-client-port")) {
+                    if ((i+1) >= args.length) {
+                        cerr("Please supply a parameter to -client-port");
+                        usage();
+                    }
+                    else {
+                        try {
+                            client_port = Integer.parseInt(args[i+1]);
+                        }
+                        catch (NumberFormatException nfe) {
+                            cerr("Invalid argument to -client-port");
+                            usage();
+                        }
+                    }
+                    i++; // Cover for argument
+                    valid_args = true;
+                }
+                else if (args[i].equals("-server-port")) {
+                    if ((i+1) >= args.length) {
+                        cerr("Please supply a parameter to -server-port");
+                        usage();
+                    }
+                    else {
+                        try {
+                            server_port = Integer.parseInt(args[i+1]);
+                        }
+                        catch (NumberFormatException nfe) {
+                            cerr("Invalid argument to -server-port");
+                            usage();
+                        }
+                    }
+                    i++; // Cover for argument
+                    valid_args = true;
+                }
+                else if (args[i].equals("-catalog")) {
+                    if ((i+1) >= args.length) {
+                        cerr("Please supply a parameter to -catalog");
+                        usage();
+                    }
+                    else {
+                        catalog = new Catalog(args[i+1]);
+                    }
+                    i++; // Cover for argument
+                    valid_args = true;
+                }
+                else if (args[i].equals("-dom")) {
+                    if ((i+1) >= args.length) {
+                        cerr("Please supply a parameter to -dom");
+                        usage();
+                    }
+                    else {
+                        DOMFactory.setImpl(args[i+1]);
+                    }
+                    i++; // Cover for argument
+                    valid_args = true;
+                }
 
-			// Open the config file if it exists and use it to init params
-			//
-			if(configInfoFile.exists()){
-	    
-				try{
-					FileInputStream fin = new FileInputStream(configInfoFile);
-					byte[] inbuff = new byte[512];
-					String curParam = null;
 
-					// Read the config file into the inbuff
-					//
-					int len = fin.read(inbuff, 0, 512);
-		
-					String inStr = new String(inbuff, 0, len);
-					StringTokenizer st = 
-						new StringTokenizer(inStr, "\n");
-		
-					// Get the yellow pages host
-					//
-					curParam = st.nextToken();
-					curParam = curParam.substring(curParam.indexOf(":")+1);
-					SEHOST = curParam;
-		
-					// Get the yellow pages host
-					//
-					curParam = st.nextToken();
-					curParam = curParam.substring(curParam.indexOf(":")+1);
-					NUM_QUERY_THREADS = Integer.parseInt(curParam);
-
-		
-					// Get the yellow pages host
-					//
-					curParam = st.nextToken();
-					curParam = curParam.substring(curParam.indexOf(":")+1);
-					NUM_OP_THREADS = Integer.parseInt(curParam);
-
-				}catch(Exception e){
-		
-				}
-				return;
-			}
-	
-			System.out.println("\nNo confing file, start server with '-init' flag");
-			usage(0);
-			System.exit(-1);
-		}
+            }
+            if (valid_args) return;
+        }
+        
+        // Open the config file if it exists and use it to init params
+        //
+        if(configInfoFile.exists()){
+            
+            try{
+                FileInputStream fin = new FileInputStream(configInfoFile);
+                byte[] inbuff = new byte[512];
+                String curParam = null;
+                
+                // Read the config file into the inbuff
+                //
+                int len = fin.read(inbuff, 0, 512);
+                
+                String inStr = new String(inbuff, 0, len);
+                StringTokenizer st = 
+                    new StringTokenizer(inStr, "\n");
+                
+                // Get the yellow pages host
+                //
+                curParam = st.nextToken();
+                curParam = curParam.substring(curParam.indexOf(":")+1);
+                SEHOST = curParam;
+                
+                // Get the yellow pages host
+                //
+                curParam = st.nextToken();
+                curParam = curParam.substring(curParam.indexOf(":")+1);
+                NUM_QUERY_THREADS = Integer.parseInt(curParam);
+                
+                
+                // Get the yellow pages host
+                //
+                curParam = st.nextToken();
+                curParam = curParam.substring(curParam.indexOf(":")+1);
+                NUM_OP_THREADS = Integer.parseInt(curParam);
+                
+            }catch(Exception e){
+                
+            }
+            return;
+        }
+        
+        cout("\nNo confing file, start server with '-init' flag");
+        usage();
+        System.exit(-1);
+    }
     
     /**
      * see if int is valid
@@ -332,7 +421,7 @@ public class NiagraServer
 				InetAddress ip = InetAddress.getByName(host);
 				return true;
 			}catch(Exception e){
-				System.err.println("* Host '"+host+"' not found *");
+				cerr("* Host '"+host+"' not found *");
 				return false;
 			}
 		}
@@ -340,25 +429,62 @@ public class NiagraServer
     /**
      * Print help and usage information
      */
-    private static void usage(int detail)
-		{
-			if(detail <= 1){
-				System.out.println();
-				System.out.println("Usage: java niagara.connection_server.NiagraServer [flags]");
-				System.out.println("\t-init   create (re-create) the .niagra_config file");
-				System.out.println("\t-se <host name> use the the search engine on <host name>");
-				System.out.println("\t-without-se Do not try to connect to a search engine");
-				System.out.println("\t-dtd-hack   Add HTML entity definitions to results");
-				System.out.println("\t-console    Rudimentary control of the server from stdin");
+    private static void usage() {
+        cout("");
+        cout("Usage: java niagara.connection_server.NiagraServer [flags]");
+        cout("\t-init   create (re-create) the .niagra_config file");
+        cout("\t-se <host name> use the the search engine on <host name>");
 
-				System.out.println("\t-help   print detailed help screen");
-			}
-			if(detail == 1){
-				System.out.println("\n\tNiagara help message goes here");
-			}
-			System.out.println();
-			System.exit(-1);
-		}
+        cout("\t-without-se   Do not try to connect to a search engine");
+        cout("\t-dtd-hack     Add HTML entity definitions to results");
+        cout("\t-console      Rudimentary control of the server from stdin");
+        cout("\t-client-port <number> Port number for client-server communication");
+        cout("\t-server-port <number> Port number for inter-server communication");
+        cout("\t-catalog <file> Catalog file.");
+        cout("\t-dom  <file> Default DOM implementation.");
+        cout("\t-help   print this help screen");
+        System.exit(-1);
+    }
+
+    private static void cout(String msg) {
+        System.out.println(msg);
+    }
+
+    private static void cerr(String msg) {
+        System.err.println(msg);
+    }
+
+
+    /**
+     * <code>getLocation</code> 
+     * 
+     * @return the location <code>String</code> for this server
+     */
+    public String getLocation() {
+        String ret = "";
+        try {
+            ret = InetAddress.getLocalHost().getHostAddress() + ":" + server_port;
+        }
+        catch (java.net.UnknownHostException e) {
+            cerr("Server host name is unknown! -- aborting...");
+            System.exit(-1);
+        }
+
+        return ret;
+    }
+
+    public static Catalog getCatalog() {
+        return catalog;
+    }
+
+    public QueryEngine getQueryEngine() {
+        return qe;
+    }
+
+    // Try to shutdown
+    public void shutdown() {
+        connectionManager.shutdown();
+    }
 }
 
 

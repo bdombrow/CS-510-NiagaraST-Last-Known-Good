@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.5 2000/08/28 21:53:10 vpapad Exp $
+  $Id: ResultTransmitter.java,v 1.6 2001/07/17 07:06:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -540,14 +540,7 @@ public class ResultTransmitter implements Runnable {
     /**Extract the XML string from the result object
      */
     private String getResultData(QueryResult.ResultObject ro) {
-	StringWriter writer = new StringWriter();
-	try {
-	    ro.result.printWithFormat(writer);
-	}
-	catch (IOException e) {
-	    e.printStackTrace();
-	}
-	return writer.toString();
+        return XMLUtils.flatten(ro.result);
     }
 
     

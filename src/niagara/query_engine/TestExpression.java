@@ -2,15 +2,16 @@ package niagara.query_engine;
 
 import niagara.xmlql_parser.op_tree.*;
 import niagara.utils.*;
+import niagara.ndom.*;
 
 import org.w3c.dom.*;
 import java.util.*;
-import com.ibm.xml.parser.*;
 
 public class TestExpression implements ExpressionIF {
     public Node processTuple(StreamTupleElement ste) {
-	Element res = new TXElement("aNumber");
-	res.appendChild(new TXText("100"));
+        Document doc = DOMFactory.newDocument();
+	Element res = doc.createElement("aNumber");
+	res.appendChild(doc.createTextNode("100"));
 	return res;
     }
     public void setupVarTable(HashMap varTable) {

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSortOperator.java,v 1.1 2000/08/21 00:59:20 vpapad Exp $
+  $Id: PhysicalSortOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,6 @@
 
 package niagara.query_engine;
 
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 
 import java.util.*;

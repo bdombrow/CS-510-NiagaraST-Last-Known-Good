@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: ResponseMessage.java,v 1.2 2001/07/17 07:06:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -81,9 +81,9 @@ class ResponseMessage
 	String result = "<responseMessage localID =\"" + localID +
 	    "\" serverID = \"" + serverID + 
 	    "\" responseType = \"" + getResponseType() + "\">\n" +
-	    "<responseData>"+
+	    "<responseData>\n"+
 	    responseData +
-	    "</responseData>" +
+	    "\n</responseData>" +
 	    "</responseMessage>\n";
 	return result;
     }

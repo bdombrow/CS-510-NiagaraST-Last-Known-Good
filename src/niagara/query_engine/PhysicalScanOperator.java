@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.4 2000/08/21 00:59:20 vpapad Exp $
+  $Id: PhysicalScanOperator.java,v 1.5 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,6 @@
 
 package niagara.query_engine;
 
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import java.util.Vector;
 import niagara.utils.*;
@@ -129,6 +128,7 @@ public class PhysicalScanOperator extends PhysicalOperator {
 						 StreamTupleElement inputTuple,
 						 int streamId,
 						 ResultTuples result) {
+
 	// Get the attribute to scan on
 	//
 	Object attribute = inputTuple.getAttribute(scanField);
@@ -136,14 +136,14 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	// Get the nodes reachable using the path expression scanned
 	//
         
-        if(attribute instanceof TXDocument) {
+        if(attribute instanceof Document) {
             // System.err.println( ((TXDocument)attribute).getText());
-            String rootName = ((TXDocument)attribute).getRootName();
+            String rootName = ((Document) attribute).getDocumentElement().getTagName();
             if(rootName==null) {
                 System.err.println("Got you!, NULL Root of DOC");
             }
         }
-        else if(attribute instanceof TXElement) {
+        else if(attribute instanceof Element) {
             // System.err.println( ((TXElement)attribute).getText());
         }
 	//System.out.println("SCAN:Node scanned is " + ((Node)attribute).getNodeName());

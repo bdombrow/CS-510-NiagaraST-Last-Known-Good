@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,11 +32,12 @@ import java.util.Vector;
 import java.util.ArrayList;
 
 import com.ibm.xml.parser.TXElement;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;        
+
+import org.w3c.dom.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.ndom.*;
 
 /**
  * This is the <code>PhysicalNestOperator</code> that extends the
@@ -140,7 +141,7 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 	// Construct the result as per the template for the tuple
 	//
 	ArrayList resultList =
-	    PhysicalConstructOperator.constructResult(tupleElement,
+	    physConstructResult(tupleElement,
 						      resultTemplate);
 
 	// The list can have a size of only one, get that result
@@ -300,4 +301,184 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 				       nodeVector.elementAt(node)).cloneNode(true));
 	}
     }
+
+    // vpapad: Brought these over from PhysicalConstruct operator,
+    // because constructResult is no longer a static method
+    private Document txd = DOMFactory.newDocument();
+    public ArrayList physConstructResult (
+				       StreamTupleElement tupleElement,
+				       constructBaseNode templateRoot) {
+
+	// Check if the template root is an internal node or a leaf node
+	// and process accordingly
+	//
+	if (templateRoot instanceof constructLeafNode) {
+
+	    return processLeafNode(tupleElement,
+				   (constructLeafNode) templateRoot);
+	}
+	else if (templateRoot instanceof constructInternalNode) {
+
+	    return processInternalNode(tupleElement,
+				       (constructInternalNode) templateRoot);
+	}
+	else {
+	    System.err.println("Error: Unknown construct node type!");
+	    return null;
+	}
+    }
+
+
+    /**
+     * This function processes a leaf node during the construction process
+     *
+     * @param tupleElement The tuple to construct the result from
+     * @param leafConstructNode The leaf node having details of construction
+     *
+     * @return The list of results constructed
+     */
+
+    private ArrayList processLeafNode (StreamTupleElement tupleElement,
+					      constructLeafNode leafNode) {
+
+	// Create a place holder for the result
+	//
+	ArrayList result = new ArrayList();
+
+	// Get the data of the leaf node
+	//
+	data leafData = leafNode.getData();
+
+	// Check the type of the data
+	//
+	int type = leafData.getType();
+
+	if (type == dataType.STRING) {
+
+	    // Add the string value to the result
+	    //
+	    result.add(txd.createTextNode((String) leafData.getValue()));
+	}
+	else if (type == dataType.ATTR) {
+
+	    // First get the schema attribute
+	    //
+	    schemaAttribute schema = (schemaAttribute) leafData.getValue();
+
+	    // Now construct result based on whether it is to be interpreted
+	    // as an element or a parent
+	    //
+	    if (schema.getType() == varType.ELEMENT_VAR) {
+
+		// The value of the leafData is a schema attribute - from it
+		// get the attribute id in the tuple to construct from
+		//
+		int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
+
+		// Add the attribute as the result
+		//
+		result.add(tupleElement.getAttribute(attributeId));
+	    }
+	    else if (schema.getType() == varType.CONTENT_VAR) {
+
+		// The value of the leafData is a schema attribute - from it
+		// get the attribute id in the tuple to construct from
+		//
+		int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
+
+		// Get the children of the attribute
+		//
+		NodeList nodeList =
+		    ((Node) tupleElement.getAttribute(attributeId)).getChildNodes();
+
+		// Add all the children to the result
+		//
+		int numChildren = nodeList.getLength();
+
+		for (int child = 0; child < numChildren; ++child) {
+
+		    result.add(nodeList.item(child));
+		}
+	    }
+	    else {
+
+		System.err.println("Unknown schema attribute type in construct leaf node");
+	    }
+	}
+	else {
+
+	    System.err.println("Unknown type in construct leaf node");
+	}
+
+	// Return the constructed result
+	//
+	return result;
+    }
+
+    
+    /**
+     * This function processes a internal node during the construction process
+     *
+     * @param tupleElement The tuple to construct the result from
+     * @param interalNode The internal node having details of construction
+     *
+     * @return The list of results constructed
+     */
+
+    private ArrayList processInternalNode (
+					 StreamTupleElement tupleElement,
+					 constructInternalNode internalNode) {
+
+	// Create a new element node with the required tag name
+	// taking care of tagvariables
+
+	data tagData = internalNode.getStartTag().getSdata();
+	String tagName;
+
+	if(tagData.getType() == dataType.ATTR) {
+	   schemaAttribute sattr = (schemaAttribute)tagData.getValue();
+	   int attrId = sattr.getAttrId();
+	   tagName = ((Node)tupleElement.getAttribute(attrId)).getNodeName();
+	}
+	else
+	   tagName = (String)tagData.getValue();
+
+	Element resultElement = txd.createElement(tagName);
+
+	// Recurse on all children and construct result
+	//
+	Vector children = internalNode.getChildren();
+
+	int numChildren = children.size();
+
+	for (int child = 0; child < numChildren; ++child) {
+
+	    // Get constructed results from child
+	    //
+	    ArrayList childResult = 
+		physConstructResult(tupleElement,
+				(constructBaseNode) children.get(child));
+
+	    // Add each constructed result to the result element
+	    //
+	    int numResults = childResult.size();
+
+	    for (int res = 0; res < numResults; ++res) {
+                Node n = ((Node) childResult.get(res)).cloneNode(true);
+                DOMFactory.importNode(txd, n);
+                resultElement.appendChild(n);
+	    }
+	}
+
+	// Construct the result array list
+	//
+	ArrayList result = new ArrayList(1);
+
+	result.add(resultElement);
+
+	// Return the result
+	//
+	return result;
+    }
+
 }

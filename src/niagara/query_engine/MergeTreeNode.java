@@ -20,7 +20,6 @@ package niagara.query_engine;
 
 import java.util.*;
 import org.w3c.dom.*;
-import com.ibm.xml.parsers.*;
 import org.xml.sax.*;
 import java.io.*;
 

@@ -2,8 +2,9 @@ package niagara.query_engine;
 
 import java.util.Vector;
 import org.w3c.dom.*;
-import com.ibm.xml.parser.*;
-import com.ibm.xml.parsers.*;
+
+import niagara.ndom.*;
+
 import org.xml.sax.*;
 import java.io.*;
 
@@ -272,7 +273,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     private void createEmptyAccumulator()  {
 	accumDoc = new NIDocument();
-	Document domDoc = new TXDocument();
+	Document domDoc = DOMFactory.newDocument();
 	accumDoc.initialize(mapTable, domDoc);
 	return;
     }
@@ -295,9 +296,9 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     private void createAccumulatorFromDisk(String initialAF) {
 
 	try {
-	    TXDOMParser p;
+	    DOMParser p;
 	    // System.out.println("Creating parser");
-	    p = new TXDOMParser();
+	    p = DOMFactory.newParser();
 	    
 	    /* Parse the initial accumulate	file */
 	    if(initialAF.startsWith("<?xml")) {

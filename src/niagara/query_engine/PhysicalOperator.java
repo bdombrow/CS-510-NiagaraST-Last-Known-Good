@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.5 2000/08/28 21:57:54 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.6 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,6 +42,8 @@ import java.io.*;
 
 import niagara.utils.*;
 import niagara.data_manager.*;
+
+import org.w3c.dom.Document;
 
 public abstract class PhysicalOperator {
 	
@@ -343,7 +345,6 @@ public abstract class PhysicalOperator {
      */
 
     public final void execute () {
-
 	// Flag that indicates whether the operator is to proceed or quit
 	//
 	boolean proceed = false;
@@ -361,7 +362,7 @@ public abstract class PhysicalOperator {
 	    // operator
 	    //
 	    proceed = this.initialize();
-
+            
 	    // If not proceeding, shut down operator
 	    //
 	    if (!proceed) {
@@ -1851,7 +1852,6 @@ public abstract class PhysicalOperator {
      */
 
     protected void cleanUp () {
-
 	// Currently no clean up
 	//
     }
@@ -1954,6 +1954,18 @@ public abstract class PhysicalOperator {
     /*this function sets the data manager--Trigger*/
     public static void setDataManager(DataManager dm) {
 	DM=dm;
+    }
+
+
+    /**
+     * <code>setResultDocument</code> provides an
+     * owner Document for XML nodes that are newly
+     * created by any operator in the query plan
+     *
+     * @param doc a <code>Document</code> 
+     */
+    public void setResultDocument(Document doc) {
+        // The default physical operator does not create new XML nodes
     }
 
     /**

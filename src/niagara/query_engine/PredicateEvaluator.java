@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PredicateEvaluator.java,v 1.3 2000/08/21 00:59:20 vpapad Exp $
+  $Id: PredicateEvaluator.java,v 1.4 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,6 @@
 
 package niagara.query_engine;
 
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 import java.io.*;
 import java.lang.*;
@@ -256,8 +255,8 @@ public class PredicateEvaluator {
 
 	for (int left = 0; left < numLeft; ++left) {
 	    
-	    for (int right = 0; right < numRight; ++right) {
-/*	        if(leftAtomicValues.elementAt(left) instanceof TXElement) {
+               for (int right = 0; right < numRight; ++right) {
+                   /*    if(leftAtomicValues.elementAt(left) instanceof TXElement) {
                     System.err.println("L Ele: " +
                             ((TXElement)leftAtomicValues.elementAt(left)).getText());
                 }

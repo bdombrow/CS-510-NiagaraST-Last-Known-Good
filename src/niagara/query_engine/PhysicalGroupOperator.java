@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.4 2000/08/21 00:59:19 vpapad Exp $
+  $Id: PhysicalGroupOperator.java,v 1.5 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,9 @@ import java.util.Iterator;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
+
+import org.w3c.dom.Document;
+
 /**
  * This is the <code>PhysicalGroupOperator</code> that extends
  * the basic PhysicalOperator with the implementation of the group
@@ -226,6 +229,8 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     //
     private int currPartialResultId;
 
+
+    protected Document doc;
 
     ///////////////////////////////////////////////////////////////////////////
     // These are the methods of the PhysicalGroupOperator class          //
@@ -567,6 +572,9 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	return tupleElement;
     }
 
+    public void setResultDocument(Document doc) {
+        this.doc = doc;
+    }
 
     /////////////////////////////////////////////////////////////////////////
     // These functions are the hooks that are used to implement specific   //

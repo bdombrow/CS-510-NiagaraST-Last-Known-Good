@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: PhysicalSelectOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -93,9 +93,13 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 		// Set the predicate for evaluating the select
 		//
 		this.pred = logicalSelectOperator.getPredicate();
-		
+
+		// XXX hack
+                clear = ((selectOp) logicalOperator).getClear();
     }
 		     
+    // XXX hack
+    boolean[] clear;
 
     /**
      * This function processes a tuple element read from a source stream
@@ -122,7 +126,17 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 				
 				// If the predicate is satisfied, add the tuple to the result
 				//
-				result.add(tupleElement, 0);
+                            // XXX hack
+                            StreamTupleElement newTuple = 
+                                new StreamTupleElement(tupleElement.isPartial());
+                            for (int i = 0; i < clear.length; i++) {
+                                if (clear[i] || i == 0) { // XXX hack on hack. doc is not variable
+                                    newTuple.appendAttribute(null);
+                                }
+                                else 
+                                    newTuple.appendAttribute(tupleElement.getAttribute(i));
+                            }
+                            result.add(newTuple, 0);
 			}
 			
 			// No problem - continue execution

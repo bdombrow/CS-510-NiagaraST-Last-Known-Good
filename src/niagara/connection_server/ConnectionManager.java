@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.2 2000/08/07 01:41:06 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.3 2001/07/17 07:06:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,12 +30,9 @@ package niagara.connection_server;
 
 import java.util.Vector;
 import java.util.Hashtable;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.InetAddress;
+import java.net.*;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 
 /**
@@ -54,6 +51,10 @@ public class ConnectionManager implements Runnable
 
     // the server that instantiated this connection manager
     private NiagraServer server;
+
+
+    // doStop == true means Do not accept any more requests, and shutdown
+    private boolean doStop;
 
     // The socket bound to a well know port that all clients 
     // connect to the query engine on
@@ -112,12 +113,34 @@ public class ConnectionManager implements Runnable
 			    queryEngineSocket);
 
 	try {
-	    
+
+            // Calls to accept unblock every 500 msecs
+            // to check for stop requests
+	    try {
+                queryEngineSocket.setSoTimeout(500);
+            }
+            catch (SocketException e) {
+                System.err.println("Could not set socket timeout!");
+                return;
+            }
+
 	    do{
 		
 		// Listen for the next client request
 		//
-		Socket clientSocket = queryEngineSocket.accept();
+                Socket clientSocket = null;
+                while (true) {
+                    try {
+                        clientSocket = queryEngineSocket.accept();
+                        break;
+                    }
+                    catch (InterruptedIOException e) {
+                        if (doStop)
+                            return;
+                        else
+                            continue;
+                    }
+                }
 
 		System.out.println("Accepted: client socket = "+clientSocket);
 		
@@ -139,12 +162,9 @@ public class ConnectionManager implements Runnable
 
     /**
      *  Shut the connection manager down gracefully
-     *
      */
-    public void shutdown()
-    {
-	// TODO::  shut the connection manager down gracefully
-	//
+    public void shutdown() {
+        doStop = true;
     }
 }
 

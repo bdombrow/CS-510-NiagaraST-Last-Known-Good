@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TrigExecutionScheduler.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: TrigExecutionScheduler.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -115,7 +115,7 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
     public TrigExecutionScheduler (DataManager dataManager,
 			       PhysicalOperatorQueue opQueue) {
 
-	super(dataManager, opQueue);	
+	super(null, dataManager, opQueue);	
 
 	// Initialize the operator queue
 	//

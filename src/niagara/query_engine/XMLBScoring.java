@@ -2,9 +2,9 @@ package niagara.query_engine;
 
 import niagara.xmlql_parser.op_tree.*;
 import niagara.utils.*;
+import niagara.ndom.*;
 
 import org.w3c.dom.*;
-import com.ibm.xml.parser.*;
 import java.util.HashMap;
 
 public class XMLBScoring implements ExpressionIF {
@@ -16,6 +16,12 @@ public class XMLBScoring implements ExpressionIF {
     static final String steal = "$steals";
 
     private HashMap varTable;
+
+    private Document doc;
+    public XMLBScoring() {
+        doc = DOMFactory.newDocument();
+    }
+
     public void setupVarTable(HashMap varTable) {
 	this.varTable = varTable;
     }
@@ -43,8 +49,8 @@ public class XMLBScoring implements ExpressionIF {
 	    + getInt(ste, win) * 10 
 	    + getInt(ste, strikeout) 
 	    + getInt(ste, runallowed) * (-1);
-	TXElement txe = new TXElement("score");
-	txe.appendChild(new TXText(Integer.toString(final_score)));
+	Element txe = doc.createElement("score");
+	txe.appendChild(doc.createTextNode(Integer.toString(final_score)));
 	return txe;
     }
 }

@@ -11,9 +11,11 @@ import java.io.*;
  */
 public class Console extends Thread {
     
+    NiagraServer server;
     BufferedReader br;
 
-    public Console(InputStream in) {
+    public Console(NiagraServer server, InputStream in) {
+        this.server = server;
 	br = new BufferedReader(new InputStreamReader(in));
     }
 
@@ -26,6 +28,7 @@ public class Console extends Thread {
 	    catch (Exception e) {}
 	    if (command.equals("exit")) {
 		System.out.println("... server exiting.");
+                server.shutdown();
 		System.exit(0);
 	    }
 	    else if (command.equals("gc")) {
