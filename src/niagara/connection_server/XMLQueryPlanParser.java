@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.31 2002/12/10 00:56:21 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.32 2002/12/10 01:58:16 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -989,11 +989,12 @@ public class XMLQueryPlanParser {
             // chop initial $ sign off
             if (varname.charAt(0) == '$')
                 varname = varname.substring(1);
-            if (left.getAttr(varname) != null
-                || right.getAttr(varname) != null)
-                return new Variable(varname);
-            else
-                throw new InvalidPlanException(
+            Variable v = (Variable) left.getAttr(varname);
+            if (v == null)
+                v = (Variable) right.getAttr(varname);
+            if (v != null)
+                return v;
+            else throw new InvalidPlanException(
                     "Unknown variable name: " + varname);
         }
     }
