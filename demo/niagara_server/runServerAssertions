@@ -1,0 +1,2 @@
+# $Id: runServerAssertions,v 1.1 2002/09/24 00:51:26 vpapad Exp $
+java -enableassertions -server -Xmx192m -classpath `cat ../classpath` niagara.connection_server.NiagraServer $*
