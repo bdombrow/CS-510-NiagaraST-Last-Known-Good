@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.14 2003/09/22 00:06:15 vpapad Exp $ -->
+<!-- $Id: build.xml,v 1.15 2003/10/11 03:54:34 vpapad Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -62,7 +62,10 @@
   <target name="compile" depends="init,create.cups">
     <javac srcdir="${src}" destdir="${build}" source="1.4" debug="true"
     	excludes="niagara/client/qbe/**,niagara/client/qpclient/**">
-      <classpath>
+      <classpath refid="compilation.classpath"/>
+    </javac>
+  </target>    
+  <path id="compilation.classpath">
         <!-- In alpha order -->
         <pathelement location="${lib}/aelfred.jar"/>
         <pathelement location="${lib}/com.mortbay.jetty.jar"/>
@@ -82,7 +85,13 @@
         <pathelement location="${lib}/xml4j.jar"/>
         <pathelement location="${lib}/XMLGenerator.jar"/>
         <pathelement location="${lib}/xmlParserAPIs.xerces-2_2_1.jar"/>
-      </classpath>
-    </javac>
-  </target>    
+  </path>
+  <target name="javadoc">
+    <javadoc packagenames="niagara.*,niagara.*.*,niagara.*.*.*" 
+           sourcepath="${basedir}/src"
+           destdir="${basedir}/docs/api" access="private" source="1.4">
+      <classpath refid="compilation.classpath"/>
+      <tag name="execution" scope="all" description="Execution time variable."/>
+    </javadoc>
+  </target>
 </project>
