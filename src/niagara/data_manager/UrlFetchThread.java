@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UrlFetchThread.java,v 1.2 2000/08/09 23:53:53 tufte Exp $
+  $Id: UrlFetchThread.java,v 1.3 2001/07/17 06:57:55 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -87,7 +87,7 @@ public class UrlFetchThread implements Runnable {
 	String url = urlObj.getUrl();
         MemCacheEntry me = urlObj.getMemCacheEntry();
 
-	TXDocument doc = null;
+	Document doc = null;
         try {
 	    doc = CUtil.parseXML(url);
 

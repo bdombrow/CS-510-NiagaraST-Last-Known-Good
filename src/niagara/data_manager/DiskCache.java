@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DiskCache.java,v 1.2 2000/08/09 23:53:53 tufte Exp $
+  $Id: DiskCache.java,v 1.3 2001/07/17 06:57:55 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,6 +42,8 @@ import niagara.trigger_engine.*;
 import niagara.query_engine.*;
 import niagara.utils.*;
 import niagara.data_manager.XMLDiff.*;
+
+import org.w3c.dom.Document;
 
 class DiskCache implements DMCache {
  
@@ -109,7 +111,7 @@ class DiskCache implements DMCache {
             // return null;
         }
 
-        TXDocument doc = null; 
+        Document doc = null; 
         String key = (String)k;
         String dfn = null;
 

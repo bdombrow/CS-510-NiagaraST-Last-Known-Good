@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheManager.java,v 1.2 2000/08/09 23:53:52 tufte Exp $
+  $Id: CacheManager.java,v 1.3 2001/07/17 06:57:55 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -314,7 +314,10 @@ public class CacheManager {
 	    File tmpF = new File(s1);
 	    if(!tmpF.exists()) {
 		try {
-		TXDocument tmpDoc = CUtil.parseXML(s2);
+                    // XXX vpapad: parseXML may return something
+                    // XXX else than a TXDocument, but I'm not fixing
+                    // XXX XMLDiff to work with that...
+                    TXDocument tmpDoc = (TXDocument) CUtil.parseXML(s2); // XXX
 		Element resRoot = resDoc.getDocumentElement();
 		Element tmpRoot = tmpDoc.getDocumentElement();
 		NodeList nl = tmpRoot.getChildNodes();
@@ -346,7 +349,10 @@ public class CacheManager {
                 doc1 = (TXDocument)memCache.fetch_reload(s1, null);
                 // doc2 = (TXDocument)memCache.fetch_reload(s2, null);
                 // doc1 = (TXDocument) CUtil.parseXML(s1);
-                doc2 = CUtil.parseXML(s2);
+                    // XXX vpapad: parseXML may return something
+                    // XXX else than a TXDocument, but I'm not fixing
+                    // XXX XMLDiff to work with that...
+                doc2 = (TXDocument) CUtil.parseXML(s2); // XXX
 		/*if(doc2.getDocumentElement()==null)
 		  System.out.println("BAD DOCUMENT !!! "); */
             } catch (Exception cfe) {

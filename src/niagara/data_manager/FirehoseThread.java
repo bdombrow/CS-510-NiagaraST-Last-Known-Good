@@ -14,11 +14,11 @@ package niagara.data_manager;
   * Based on FetchThread
   */
 
-import com.ibm.xml.parser.*;
-import com.ibm.xml.parsers.*;
 import org.w3c.dom.*;
 import java.io.*;
 import org.xml.sax.*;
+
+import niagara.ndom.*;
 
 import niagara.query_engine.*;
 import niagara.utils.*;
@@ -84,11 +84,11 @@ public class FirehoseThread implements Runnable {
     }
 
     /** process the incoming message which was just put in the message
-     * buffer - this means parse it and put the resulting TXDocument
+     * buffer - this means parse it and put the resulting Document
      * in the output stream
      */
     private boolean processMessageBuffer() {
-	TXDocument parsedDoc = parseMessageBuffer();
+	Document parsedDoc = parseMessageBuffer();
 	boolean succeed;
 	try {
 	    succeed = outputStream.put(parsedDoc);
@@ -114,14 +114,14 @@ public class FirehoseThread implements Runnable {
     }
 
     // We are trusting the firehose to return valid documents
-    NonValidatingTXDOMParser parser;
+    DOMParser parser;
 
     /**
      * parse the messageBuffer 
      *
      * @return returns the parsed Document
      */
-    private TXDocument parseMessageBuffer() {
+    private Document parseMessageBuffer() {
 	/* parse the messageBuffer 
 	 * Note: messageBuffer may be longer than actual message 
 	 */
@@ -139,10 +139,10 @@ public class FirehoseThread implements Runnable {
  	    messageBuffer = messageBuffer.substring(0, messageBuffer.indexOf(0));	
 	try {
 	    if (parser == null) {
-  		parser = new NonValidatingTXDOMParser();
+  		parser = DOMFactory.newParser();
 	    }
 	    parser.parse(new InputSource(new ByteArrayInputStream(messageBuffer.getBytes())));
-	    TXDocument doc = (TXDocument) parser.getDocument();
+	    Document doc = parser.getDocument();
 	    return doc;
 	}
 	catch (Exception ex) {

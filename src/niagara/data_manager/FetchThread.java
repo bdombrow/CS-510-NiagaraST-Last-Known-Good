@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: FetchThread.java,v 1.2 2000/08/09 23:53:53 tufte Exp $
+  $Id: FetchThread.java,v 1.3 2001/07/17 06:57:55 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -53,7 +53,7 @@ class FetchThread implements Runnable {
         this.req = req;
         this.cache = dmc;
         blockCount = 0;
-        thr = new Thread(this);
+        thr = new Thread(this, "FetchThread");
         thr.start();
         return;
     }
