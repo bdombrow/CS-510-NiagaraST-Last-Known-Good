@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSortOperator.java,v 1.3 2002/04/29 19:51:24 tufte Exp $
+  $Id: PhysicalSortOperator.java,v 1.4 2002/10/26 04:34:14 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,6 +32,8 @@ import org.w3c.dom.*;
 
 import java.util.*;
 
+import niagara.logical.OldVariable;
+import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -45,14 +47,7 @@ import niagara.xmlql_parser.syntax_tree.*;
  */
 
 public class PhysicalSortOperator extends PhysicalOperator {
-
-    //////////////////////////////////////////////////////////////////////////
-    // These are the private data members of the PhysicalSortOperator class //
-    //////////////////////////////////////////////////////////////////////////
-
-    // This is the array having information about blocking and non-blocking
-    // streams
-    //
+    // Sort is blocking on its input stream
     private static final boolean[] blockingSourceStreams = { true };
 
     // A container that keeps itself sorted
@@ -60,6 +55,11 @@ public class PhysicalSortOperator extends PhysicalOperator {
     // To distinguish between "equal" tuples. This is an ugly hack
     // what we really want here is a "sorted bag" implementation
     private int incomingTupleOrder;
+    
+    private Attribute sortingField;
+    private short comparisonMethod;
+    private boolean ascending;
+    
     private class BoxedElement {
 	StreamTupleElement ste;
 	int order_id;
@@ -75,47 +75,16 @@ public class PhysicalSortOperator extends PhysicalOperator {
 	}
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // These are the methods of the PhysicalSortOperatorClass                //
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * This is the constructor for the PhysicalSortOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param blocking True if the operator is blocking and false if it is
-     *                 non-blocking
-     * @param responsiveness The responsiveness, in milliseconds, to control
-     *                       messages
-     */
-
-    public PhysicalSortOperator (op logicalOperator,
-				 SourceTupleStream[] sourceStreams,
-				 SinkTupleStream[] sinkStreams,
-				 Integer responsiveness) {
-
-	// Call the constructor on the super class
-	//
-	super(sourceStreams,
-	      sinkStreams,
-	      blockingSourceStreams,
-	      responsiveness);
-
+    public PhysicalSortOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
+    }
+    
+    public void initFrom(LogicalOp logicalOperator) {
 	// Type cast the logical operator to a Sort operator
-	//
 	SortOp logicalSortOperator = (SortOp) logicalOperator;
-	int sortingField = logicalSortOperator.getAttr().getAttrId();
-	short comparisonMethod = logicalSortOperator.getComparisonMethod();
-	boolean ascending = logicalSortOperator.getAscending();
-	
-	// Create an appropriate Comparator object and TreeSet
-	ts = new TreeSet(new SortComparator(sortingField, comparisonMethod, ascending));
-	incomingTupleOrder = 0;
+	sortingField = new OldVariable(logicalSortOperator.getAttr());
+	comparisonMethod = logicalSortOperator.getComparisonMethod();
+	ascending = logicalSortOperator.getAscending();
     }
 
 
@@ -218,14 +187,49 @@ public class PhysicalSortOperator extends PhysicalOperator {
 	    }
 	    return return_value;
 	}
-
-	public boolean equals(Object o) {
-	    return this == o;
-	}
     }
 
     public boolean isStateful() {
 	return true;
+    }
+    
+
+    public PhysicalProperty[] InputReqdProp(
+        PhysicalProperty PhysProp,
+        LogicalProperty InputLogProp,
+        int InputNo) {
+        if (PhysProp.equals(PhysicalProperty.ANY)) {
+            return new PhysicalProperty[] {};
+        }
+
+        // XXX vpapad: i don't like this
+        if (PhysProp.getOrder().isSorted()) {
+            if ((InputLogProp).Contains(PhysProp.getOrderAttrNames()))
+                return new PhysicalProperty[] {};
+            else
+                throw new PEException("Cannot sort on invisible attributes");
+        } else
+            throw new PEException("Cannot handle anything other than sorted");
+    } 
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
+     */
+    public Cost FindLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] InputLogProp) {
+        double InputCard = InputLogProp[0].getCardinality();
+        return new Cost(InputCard * catalog.getDouble("tuple_reading_cost") +
+                        InputCard * Math.log(InputCard) * catalog.getDouble("tuple_hashing_cost"));
+    }
+
+
+    /**
+     * @see niagara.query_engine.PhysicalOperator#opInitialize()
+     */
+    protected void opInitialize() {
+        // Create an appropriate Comparator object and TreeSet
+        ts = new TreeSet(new SortComparator(((OldVariable) sortingField).getSA().getAttrId(), comparisonMethod, ascending));
+        incomingTupleOrder = 0;
     }
 }
 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.10 2002/10/24 03:20:30 vpapad Exp $
+  $Id: PhysicalAverageOperator.java,v 1.11 2002/10/26 04:34:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -132,6 +132,7 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 
     
     public void initFrom(LogicalOp logicalOperator) {
+        super.initFrom(logicalOperator);
 	// Get the averaging attribute of the average logical operator
 	averageAttribute = ((averageOp) logicalOperator).getAveragingAttribute();
         ae = new AtomicEvaluator(averageAttribute);

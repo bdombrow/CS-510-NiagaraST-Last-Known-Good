@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.15 2002/10/24 02:15:41 vpapad Exp $
+  $Id: PhysicalGroupOperator.java,v 1.16 2002/10/26 04:34:14 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,6 +30,7 @@ package niagara.query_engine;
 import java.util.*;
 
 import niagara.logical.Variable;
+import niagara.optimizer.colombia.LogicalOp;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -224,8 +225,9 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
     
-    public void initFrom(op logicalOperator) {
+    public void initFrom(LogicalOp logicalOperator) {
 	// Typecast to a group logical operator
+        System.err.println("XXX initFrom called " + logicalOperator);
 	logicalGroupOperator = (groupOp) logicalOperator;
     }
     

@@ -1,4 +1,4 @@
-/* $Id: UnoptimizablePhysicalOperator.java,v 1.3 2002/10/24 01:02:48 vpapad Exp $ */
+/* $Id: UnoptimizablePhysicalOperator.java,v 1.4 2002/10/26 04:34:14 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -18,6 +18,9 @@ public abstract class UnoptimizablePhysicalOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
         plugInStreams(sourceStreams, sinkStreams, responsiveness);
     }
+
+    // The required zero-argument constructor
+    public UnoptimizablePhysicalOperator() {}
 
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
@@ -55,9 +58,7 @@ public abstract class UnoptimizablePhysicalOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
      */
-    public final void initFrom(LogicalOp op) {
-      // Do nothing, unoptimizable operators should 
-      // get initialized in their constructors
+    public void initFrom(LogicalOp op) {
     }
 
     /**

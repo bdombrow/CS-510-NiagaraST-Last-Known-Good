@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalDisplayOperator.java,v 1.4 2002/05/23 06:31:41 vpapad Exp $
+ * $Id: PhysicalDisplayOperator.java,v 1.5 2002/10/26 04:34:15 vpapad Exp $
  *
  */
 
@@ -10,13 +10,13 @@ import java.util.Vector;
 
 import org.w3c.dom.*;
 
+import niagara.optimizer.colombia.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
 /**
  * This is the <code>PhysicalDisplayOperator</code> that extends
@@ -26,9 +26,7 @@ import java.util.*;
  */
 
 public class PhysicalDisplayOperator extends PhysicalOperator {
-    // This is the array having information about blocking and non-blocking
-    // streams
-    //
+    // No blocking inputs
     private static final boolean[] blockingSourceStreams = { false };
 
     private PrintWriter pw;
@@ -42,40 +40,31 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
 
     URLConnection connection;
 
-    /**
-     * This is the constructor for the PhysicalDisplayOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     */
+    public PhysicalDisplayOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
+    }
 
-    public PhysicalDisplayOperator(op logicalOperator,
-				   SourceTupleStream[] sourceStreams,
-				   SinkTupleStream[] sinkStreams,
-				   Integer responsiveness) {
-
-
-	// Call the constructor of the super class
-	//
-	super(sourceStreams,
-	      sinkStreams,
-	      blockingSourceStreams,
-	      responsiveness);
-        
-        DisplayOp display = (DisplayOp) logicalOperator;
-        query_id = display.getQueryId();
-        String location = display.getClientLocation();
-
+    protected PhysicalDisplayOperator(String query_id, String url_location) {
+        this();
+        this.query_id = query_id;
+        this.url_location = url_location;        
+                
         toDisplay = new StringBuffer();
-        url_location = "http://" + location + "/servlet/display";
     }
     
+    public Op copy() {
+        return new PhysicalDisplayOperator(query_id, url_location);
+    }
+    public void initFrom(LogicalOp logicalOperator) {
+        DisplayOp display = (DisplayOp) logicalOperator;
+        query_id = display.getQueryId();
+        url_location = display.getClientLocation();
+        toDisplay = new StringBuffer();
+    }
+
+    public int hashCode() {
+        return query_id.hashCode() ^ url_location.hashCode();
+    }
 
     /**
      * This function processes a tuple element read from a source stream
@@ -88,12 +77,11 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
      * @exception ShutdownException query shutdown by user or execution error
      */
 
-
     int counter = 0;
-    protected void nonblockingProcessSourceTupleElement (
-		     			 StreamTupleElement tupleElement,
-						 int streamId) 
-	throws ShutdownException, UserErrorException {
+    protected void nonblockingProcessSourceTupleElement(
+        StreamTupleElement tupleElement,
+        int streamId)
+        throws ShutdownException, UserErrorException {
         if (counter == 0) {
             try {
                 URL url = new URL(url_location);
@@ -102,20 +90,22 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
                 out = connection.getOutputStream();
                 pw = new PrintWriter(out);
                 pw.println(query_id);
-	    } catch(java.net.MalformedURLException mue) {
-		throw new UserErrorException("Bad url for client " +
-					     mue.getMessage());
-	    } catch(java.io.IOException ioe) {
-		throw new UserErrorException("Unable to open connection to client " + url_location + " " + ioe.getMessage());
-	    }
+            } catch (java.net.MalformedURLException mue) {
+                throw new UserErrorException(
+                    "Bad url for client " + mue.getMessage());
+            } catch (java.io.IOException ioe) {
+                throw new UserErrorException(
+                    "Unable to open connection to client "
+                        + url_location
+                        + " "
+                        + ioe.getMessage());
+            }
         }
 
         counter++;
 
-
         // We assume result is the last element of the tuple...
-        Object attribute = tupleElement.getAttribute(
-            tupleElement.size()-1);
+        Object attribute = tupleElement.getAttribute(tupleElement.size() - 1);
         if (attribute instanceof Document) {
             // Serialize its root element instead
             attribute = ((Document) attribute).getDocumentElement();
@@ -126,60 +116,76 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
     }
 
     protected void serialize(Object o, StringBuffer sb) {
-        // XXX we don't handle attributes at the top level
-
-        if (o == null)
-            return;
-
-        if (o instanceof Text) {
-            sb.append(((Text) o).getData());
-        }
-
-        else if (o instanceof Element) {
-            Element e = (Element) o;
-            sb.append("<" + e.getTagName());
-            if (e.hasAttributes()) {
-                NamedNodeMap attrs = e.getAttributes();
-                sb.append(" ");
-                for (int i = 0; i < attrs.getLength(); i++) {
-                    Attr a = (Attr) attrs.item(i);
-                    sb.append(a.getName() + "='" + a.getValue() + "' ");
-                }
-            }
-            sb.append(">");
-            NodeList nl = ((Element) o).getChildNodes();
-            for (int i = 0; i < nl.getLength(); i++) {
-                serialize(nl.item(i), sb);
-            }
-            sb.append("</" + ((Element) o).getTagName() + ">");
-        }
-        else {
-            System.out.println("XXX ignoring attribute of type: " 
-                               + o.getClass());
-        }
+        XMLUtils.flatten((Node) o, sb, false);
     }
 
-    protected void cleanUp () {
-	try {
-              System.out.println("XXX display transmitted " 
-                                 + counter + " tuples");
-              pw.flush();
-              out.close();
-              connection.getInputStream().close();
-              Date d = new Date();
-              System.out.println("Query done: " 
-                                 + d.getTime() % (60 * 60 * 1000));
-	} catch (java.io.IOException e) {
-	    System.out.println("Display: error while sending results to client:" + url_location);
-	    e.printStackTrace();
-	    System.exit(-1);
-	}
+    protected void cleanUp() {
+        try {
+            pw.flush();
+            out.close();
+            connection.getInputStream().close();
+        } catch (java.io.IOException e) {
+            System.err.println(
+                "Display: error while sending results to client:"
+                    + url_location);
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
 
     public boolean isStateful() {
         // XXX vpapad: Display *is* stateful, but does not know how to 
         // handle partial results...
-	return false;
+        return false;
     }
-}
 
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
+     */
+    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+        return PhysicalProperty.ANY;
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#InputReqdProp(PhysicalProperty, LogicalProperty, int)
+     */
+    public PhysicalProperty[] InputReqdProp(
+        PhysicalProperty physProp,
+        LogicalProperty InputLogProp,
+        int InputNo) {
+        if (physProp.equals(PhysicalProperty.ANY))
+            return new PhysicalProperty[] {};
+        else
+            // PhysicalDisplay cannot guarantee any specific property
+            return null;
+    }
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(LogicalProperty, LogicalProperty[])
+     */
+    public Cost FindLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] InputLogProp) {
+        // Setup costs for opening a connection, plus a fixed cost per transmitted tuple
+        Cost final_cost = new Cost(catalog.getDouble("open_connection_cost"));
+        Cost tuple_transmission = new Cost(catalog.getDouble("tuple_transmission_cost"));
+        final_cost.add(tuple_transmission.times(InputLogProp[0].getCardinality()));
+        return final_cost;
+    }
+    
+    /**
+     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
+     */
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        inputTupleSchemas = inputSchemas;
+        outputTupleSchema = new TupleSchema();
+    }
+    
+    /**
+     * @see niagara.utils.SerializableToXML#dumpAttributesInXML(StringBuffer)
+     */
+    public void dumpAttributesInXML(StringBuffer sb) {
+        sb.append(" query_id='").append(query_id).append("' location='");
+        sb.append(url_location).append("'");     
+    }
+
+}

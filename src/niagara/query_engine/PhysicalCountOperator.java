@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.9 2002/10/24 03:11:58 vpapad Exp $
+  $Id: PhysicalCountOperator.java,v 1.10 2002/10/26 04:34:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -120,6 +120,7 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
 
     
     public void initFrom(LogicalOp logicalOperator) {
+        super.initFrom(logicalOperator);
 	// Get the counting attribute of the Count logical operator
 	countingAttribute = ((CountOp) logicalOperator).getCountingAttribute();
         ae = new AtomicEvaluator(countingAttribute);

@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.12 2002/04/29 19:51:23 tufte Exp $
+  $Id: PhysicalConstructOperator.java,v 1.13 2002/10/26 04:34:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,34 +36,20 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
+import niagara.optimizer.colombia.*;
 
 /**
- * This is the <code>PhysicalConstructOperator</code> that extends
- * the basic PhysicalOperator with the implementation of the Construct
- * operator.
- *
- * @version 1.0
- *
+ * <code>PhysicalConstructOperator</code> is an implementation of 
+ * the Construct operator.
  */
-
 public class PhysicalConstructOperator extends PhysicalOperator {
-
-    /////////////////////////////////////////////////////////////////////////
-    // These are the private data members of the PhysicalConstructOperator //
-    // class                                                               //
-    /////////////////////////////////////////////////////////////////////////
-
-    // This is the array having information about blocking and non-blocking
-    // streams
-    //
+    // No blocking inputs
     private static final boolean[] blockingSourceStreams = { false };
 
+    private Attribute variable;
+    
     // The result template to construct from
-    //
     private constructBaseNode resultTemplate;
-
-    // "Clear the output tuple" flag
-    boolean clear;
 
     // We will use this Document as the "owner" of all the DOM nodes
     // we create
@@ -73,43 +58,21 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     // temporary result list storage place
     private NodeVector resultList;
     
-    ///////////////////////////////////////////////////////////////////////////
-    // These are the methods of the PhysicalConstructOperator class          //
-    ///////////////////////////////////////////////////////////////////////////
 
-    /**
-     * This is the constructor for the PhysicalConstructOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     */
-
-    public PhysicalConstructOperator(op logicalOperator,
-				     SourceTupleStream[] sourceStreams,
-				     SinkTupleStream[] sinkStreams,
-				     Integer responsiveness) {
-	// Call the constructor of the super class
-	super(sourceStreams,
-	      sinkStreams,
-	      blockingSourceStreams,
-	      responsiveness);
-
-	// Typecast to a construct logical operator
-	//
-	constructOp constructLogicalOp = (constructOp) logicalOperator;
-
-	// Initialize the result template and the "clear" flag
-	this.resultTemplate = constructLogicalOp.getResTemp();
-	this.clear = constructLogicalOp.isClear();
-	resultList = new NodeVector();
+    public PhysicalConstructOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
+        resultList = new NodeVector();
     }
     
+    public void initFrom(LogicalOp logicalOperator) {
+	// Typecast to a construct logical operator
+	constructOp constructLogicalOp = (constructOp) logicalOperator;
+
+	// Initialize the result template 
+	this.resultTemplate = constructLogicalOp.getResTemp();
+    
+        this.variable = constructLogicalOp.getVariable();
+    }
 
     /**
      * This function processes a tuple element read from a source stream
@@ -141,12 +104,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	    //
 	    StreamTupleElement outputTuple;
 
-	    if (clear) {
-		// Start a completely new tuple
-		outputTuple = new StreamTupleElement(tupleElement.isPartial());
-	    } else {
 		outputTuple = (StreamTupleElement) tupleElement.clone();
-	    }
 
 	    // Append the constructed result to end of newly created tuple
 	    outputTuple.appendAttribute(resultList.get(res));
@@ -249,7 +207,6 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	} else {
 	    throw new PEException("Unknown type in construct leaf node");
 	}
-	return;
     }
 
     
@@ -333,7 +290,6 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	int numChildren = children.size();
 
 	for (int child = 0; child < numChildren; ++child) {
-
 	    // Get constructed results from child
 	    int prevSize = resultList.size();
 	    constructResult(tupleElement,
@@ -352,9 +308,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	}
 
 	// Construct the result array list
-	//
 	result.add(resultElement);
-	return; 
     }
 
     public void setResultDocument(Document doc) {
@@ -364,6 +318,74 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     public boolean isStateful() {
 	return false;
     }
+    
+    public int hashCode() {
+        return resultTemplate.hashCode() ^ variable.hashCode();
+    }
+    
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof PhysicalConstructOperator))
+            return false;
+        if (o.getClass() != getClass())
+            return o.equals(this);
+        PhysicalConstructOperator other = (PhysicalConstructOperator) o;
+        // XXX vpapad TODO constructBaseNode doesn't override equals
+        return resultTemplate.equals(other.resultTemplate)
+                        && variable.equals(other.variable);
+    }
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#InputReqdProp(PhysicalProperty, LogicalProperty, int)
+     */
+    public PhysicalProperty[] InputReqdProp(
+        PhysicalProperty physProp,
+        LogicalProperty inputLogProp,
+        int inputNo) {
+        if (physProp.equals(PhysicalProperty.ANY))
+            return new PhysicalProperty[] {};
+        else
+            return new PhysicalProperty[] {physProp};
+    }
 
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+        PhysicalConstructOperator op = new PhysicalConstructOperator();
+        // XXX vpapad: We treat resultTemplate as an immutable object
+        op.resultTemplate = resultTemplate;
+        op.variable = variable;
+        return op;
+    }
+    
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(ICatalog, LogicalProperty, LogicalProperty[])
+     */
+    public Cost FindLocalCost(
+        ICatalog catalog,
+        LogicalProperty[] InputLogProp) {
+        // XXX vpapad: Absolutely no connection to reality!
+        // We consider only a fixed cost per incoming tuple
+        // XXX vpapad: it should be: touch input tuples + construction cost
+        // + output tuples (?)
+        return new Cost(
+            catalog.getDouble("tuple_construction_cost")
+                * InputLogProp[0].getCardinality());
+    }
+    /**
+     * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
+     */
+    public PhysicalProperty FindPhysProp(PhysicalProperty[] input_phys_props) {
+        return PhysicalProperty.ANY;
+    }
+
+    /**
+     * @see niagara.query_engine.SchemaProducer#constructTupleSchema(TupleSchema[])
+     */
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        this.inputTupleSchemas = inputSchemas;
+        resultTemplate.replaceVar(new varTbl(inputSchemas[0]));
+        outputTupleSchema = inputSchemas[0].copy();
+        outputTupleSchema.addMapping(variable);
+    }
 }
 
