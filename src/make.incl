@@ -1,5 +1,5 @@
 #######################################################################
-#  $Id: make.incl,v 1.8 2002/08/17 17:05:37 tufte Exp $
+#  $Id: make.incl,v 1.9 2002/09/09 22:06:44 tufte Exp $
 #
 #  Make include file - for common constant info
 #  Added 1-17-02 by Kristin Tufte - remove the fact that some 
@@ -46,6 +46,7 @@ export SERVLET	    = $(LIBDIR)/javax.servlet.jar
 export XERCES2      = /disk/hopper/projects/disc/niagara/install/xerces-2_0_1/xercesImpl.jar:/disk/hopper/projects/disc/niagara/install/xerces-2_0_1/xmlParserAPIs.jar
 export NIAGSRC     = $(NIAGROOT)/src
 export XMLGEN       = $(LIBDIR)/XMLGenerator.jar
+export JPCAP       = $(LIBDIR)/jpcap.jar
 
 #----------------
 #  Niagra libs
@@ -61,7 +62,7 @@ export XMLGEN       = $(LIBDIR)/XMLGenerator.jar
 #export TRIGLIB	      = $(LIBDIR)/trig.jar
 #export QBELIB2	      = $(LIBDIR)/qbe2.jar
 
-export CLASSPATH     = .:$(XERCES2):$(REGEXPLIB):$(CUPLIB):$(DIFF):$(DIVA):$(JUNIT):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET):$(JFLEX):$(NIAGSRC):$(XMLGEN):$(SAX):$(XML4J)
+export CLASSPATH     = .:$(XERCES2):$(REGEXPLIB):$(CUPLIB):$(DIFF):$(DIVA):$(JUNIT):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET):$(JFLEX):$(NIAGSRC):$(XMLGEN):$(SAX):$(XML5J):$(JPCAP)
 
 export DEBUG = -O
 export SOURCE = -source 1.4
