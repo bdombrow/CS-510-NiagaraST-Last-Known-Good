@@ -1,3 +1,4 @@
+// $Id: LocalKey.java,v 1.4 2002/04/26 02:38:31 vpapad Exp $
 package niagara.query_engine;
 
 /*
@@ -15,7 +16,6 @@ import java.lang.reflect.*;
 import niagara.utils.*;
 import niagara.utils.type_system.*;
 import niagara.xmlql_parser.syntax_tree.*;
-import niagara.xmlql_parser.syntax_tree.re_parser.*;
 
 /**
  * Implementation of a <code> MatchTemplate </code> class whose
