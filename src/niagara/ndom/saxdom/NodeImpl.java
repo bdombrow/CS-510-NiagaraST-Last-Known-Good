@@ -1,5 +1,5 @@
 /**
- * $Id: NodeImpl.java,v 1.3 2002/04/06 02:15:08 vpapad Exp $
+ * $Id: NodeImpl.java,v 1.4 2002/10/31 04:29:27 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -33,6 +33,13 @@ public abstract class NodeImpl implements Node {
 
         return doc.hashCode() ^ index;
     }
+    
+    /** SAXDOM specific method for serializing a node 
+     * and all its descendants in a StringBuffer */
+    public void flatten(StringBuffer sb) {
+        BufferManager.flatten(index, sb);
+    }
+    
     public abstract String getNodeName();
 
     public String getNodeValue() throws DOMException {

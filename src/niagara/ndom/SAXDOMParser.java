@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.13 2002/09/24 23:15:52 ptucker Exp $
+ * $Id: SAXDOMParser.java,v 1.14 2002/10/31 04:29:27 vpapad Exp $
  *
  */
 
@@ -215,7 +215,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 
         // The next_sibling pointer in END_ELEMENT points to the
         // beginning of the element
-        page.addEvent(doc, SAXEvent.END_ELEMENT, null);
+        page.addEvent(doc, SAXEvent.END_ELEMENT, localName);
         page.setNextSibling(page.getLastOffset(), open_nodes[depth]);
 
         // if we're streaming, and this is a top-level element

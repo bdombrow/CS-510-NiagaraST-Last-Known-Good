@@ -1,5 +1,5 @@
 /**
- * $Id: DOMParser.java,v 1.2 2002/03/26 23:52:07 tufte Exp $
+ * $Id: DOMParser.java,v 1.3 2002/10/31 04:29:27 vpapad Exp $
  *
  */
 
@@ -12,8 +12,6 @@ import java.io.IOException;
 /**
  * <code>DOMParser</code> is the interface implemented by all
  * Niagara DOM implementations.
- *
- * @author <a href="mailto:vpapad@cse.ogi.edu">Vassilis Papadimos</a>
  */
 public interface DOMParser {
 

@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.15 2002/09/27 01:26:19 vpapad Exp $
+ * $Id: BufferManager.java,v 1.16 2002/10/31 04:29:27 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -32,9 +32,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class BufferManager {
-    private static Page[] pages;
+    protected static Page[] pages;
 
-    private static Stack free_pages;
+    protected static Stack free_pages;
 
     private static int page_size;
 
@@ -707,6 +707,93 @@ public class BufferManager {
 
     public static String getTarget(int index) {
         throw new PEException("Not Implemented Yet!");
+    }
+    
+    public static void flatten(int index, StringBuffer sb) {
+        switch (getEventType(index)) {
+            case SAXEvent.START_ELEMENT:
+                flattenElement(index, sb);
+                break;
+            case SAXEvent.START_DOCUMENT:
+                flattenElement(getFirstChildIndex(index), sb);
+                break;
+            case SAXEvent.ATTR_NAME:
+                // It is not clear what an attribute should serialize to.
+                // For now, output ' name="value"'
+                sb.append(" ").
+                append(getEventString(index)).append("=").append("\"").
+                append(getAttributeValue(index)).append("\"");
+                break;
+            case SAXEvent.TEXT:
+                sb.append(getEventString(index));
+                break;
+            default:
+                throw new PEException("Unexpected event type");            
+        }
+    }
+
+    private static void flattenElement(int index, StringBuffer sb) {
+        Page page = getPage(index);
+        int offset = getOffset(index);
+        int pageSize = page.getSize();    
+
+        int depth = -1;
+        boolean[] closedStartTag = new boolean[1024];
+        
+        String currentTag = null;
+        
+        while (true) {
+            switch (page.getEventType(offset)) {
+                case SAXEvent.START_ELEMENT:
+                    if (depth >= 0 && !closedStartTag[depth]) {
+                       sb.append(">");
+                       closedStartTag[depth] = true;
+                    }                    
+                    sb.append("<").append(page.getEventString(offset));
+                    depth++;                    
+                    closedStartTag[depth] = false;
+                    break;
+                case SAXEvent.END_ELEMENT:
+                    if (closedStartTag[depth]) {
+                        sb.append("</")
+                        .append(page.getEventString(offset))
+                        .append(">");
+                    }
+                    else
+                        sb.append("/>");
+                    closedStartTag[depth] = true;
+                    depth--;
+                    if (depth == -1) return;
+                    break;
+                case SAXEvent.TEXT:
+                    if (depth < 0)
+                        throw new PEException("Text node outside document");
+                    if (!closedStartTag[depth]) {
+                        sb.append(">");
+                        closedStartTag[depth] = true;
+                    }
+                    sb.append(page.getEventString(offset));
+                    break;
+                case SAXEvent.ATTR_NAME:
+                    if (depth < 0 || closedStartTag[depth])
+                        throw new PEException("Attribute outside an element");
+                    sb.append(" ").append(page.getEventString(offset));
+                    break;
+                case SAXEvent.ATTR_VALUE:
+                    if (depth < 0 || closedStartTag[depth])
+                        throw new PEException("Attribute outside an element");
+                    sb.append("=").append("\"")
+                    .append(page.getEventString(offset)).append("\"");
+                    break;
+                default:
+                    throw new PEException("Unexpected event type");
+            }
+
+            if (offset == pageSize - 1) {
+                page = page.getNext();
+                offset = 0;
+            }  else offset++;
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 /**
- * $Id: XML4JParser.java,v 1.3 2002/08/17 16:49:48 tufte Exp $
+ * $Id: XML4JParser.java,v 1.4 2002/10/31 04:29:27 vpapad Exp $
  *
  */
 
@@ -9,7 +9,6 @@ import org.w3c.dom.Document;
 import niagara.ndom.*;
 import java.io.IOException;
 
-import com.ibm.xml.parsers.DOMParser;
 import org.xml.sax.*;
 
 

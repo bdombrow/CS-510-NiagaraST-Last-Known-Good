@@ -1,5 +1,5 @@
 /**
- * $Id: XercesJ2Parser.java,v 1.1 2002/03/26 23:52:08 tufte Exp $
+ * $Id: XercesJ2Parser.java,v 1.2 2002/10/31 04:29:27 vpapad Exp $
  *
  */
 
@@ -15,20 +15,18 @@ import javax.xml.parsers.*;
 
 /**
  * <code>XercesJParser</code> is a wrapper for org.apache.xerces.parsers.DOMParser;
- *
- * @author <a href="mailto:vpapad@king.cse.ogi.edu">Vassilis Papadimos</a>
  */
 public class XercesJ2Parser implements niagara.ndom.DOMParser {
 
     private DocumentBuilder parser;
-    private SimpleHandler sh;
+    private SimpleHandler2 sh;
     private Document d;
 
     public XercesJ2Parser(DocumentBuilderFactory dbf) {
 
 	try {
 	    parser = dbf.newDocumentBuilder();
-	    sh = new SimpleHandler();
+	    sh = new SimpleHandler2();
 	} catch (javax.xml.parsers.ParserConfigurationException pce) {
 	    System.err.println("Unable to create XercesJ2Parser " + 
 			       pce.getMessage());

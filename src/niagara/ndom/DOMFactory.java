@@ -1,5 +1,5 @@
 /**
- * $Id: DOMFactory.java,v 1.3 2002/03/26 23:52:07 tufte Exp $
+ * $Id: DOMFactory.java,v 1.4 2002/10/31 04:29:27 vpapad Exp $
  *
  */
 
@@ -13,8 +13,6 @@ import java.util.Hashtable;
 /**
  * <code>DOMFactory</code> allows us to choose
  * a DOM implementation at runtime.
- *
- * @author <a href="mailto:vpapad@cse.ogi.edu">Vassilis Papadimos</a>
  */
 public class DOMFactory {
 

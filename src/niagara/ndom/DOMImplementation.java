@@ -1,5 +1,5 @@
 /**
- * $Id: DOMImplementation.java,v 1.1 2001/07/17 03:36:36 vpapad Exp $
+ * $Id: DOMImplementation.java,v 1.2 2002/10/31 04:29:27 vpapad Exp $
  *
  */
 
@@ -10,8 +10,6 @@ import org.w3c.dom.*;
 /**
  * <code>DOMImplementation</code> is the interface implemented
  * by all DOM implementations.
- *
- * @author <a href="mailto:vpapad@cse.ogi.edu">Vassilis Papadimos</a>
  */
 public interface DOMImplementation {
 

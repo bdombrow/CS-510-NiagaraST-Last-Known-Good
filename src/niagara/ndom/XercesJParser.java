@@ -1,5 +1,5 @@
 /**
- * $Id: XercesJParser.java,v 1.2 2002/03/26 23:52:08 tufte Exp $
+ * $Id: XercesJParser.java,v 1.3 2002/10/31 04:29:27 vpapad Exp $
  *
  */
 
@@ -15,8 +15,6 @@ import org.apache.xerces.parsers.*;
 
 /**
  * <code>XercesJParser</code> is a wrapper for org.apache.xerces.parsers.DOMParser;
- *
- * @author <a href="mailto:vpapad@king.cse.ogi.edu">Vassilis Papadimos</a>
  */
 public class XercesJParser implements niagara.ndom.DOMParser {
 
