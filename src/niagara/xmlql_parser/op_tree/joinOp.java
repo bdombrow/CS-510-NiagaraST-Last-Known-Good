@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: joinOp.java,v 1.3 2000/08/21 00:38:38 vpapad Exp $
+  $Id: joinOp.java,v 1.4 2001/07/17 06:52:23 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -129,4 +129,11 @@ public class joinOp extends binOp {
       return strBuf.toString();
    }
 
+    public String dumpAttributesInXML() {
+        return " physical='" + getSelectedAlgo().getName() +"' ";
+    }
+
+    public String dumpChildrenInXML() {
+        return pred.toXML();
+    }
 }

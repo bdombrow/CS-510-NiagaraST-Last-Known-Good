@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logNode.java,v 1.4 2000/08/21 00:38:38 vpapad Exp $
+  $Id: logNode.java,v 1.5 2001/07/17 06:52:23 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,6 +55,11 @@ public class logNode implements java.io.Serializable {
    protected int[] inputsId;    // For Trigger ONLY!
    protected int Id;            // for trig use.  Not trig system Id = -1
 
+    private String location;
+
+    private String name;
+
+
    /**
     * Constructor without any parameter
     */
@@ -84,7 +89,7 @@ public class logNode implements java.io.Serializable {
    public logNode(op _op) {
 	operator = _op;
         Id = -1;
-	inputs = null;
+	inputs = new logNode[] {};
 	tupleDes = null;
 	varList = null;
    }
@@ -124,6 +129,14 @@ public class logNode implements java.io.Serializable {
    public op getOperator() {
 	return operator;
    }
+
+   public void setOperator(op operator) {
+       this.operator = operator;
+   }
+
+    public logNode[] getInputs() {
+        return inputs;
+    }
 
    /**
     * This function returns the number of inputs to this logical node
@@ -179,6 +192,10 @@ public class logNode implements java.io.Serializable {
         if(inputsId==null) return;
         inputsId[index] = newChild.Id;
    }
+
+    public void setInputs(logNode[] inputs) {
+        this.inputs = inputs;
+    }
 
    /**
     * @param the Schema of the tuples at this node
@@ -280,6 +297,95 @@ public class logNode implements java.io.Serializable {
 		input(i).dump(nodesDumped);
     }
 
+
+    // A node is schedulable if none of its
+    // inputs depends on an abstract resource
+    public boolean isSchedulable() {
+        if (inputs.length == 0 && operator instanceof ResourceOp)
+            return false;
+        for (int i = 0; i < inputs.length; i++) {
+            if (!inputs[i].isSchedulable())
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * XML representation of this node
+     *
+     * @return a <code>String</code> with the XML 
+     * representation of this operator
+     */
+    public String toXML() {
+        // XXX convert to StringBuffer
+        String eltname = operators.getName(operator);
+        String ret = "<" + eltname;
+        // id = last variable in the variable table
+        ret += " id='" + getName() + "'";
+        // location
+        if (location != null) 
+            ret += " location='" + location + "'";
+        // inputs
+        if (inputs.length != 0) {
+            ret += " input='";
+            for (int i = 0; i < inputs.length; i++) {
+                ret += inputs[i].getName() + " ";
+            }
+            ret = ret.substring(0, ret.length()-1);
+            ret += "'";
+        }
+        // other attributes for operator
+        ret += operator.dumpAttributesInXML();
+        String children = operator.dumpChildrenInXML();
+        if (children.length() != 0)
+            ret += ">" + children + "</" + eltname + ">";
+        else
+            ret += "/>";
+        return ret;
+    }
+
+    public String planToXML() {
+        StringBuffer buf = new StringBuffer("<plan top='");
+        buf.append(getName());
+        buf.append("'>");
+        subplanToXML(new Hashtable(), buf);
+        buf.append("</plan>");
+        return buf.toString();
+    }
+
+    public String subplanToXML() {
+        StringBuffer buf = new StringBuffer("<plan top='send'><send id='send' input='" + getName() + "'/>");
+        subplanToXML(new Hashtable(), buf);
+        buf.append("</plan>");
+        return buf.toString();
+    }
+
+    public void subplanToXML(Hashtable seen, StringBuffer buf) {
+        if (seen.containsKey(name)) 
+            return;
+        buf.append(toXML());
+        seen.put(name, name);
+        for (int i = 0; i < inputs.length; i++) {
+            inputs[i].subplanToXML(seen, buf);
+        }
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
     public boolean isAccumulateOp() {
 	return (operator instanceof AccumulateOp);
     }
@@ -291,3 +397,6 @@ public class logNode implements java.io.Serializable {
 	return ((AccumulateOp)operator).getAccumFileName();
     }
 }
+
+
+

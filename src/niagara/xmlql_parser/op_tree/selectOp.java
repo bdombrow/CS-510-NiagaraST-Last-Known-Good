@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: selectOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: selectOp.java,v 1.2 2001/07/17 06:52:23 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -84,5 +84,28 @@ public class selectOp extends unryOp {
 
       return strBuf.toString();
    }
+
+    // XXX hack 
+    boolean[] clear;
+
+    String clearAttr;
+
+    public void setClearAttr(String clearAttr) {
+        this.clearAttr = clearAttr;
+    }
+
+    public void setClear(boolean[] clear) {
+        this.clear = clear;
+    }
+    public boolean[] getClear() {
+        return clear;
+    }
+
+    public String dumpAttributesInXML() {
+        return "clear='" + clearAttr + "'";
+    }
+    public String dumpChildrenInXML() {
+        return pred.toXML();
+    }
 }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: dtdScanOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: dtdScanOp.java,v 1.2 2001/07/17 06:52:23 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -142,4 +142,11 @@ public class dtdScanOp extends unryOp {
       return strBuf.toString();
    }
 
+    public String dumpChildrenInXML() {
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < docs.size(); i++) {
+            buf.append("<url value='" + docs.elementAt(i)  +"'/>");
+        }
+        return buf.toString();
+    }
 }

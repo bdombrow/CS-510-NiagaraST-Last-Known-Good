@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: scanOp.java,v 1.2 2000/08/21 00:38:39 vpapad Exp $
+  $Id: scanOp.java,v 1.3 2001/07/17 06:52:23 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -100,5 +100,24 @@ public class scanOp extends unryOp {
 	attrId = parent;
 	regExpToScan = toScan;
     }
+
+    public String dumpAttributesInXML() {
+        String toReturn =  " regexp='" + regExpToScan.toString() + "'";
+        if (typeAttr != null && !typeAttr.equals("")) 
+            toReturn += " type='" + typeAttr + "'";
+        if (rootAttr != null && !rootAttr.equals("")) 
+            toReturn += " root='" + rootAttr + "'";
+
+        return toReturn;
+    }
+
+    String typeAttr, rootAttr; // XXX dump attributes hack
+
+    public void setDumpAttributes(String typeAttr, String rootAttr) {
+        this.typeAttr = typeAttr;
+        this.rootAttr = rootAttr;
+    }
+
 }
+
 

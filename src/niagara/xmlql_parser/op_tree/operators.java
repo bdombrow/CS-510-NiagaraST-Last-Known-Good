@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: operators.java,v 1.5 2000/08/21 00:38:38 vpapad Exp $
+  $Id: operators.java,v 1.6 2001/07/17 06:52:23 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,9 +42,13 @@ import java.util.*;
 import java.lang.*;
 
 public class operators {
+    private static Hashtable operatorNames = new Hashtable();
+
 	public static dbScanOp DbScan;     // to read a database (not used)
 	public static dtdScanOp DtdScan;   // to read the XML data sources
     public static FirehoseScanOp FirehoseScan;   // to read from a firehose
+    public static ConstantOp constantOp;   // embedded XML document
+    public static ResourceOp resourceOp;   // an abstract resource
         public static tupleScanOp TupleScan; //Trigger
 	public static scanOp Scan;         // to read the elements
 	public static selectOp Select;     // Selection
@@ -62,11 +66,18 @@ public class operators {
     public static SortOp sort; // Sorting
     public static UnionOp union; // Union of streams
 
+    public static DisplayOp display; // Sending results to client
+
+    public static SendOp send; // Sending subplan results
+    public static ReceiveOp receive; // Receiving subplan results
+
 // Names of the classes that implement the algorithms for different operators
 
 	private static String[] dbScanAlgo = {"niagara.query_engine.PhysicalScanOperator"};
 	private static String[] dtdScanAlgo = {};
     private static String[] firehoseScanAlgo = {}; 
+    private static String[] constantOpAlgo = {}; 
+    private static String[] resourceOpAlgo = {}; 
         private static String[] tupleScanAlgo = {};
 	private static String[] scanAlgo = {"niagara.query_engine.PhysicalScanOperator"};
 	private static String[] selectAlgo = {"niagara.query_engine.PhysicalSelectOperator"};
@@ -79,6 +90,11 @@ public class operators {
     private static String[] expressionAlgo = {"niagara.query_engine.PhysicalExpressionOperator"}; 
     private static String[] sortAlgo = {"niagara.query_engine.PhysicalSortOperator"}; 
     private static String[] unionAlgo = {"niagara.query_engine.PhysicalUnionOperator"}; 
+
+    private static String[] displayAlgo = {"niagara.query_engine.PhysicalDisplayOperator"}; 
+    private static String[] sendAlgo = {"niagara.query_engine.PhysicalSendOperator"}; 
+    private static String[] receiveAlgo = {}; 
+
         private static String[] sumAlgo = {"niagara.query_engine.PhysicalSumOperator"};
         private static String[] countAlgo = {"niagara.query_engine.PhysicalCountOperator"};
         private static String[] duplicateAlgo = {"niagara.query_engine.PhysicalDuplicateOperator"};
@@ -105,6 +121,7 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(dtdScanAlgo[i]);
 		DtdScan = new dtdScanOp(algoClasses);
+                operatorNames.put(DtdScan.getClass().getName(), "dtdscan");
 
 		// FirehoseScan
 		numOfAlgo = firehoseScanAlgo.length;
@@ -112,6 +129,23 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(firehoseScanAlgo[i]);
 		FirehoseScan = new FirehoseScanOp(algoClasses);
+                operatorNames.put(FirehoseScan.getClass().getName(), "fhscan");
+
+		// ConstantOp
+		numOfAlgo = constantOpAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(constantOpAlgo[i]);
+		constantOp = new ConstantOp(algoClasses);
+                operatorNames.put(constantOp.getClass().getName(), "constant");
+
+		// ResourceOp
+		numOfAlgo = resourceOpAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(resourceOpAlgo[i]);
+		resourceOp = new ResourceOp(algoClasses);
+                operatorNames.put(resourceOp.getClass().getName(), "resource");
 
 		// TupleScan
 		numOfAlgo = tupleScanAlgo.length;
@@ -126,6 +160,7 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(scanAlgo[i]);
 		Scan = new scanOp(algoClasses);
+                operatorNames.put(Scan.getClass().getName(), "scan");
 
 		// Select
 		numOfAlgo = selectAlgo.length;
@@ -133,13 +168,15 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(selectAlgo[i]);
 		Select = new selectOp(algoClasses);
-	
+                operatorNames.put(Select.getClass().getName(), "select");
+
 		// Join
 		numOfAlgo = joinAlgo.length;
 		algoClasses = new Class[numOfAlgo];
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(joinAlgo[i]);
 		Join = new joinOp(algoClasses);
+                operatorNames.put(Join.getClass().getName(), "join");
 
 		// Construct
 		numOfAlgo = constructAlgo.length;
@@ -147,6 +184,7 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(constructAlgo[i]);
 		Construct = new constructOp(algoClasses);
+                operatorNames.put(Construct.getClass().getName(), "construct");
 	
 		// Nest
 		numOfAlgo = nestAlgo.length;
@@ -161,6 +199,7 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(averageAlgo[i]);
 		Average = new averageOp(algoClasses);
+                operatorNames.put(Average.getClass().getName(), "average");
 
 		// Accumulate
 		numOfAlgo = accumulateAlgo.length;
@@ -168,6 +207,7 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(accumulateAlgo[i]);
 		Accumulate = new AccumulateOp(algoClasses);
+                operatorNames.put(Accumulate.getClass().getName(), "accumulate");
 
 		// Expression
 		numOfAlgo = expressionAlgo.length;
@@ -175,6 +215,7 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(expressionAlgo[i]);
 		expression = new ExpressionOp(algoClasses);
+                operatorNames.put(expression.getClass().getName(), "expression");
 
 		// Sort
 		numOfAlgo = sortAlgo.length;
@@ -182,6 +223,7 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(sortAlgo[i]);
 		sort = new SortOp(algoClasses);
+                operatorNames.put(sort.getClass().getName(), "sort");
 
 		// Union
 		numOfAlgo = unionAlgo.length;
@@ -189,6 +231,31 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(unionAlgo[i]);
 		union = new UnionOp(algoClasses);
+                operatorNames.put(union.getClass().getName(), "union");
+
+		// Display
+		numOfAlgo = displayAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(displayAlgo[i]);
+		display = new DisplayOp(algoClasses);
+                operatorNames.put(display.getClass().getName(), "display");
+
+		// Send
+		numOfAlgo = sendAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(sendAlgo[i]);
+		send = new SendOp(algoClasses);
+                operatorNames.put(send.getClass().getName(), "send");
+
+		// Receive
+		numOfAlgo = receiveAlgo.length;
+		algoClasses = new Class[numOfAlgo];
+		for(int i=0;i<numOfAlgo;i++)
+			algoClasses[i] = Class.forName(receiveAlgo[i]);
+		receive = new ReceiveOp(algoClasses);
+                operatorNames.put(receive.getClass().getName(), "receive");
 
 		// Sum
 		numOfAlgo = sumAlgo.length;
@@ -196,6 +263,7 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(sumAlgo[i]);
 		Sum = new SumOp(algoClasses);
+                operatorNames.put(Sum.getClass().getName(), "sum");
 
 		// Count
 		numOfAlgo = countAlgo.length;
@@ -203,6 +271,7 @@ public class operators {
 		for(int i=0;i<numOfAlgo;i++)
 			algoClasses[i] = Class.forName(countAlgo[i]);
 		Count = new CountOp(algoClasses);
+                operatorNames.put(Count.getClass().getName(), "count");
 
 		// Duplicate
                 numOfAlgo = duplicateAlgo.length;
@@ -210,6 +279,7 @@ public class operators {
                 for(int i=0;i<numOfAlgo;i++)
                         algoClasses[i] = Class.forName(duplicateAlgo[i]);
                 Duplicate = new dupOp(algoClasses);
+                operatorNames.put(Duplicate.getClass().getName(), "dup");
 
 		// Split
                 numOfAlgo = splitAlgo.length;
@@ -229,4 +299,11 @@ public class operators {
 			System.err.println(e);	
 	      }	
 	}
+
+    public static String getName(Object o) {
+        if (operatorNames.containsKey(o.getClass().getName())) 
+            return (String) operatorNames.get(o.getClass().getName());
+        else
+            return "INVALIDOP";
+    }
 }
