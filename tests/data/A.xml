@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<Relation>
+<Tuple>
+  <A> 1 </A>
+  <B> 2 </B>
+</Tuple>
+<Tuple>
+  <A> 1 </A>
+  <B> 4 </B>
+</Tuple>
+<Tuple>
+  <A> 2 </A>
+  <B> 2 </B>
+</Tuple>
+</Relation>
+
