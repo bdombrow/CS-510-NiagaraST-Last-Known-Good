@@ -1,5 +1,5 @@
 /**
- * $Id: Optimizer.java,v 1.5 2002/06/25 23:51:57 vpapad Exp $
+ * $Id: Optimizer.java,v 1.6 2002/07/05 22:25:48 vpapad Exp $
  */
 package niagara.optimizer;
 
@@ -7,14 +7,14 @@ import niagara.xmlql_parser.op_tree.logNode;
 import niagara.connection_server.NiagraServer;
 import niagara.connection_server.Catalog;
 
-import niagara.optimizer.colombia.SSP;
+//import niagara.optimizer.colombia.SSP;
 
  public class Optimizer {
-    private static SSP ssp; // Search space
+    //private static SSP ssp; // Search space
 
     public static void init() {
 	System.out.println("XXX vpapad: in initColumbia!");
-	ssp = new SSP();
+//	ssp = new SSP();
 
 // 	initStatistics();
 	
@@ -74,7 +74,7 @@ import niagara.optimizer.colombia.SSP;
 // 	oldMemState.Checkpoint();
 // #endif
 
-	ssp.init();
+	//ssp.init();
 
 // 	// print the content of the initial search space
 // 	PTRACE0("Initial Search Space:\n" + Ssp->Dump());
@@ -134,7 +134,7 @@ import niagara.optimizer.colombia.SSP;
 	
 // 	PTRACE("used memory before delete ssp: %dM\r\n",GetUsedMemory()/1000);
 // 	delete Ssp;
-	ssp.clear();
+	//ssp.clear();
 	
 // 	PTRACE("used memory before delete cat: %dM\r\n",GetUsedMemory()/1000);
 	
