@@ -4,7 +4,9 @@
   	<!-- Logical and physical operators, name to class mappings, and
   	     logical-to-physical mappings for unoptimized query plans. -->
     <logical name="dtdscan" 
-      class="niagara.xmlql_parser.op_tree.dtdScanOp"/>
+      class="niagara.xmlql_parser.op_tree.dtdScanOp">
+<!-- XXX vpapad: not ready yet <physical name="DTDThread" class="niagara.data_manager.DTDThread"/> -->
+    </logical>
     <logical name="firehosescan" 
       class="niagara.xmlql_parser.op_tree.FirehoseScanOp">
             <physical name="StreamThread" class="niagara.data_manager.StreamThread"/>
@@ -19,12 +21,10 @@
     </logical>
     <logical name="resource"
       class="niagara.xmlql_parser.op_tree.ResourceOp"/>
-    <!-- XXX vpapad: the world is not ready for this yet
     <logical name="unnest"
       class="niagara.logical.Unnest">
-      <physical name="PhysicalUnnest" class="niagara.query_engine.PhysicalUnnest"/>
+      <!-- <physical name="PhysicalUnnest" class="niagara.query_engine.PhysicalUnnest"/> -->
     </logical>
-    XXX vpapad -->
     <logical name="select"
       class="niagara.xmlql_parser.op_tree.selectOp">
       <physical name="PhysicalSelect" class="niagara.query_engine.PhysicalSelectOperator"/>
@@ -107,40 +107,59 @@
     </logical>
   </operators>
 
-  <rules>
-  	<!-- Implementation rules -->
-  	<rule type="implementation" name="unnest to PhysicalUnnest">
-  		<before><logical name="unnest"/></before>
- 		<after><physical name="PhysicalUnnest"/></after>
-  	</rule>
-  	<rule type="implementation" name="construct to PhysicalConstruct">
-  		<before><logical name="construct"/></before>
- 		<after><physical name="PhysicalConstruct"/></after>
-  	</rule>
-  	<rule type="implementation" name="display to PhysicalDisplay">
-  		<before><logical name="display"/></before>
- 		<after><physical name="PhysicalDisplay"/></after>
-  	</rule>
-  	<rule type="implementation" name="join to NestedLoopsJoin">
-  		<before><logical name="join"/></before>
- 		<after><physical name="NestedLoopsJoin"/></after>
-  	</rule>
-  	<rule type="implementation" name="constant to ConstantThread">
-  		<before><logical name="constant"/></before>
- 		<after><physical name="ConstantThread"/></after>
-  	</rule>
-  	<rule type="implementation" name="fhcan to StreamThread">
-  		<before><logical name="firehosescan"/></before>
- 		<after><physical name="StreamThread"/></after>
-  	</rule>
-  	<rule type="implementation" name="filescan to StreamThread">
-  		<before><logical name="filescan"/></before>
- 		<after><physical name="StreamThread"/></after>
-  	</rule>
-  	<rule type="custom" name="commuteJoin" class="niagara.optimizer.rules.CommuteJoin"/>
+  <ruleset name="consolidation ruleset">
   	<rule type="custom" name="commuteRL" class="niagara.optimizer.rules.CommuteRL"/>
+  	<rule type="custom" name="associateRL" class="niagara.optimizer.rules.ConsolidatingAssociateJoinRtoL"/>
+  	<rule type="custom" name="ConsolidateMeRule" class="niagara.optimizer.rules.ConsolidateMeRule"/>
+  	<rule type="simple" name="resource to dtdscan">
+  		<before><logical name="resource" condition="isLocallyResolvable"/></before>
+ 		<after><op name="dtdscan"/></after>
+  	</rule>
+  </ruleset>
+  
+  <ruleset name="normal ruleset">
+	<!-- XXX vpapad: not yet
+  	<rule type="simple" name="unnest to PhysicalUnnest">
+  		<before><logical name="unnest"/></before>
+ 		<after><op name="PhysicalUnnest"/></after>
+  	</rule>
+  	<rule type="simple" name="construct to PhysicalConstruct">
+  		<before><logical name="construct"/></before>
+ 		<after><op name="PhysicalConstruct"/></after>
+  	</rule>
+  	<rule type="simple" name="display to PhysicalDisplay">
+  		<before><logical name="display"/></before>
+ 		<after><op name="PhysicalDisplay"/></after>
+  	</rule>
+  	<rule type="simple" name="join to HashJoin">
+  		<before><logical name="join" condition="isEquiJoin"/></before>
+ 		<after><op name="HashJoin"/></after>
+  	</rule> 
+  	<rule type="simple" name="join to NestedLoopsJoin">
+  		<before><logical name="join"/></before>
+ 		<after><op name="NestedLoopsJoin"/></after>
+  	</rule>
+  	<rule type="simple" name="constant to ConstantThread">
+  		<before><logical name="constant"/></before>
+ 		<after><op name="ConstantThread"/></after>
+  	</rule>
+  	<rule type="simple" name="fhcan to StreamThread">
+  		<before><logical name="firehosescan"/></before>
+ 		<after><op name="StreamThread"/></after>
+  	</rule>
+  	<rule type="simple" name="filescan to StreamThread">
+  		<before><logical name="filescan"/></before>
+ 		<after><op name="StreamThread"/></after>
+  	</rule>
+  	<rule type="simple" name="dtdscan to DTDThread">
+  		<before><logical name="dtdscan"/></before>
+ 		<after><op name="DTDThread"/></after>
+  	</rule>
+	-->
+  	<!-- Custom rules -->
+  	<rule type="custom" name="commuteJoin" class="niagara.optimizer.rules.CommuteJoin"/>
   	<rule type="custom" name="associateJoin" class="niagara.optimizer.rules.AssociateJoinRtoL"/>
-  </rules>
+  </ruleset>
   
   	<!-- Cost Model -->
     <costmodel>
@@ -188,10 +207,20 @@
     <url location="http://king.cse.ogi.edu/xml/tempest.xml"/>
     <url location="http://king.cse.ogi.edu/xml/troilus.xml"/>
     <url location="http://king.cse.ogi.edu/xml/win_tale.xml"/>
-    <url location="http://king.cse.ogi.edu/xml/win_tale.xml"/>
   </resource>
 
   <resource name="urn:niagara:tragedies">
     <resolver location="king.cse.ogi.edu:9090"/>
   </resource>
+  
+  <resource name="urn:niagara:numbers">
+    <url location="http://king.cse.ogi.edu/xml/numbers.xml"/>
+  </resource>
+
+  <resource name="urn:niagara:morenumbers">
+    <url location="http://king.cse.ogi.edu/xml/numbers.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/numbers.xml"/>
+    <url location="http://king.cse.ogi.edu/xml/numbers.xml"/>
+  </resource>
+
 </catalog>
