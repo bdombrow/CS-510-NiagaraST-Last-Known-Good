@@ -1,5 +1,5 @@
 /**
- * $Id: NodeImpl.java,v 1.1 2002/03/26 22:07:50 vpapad Exp $
+ * $Id: NodeImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -12,10 +12,10 @@ import org.w3c.dom.*;
 
 public abstract class NodeImpl implements Node {
 
-    protected Document doc;
+    protected DocumentImpl doc;
     protected int index;
 
-    public NodeImpl(Document doc, int index) {
+    public NodeImpl(DocumentImpl doc, int index) {
         this.doc = doc;
         this.index = index;
     }
@@ -23,9 +23,10 @@ public abstract class NodeImpl implements Node {
     public abstract String getNodeName();
 
     public String getNodeValue() throws DOMException {
-        // XXX vpapad: What does this do exactly?
+        // Default implementation - overriden in some subclasses
         return null;
     }
+
     public int getIndex() { 
         return index;
     }
@@ -42,11 +43,11 @@ public abstract class NodeImpl implements Node {
     }
 
     public NodeList getChildNodes() {
-        return BufferManager.getChildNodes(index);
+        return BufferManager.getChildNodes(doc, index);
     }
 
     public Node getFirstChild() {
-        return BufferManager.getFirstChild(index);
+        return BufferManager.getFirstChild(doc, index);
     }
 
     public Node getLastChild() {
@@ -58,11 +59,11 @@ public abstract class NodeImpl implements Node {
     }
 
     public Node getNextSibling() {
-        return BufferManager.getNextSibling(index);
+        return BufferManager.getNextSibling(doc, index);
     }
 
     public NamedNodeMap getAttributes() {
-        return BufferManager.getAttributes(index);
+        return BufferManager.getAttributes(doc, index);
     }
 
     public Document getOwnerDocument() {

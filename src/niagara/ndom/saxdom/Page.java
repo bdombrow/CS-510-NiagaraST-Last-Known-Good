@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.1 2002/03/26 22:07:50 vpapad Exp $
+ * $Id: Page.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -24,17 +24,21 @@ public class Page {
     private Page previous;
     private Page next;
 
+    private int number;
+
     private int pin_count;
 
-    private int current_event;
+    private int current_offset;
 
-    public Page(int size) {
+    public Page(int size, int number) {
         event_type = new byte[size];
         event_string = new String[size];
 
         previous = next = null;
         pin_count = 0;
-        current_event = 0;
+        current_offset = 0;
+        
+        this.number = number;
     }
 
     /** Prepare page for reuse 
@@ -53,7 +57,7 @@ public class Page {
 
         previous = next = null;
         pin_count = 0;
-        current_event = 0;
+        current_offset = 0;
     }
 
     public void pin() {
@@ -66,37 +70,44 @@ public class Page {
         if (pin_count == 0) {
             clear();
             BufferManager.addFreePage(this);
+            System.err.println("XXX vpapad: freeing page " + this);
         }
     }
 
     public void addEvent(DocumentImpl doc, byte type, String string) {
-        Page page;
+        if (current_offset < event_type.length) {
+            if (!doc.includesPage(this))
+                doc.addPage(this);
 
-        if (current_event < event_type.length)
-            page = this;
-        else {
-            page = BufferManager.getFreePage();
+            event_type[current_offset] = type;
+            event_string[current_offset] = string;
+
+            current_offset++;
+        } else if (next == null) { // last page of document
+            Page page = BufferManager.getFreePage();
             page.setPrevious(this);
             setNext(page);
 
-            page.setPrevious(this);
-            setNext(page);
             page.addEvent(doc, type, string);
-            return;
+        } else { // there is a next page
+            next.addEvent(doc, type, string);
+        }
+    }
+
+    public byte getEventType(int offset) {
+        if (pin_count <= 0) { // XXX vpapad
+            System.out.println("XXX vpapad: accessing freed page" + this);
+        }
+        
+        return event_type[offset];
+    }
+
+    public String getEventString(int offset) {
+        if (pin_count <= 0) { // XXX vpapad
+            System.out.println("XXX vpapad: accessing freed page");
         }
 
-        if (!doc.includesPage(page))
-            doc.addPage(page);
-        
-        current_event++;
-    }
-
-    public byte getEventType(int index) {
-        return event_type[index];
-    }
-
-    public String getEventString(int index) {
-        return event_string[index];
+        return event_string[offset];
     }
 
     public void setPrevious(Page previous) {
@@ -105,5 +116,21 @@ public class Page {
 
     public void setNext(Page next) {
         this.next = next;
+    }
+
+    public Page getNext() {
+        return next;
+    }
+
+    public int getCurrentOffset() {
+        return current_offset;
+    }
+
+    public int getSize() {
+        return event_type.length;
+    }
+
+    public int getNumber() {
+        return number;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.2 2002/03/26 23:52:07 tufte Exp $
+ * $Id: SAXDOMParser.java,v 1.3 2002/03/27 10:12:06 vpapad Exp $
  *
  */
 
@@ -24,7 +24,6 @@ import niagara.ndom.saxdom.*;
 /**
  * <code>SAXDOMParser</code> constructs read-only SAXDOM documents
  * from a SAX source
- * @author <a href="mailto:vpapad@king.cse.ogi.edu">Vassilis Papadimos</a>
  */
 public class SAXDOMParser implements niagara.ndom.DOMParser {
 
@@ -73,7 +72,7 @@ public class SAXDOMParser implements niagara.ndom.DOMParser {
 class SAXDOMHandler extends DefaultHandler {
     private DocumentImpl doc;
     private Page page;
-    private int index;
+    private int offset;
 
     public SAXDOMHandler() {
         reset();
@@ -88,11 +87,11 @@ class SAXDOMHandler extends DefaultHandler {
     public void startDocument() throws SAXException {
         if (page == null) {
             page = BufferManager.getFreePage();
-            index = 0;
         }
+        
+        offset = page.getCurrentOffset();
 
-        doc = new DocumentImpl(page, index);
-        page.addEvent(doc, SAXEvent.START_DOCUMENT, null);
+        doc = new DocumentImpl(page, offset);
     }
 
     public void endDocument() throws SAXException {
@@ -103,7 +102,7 @@ class SAXDOMHandler extends DefaultHandler {
                              String qName, Attributes attrs) 
         throws SAXException {
         // XXX vpapad: not doing anything about namespaces yet
-        page.addEvent(doc, SAXEvent.START_ELEMENT, localName);
+        page.addEvent(doc, SAXEvent.START_ELEMENT, qName);
 
         for (int i = 0; i < attrs.getLength(); i++) {
             page.addEvent(doc, SAXEvent.ATTR_NAME, attrs.getLocalName(i));
@@ -145,6 +144,7 @@ class SAXDOMHandler extends DefaultHandler {
     }
 
     public void reset() {
+        doc = null;
         hasErrors = hasWarnings = false;
     }
 

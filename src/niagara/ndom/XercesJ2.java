@@ -1,5 +1,5 @@
 /**
- * $Id: XercesJ2.java,v 1.1 2002/03/26 23:52:07 tufte Exp $
+ * $Id: XercesJ2.java,v 1.2 2002/03/27 10:12:06 vpapad Exp $
  *
  */
 
@@ -13,7 +13,6 @@ import javax.xml.parsers.*;
 /**
  * <code>XercesJ</code> wraps the Apache Xerces DOM implementation.
  *
- * @author <a href="mailto:vpapad@cse.ogi.edu">Vassilis Papadimos</a>
  */
 class XercesJ2 implements DOMImplementation {
 

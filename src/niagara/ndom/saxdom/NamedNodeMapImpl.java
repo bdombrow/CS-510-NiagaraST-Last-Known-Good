@@ -1,5 +1,5 @@
 /**
- * $Id: NamedNodeMapImpl.java,v 1.1 2002/03/26 22:07:50 vpapad Exp $
+ * $Id: NamedNodeMapImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -19,7 +19,7 @@ public class NamedNodeMapImpl implements NamedNodeMap {
     private Hashtable name2node;
     private Vector id2name;
 
-    public NamedNodeMapImpl(Document doc) {
+    public NamedNodeMapImpl(DocumentImpl doc) {
         this.doc = doc;
         name2node = new Hashtable();
         id2name = new Vector();

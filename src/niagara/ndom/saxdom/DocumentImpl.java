@@ -1,5 +1,5 @@
 /**
- * $Id: DocumentImpl.java,v 1.1 2002/03/26 22:07:50 vpapad Exp $
+ * $Id: DocumentImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -16,12 +16,13 @@ public class DocumentImpl extends NodeImpl implements Document {
 
     private Vector pages;
 
-    public DocumentImpl(Page firstPage, int index) {
-        super(null, index);
+    public DocumentImpl(Page firstPage, int offset) {
+        super(null, BufferManager.getIndex(firstPage, offset));
 
         pages = new Vector();
         addPage(firstPage);
-        
+
+        firstPage.addEvent(this, SAXEvent.START_DOCUMENT, null);        
     }
 
     public short getNodeType() {
@@ -46,6 +47,7 @@ public class DocumentImpl extends NodeImpl implements Document {
         return false;
     }
 
+
     public void finalize() throws Throwable {
         // Unpin all pages for this document
         for (int i = 0; i < pages.size(); i++)
@@ -64,19 +66,7 @@ public class DocumentImpl extends NodeImpl implements Document {
     }
 
     public Element getDocumentElement() {
-        NodeImpl n = (NodeImpl) BufferManager.getFirstChild(index);
-
-        if (n == null) return null;
-
-        if (n.getNodeType() == Node.ELEMENT_NODE)
-            return (Element) n;
-
-        while (true) {
-            n = (NodeImpl) BufferManager.getNextSibling(n.getIndex());
-            if (n == null) return null;
-            if (n.getNodeType() == Node.ELEMENT_NODE)
-                return (Element) n;
-        }
+        return BufferManager.getFirstElementChild(this, index);
     }
 
     // The specification does not allow a NO_MODIFICATION_ALLOWED exception

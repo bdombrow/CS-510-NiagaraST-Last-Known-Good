@@ -1,5 +1,5 @@
 /**
- * $Id: EntityReferenceImpl.java,v 1.1 2002/03/26 22:07:50 vpapad Exp $
+ * $Id: EntityReferenceImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -12,7 +12,7 @@ import org.w3c.dom.*;
 
 public class EntityReferenceImpl extends NodeImpl implements EntityReference {
 
-    public EntityReferenceImpl(Document doc, int index) {
+    public EntityReferenceImpl(DocumentImpl doc, int index) {
         super(doc, index);
     }
 

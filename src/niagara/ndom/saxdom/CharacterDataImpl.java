@@ -1,5 +1,5 @@
 /**
- * $Id: CharacterDataImpl.java,v 1.1 2002/03/26 22:07:49 vpapad Exp $
+ * $Id: CharacterDataImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -12,8 +12,12 @@ import org.w3c.dom.*;
 
 public abstract class CharacterDataImpl extends NodeImpl {
 
-    public CharacterDataImpl(Document doc, int index) {
+    public CharacterDataImpl(DocumentImpl doc, int index) {
         super(doc, index);
+    }
+
+    public String getNodeValue() throws DOMException {
+        return BufferManager.getData(index);
     }
 
     public String getData() throws DOMException {

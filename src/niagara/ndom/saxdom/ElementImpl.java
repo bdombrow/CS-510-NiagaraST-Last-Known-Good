@@ -1,5 +1,5 @@
 /**
- * $Id: ElementImpl.java,v 1.1 2002/03/26 22:07:50 vpapad Exp $
+ * $Id: ElementImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -15,7 +15,7 @@ public class ElementImpl extends NodeImpl implements Element {
     // XXX vpapad: Comments? COMMENTS?! We don't need no stinkin' comments!
     // See the documentation for DOM2 core interfaces.
 
-    public ElementImpl(Document doc, int index) {
+    public ElementImpl(DocumentImpl doc, int index) {
         super(doc, index);
     }
 
