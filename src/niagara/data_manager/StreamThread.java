@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.29 2003/08/01 17:28:23 tufte Exp $
+ * $Id: StreamThread.java,v 1.30 2003/12/24 02:12:09 vpapad Exp $
  */
 
 package niagara.data_manager;
@@ -15,12 +15,12 @@ package niagara.data_manager;
 import java.io.*;
 import org.xml.sax.*;
 
-import niagara.logical.StreamOp;
+import niagara.logical.*;
+import niagara.logical.Stream;
 import niagara.ndom.*;
 import niagara.optimizer.colombia.*;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
 import niagara.firehose.*;
 import niagara.connection_server.NiagraServer;
 
@@ -38,7 +38,7 @@ public class StreamThread extends SourceThread {
     private Attribute variable;
 
     public void opInitFrom(LogicalOp lop) {
-        StreamOp op = (StreamOp) lop;
+        Stream op = (Stream) lop;
         spec = op.getSpec();
         variable = op.getVariable();
     }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheManager.java,v 1.9 2003/09/22 02:00:11 vpapad Exp $
+  $Id: CacheManager.java,v 1.10 2003/12/24 02:12:08 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,7 +30,7 @@ package niagara.data_manager;
 import org.w3c.dom.*;
 import java.util.*;
 import niagara.utils.*;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.xmlql_parser.*;
 
 /**
  *  Initial implementation of data manager no memory management
@@ -58,34 +58,6 @@ public class CacheManager {
         memCache.setLowerCache(diskCache);
         otherCacheVec = new Vector();
         vClock = 0;
-    }
-
-    public MemCache createCache(int rep, int totalS, int lw, int hw) {
-        // right now I ignore replace alg.  Just FIFO
-        MemCache mc = new MemCacheFIFO(totalS, lw, hw);
-        mc.setLowerCache(diskCache);
-        otherCacheVec.addElement(mc);
-        return mc;
-    }
-    
-    public void releaseCache(MemCache mc) {
-        try {
-            mc.release();
-        } catch (CacheReleaseException cre) {
-            cre.printStackTrace();
-        }
-        otherCacheVec.removeElement(mc);
-    }
-    
-    public long getVClock() {
-        return vClock;
-    }
-    public void setVClock(long now) {
-        if(vClock>=now) { 
-            // System.err.println("vClock error");
-            // vClock++;
-        }
-        else vClock = now;
     }
     
     public synchronized boolean getDocuments(Vector xmlURLList, 

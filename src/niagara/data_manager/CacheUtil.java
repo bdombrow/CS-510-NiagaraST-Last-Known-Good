@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheUtil.java,v 1.8 2003/09/26 20:17:15 vpapad Exp $
+  $Id: CacheUtil.java,v 1.9 2003/12/24 02:12:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -223,7 +223,7 @@ public class CacheUtil {
         root.setAttribute("DIRTY", "FALSE");
         long threshold = System.currentTimeMillis() - timespan;
         for(int i=0; i<vec.size(); i++) {
-            StreamTupleElement tmp = (StreamTupleElement)vec.elementAt(i);
+            Tuple tmp = (Tuple)vec.elementAt(i);
             root.appendChild(tmp.toEle(doc));
         }
         doc.appendChild(root);

@@ -1,15 +1,15 @@
 /**
- * $Id: MQPHandler.java,v 1.7 2003/03/07 23:41:11 vpapad Exp $
+ * $Id: MQPHandler.java,v 1.8 2003/12/24 02:16:38 vpapad Exp $
  *
  */
 
 package niagara.connection_server;
 
+import niagara.logical.*;
 import niagara.optimizer.Optimizer;
 import niagara.optimizer.Plan;
 import niagara.optimizer.colombia.Attrs;
 import niagara.query_engine.*;
-import niagara.xmlql_parser.op_tree.*;
 import niagara.utils.*;
 
 import niagara.client.LightMQPClient;
@@ -92,7 +92,7 @@ public class MQPHandler {
         // Build new MQP
         for (int k = 0; k < schedulableRoots.size(); k++) {
             Plan p = (Plan) schedulableRoots.get(k);
-            ConstantOp cop = new ConstantOp(results[number], new Attrs(p.getTupleSchema().getVariables()));
+            ConstantScan cop = new ConstantScan(results[number], new Attrs(p.getTupleSchema().getVariables()));
             p.setOperator(cop);
             p.setInputs(new Plan[] {});
         }
@@ -105,7 +105,7 @@ public class MQPHandler {
         HashMap votes = new HashMap();
         for (int i = 0; i < resources.size(); i++) {
             Plan node = (Plan) resources.get(i);
-            ResourceOp rop = node.getResource();
+            Resource rop = node.getResource();
             String urn = rop.getURN();
             Vector resolvers = catalog.getResolvers(urn);
             if (resolvers == null)
@@ -147,7 +147,7 @@ public class MQPHandler {
                 "Unable to route MQP to server: " + location);
                 
         // Delivery failed, route back to client
-        DisplayOp d = (DisplayOp) root.getOperator();
+        Display d = (Display) root.getOperator();
         // If that fails too, give up
         if (!sendHTTP(plan, d.getClientLocation()))
             System.err.println("Could not return undeliverable MQP to client");
@@ -167,7 +167,7 @@ public class MQPHandler {
     private boolean sendHTTP(String plan, String location) {
         try {
             String result = root.planToXML();
-            String query_id = String.valueOf(((DisplayOp) root.getOperator()).getQueryId());
+            String query_id = String.valueOf(((Display) root.getOperator()).getQueryId());
             URL url = new URL(location);
             URLConnection connection = url.openConnection();
             connection.setDoOutput(true);

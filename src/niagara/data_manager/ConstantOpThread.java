@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOpThread.java,v 1.9 2003/07/03 19:36:29 tufte Exp $
+ * $Id: ConstantOpThread.java,v 1.10 2003/12/24 02:12:09 vpapad Exp $
  *
  */
 
@@ -18,7 +18,7 @@ import org.xml.sax.*;
 
 import niagara.query_engine.*;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.ConstantOp;
+import niagara.logical.ConstantScan;
 import niagara.ndom.*;
 import niagara.optimizer.colombia.*;
 
@@ -98,7 +98,7 @@ public class ConstantOpThread extends SourceThread {
                 for (int i = 0; i < tuples.getLength(); i++) {
                     Element tuple = (Element) tuples.item(i);
                     NodeList attrs = tuple.getElementsByTagName("elt");
-                    StreamTupleElement ste = new StreamTupleElement(false);
+                    Tuple ste = new Tuple(false);
                     for (int j = 0; j < attrs.getLength(); j++) {
                         ste.appendAttribute(attrs.item(j).getFirstChild());
                     }
@@ -155,7 +155,7 @@ public class ConstantOpThread extends SourceThread {
      * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
      */
     public void opInitFrom(LogicalOp op) {
-        ConstantOp cop = (ConstantOp) op;
+        ConstantScan cop = (ConstantScan) op;
         this.vars = cop.getVars();
         this.content = cop.getContent();
     }

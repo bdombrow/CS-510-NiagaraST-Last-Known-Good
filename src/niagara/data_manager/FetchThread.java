@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: FetchThread.java,v 1.9 2003/03/08 01:01:53 vpapad Exp $
+  $Id: FetchThread.java,v 1.10 2003/12/24 02:12:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -72,7 +72,7 @@ class FetchThread implements Runnable {
 		}
 	    }
 	outer:	while(tmpUrl.size()!=0) {
-	    if(!notified) _wait();
+	    while (!notified) _wait();
 	    
 	    for(int i=0; i<tmpUrl.size(); i++) {
 		ret = null;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ServerQueryInfo.java,v 1.5 2003/08/01 17:28:15 tufte Exp $
+  $Id: ServerQueryInfo.java,v 1.6 2003/12/24 02:16:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,17 +27,14 @@
 
 package niagara.connection_server;
 
-/**Stores the info about a query in the server
-*/
-import niagara.utils.*;
 import niagara.query_engine.*;
 
+/**Stores the info about a query in the server */
 public class ServerQueryInfo {
 
     // constants for the variable queryType
-    final static int QueryEngine = 1;
-    final static int GetDTD = 3;
-    final static int AccumFile = 4;
+    public final static int QueryEngine = 1;
+    public final static int AccumFile = 4;
 
     private int queryType;
 
@@ -48,7 +45,6 @@ public class ServerQueryInfo {
     // Is this query synchronous? 
     // (Implies no result padding, and closing of connection at the end)
     private boolean synchronous;
-    private SynchronizedQueue queryResultQueue;
 
     // qe query related data
     private QueryResult queryResult;
@@ -74,10 +70,6 @@ public class ServerQueryInfo {
 
     boolean isAccumFileQuery() {
         return queryType == AccumFile;
-    }
-
-    boolean isDTDQuery() {
-        return queryType == GetDTD;
     }
 
     boolean isSynchronous() {

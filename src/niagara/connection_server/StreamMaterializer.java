@@ -1,5 +1,5 @@
 /**
- * $Id: StreamMaterializer.java,v 1.4 2003/03/05 19:25:10 tufte Exp $
+ * $Id: StreamMaterializer.java,v 1.5 2003/12/24 02:16:38 vpapad Exp $
  */
 
 package niagara.connection_server;
@@ -21,7 +21,7 @@ public class StreamMaterializer extends Thread {
 	try {
 	    output.append("<stream>");
 	    while (true) {
-		StreamTupleElement ste = inputStream.getTuple(500);
+		Tuple ste = inputStream.getTuple(500);
 		if (ste == null) {
 		    if(inputStream.getCtrlFlag() == CtrlFlags.EOS) {
 			break;
@@ -43,7 +43,7 @@ public class StreamMaterializer extends Thread {
 	}
     }
 
-    public void process(StreamTupleElement ste) {
+    public void process(Tuple ste) {
         output.append("<tuple>");
         for (int i = 0; i < ste.size(); i++) {
             Object o = ste.getAttribute(i);

@@ -1,5 +1,5 @@
 /**
- * $Id: TimerThread.java,v 1.5 2003/07/03 19:36:29 tufte Exp $
+ * $Id: TimerThread.java,v 1.6 2003/12/24 02:12:09 vpapad Exp $
  *
  */
 
@@ -14,8 +14,8 @@ import org.w3c.dom.*;
 
 import niagara.query_engine.*;
 import niagara.utils.*;
-import niagara.logical.Variable;
 import niagara.logical.Timer;
+import niagara.logical.Variable;
 
 import java.util.Date;
 import java.text.DateFormat;

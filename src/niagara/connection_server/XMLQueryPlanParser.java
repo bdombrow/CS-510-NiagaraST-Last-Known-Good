@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.47 2003/09/26 21:25:13 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.48 2003/12/24 02:16:38 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -10,7 +10,6 @@ import org.xml.sax.*;
 import java.io.*;
 import java.util.*;
 
-import niagara.xmlql_parser.op_tree.*;
 import niagara.logical.*;
 
 import niagara.ndom.*;
@@ -144,9 +143,9 @@ public class XMLQueryPlanParser {
         Class opClass = catalog.getOperatorClass(nodeName);
         if (opClass == null)
             throw new InvalidPlanException("Unknown operator: " + nodeName);
-        op operator;
+        LogicalOperator operator;
         try {
-            operator = (op) opClass.newInstance();
+            operator = (LogicalOperator) opClass.newInstance();
         } catch (ClassCastException cce) {
             throw new InvalidPlanException(
                 nodeName + " is not a logical operator");
@@ -168,7 +167,7 @@ public class XMLQueryPlanParser {
         for (int i = 0; i < arity; i++)
             inputProperties[i] =
                 (LogicalProperty) ids2logprops.get(inputs.get(i));
-        operator.loadFromXML(e, inputProperties);
+        operator.loadFromXML(e, inputProperties, catalog);
 	operator.setId(id); // KT - for debugging/profiling output
         Plan[] inputPlans = new Plan[arity];
         for (int i = 0; i < arity; i++)
@@ -183,11 +182,11 @@ public class XMLQueryPlanParser {
             //  1. Specified locations are never our own
             //  2. Remote subplans are never nested 
             Plan remoteExpr = (Plan) ids2plans.get(id);
-            SendOp sop = new SendOp(location);
+            Send sop = new Send(location);
             remotePlans.add(new Plan(sop, remoteExpr));
 
             // Put a receive operator in the place of the remote plan
-            ReceiveOp rop = new ReceiveOp(sop);
+            Receive rop = new Receive(sop);
             rop.setLogProp((LogicalProperty) ids2logprops.get(id));
             ids2plans.put(id, new Plan(rop));
         }

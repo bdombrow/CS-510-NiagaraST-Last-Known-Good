@@ -1,11 +1,17 @@
 /*
- * $Id: Catalog.java,v 1.10 2003/09/16 05:05:04 vpapad Exp $
- *
+ * $Id: Catalog.java,v 1.11 2003/12/24 02:16:38 vpapad Exp $
+ *  
  */
 
 package niagara.connection_server;
 import java.util.*;
 import java.io.*;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
@@ -25,13 +31,23 @@ import niagara.optimizer.rules.SimpleRule;
 public class Catalog implements ICatalog {
 
     private static final boolean debug = true;
-    // This primitive Catalog maintains a mapping from URNs to URLs, 
+    // This primitive Catalog maintains a mapping from URNs to URLs,
     // or location of servers that know to resolve the URNs
+    
+    /** Configuration parameters */
+    private HashMap configParams;
 
-    private Hashtable urn2urls; // locally resolvable
+    /** All the known resource names */
+    private HashSet resourceNames;
+    /** Resources to local filenames */
+    private Hashtable urn2local;
+    /** Resources to servers that can resolve them */
     private Hashtable urn2resolvers;
+    /** Resources to URLs */
+    private Hashtable urn2urls;
 
-    private HashMap parameters; // Columbia cost model parameters
+    /** Colombia cost model parameters */
+    private HashMap parameters;
 
     /** Cache for double parameters lookups */
     private HashMap doubleParams;
@@ -44,21 +60,20 @@ public class Catalog implements ICatalog {
 
     private HashMap rulesets;
 
+    /** The catalog file name */
+    private String filename;
+
+    /** The catalog DOM document */
+    private Document document;
+
     // Logical operator -> Array of Physical operator classes
-    HashMap logical2physical;
+    private HashMap logical2physical;
 
     // Resource name -> its logical properties
-    HashMap logicalProperties;
+    private HashMap logicalProperties;
 
-    public Catalog() {
-        urn2urls = new Hashtable();
-        urn2resolvers = new Hashtable();
-        parameters = new HashMap();
-        name2class = new HashMap();
-        class2name = new HashMap();
-        rulesets = new HashMap();
-        logical2physical = new HashMap();
-        logicalProperties = new HashMap();
+    public String getConfigParam(String name) {
+        return (String) configParams.get(name);
     }
 
     public void addResolver(String urn, String resolver) {
@@ -67,22 +82,42 @@ public class Catalog implements ICatalog {
         }
         Vector resolvers = (Vector) urn2resolvers.get(urn);
         resolvers.add(resolver);
+        resourceNames.add(urn);
     }
 
+    /** Get an appropriate file name to store data for the given URN. 
+     * (Should only be called from the data manager.) */
+    public String getNewFileName(String urn) {
+        return urn.hashCode() + "." + System.currentTimeMillis();
+    }
+
+    /** Register the fact that we have stored the parsed contents of 
+     * <code>urn</code> locally. (Should only be called from the data 
+     * manager.) */
+    public void addLocal(String urn, String filename) {
+        urn2local.put(urn, filename);
+        resourceNames.add(urn);
+    }
+    
     public void addURL(String urn, String url) {
         if (!urn2urls.containsKey(urn)) {
             urn2urls.put(urn, new Vector());
         }
         Vector urls = (Vector) urn2urls.get(urn);
         urls.add(url);
+        resourceNames.add(urn);
     }
 
     public boolean isLocallyResolvable(String urn) {
-        return urn2urls.containsKey(urn);
+        return urn2local.containsKey(urn) || urn2urls.containsKey(urn);
     }
 
     public Vector getURL(String urn) {
         return (Vector) urn2urls.get(urn);
+    }
+
+    public String getFile(String urn) {
+        return (String) urn2local.get(urn);
     }
 
     public Vector getResolvers(String urn) {
@@ -109,7 +144,18 @@ public class Catalog implements ICatalog {
     }
 
     public Catalog(String filename) {
-        this();
+        configParams = new HashMap();
+        resourceNames = new HashSet();
+        urn2local = new Hashtable();
+        urn2urls = new Hashtable();
+        urn2resolvers = new Hashtable();
+        parameters = new HashMap();
+        name2class = new HashMap();
+        class2name = new HashMap();
+        rulesets = new HashMap();
+        logical2physical = new HashMap();
+        logicalProperties = new HashMap();
+        this.filename = filename;
 
         // parse the catalog file
         niagara.ndom.DOMParser parser = DOMFactory.newParser();
@@ -120,12 +166,13 @@ public class Catalog implements ICatalog {
             parser.parse(is);
 
             // Get document
-            Document d = parser.getDocument();
+            document = parser.getDocument();
 
             // Get root element
-            Element root = d.getDocumentElement();
+            Element root = document.getDocumentElement();
 
             System.err.println("Parsing catalog...");
+            loadConfiguration(root);
             loadOperators(root);
             loadResources(root);
             loadParameters(root, "costmodel");
@@ -141,6 +188,18 @@ public class Catalog implements ICatalog {
             throw new PEException(
                 "Error reading catalog file " + ioe.getMessage());
         }
+    }
+
+    void loadConfiguration(Element root) {
+        NodeList nl = root.getElementsByTagName("configuration");
+        if (nl.getLength() != 1)
+            confError("The catalog must contain exactly one <configuration> element");
+        Element conf= (Element) nl.item(0);
+        nl = conf.getElementsByTagName("param");
+        for (int i = 0; i < nl.getLength(); i++) {
+            Element param = (Element) nl.item(i);
+            configParams.put(param.getAttribute("name"), param.getAttribute("value"));
+        } 
     }
 
     void loadOperators(Element root) {
@@ -203,6 +262,7 @@ public class Catalog implements ICatalog {
         for (int i = 0; i < resources.getLength(); i++) {
             Element resource = (Element) resources.item(i);
             String urn = resource.getAttribute("name");
+            resourceNames.add(urn);
 
             NodeList urls = resource.getElementsByTagName("url");
             for (int j = 0; j < urls.getLength(); j++) {
@@ -226,13 +286,30 @@ public class Catalog implements ICatalog {
                 v.add(location);
             }
 
-            LogicalProperty lp = null;
-            boolean local = (urls.getLength() > 0);
-            lp =
+            NodeList files = resource.getElementsByTagName("file");
+            int len = files.getLength();
+            if (len > 1)
+                confError("Resource " + urn + " has more than one local file");
+
+            if (len == 1) {
+                Element file = (Element) files.item(0);
+                String location = file.getAttribute("location");
+                urn2local.put(urn, location);
+            }
+
+            boolean resolvable =
+                (files.getLength() > 0 || urls.getLength() > 0);
+            int size;
+            if (len > 0)
+                size = 1;
+            // XXX vpapad: here we must grab the statistics from the file
+            else
+                size = urls.getLength();
+            LogicalProperty lp =
                 new LogicalProperty(
-                    urls.getLength(),
+                    size,
                     new Attrs(new Variable(urn, NodeDomain.getDOMNode())),
-                    local);
+                    resolvable);
             logicalProperties.put(urn, lp);
         }
     }
@@ -279,7 +356,7 @@ public class Catalog implements ICatalog {
     public LogicalProperty getLogProp(String resourceName) {
         if (logicalProperties.containsKey(resourceName))
             return (LogicalProperty) logicalProperties.get(resourceName);
-        // If we don't know anything about the resource, 
+        // If we don't know anything about the resource,
         // treat URLs as local resources, unknown URNs as remote
         float card;
         boolean local;
@@ -377,7 +454,73 @@ public class Catalog implements ICatalog {
         System.err.println(msg);
     }
 
-    // for testing 
+    public void shutdown() {
+        // Save resources
+        try {
+            PrintWriter pw =
+                new PrintWriter(
+                    new BufferedOutputStream(new FileOutputStream(filename)));
+            StreamResult streamResult = new StreamResult(pw);
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer serializer = tf.newTransformer();
+            Element root = document.getDocumentElement();
+            NodeList resourcesList = root.getElementsByTagName("resources");
+            Element resources;
+            if (resourcesList.getLength() != 0) {
+                // Delete it, we will create it anew
+                resources = (Element) resourcesList.item(0);
+                root.removeChild(resources);
+            }
+            resources = document.createElement("resources");
+
+            Iterator keys = resourceNames.iterator();
+            while (keys.hasNext()) {
+
+                String urn = (String) keys.next();
+                Element r = document.createElement("resource");
+                r.setAttribute("name", urn);
+                r.appendChild(document.createTextNode("\n"));
+                if (urn2local.containsKey(urn)) {
+                    Element l = document.createElement("file");
+                    l.setAttribute("location", (String) urn2local.get(urn));
+                    r.appendChild(l);
+                    r.appendChild(document.createTextNode("\n"));
+                }
+                if (urn2urls.containsKey(urn)) {
+                    Vector v = (Vector) urn2urls.get(urn);
+                    for (int i = 0; i < v.size(); i++) {
+                        Element l = document.createElement("url");
+                        l.setAttribute("location", (String) v.get(i));
+                        r.appendChild(l);
+                        r.appendChild(document.createTextNode("\n"));
+                    }
+                }
+                if (urn2resolvers.containsKey(urn)) {
+                    Vector v = (Vector) urn2resolvers.get(urn);
+                    for (int i = 0; i < v.size(); i++) {
+                        Element l = document.createElement("url");
+                        l.setAttribute("location", (String) v.get(i));
+                        r.appendChild(l);
+                        r.appendChild(document.createTextNode("\n"));
+                    }
+                }
+                resources.appendChild(document.createTextNode("\n"));
+                resources.appendChild(r);
+            }
+            resources.appendChild(document.createTextNode("\n"));
+            root.appendChild(resources);
+            root.appendChild(document.createTextNode("\n"));
+
+            serializer.transform(new DOMSource(document), streamResult);
+            pw.close();
+        } catch (FileNotFoundException fnfe) {
+            cerr("Catalog file does not seem to exist.");
+        } catch (TransformerException te) {
+            cerr("Unable to save catalog data.");
+        }
+    }
+
+    // for testing
     public void dumpStats() {
         cerr("Locally resolvable URNs:");
         Enumeration e = urn2urls.keys();

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.29 2003/09/22 00:20:29 vpapad Exp $
+  $Id: NiagraServer.java,v 1.30 2003/12/24 02:16:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,7 +31,6 @@ import java.net.InetAddress;
 import niagara.ndom.DOMFactory;
 import niagara.ndom.saxdom.BufferManager;
 import niagara.query_engine.QueryEngine;
-
 
 /**The main Niagra Server which receives all the client requests
    It has an instance of query engine and a SEClient for 
@@ -67,8 +66,6 @@ public class NiagraServer {
     // Client for contacting the search engine
     //SEClient seClient;
 
-    private static boolean dtd_hack = false;
-
     private static boolean startConsole = false;
 
     // Catalog
@@ -83,17 +80,12 @@ public class NiagraServer {
         try {
             // Read the catalog
             catalog = new Catalog(catalogFileName);
-            
+
             // Create the query engine
-                qe =
-                    new QueryEngine(
-                        this,
-                        NUM_QUERY_THREADS,
-                        NUM_OP_THREADS); 
+            qe = new QueryEngine(this, NUM_QUERY_THREADS, NUM_OP_THREADS);
 
             // Create and start the connection manager
-            connectionManager =
-                new ConnectionManager(client_port, this, dtd_hack);
+            connectionManager = new ConnectionManager(client_port, this);
 
             if (startConsole) {
                 Console console = new Console(this, System.in);
@@ -109,123 +101,90 @@ public class NiagraServer {
         }
     }
 
-    /** For reading the options from a configuration file and in case
-    	the file is not there or the command line argument is
-    	-init then takes the options from the user and stores
-    	them in the configuration file */
-    public static void main(String[] args)
-    	{
-	    // Initialize the QueryEngine parameters
-	    init(args);
-	    if(TIME_OPERATORS | RUNNING_NIPROF) {
-	       System.loadLibrary("profni");
-	    }
-	    new NiagraServer();
-    	}
+    public static void main(String[] args) {
+        // Initialize the QueryEngine parameters
+        init(args);
+        if (TIME_OPERATORS | RUNNING_NIPROF) {
+            System.loadLibrary("profni");
+        }
+        new NiagraServer();
+    }
 
     public static void init(String[] args) {
-
         // Print usage/help info if -help flag is given
-	if (args.length == 1 && args[0].equals("-help")) {
+        if (args.length == 1 && args[0].equals("-help")) {
             usage();
             return;
         }
 
-	NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS;
-	NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS;
-	
-	for (int i = 0; i < args.length; i++) {
-	    if (args[i].equals("-without-se")) {
-		System.out.println("Search Engine not supported now");
-		// nothing to do
-	    } else if (args[i].equals("-quiet")) {
-		ResultTransmitter.QUIET = true;
-	    } else if (args[i].equals("-full-tuple")){
-	    	ResultTransmitter.OUTPUT_FULL_TUPLE = true;
-	    } else if (args[i].equals("-dtd-hack")) {
-		dtd_hack = true;
-	    } else if (args[i].equals("-console")) {
-		startConsole = true;
-	    } else if (args[i].equals("-client-port")) {
-		if ((i + 1) >= args.length) {
-		    cerr("Please supply a parameter to -client-port");
-		    usage();
-		} else {
-		    try {
-			client_port = Integer.parseInt(args[i + 1]);
-		    } catch (NumberFormatException nfe) {
-			cerr("Invalid argument to -client-port");
-			usage();
-		    }
-		}
-		i++; // Cover for argument
-	    } else if (args[i].equals("-server-port")) {
-		if ((i + 1) >= args.length) {
-		    cerr("Please supply a parameter to -server-port");
-		    usage();
-		} else {
-		    try {
-			server_port = Integer.parseInt(args[i + 1]);
-		    } catch (NumberFormatException nfe) {
-			cerr("Invalid argument to -server-port");
-			usage();
-		    }
-		}
-		i++; // Cover for argument
-	    } else if (args[i].equals("-catalog")) {
-		if ((i + 1) >= args.length) {
-		    cerr("Please supply a parameter to -catalog");
-		    usage();
-		} else {
-		    catalogFileName = args[i + 1];
-		}
-		i++; // Cover for argument
-	    } else if (args[i].equals("-dom")) {
-		if ((i + 1) >= args.length) {
-		    cerr("Please supply a parameter to -dom");
-		    usage();
-		} else {
-		    DOMFactory.setImpl(args[i + 1]);
-		}
-		i++; // Cover for argument
-	    } else if (args[i].equals("-no-saxdom")) {
-		useSAXDOM = false;
-	    } else if (args[i].equals("-saxdom-pages")) {
-		saxdom_pages = parseIntArgument(args, i);
-		i++; // Cover for argument
-	    } else if (args[i].equals("-saxdom-page-size")) {
-		saxdom_page_size = parseIntArgument(args, i);
-		i++; // Cover for argument
-	    } else if (args[i].equals("-run-niprof")) {
-		RUNNING_NIPROF = true;
-	    } else if (args[i].equals("-time-operators")) { 
-		TIME_OPERATORS = true;
-	    } else {
-		cerr("Unknown option: " + args[i]);
-		usage();
-	    }
-	}
-    }
+        NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS;
+        NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS;
 
-    /**
-     * see if int is valid
-     */
-    private static boolean isInteger(String intValue) {
-	int tmpInt = Integer.parseInt(intValue);
-	return true;
-    }
-
-    /**
-     *  see if host is valid
-     */
-    private static boolean hostIsValid(String host) {
-        try {
-            // Try to lookup the host
-            InetAddress ip = InetAddress.getByName(host);
-            return true;
-        } catch (java.net.UnknownHostException e) {
-            cerr("* Host '" + host + "' not found *");
-            return false;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-quiet")) {
+                ResultTransmitter.QUIET = true;
+            } else if (args[i].equals("-full-tuple")) {
+                ResultTransmitter.OUTPUT_FULL_TUPLE = true;
+            } else if (args[i].equals("-console")) {
+                startConsole = true;
+            } else if (args[i].equals("-client-port")) {
+                if ((i + 1) >= args.length) {
+                    cerr("Please supply a parameter to -client-port");
+                    usage();
+                } else {
+                    try {
+                        client_port = Integer.parseInt(args[i + 1]);
+                    } catch (NumberFormatException nfe) {
+                        cerr("Invalid argument to -client-port");
+                        usage();
+                    }
+                }
+                i++; // Cover for argument
+            } else if (args[i].equals("-server-port")) {
+                if ((i + 1) >= args.length) {
+                    cerr("Please supply a parameter to -server-port");
+                    usage();
+                } else {
+                    try {
+                        server_port = Integer.parseInt(args[i + 1]);
+                    } catch (NumberFormatException nfe) {
+                        cerr("Invalid argument to -server-port");
+                        usage();
+                    }
+                }
+                i++; // Cover for argument
+            } else if (args[i].equals("-catalog")) {
+                if ((i + 1) >= args.length) {
+                    cerr("Please supply a parameter to -catalog");
+                    usage();
+                } else {
+                    catalogFileName = args[i + 1];
+                }
+                i++; // Cover for argument
+            } else if (args[i].equals("-dom")) {
+                if ((i + 1) >= args.length) {
+                    cerr("Please supply a parameter to -dom");
+                    usage();
+                } else {
+                    DOMFactory.setImpl(args[i + 1]);
+                }
+                i++; // Cover for argument
+            } else if (args[i].equals("-no-saxdom")) {
+                useSAXDOM = false;
+            } else if (args[i].equals("-saxdom-pages")) {
+                saxdom_pages = parseIntArgument(args, i);
+                i++; // Cover for argument
+            } else if (args[i].equals("-saxdom-page-size")) {
+                saxdom_page_size = parseIntArgument(args, i);
+                i++; // Cover for argument
+            } else if (args[i].equals("-run-niprof")) {
+                RUNNING_NIPROF = true;
+            } else if (args[i].equals("-time-operators")) {
+                TIME_OPERATORS = true;
+            } else {
+                cerr("Unknown option: " + args[i]);
+                usage();
+            }
         }
     }
 
@@ -252,16 +211,11 @@ public class NiagraServer {
     private static void usage() {
         cout("");
         cout("Usage: java niagara.connection_server.NiagraServer [flags]");
-        cout("\t-init   create (re-create) the .niagra_config file");
-        cout("\t-se <host name> use the the search engine on <host name>");
-
-        cout("\t-without-se   Do not try to connect to a search engine");
-        cout("\t-dtd-hack     Add HTML entity definitions to results");
         cout("\t-console      Rudimentary control of the server from stdin");
         cout("\t-client-port <number> Port number for client-server communication");
         cout("\t-server-port <number> Port number for inter-server communication");
         cout(
-            "\t-catalog <file> Specify catalog file (default is:"
+            "\t-catalog <file> alternate catalog file (default is:"
                 + catalogFileName
                 + ")");
         cout("\t-dom  <implementation name> Default DOM implementation.");
@@ -312,12 +266,16 @@ public class NiagraServer {
 
     // Try to shutdown
     public void shutdown() {
+        info("Server is shutting down.");
         connectionManager.shutdown();
+        qe.shutdown();
+        catalog.shutdown();
+        System.exit(0);
     }
 
     /** Simple method for info messages - just outputs to stdout now
      * we can extend it later to do something fancier */
     public static void info(String msg) {
-	cout(msg);
+        cout(msg);
     }
 }

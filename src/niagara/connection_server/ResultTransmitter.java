@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.26 2003/09/22 00:20:29 vpapad Exp $
+  $Id: ResultTransmitter.java,v 1.27 2003/12/24 02:16:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -106,8 +106,6 @@ public class ResultTransmitter implements Schedulable {
 
             if (queryInfo.isQEQuery()) {
                 handleQEQuery();
-            } else if (queryInfo.isDTDQuery()) {
-                handleDTDQuery();
             } else if (queryInfo.isAccumFileQuery()) {
                 handleQEQuery();
                 //handleAccumQuery();

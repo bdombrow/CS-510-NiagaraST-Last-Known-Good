@@ -1,5 +1,5 @@
 /**
- * $Id: ReceiveThread.java,v 1.6 2003/07/09 04:59:43 tufte Exp $
+ * $Id: ReceiveThread.java,v 1.7 2003/12/24 02:12:08 vpapad Exp $
  *
  */
 
@@ -19,16 +19,16 @@ import java.util.*;
 
 
 import niagara.utils.*;
+import niagara.logical.Receive;
 import niagara.ndom.*;
-import niagara.xmlql_parser.op_tree.ReceiveOp;
 
 //  XXX vpapad: hack to get CVS to compile
 public class ReceiveThread /* extends SourceThread */{
     private SinkTupleStream outputStream;
 
-    private ReceiveOp op;
+    private Receive op;
 
-    public ReceiveThread(ReceiveOp op, SinkTupleStream outStream) {
+    public ReceiveThread(Receive op, SinkTupleStream outStream) {
 	this.op = op;
 	outputStream = outStream;
     }
@@ -96,7 +96,7 @@ public class ReceiveThread /* extends SourceThread */{
 	    parser.parse(new InputSource(new ByteArrayInputStream(tuplestr.getBytes())));
 	    Document doc =parser.getDocument();
             
-            StreamTupleElement ste = new StreamTupleElement(true);
+            Tuple ste = new Tuple(true);
 
             Element tuple = doc.getDocumentElement();
 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.31 2003/09/26 21:25:13 vpapad Exp $
+  $Id: RequestHandler.java,v 1.32 2003/12/24 02:16:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,16 +32,16 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
 import java.util.ArrayList;
 
 import niagara.data_manager.ConstantOpThread;
 import niagara.data_manager.StreamThread;
 import niagara.optimizer.Optimizer;
 import niagara.optimizer.Plan;
+import niagara.optimizer.TracingOptimizer;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Op;
-import niagara.query_engine.PhysicalAccumulateOperator;
+import niagara.physical.PhysicalAccumulate;
 import niagara.query_engine.QueryResult;
 import niagara.utils.*;
 
@@ -65,9 +65,6 @@ public class RequestHandler {
     // Every query is given a server query id. This is the counter for giving out that service id
     private int lastQueryId = 0;
 
-    private boolean dtd_hack;
-    // True if we want to add HTML entities to the result   
-
     private XMLQueryPlanParser xqpp;
     private Optimizer optimizer;
     private CPUTimer cpuTimer;
@@ -76,9 +73,8 @@ public class RequestHandler {
        @param sock The socket to read from 
        @param server The server that has access to other modules
     */
-    public RequestHandler(Socket sock, NiagraServer server, boolean dtd_hack)
+    public RequestHandler(Socket sock, NiagraServer server)
         throws IOException {
-        this.dtd_hack = dtd_hack;
 
         // A hashtable of queries with qid as key
         this.queryList = new QueryList();
@@ -90,7 +86,7 @@ public class RequestHandler {
         this.xqpp = new XMLQueryPlanParser();
         this.optimizer = new Optimizer();
         // XXX vpapad: uncomment next line to get the tracing optimizer
-        // this.optimizer = new TracingOptimizer();
+        //this.optimizer = new TracingOptimizer();
 
         this.requestParser = new RequestParser(sock.getInputStream(), this);
         this.requestParser.startParsing();
@@ -98,13 +94,7 @@ public class RequestHandler {
 
     // Send the initial string to the client
     private void sendBeginDocument() throws IOException {
-        String header = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n";
-        // DTD is hack for sigmod record    
-        if (dtd_hack) {
-            // added to support the SigmodRecord Entities
-            header = header + EntitySupplement.returnEntityDefs("CarSet.cfg");
-        }
-        header = header + "<response>\n";
+        String header = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n<response>\n";
         outputWriter.write(header);
         outputWriter.flush();
     }
@@ -263,8 +253,7 @@ public class RequestHandler {
                 ResponseMessage shutMesg =
                     new ResponseMessage(request, ResponseMessage.END_RESULT);
                 sendResponse(shutMesg);
-                // boy this is ugly
-                System.exit(0);
+                server.shutdown();
                 break;
             case RequestMessage.SYNCHRONOUS_QP_QUERY :
                 plan = xqpp.parse(request.requestData);
@@ -366,8 +355,8 @@ public class RequestHandler {
         ServerQueryInfo serverQueryInfo;
         Op top = plan.getOperator();
 
-        if (top instanceof PhysicalAccumulateOperator) {
-            PhysicalAccumulateOperator pao = (PhysicalAccumulateOperator) top;
+        if (top instanceof PhysicalAccumulate) {
+            PhysicalAccumulate pao = (PhysicalAccumulate) top;
             serverQueryInfo =
                 new ServerQueryInfo(
                     qid,

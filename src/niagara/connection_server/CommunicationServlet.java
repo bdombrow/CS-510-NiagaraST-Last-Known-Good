@@ -1,5 +1,5 @@
 /*
- * $Id: CommunicationServlet.java,v 1.6 2003/07/09 04:59:40 tufte Exp $
+ * $Id: CommunicationServlet.java,v 1.7 2003/12/24 02:16:38 vpapad Exp $
  */
 
 package niagara.connection_server;
@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import niagara.optimizer.Optimizer;
-import niagara.query_engine.PhysicalSendOperator;
+import niagara.physical.PhysicalSend;
 import niagara.utils.UnrecoverableException;
 
 public class CommunicationServlet extends HttpServlet {
@@ -55,12 +55,12 @@ public class CommunicationServlet extends HttpServlet {
                 
                 while (true) {
                     Object o = queries.get(query_id);
-                    if (!(o instanceof PhysicalSendOperator)) {
+                    if (!(o instanceof PhysicalSend)) {
                         // Send operator not running yet
                         Thread.sleep(200);
                     }
                     else {
-                        PhysicalSendOperator send = (PhysicalSendOperator) o;
+                        PhysicalSend send = (PhysicalSend) o;
                         send.setOutputStream(res.getOutputStream());
                         break;
                     }
@@ -74,7 +74,7 @@ public class CommunicationServlet extends HttpServlet {
         }
     }
 
-    public void setSend(String query_string, PhysicalSendOperator send) {
+    public void setSend(String query_string, PhysicalSend send) {
         queries.put(query_string, send);
     }
 

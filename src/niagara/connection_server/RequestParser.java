@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestParser.java,v 1.13 2003/08/01 17:28:15 tufte Exp $
+  $Id: RequestParser.java,v 1.14 2003/12/24 02:16:38 vpapad Exp $
 
   NIAGARA -- Net Data Management System                                 
                                                                         
@@ -169,7 +169,7 @@ public class RequestParser extends HandlerBase implements Runnable {
 		err_type = -1;
 		message = null;
 		// kill system as would be expected on a runtime exception
-		System.exit(0);
+		reqHandler.server.shutdown();
 	    } 
 
 	    if(error) {

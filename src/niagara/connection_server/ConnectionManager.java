@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.9 2003/09/22 00:20:29 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.10 2003/12/24 02:16:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,14 +25,12 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.connection_server;
 
 import java.net.*;
 import java.util.Date;
 import java.io.IOException;
 import java.io.*;
-
 
 /**
  *  The ConnectionManager listens on a well known port for 
@@ -41,8 +39,7 @@ import java.io.*;
  *  receive all subsequent messages sent over that connection.
  *
  */
-public class ConnectionManager implements Runnable 
-{
+public class ConnectionManager implements Runnable {
     // The thread associated with the class
     private Thread thread;
 
@@ -55,85 +52,86 @@ public class ConnectionManager implements Runnable
     // The socket bound to a well know port that all clients 
     // connect to the query engine on
     private ServerSocket queryEngineSocket;
-    
+
     /**
      *server is passed because it is used for getting access to 
      * dataManager and queryQueues
-     */  
-    public ConnectionManager(int queryEngineWellKnownPort,NiagraServer server) {
-		// Init our ref to the NiagraServer
-		this.server = server;
-	
-		// Create the main connection communication socket
-		try {
-	    	queryEngineSocket = new ServerSocket(queryEngineWellKnownPort);
-		}
-		catch (IOException e) {
-	    	System.out.println("Failed to bind socket to port: "
-				       +queryEngineWellKnownPort+"\n"+e);
-	    	System.exit(1);
-		}
+     */
+    public ConnectionManager(
+        int queryEngineWellKnownPort,
+        NiagraServer server) {
+        // Init our ref to the NiagraServer
+        this.server = server;
 
-		// Create a new java thread for running an instance of this object
-		thread = new Thread (this,"Connection Manager");
+        // Create the main connection communication socket
+        try {
+            queryEngineSocket = new ServerSocket(queryEngineWellKnownPort);
+        } catch (IOException e) {
+            System.out.println(
+                "Failed to bind socket to port: "
+                    + queryEngineWellKnownPort
+                    + "\n"
+                    + e);
+            System.exit(1);
+        }
 
-		// Call the query thread run method
-		thread.start();	
+        // Create a new java thread for running an instance of this object
+        thread = new Thread(this, "Connection Manager");
+
+        // Call the query thread run method
+        thread.start();
     }
-
-    public ConnectionManager(int queryEngineWellKnownPort,
-			     NiagraServer server, boolean dtd_hack) {
-		this(queryEngineWellKnownPort, server);
-		this.dtd_hack = dtd_hack;
-    }
-
-    private boolean dtd_hack = false;
 
     /**
      *  This is the run method invoked by the Java thread - it simply waits
      *  on a socket for client connection messages
      */
-    public void run () 
-    {
-		System.out.println("KT: Connection Manager up, listening on socket: "+
-			    queryEngineSocket);
+    public void run() {
+        System.out.println(
+            "KT: Connection Manager up, listening on socket: "
+                + queryEngineSocket);
 
-		try {
+        try {
             // Calls to accept unblock every 500 msecs
             // to check for stop requests
             queryEngineSocket.setSoTimeout(500);
-		} catch (SocketException e) {
-			System.err.println("Could not set socket timeout!");
-		}
-	    
-	    do{
-	    	try{
-				// Listen for the next client request
+        } catch (SocketException e) {
+            System.err.println("Could not set socket timeout!");
+        }
+
+        do {
+            try {
+                // Listen for the next client request
                 Socket clientSocket = null;
                 while (true) {
                     clientSocket = queryEngineSocket.accept();
                     break;
                 }
 
-				System.err.println("Query received: " + new Date() + ", client socket = "+clientSocket);
-		
-				// Process the request
-				// Hand over this socket to the Request handler 
-				// which will handle all the further requests
-		    	RequestHandler newHandler = 
-					new RequestHandler(clientSocket,server, dtd_hack);
-			} catch (InterruptedIOException e) {
-				if (doStop)
-					return;
-				else
-					continue;
-			} catch (IOException e) {
-				System.out.println("Exception thrown while listening on QE server socket: "+e);
-				return;
-			}
-		}while(true);
-    }
+                System.err.println(
+                    "Query received: "
+                        + new Date()
+                        + ", client socket = "
+                        + clientSocket);
 
+                // Process the request
+                // Hand over this socket to the Request handler 
+                // which will handle all the further requests
+                new RequestHandler(clientSocket, server);
+            } catch (InterruptedIOException e) {
+                if (doStop)
+                    return;
+                else
+                    continue;
+            } catch (IOException e) {
+                System.out.println(
+                    "Exception thrown while listening on QE server socket: "
+                        + e);
+                return;
+            }
+        }
+        while (true);
+    }
 
     /**
      *  Shut the connection manager down gracefully
@@ -142,10 +140,3 @@ public class ConnectionManager implements Runnable
         doStop = true;
     }
 }
-
-
-
-
-
-
-

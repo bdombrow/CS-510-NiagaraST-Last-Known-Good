@@ -4,6 +4,7 @@ package niagara.data_manager;
 
 import java.util.Vector;
 
+import niagara.logical.DTDScan;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
@@ -14,7 +15,6 @@ import niagara.query_engine.TupleSchema;
 import niagara.utils.PEException;
 import niagara.utils.ShutdownException;
 import niagara.utils.SinkTupleStream;
-import niagara.xmlql_parser.op_tree.dtdScanOp;
 
 /** DTDThread provides a SourceThread compatible interface to the 
  *  DM fetch functionality */
@@ -69,7 +69,7 @@ public class DTDThread extends SourceThread {
      * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
      */
     public void opInitFrom(LogicalOp op) {
-        dtdScanOp dop = (dtdScanOp) op;
+        DTDScan dop = (DTDScan) op;
         urls = dop.getDocs();
         variable = dop.getVariable();
     }
