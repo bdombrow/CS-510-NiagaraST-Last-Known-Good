@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Stream.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: Stream.java,v 1.2 2002/03/26 23:53:34 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,7 +64,8 @@ public class Stream {
     // Information about whether the stream is closed - this is inherited by NetworkStream
     //
     protected boolean isClosed;
-    
+
+    private final int DEFAULT_STREAM_CAPACITY = 250;
 
     //////////////////////////////////////////////////////////////////
     // Methods of the Stream Class
@@ -77,7 +78,7 @@ public class Stream {
 	{
 	    // Create up stream tuple buffer
 	    //
-	    upStreamTupleBuffer = new Queue(20);
+	    upStreamTupleBuffer = new Queue(DEFAULT_STREAM_CAPACITY);
 	    
 	    // Create up stream control buffer
 	    //
@@ -90,6 +91,7 @@ public class Stream {
 	    // The stream is open initially
 	    //
 	    isClosed = false;
+	    
 	}  
 
     /**
@@ -98,26 +100,10 @@ public class Stream {
      *   
      * @param upStreamBufferSize The size of upward tuple channel
      */
-
-    public Stream(int upStreamBufferSize) {
-
-	// Create up stream tuple buffer
-	//
-	upStreamTupleBuffer = new Queue(upStreamBufferSize);
-
-	// Create up stream control buffer
-	//
-	upStreamControlBuffer = new LinkedList();
-
-	// Create down stream control buffer
-	//
-	downStreamControlBuffer = new LinkedList();
-
-	// The stream is open initially
-	//
-	isClosed = false;
-    }    
-    
+     /* KT - removed this constructor to make sure that
+      * everything was using the default, we can put it
+      * back in if we need it
+      */
     
 
     /** This function tells whether the stream is empty or not.
@@ -503,7 +489,7 @@ public class Stream {
      */
 
     private synchronized StreamControlElement internalPut(
-						 StreamElement outputElement)
+					         StreamElement outputElement)
 	throws java.lang.InterruptedException,
 	       StreamPreviouslyClosedException,
 	       NullElementException {

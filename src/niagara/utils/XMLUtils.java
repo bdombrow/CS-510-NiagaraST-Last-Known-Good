@@ -36,18 +36,29 @@ public class XMLUtils {
                 flatten(nl.item(i), sb);
 	    }
 	    sb.append("</" + n.getNodeName() + ">");
-	}
-	else if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE) {
+	} else if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE) {
 	    sb.append(n.getNodeValue());
-	}
-	else if (type == Node.DOCUMENT_NODE) {
-            if (n.getFirstChild() != null)
-                flatten(n.getFirstChild(), sb);
-            else
-                sb.append("<!-- Empty document node -->");
-	}
-	else
+	} else if (type == Node.DOCUMENT_NODE) {
+	    Node kid = n.getFirstChild();
+	    boolean done = false;
+            while (kid != null && done == false) {
+		short kidType = kid.getNodeType();
+		if(kidType == Node.TEXT_NODE ||
+		   kidType == Node.CDATA_SECTION_NODE ||
+		   kidType == Node.ELEMENT_NODE) {
+		    flatten(kid, sb);
+		    done = true;
+		} else {
+		    kid = kid.getNextSibling();
+		}
+	    }
+	    if(done == false) {
+		sb.append("<!-- Empty document node -->");
+	    }
+	} else {
 	    sb.append("<!-- XMLUtils.flatten() could not serialize this node -->");
+	    throw new RuntimeException("flatten" + type + " " + Node.DOCUMENT_NODE);
+	}
     }
 }
 
