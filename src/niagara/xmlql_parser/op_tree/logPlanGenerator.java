@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logPlanGenerator.java,v 1.7 2003/03/08 02:23:57 vpapad Exp $
+  $Id: logPlanGenerator.java,v 1.8 2003/03/19 00:35:26 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,6 +49,7 @@ import niagara.logical.Predicate;
 import niagara.logical.StringConstant;
 import niagara.logical.Variable;
 import niagara.logical.Select;
+import niagara.logical.Nest;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class logPlanGenerator {
@@ -729,7 +730,7 @@ public class logPlanGenerator {
 		Schema _schema;
 		
 		constructOp construct;
-		nestOp nest;
+		Nest nest;
 
 		constructInternalNode constructTagPart;
 		
@@ -794,7 +795,7 @@ public class logPlanGenerator {
 			}
 
 			// skolem function is present. Add a nest operator
-			nest = new nestOp();
+			nest = new Nest();
 
 			// to keep track of how many skolem function was
 			// encountered
@@ -805,11 +806,10 @@ public class logPlanGenerator {
 			// in one root
 			if(numGroup ==2) {
 				constructTagPart.truncate();
-//				constructTagPart.dump(0);
 			}
 			/*-----------------------*/
-
-			nest.setResTemp(constructTagPart);
+			
+			nest.setNest(constructTagPart);
 			curLogNode = new logNode(nest,curLogNode);
 			curLogNode.setVarTbl(var_tbl);
 			curLogNode.setSchema(_schema);

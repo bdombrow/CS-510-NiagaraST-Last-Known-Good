@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SlidingMaxOp.java,v 1.3 2003/03/07 23:36:43 vpapad Exp $
+  $Id: SlidingMaxOp.java,v 1.4 2003/03/19 00:35:26 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -59,11 +59,11 @@ public class SlidingMaxOp extends SlidingWindowOp {
      * This function sets the skolem attributes on which grouping is
      * done, and the attribute that is summed
      *
-     * @param skolemAttributes Attributes on which grouping is done
+     * @param groupingAttrs Attributes on which grouping is done
      * @param summingAttribute Attribute on which summing is done
      */
 
-    public void setMaxingInfo (skolem skolemAttributes,
+    public void setMaxingInfo (skolem groupingAttrs,
 				Attribute maxingAttribute) {
 
 	// Set the maxing attribute
@@ -72,7 +72,7 @@ public class SlidingMaxOp extends SlidingWindowOp {
 
 	// Set the skolem attributes in the super class
 	//
-	this.setSkolemAttributes(skolemAttributes);
+	this.groupingAttrs = groupingAttrs;
     }
 
 
@@ -88,7 +88,7 @@ public class SlidingMaxOp extends SlidingWindowOp {
 
     public void dump() {
 	System.out.println("SlidingMaxOp");
-	skolemAttributes.dump();
+	groupingAttrs.dump();
 	System.err.println(maxingAttribute.getName());
     }
 
@@ -108,20 +108,20 @@ public class SlidingMaxOp extends SlidingWindowOp {
     
     public Op copy() {
         SlidingMaxOp op = new SlidingMaxOp();
-        op.setMaxingInfo(skolemAttributes, maxingAttribute);
+        op.setMaxingInfo(groupingAttrs, maxingAttribute);
         op.setWindowInfo(range, every);
         return op;
     }
 
     public int hashCode() {
-        return skolemAttributes.hashCode() ^ maxingAttribute.hashCode();
+        return groupingAttrs.hashCode() ^ maxingAttribute.hashCode();
     }
 
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof SlidingMaxOp)) return false;
         if (obj.getClass() != SlidingMaxOp.class) return obj.equals(this);
         SlidingMaxOp other = (SlidingMaxOp) obj;
-        return skolemAttributes.equals(other.skolemAttributes) &&
+        return groupingAttrs.equals(other.groupingAttrs) &&
                 maxingAttribute.equals(other.maxingAttribute);
     }
 

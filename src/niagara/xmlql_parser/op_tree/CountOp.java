@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: CountOp.java,v 1.8 2003/03/07 23:36:43 vpapad Exp $
+  $Id: CountOp.java,v 1.9 2003/03/19 00:35:26 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,76 +49,18 @@ import niagara.optimizer.colombia.Op;
 import niagara.utils.PEException;
 import niagara.xmlql_parser.syntax_tree.*;
 
-public class CountOp extends groupOp {
-    // This is the attribute on which counting is done
-    Attribute countingAttribute;
+public class CountOp extends AggregateOp {
 
-    /**
-     * This function sets the skolem attributes on which grouping is
-     * done, and the attribute that is counted
-     *
-     * @param skolemAttributes Attributes on which grouping is done
-     * @param countAttribute Attribute on which counting is done
-     */
-
-    public void setCountingInfo (skolem skolemAttributes,
-				Attribute countingAttribute) {
-	this.countingAttribute = countingAttribute;
-
-	// Set the skolem attributes in the super class
-	this.setSkolemAttributes(skolemAttributes);
+    public void dump() {
+	super.dump("CountOp");
     }
 
-
-    /**
-     * This function returns the counting attributes
-     *
-     * @return Counting attribute of the operator
-     */
-    public Attribute getCountingAttribute () {
-	return countingAttribute;
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties) 
+	throws InvalidPlanException {
+	super.loadFromXML(e, inputProperties, "countattr");
     }
 
-    /**
-     * @see niagara.optimizer.colombia.Op#copy()
-     */
-    public Op copy() {
-        CountOp cop = new CountOp();
-        cop.setCountingInfo(skolemAttributes, countingAttribute);
-        return cop;
-    }
-
-    public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof CountOp)) return false;
-        if (obj.getClass() != CountOp.class) return obj.equals(this);
-        CountOp other = (CountOp) obj;
-        return skolemAttributes.equals(other.skolemAttributes) &&
-                countingAttribute.equals(other.countingAttribute);
-    }
-    
-    public int hashCode() {
-        return skolemAttributes.hashCode() ^ countingAttribute.hashCode();
-    }
-
-    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
-        throws InvalidPlanException {
-        String id = e.getAttribute("id");
-        String groupby = e.getAttribute("groupby");
-        String countattr = e.getAttribute("countattr");
-
-        LogicalProperty inputLogProp = inputProperties[0];
-
-        // Parse the groupby attribute to see what to group on
-        Vector groupbyAttrs = new Vector();
-        StringTokenizer st = new StringTokenizer(groupby);
-        while (st.hasMoreTokens()) {
-            String varName = st.nextToken();
-            Attribute attr = Variable.findVariable(inputLogProp, varName);
-            groupbyAttrs.addElement(attr);
-        }
-
-        Attribute countingAttribute =
-            Variable.findVariable(inputLogProp, countattr);
-        setCountingInfo(new skolem(id, groupbyAttrs), countingAttribute);
+    protected AggregateOp getInstance() {
+	return new CountOp();
     }
 }

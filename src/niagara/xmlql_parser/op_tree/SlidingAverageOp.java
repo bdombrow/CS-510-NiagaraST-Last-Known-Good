@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SlidingAverageOp.java,v 1.3 2003/03/07 23:36:43 vpapad Exp $
+  $Id: SlidingAverageOp.java,v 1.4 2003/03/19 00:35:26 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -71,7 +71,7 @@ public class SlidingAverageOp extends SlidingWindowOp {
 
 	// Set the skolem attributes in the super class
 	//
-	this.setSkolemAttributes(skolemAttributes);
+	this.groupingAttrs = skolemAttributes;
     }
 
 
@@ -108,26 +108,26 @@ public class SlidingAverageOp extends SlidingWindowOp {
 
     public void dump() {
 	System.out.println("SlidingAverageOp");
-	skolemAttributes.dump();
+	groupingAttrs.dump();
 	System.err.println(averageAttribute.getName());
     }
     
     public Op copy() {
         SlidingAverageOp op = new SlidingAverageOp();
-        op.setAverageInfo(skolemAttributes, averageAttribute);
+        op.setAverageInfo(groupingAttrs, averageAttribute);
         op.setWindowInfo (range, every);
         return op;
     }
 
     public int hashCode() {
-        return skolemAttributes.hashCode() ^ averageAttribute.hashCode();
+        return groupingAttrs.hashCode() ^ averageAttribute.hashCode();
     }
 
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof SlidingAverageOp)) return false;
         if (obj.getClass() != SlidingAverageOp.class) return obj.equals(this);
         SlidingAverageOp other = (SlidingAverageOp) obj;
-        return skolemAttributes.equals(other.skolemAttributes) &&
+        return groupingAttrs.equals(other.groupingAttrs) &&
                 averageAttribute.equals(other.averageAttribute);
     }
 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SlidingWindowOp.java,v 1.3 2003/03/19 00:35:26 tufte Exp $
+  $Id: AggregateOp.java,v 1.1 2003/03/19 00:35:26 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -26,8 +26,9 @@
 
 package niagara.xmlql_parser.op_tree;
 
-import java.util.Vector;
+import org.w3c.dom.*;
 
+import niagara.connection_server.InvalidPlanException;
 import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -39,28 +40,55 @@ import niagara.xmlql_parser.syntax_tree.*;
  * used for grouping and are common to all the sub-classes
  *
  */
-public abstract class SlidingWindowOp extends groupOp {
-    /**
-     * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, LogicalProperty[])
-     */
-    public LogicalProperty findLogProp(
-        ICatalog catalog,
-        LogicalProperty[] input) {
-        LogicalProperty inpLogProp = input[0];
-        // XXX vpapad: Really crude, fixed restriction factor for groupbys
-        float card =
-            inpLogProp.getCardinality() / catalog.getInt("restrictivity");
-        Vector groupbyAttrs = groupingAttrs.getVarList();
-        // We keep the group-by attributes (possibly rearranged)
-        // and we add an attribute for the aggregated result
-        Attrs attrs = new Attrs(groupbyAttrs.size() + 1);
-        for (int i = 0; i < groupbyAttrs.size(); i++) {
-            Attribute a = (Attribute) groupbyAttrs.get(i);
-            attrs.add(a);
-        }
-        attrs.add(new Variable(groupingAttrs.getName(), varType.CONTENT_VAR));
-        attrs.add(new Variable("index", varType.CONTENT_VAR));
-        
-        return  new LogicalProperty(card, attrs, inpLogProp.isLocal());
+public abstract class AggregateOp extends groupOp {
+
+    // the attribute on which the aggregation function should
+    // be performed
+    protected Attribute aggrAttr;
+    protected abstract AggregateOp getInstance();
+
+    protected void loadFromXML(Element e, 
+			       LogicalProperty[] inputProperties,
+			       String aggrAttrName) 
+	throws InvalidPlanException {
+
+        String aggAttrStr = e.getAttribute(aggrAttrName);
+        aggrAttr = Variable.findVariable(inputProperties[0], aggAttrStr);
+	loadGroupingAttrsFromXML(e, inputProperties[0]);
     }
+
+    public Attribute getAggrAttr() {
+	return aggrAttr;
+    }
+
+    protected void dump(String opName) {
+	System.out.println("opName");
+	System.out.print("Grouping Attrs: ");
+	groupingAttrs.dump();
+	System.err.println("Aggregate Attr: " + aggrAttr.getName());
+    }
+
+    public Op copy() {
+	AggregateOp op =null;
+	op = getInstance();
+	op.groupingAttrs = this.groupingAttrs;
+	op.aggrAttr = this.aggrAttr;
+	return op;
+    }
+
+    public int hashCode() {
+        return groupingAttrs.hashCode() ^ aggrAttr.hashCode();
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null)
+	    return false;
+	if(!this.getClass().isInstance(obj)) 
+	    return false;
+        if (obj.getClass() != this.getClass()) 
+	    return obj.equals(this);
+        AggregateOp other = (AggregateOp) obj;
+        return groupingAttrs.equals(other.groupingAttrs) &&
+                aggrAttr.equals(other.aggrAttr);
+    }    
 }

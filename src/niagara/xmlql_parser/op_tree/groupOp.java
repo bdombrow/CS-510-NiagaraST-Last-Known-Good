@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: groupOp.java,v 1.4 2002/10/31 04:17:05 vpapad Exp $
+  $Id: groupOp.java,v 1.5 2003/03/19 00:35:26 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,10 +27,14 @@
 package niagara.xmlql_parser.op_tree;
 
 import java.util.Vector;
+import java.util.StringTokenizer;
+
+import org.w3c.dom.Element;
 
 import niagara.logical.Variable;
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.connection_server.InvalidPlanException;
 
 /**
  * This is the class for the logical group operator. This is an abstract
@@ -40,18 +44,8 @@ import niagara.xmlql_parser.syntax_tree.*;
  *
  */
 public abstract class groupOp extends unryOp {
-    // The skolem attributes associated with the group operator
-    protected skolem skolemAttributes;
-
-    /**
-     * This function sets the skolem attributes of the group operator
-     *
-     * @param skolemAttributes The skolem attributes associated with the
-     *                         group operator
-     */
-    protected void setSkolemAttributes(skolem skolemAttributes) {
-        this.skolemAttributes = skolemAttributes;
-    }
+    // The attributes to group on (a.k.a. skolem attributes)
+    protected skolem groupingAttrs;
 
     /**
      * This function returns the skolem attributes associated with the group
@@ -60,7 +54,7 @@ public abstract class groupOp extends unryOp {
      * @return The skolem attributes associated with the operator
      */
     public skolem getSkolemAttributes() {
-        return skolemAttributes;
+        return groupingAttrs;
     }
 
     /**
@@ -73,7 +67,7 @@ public abstract class groupOp extends unryOp {
         // XXX vpapad: Really crude, fixed restriction factor for groupbys
         float card =
             inpLogProp.getCardinality() / catalog.getInt("restrictivity");
-        Vector groupbyAttrs = skolemAttributes.getVarList();
+        Vector groupbyAttrs = groupingAttrs.getVarList();
         // We keep the group-by attributes (possibly rearranged)
         // and we add an attribute for the aggregated result
         Attrs attrs = new Attrs(groupbyAttrs.size() + 1);
@@ -81,8 +75,25 @@ public abstract class groupOp extends unryOp {
             Attribute a = (Attribute) groupbyAttrs.get(i);
             attrs.add(a);
         }
-        attrs.add(new Variable(skolemAttributes.getName(), varType.CONTENT_VAR));
+        attrs.add(new Variable(groupingAttrs.getName(), varType.CONTENT_VAR));
         
         return  new LogicalProperty(card, attrs, inpLogProp.isLocal());
+    }
+
+    protected void loadGroupingAttrsFromXML(Element e,
+					    LogicalProperty inputLogProp) 
+	throws InvalidPlanException {
+        String id = e.getAttribute("id");
+        String groupbyStr = e.getAttribute("groupby");
+
+        // Parse the groupby attribute to see what to group on
+        Vector groupbyAttrs = new Vector();
+        StringTokenizer st = new StringTokenizer(groupbyStr);
+        while (st.hasMoreTokens()) {
+            String varName = st.nextToken();
+            Attribute attr = Variable.findVariable(inputLogProp, varName);
+            groupbyAttrs.addElement(attr);
+        }
+	groupingAttrs = new skolem(id, groupbyAttrs);
     }
 }

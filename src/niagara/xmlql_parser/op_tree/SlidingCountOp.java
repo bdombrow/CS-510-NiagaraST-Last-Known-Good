@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SlidingCountOp.java,v 1.3 2003/03/07 23:36:42 vpapad Exp $
+  $Id: SlidingCountOp.java,v 1.4 2003/03/19 00:35:26 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -72,7 +72,7 @@ public class SlidingCountOp extends SlidingWindowOp {
      * @param countAttribute Attribute on which counting is done
      */
 
-    public void setCountingInfo (skolem skolemAttributes,
+    public void setCountingInfo (skolem groupingAttrs,
 				Attribute countingAttribute) {
 
 	// Set the counting attribute
@@ -81,7 +81,7 @@ public class SlidingCountOp extends SlidingWindowOp {
 
 	// Set the skolem attributes in the super class
 	//
-	this.setSkolemAttributes(skolemAttributes);
+	this.groupingAttrs = groupingAttrs;
     }
 
 
@@ -100,7 +100,7 @@ public class SlidingCountOp extends SlidingWindowOp {
 
     public void dump() {
 	System.out.println("SlidingCountOp");
-	skolemAttributes.dump();
+	groupingAttrs.dump();
 	System.err.println(countingAttribute.getName());
     }
 
@@ -119,20 +119,20 @@ public class SlidingCountOp extends SlidingWindowOp {
     
     public Op copy() {
         SlidingCountOp op = new SlidingCountOp();
-        op.setCountingInfo(skolemAttributes, countingAttribute);
+        op.setCountingInfo(groupingAttrs, countingAttribute);
         op.setWindowInfo(range, every);
         return op;
     }
 
     public int hashCode() {
-        return skolemAttributes.hashCode() ^ countingAttribute.hashCode();
+        return groupingAttrs.hashCode() ^ countingAttribute.hashCode();
     }
 
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof SlidingCountOp)) return false;
         if (obj.getClass() != SlidingCountOp.class) return obj.equals(this);
         SlidingCountOp other = (SlidingCountOp) obj;
-        return skolemAttributes.equals(other.skolemAttributes) &&
+        return groupingAttrs.equals(other.groupingAttrs) &&
                 countingAttribute.equals(other.countingAttribute);
     }
          

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MaxOp.java,v 1.2 2003/03/07 23:36:43 vpapad Exp $
+  $Id: MaxOp.java,v 1.3 2003/03/19 00:35:26 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,84 +49,19 @@ import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.syntax_tree.*;
 
 
-public class MaxOp extends groupOp {
-    // This is the attribute on which maxing is done
-    Attribute maxingAttribute;
-
-    /**
-     * This function sets the skolem attributes on which grouping is
-     * done, and the attribute that is maxed
-     *
-     * @param skolemAttributes Attributes on which grouping is done
-     * @param maxingAttribute Attribute on which maxing is done
-     */
-
-    public void setMaxingInfo (skolem skolemAttributes,
-				Attribute maxingAttribute) {
-
-	// Set the maxing attribute
-	//
-	this.maxingAttribute = maxingAttribute;
-
-	// Set the skolem attributes in the super class
-	//
-	this.setSkolemAttributes(skolemAttributes);
-    }
-
-
-    /**
-     * This function returns the averaging attributes
-     *
-     * @return Maxing attribute of the operator
-     */
-
-    public Attribute getMaxingAttribute () {
-	return maxingAttribute;
-    }
+public class MaxOp extends AggregateOp {
 
     public void dump() {
-	System.out.println("MaxOp");
-	skolemAttributes.dump();
-	System.err.println(maxingAttribute.getName());
+	super.dump("MaxOp");
     }
-    
-    public Op copy() {
-        MaxOp op = new MaxOp();
-        op.setMaxingInfo(skolemAttributes, maxingAttribute);
-        return op;
-    }
-
-    public int hashCode() {
-        return skolemAttributes.hashCode() ^ maxingAttribute.hashCode();
-    }
-
-    public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof MaxOp)) return false;
-        if (obj.getClass() != MaxOp.class) return obj.equals(this);
-        MaxOp other = (MaxOp) obj;
-        return skolemAttributes.equals(other.skolemAttributes) &&
-                maxingAttribute.equals(other.maxingAttribute);
-    }    
 
     public void loadFromXML(Element e, LogicalProperty[] inputProperties)
         throws InvalidPlanException {
-        String id = e.getAttribute("id");
-        String groupby = e.getAttribute("groupby");
-        String maxattr = e.getAttribute("maxattr");
-
-        LogicalProperty inputLogProp = inputProperties[0];
-
-        // Parse the groupby attribute to see what to group on
-        Vector groupbyAttrs = new Vector();
-        StringTokenizer st = new StringTokenizer(groupby);
-        while (st.hasMoreTokens()) {
-            String varName = st.nextToken();
-            Attribute attr = Variable.findVariable(inputLogProp, varName);
-            groupbyAttrs.addElement(attr);
-        }
-
-        Attribute maxingAttribute =
-            Variable.findVariable(inputLogProp, maxattr);
-        setMaxingInfo(new skolem(id, groupbyAttrs), maxingAttribute);
+	super.loadFromXML(e, inputProperties, "maxattr");
     }
+
+    protected AggregateOp getInstance() {
+	return new MaxOp();
+    }
+
 }

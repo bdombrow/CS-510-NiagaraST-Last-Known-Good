@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SlidingSumOp.java,v 1.3 2003/03/07 23:36:43 vpapad Exp $
+  $Id: SlidingSumOp.java,v 1.4 2003/03/19 00:35:26 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -57,11 +57,11 @@ public class SlidingSumOp extends SlidingWindowOp {
      * This function sets the skolem attributes on which grouping is
      * done, and the attribute that is summed
      *
-     * @param skolemAttributes Attributes on which grouping is done
+     * @param groupingAttrs Attributes on which grouping is done
      * @param summingAttribute Attribute on which summing is done
      */
 
-    public void setSummingInfo (skolem skolemAttributes,
+    public void setSummingInfo (skolem groupingAttrs,
 				Attribute summingAttribute) {
 
 	// Set the summing attribute
@@ -70,7 +70,7 @@ public class SlidingSumOp extends SlidingWindowOp {
 
 	// Set the skolem attributes in the super class
 	//
-	this.setSkolemAttributes(skolemAttributes);
+	this.groupingAttrs = groupingAttrs;
     }
 
 
@@ -86,7 +86,7 @@ public class SlidingSumOp extends SlidingWindowOp {
 
     public void dump() {
 	System.out.println("SlidingSumOp");
-	skolemAttributes.dump();
+	groupingAttrs.dump();
 	System.err.println(summingAttribute.getName());
     }
 
@@ -106,20 +106,20 @@ public class SlidingSumOp extends SlidingWindowOp {
        
     public Op copy() {
         SlidingSumOp op = new SlidingSumOp();
-        op.setSummingInfo(skolemAttributes, summingAttribute);
+        op.setSummingInfo(groupingAttrs, summingAttribute);
         op.setWindowInfo(range, every);
         return op;
     }
 
     public int hashCode() {
-        return skolemAttributes.hashCode() ^ summingAttribute.hashCode();
+        return groupingAttrs.hashCode() ^ summingAttribute.hashCode();
     }
 
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof SlidingSumOp)) return false;
         if (obj.getClass() != SlidingSumOp.class) return obj.equals(this);
         SlidingSumOp other = (SlidingSumOp) obj;
-        return skolemAttributes.equals(other.skolemAttributes) &&
+        return groupingAttrs.equals(other.groupingAttrs) &&
                 summingAttribute.equals(other.summingAttribute);
     }
     
