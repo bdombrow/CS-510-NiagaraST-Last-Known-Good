@@ -7,7 +7,7 @@ public abstract class Op {
      * as clone() - updateable fields of an operator such as 
      * predicates attached to <code>join</code>s should be deep cloned.
      */
-    //public abstract Op copy();
+    public abstract Op copy();
 
     public abstract String getName(); 
     
