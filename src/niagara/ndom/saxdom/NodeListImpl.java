@@ -1,5 +1,5 @@
 /**
- * $Id: NodeListImpl.java,v 1.1 2002/03/26 22:07:50 vpapad Exp $
+ * $Id: NodeListImpl.java,v 1.2 2002/04/30 21:26:07 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -9,23 +9,24 @@
 package niagara.ndom.saxdom;
 
 import org.w3c.dom.*;
+import java.util.ArrayList;
 
 public class NodeListImpl implements NodeList {
 
-    private Node[] items;
+    private ArrayList items;
 
-    public NodeListImpl(Node[] items) {
+    public NodeListImpl(ArrayList items) {
         this.items = items;
     }
 
     public Node item(int index) {
-        if (index < 0 || index >= items.length)
+        if (index < 0 || index >= items.size())
             return null;
-        else return items[index];
+        else return (Node) items.get(index);
     }
 
     public int getLength() {
-        return items.length;
+        return items.size();
     }
 
 }
