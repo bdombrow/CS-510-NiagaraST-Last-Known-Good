@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: groupOp.java,v 1.3 2002/10/27 01:20:21 vpapad Exp $
+  $Id: groupOp.java,v 1.4 2002/10/31 04:17:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -24,6 +24,14 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
+package niagara.xmlql_parser.op_tree;
+
+import java.util.Vector;
+
+import niagara.logical.Variable;
+import niagara.optimizer.colombia.*;
+import niagara.xmlql_parser.syntax_tree.*;
+
 /**
  * This is the class for the logical group operator. This is an abstract
  * class from which various notions of grouping can be derived. The
@@ -31,12 +39,6 @@
  * used for grouping and are common to all the sub-classes
  *
  */
-
-package niagara.xmlql_parser.op_tree;
-
-import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.syntax_tree.*;
-
 public abstract class groupOp extends unryOp {
     // The skolem attributes associated with the group operator
     protected skolem skolemAttributes;
@@ -47,7 +49,6 @@ public abstract class groupOp extends unryOp {
      * @param skolemAttributes The skolem attributes associated with the
      *                         group operator
      */
-
     protected void setSkolemAttributes(skolem skolemAttributes) {
         this.skolemAttributes = skolemAttributes;
     }
@@ -60,5 +61,28 @@ public abstract class groupOp extends unryOp {
      */
     public skolem getSkolemAttributes() {
         return skolemAttributes;
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, LogicalProperty[])
+     */
+    public LogicalProperty findLogProp(
+        ICatalog catalog,
+        LogicalProperty[] input) {
+        LogicalProperty inpLogProp = input[0];
+        // XXX vpapad: Really crude, fixed restriction factor for groupbys
+        float card =
+            inpLogProp.getCardinality() / catalog.getInt("restrictivity");
+        Vector groupbyAttrs = skolemAttributes.getVarList();
+        // We keep the group-by attributes (possibly rearranged)
+        // and we add an attribute for the aggregated result
+        Attrs attrs = new Attrs(groupbyAttrs.size() + 1);
+        for (int i = 0; i < groupbyAttrs.size(); i++) {
+            Attribute a = (Attribute) groupbyAttrs.get(i);
+            attrs.add(a);
+        }
+        attrs.add(new Variable(skolemAttributes.getName(), varType.CONTENT_VAR));
+        
+        return  new LogicalProperty(card, attrs, inpLogProp.isLocal());
     }
 }

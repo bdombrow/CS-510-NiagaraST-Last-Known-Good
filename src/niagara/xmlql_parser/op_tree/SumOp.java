@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SumOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
+  $Id: SumOp.java,v 1.6 2002/10/31 04:17:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,6 +39,7 @@ package niagara.xmlql_parser.op_tree;
 import org.w3c.dom.*;
 
 import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class SumOp extends groupOp {
@@ -68,4 +69,23 @@ public class SumOp extends groupOp {
 	skolemAttributes.dump();
 	System.err.println(summingAttribute.getName());
     }
+    
+    public Op copy() {
+        SumOp op = new SumOp();
+        op.setSummingInfo(skolemAttributes, summingAttribute);
+        return op;
+    }
+
+    public int hashCode() {
+        return skolemAttributes.hashCode() ^ summingAttribute.hashCode();
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof SumOp)) return false;
+        if (obj.getClass() != SumOp.class) return obj.equals(this);
+        SumOp other = (SumOp) obj;
+        return skolemAttributes.equals(other.skolemAttributes) &&
+                summingAttribute.equals(other.summingAttribute);
+    }
+    
 }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: logNode.java,v 1.8 2002/10/26 04:30:28 vpapad Exp $
+  $Id: logNode.java,v 1.9 2002/10/31 04:17:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,6 +43,7 @@ import niagara.data_manager.*;
 import niagara.optimizer.colombia.Op;
 import niagara.query_engine.PhysicalOperator;
 import niagara.query_engine.SchedulablePlan;
+import niagara.query_engine.TupleSchema;
 import niagara.utils.*;
 
 public class logNode implements SchedulablePlan, java.io.Serializable {
@@ -360,6 +361,13 @@ public class logNode implements SchedulablePlan, java.io.Serializable {
         }
 
         physicalOperator.initFrom(operator);
+        // XXX vpapad: tuple schema construction is useless
+        // for legacy query plans, but we still have to do it 
+        // even with empty tuple schemas
+        TupleSchema[] ts = new TupleSchema[getArity()];
+        for (int i = 0; i < getArity(); i++)
+            ts[i] = new TupleSchema();
+        physicalOperator.constructTupleSchema(ts);
         return physicalOperator;
     }
     

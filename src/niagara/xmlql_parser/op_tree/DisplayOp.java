@@ -74,9 +74,6 @@ public class DisplayOp extends unryOp {
         return input[0].copy();
     }
     
-    /**
-     * @see java.lang.Object#equals(Object)
-     */
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof DisplayOp)) return false;
         if (obj.getClass() != DisplayOp.class) return obj.equals(this);
@@ -84,11 +81,7 @@ public class DisplayOp extends unryOp {
         return query_id.equals(other.query_id) && client_location.equals(other.client_location);
     }
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
     public int hashCode() {
         return query_id.hashCode() ^ client_location.hashCode();
     }
-
 }

@@ -1,4 +1,4 @@
-// $Id: FirehoseScanOp.java,v 1.6 2002/10/27 01:20:21 vpapad Exp $
+// $Id: FirehoseScanOp.java,v 1.7 2002/10/31 04:17:05 vpapad Exp $
 
 package niagara.xmlql_parser.op_tree;
 
@@ -9,12 +9,24 @@ package niagara.xmlql_parser.op_tree;
  */
 
 import java.util.*;
+
+import niagara.logical.NullaryOp;
+import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.firehose.FirehoseSpec;
 
-public class FirehoseScanOp extends unryOp {
-
+public class FirehoseScanOp extends NullaryOp {
     private FirehoseSpec fhSpec;
+
+    private Attribute variable;
+    
+    // Required zero-argument constructor
+    public FirehoseScanOp() {}
+    
+    public FirehoseScanOp(FirehoseSpec fhSpec, Attribute variable) {
+        setFirehoseScan(fhSpec, variable);
+    }
+    
 
     /**
      * Method for initializing the firehose scan operator. See
@@ -24,8 +36,9 @@ public class FirehoseScanOp extends unryOp {
      * @param spec A completed FirehoseSpec object with all
      *             the specifications necessary for the firehose.
      */
-    public void setFirehoseScan(FirehoseSpec spec) {
+    public void setFirehoseScan(FirehoseSpec spec, Attribute variable) {
 	fhSpec = spec;
+        this.variable = variable;
     }
     
     /**
@@ -43,13 +56,33 @@ public class FirehoseScanOp extends unryOp {
     public void dump() {
 	System.out.println("FirehoseScan Operator: ");
 	fhSpec.dump(System.out);
-	System.out.println("Selected Algo " + 
-			   String.valueOf(selectedAlgorithmIndex));
 	System.out.println();
     }
 
     public boolean isSourceOp() {
 	return true;
+    }
+    
+    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+        return new LogicalProperty(
+            1,
+            new Attrs(variable),
+            true);
+    }
+    
+    public Op copy() {
+        return new FirehoseScanOp(fhSpec, variable);
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof FileScanOp)) return false;
+        if (obj.getClass() != FileScanOp.class) return obj.equals(this);
+        FirehoseScanOp other = (FirehoseScanOp) obj;
+        return fhSpec.equals(other.fhSpec) && variable.equals(other.variable);
+    }
+
+    public int hashCode() {
+        return fhSpec.hashCode() ^ variable.hashCode();
     }
 }
 

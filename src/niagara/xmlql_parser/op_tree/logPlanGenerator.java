@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logPlanGenerator.java,v 1.3 2002/10/27 01:20:21 vpapad Exp $
+  $Id: logPlanGenerator.java,v 1.4 2002/10/31 04:17:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -753,6 +753,8 @@ public class logPlanGenerator {
 		if(constructPart instanceof constructLeafNode) {
 			constructPart.replaceVar(var_tbl);			
 			construct = new constructOp();
+                        // XXX vpapad: Adding a fake variable
+                        construct.setVariable(new OldVariable("temp"));
 			construct.setConstruct(constructPart);
 			curLogNode = new logNode(construct,curLogNode);
 			curLogNode.setVarTbl(var_tbl);
@@ -779,6 +781,8 @@ public class logPlanGenerator {
 			// no skolem function. add a construct operator.
 			if(sk == null) {
 				construct = new constructOp();
+                                // XXX vpapad: Adding a fake variable
+                                construct.setVariable(new OldVariable("temp"));
 				construct.setConstruct(constructTagPart);
 				curLogNode = new logNode(construct,curLogNode);
 				curLogNode.setVarTbl(var_tbl);

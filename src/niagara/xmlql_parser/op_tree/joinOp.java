@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: joinOp.java,v 1.6 2002/10/27 01:20:21 vpapad Exp $
+  $Id: joinOp.java,v 1.7 2002/10/31 04:17:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,6 +36,7 @@ import java.util.*;
 import niagara.logical.And;
 import niagara.logical.EquiJoinPredicateList;
 import niagara.logical.Predicate;
+import niagara.logical.True;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
@@ -89,21 +90,14 @@ public class joinOp extends binOp {
    public void setJoin(Predicate p, ArrayList left, ArrayList right) {
         equiJoinPredicates = new EquiJoinPredicateList(left, right);
         pred = p;    
+        if (pred == null) pred = True.getTrue();
    }
 
    public void setCartesian(Predicate p) {
        equiJoinPredicates = new EquiJoinPredicateList();
-       pred = p;
+       pred = True.getTrue();
    }
    
-   /**
-    * sets the predicate for a generic join operator. 
-    * @param pred predicate
-    */
-   public void setJoin(Predicate pred) {
-       this.pred = pred;
-   }
-
    /**
     * print the operator to the standard output
     */
@@ -142,8 +136,8 @@ public class joinOp extends binOp {
         LogicalProperty right = input[1];
 
         // check the joined predicates(attributes) are in the schema
-        assert(left.GetAttrs().Contains(equiJoinPredicates.getLeft()));
-        assert(right.GetAttrs().Contains(equiJoinPredicates.getRight()));
+        assert(left.getAttrs().Contains(equiJoinPredicates.getLeft()));
+        assert(right.getAttrs().Contains(equiJoinPredicates.getRight()));
 
         LogicalProperty result = left.copy();
 
@@ -155,7 +149,7 @@ public class joinOp extends binOp {
         result.setHasRemote(left.hasRemote() || right.hasRemote());
 
         // Derive the schema
-        result.GetAttrs().Merge(right.GetAttrs());
+        result.getAttrs().Merge(right.getAttrs());
 
         return result;
     }

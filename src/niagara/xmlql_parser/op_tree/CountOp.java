@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: CountOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
+  $Id: CountOp.java,v 1.6 2002/10/31 04:17:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -89,5 +88,17 @@ public class CountOp extends groupOp {
         CountOp cop = new CountOp();
         cop.setCountingInfo(skolemAttributes, countingAttribute);
         return cop;
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof CountOp)) return false;
+        if (obj.getClass() != CountOp.class) return obj.equals(this);
+        CountOp other = (CountOp) obj;
+        return skolemAttributes.equals(other.skolemAttributes) &&
+                countingAttribute.equals(other.countingAttribute);
+    }
+    
+    public int hashCode() {
+        return skolemAttributes.hashCode() ^ countingAttribute.hashCode();
     }
 }

@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: dupOp.java,v 1.5 2002/10/26 04:30:28 vpapad Exp $
+  $Id: dupOp.java,v 1.6 2002/10/31 04:17:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -53,34 +52,33 @@ public class dupOp extends unryOp {
 	this.numDestinationStreams = numDestinationStreams;
     }
 
-    public int getNumDestinationStreams(){
-        return numDestinationStreams;
-    };
-
     public void dump() {
 	System.out.println("dupOp");
     }
 
-    public int getNumberOfOutputStreams() {
-	return numDestinationStreams;
+    public int getNumberOfOutputs() {
+        return numDestinationStreams;
     }
     
+    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+        return input[0].copy();
+    }
+
     public Op copy() {
         dupOp op = new dupOp();
         op.numDestinationStreams = numDestinationStreams;
         return op;
     }
     
-    public int getNumberOfOutputs() {
+    public int hashCode() {
         return numDestinationStreams;
     }
     
-    /**
-     * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, ArrayList)
-     */
-    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
-        return input[0].copy();
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof dupOp)) return false;
+        if (obj.getClass() != dupOp.class) return obj.equals(this);
+        dupOp other = (dupOp) obj;
+        return numDestinationStreams == other.numDestinationStreams;
     }
-
 }
 

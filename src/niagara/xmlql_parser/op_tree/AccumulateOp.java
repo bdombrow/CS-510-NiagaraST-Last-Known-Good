@@ -1,5 +1,5 @@
 /*
- * $Id: AccumulateOp.java,v 1.7 2002/10/27 01:20:21 vpapad Exp $
+ * $Id: AccumulateOp.java,v 1.8 2002/10/31 04:17:05 vpapad Exp $
  */
 
 package niagara.xmlql_parser.op_tree;
@@ -16,10 +16,7 @@ import org.w3c.dom.*;
 
 import niagara.utils.PEException;
 import niagara.xmlql_parser.syntax_tree.*;
-import niagara.optimizer.colombia.Attribute;
-import niagara.optimizer.colombia.ICatalog;
-import niagara.optimizer.colombia.LogicalProperty;
-import niagara.optimizer.colombia.Op;
+import niagara.optimizer.colombia.*;
 import niagara.query_engine.MergeTree;
 import niagara.query_engine.MTException;
 
@@ -29,7 +26,8 @@ public class AccumulateOp extends unryOp {
     private Attribute mergeAttr;
     private String accumFileName;
     private String initialAccumFile;
-    boolean clear; /* clear existing accum file or not */
+    /** clear existing accum file or not */    
+    boolean clear; 
 
     /**
      * Creates the AccumulateOp. Traverses the mergeTemplate tree and
@@ -41,55 +39,94 @@ public class AccumulateOp extends unryOp {
      * @param mergeIndex  The index in the tuple structure of the XML 
      *              documents/fragments to be merged
      */
-    public void setAccumulate(String _mergeTemplate, 
-			      Attribute _mergeAttr,
-			      String _accumFileName, 
-			      String _initialAccumFile,
-			      boolean _clear) 
-	throws MTException {
-	mergeAttr = _mergeAttr;
-	mergeTree = new MergeTree();
-	accumFileName = _accumFileName;
-	initialAccumFile = _initialAccumFile;
-	clear = _clear;
+    public void setAccumulate(
+        String _mergeTemplate,
+        Attribute _mergeAttr,
+        String _accumFileName,
+        String _initialAccumFile,
+        boolean _clear)
+        throws MTException {
+        mergeAttr = _mergeAttr;
+        mergeTree = new MergeTree();
+        accumFileName = _accumFileName;
+        initialAccumFile = _initialAccumFile;
+        clear = _clear;
 
-	/* true indicates that accumulate constraints should be checked */
-	mergeTree.create(_mergeTemplate, true);
-	return;
+        /* true indicates that accumulate constraints should be checked */
+        mergeTree.create(_mergeTemplate, true);
+        return;
     }
 
     /** 
      * Returns the mergeTree for this operator.
      */
     public MergeTree getMergeTree() {
-	return mergeTree;
+        return mergeTree;
     }
 
     public Attribute getMergeAttr() {
-	return mergeAttr; 
+        return mergeAttr;
     }
 
     public String getAccumFileName() {
-	return accumFileName;
+        return accumFileName;
     }
 
     public String getInitialAccumFile() {
-	return initialAccumFile;
+        return initialAccumFile;
     }
 
     public boolean getClear() {
-	return clear;
+        return clear;
+    }
+
+    public void dump() {
+        System.out.println("Accumulate Operator: ");
+        mergeTree.dump(System.out);
+        System.out.println("MergeIndex " + mergeAttr.getName());
+        if (accumFileName != null) {
+            System.out.println("AccumFileName " + accumFileName);
+        }
+        System.out.println(
+            "Selected Algo " + String.valueOf(selectedAlgorithmIndex));
+        System.out.println();
+    }
+
+    public LogicalProperty findLogProp(
+        ICatalog catalog,
+        LogicalProperty[] input) {
+        return new LogicalProperty(0, new Attrs(), input[0].isLocal());
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof AccumulateOp))
+            return false;
+        if (obj.getClass() != AccumulateOp.class)
+            return obj.equals(this);
+        AccumulateOp other = (AccumulateOp) obj;
+        return mergeTree.equals(other.mergeTree)
+            && mergeAttr.equals(other.mergeAttr)
+            && accumFileName.equals(other.accumFileName)
+            && initialAccumFile.equals(other.initialAccumFile)
+            && clear == other.clear;
+    }
+
+    public Op copy() {
+        AccumulateOp op = new AccumulateOp();
+        // Just a shallow copy of all members for now
+        op.mergeAttr = mergeAttr;
+        op.mergeTree = mergeTree;
+        op.initialAccumFile = initialAccumFile;
+        op.accumFileName = accumFileName;
+        op.clear = clear;
+        return op;
     }
     
-    public void dump() {
-	System.out.println("Accumulate Operator: ");
-	mergeTree.dump(System.out);
-	System.out.println("MergeIndex " + mergeAttr.getName());
-	if(accumFileName != null) {
-	    System.out.println("AccumFileName " + accumFileName);
-	}
-	System.out.println("Selected Algo " + 
-			   String.valueOf(selectedAlgorithmIndex));
-	System.out.println();
+    public int hashCode() {
+        return mergeTree.hashCode()
+            ^ mergeAttr.hashCode()
+            ^ accumFileName.hashCode()
+            ^ initialAccumFile.hashCode()
+            ^ (clear ? 1 : 0);
     }
 }

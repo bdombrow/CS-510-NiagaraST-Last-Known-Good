@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: averageOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
+  $Id: averageOp.java,v 1.6 2002/10/31 04:17:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -90,6 +90,18 @@ public class averageOp extends groupOp {
 
     public void dump() {
 	System.out.println("AverageOp");
+    }
+    
+    public int hashCode() {
+        return skolemAttributes.hashCode() ^ averageAttribute.hashCode();
+    }
+    
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof averageOp)) return false;
+        if (obj.getClass() != averageOp.class) return obj.equals(this);
+        averageOp other = (averageOp) obj;
+        return skolemAttributes.equals(other.skolemAttributes) &&
+                averageAttribute.equals(other.averageAttribute);
     }
 }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UnionOp.java,v 1.4 2002/10/27 01:20:21 vpapad Exp $
+  $Id: UnionOp.java,v 1.5 2002/10/31 04:17:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,7 +38,18 @@ import niagara.xmlql_parser.syntax_tree.*;
 /**
  * This class is used to represent the Union operator.
  */
-public class UnionOp extends binOp {
+public class UnionOp extends op {
+
+    private int arity;
+    
+    public void setArity(int arity) {
+        this.arity = arity;
+    }
+     
+    public int getArity() {
+        return arity;
+    }
+       
    /**
     * print the operator to the standard output
     */
@@ -58,7 +69,9 @@ public class UnionOp extends binOp {
      * @see niagara.optimizer.colombia.Op#copy()
      */
     public Op copy() {
-        return new UnionOp();
+        UnionOp op = new UnionOp();
+        op.setArity(arity);
+        return op;
     }
     
     /**
@@ -70,18 +83,27 @@ public class UnionOp extends binOp {
         // project through union: before projecting out a variable from
         // the first input we should make sure to project out the
         // respective variables from all the other inputs
-        return (LogicalProperty) input[0].copy();
+        return input[0].copy();
     }
 
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof UnionOp)) return false;
         if (obj.getClass() != UnionOp.class) return obj.equals(this);
         UnionOp other = (UnionOp) obj;
-        // XXX vpapad: should we compare arities?
-        return true;
+        return arity == other.arity;
     }
 
     public int hashCode() {
-        return 0;
+        return arity;
+    }
+    
+   
+    /**
+     * @see niagara.optimizer.colombia.Op#matches(Op)
+     */
+    public boolean matches(Op other) {
+        if (arity == 0) // Special case arity = 0 => match any Union
+            return (other instanceof UnionOp);
+        return super.matches(other);
     }
 }

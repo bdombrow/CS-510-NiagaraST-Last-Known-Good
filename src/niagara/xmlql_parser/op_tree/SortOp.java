@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SortOp.java,v 1.3 2002/10/27 01:20:21 vpapad Exp $
+  $Id: SortOp.java,v 1.4 2002/10/31 04:17:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -133,9 +133,6 @@ public class SortOp extends unryOp {
                attr.equals(other.attr);
     }
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
     public int hashCode() {
         int result = comparisonMethod ^ attr.hashCode();
         if (ascending) result = ~result;

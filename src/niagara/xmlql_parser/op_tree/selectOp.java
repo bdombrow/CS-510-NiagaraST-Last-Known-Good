@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: selectOp.java,v 1.4 2002/10/27 01:20:21 vpapad Exp $
+  $Id: selectOp.java,v 1.5 2002/10/31 04:17:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,6 +36,7 @@ import java.util.*;
 import niagara.logical.Predicate;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class selectOp extends unryOp {
@@ -104,6 +104,21 @@ public class selectOp extends unryOp {
         LogicalProperty result = input[0].copy();
         result.setCardinality(result.getCardinality() * pred.selectivity());
         return result;
+    }
+    
+    public Op copy() {
+        return new selectOp(pred);
+    }
+    
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof selectOp)) return false;
+        if (obj.getClass() != selectOp.class) return obj.equals(this);
+        selectOp other = (selectOp) obj;
+        return pred.equals(other.pred);
+    }
+    
+    public int hashCode() {
+        return pred.hashCode();
     }
 }
 

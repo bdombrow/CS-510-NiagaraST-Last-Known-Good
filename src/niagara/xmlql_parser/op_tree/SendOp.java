@@ -1,5 +1,5 @@
 /**
- * $Id: SendOp.java,v 1.3 2002/10/27 01:20:21 vpapad Exp $
+ * $Id: SendOp.java,v 1.4 2002/10/31 04:17:05 vpapad Exp $
  *
  */
 
@@ -15,7 +15,8 @@ import niagara.xmlql_parser.syntax_tree.*;
 
 import niagara.connection_server.CommunicationServlet;
 
-public class SendOp extends unryOp {
+// XXX vpapad: hack to get CVS to compile
+public class SendOp extends UnoptimizableLogicalOperator {
     String query_id;
     CommunicationServlet cs;
 

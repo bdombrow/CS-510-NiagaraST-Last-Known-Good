@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: dtdScanOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
+  $Id: dtdScanOp.java,v 1.6 2002/10/31 04:17:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -207,11 +207,13 @@ public class dtdScanOp extends NullaryOp implements Initializable {
         if (obj.getClass() != dtdScanOp.class)
             return obj.equals(this);
         dtdScanOp other = (dtdScanOp) obj;
-        return variable.equals(other.variable) && docs.equals(other.docs) && type.equals(other.type);
+        if ((type == null) != (other.type == null))  return false;
+        if (type != null && !type.equals(other.type)) return false;
+        return variable.equals(other.variable) && docs.equals(other.docs);
     }
 
     public int hashCode() {
-        int hashCode = dtdScanOp.class.hashCode();
+        int hashCode = 0;
         if (variable != null)
             hashCode ^= variable.hashCode();
         if (docs != null)

@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: ExpressionOp.java,v 1.4 2002/10/27 01:20:21 vpapad Exp $
+  $Id: ExpressionOp.java,v 1.5 2002/10/31 04:17:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,21 +38,20 @@ import java.util.HashMap;
 
 import niagara.logical.NodeDomain;
 import niagara.logical.Variable;
-import niagara.optimizer.colombia.Attribute;
-import niagara.optimizer.colombia.ICatalog;
-import niagara.optimizer.colombia.LogicalProperty;
-import niagara.optimizer.colombia.Op;
+import niagara.optimizer.colombia.*;
 
 public class ExpressionOp extends unryOp {
 
     private String variableName;
     private Class expressionClass;
+    private Attrs variablesUsed;
 
     public ExpressionOp() {}
-    public ExpressionOp(String variableName, Class expressionClass, String expression) {
+    public ExpressionOp(String variableName, Attrs variablesUsed, Class expressionClass, String expression) {
         assert (expressionClass == null) ^ (expression == null) 
             : "ExpressionOp needs either an expression, or a class, but not both";
         this.variableName = variableName;
+        this.variablesUsed = variablesUsed;
         if (expressionClass != null)
             setExpressionClass(expressionClass);
         if (expression != null)
@@ -103,22 +101,12 @@ public class ExpressionOp extends unryOp {
 	return interpreted;
     }
 
-    HashMap varTable;
-
-    public void setVarTable(HashMap varTable) {
-	this.varTable = varTable;
-    }
-
-    public HashMap getVarTable() {
-	return varTable;
-    }
-
     public Class getExpressionClass() {
 	return expressionClass;
     }
 
     public Op copy() {
-        return new ExpressionOp(variableName, expressionClass, expression);
+        return new ExpressionOp(variableName, variablesUsed, expressionClass, expression);
     }
 
     public void setInterpreted(boolean interpreted) {
@@ -141,7 +129,18 @@ public class ExpressionOp extends unryOp {
         ExpressionOp other = (ExpressionOp) o;
         if (expression != null && !expression.equals(other.expression)) return false;
         if (expressionClass != null && !expressionClass.equals(other.expressionClass)) return false;
-        return variableName.equals(other.variableName);
+        return variableName.equals(other.variableName) && variablesUsed.equals(other.variablesUsed);
+    }
+    
+    public int hashCode() {
+        int hashcode = (expression == null) ? 0 : expression.hashCode();
+        hashcode ^= (expressionClass == null) ? 0 : expressionClass.hashCode();
+        hashcode ^= variableName.hashCode() ^ variablesUsed.hashCode();
+        return hashcode;
+    }
+
+    public Attrs getVariablesUsed() {
+        return variablesUsed;
     }
 }
 
