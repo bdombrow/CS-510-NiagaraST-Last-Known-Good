@@ -24,8 +24,9 @@ import niagara.query_engine.MTException;
 public class AccumulateOp extends unryOp {
 
     private MergeTree mergeTree;
-    private int mergeIndex;
+    private schemaAttribute mergeAttr;
     private String accumFileName;
+    private String initialAccumFile;
     boolean clear; /* clear existing accum file or not */
 
     /**
@@ -37,7 +38,6 @@ public class AccumulateOp extends unryOp {
     public AccumulateOp(Class[] al) {
 	super("Accumulate", al);
 	mergeTree = null;
-	mergeIndex = 0;
     }
 
     /**
@@ -50,12 +50,16 @@ public class AccumulateOp extends unryOp {
      * @param mergeIndex  The index in the tuple structure of the XML 
      *              documents/fragments to be merged
      */
-    public void setAccumulate(String mergeTemplateStr, int _mergeIndex,
-			      String _accumFileName, boolean _clear) 
+    public void setAccumulate(String mergeTemplateStr, 
+			      schemaAttribute _mergeAttr,
+			      String _accumFileName, 
+			      String _initialAccumFile,
+			      boolean _clear) 
 	throws MTException {
-	mergeIndex = _mergeIndex;
+	mergeAttr = _mergeAttr;
 	mergeTree = new MergeTree();
 	accumFileName = _accumFileName;
+	initialAccumFile = _initialAccumFile;
 	clear = _clear;
 
 	/* true indicates that accumulate constraints should be checked */
@@ -70,12 +74,16 @@ public class AccumulateOp extends unryOp {
 	return mergeTree;
     }
 
-    public int getMergeIndex() {
-	return mergeIndex; 
+    public schemaAttribute getMergeAttr() {
+	return mergeAttr; 
     }
 
     public String getAccumFileName() {
 	return accumFileName;
+    }
+
+    public String getInitialAccumFile() {
+	return initialAccumFile;
     }
 
     public boolean getClear() {
@@ -85,7 +93,7 @@ public class AccumulateOp extends unryOp {
     public void dump() {
 	System.out.println("Accumulate Operator: ");
 	mergeTree.dump(System.out);
-	System.out.println("MergeIndex " + String.valueOf(mergeIndex));
+	System.out.println("MergeIndex " + mergeAttr.getAttrId());
 	if(accumFileName != null) {
 	    System.out.println("AccumFileName " + accumFileName);
 	}
