@@ -1,6 +1,7 @@
 package niagara.utils;
 
 /**
+ * $Id: UserErrorException.java,v 1.2 2002/10/24 23:26:37 vpapad Exp $
  * UserErrorException.java
  * Created: March 30, 2000 
  *
@@ -15,7 +16,7 @@ package niagara.utils;
  * server should not crash
  */
 
-public class UserErrorException extends Exception {
+public class UserErrorException extends RuntimeException {
   
     /**
      * constructor
