@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.8 2001/08/08 21:21:36 tufte Exp $
+  $Id: ConnectionManager.java,v 1.9 2002/03/26 23:50:30 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,7 +64,7 @@ public class ConnectionManager implements QueryExecutionIF
 	public static final String RUN_GC = "gc";
 	public static final String SHUTDOWN = "shutdown";
 	
-	
+     	
 	// private variables
 	/**
 	 * Query id generator
@@ -98,6 +98,8 @@ public class ConnectionManager implements QueryExecutionIF
 	 */
 	private UIDriverIF ui;
 
+	private boolean KT_PERFORMANCE = false;
+
     // Constructors
     public ConnectionManager(String hostname, int port, UIDriverIF ui) {
 	this(hostname, port, ui, false);
@@ -128,7 +130,9 @@ public class ConnectionManager implements QueryExecutionIF
 	crThread.start();
 	
 	// Send a request to get the DTD's
-	sendDTDRequest();
+	if(!KT_PERFORMANCE) {
+	   sendDTDRequest();
+	}
     }
 
 	// Public interface

@@ -198,7 +198,6 @@ public class SimpleClient implements UIDriverIF {
 
 	int id = cm.executeQuery(QueryFactory.makeQuery(queryText), 
 				    Integer.MAX_VALUE);
-        System.out.println("Query executing...");
 	return;
     }
     
