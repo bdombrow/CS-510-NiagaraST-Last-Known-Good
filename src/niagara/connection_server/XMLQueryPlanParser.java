@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.26 2002/09/09 16:37:28 ptucker Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.27 2002/09/14 04:56:47 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -825,7 +825,7 @@ public class XMLQueryPlanParser {
 	int numTLElts = Integer.parseInt(e.getAttribute("num_tl_elts"));
         boolean streaming = e.getAttribute("streaming").equalsIgnoreCase("yes");
         boolean prettyPrint = e.getAttribute("prettyprint").equalsIgnoreCase("yes");
-        boolean trace = e.getAttribute("trace").equalsIgnoreCase("yes");
+        String trace = e.getAttribute("trace");
 
 	int dataType = -1;
 	boolean found = false;

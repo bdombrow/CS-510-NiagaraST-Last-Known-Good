@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestMessage.java,v 1.3 2001/08/08 21:25:05 tufte Exp $
+  $Id: RequestMessage.java,v 1.4 2002/09/14 04:56:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,6 +48,10 @@ public class RequestMessage {
     static final int EXECUTE_QP_QUERY = 10; 
     static final int RUN_GC = 11; // run the garbage collector
     static final int SHUTDOWN = 12;
+    // Same as QP_QUERY, but start sending back results immediately,
+    // assuming this is the only outstanding query for this client
+    // (EXECUTE_QP_QUERY and GET_NEXT in one step)
+    static final int SYNCHRONOUS_QP_QUERY = 13;
 
     String requestType;
     int serverID;
@@ -79,7 +83,7 @@ public class RequestMessage {
 	case GET_PARTIAL:this.requestType = "get_partial";break;
 	case GET_DTD:this.requestType = "get_dtd";break;
 	case EXECUTE_QP_QUERY: this.requestType = "execute_qp_query";break;
-
+        case SYNCHRONOUS_QP_QUERY: this.requestType = "synchronous_qp_query";break;
 	default: throw new InvalidRequestTypeException();
 	}
     }
@@ -114,6 +118,8 @@ public class RequestMessage {
 	    intRequestType = RUN_GC;
         if (requestType.equals("shutdown"))
 	    intRequestType = SHUTDOWN;
+        if (requestType.equals("synchronous_qp_query"))
+            intRequestType = SYNCHRONOUS_QP_QUERY;
 	return intRequestType;
     }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ServerQueryInfo.java,v 1.2 2000/08/09 23:53:48 tufte Exp $
+  $Id: ServerQueryInfo.java,v 1.3 2002/09/14 04:56:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,6 +48,10 @@ public class ServerQueryInfo {
     ResultTransmitter transmitter;
     private int queryId;
 
+    // Is this query synchronous? 
+    // (Implies no result padding, and closing of connection at the end)
+    private boolean synchronous;
+    
     // trigger query related data
     String triggerName;
     SynchronizedQueue queryResultQueue;
@@ -76,6 +80,11 @@ public class ServerQueryInfo {
 	searchEngineQuery = "";
     }
 
+    public ServerQueryInfo(int queryId, int queryType, boolean synchronous) {
+        this(queryId, queryType);
+        this.synchronous = synchronous;
+    }
+    
     boolean isTriggerQuery() {
 	return queryType == TriggerEngine;
     }
@@ -96,6 +105,10 @@ public class ServerQueryInfo {
         return queryType == GetDTD;
     }
 
+    boolean isSynchronous() {
+        return synchronous;
+    }
+    
     public int getQueryId() {
 	return queryId;
     }

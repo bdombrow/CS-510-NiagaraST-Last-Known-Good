@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.2 2001/07/17 07:06:06 vpapad Exp $
+  $Id: ResponseMessage.java,v 1.3 2002/09/14 04:56:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,6 +27,12 @@
 
 
 package niagara.connection_server;
+
+import java.io.IOException;
+import java.io.Writer;
+
+import niagara.query_engine.QueryResult;
+import niagara.utils.XMLUtils;
 
 
 /**
@@ -61,7 +67,28 @@ class ResponseMessage
     /**
      * Object corresponding to responsedata
      */
-    public String responseData;
+    private StringBuffer responseData;
+    
+    public void clearData() {
+        responseData.setLength(0);
+    }
+    
+    public int dataSize() {
+        return responseData.length();
+    }
+    
+    public void appendData(String moreData) {
+        responseData.append(moreData);
+    }
+    
+    public void appendResultData(QueryResult.ResultObject ro) {
+        XMLUtils.flatten(ro.result, responseData, false);
+    }
+    
+    public void setData(String data) {
+        responseData.setLength(0);
+        responseData.append(data);
+    }
     
     /**
      * Constructor
@@ -71,21 +98,31 @@ class ResponseMessage
 	this.localID = request.localID;
 	this.serverID = request.serverID;
 	this.type = type;
-	responseData = "";
+	responseData = new StringBuffer();
     }
 
     /**Convert this response to an XML string
        @return The XML representation of this response
     */
-    public String toXML() {
-	String result = "<responseMessage localID =\"" + localID +
-	    "\" serverID = \"" + serverID + 
-	    "\" responseType = \"" + getResponseType() + "\">\n" +
-	    "<responseData>\n"+
-	    responseData +
-	    "\n</responseData>" +
-	    "</responseMessage>\n";
-	return result;
+    public void toXML(Writer writer, boolean padding) throws IOException {
+        if (padding) {
+            writer.write("<responseMessage localID =\"");
+            writer.write(String.valueOf(localID));
+	    writer.write("\" serverID = \"");
+            writer.write(String.valueOf(serverID));
+            writer.write("\" responseType = \"");
+            writer.write(getResponseType());
+            writer.write("\">\n<responseData>\n");
+        }
+        writer.write(responseData.toString());
+        // XXX vpapad: this is just here to make the output at the other
+        // end a bit more human readable
+        writer.write("\n");
+        if (padding) {
+    	    writer.write("</responseData></responseMessage>\n");
+        }
+        if (type == END_RESULT)
+            writer.write("</response>\n");
     }
 
     /** Get the responseType of the message in this object

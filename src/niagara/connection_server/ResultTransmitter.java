@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.11 2002/05/07 03:10:34 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.12 2002/09/14 04:56:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,6 @@
 package niagara.connection_server;
 
 import org.w3c.dom.*;
-//VPAPAD - deleted: import com.ibm.xml.parser.*;
 import java.io.*;
 import niagara.query_engine.*;
 import java.net.*;
@@ -70,8 +69,8 @@ public class ResultTransmitter implements Runnable {
     // The number of results that have been collected so far in 'response'
     private int resultsSoFar = 0;
     
-    // The size of batch in a batched query
-    private static final int BatchSize=50;
+    // The size (in bytes) of a batch in a batched query
+    private static final int BatchSize = 512;
     
     // Tags for element and attribute list
     private static final String ELEMENT = "<!ELEMENT";
@@ -118,20 +117,20 @@ public class ResultTransmitter implements Runnable {
 	try {
 	    URL url = new URL(request.requestData);
 	    BufferedReader rd = new BufferedReader(new InputStreamReader(url.openStream()));
-	    response.responseData = "<![CDATA[";
+	    response.appendData("<![CDATA[");
 	    //  	    while (rd.ready()) {
 	    //  		response.responseData += rd.readLine()+"\n";
 	    //  	    }
-	    response.responseData += assembleDTD(rd) + "]]>";
+	    response.appendData(assembleDTD(rd) + "]]>");
 	    //  	    response.responseData += "]]>";
 	}
 	catch (MalformedURLException e1) {
 	    response = new ResponseMessage(request,ResponseMessage.ERROR);
-	    response.responseData = "Bad Url for DTD";
+	    response.setData("Bad Url for DTD");
 	}
 	catch (IOException e2) {
 	    response = new ResponseMessage(request,ResponseMessage.ERROR);
-	    response.responseData = "Could Not Fetch the DTD";
+	    response.setData("Could Not Fetch the DTD");
 	}
 	handler.sendResponse(response);
     }
@@ -177,7 +176,7 @@ public class ResultTransmitter implements Runnable {
 	String result = handler.server.seClient.query(queryInfo.searchEngineQuery);
 	// create the response message
 	ResponseMessage response = new ResponseMessage(request,ResponseMessage.SE_QUERY_RESULT);
-	response.responseData = result;
+	response.setData(result);
 	handler.sendResponse(response);
 	// send the end result saying everything is in
 	handler.sendResponse(new ResponseMessage(request,ResponseMessage.END_RESULT));
@@ -196,16 +195,17 @@ public class ResultTransmitter implements Runnable {
     private void handleQEQuery() 
 	throws ShutdownException, InterruptedException {
 	QueryResult queryResult = queryInfo.queryResult;
-	
+
+        // XXX vpapad: Taking this out of the loop
+        response = 
+        new ResponseMessage(request,
+                    ResponseMessage.QUERY_RESULT);
+        
 	while (true) {
 	    // if this thread has been marked for committing suicide, do it
 	    if (killThread) 
 		return;
-	    
-	    response = 
-		new ResponseMessage(request,
-				    ResponseMessage.QUERY_RESULT);
-	    
+        
 	    // see if the transmitter is currently suspended
 	    // It could be becuase of two reasons
 	    // 1. No Pending Requests 2. Last results were suspended
@@ -261,12 +261,12 @@ public class ResultTransmitter implements Runnable {
 		// add the result to responseData
 		totalResults--;
 		resultsSoFar++;
-		if (resultsSoFar > BatchSize && !NiagraServer.QUIET)
+		if (response.dataSize() > BatchSize && !NiagraServer.QUIET)
 		    sendResults();
 		// KT - what is this??? - don't need a response for each
 		// result element do we???
 		if(!NiagraServer.QUIET) {
-		    response.responseData += getResultData(resultObject);
+		    response.appendResultData(resultObject);
 		    handler.sendResponse(response);
 		}
 		break;
@@ -338,7 +338,7 @@ public class ResultTransmitter implements Runnable {
 	    case QueryResult.PartialQueryResult:
 				// add the result to responseData
 		totalResults--;
-		response.responseData = getResultData(resultObject);
+		response.setData(getResultData(resultObject));
 		handler.sendResponse(response);
 		break;
 		
@@ -426,7 +426,7 @@ public class ResultTransmitter implements Runnable {
 			response = 
 			new ResponseMessage(request,
 					    ResponseMessage.QUERY_RESULT);
-		    response.responseData += getResultData(resultObject);
+		    response.appendData(getResultData(resultObject));
 		    handler.sendResponse(response);
 
 		    break;
@@ -488,6 +488,12 @@ public class ResultTransmitter implements Runnable {
 	notify();
     }
 
+    synchronized public void handleSynchronousRequest() {
+        totalResults = Integer.MAX_VALUE;
+        suspended = false;
+        notify();
+    }
+    
     // Just a synchronized wrapper around wait()
     synchronized private void doWait() {
 	try {
@@ -542,7 +548,7 @@ public class ResultTransmitter implements Runnable {
     private void processError () {
 	System.out.println("Request for shut down. Sending error message");
 	ResponseMessage response = new ResponseMessage(request,ResponseMessage.ERROR);
-	response.responseData = "Internal Error in Query Engine";
+	response.setData("Internal Error in Query Engine");
 	handler.sendResponse(response);
 	// there is no purpose left in my life. I should die
 	destroy();
@@ -555,9 +561,9 @@ public class ResultTransmitter implements Runnable {
 
     // send the results collected so far
     private void sendResults() {
-	if (!response.responseData.equals(""))
+	if (response.dataSize() != 0)
 	    handler.sendResponse(response);
-	response.responseData = "";
+	response.clearData();
 	resultsSoFar = 0;
     }
 }

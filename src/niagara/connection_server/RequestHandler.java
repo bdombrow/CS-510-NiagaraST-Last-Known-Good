@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.13 2002/08/16 17:55:53 tufte Exp $
+  $Id: RequestHandler.java,v 1.14 2002/09/14 04:56:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,7 @@ import niagara.trigger_engine.*;
 import niagara.xmlql_parser.op_tree.logNode;
 import niagara.data_manager.DataManager;
 import niagara.utils.PEException;
+import niagara.utils.ShutdownException;
 
 /**There is one request handler per client and receives all the requests from that client
    Then that request is further dispatched to the appropriate module and results sent back
@@ -48,7 +49,7 @@ public class RequestHandler {
     RequestParser requestParser;
 
     // The Writer to which all the results have to go
-    BufferedWriter outputWriter;
+    private BufferedWriter outputWriter;
 
     // The server which instantiated this RequestHandler
     NiagraServer server;
@@ -99,8 +100,9 @@ public class RequestHandler {
     }
 
     // Send the initial string to the client
-    private void sendBeginDocument() throws IOException { // DTD is hack for sigmod record
+    private void sendBeginDocument() throws IOException { 
 	String header =  "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n";
+        // DTD is hack for sigmod record    
 	if (dtd_hack) {
 	    // added to support the SigmodRecord Entities
 	    header = header + EntitySupplement.returnEntityDefs("CarSet.cfg");
@@ -116,60 +118,17 @@ public class RequestHandler {
      */
     public void handleRequest(RequestMessage request) {
 	try{
-	    
 	    // Handle the request according to requestType
 	    switch(request.getIntRequestType()){
 	    //   EXECUTE_QUERY request
 	    //-------------------------------------
 	    case RequestMessage.EXECUTE_QP_QUERY:
-		{
-		    // assign a new query id to this request
-		    int qid = getNextConnServerQueryId();
-
-		    XMLQueryPlanParser xp = new XMLQueryPlanParser();
-		    logNode topNode = xp.parse(request.requestData);
-		
-		    QueryResult qr = 
-			server.qe.executeOptimizedQuery(topNode);
-		    
-		    request.serverID = qid;
-		    
-		    /* create and populate the query info
-		     * We assume that if the top node is Accumulate
-		     * operator, then we should run Accumulate file
-		     * query
-		     * Oh boy, this is ugly - I use the fact that the
-		     * query has already been parsed to help set up
-		     * the query info. What will I do when I have to
-		     * deal with a real query?? Modify queryInfo after
-		     * the fact?? Ugly!!!
-		     */
-		    ServerQueryInfo serverQueryInfo;
-		    if(topNode.isAccumulateOp()) {
-			System.out.println("top node is accumulate: " +
-					   topNode.getAccumFileName());
-			serverQueryInfo = new ServerQueryInfo(qid,
-					ServerQueryInfo.AccumFile);
-			serverQueryInfo.accumFileName = topNode.getAccumFileName();
-		    } else {
-			serverQueryInfo = new ServerQueryInfo(qid,
-				       ServerQueryInfo.QueryEngine);
-		    }
-		    serverQueryInfo.queryResult = qr;
-		    queryList.put(qid,serverQueryInfo);
-
-		    // start the transmitter thread for sending results back
-		    serverQueryInfo.transmitter = 
-			new ResultTransmitter(this,serverQueryInfo,request);
-
-		
-		    //send the query ID out
-		    sendQueryId(request);
-		}
-		break;
+	       processQPQuery(request); 	
+ 	       //send the query ID out
+               sendQueryId(request);
+               break;
 
 	    case RequestMessage.EXECUTE_QE_QUERY:
-		
 		// assign a new query id to this request
 		int qid = getNextConnServerQueryId();
 		
@@ -209,7 +168,7 @@ public class RequestHandler {
 		// if some error happened
 		if (queryInfo.triggerName == null) {
 		    ResponseMessage response = new ResponseMessage(request,ResponseMessage.ERROR);
-		    response.responseData = "The trigger could not be installed";
+		    response.setData("The trigger could not be installed");
 		    sendResponse(response);
 		    break;
 		}
@@ -226,9 +185,7 @@ public class RequestHandler {
 		
 		break;
 
-
 	 case RequestMessage.EXECUTE_SE_QUERY:
-			
 		// Get the next qid
 		qid = getNextConnServerQueryId();
 		request.serverID = qid;
@@ -243,7 +200,6 @@ public class RequestHandler {
 		
 		//send the query ID out
 		sendQueryId(request);
-		
 		break;
 	
 	    case RequestMessage.GET_DTD:
@@ -349,6 +305,13 @@ public class RequestHandler {
 		    // boy this is ugly
 		    System.exit(0);
 		    break;
+            case RequestMessage.SYNCHRONOUS_QP_QUERY :
+                processQPQuery(request);
+                // get the queryInfo of this query
+                queryInfo = queryList.get(request.serverID);
+                queryInfo.transmitter.handleSynchronousRequest();
+                break;
+            
 		//-------------------------------------
 		//   Ooops 
 		//-------------------------------------
@@ -378,13 +341,57 @@ public class RequestHandler {
 	    System.err.println("Shutdown exception received in RequestHandler.handleRequest " + se.getMessage());
 	}
     }    
-    
+
+    private void processQPQuery(RequestMessage request)
+    throws XMLQueryPlanParser.InvalidPlanException, ShutdownException {
+            // assign a new query id to this request
+            int qid = getNextConnServerQueryId();
+
+            XMLQueryPlanParser xp = new XMLQueryPlanParser();
+            logNode topNode = xp.parse(request.requestData);
+        
+            QueryResult qr = 
+            server.qe.executeOptimizedQuery(topNode);
+            
+            request.serverID = qid;
+            
+            /* create and populate the query info
+             * We assume that if the top node is Accumulate
+             * operator, then we should run Accumulate file
+             * query
+             * Oh boy, this is ugly - I use the fact that the
+             * query has already been parsed to help set up
+             * the query info. What will I do when I have to
+             * deal with a real query?? Modify queryInfo after
+             * the fact?? Ugly!!!
+             */
+            ServerQueryInfo serverQueryInfo;
+            boolean isSynchronous = (request.getIntRequestType() == request.SYNCHRONOUS_QP_QUERY);
+            if(topNode.isAccumulateOp()) {
+            System.out.println("top node is accumulate: " +
+                       topNode.getAccumFileName());
+            serverQueryInfo = new ServerQueryInfo(qid,
+                    ServerQueryInfo.AccumFile, isSynchronous);
+            serverQueryInfo.accumFileName = topNode.getAccumFileName();
+            } else {
+            serverQueryInfo = new ServerQueryInfo(qid,
+                       ServerQueryInfo.QueryEngine, isSynchronous);
+            }
+            serverQueryInfo.queryResult = qr;
+            queryList.put(qid,serverQueryInfo);
+
+            // start the transmitter thread for sending results back
+            serverQueryInfo.transmitter = 
+            new ResultTransmitter(this,serverQueryInfo,request);
+    }   
+     
     /**Method used by everyone to send responses to the client
        @param mesg The message that needs to be sent
     */
     public synchronized void sendResponse(ResponseMessage mesg) {
 	try {
-            outputWriter.write(mesg.toXML());
+            mesg.toXML(outputWriter, !queryList.get(mesg.serverID).isSynchronous()); 
+            mesg.clearData();
 	    outputWriter.flush();
 	}
 	catch (IOException e) {
@@ -424,6 +431,14 @@ public class RequestHandler {
 	else if (!queryInfo.isSEQuery())
 	    // Put a KILL control message down stream
 	    queryInfo.queryResult.kill();
+
+        if (queryInfo.isSynchronous()) {
+            try {
+            outputWriter.close();
+            } catch (IOException e) {
+                ; // XXX vpapad: don't know what to do here
+            }
+        }
     }
 
     /**
@@ -464,7 +479,7 @@ public class RequestHandler {
 	    resp.type = ResponseMessage.ERROR;
 	else {
 	    for (int i=0;i<dtdlist.size();i++) 
-		resp.responseData += (String) dtdlist.elementAt(i) + "\n";
+		resp.appendData((String) dtdlist.elementAt(i) + "\n");
 	}
 	sendResponse(resp);
     }
