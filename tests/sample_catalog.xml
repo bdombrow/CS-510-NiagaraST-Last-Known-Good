@@ -1,97 +1,177 @@
 <?xml version="1.0" ?>
 <catalog>
   <operators>
+  	<!-- Logical and physical operators, name to class mappings, and
+  	     logical-to-physical mappings for unoptimized query plans. -->
     <logical name="dtdscan" 
       class="niagara.xmlql_parser.op_tree.dtdScanOp"/>
     <logical name="firehosescan" 
-      class="niagara.xmlql_parser.op_tree.FirehoseScanOp"/>
-    <logical name="streamscan"
-      class="niagara.xmlql_parser.op_tree.StreamScanOp"/>
+      class="niagara.xmlql_parser.op_tree.FirehoseScanOp">
+            <physical name="StreamThread" class="niagara.data_manager.StreamThread"/>
+    </logical>
+    <logical name="filescan"
+      class="niagara.xmlql_parser.op_tree.FileScanOp">
+            <physical name="StreamThread" class="niagara.data_manager.StreamThread"/>      
+    </logical>      
     <logical name="constant"
-      class="niagara.xmlql_parser.op_tree.ConstantOp"/>
+      class="niagara.xmlql_parser.op_tree.ConstantOp">
+      <physical name="ConstantThread" class="niagara.data_manager.ConstantOpThread"/>
+    </logical>
     <logical name="resource"
       class="niagara.xmlql_parser.op_tree.ResourceOp"/>
-    <logical name="scan"
-      class="niagara.xmlql_parser.op_tree.scanOp">
-      <physical class="niagara.query_engine.PhysicalScanOperator"/>
+    <!-- XXX vpapad: the world is not ready for this yet
+    <logical name="unnest"
+      class="niagara.logical.Unnest">
+      <physical name="PhysicalUnnest" class="niagara.query_engine.PhysicalUnnest"/>
     </logical>
+    XXX vpapad -->
     <logical name="select"
       class="niagara.xmlql_parser.op_tree.selectOp">
-      <physical class="niagara.query_engine.PhysicalSelectOperator"/>
+      <physical name="PhysicalSelect" class="niagara.query_engine.PhysicalSelectOperator"/>
     </logical>
     <logical name="join"
       class="niagara.xmlql_parser.op_tree.joinOp">
-      <physical class="niagara.query_engine.PhysicalNLJoinOperator"/>
-      <physical class="niagara.query_engine.PhysicalHashJoinOperator"/>
+      <physical name="NestedLoopsJoin" class="niagara.query_engine.PhysicalNLJoinOperator"/>
+      <physical name="HashJoin" class="niagara.query_engine.PhysicalHashJoinOperator"/>
     </logical>
     <logical name="construct"
       class="niagara.xmlql_parser.op_tree.constructOp">
-      <physical class="niagara.query_engine.PhysicalConstructOperator"/>
+      <physical name="PhysicalConstruct" class="niagara.query_engine.PhysicalConstructOperator"/>
     </logical>
     <logical name="avg"
       class="niagara.xmlql_parser.op_tree.averageOp">
-      <physical class="niagara.query_engine.PhysicalAverageOperator"/>
+      <physical name="PhysicalAverage" class="niagara.query_engine.PhysicalAverageOperator"/>
     </logical>
     <logical name="accumulate"
       class="niagara.xmlql_parser.op_tree.AccumulateOp">
-      <physical class="niagara.query_engine.PhysicalAverageOperator"/>
+      <physical name="PhysicalAccumulate" class="niagara.query_engine.PhysicalAccumulateOperator"/>
     </logical>
     <logical name="expression"
       class="niagara.xmlql_parser.op_tree.ExpressionOp">
-      <physical class="niagara.query_engine.PhysicalExpressionOperator"/>
+      <physical name="PhysicalExpression" class="niagara.query_engine.PhysicalExpressionOperator"/>
     </logical>
     <logical name="sort"
       class="niagara.xmlql_parser.op_tree.SortOp">
-      <physical class="niagara.query_engine.PhysicalSortOperator"/>
+      <physical name="PhysicalSort" class="niagara.query_engine.PhysicalSortOperator"/>
     </logical>
     <logical name="union"
       class="niagara.xmlql_parser.op_tree.UnionOp">
-      <physical class="niagara.query_engine.PhysicalUnionOperator"/>
+      <physical name="PhysicalUnion" class="niagara.query_engine.PhysicalUnionOperator"/>
     </logical>
     <logical name="display"
       class="niagara.xmlql_parser.op_tree.DisplayOp">
-      <physical class="niagara.query_engine.PhysicalDisplayOperator"/>
+      <physical name="PhysicalDisplay" class="niagara.query_engine.PhysicalDisplayOperator"/>
     </logical>
     <logical name="send"
       class="niagara.xmlql_parser.op_tree.SendOp">
-      <physical class="niagara.query_engine.PhysicalSendOperator"/>
+      <physical name="PhysicalSend" class="niagara.query_engine.PhysicalSendOperator"/>
     </logical>
     <logical name="receive"
       class="niagara.xmlql_parser.op_tree.ReceiveOp"/>
     <logical name="sum"
       class="niagara.xmlql_parser.op_tree.SumOp">
-      <physical class="niagara.query_engine.PhysicalSumOperator"/>
+      <physical name="PhysicalSum" class="niagara.query_engine.PhysicalSumOperator"/>
     </logical>
     <logical name="count"
       class="niagara.xmlql_parser.op_tree.CountOp">
-      <physical class="niagara.query_engine.PhysicalCountOperator"/>
+      <physical name="PhysicalCount" class="niagara.query_engine.PhysicalCountOperator"/>
     </logical>
     <logical name="dup"
       class="niagara.xmlql_parser.op_tree.dupOp">
-      <physical class="niagara.query_engine.PhysicalDuplicateOperator"/>
+      <physical name="PhysicalDup" class="niagara.query_engine.PhysicalDuplicateOperator"/>
     </logical>
-    <!-- The following operators cannot be accessed from XML query plans -->
-    <logical name="dbscan"
-      class="niagara.xmlql_parser.op_tree.dbScanOp">
-      <physical class="niagara.query_engine.PhysicalScanOperator"/>
+    <logical name="incrmax"
+      class="niagara.logical.IncrementalMax">
+      <physical name="PhysicalIncrementalMax" class="niagara.query_engine.PhysicalIncrementalMax"/>
     </logical>
-    <logical name="tuplescan"
-      class="niagara.xmlql_parser.op_tree.tupleScanOp"/>
+    <logical name="incravg"
+      class="niagara.logical.IncrementalAverage">
+      <physical name="PhysicalIncrementalAverage" class="niagara.query_engine.PhysicalIncrementalAverage"/>
+    </logical>
+    <!-- The following operators are not accessible from XML query plans -->
     <logical name="nest"
       class="niagara.xmlql_parser.op_tree.nestOp">
-      <physical class="niagara.query_engine.PhysicalNestOperator"/>
+      <physical name="PhysicalNest" class="niagara.query_engine.PhysicalNestOperator"/>
     </logical>
     <logical name="split"
       class="niagara.xmlql_parser.op_tree.splitOp">
-      <physical class="niagara.query_engine.PhysicalSplitOperator"/>
+      <physical name="PhysicalSplit" class="niagara.query_engine.PhysicalSplitOperator"/>
     </logical>
     <logical name="trigaction"
       class="niagara.xmlql_parser.op_tree.trigActionOp">
-      <physical class="niagara.query_engine.PhysicalTrigActionOperator"/>
+      <physical name="PhysicalTrigAction" class="niagara.query_engine.PhysicalTrigActionOperator"/>
+    </logical>
+    <logical name="scanOp"
+      class="niagara.xmlql_parser.op_tree.scanOp">
+      <physical name="PhysicalScan" class="niagara.query_engine.PhysicalScanOperator"/>
     </logical>
   </operators>
 
-  <resource name="urn:niagara:comedies">
+  <rules>
+  	<!-- Implementation rules -->
+  	<rule type="implementation" name="unnest to PhysicalUnnest">
+  		<before><logical name="unnest"/></before>
+ 		<after><physical name="PhysicalUnnest"/></after>
+  	</rule>
+  	<rule type="implementation" name="construct to PhysicalConstruct">
+  		<before><logical name="construct"/></before>
+ 		<after><physical name="PhysicalConstruct"/></after>
+  	</rule>
+  	<rule type="implementation" name="display to PhysicalDisplay">
+  		<before><logical name="display"/></before>
+ 		<after><physical name="PhysicalDisplay"/></after>
+  	</rule>
+  	<rule type="implementation" name="join to NestedLoopsJoin">
+  		<before><logical name="join"/></before>
+ 		<after><physical name="NestedLoopsJoin"/></after>
+  	</rule>
+  	<rule type="implementation" name="constant to ConstantThread">
+  		<before><logical name="constant"/></before>
+ 		<after><physical name="ConstantThread"/></after>
+  	</rule>
+  	<rule type="implementation" name="fhcan to StreamThread">
+  		<before><logical name="firehosescan"/></before>
+ 		<after><physical name="StreamThread"/></after>
+  	</rule>
+  	<rule type="implementation" name="filescan to StreamThread">
+  		<before><logical name="filescan"/></before>
+ 		<after><physical name="StreamThread"/></after>
+  	</rule>
+  	<rule type="custom" name="commuteJoin" class="niagara.optimizer.rules.CommuteJoin"/>
+  	<rule type="custom" name="commuteRL" class="niagara.optimizer.rules.CommuteRL"/>
+  	<rule type="custom" name="associateJoin" class="niagara.optimizer.rules.AssociateJoinRtoL"/>
+  </rules>
+  
+  	<!-- Cost Model -->
+    <costmodel>
+      <!-- Totally meaningless flat cost for all stream scan operators -->
+      <stream_scan_cost value="100"/>
+      <!-- Cost of parsing a document -->
+      <document_parsing_cost value="1"/>
+      <!-- Cost of reading a tuple -->
+      <tuple_reading_cost value="0.01"/>
+      <!-- Cost of unnesting per match -->
+      <dom_unnesting_cost value="0.05"/>
+      <!-- Cost of evaluating a predicate on one tuple -->
+      <predicate_cost value="0.05"/>
+      <!-- Cost of hashing one tuple -->
+      <tuple_hashing_cost value="0.1"/>
+      <!-- Cost of "constructing" one output tuple -->
+      <tuple_construction_cost value="0.5"/>
+      <!-- Cost of opening an HTTP connection -->
+      <open_connection_cost value="0.5"/>
+      <!-- Cost of transmitting one tuple -->
+      <tuple_transmission_cost value="0.1"/>
+    </costmodel>
+
+    <!-- Configuration parameters -->
+    <config>
+      <!-- Default fanout for unnest operations -->
+      <unnest_fanout value="10"/>
+    </config>
+  
+  	<!-- Resources: urn to url, or urn to server mappings -->
+    <resource name="urn:niagara:comedies">
     <url location="http://king.cse.ogi.edu/xml/all_well.xml"/>
     <url location="http://king.cse.ogi.edu/xml/as_you.xml"/>
     <url location="http://king.cse.ogi.edu/xml/com_err.xml"/>
@@ -114,65 +194,4 @@
   <resource name="urn:niagara:tragedies">
     <resolver location="king.cse.ogi.edu:9090"/>
   </resource>
-
-  <columbia>
-    <!-- Cost model from Columbia's "config.txt" -->
-    <costmodel>
-      <!-- cpu cost of copying one tuple to the next operator -->
-      <TOUCH_COPY value="0.0000001"/> 
-      <!-- cpu cost of evaluating one predicate -->
-      <CPU_PRED value="0.0000001"/>
-      <!-- cpu cost of evaluating an aggregation -->
-      <CPU_AGG value="0.0000001"/>
-      <!-- cpu cost of constructing CVA -->
-      <CPU_CVA value="0.000001"/>
-      <!-- cpu cost of applying function on one attribute -->
-      <CPU_APPLY value="0.0000001"/>
-      <!-- cpu cost of comparing and moving tuples -->
-      <CPU_COMP_MOVE value="0.0000001"/>
-      <!-- cpu cost of building hash table -->
-      <HASH_COST value="0.000002"/>
-      <!-- cpu cost for each hashjoin entry in hashjoin -->
-      <HASH_COST_JOIN value="0.00002"/>
-      <!-- cpu cost of finding index -->
-      <INDEX_PROBE value="0.000001"/>
-      <!-- block factor of table file -->
-      <BF value="100"/>
-      <!-- block factor of index file -->
-      <INDEX_BF value="1000"/>
-      <!-- i/o cost of reading one block -->
-      <IO value="0.025"/>
-      <!-- block factor of bit index file -->
-      <BIT_BF value="100000"/>
-      <!-- number of buffer pages -->
-      <BUF_SIZE value="40"/>
-      <!-- number of bytes each page -->
-      <PAGE_SIZE value="1024"/>
-      <!-- number of bytes an OID occupies -->
-      <OID_SIZE value="8"/>
-    </costmodel>
-    <!-- Configuration parameters, from Columbia's "config.txt" -->
-    <config>
-      <!-- default fanin for students and emps, also acting as CVACard -->
-      <StdFanin value="10"/>		
-      <!-- default fanin for students and emps, also acting as CVACard -->
-      <EmpFanin value="10"/>
-      <!-- default density -->
-      <Density value="1"/>
-      <!-- Number of catalogs examined, if varyFanin or varyDen is 1 -->
-      <NumCats value="10"/>
-      <!-- Care for "Cost vs. fanin" -->
-      <VaryFanin value="0"/>
-      <!-- Care for "Cost vs. density" -->
-      <VaryDen value="0"/>
-      <!-- fanin interval -->
-      <FaninItrv value="2"/>		
-      <!-- density interval -->
-      <DensityItrv value="0.05"/>
-      <!-- The ESTIMATED selectivity of filter predicate -->
-      <Selectivity value="1.0"/>
-      <!-- The ACTUAL selectivity of filter predicate -->
-      <ActualSelectivity value="0.1"/>
-    </config>
-  </columbia>
 </catalog>
