@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.12 2003/07/09 19:11:49 tufte Exp $ -->
+<!-- $Id: build.xml,v 1.13 2003/07/17 23:21:54 tufte Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
   <property name="build" value="${src}/build"/>
   <property name="lib" value="${basedir}/lib"/>
-  
+
   <target name="init">
     <mkdir dir="${build}"/>
 
@@ -60,8 +60,8 @@
 
   <!-- Compile everything -->
   <target name="compile" depends="init,create.cups">
-    <javac srcdir="${src}" destdir="${build}" source="1.4" debug="yes" 
-    	excludes="niagara/client/qbe/**,niagara/client/qpclient/**,niagara/xmlql_parser/op_tree/TypeChk.java,niagara/utils/nitree/**">
+    <javac srcdir="${src}" destdir="${build}" source="1.4" debug="true"
+    	excludes="niagara/client/qbe/**,niagara/client/qpclient/**">
       <classpath>
         <!-- In alpha order -->
         <pathelement location="${lib}/aelfred.jar"/>

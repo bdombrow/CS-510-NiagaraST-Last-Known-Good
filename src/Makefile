@@ -1,5 +1,5 @@
 #######################################################################
-# $Id: Makefile,v 1.17 2003/03/08 02:24:54 vpapad Exp $
+# $Id: Makefile,v 1.18 2003/07/17 23:21:53 tufte Exp $
 #
 #  Makefile to build query engine related stuff
 #
@@ -21,7 +21,7 @@ include make.incl
 #  list and it will be built using 'make all'
 #
 ##############################################################################
-all:	se_server ql_parser con_server ndom qe client mqpclient dm applet type_system saxdom optimizer firehose
+all:	ql_parser con_server ndom qe client mqpclient dm applet type_system saxdom optimizer firehose
 
 client:
 	$(JAVAC) $(JAVAFLAGS) niagara/client/*.java niagara/client/qpclient/*.java
@@ -43,9 +43,6 @@ optimizer:
 dm:
 	$(JAVAC) $(JAVACFLAGS) niagara/data_manager/*.java
 
-#nitree:
-#	$(JAVAC) $(JAVACFLAGS) niagara/utils/nitree/NIDocument.java
-
 ndom:
 	$(JAVAC) $(JAVACFLAGS) niagara/ndom/*.java
 
@@ -57,10 +54,6 @@ type_system:
 
 firehose:
 	$(JAVAC) $(JAVACFLAGS) niagara/firehose/*.java
-
-se_server:
-	cd niagara/search_engine && $(MAKE)
-
 
 applet: 
 	$(JAVAC) NiagaraUIApplet.java AppletSocketRouter.java; \
@@ -91,5 +84,4 @@ clean:
 	rm -f */*~ */*/*~ */*/*/*~ */*/*/*/*~ *~ niagara.jar
 	cd niagara/xmlql_parser/syntax_tree && make clean
 	cd niagara/xmlql_parser/op_tree && make clean 
-	cd niagara/search_engine && make clean 
 
