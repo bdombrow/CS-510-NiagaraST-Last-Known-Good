@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.9 2002/04/19 15:55:04 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.10 2002/04/29 19:49:33 tufte Exp $
  *
  */
 
@@ -55,8 +55,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 
     private static final String newLine = "\n";
 
-    // for streaming support - KT
-    private SourceStream outputStream;
+    private SinkTupleStream outputStream;
 
     public SAXDOMParser() {
         try {
@@ -107,7 +106,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
     }
 
     // for streaming, a place to put top-level elements
-    public void setOutputStream(SourceStream outputStream) {
+    public void setOutputStream(SinkTupleStream outputStream) {
 	this.outputStream = outputStream;
 	streaming = true;
     }
@@ -215,17 +214,12 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 	    // actually works
 	    try {
 		if (producingOutput)
-		    // if put returns false, downstream wants us to shutdown
-		    if (!outputStream.put(doc))
-			    return;
+		    outputStream.put(doc);
 	    } catch (java.lang.InterruptedException ie) {
                 throw new PEException("KT - InterruptedException in SAXDOMParser");
-	    } catch (niagara.utils.NullElementException ne) {
-		throw new PEException("KT - NullElementException in SAXDOMParser");
-	    } catch (niagara.utils.StreamPreviouslyClosedException spce) {
-		throw new PEException("KT - StreamPreviouslyClosedException in SAXDOMParser");
+	    } catch (ShutdownException se) {
+		throw new SAXException("Query shutdown " + se.getMessage());
 	    }
-	    
 	    if (--depth != -1) 
 		throw new PEException("Unbalanced open nodes list.");
 	}
