@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SlidingSumOp.java,v 1.4 2003/03/19 00:35:26 tufte Exp $
+  $Id: SlidingSumOp.java,v 1.5 2003/07/03 19:29:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -104,7 +104,7 @@ public class SlidingSumOp extends SlidingWindowOp {
     return this.every;
     }
        
-    public Op copy() {
+    public Op opCopy() {
         SlidingSumOp op = new SlidingSumOp();
         op.setSummingInfo(groupingAttrs, summingAttribute);
         op.setWindowInfo(range, every);

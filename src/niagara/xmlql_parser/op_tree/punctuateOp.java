@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: punctuateOp.java,v 1.1 2003/03/15 17:55:36 ptucker Exp $
+  $Id: punctuateOp.java,v 1.2 2003/07/03 19:29:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -134,7 +134,7 @@ public class punctuateOp extends binOp {
         return result;
     }
 
-    public Op copy() {
+    public Op opCopy() {
         return new punctuateOp(this.iDataInput, this.attrTimer,
 			       this.stDataTimer, this.attrDataRoot);
     }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: joinOp.java,v 1.10 2003/03/07 23:36:42 vpapad Exp $
+  $Id: joinOp.java,v 1.11 2003/07/03 19:29:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -220,7 +220,7 @@ public class joinOp extends binOp {
         return false;
     }
     
-    public Op copy() {
+    public Op opCopy() {
         return new joinOp(
             pred.copy(),
             equiJoinPredicates.copy(),

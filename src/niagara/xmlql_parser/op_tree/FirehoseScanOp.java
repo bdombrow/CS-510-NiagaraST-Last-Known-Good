@@ -1,4 +1,4 @@
-// $Id: FirehoseScanOp.java,v 1.10 2003/03/07 23:36:42 vpapad Exp $
+// $Id: FirehoseScanOp.java,v 1.11 2003/07/03 19:29:59 tufte Exp $
 
 package niagara.xmlql_parser.op_tree;
 
@@ -48,7 +48,7 @@ public class FirehoseScanOp extends StreamOp {
             true);
     }
     
-    public Op copy() {
+    public Op opCopy() {
         return new FirehoseScanOp((FirehoseSpec) streamSpec, variable);
     }
 

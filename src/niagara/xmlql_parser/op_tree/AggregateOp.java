@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: AggregateOp.java,v 1.2 2003/03/19 22:44:38 tufte Exp $
+  $Id: AggregateOp.java,v 1.3 2003/07/03 19:29:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -68,7 +68,7 @@ public abstract class AggregateOp extends groupOp {
 	System.err.println("Aggregate Attr: " + aggrAttr.getName());
     }
 
-    public Op copy() {
+    public Op opCopy() {
 	AggregateOp op =null;
 	op = getInstance();
 	op.groupingAttrs = this.groupingAttrs;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SlidingMaxOp.java,v 1.4 2003/03/19 00:35:26 tufte Exp $
+  $Id: SlidingMaxOp.java,v 1.5 2003/07/03 19:29:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -106,7 +106,7 @@ public class SlidingMaxOp extends SlidingWindowOp {
     }
     
     
-    public Op copy() {
+    public Op opCopy() {
         SlidingMaxOp op = new SlidingMaxOp();
         op.setMaxingInfo(groupingAttrs, maxingAttribute);
         op.setWindowInfo(range, every);

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ExpressionOp.java,v 1.6 2003/03/07 23:36:43 vpapad Exp $
+  $Id: ExpressionOp.java,v 1.7 2003/07/03 19:29:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -107,7 +107,7 @@ public class ExpressionOp extends unryOp {
 	return expressionClass;
     }
 
-    public Op copy() {
+    public Op opCopy() {
         return new ExpressionOp(variableName, variablesUsed, expressionClass, expression);
     }
 

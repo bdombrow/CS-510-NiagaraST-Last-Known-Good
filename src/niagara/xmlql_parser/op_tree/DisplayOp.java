@@ -27,7 +27,7 @@ public class DisplayOp extends unryOp {
         this(op.query_id, op.client_location);
     }
 
-    public Op copy() {
+    public Op opCopy() {
         return new DisplayOp(this);
     }
 

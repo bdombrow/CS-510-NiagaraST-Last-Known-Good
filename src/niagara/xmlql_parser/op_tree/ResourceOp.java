@@ -1,5 +1,5 @@
 /**
- * $Id: ResourceOp.java,v 1.5 2003/03/07 23:36:42 vpapad Exp $
+ * $Id: ResourceOp.java,v 1.6 2003/07/03 19:29:59 tufte Exp $
  *
  */
 
@@ -82,7 +82,7 @@ public class ResourceOp extends NullaryOp {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         return new ResourceOp(variable.copy(), urn);
     }
 

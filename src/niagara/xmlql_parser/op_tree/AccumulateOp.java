@@ -1,5 +1,5 @@
 /*
- * $Id: AccumulateOp.java,v 1.9 2003/03/07 23:36:43 vpapad Exp $
+ * $Id: AccumulateOp.java,v 1.10 2003/07/03 19:29:59 tufte Exp $
  */
 
 package niagara.xmlql_parser.op_tree;
@@ -110,7 +110,7 @@ public class AccumulateOp extends unryOp {
             && clear == other.clear;
     }
 
-    public Op copy() {
+    public Op opCopy() {
         AccumulateOp op = new AccumulateOp();
         // Just a shallow copy of all members for now
         op.mergeAttr = mergeAttr;

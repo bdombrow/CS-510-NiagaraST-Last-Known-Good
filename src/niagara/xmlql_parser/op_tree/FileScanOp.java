@@ -1,4 +1,4 @@
-// $Id: FileScanOp.java,v 1.4 2003/03/07 23:36:43 vpapad Exp $
+// $Id: FileScanOp.java,v 1.5 2003/07/03 19:29:59 tufte Exp $
 
 package niagara.xmlql_parser.op_tree;
 
@@ -44,7 +44,7 @@ public class FileScanOp extends StreamOp {
             true);
     }
     
-    public Op copy() {
+    public Op opCopy() {
         return new FileScanOp((FileScanSpec) streamSpec, variable);
     }
 

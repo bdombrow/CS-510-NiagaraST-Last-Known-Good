@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: dupOp.java,v 1.7 2003/03/07 23:36:42 vpapad Exp $
+  $Id: dupOp.java,v 1.8 2003/07/03 19:29:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,7 +63,7 @@ public class dupOp extends unryOp {
         return input[0].copy();
     }
 
-    public Op copy() {
+    public Op opCopy() {
         dupOp op = new dupOp();
         op.numDestinationStreams = numDestinationStreams;
         return op;

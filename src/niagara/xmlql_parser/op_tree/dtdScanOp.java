@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: dtdScanOp.java,v 1.8 2003/03/08 02:23:57 vpapad Exp $
+  $Id: dtdScanOp.java,v 1.9 2003/07/03 19:29:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -62,7 +62,7 @@ public class dtdScanOp extends NullaryOp implements Initializable {
         this(op.variable, op.docs, op.type);
     }
     
-    public Op copy() {
+    public Op opCopy() {
         return new dtdScanOp(this);
     }
     
@@ -210,4 +210,5 @@ public class dtdScanOp extends NullaryOp implements Initializable {
         setDocs(urls);
         variable = new Variable(id, NodeDomain.getDOMNode());
     }
+   
 }

@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOp.java,v 1.5 2003/03/07 23:36:43 vpapad Exp $
+ * $Id: ConstantOp.java,v 1.6 2003/07/03 19:29:59 tufte Exp $
  *
  */
 
@@ -72,7 +72,7 @@ public class ConstantOp extends NullaryOp {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         ConstantOp cop = new ConstantOp();
         cop.content = this.content;
         cop.vars = this.vars.copy();

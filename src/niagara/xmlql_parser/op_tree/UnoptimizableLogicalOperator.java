@@ -16,7 +16,7 @@ public abstract class UnoptimizableLogicalOperator extends op {
         throw new PEException("Optimization is not supported for this operator");
     }
 
-    public final Op copy() {
+    public final Op opCopy() {
         throw new PEException("Optimization is not supported for this operator");
     }
     

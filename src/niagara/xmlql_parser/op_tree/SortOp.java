@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SortOp.java,v 1.5 2003/03/07 23:36:42 vpapad Exp $
+  $Id: SortOp.java,v 1.6 2003/07/03 19:29:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -119,7 +119,7 @@ public class SortOp extends unryOp {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
        SortOp op = new SortOp();
        op.setSort(attr, comparisonMethod, ascending);
        return op;

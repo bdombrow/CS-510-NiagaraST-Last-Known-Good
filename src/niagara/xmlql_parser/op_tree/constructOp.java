@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: constructOp.java,v 1.8 2003/03/07 23:36:42 vpapad Exp $
+  $Id: constructOp.java,v 1.9 2003/07/03 19:29:59 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -65,7 +65,7 @@ public class constructOp extends unryOp {
         this(op.variable, op.resultTemplate, op.projectedAttrs);
     }
 
-    public Op copy() {
+    public Op opCopy() {
         return new constructOp(this);
     }
 

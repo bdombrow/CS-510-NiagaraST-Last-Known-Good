@@ -1,5 +1,5 @@
 /**
- * $Id: ReceiveOp.java,v 1.4 2002/10/27 01:20:21 vpapad Exp $
+ * $Id: ReceiveOp.java,v 1.5 2003/07/03 19:29:59 tufte Exp $
  *
  */
 
@@ -75,7 +75,7 @@ public class ReceiveOp extends unryOp {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         ReceiveOp rop = new ReceiveOp();
         rop.setReceive(location, query_id);
         return rop;
