@@ -17,11 +17,6 @@
    <wid_to>3</wid_to>
 </bucket>
 <bucket>
-   <NUM1>*</NUM1>
-   <wid_from>(,1)</wid_from>
-   <wid_to>*</wid_to>
-</bucket>
-<bucket>
    <NUM1>4</NUM1>
    <wid_from>2</wid_from>
    <wid_to>3</wid_to>
@@ -35,11 +30,6 @@
    <NUM1>6</NUM1>
    <wid_from>2</wid_from>
    <wid_to>4</wid_to>
-</bucket>
-<bucket>
-   <NUM1>*</NUM1>
-   <wid_from>(,2)</wid_from>
-   <wid_to>*</wid_to>
 </bucket>
 <bucket>
    <NUM1>7</NUM1>
@@ -57,11 +47,6 @@
    <wid_to>5</wid_to>
 </bucket>
 <bucket>
-   <NUM1>*</NUM1>
-   <wid_from>(,3)</wid_from>
-   <wid_to>*</wid_to>
-</bucket>
-<bucket>
    <NUM1>10</NUM1>
    <wid_from>4</wid_from>
    <wid_to>5</wid_to>
@@ -77,11 +62,6 @@
    <wid_to>6</wid_to>
 </bucket>
 <bucket>
-   <NUM1>*</NUM1>
-   <wid_from>(,4)</wid_from>
-   <wid_to>*</wid_to>
-</bucket>
-<bucket>
    <NUM1>13</NUM1>
    <wid_from>5</wid_from>
    <wid_to>6</wid_to>
@@ -95,11 +75,6 @@
    <NUM1>15</NUM1>
    <wid_from>5</wid_from>
    <wid_to>7</wid_to>
-</bucket>
-<bucket>
-   <NUM1>*</NUM1>
-   <wid_from>(,5)</wid_from>
-   <wid_to>*</wid_to>
 </bucket>
 
 </niagara:results>
