@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.21 2003/01/25 20:57:00 tufte Exp $
+ * $Id: StreamThread.java,v 1.22 2003/02/22 08:07:15 tufte Exp $
  */
 
 package niagara.data_manager;
@@ -75,20 +75,18 @@ public class StreamThread extends SourceThread {
 	try {
 	    inputStream = createInputStream();
 	   
-	    if(parser instanceof SAXDOMParser && spec.isStreaming()) {
-		// Use SAXDOMParser in streaming mode
+	    if(parser instanceof SAXDOMParser) {
+		// Use SAXDOMParser - assumes niagara:stream format
 		((SAXDOMParser)(parser)).setOutputStream(outputStream);
 		InputSource inputSource = new InputSource(inputStream);
 		parser.parse(inputSource);
-	    } else if(spec.isStreaming() && parser.supportsStreaming()) {
+	    } else if(parser.supportsStreaming()) {
 		// This must be a modified Xerces parser in streaming mode
 		// Note this is awkward, I want streaming, but I don't
 		// want streaming format... No good way to specify this now
 		// for the firehose.
-		throw new PEException("KT not supported ");
 
 		// stream is done when inputStream.read() returns -1
-		/*
 		InputSource inputSource = new InputSource(inputStream);
 		sourcecreated=true;
 		while(true) {
@@ -96,8 +94,8 @@ public class StreamThread extends SourceThread {
 		    parser.parse(inputSource);
 		    outputStream.put(parser.getDocument());
 		}
-		*/
 	    } else {
+		System.out.println("KT: WARNING USING INEFFICIENT READ IN");
 		try {
 		    bufferedInput = 
 			new BufferedReader(new InputStreamReader(inputStream));
