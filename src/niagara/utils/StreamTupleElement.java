@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.11 2003/07/09 04:59:40 tufte Exp $
+  $Id: StreamTupleElement.java,v 1.12 2003/07/27 02:40:51 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -226,8 +226,12 @@ public class StreamTupleElement {
         
         // XXX vpapad: what are we supposed to do about timestamp?
         
-        for (int i = 0; i < attributeMap.length; i++)
-            returnElement.tuple[i] = tuple[attributeMap[i]];
+        for (int i = 0; i < attributeMap.length; i++) {
+        	if(attributeMap[i] == -1)
+        		returnElement.tuple[i] = null;
+        	else
+            	returnElement.tuple[i] = tuple[attributeMap[i]];
+        }
         returnElement.tupleSize = attributeMap.length;
                 
         return returnElement;
