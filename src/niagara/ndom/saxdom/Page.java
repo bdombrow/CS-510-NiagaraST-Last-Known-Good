@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.9 2002/04/26 02:38:11 vpapad Exp $
+ * $Id: Page.java,v 1.10 2002/05/02 22:04:56 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -69,12 +69,12 @@ public class Page {
         parser = null;
     }
 
-    public synchronized void pin() {
+    public void pin() {
         pin_count++;
     }
     
-    public synchronized void unpin() {
-        pin_count--;
+    public void unpin(int pins) {
+        pin_count -= pins;
 
         if (pin_count == 0) {
             clear();

@@ -1,5 +1,5 @@
 /**
- * $Id: DocumentImpl.java,v 1.6 2002/04/15 22:48:56 vpapad Exp $
+ * $Id: DocumentImpl.java,v 1.7 2002/05/02 22:04:56 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -9,21 +9,24 @@
 package niagara.ndom.saxdom;
 
 import org.w3c.dom.*;
-
-import java.util.Vector;
+import java.lang.ref.Reference;
 
 public class DocumentImpl extends NodeImpl implements Document {
 
-    private Page firstPage;
-    private Page lastPage;
+    /**
+     * A week reference to this document, used by BufferManager
+     * to keep track of our pages, so that it can free them up
+     * when the document is garbage collected.
+     */
+    private Reference ref;
 
-    public DocumentImpl(Page firstPage, int offset) {
-        super(null, BufferManager.getIndex(firstPage, offset));
+    public DocumentImpl(Page firstPage, int index) {
+        super(null, index);
 
         doc = this;
 
         firstPage.pin();
-        lastPage = this.firstPage = firstPage;
+        ref = BufferManager.registerFirstPage(this, firstPage);
     }
 
     public short getNodeType() {
@@ -36,20 +39,7 @@ public class DocumentImpl extends NodeImpl implements Document {
 
     public void addPage(Page page) {
         page.pin();
-        lastPage = page;
-    }
-
-    public void finalize() throws Throwable {
-        // Unpin all pages for this document
-        Page page = firstPage;
-        do {
-            Page next = page.getNext();
-            page.unpin();
-            if (page == lastPage) break;
-            page = next;
-        } while (page != null);
-        
-        super.finalize();
+        BufferManager.registerLastPage(ref, page);
     }
 
     // We don't support DTDs yet.

@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.10 2002/04/30 21:26:07 vpapad Exp $
+ * $Id: BufferManager.java,v 1.11 2002/05/02 22:04:56 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -23,6 +23,14 @@ import org.w3c.dom.*;
 
 import niagara.utils.PEException;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.lang.ref.ReferenceQueue;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 public class BufferManager {
     private static Page[] pages;
 
@@ -30,10 +38,32 @@ public class BufferManager {
 
     private static int page_size;
 
+    private static Map pageRegistry;
+
+    /** The garbage collector will enqueue garbage collected
+     * documents here */
+    private static ReferenceQueue usedDocuments;
+
+    /** We will wait for <code>timeout</code> milliseconds
+     * for free pages to appear before throwing an insufficient
+     * memory exception */
+    private static final int timeout = 250;
+
+    /** The page reclaimer thread will wait for <code>reclaimerTimeout</code>
+     *  milliseconds for newly freed documents to appear before it performs
+     *  a batch of unpinnings */
+    private static final int reclaimerTimeout = 25;
+
+    /** If the usedDocuments queue is not empty, the page reclaimer 
+     *  thread will unpin a batch of <code>unpinBatchSize</code> pages */
+    private static final int unpinBatchSize = 100;
+
     // No public constructor, BufferManager is a singleton
     private BufferManager(int size, int page_size) {
         pages = new Page[size]; 
         free_pages = new Stack();
+        pageRegistry = new HashMap(size);
+        usedDocuments = new ReferenceQueue();
         
         for (int i = 0; i < size; i++) {
             pages[i] = new Page(page_size, i);
@@ -41,6 +71,8 @@ public class BufferManager {
         }
 
         this.page_size = page_size;
+
+        (new PageReclaimer()).run();
     }
 
     public static void createBufferManager(int size, int page_size) {
@@ -54,19 +86,103 @@ public class BufferManager {
         free_pages.push(page);
     }
 
+    private static final class PageRange {
+        Page first, last;
+        PageRange(Page first, Page last) {
+            this.first = first;
+            this.last = last;
+        }
+    }
+
+    public static Reference registerFirstPage(DocumentImpl d, Page page) {
+        Reference ref = new WeakReference(d, usedDocuments);
+        synchronized(pages) {
+            pageRegistry.put(ref, new PageRange(page, page));
+        }
+        return ref;
+    }
+
+    public static void registerLastPage(Reference ref, Page page) {
+        synchronized(pages) {
+        ((PageRange) pageRegistry.get(ref)).last = page;
+        }
+    }
+
+    class PageReclaimer extends Thread {
+        private int[] page_unpins = new int [pages.length];
+
+        public void run() {
+            while (true) {
+                int unpins = 0;
+                
+                while (unpins < unpinBatchSize) {
+                    Reference r;
+                    try {
+                        r = usedDocuments.remove(reclaimerTimeout);
+                    } catch (InterruptedException e) {
+                        continue;
+                    }
+
+                    if (r == null) 
+                        if (unpins > 0) break;
+                        else continue;
+
+                    PageRange pr;
+                    synchronized(pages) {
+                        pr = (PageRange) pageRegistry.remove(r);
+                    }
+                    if (pr == null) continue;
+
+                    Page page = pr.first;
+                    do {
+                        unpins++;
+                        page_unpins[page.getNumber()]++;
+
+                        if (page == pr.last) break;
+
+                        page = page.getNext();
+                    } while (page != null);
+                }
+
+                // Perform a batch of unpins
+                boolean wasEmpty = free_pages.empty();
+                
+                for (int i = 0; unpins > 0 && i < page_unpins.length; i++) {
+                    int pins = page_unpins[i];
+                    if (pins == 0) continue;
+                    pages[i].unpin(pins);
+                    unpins -= pins;
+                    page_unpins[i] = 0;
+                }
+
+                synchronized (free_pages) {
+                    if (wasEmpty && !free_pages.empty())
+                        free_pages.notify();
+                }                    
+            }
+        }
+    }
+
     public static Page getFreePage() {
         if (free_pages.empty()) {
-	    System.err.println("No SAXDOM pages left - garbage collecting...");
-	    System.gc();
-	    System.runFinalization();
+            System.gc();
+            synchronized(free_pages) {
+                try {
+                    free_pages.wait(timeout);
+                }
+                catch (InterruptedException e) {}
+            }
+        }
 
-	    if (free_pages.empty()) 
-		// XXX vpapad: Run away! Run away!
-		throw new InsufficientMemoryException();
-	}
+        if (free_pages.empty()) 
+            // XXX vpapad: Run away! Run away!
+            throw new InsufficientMemoryException();
+
         return (Page) free_pages.pop();
     }
     
+
+    // Accessors and utility methods 
 
     public static Page getPage(int index) {
         return pages[index / page_size];
@@ -87,6 +203,8 @@ public class BufferManager {
     public static String getEventString(int index) {
         return getPage(index).getEventString(getOffset(index));
     }
+
+    // DOM methods 
 
     public static Element getFirstElementChild(DocumentImpl doc, int index) {
         Page page = getPage(index);
@@ -117,8 +235,6 @@ public class BufferManager {
             }
         }
     }
-
-    // DOM methods 
 
     public static String getTagName(int index) {
         return getEventString(index);
@@ -530,3 +646,5 @@ public class BufferManager {
         throw new PEException("Not Implemented Yet!");
     }
 }
+
+
