@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.3 2000/08/23 03:55:02 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.4 2000/08/24 04:04:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -354,7 +354,7 @@ public class ResultTransmitter implements Runnable {
 
 	/* give the query some time to get started */
 	/* 	transmitThread.sleep(5000); */
-
+        int count = 0;
 	while (true) {
 
 	    /* If a kill query message has been sent, killThread will
@@ -373,53 +373,60 @@ public class ResultTransmitter implements Runnable {
 	     * fully understand suspension and because it doesn't
 	     * seem necessary for AccumFile stuff
 	     */
-
 	    try {
-		if(!alreadyReturningPartial) {
-		    /* sleep for some amount of time */
-		    /* there are two thread sleep functions 
-		     * sleep(long millis), sleep(long millis, int nanos)
-		     */
-		    transmitThread.sleep(10000);
-		    
-		    /* request the generation of partial results - 
-		     * who knows if this will work or not
-		     */
+		/*if(!alreadyReturningPartial) { */
+		/* sleep for some amount of time */
+		/* there are two thread sleep functions 
+		 * sleep(long millis), sleep(long millis, int nanos)
+		 */
+		/*transmitThread.sleep(100);
+		  count += 100; */
+		
+		/* request the generation of partial results - 
+		 * who knows if this will work or not
+		 */
+		if(count >= 2000 && !alreadyReturningPartial) {
 		    //System.out.println("Accum Mgr requesting partial result");
-		    queryInfo.queryResult.returnPartialResults();
-		}
+		    //queryInfo.queryResult.returnPartialResults();
+		    count = 0;
+		} 
+		/*}*/
 
-		alreadyReturningPartial = false;
+		/*alreadyReturningPartial = false; */
 		
 		/* get the result and update the accum file dir */
-		/* OK, now wait for the result to come popping up */
-		resultObject = queryResult.getNext();
-		
-		//System.out.println("Accum Mgr received result");
-		switch (resultObject.status) {
-		case QueryResult.PartialQueryResult:
-		    /* In this case, resultObject.result is a TXDocument 
-		     * AccumFileDir stores standard DOM Docs, since that
-		     * is what the system uses now 
-		     */
-		    System.out.println("Updating Accumulate File " +
-		    		       queryInfo.accumFileName);
-		    DataManager.AccumFileDir.put(queryInfo.accumFileName, 
-						 resultObject.result);
-		    break;
-
-		case QueryResult.FinalQueryResult:
-		    /* In this case, resultObject.result is a TXDocument 
-		     * AccumFileDir stores standard DOM Docs, since that
-		     * is what the system uses now 
-		     */
-		    //System.out.println("Updating Accumulate File " +
-		    //		       queryInfo.accumFileName);
-		    DataManager.AccumFileDir.put(queryInfo.accumFileName, 
-						 resultObject.result);
-
-		    /* send final results to client */
-		    response = 
+	        /* OK, now wait for the result to come popping up */
+	        resultObject = queryResult.getNext(100);
+	
+		if(resultObject.status == QueryResult.TimedOut) {
+                    count += 100;
+		} else {
+		    //System.out.println("Accum Mgr received result");
+		    alreadyReturningPartial = false; 
+		    switch (resultObject.status) {
+		    case QueryResult.PartialQueryResult:
+			/* In this case, resultObject.result is a TXDocument 
+			 * AccumFileDir stores standard DOM Docs, since that
+			 * is what the system uses now 
+			 */
+			System.out.println("Updating Accumulate File " +
+					   queryInfo.accumFileName);
+			DataManager.AccumFileDir.put(queryInfo.accumFileName, 
+						     resultObject.result);
+			break;
+			
+		    case QueryResult.FinalQueryResult:
+			/* In this case, resultObject.result is a TXDocument 
+			 * AccumFileDir stores standard DOM Docs, since that
+			 * is what the system uses now 
+			 */
+			//System.out.println("Updating Accumulate File " +
+			//		       queryInfo.accumFileName);
+			DataManager.AccumFileDir.put(queryInfo.accumFileName, 
+						     resultObject.result);
+			
+			/* send final results to client */
+			response = 
 			new ResponseMessage(request,
 					    ResponseMessage.QUERY_RESULT);
 		    response.responseData += getResultData(resultObject);
@@ -448,24 +455,25 @@ public class ResultTransmitter implements Runnable {
 		    break;
 
 		    case QueryResult.NonBlockingResult:
-		case QueryResult.TimedOut:
-		    /* should only get partial results, something
+		    case QueryResult.TimedOut:
+			/* should only get partial results, something
 		     * is wrong if I get one of the other statuses, I think
 		     */
-		    throw new PEException("Unexpected QueryResult status" +
+			throw new PEException("Unexpected QueryResult status" +
 					  String.valueOf(resultObject.status));
 		    
 		default:
 		    throw new PEException("Unexpected QueryResult status");
 		}
+		}
 	    } catch (QueryResult.ResultsAlreadyReturnedException e) {
 		throw new PEException("HELP - What happened??");
-	    } catch (InterruptedException e) {
+		/*	    } catch (InterruptedException e) {
 		System.out.println("WARNING: Accumulate File Result Transmitter Thread interrupted!!");
-		/* do nothing, just continue??? */
-	    } catch (QueryResult.AlreadyReturningPartialException e) {
+		*do nothing, just continue??? */
+	    /*} catch (QueryResult.AlreadyReturningPartialException e) {
 		alreadyReturningPartial = true;
-
+*/
 	    } catch (RequestHandler.InvalidQueryIDException e) {
 		throw new PEException("Invalid query id found in ResultTrans");
 	    }
