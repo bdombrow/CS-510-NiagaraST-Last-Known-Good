@@ -51,8 +51,11 @@ export SAX	      = $(LIBDIR)/aelfred.jar
 export DIFF	      	= $(LIBDIR)/diff.jar
 export JFLEX		= $(LIBDIR)/JFlex.zip:$(LIBDIR)/JLex.jar
 export FHOSE            = $(FIREHOSEDIR)
+export DIVA	    = $(LIBDIR)/diva.jar
+export DJAVA	    = $(LIBDIR)/djava.jar
+export HTMLLAYOUT   = $(LIBDIR)/htmllayout.jar
 
-export CLASSPATH     = .:..:$(COMMONLIB):$(REGEXPLIB):$(XMLQLPARSE):$(LOGICALOPTREE):$(DMLIB):$(CUPLIB):$(PARSELIB):$(TRIGGERM):$(TRIGLIB):$(QBELIB2):$(SAX):$(DIFF):$(FHOSE)
+export CLASSPATH     = .:..:$(COMMONLIB):$(REGEXPLIB):$(XMLQLPARSE):$(LOGICALOPTREE):$(DMLIB):$(CUPLIB):$(PARSELIB):$(TRIGGERM):$(TRIGLIB):$(QBELIB2):$(SAX):$(DIFF):$(FHOSE):$(DIVA):$(DJAVA):$(HTMLLAYOUT)
 #export CLASSPATH     = .:..:$(REGEXPLIB):$(CUPLIB):$(PARSELIB):$(QBELIB2):$(SAX):$(DIFF)
 
 export DEBUG = -g
@@ -74,7 +77,7 @@ all:	ql_parser client se_server dm qe trigger con_server applet nitree type_syst
 #client: 
 #	$(JAVAC) $(JAVAFLAGS) `find niagara/client -name \*.java`
 client:
-	$(JAVAC) $(JAVAFLAGS) niagara/client/NiagaraUI.java niagara/client/SimpleClient.java
+	$(JAVAC) $(JAVAFLAGS) niagara/client/NiagaraUI.java niagara/client/SimpleClient.java niagara/client/qpclient/*.java
 
 con_server:
 	$(JAVAC) $(JAVAFLAGS) niagara/connection_server/*.java
