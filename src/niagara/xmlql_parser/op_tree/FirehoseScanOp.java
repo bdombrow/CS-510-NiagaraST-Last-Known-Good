@@ -15,6 +15,7 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.firehose.FirehoseSpec;
 
 public class FirehoseScanOp extends unryOp {
 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.14 2002/05/23 06:31:41 vpapad Exp $
+  $Id: ExecutionScheduler.java,v 1.15 2002/08/16 17:56:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -272,8 +272,8 @@ public class ExecutionScheduler {
 	    } else if (operator instanceof FirehoseScanOp) {
 		processFirehoseScanOperator((FirehoseScanOp) operator, 
 					    sinkStream);
-	    } else if (operator instanceof StreamScanOp) {
-		processStreamScanOperator((StreamScanOp) operator, sinkStream);
+	    } else if (operator instanceof FileScanOp) {
+		processFileScanOperator((FileScanOp) operator, sinkStream);
 	    } else if (operator instanceof ConstantOp) {
 		processConstantOp((ConstantOp) operator, sinkStream);
 	    } else if (operator instanceof ReceiveOp) {
@@ -400,8 +400,8 @@ public class ExecutionScheduler {
 	 * firehose and start reading documents from that firehose and
 	 * putting them into the output stream
 	 */
-	FirehoseThread firehose = new FirehoseThread(fhScanOp.getSpec(),
-						     outputStream);
+	StreamThread firehose = new StreamThread(fhScanOp.getSpec(),
+						 outputStream);
 	
 	// start the thread
 	Thread fhthread = new Thread(firehose);
@@ -420,7 +420,7 @@ public class ExecutionScheduler {
      *                     is to be fed
      */
 
-    protected void processStreamScanOperator (StreamScanOp sScanOp,
+    protected void processFileScanOperator (FileScanOp sScanOp,
 					      SinkTupleStream outputStream) {
 	
 	/* Create a StreamThread which will connect to the appropriate

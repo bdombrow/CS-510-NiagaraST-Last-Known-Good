@@ -1,5 +1,5 @@
 /**
- * $Id: ElementImpl.java,v 1.4 2002/04/02 21:53:10 vpapad Exp $
+ * $Id: ElementImpl.java,v 1.5 2002/08/16 17:56:26 tufte Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -14,12 +14,16 @@ public class ElementImpl extends NodeImpl implements Element {
 
     // XXX vpapad: Comments? COMMENTS?! We don't need no stinkin' comments!
     // See the documentation for DOM2 core interfaces.
-    
-    // Oh, really, no comments? Well fine, I won't comment either
-    // and we'll see who can dig through whose code!!! :)
+
+   private String[] dummySpace;
 
     public ElementImpl(DocumentImpl doc, int index) {
         super(doc, index);
+	try {
+	dummySpace = new String[15];
+	} catch (Exception e) {
+             System.out.println("String alloc got error");
+	}
     }
 
     public short getNodeType() {

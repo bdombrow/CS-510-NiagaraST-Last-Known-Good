@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.7 2002/04/30 22:22:35 vpapad Exp $
+ * $Id: StreamThread.java,v 1.8 2002/08/16 17:56:01 tufte Exp $
  */
 
 
@@ -19,13 +19,11 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 import java.net.Socket;
 import java.lang.reflect.Array;
-import javax.xml.parsers.*;
-import com.microstar.xml.*;
 
 import niagara.ndom.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
-
+import niagara.firehose.*;
 import niagara.connection_server.NiagraServer;
 
 public class StreamThread implements Runnable {
@@ -33,35 +31,18 @@ public class StreamThread implements Runnable {
     private InputStream inputStream;
     private SinkTupleStream outputStream;
     private niagara.ndom.DOMParser parser;
-    //private javax.xml.parsers.SAXParser parser;
-    //private com.microstar.xml.SAXDriver parser;
-    private Socket firehoseSocket;
-    private char c;
+    private FirehoseClient firehoseClient;
     private BufferedReader bufferedInput = null;
     private MyArray buffer; 
-    private int idx;
-    private StreamSimpleHandler handler;
 
     public StreamThread(StreamSpec spec, SinkTupleStream outStream) {
 
-	//	try {
-	    this.spec = spec;
-	    outputStream = outStream;
-	    //parser = new com.microstar.xml.SAXDriver();
-            if (NiagraServer.usingSAXDOM())
-                parser = DOMFactory.newParser("saxdom");
-            else
-                parser = DOMFactory.newParser();
-	    //parser = SAXParserFactory.newInstance().newSAXParser();
-	    firehoseSocket = null;
-	    //handler = new StreamSimpleHandler();
-	    //parser.setHandler(handler);
-	    /*  } catch (javax.xml.parsers.ParserConfigurationException pce) {
-	    System.err.println("KT parser configuration error " + 
-	     		       pce.getMessage());
-	    } catch(org.xml.sax.SAXException se) {
-	    System.err.println("KT sax exception " + se.getMessage());
-	    }*/
+	this.spec = spec;
+	outputStream = outStream;
+	if (NiagraServer.usingSAXDOM()) 
+	    parser = DOMFactory.newParser("saxdom");
+	else
+	    parser = DOMFactory.newParser();
     }
 
     /**
@@ -75,11 +56,19 @@ public class StreamThread implements Runnable {
 	    inputStream = createInputStream();
 	   
 	    if(parser instanceof SAXDOMParser && spec.isStreaming()) {
+		// Use SAXDOMParser in streaming mode
 		((SAXDOMParser)(parser)).setOutputStream(outputStream);
 		InputSource inputSource = new InputSource(inputStream);
 		parser.parse(inputSource);
 	    } else if(spec.isStreaming() && parser.supportsStreaming()) {
+		// This must be a modified Xerces parser in streaming mode
+		// Note this is awkward, I want streaming, but I don't
+		// want streaming format... No good way to specify this now
+		// for the firehose.
+		throw new PEException("KT not supported ");
+
 		// stream is done when inputStream.read() returns -1
+		/*
 		InputSource inputSource = new InputSource(inputStream);
 		sourcecreated=true;
 		while(true) {
@@ -87,101 +76,90 @@ public class StreamThread implements Runnable {
 		    parser.parse(inputSource);
 		    outputStream.put(parser.getDocument());
 		}
+		*/
 	    } else {
 		try {
 		    bufferedInput = 
 			new BufferedReader(new InputStreamReader(inputStream));
 		    buffer = new MyArray(8192);
 
-		    idx = 0;
 		    boolean keepgoing = true;
-		    boolean startOfDoc = false;
-		    
+		    boolean startOfDoc = false;		    
 		    char cbuf[] = new char[5];
+
 		    bufferedInput.read(cbuf, 0, 5);
 		    if(cbuf[0] != '<' || cbuf[1] != '?' || cbuf[2] != 'x' ||
 		       cbuf[3] != 'm' || cbuf[4] != 'l')
 			throw new DMException("Invalidly formed stream");
 		    
-		    int cbufLen = 0;
-		    
+		    int cBufOffset = 0;
+		    int cBufSize = 5;
+
 		    while(true) {
-			idx = 0;
+			buffer.reset();
 			startOfDoc = false;
-			cbufLen = 0;
 			
 			// at this point cbuf should always hold <?xml
-			for(int i = 0; i<5; i++) {
-			    buffer.setChar(idx, cbuf[i]);
-			    idx++;
-			}
+			buffer.appendChars(cbuf, 5);
 			
 			while(!startOfDoc) {
 			    // look for string <?xml - indicates start of NEXT document
-			    boolean found = false;
 
-			    // if readChar returns true - indicates endOfStream
-			    // puts character read in c
-			    if(!readCharAndCheck('<')) {
-				buffer.setChar(idx, c);
-				idx++;
+			    // fill the remaining portion of cbuf and check
+			    // for start of document
+			    cBufSize = 5;
+			    int ret = bufferedInput.read(cbuf, 
+							 cBufOffset, 
+							 5-cBufOffset);
+			    if(ret == -1)
+				throw new EOSException();
+			    if(ret != 5-cBufOffset)
+				cBufSize = ret; // at end of file
+			    cBufOffset = 0; // reset for next round;
+
+			    if(cbuf[0] == '<' && cbuf[1] == '?' && 
+			       cbuf[2] == 'x' &&
+			       cbuf[3] == 'm' && cbuf[4] == 'l') {
+				// found start of document
+				startOfDoc = true;
 			    } else {
-				cbuf[0] = c;
-				cbufLen = 1;
-				found = readCharAndCheck('?');
-				cbuf[1] = c;
-				cbufLen = 2;
-				if(found) {
-				    found = readCharAndCheck('x');
-				    cbuf[2] = c;
-				    cbufLen = 3;
-				    if(found) {
-					found = readCharAndCheck('m');
-					cbuf[3] = c;
-					cbufLen = 4;
-					if(found) {
-					    found = readCharAndCheck('l');
-					    cbuf[4] = c;
-					    cbufLen = 5;
-					    if(found) {
-						startOfDoc = true;
-					    }
-					}
+				buffer.appendChar(cbuf[0]);
+				for(int i = 1; i<cBufSize; i++) {
+				    if(cbuf[i] != '<') {
+					buffer.appendChar(cbuf[i]);
+				    } else {
+					for(int j = 0; j<cBufSize-i; j++)
+					    cbuf[j] = cbuf[j+i];
+					cBufOffset = 5-i;
 				    }
-				}
-				if(!startOfDoc) {
-				    for(int i = 0; i<cbufLen; i++) {
-					buffer.setChar(idx+i, cbuf[i]);
-				    }
-				    idx+=cbufLen;
 				}
 			    }
 			}
 			
 			// parse the buffer and put the resulting document
 			// in the output stream
-			parseAndSendBuffer(buffer, idx);
+			parseAndSendBuffer(buffer);
 		    }
 		} catch(EOSException eosE) {
 		    // parse final doc and put in output stream, then return
-		    parseAndSendBuffer(buffer, idx);
+		    parseAndSendBuffer(buffer);
 		}
 	    }
 	    
 	} catch (org.xml.sax.SAXException saxE){
 	    System.err.println("StreamThread::SAX exception parsing document. Message: " 
-			       + saxE.getMessage());
+			       + saxE.toString());
 	} catch (java.lang.InterruptedException intE) {
 	    System.err.println("StreamThread::Interruped Exception::run. Message: " 
 			       + intE.getMessage());
 	} catch (java.io.FileNotFoundException fnfE) {
-	    System.err.println("StreamThread::File not found: filename: " 
-			       + spec.getFileName() +
+	    System.err.println("StreamThread::File not found: filename: " +
 			       "Message" + fnfE.getMessage());
 	} catch (java.net.UnknownHostException unhE) {
-	    System.err.println("StreamThread::Unknown Host: host: " + spec.getHostName() + 
+	    System.err.println("StreamThread::Unknown Host: host: " +
 			       "Message" + unhE.getMessage());
 	} catch(java.io.IOException ioe) {
+	    System.out.println("IO error");
 	    if(!sourcecreated) {
 	       System.err.println("StreamThread::IOException. Message: " + ioe.getMessage());
 	    }
@@ -232,9 +210,9 @@ public class StreamThread implements Runnable {
 	throws java.io.FileNotFoundException, 
 	       java.net.UnknownHostException,
 	       java.io.IOException {
-	if(spec.getType() == StreamSpec.FILE) {
+	if(spec instanceof FileScanSpec) {
 	    return createFileStream();
-	} else if (spec.getType() == StreamSpec.FIREHOSE) {
+	} else if (spec instanceof FirehoseSpec) {
 	    return createFirehoseStream();
 	} else {
 	    throw new PEException("Invalid Stream Type");
@@ -246,17 +224,21 @@ public class StreamThread implements Runnable {
      */
     private java.io.InputStream createFileStream() 
     throws java.io.FileNotFoundException{
-	//System.out.println("KT: Creating file stream for " + spec.getFileName());
-	return new FileInputStream(spec.getFileName());
+    	String fileName = ((FileScanSpec)spec).getFileName();
+	System.out.println("Creating file stream: " + fileName);
+	return new FileInputStream(((FileScanSpec)spec).getFileName());
     }
 
     /** 
      * create an input stream from the socket given
      */
-    private java.io.InputStream createFirehoseStream() 
+    private InputStream createFirehoseStream() 
 	throws java.net.UnknownHostException, java.io.IOException {
-	firehoseSocket = new Socket(spec.getHostName(), spec.getPortNum());
-	return firehoseSocket.getInputStream();
+
+	// create firehose client
+	if(firehoseClient == null)
+	    firehoseClient = new FirehoseClient();
+	return firehoseClient.open_stream((FirehoseSpec)spec);
     }
      
     /**
@@ -265,9 +247,9 @@ public class StreamThread implements Runnable {
      */
     private void closeInputStream() 
 	throws java.io.IOException {
-	if(spec.getType() == StreamSpec.FILE) {
+	if(spec instanceof FileScanSpec) {
 	    closeFileStream();
-	} else if (spec.getType() == StreamSpec.FIREHOSE) {
+	} else if (spec instanceof FirehoseSpec) {
 	    closeFirehoseStream();
 	} else {
 	    throw new PEException("Invalid Stream Type");
@@ -285,38 +267,17 @@ public class StreamThread implements Runnable {
 
     private void closeFirehoseStream() 
 	throws java.io.IOException {
-	if(inputStream != null) {
-	    inputStream.close();
-	}
-	if(firehoseSocket != null) {
-	    firehoseSocket.close();
+	if(firehoseClient != null) {
+	    firehoseClient.close_stream();
 	}
     }
   
-    /** 
-     * Reads a character from the stream, checks for end of stream,
-     * puts the character read in c, checks to see if the character
-     * matches the checkVal
-     * returns true if matches checkVal, false otherwise
-     */
-    private boolean readCharAndCheck(char checkVal) 
-    throws EOSException, java.io.IOException {
-	int i = bufferedInput.read();
-	if(i == -1) {
-	    throw new EOSException();
-	}
-	c = (char)i;
-	if(c == checkVal)
-	    return true;
-	else
-	    return false;
-    }
 
-    private void parseAndSendBuffer(MyArray buffer, int idx) 
+    private void parseAndSendBuffer(MyArray buffer) 
 	throws org.xml.sax.SAXException, java.lang.InterruptedException,
 	       java.io.IOException, ShutdownException {
 	InputSource inputSource = 
-	    new InputSource(new CharArrayReader(buffer.getBuf(), 0, idx));
+	    new InputSource(new CharArrayReader(buffer.getBuf(), 0, buffer.getLen()));
 	parser.parse(inputSource);
 	outputStream.put(parser.getDocument());
     }
@@ -330,6 +291,7 @@ public class StreamThread implements Runnable {
     // simple array 
     class MyArray {
 	char buffer[];
+	int allocSize;
 	int len;
 
 	MyArray() {
@@ -338,25 +300,31 @@ public class StreamThread implements Runnable {
 
 	MyArray(int size) {
 	    buffer = new char[8192];
-	    len = 8192;
+	    allocSize = 8192;
+	    len = 0;
 	}
 
-	void setChar(int idx, char c) {
-	    if(idx >= len) {
-		ensureCapacity(idx);
-	    }
-	    buffer[idx] = c;
+	void appendChar(char c) {
+	    ensureCapacity();
+	    buffer[len] = c;
+	    len++;
 	}
 
-	void ensureCapacity(int idx) {
-	    if(idx < len)
+	void appendChars(char[] cbuf, int cLen) {
+	    for(int i = 0; i<cLen; i++)
+		appendChar(cbuf[i]);
+	}
+
+	void ensureCapacity() {
+	    if(len < allocSize) 
 		return;
-	    int oldlen = len;
-	    while(idx >= len) {
-		len *=2;
+	    
+	    int oldAlloc = allocSize;
+	    while(len >= allocSize) {
+		allocSize *=2;
 	    }
-	    char newBuffer[] = new char[len];
-	    System.arraycopy(buffer, 0, newBuffer, 0, oldlen);
+	    char newBuffer[] = new char[allocSize];
+	    System.arraycopy(buffer, 0, newBuffer, 0, oldAlloc);
 	    buffer = newBuffer;
 	    return;
 	}
@@ -365,22 +333,18 @@ public class StreamThread implements Runnable {
 	    return buffer;
 	}
 
+	void reset() {
+	    len = 0;
+	}
+
+	int getLen() {
+	    return len;
+	}
+
+	public String toString() {
+	    String s = new String(buffer, 0, len);
+	    return s;
+	}
     }
 }
 
-
-
-class StreamSimpleHandler extends DefaultHandler {
-
-    public StreamSimpleHandler() {
-    }
-
-    public void startDocument() {
-	//System.out.println("Stream start document");
-    }
-
-    public void endDocument() {
-	//System.out.println("Stream end document");
-    }
-
-}

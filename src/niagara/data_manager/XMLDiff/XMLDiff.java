@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: XMLDiff.java,v 1.2 2001/07/17 06:58:48 vpapad Exp $
+  $Id: XMLDiff.java,v 1.3 2002/08/16 17:56:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -286,8 +286,8 @@ public class XMLDiff
     
     public static Result doLevel2(TXDocument doc1, TXDocument doc2) 
     {
-        TXElement r1 = (TXElement)doc1.getDocumentElement();
-        TXElement r2 = (TXElement)doc2.getDocumentElement();
+        Element r1 = doc1.getDocumentElement();
+        Element r2 = doc2.getDocumentElement();
         // bad diff.  OR, diff on _SAME_ object.
         // won't return any interesting result anyway.
         if(r1==null || r2==null || r1==r2) {
