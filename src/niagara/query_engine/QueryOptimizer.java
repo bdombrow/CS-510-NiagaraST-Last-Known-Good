@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryOptimizer.java,v 1.7 2003/09/22 00:15:42 vpapad Exp $
+  $Id: QueryOptimizer.java,v 1.8 2003/12/24 01:31:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,8 +29,7 @@ package niagara.query_engine;
 
 import java.util.Vector;
 import niagara.data_manager.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.xmlql_parser.*;
 import niagara.logical.*;
 
 /**
@@ -83,7 +82,7 @@ public class QueryOptimizer {
      *         return null.
      */
 
-    public logNode optimize (logNode unoptimizedPlan) 
+    public LogNode optimize (LogNode unoptimizedPlan) 
 	throws NoDataSourceException {
 
 	// Walk the unoptimized plan and get statistics and list of URLs to
@@ -127,13 +126,13 @@ public class QueryOptimizer {
      * @return True if no error occurs; false otherwise.
      */
 
-    private boolean getStatisticsAndUrls (logNode logicalPlan) 
+    private boolean getStatisticsAndUrls (LogNode logicalPlan) 
 	throws PushSEQueryException, NoDataSourceException {
 
-	op operator = logicalPlan.getOperator();
+	LogicalOperator operator = logicalPlan.getOperator();
 
 	// if it is constructOp, we keep descending
-	if (operator instanceof constructOp) {
+	if (operator instanceof Construct) {
 	    int numInputs = logicalPlan.getArity ();
 
 	    if (numInputs != 1) {
@@ -145,7 +144,7 @@ public class QueryOptimizer {
 	}
 
 	// same goes for joinOp. note that statistics are not gathered now
-	else if (operator instanceof joinOp) {
+	else if (operator instanceof Join) {
 	    int numInputs = logicalPlan.getArity();
 
 	    boolean proceed = true;
@@ -230,13 +229,13 @@ public class QueryOptimizer {
      * @return True if no error occurred, false otherwise
      */
 
-    private boolean collectDTDsAndSelectNodes (logNode logPlanRoot, 
+    private boolean collectDTDsAndSelectNodes (LogNode logPlanRoot, 
 	Vector dtdVector, Vector selectNodes) {
 
-	op operator = logPlanRoot.getOperator();
+	LogicalOperator operator = logPlanRoot.getOperator();
 
-	if (operator instanceof dtdScanOp) {
-	    return getDTDWithInexplicitURLs((dtdScanOp)operator, dtdVector);
+	if (operator instanceof DTDScan) {
+	    return getDTDWithInexplicitURLs((DTDScan)operator, dtdVector);
 	}
 	else {
 	    boolean proceed = true;
@@ -270,7 +269,7 @@ public class QueryOptimizer {
      * @return True if there is no error and false otherwise
      */
 
-    private boolean getDTDWithInexplicitURLs (dtdScanOp dtdScanOperator,
+    private boolean getDTDWithInexplicitURLs (DTDScan dtdScanOperator,
 					      Vector dtdVector) 
     {
 
@@ -362,19 +361,19 @@ public class QueryOptimizer {
      * @return True if no error occurred, false otherwise
      */
 
-    private boolean updateDTDInfoWithURLs (logNode logPlanRoot, 
+    private boolean updateDTDInfoWithURLs (LogNode logPlanRoot, 
 						DTDInfo dtdInfo)
 			throws PushSEQueryException, NoDataSourceException  {
 
 	// Get the operator corresponding to the logical node
 	//
-	op operator = logPlanRoot.getOperator();
+	LogicalOperator operator = logPlanRoot.getOperator();
 
 	// If this is a DTD Scan operator, then process accordingly
 	//
-	if (operator instanceof dtdScanOp) {
+	if (operator instanceof DTDScan) {
 
-	    return updateInfoWithURLs((dtdScanOp) operator, dtdInfo);
+	    return updateInfoWithURLs((DTDScan) operator, dtdInfo);
 	}
 	else {
 
@@ -422,7 +421,7 @@ public class QueryOptimizer {
      * @return True if no error occurred, false otherwise
      */
 
-    private boolean updateInfoWithURLs (dtdScanOp dtdScanOperator,
+    private boolean updateInfoWithURLs (DTDScan dtdScanOperator,
 					DTDInfo dtdInfo) throws NoDataSourceException {
 
 	// Add the URLs if found
@@ -464,15 +463,15 @@ public class QueryOptimizer {
      * @return True if no error occured; false otherwise
      */
 
-    private boolean selectAlgorithms (logNode logicalPlan) {
+    private boolean selectAlgorithms (LogNode logicalPlan) {
 
 	// Get the operator corresponding to the logical node
 	//
-	op operator = logicalPlan.getOperator();
+	LogicalOperator operator = logicalPlan.getOperator();
 
 	// If this is a DTD Scan operator, then nothing to do
 	//
-	if (operator instanceof dtdScanOp) {
+	if (operator instanceof DTDScan) {
 
 	    return true;
 	}
@@ -480,9 +479,9 @@ public class QueryOptimizer {
 
 	    // This is a regular operator, so have to select algorithm
 	    //
-	    if (operator instanceof joinOp) {
+	    if (operator instanceof Join) {
 		
-		selectJoinAlgorithm((joinOp) operator);
+		selectJoinAlgorithm((Join) operator);
 	    }
 	    else {
 
@@ -516,7 +515,7 @@ public class QueryOptimizer {
      *                     selected
      */
 
-    private void selectJoinAlgorithm (joinOp joinOperator) {
+    private void selectJoinAlgorithm (Join joinOperator) {
 
 	// If there is an equi-join component, then use hash join (join algorithm
 	// index of 1), else use nested loop join (join algorithm index of 0). Note

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryThread.java,v 1.10 2003/09/22 00:15:42 vpapad Exp $
+  $Id: QueryThread.java,v 1.11 2003/12/24 01:31:44 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,9 +28,12 @@
 package niagara.query_engine;
 
 import java.io.StringReader;
+
+import niagara.connection_server.XMLQueryPlanParser;
 import niagara.data_manager.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.xmlql_parser.*;
+import niagara.logical.*;
+import niagara.optimizer.Optimizer;
 import niagara.utils.*;
 
 /**
@@ -78,17 +81,15 @@ public class QueryThread implements Runnable {
     private QueryParser queryParser;
 
     // Logical plan generator from parse tree, 1 per thread
-    private logPlanGenerator logicalPlanGenerator;
+    private LogPlanGenerator logicalPlanGenerator;
 
     // The query optimizer, 1 per thread
     private QueryOptimizer queryOptimizer;
 
 
+    private XMLQueryPlanParser xqpp;
+    private Optimizer optimizer;
     
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //   Methods of the Query Class
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     /**
      * Constructor for QueryThread class.
      * 
@@ -103,9 +104,7 @@ public class QueryThread implements Runnable {
     public QueryThread (DataManager dataManager,
 						QueryQueue queryQueue,
 						ExecutionScheduler scheduler) {
-
 		// Initialize the reference to the query queue
-		//
 		this.queryQueue = queryQueue;
 	
 		// Initialize the reference to the scheduler
@@ -114,6 +113,9 @@ public class QueryThread implements Runnable {
 		// Create an optimizer for this thread
 		queryOptimizer = new QueryOptimizer(dataManager);
 
+                this.xqpp = new XMLQueryPlanParser();
+                this.optimizer = new Optimizer();
+                
 		// Create a new java thread for running an instance of this object
 		thread = new Thread (this,"QueryThread");
 
@@ -128,7 +130,6 @@ public class QueryThread implements Runnable {
      */
 
     public void run () {
-
 	    // Waiting on the Query Queue until there is a new query to
 	    // be scheduled. Then once an query is obtained, run it to completion.
 	    // Then repeat the process.
@@ -184,14 +185,14 @@ public class QueryThread implements Runnable {
 	// Get the logical plan from the query representation
 	// THIS HAS TO CHANGE TO REUSE LOGICAL PLAN GENERATOR
 	//
-	logicalPlanGenerator = new logPlanGenerator(queryRep);
+	logicalPlanGenerator = new LogPlanGenerator(queryRep);
 	
 	// Get the logical plan
 	//
-	logNode logicalPlan = logicalPlanGenerator.getLogPlan();
+	LogNode logicalPlan = logicalPlanGenerator.getLogPlan();
 	
 	// Perform optimization on the logical plan and get optimized plan
-	logNode optimizedPlan = null;
+	LogNode optimizedPlan = null;
 	try {
 	    optimizedPlan = queryOptimizer.optimize(logicalPlan);
 	}

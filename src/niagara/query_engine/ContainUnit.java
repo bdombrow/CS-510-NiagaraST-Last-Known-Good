@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ContainUnit.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: ContainUnit.java,v 1.2 2003/12/24 01:31:49 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,8 @@
 package niagara.query_engine;
 
 import java.util.*;
-import niagara.xmlql_parser.syntax_tree.*;
+
+import niagara.xmlql_parser.*;
 
 /**
  * A ContainUnit corresponds to a SchemaUnit. Unlike SchemaUnit which

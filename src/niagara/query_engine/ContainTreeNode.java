@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ContainTreeNode.java,v 1.4 2003/07/09 04:59:35 tufte Exp $
+  $Id: ContainTreeNode.java,v 1.5 2003/12/24 01:31:48 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,8 @@
 package niagara.query_engine;
 
 import java.util.*;
-import niagara.xmlql_parser.syntax_tree.*;
+
+import niagara.xmlql_parser.*;
 
 /**
  * A tree of ContainTreeNode forms a containment tree.

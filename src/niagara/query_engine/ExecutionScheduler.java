@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.21 2003/09/22 00:15:42 vpapad Exp $
+  $Id: ExecutionScheduler.java,v 1.22 2003/12/24 01:31:45 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,6 +32,7 @@ import java.util.HashMap;
 import niagara.data_manager.*;
 import niagara.utils.*;
 import niagara.ndom.*;
+import niagara.physical.*;
 
 import niagara.connection_server.*;
 
@@ -117,8 +118,8 @@ public class ExecutionScheduler {
 		outputStreams[0].setSendImmediate();
 	    }
 	    
-	    PhysicalHeadOperator headOperator = 
-		new PhysicalHeadOperator(queryInfo,
+	    PhysicalHead headOperator = 
+		new PhysicalHead(queryInfo,
 					 inputStreams,
 					 outputStreams,
 					 responsiveness);
@@ -222,7 +223,7 @@ public class ExecutionScheduler {
 	    
 	    // Get the physical operator -
 	    PhysicalOperator physicalOperator = node.getPhysicalOperator();
-            physicalOperator.plugInStreams(inputStreams, outputStreams, responsiveness);
+        physicalOperator.plugInStreams(inputStreams, outputStreams, dataManager, responsiveness);
 
 	    if(node.isHead()) {
 		physicalOperator.setAsHead(queryInfo);

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.18 2003/08/01 17:29:25 tufte Exp $
+  $Id: QueryResult.java,v 1.19 2003/12/24 01:31:48 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -221,7 +221,7 @@ public class QueryResult {
             timeout = PageStream.MAX_DELAY;
         }
 
-        StreamTupleElement tuple = outputStream.getTuple(timeout);
+        Tuple tuple = outputStream.getTuple(timeout);
         int ctrlFlag = outputStream.getCtrlFlag();
 
         // Now handle the various types of results
@@ -242,7 +242,7 @@ public class QueryResult {
         return ctrlFlag;
     }
 
-    private Document extractXMLDocument(StreamTupleElement tupleElement) {
+    private Document extractXMLDocument(Tuple tupleElement) {
         // First get the last attribute of the tuple
 
         if (ResultTransmitter.OUTPUT_FULL_TUPLE) {

@@ -1,7 +1,8 @@
-/* $Id: SchedulablePlan.java,v 1.4 2003/09/22 00:15:42 vpapad Exp $ */
+/* $Id: SchedulablePlan.java,v 1.5 2003/12/24 01:31:46 vpapad Exp $ */
 package niagara.query_engine;
 
 import niagara.data_manager.DataManager;
+import niagara.physical.*;
 import niagara.utils.ShutdownException;
 import niagara.utils.SinkTupleStream;
 

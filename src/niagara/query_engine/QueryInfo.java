@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryInfo.java,v 1.7 2003/08/01 17:29:25 tufte Exp $
+  $Id: QueryInfo.java,v 1.8 2003/12/24 01:31:48 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,17 +41,9 @@ import niagara.utils.*;
  */
 
 public class QueryInfo {
-
-    ///////////////////////////////////////////////////////////
-    // These represent the states of the query               //
-    ///////////////////////////////////////////////////////////
-	
+    // These represent the states of the query
     public static final int STATE_ACTIVE = 0;
     public static final int STATE_DEAD = 1;
-
-    ///////////////////////////////////////////////////////////
-    // These are the private data members of the class       //
-    ///////////////////////////////////////////////////////////
 
     // The query as a string
     private String queryString;
@@ -78,10 +70,6 @@ public class QueryInfo {
     // Flag to indicate whether this query should be removed by the physical head op.
     //
     private boolean removeFromActive;
-
-    ////////////////////////////////////////////////////////////
-    // These are the methods of the class                     //
-    ////////////////////////////////////////////////////////////
 
     /**
      * Constructor for QueryInfo objects.

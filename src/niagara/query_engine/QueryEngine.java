@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.15 2003/09/26 21:19:32 vpapad Exp $
+  $Id: QueryEngine.java,v 1.16 2003/12/24 01:31:48 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -98,11 +98,12 @@ public class QueryEngine {
 
         // Initialize the data manager
         //
-            dataManager = new DataManager(".", // Path for temp files
-        10000, // Disk space
-        0, //
-        10, // Fetch threads
-    5); // URL Threads
+            dataManager = new DataManager(server.getCatalog(),
+                ".", // Path for temp files
+                10000, // Disk space
+				0, //
+				10, // Fetch threads
+				5); // URL Threads
 
         // Create a vector for operators scheduled for execution
         opQueue = new PhysicalOperatorQueue(maxOperators);
@@ -238,22 +239,6 @@ public class QueryEngine {
         } catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
             assert false : "Error in Assigning Unique Query Ids!";
         }
-    }
-
-    /**
-     *  Enable Caching in the data manager
-     * 
-     */
-    public void enableDataManagerCache() {
-        dataManager.enableCache();
-    }
-
-    /**
-     *  Enable Caching in the data manager
-     * 
-     */
-    public void disableDataManagerCache() {
-        dataManager.disableCache();
     }
 
     /**

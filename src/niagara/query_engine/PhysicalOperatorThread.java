@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperatorThread.java,v 1.8 2003/09/22 00:15:42 vpapad Exp $
+  $Id: PhysicalOperatorThread.java,v 1.9 2003/12/24 01:31:49 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,6 +55,7 @@ package niagara.query_engine;
 //
 /////////////////////////////////////////////////////////////////////////
 
+import niagara.physical.PhysicalOperator;
 import niagara.utils.JProf;
 
 public class PhysicalOperatorThread implements Runnable {
