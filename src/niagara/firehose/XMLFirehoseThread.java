@@ -116,6 +116,7 @@ class XMLFirehoseThread extends Thread {
 		case FirehoseConstants.FILE:
 		    xml_generator = new XMLFileReader(fhSpec.getDescriptor(),
 						      useStreamingFormat);
+		    break;
 		default:
 		    throw new PEException("KT unexpected stream data type");
 		}
