@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: MagicShellElement.java,v 1.2 2003/12/24 02:00:54 vpapad Exp $
+  $Id: MagicShellElement.java,v 1.3 2004/02/10 00:59:20 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,7 +27,9 @@
 package niagara.magic;
 
 import org.w3c.dom.*;
+
 import niagara.utils.Tuple;
+import niagara.utils.PEException;
 
 /**
  * <code>MagicRoot</code> DOM element - but has a pointer to
@@ -296,4 +298,24 @@ public class MagicShellElement extends MagicBaseNode
 	}
     }
 
+    public TypeInfo getSchemaTypeInfo() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setIdAttribute(String name, boolean isId) throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setIdAttributeNode(Attr idAttr, boolean isId)
+        throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setIdAttributeNS(
+        String namespaceURI,
+        String localName,
+        boolean isId)
+        throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
 }

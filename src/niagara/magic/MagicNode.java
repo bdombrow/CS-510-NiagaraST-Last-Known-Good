@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: MagicNode.java,v 1.3 2003/12/24 02:00:54 vpapad Exp $
+  $Id: MagicNode.java,v 1.4 2004/02/10 00:59:20 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,6 +27,7 @@
 package niagara.magic;
 
 import niagara.utils.Tuple;
+import niagara.utils.PEException;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.CharacterData;
@@ -36,6 +37,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+import org.w3c.dom.TypeInfo;
 
 /**
  * <code>MagicNode</code> is an implementation of 
@@ -322,4 +324,42 @@ public class MagicNode extends MagicBaseNode
 	    return root.getCurrentTuple().getAttribute(attrIdx);
 	
 	    }*/
+    
+    public TypeInfo getSchemaTypeInfo() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setIdAttribute(String name, boolean isId) throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setIdAttributeNode(Attr idAttr, boolean isId)
+        throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setIdAttributeNS(
+        String namespaceURI,
+        String localName,
+        boolean isId)
+        throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public boolean isId() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String getWholeText() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public boolean isElementContentWhitespace() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public Text replaceWholeText(String content) throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
 }

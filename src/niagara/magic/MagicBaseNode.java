@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: MagicBaseNode.java,v 1.2 2003/12/24 02:00:54 vpapad Exp $
+  $Id: MagicBaseNode.java,v 1.3 2004/02/10 00:59:20 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,6 +27,7 @@
 package niagara.magic;
 
 import org.w3c.dom.*;
+
 import niagara.utils.Tuple;
 import niagara.utils.PEException;
 
@@ -145,4 +146,54 @@ public abstract class MagicBaseNode implements Node {
                                "Magic objects are read-only.");
     }
 
+    public short compareDocumentPosition(Node other) throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String getBaseURI() {
+        throw new PEException("Not implemented yet");
+    }
+
+    public Object getFeature(String feature, String version) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String getTextContent() throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public Object getUserData(String key) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public boolean isDefaultNamespace(String namespaceURI) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public boolean isEqualNode(Node arg) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public boolean isSameNode(Node other) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String lookupNamespaceURI(String prefix) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public String lookupPrefix(String namespaceURI) {
+        throw new PEException("Not implemented yet");
+    }
+
+    public void setTextContent(String textContent) throws DOMException {
+        throw new PEException("Not implemented yet");
+    }
+
+    public Object setUserData(
+        String key,
+        Object data,
+        UserDataHandler handler) {
+        throw new PEException("Not implemented yet");
+    }
 }
