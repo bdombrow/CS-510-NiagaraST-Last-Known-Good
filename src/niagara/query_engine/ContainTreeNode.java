@@ -1,6 +1,7 @@
 
+
 /**********************************************************************
-  $Id: ContainTreeNode.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: ContainTreeNode.java,v 1.2 2000/06/01 06:10:32 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
