@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.27 2003/07/27 04:16:44 tufte Exp $
+  $Id: RequestHandler.java,v 1.28 2003/08/01 16:57:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,7 @@ import java.net.Socket;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.ArrayList;
 
 import niagara.data_manager.ConstantOpThread;
 import niagara.data_manager.StreamThread;
@@ -44,18 +45,16 @@ import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Op;
 import niagara.query_engine.PhysicalAccumulateOperator;
 import niagara.query_engine.QueryResult;
-import niagara.utils.CPUTimer;
-import niagara.utils.JProf;
-import niagara.utils.PEException;
-import niagara.utils.ShutdownException;
+import niagara.utils.*;
 
 /**There is one request handler per client and receives all the requests from that client
    Then that request is further dispatched to the appropriate module and results sent back
 */
+		
 public class RequestHandler {
 
     // Hashtable of queries
-    QueryList queryList;
+    private QueryList queryList;
 
     // The parser which listens to the stream coming from client
     RequestParser requestParser;
@@ -66,7 +65,7 @@ public class RequestHandler {
     NiagraServer server;
 
     // Every query is given a server query id. This is the counter for giving out that service id
-    int lastQueryId = 0;
+   	private int lastQueryId = 0;
 
     private boolean dtd_hack;
     // True if we want to add HTML entities to the result   
@@ -99,25 +98,6 @@ public class RequestHandler {
         this.requestParser.startParsing();
     }
 
-    public RequestHandler(InputStream is, OutputStream os, NiagraServer server)
-        throws IOException {
-        this.dtd_hack = false;
-        // A hashtable of queries with qid as key
-        System.out.println("inter-server request handler started...");
-        this.queryList = new QueryList();
-        this.outputWriter = new BufferedWriter(new OutputStreamWriter(os));
-        this.server = server;
-        sendBeginDocument();
-
-        this.requestParser = new RequestParser(is, this);
-        this.requestParser.startParsing();
-    }
-
-    public RequestHandler(Socket sock, NiagraServer server)
-        throws IOException {
-        this(sock, server, true);
-    }
-
     // Send the initial string to the client
     private void sendBeginDocument() throws IOException {
         String header = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n";
@@ -136,18 +116,17 @@ public class RequestHandler {
      */
     public void handleRequest(RequestMessage request)
         throws
-            InvalidQueryIDException,
             InvalidPlanException,
             QueryResult.AlreadyReturningPartialException,
             ShutdownException,
             IOException {
         Plan plan, optimizedPlan;
 
-	if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
-	    if(cpuTimer == null)
-		cpuTimer = new CPUTimer();
-	    cpuTimer.start();
-	}
+		if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+	    	if(cpuTimer == null)
+			cpuTimer = new CPUTimer();
+	    	cpuTimer.start();
+		}
 
         // Handle the request according to requestType
         switch (request.getIntRequestType()) {
@@ -162,7 +141,7 @@ public class RequestHandler {
                 } catch (Exception e) {
                     System.err.println(
                         "XXX vpapad: exception occured during optimization");
-		    e.printStackTrace();
+				    e.printStackTrace();
                     assert false;
                 }
                 xqpp.clear();
@@ -183,40 +162,24 @@ public class RequestHandler {
 
                 // now give the query to the query engine
                 QueryResult qr = server.qe.executeQuery(request.requestData);
-
                 request.serverID = qid;
 
                 // create and populate the query info
                 ServerQueryInfo queryInfo =
                     new ServerQueryInfo(qid, ServerQueryInfo.QueryEngine);
-                queryInfo.queryResult = qr;
+                queryInfo.setQueryResult(qr);
                 queryList.put(qid, queryInfo);
 
                 // start the transmitter thread for sending results back
-                queryInfo.transmitter =
-                    new ResultTransmitter(this, queryInfo, request);
+                queryInfo.setTransmitter(
+                    new ResultTransmitter(this, queryInfo, request));
 
                 //send the query ID out
                 sendQueryId(request);
                 break;
 
             case RequestMessage.EXECUTE_SE_QUERY :
-                // Get the next qid
-                qid = getNextConnServerQueryId();
-                request.serverID = qid;
-
-                // Create a query info object
-                queryInfo =
-                    new ServerQueryInfo(qid, ServerQueryInfo.SearchEngine);
-                queryInfo.searchEngineQuery = request.requestData;
-
-                // start the transmitter thread for sending results back
-                queryInfo.transmitter =
-                    new ResultTransmitter(this, queryInfo, request);
-
-                //send the query ID out
-                sendQueryId(request);
-                break;
+                throw new InvalidPlanException("SE queries no longer supported");
 
             case RequestMessage.GET_DTD :
                 // Get the next qid
@@ -225,35 +188,17 @@ public class RequestHandler {
 
                 queryInfo = new ServerQueryInfo(qid, ServerQueryInfo.GetDTD);
                 // start the transmitter thread for sending results back
-                queryInfo.transmitter =
-                    new ResultTransmitter(this, queryInfo, request);
+                queryInfo.setTransmitter(
+                    new ResultTransmitter(this, queryInfo, request));
                 break;
 
             case RequestMessage.SUSPEND_QUERY :
-                // get the queryInfo of this query
-                queryInfo = queryList.get(request.serverID);
-                // Respond to invalid queryID
-                if (queryInfo == null) {
-                    System.out.println("QID Recvd " + request.serverID);
-                    throw new InvalidQueryIDException();
-                }
-
-                if (queryInfo.transmitter != null)
-                    queryInfo.transmitter.suspend();
-                break;
+                throw new InvalidPlanException(
+					"Query suspension no longer allowed");
 
             case RequestMessage.RESUME_QUERY :
-                // get the queryInfo of this query
-                queryInfo = queryList.get(request.serverID);
-                // Respond to invalid queryID
-                if (queryInfo == null) {
-                    System.out.println("QID Recvd " + request.serverID);
-                    throw new InvalidQueryIDException();
-                }
-
-                if (queryInfo.transmitter != null)
-                    queryInfo.transmitter.resume();
-                break;
+                 throw new InvalidPlanException(
+					"Query suspension no longer allowed");
 
                 //-------------------------------------
                 //   KILL_QUERY request
@@ -275,11 +220,14 @@ public class RequestHandler {
 
                 // Respond to invalid queryID
                 if (queryInfo == null) {
-                    System.out.println("QID Recvd " + request.serverID);
-                    throw new InvalidQueryIDException();
+                    if(queryList.queryWasRun(request.serverID)) {
+                        break;
+                    } else {
+                        assert false : "Bad query id " + request.serverID;
+                    }
                 }
 
-                queryInfo.transmitter.handleRequest(request);
+                queryInfo.getTransmitter().handleRequest(request);
 
                 break;
 
@@ -292,10 +240,10 @@ public class RequestHandler {
 
                 // Respond to invalid queryID
                 if (queryInfo == null)
-                    throw new InvalidQueryIDException();
+                    assert false : "Bad query id " + request.serverID;
 
                 // Put a get partial message upstream
-                queryInfo.queryResult.requestPartialResult();
+                queryInfo.getQueryResult().requestPartialResult();
                 break;
 
             case RequestMessage.RUN_GC :
@@ -354,7 +302,7 @@ public class RequestHandler {
                 processQPQuery(optimizedPlan, request);
                 // get the queryInfo of this query
                 queryInfo = queryList.get(request.serverID);
-                queryInfo.transmitter.handleSynchronousRequest();
+                queryInfo.getTransmitter().handleSynchronousRequest();
                 break;
             case RequestMessage.EXPLAIN_QP_QUERY :
                 plan = xqpp.parse(request.requestData);
@@ -394,15 +342,15 @@ public class RequestHandler {
                         + request.getIntRequestType());
         }
 
-	if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
-	    cpuTimer.stop();
-	    cpuTimer.print("HandleRequest (" + request.requestType +")");
-	}
+		if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+	    	cpuTimer.stop();
+	    	cpuTimer.print("HandleRequest (" + request.requestType +")");
+		}
 
     }
 
     private void processQPQuery(Plan plan, RequestMessage request)
-        throws InvalidPlanException, ShutdownException {
+        throws InvalidPlanException, ShutdownException, IOException {
         // XXX vpapad: commenting out code is a horrible sin
         //            if (type.equals("submit_subplan")) {
         //                //                // The top operator better be a send...
@@ -426,22 +374,12 @@ public class RequestHandler {
         // assign a new query id to this request
         int qid = getNextConnServerQueryId();
 
-
-
         request.serverID = qid;
-
-        boolean isSynchronous =
+	
+	boolean isSynchronous =
             (request.getIntRequestType() == RequestMessage.SYNCHRONOUS_QP_QUERY);
 
         /* create and populate the query info
-         * We assume that if the top node is Accumulate
-         * operator, then we should run Accumulate file
-         * query
-         * Oh boy, this is ugly - I use the fact that the
-         * query has already been parsed to help set up
-         * the query info. What will I do when I have to
-         * deal with a real query?? Modify queryInfo after
-         * the fact?? Ugly!!!
          */
         ServerQueryInfo serverQueryInfo;
         Op top = plan.getOperator();
@@ -453,7 +391,7 @@ public class RequestHandler {
                     qid,
                     ServerQueryInfo.AccumFile,
                     isSynchronous);
-            serverQueryInfo.accumFileName = pao.getAccumFileName();
+            serverQueryInfo.setAccumFileName(pao.getAccumFileName());
         } else {
             serverQueryInfo =
                 new ServerQueryInfo(
@@ -461,22 +399,27 @@ public class RequestHandler {
                     ServerQueryInfo.QueryEngine,
                     isSynchronous);
         }
-	boolean stpp = true;
+		boolean stpp = true;
 
-	if (top instanceof StreamThread) {
-	    stpp = ((StreamThread)top).prettyprint();
+		if (top instanceof StreamThread) {
+	    	stpp = ((StreamThread)top).prettyprint();
         }
 
-        QueryResult qr = server.qe.executeOptimizedQuery(plan);
-        serverQueryInfo.queryResult = qr;
+        QueryResult qr = server.qe.getNewQueryResult();
+        serverQueryInfo.setQueryResult(qr);
         queryList.put(qid, serverQueryInfo);
 
         // start the transmitter thread for sending results back
-        serverQueryInfo.transmitter =
-            new ResultTransmitter(this, serverQueryInfo, request);
-	if (top instanceof StreamThread && stpp) {
-	    serverQueryInfo.transmitter.setPrettyprint(false);
+        serverQueryInfo.setTransmitter(
+            new ResultTransmitter(this, serverQueryInfo, request));
+		if (top instanceof StreamThread && stpp) {
+	    	serverQueryInfo.getTransmitter().setPrettyprint(false);	
         }
+       
+
+        // KT - DO THIS LAST - otherwise we get unexpectedly null
+        // transmitter!!!
+        server.qe.execOptimizedQuery(plan, qr);
     }
 
     /**Method used by everyone to send responses to the client
@@ -484,7 +427,7 @@ public class RequestHandler {
     */
     public synchronized void sendResponse(ResponseMessage mesg)
         throws IOException {
-        ServerQueryInfo sqi = queryList.get(mesg.serverID);
+        ServerQueryInfo sqi = queryList.get(mesg.getServerID());
         boolean padding = true; // is this the correct default?
         if (sqi != null) {
             padding = !sqi.isSynchronous();
@@ -499,13 +442,13 @@ public class RequestHandler {
      *
      *  @param queryID the id of the query to kill
      */
-    public void killQuery(int queryID) throws InvalidQueryIDException {
+    public void killQuery(int queryID) {
         // Get the queryInfo object for this request
         ServerQueryInfo queryInfo = queryList.get(queryID);
 
         // Respond to an invalid queryID
         if (queryInfo == null) {
-            throw new InvalidQueryIDException();
+	    assert false : "Bad query id " + queryID;
         }
 
         // Process Kill message
@@ -513,11 +456,12 @@ public class RequestHandler {
         queryList.remove(queryID);
 
         // destroy the transmitter thread
-        queryInfo.transmitter.destroy();
+	assert queryInfo.getTransmitter() != null :
+	   "KT way bad transmitter is null";
+        queryInfo.getTransmitter().destroy();
 
-        if (!queryInfo.isSEQuery())
-            // Put a KILL control message down stream
-            queryInfo.queryResult.kill();
+        // Put a KILL control message down stream
+        queryInfo.getQueryResult().kill();
 
         if (queryInfo.isSynchronous()) {
             try {
@@ -545,14 +489,8 @@ public class RequestHandler {
         // first of all,kill all the queries
         Enumeration e = queryList.elements();
         while (e.hasMoreElements()) {
-            try {
-                ServerQueryInfo info = (ServerQueryInfo) e.nextElement();
-                killQuery(info.getQueryId());
-            } catch (InvalidQueryIDException iqe) {
-                System.err.println(
-                    "RequestHandler - invalid query id during closeConnection "
-                        + iqe.getMessage());
-            }
+            ServerQueryInfo info = (ServerQueryInfo) e.nextElement();
+            killQuery(info.getQueryId());
         }
         // and we are done!
     }
@@ -590,17 +528,16 @@ public class RequestHandler {
         return (lastQueryId++);
     }
 
-    class InvalidQueryIDException extends Exception {
-    }
-
     /**Class for storing the ServerQueryInfo objects into a hashtable and accessing it
        Essentially a wrapper around Hashtable class with similar functionality
     */
     class QueryList {
         Hashtable queryList;
+        ArrayList removedQueryList;
 
         public QueryList() {
             queryList = new Hashtable();
+            removedQueryList = new ArrayList();
         }
 
         public ServerQueryInfo get(int qid) {
@@ -612,11 +549,20 @@ public class RequestHandler {
         }
 
         public ServerQueryInfo remove(int qid) {
-            System.out.println(
-			       "KT: Query with ServerQueryId "
-			       + qid
-			       + " removed from RequestHandler.QueryList ");
-            return (ServerQueryInfo) queryList.remove(new Integer(qid));
+           // System.out.println(
+           // 	       "KT: Query with ServerQueryId "
+           //	       + qid
+           //       + " removed from RequestHandler.QueryList "); 
+            //return (ServerQueryInfo) queryList.remove(new Integer(qid));
+            Integer temp = new Integer(qid);
+            ServerQueryInfo removed = 
+                (ServerQueryInfo)queryList.remove(temp);
+            removedQueryList.add(temp);
+            return removed;
+        }
+
+        public boolean queryWasRun(int qid) {
+            return removedQueryList.contains(new Integer(qid));
         }
 
         public Enumeration elements() {
