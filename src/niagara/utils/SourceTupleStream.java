@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SourceTupleStream.java,v 1.4 2003/08/01 17:29:30 tufte Exp $
+  $Id: SourceTupleStream.java,v 1.5 2003/12/24 01:05:34 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -108,7 +108,7 @@ public final class SourceTupleStream {
      * @exception java.lang.InterruptedException The thread is interupped 
      *             in the middle of execution - KT what does this mean???
      */    
-    public StreamTupleElement getTuple(int timeout)  
+    public Tuple getTuple(int timeout)  
 	throws java.lang.InterruptedException, ShutdownException {
 	
 	ctrlFlag = CtrlFlags.NULLFLAG; // for safety
@@ -133,7 +133,7 @@ public final class SourceTupleStream {
 	}
 
 	if(!buffer.isEmpty()) {
-	    StreamTupleElement retTuple = buffer.get();
+	    Tuple retTuple = buffer.get();
 
 	    // never leave an empty buffer without a control flag around
 	    if(buffer.isEmpty() && buffer.getFlag() == CtrlFlags.NULLFLAG) {

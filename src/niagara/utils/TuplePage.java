@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TuplePage.java,v 1.6 2003/08/01 17:29:30 tufte Exp $
+  $Id: TuplePage.java,v 1.7 2003/12/24 01:05:35 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,7 +43,7 @@ package niagara.utils;
 
 public class TuplePage {
 
-    private StreamTupleElement tuples[];
+    private Tuple tuples[];
 
     // number of tuples in a page
     private final static int PAGE_SIZE = 30;
@@ -80,7 +80,7 @@ public class TuplePage {
 	if(empty)
 	    tuples = null;
 	else {
-	    tuples = new StreamTupleElement[PAGE_SIZE];
+	    tuples = new Tuple[PAGE_SIZE];
 	}
 	currentPos = 0;
 	bufSize = 0;
@@ -130,7 +130,7 @@ public class TuplePage {
      * to read from the page.
      *
      */
-    public void put(StreamTupleElement tuple) {
+    public void put(Tuple tuple) {
 	assert !getMode : "KT Can't put tuples in getMode";
 	assert currentPos < PAGE_SIZE : "KT Reading tuples into a full page";
 
@@ -158,11 +158,11 @@ public class TuplePage {
      * to read from the page.
      *
      */
-    public StreamTupleElement get() {
+    public Tuple get() {
 	assert getMode : "KT Can't get tuples in putMode";
 	assert currentPos < bufSize : "KT Reading tuple from empty page";
 	
-	StreamTupleElement ret = tuples[currentPos];
+	Tuple ret = tuples[currentPos];
 	tuples[currentPos] = null;
 	currentPos++;
 	return ret;

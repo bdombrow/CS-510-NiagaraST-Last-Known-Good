@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamPunctuationElement.java,v 1.5 2003/09/26 18:12:38 vpapad Exp $
+  $Id: Punctuation.java,v 1.1 2003/12/24 01:05:34 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,18 +41,18 @@ package niagara.utils;
 import org.w3c.dom.*;
 import java.util.StringTokenizer;
 
-public final class StreamPunctuationElement extends StreamTupleElement {
+public final class Punctuation extends Tuple {
     public static final String STPUNCTNS = "PUNCT";
 
-    public StreamPunctuationElement (boolean partial) {
+    public Punctuation (boolean partial) {
 		super(partial);
     }
 
-    public StreamPunctuationElement (boolean partial, int capacity) {
+    public Punctuation (boolean partial, int capacity) {
 		super(partial, capacity);
     }
 
-    public StreamPunctuationElement(Element ele) {
+    public Punctuation(Element ele) {
 		super(ele);
     }
 
@@ -67,7 +67,7 @@ public final class StreamPunctuationElement extends StreamTupleElement {
      * @return true if the two punctuations are equal
      */
 
-    public boolean equals(StreamPunctuationElement punct) {
+    public boolean equals(Punctuation punct) {
 	//Only compare the 'document' nodes
 
 	return nodeEquals(this.getAttribute(0), punct.getAttribute(0));
@@ -112,8 +112,8 @@ public final class StreamPunctuationElement extends StreamTupleElement {
 
 	// Create a new stream punctuation element with the same partial
 	// semantics
-	StreamPunctuationElement returnElement = 
-	    new StreamPunctuationElement(this.partial, tupleSize);
+	Punctuation returnElement = 
+	    new Punctuation(this.partial, tupleSize);
 
 	// Add all the attributes of the current tuple to the clone
 	returnElement.appendTuple(this);
@@ -123,7 +123,7 @@ public final class StreamPunctuationElement extends StreamTupleElement {
 	return returnElement;
     }
 
-    public boolean match(StreamTupleElement ste) {
+    public boolean match(Tuple ste) {
 	//Punctuations do not match each other
 	if (ste.isPunctuation())
 	    return false;

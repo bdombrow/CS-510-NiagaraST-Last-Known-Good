@@ -1,4 +1,4 @@
-/* $Id: NodeVector.java,v 1.4 2003/09/26 18:12:38 vpapad Exp $ */
+/* $Id: NodeVector.java,v 1.5 2003/12/24 01:05:35 vpapad Exp $ */
 package niagara.utils;
 
 /**
@@ -9,16 +9,18 @@ package niagara.utils;
  * @author Kristin Tufte
  */
 
-import niagara.query_engine.NodeConsumer;
+import niagara.physical.NodeConsumer;
 
 import org.w3c.dom.Node;
 
 public class NodeVector implements NodeConsumer {
 
-    /* Contains a list of the key value lists */
+    /** Contains a list of the key value lists */
     Node[] list;
-    int allocSize; /* number of spots alloced in list */
-    int listSize; /* number of elts in list */
+    /** number of spots alloced in list */    
+    int allocSize;
+    /** number of elts in list */    
+    int listSize; 
     public static int count = 0;
     static private int DEFAULT_SIZE = 10;
 
@@ -84,6 +86,15 @@ public class NodeVector implements NodeConsumer {
 	listSize++;
     }
 
+    public Node pop() {
+        assert listSize > 0;
+        int newSize = listSize - 1;
+        Node n = list[newSize];
+        list[newSize] = null;
+        listSize = newSize;
+        return n;
+    }
+    
     public void consume(Node n) {
         add(n);
     }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.9 2003/10/23 18:14:45 tufte Exp $
+  $Id: SinkTupleStream.java,v 1.10 2003/12/24 01:05:34 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -145,7 +145,7 @@ public final class SinkTupleStream {
      *                                           the middle of execution.
      */
 
-    public int putTuple(StreamTupleElement tuple)
+    public int putTuple(Tuple tuple)
 	throws java.lang.InterruptedException, ShutdownException {
 	// try to put the tuple in the buffer, if the buffer is full
 	// flush it - leave an empty buffer for next call
@@ -164,7 +164,7 @@ public final class SinkTupleStream {
 	}
     }	
 
-    public void putTupleNoCtrlMsg(StreamTupleElement tuple)
+    public void putTupleNoCtrlMsg(Tuple tuple)
 	throws java.lang.InterruptedException, ShutdownException {
 	// try to put the tuple in the buffer, if the buffer is full
 	// flush it - leave an empty buffer for next call
@@ -183,7 +183,7 @@ public final class SinkTupleStream {
     public void put(Node node) 
         throws java.lang.InterruptedException, ShutdownException {
 
-	StreamTupleElement tuple = null;
+	Tuple tuple = null;
 
 	//Let's see if this is a punctuation or not
 	Node child = node.getFirstChild();
@@ -191,13 +191,13 @@ public final class SinkTupleStream {
 	    //It will be a punctuation if it prefixed with "PUNCT"
 	    String name = child.getNodeName();
 	    if (name != null &&
-		name.startsWith(StreamPunctuationElement.STPUNCTNS))
-		tuple = new StreamPunctuationElement(false, 1);
+		name.startsWith(Punctuation.STPUNCTNS))
+		tuple = new Punctuation(false, 1);
 	}
 
 	if (tuple == null)
 	    // create a tuple that is not a partial result
-	    tuple = new StreamTupleElement(false, 1);
+	    tuple = new Tuple(false, 1);
 
         // Add the object as an attribute of the tuple
         tuple.appendAttribute(node);

@@ -17,7 +17,7 @@ package niagara.utils.type_system;
  */
 
 /* uugh, very bad hack */
-import niagara.query_engine.MTException;
+import niagara.physical.MTException;
 
 public class NodeHelpers {
     public static final DoubleNodeHelper DOUBLEHELPER

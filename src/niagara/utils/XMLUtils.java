@@ -28,7 +28,7 @@ public class XMLUtils {
 
     public static int numCalls=0;
 
-    public static int getInt(StreamTupleElement ste, int attrpos) {
+    public static int getInt(Tuple ste, int attrpos) {
         String sval =
             ((Node) ste.getAttribute(attrpos))
                 .getChildNodes()
@@ -142,7 +142,7 @@ public class XMLUtils {
         	if(!isWhite(nodeVal)) {
                 if (prettyprint && !firstchild)
                     sb.append(indent[level]);
-                sb.append(n.getNodeValue());
+                sb.append(nodeVal);
 				if (prettyprint && !onlychild)
 					sb.append("\n");
         	} else {

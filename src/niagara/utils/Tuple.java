@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.13 2003/09/26 18:12:38 vpapad Exp $
+  $Id: Tuple.java,v 1.1 2003/12/24 01:05:34 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,7 +27,7 @@
 package niagara.utils;
 
 /**
- * This is the <code>StreamTupleElement</code> class that is the unit
+ * This is the <code>Tuple</code> class that is the unit
  * of transfer of tuples across a stream. Tuples are arrays of Nodes.
  *
  * @see Stream
@@ -39,7 +39,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
-public class StreamTupleElement {
+public class Tuple {
     // Members to create an expandable array of nodes
     protected Node tuple[];
     protected int allocSize;
@@ -54,7 +54,7 @@ public class StreamTupleElement {
      * @param partial If this is true, the tuple represents a partial result;
      *                else it represents a final result
      */
-    public StreamTupleElement(boolean partial) {
+    public Tuple(boolean partial) {
         // Initialize the tuple vector with the capacity
         createTuple(8);
         this.partial = partial;
@@ -67,7 +67,7 @@ public class StreamTupleElement {
      *                else it represents a final result
      * @param capacity The initial capacity of the tuple
      */
-    public StreamTupleElement(boolean partial, int capacity) {
+    public Tuple(boolean partial, int capacity) {
         // Initialize the tuple vector with the capacity
         if (capacity <= 0) {
             createTuple(8);
@@ -124,7 +124,7 @@ public class StreamTupleElement {
      * @param tupleElement The tuple whose attributes are to be appended to
      *                     the current tuple
      */
-    public void appendTuple(StreamTupleElement otherTuple) {
+    public void appendTuple(Tuple otherTuple) {
         // Loop over all the attributes of the other tuple and append them
         if (tupleSize + otherTuple.tupleSize > allocSize)
             expandTuple(tupleSize + otherTuple.tupleSize);
@@ -170,13 +170,13 @@ public class StreamTupleElement {
     }
 
     /** Copy of this tuple, with space reserved for up to `size` attributes */
-    public StreamTupleElement copy(int size) {
+    public Tuple copy(int size) {
         // XML-QL query plans will come in with size = 0
         if (tupleSize > size)
             size = tupleSize;
         // Create a new stream tuple element with the same partial semantics
-        StreamTupleElement returnElement =
-            new StreamTupleElement(partial, size);
+        Tuple returnElement =
+            new Tuple(partial, size);
 
         // Add all the attributes of the current tuple to the clone
         System.arraycopy(tuple, 0, returnElement.tuple, 0, tupleSize);
@@ -188,11 +188,11 @@ public class StreamTupleElement {
 
     /** Copy parts of this tuple to a new tuple, with space reserved for up to
      * <code>size</code> attributes */
-    public StreamTupleElement copy(int size, int attributeMap[]) {
+    public Tuple copy(int size, int attributeMap[]) {
         assert size >= attributeMap.length : "Insufficient tuple capacity";
         // Create a new stream tuple element with the same partial semantics
-        StreamTupleElement returnElement =
-            new StreamTupleElement(partial, size);
+        Tuple returnElement =
+            new Tuple(partial, size);
 
         Node[] newTuple = returnElement.tuple;
         for (int to = 0; to < attributeMap.length; to++) {
@@ -207,7 +207,7 @@ public class StreamTupleElement {
 
     /** Copy parts of this tuple into another tuple, starting at offset */
     public void copyInto(
-        StreamTupleElement ste,
+        Tuple ste,
         int offset,
         int attributeMap[]) {
         // If this tuple is partial, the result should be partial        
@@ -253,7 +253,7 @@ public class StreamTupleElement {
         return ret;
     }
 
-    public StreamTupleElement(Element ele) {
+    public Tuple(Element ele) {
         if (ele.getAttribute("PARTIAL").equals("TRUE"))
             partial = true;
         else
