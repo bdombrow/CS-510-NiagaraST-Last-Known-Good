@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DTDDirEntry.java,v 1.3 2001/08/08 21:25:48 tufte Exp $
+  $Id: DTDDirEntry.java,v 1.4 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,12 +32,7 @@ import org.w3c.dom.*;
 import java.io.*;
 import java.net.URL;
 import java.util.Vector;
-import java.util.Hashtable;
-
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
 import niagara.utils.*;
-import niagara.data_manager.XMLDiff.*;
 /**
  *  The DTDEntry class implements an entry to store information about a DTD
  *  in the DTDDirectory.  Information stored includes the DTD name, the DTD Id

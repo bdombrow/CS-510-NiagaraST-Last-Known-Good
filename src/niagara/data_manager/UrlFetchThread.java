@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: UrlFetchThread.java,v 1.6 2002/10/31 03:26:48 vpapad Exp $
+  $Id: UrlFetchThread.java,v 1.7 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,17 +27,10 @@
 
 package niagara.data_manager;
 
-import java.io.*;
-import java.net.*;
-
-import java.util.Vector;
 import org.w3c.dom.*;
 
 import niagara.ndom.*;
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
 import niagara.utils.*;
-import niagara.data_manager.XMLDiff.*;
 
 
 /**

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UrlQueue.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
+  $Id: UrlQueue.java,v 1.3 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,16 +28,7 @@
 
 package niagara.data_manager;
 
-import java.io.*;
-import java.net.*;
-
-import java.util.Vector;
-import org.w3c.dom.*;
-
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
 import niagara.utils.*;
-import niagara.data_manager.XMLDiff.*;
 
 class UrlQueue {
     private SynchronizedQueue urlq;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCacheEntry.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
+  $Id: MemCacheEntry.java,v 1.3 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,10 +32,6 @@ package niagara.data_manager;
   */
 import java.util.*;
 import org.w3c.dom.*;
-
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
-import niagara.data_manager.XMLDiff.*;
 
 class MemCacheEntry {
     Object key; // usually should be a string

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: FetchThread.java,v 1.8 2003/02/26 06:34:51 tufte Exp $
+  $Id: FetchThread.java,v 1.9 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,10 +35,7 @@ package niagara.data_manager;
 import java.util.*;
 import org.w3c.dom.*;
 
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
 import niagara.utils.*;
-import niagara.data_manager.XMLDiff.*;
 
 
 class FetchThread implements Runnable {

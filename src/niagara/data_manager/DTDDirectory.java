@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DTDDirectory.java,v 1.3 2001/08/08 21:25:48 tufte Exp $
+  $Id: DTDDirectory.java,v 1.4 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,12 +39,6 @@ import org.w3c.dom.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.lang.reflect.*;
-
-
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
-import niagara.data_manager.XMLDiff.*;
 
 
 /**

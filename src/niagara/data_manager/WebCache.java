@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: WebCache.java,v 1.2 2002/05/07 03:10:49 tufte Exp $
+  $Id: WebCache.java,v 1.3 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,13 +34,6 @@ package niagara.data_manager;
 /* WebCache is not cache at all.  Its only functionality
  * is going out to web and fetch back a Url
  */
-
-import java.io.*;
-import java.net.*;
-
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
-import niagara.data_manager.XMLDiff.*;
 
 class WebCache implements DMCache {
 

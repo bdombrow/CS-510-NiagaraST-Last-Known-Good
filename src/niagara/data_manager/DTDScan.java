@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DTDScan.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: DTDScan.java,v 1.2 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,10 +44,6 @@ import java.util.Vector;
 import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.Enumeration;
-
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
-import niagara.data_manager.XMLDiff.*;
 
 /**
  * the purpose of this class to to get the root element of an DTD

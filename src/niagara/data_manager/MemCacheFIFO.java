@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCacheFIFO.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: MemCacheFIFO.java,v 1.2 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,10 +29,6 @@
 package niagara.data_manager;
 
 import java.util.*;
-
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
-import niagara.data_manager.XMLDiff.*;
 
 class MemCacheFIFO extends MemCache {
     private Vector entryList;

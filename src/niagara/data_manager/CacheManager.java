@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheManager.java,v 1.6 2002/05/07 03:10:49 tufte Exp $
+  $Id: CacheManager.java,v 1.7 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,15 +31,8 @@ import org.w3c.dom.*;
 import com.ibm.xml.parser.*;
 import java.util.*;
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.net.MalformedURLException;
 import niagara.ndom.*;
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
 import niagara.utils.*;
 import niagara.data_manager.XMLDiff.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -54,7 +47,6 @@ public class CacheManager {
     private DiskCache diskCache;
     private MemCache  memCache;
     private Vector otherCacheVec;
-    private EventDetector eventDetector;
 
     private long vClock;
     // vClock(virtual Clock)  is used to syncronize with EventDector.  
@@ -71,10 +63,6 @@ public class CacheManager {
         memCache.setLowerCache(diskCache);
         otherCacheVec = new Vector();
         vClock = 0;
-    }
-
-    public void setEventDetector(EventDetector ed) {
-        eventDetector = ed;
     }
 
     public MemCache createCache(int rep, int totalS, int lw, int hw) {
@@ -115,51 +103,6 @@ public class CacheManager {
         else return false;
     }
     
-    /** Monitor a trigger file.  2 file are created, one to
-      * save the original file, one to record diff. 
-      */
-    public boolean Monitor(String s, boolean isTrigTmp) throws IOException {
-        String tmp = null;
-        File tmpF = null;
-        // System.err.println(" ++++++++ Monitor " + s );
-        if(!isTrigTmp) {
-            /* save a copy of the file in local directory */
-            // System.err.println("Monitoring usurall file " + s);
-            if(CacheUtil.isUrl(s)) {
-                tmp = diskCache.urlToFile(s);
-                tmpF = new File(tmp);
-                if(tmpF.exists()) return CacheUtil.isPush(tmp);
-                System.out.println("Fetching " + s + " to " + tmp);
-                CacheUtil.fetchUrl(s, tmp);
-            } 
-            else {
-                tmp = diskCache.pathToFile(s);
-                tmpF = new File(tmp);
-                if(tmpF.exists()) return CacheUtil.isPush(tmp);
-                // System.err.println("Fetching " + s + " to " + tmp);
-                CacheUtil.fetchLocal(s, tmp);
-            } 
-        }
-        else return true;
-        return CacheUtil.isPush(tmp);
-    }
-
-    /** UnMonitor a file.  The original and diff file are deleted. */
-    public void unMonitor(String s, boolean isTrigTmp) {
-        String tmp = null;
-        if(!isTrigTmp) {
-            if(CacheUtil.isUrl(s)) tmp = diskCache.urlToFile(s);
-            else tmp = diskCache.pathToFile(s);
-
-            // System.err.println("Deleting monitored file " + tmp);
-            memCache.deleteDoc(tmp);
-            memCache.deleteDoc(tmp+"_DIFF_.xml");
-        } 
-        else {
-            // System.err.println("Deleting monitored trigger tmp " + tmp);
-            memCache.deleteDoc(tmp);
-        }
-    }
 
     public void setFileSpan(String s, long span, boolean isTrigTmp) {
         String tmp = null;
@@ -208,8 +151,12 @@ public class CacheManager {
         if(v2==null) {
             System.out.println("StoreTuple: Got null from scanTuple");
             v2 = v;
-            int onceCount = eventDetector.getTriggerCount(file);
-            memCache.setOnceCount(file, onceCount);
+            // XXX vpapad TODO: this code has to be cleaned
+            // commenting out and asserting out for now
+            assert false;
+            
+//            int onceCount = eventDetector.getTriggerCount(file);
+//            memCache.setOnceCount(file, onceCount);
         }
         else {
             System.out.println("CM.storeTuple: Scanned v2 size " + v2.size());
@@ -225,8 +172,11 @@ public class CacheManager {
         memCache.remap(file, v2, vc);
         // System.out.println("@@@@@ After store remap, size " + v2.size());
         // System.out.println("@@@@@ I am pressing ED Button on " + file);
-        eventDetector.setFileLastModified(file,
-                new Date(vc));
+        // XXX vpapad TODO: this code has to be cleaned
+        // commenting out and asserting off now
+        assert false;
+//        eventDetector.setFileLastModified(file,
+//                new Date(vc));
         // System.err.println("Return from storeTuple " + file);
     }
     
@@ -266,126 +216,6 @@ public class CacheManager {
         }
     }
             
-    /** scan part of file inside an interval */
-    public Document getDiff(String file, long since, long to) 
-	throws InvalidDOMRepException {
-
-        Document resDoc = getDiff(file, to);
-        Document ddoc = CacheUtil.getQEDiffDoc(resDoc, since, to);
-
-        return ddoc;
-    }
-
-    /** Generate new Diffs */
-    private Document getDiff(String s, long tsp) 
-	throws InvalidDOMRepException {
-
-        String tmp = null;
-        if(CacheUtil.isUrl(s)) tmp = diskCache.urlToFile(s);
-        else tmp = diskCache.pathToFile(s);
-        Document resDoc = null;
-
-        try {
-            resDoc = (Document)(memCache.fetch(tmp+"_DIFF_.xml", null));
-	} catch (CacheFetchException fe) {
-            System.err.println("Fetch Error, in GetDiff resDoc");
-	}
-        if(resDoc.getDocumentElement()==null) {
-            // System.err.println("====== %%%%%% Dummy resDoc");
-            Element tmpEle = resDoc.createElement("ROOT"); 
-            tmpEle.setAttribute("TIMESPAN", "0");
-            tmpEle.setAttribute("LASTSTAMP", "0");
-            tmpEle.setAttribute("DIRTY", "FALSE");
-            resDoc.appendChild(tmpEle);
-        }
-
-        Diff(tmp, s, resDoc, tsp);
-
-        return resDoc;
-    }
-
-    private synchronized void Diff(String s1, String s2, Document resDoc, 
-				   long tsp) 
-	throws InvalidDOMRepException {
-	
-        long ts1 = CacheUtil.getTimeStamp(s1);
-        long ts2 = CacheUtil.getTimeStamp(s2);
-        if(ts2==0) ts2 = getVClock();
-        System.out.println("Diffing " + s1 + " $$$ " + s2);
-        System.out.println("Diffing Time stamp " + ts1 + " $$$ " + ts2);
-        if(ts1<ts2) {
-	     System.err.println("%%% Checking time stamp ...  needs diff");
-	    // System.err.println("%%% This should only appear once!");
-	    File tmpF = new File(s1);
-	    if(!tmpF.exists()) {
-		try {
-                    Document tmpDoc = (Document) CUtil.parseXML(s2); // XXX
-		    Element resRoot = resDoc.getDocumentElement();
-		    Element tmpRoot = tmpDoc.getDocumentElement();
-		    NodeList nl = tmpRoot.getChildNodes();
-		    for(int i=0; i<nl.getLength(); i++) {
-			Node n = nl.item(i);
-			if(n instanceof Element) {
-			Element eleins = resDoc.createElement("Insert");
-			eleins.setAttribute("TIMESTAMP", ""+getVClock());
-			// Xpointer = eleins.makeXPointer();
-			// eleins.setAttribute("POSITION", p.toString());
-			Node nchild = n.cloneNode(true);
-			eleins.appendChild(nchild);
-			resRoot.appendChild(eleins);
-		    }
-		}
-		resRoot.setAttribute("DIRTY", "TRUE");
-		if(CacheUtil.isUrl(s2))
-		    CacheUtil.fetchUrl(s2, s1);
-		else
-		    CacheUtil.fetchLocal(s2,s1);
-		} catch (ParseException e) {
-		    System.err.print("Illegal XML DOC! " + e.getMessage());
-		    e.printStackTrace();
-		} catch (IOException ioe) {
-		    System.err.println("IOException " + ioe.getMessage());
-		    ioe.printStackTrace();
-		}
-	    }
-            Document doc1 = null;
-            Document doc2 = null;
-            try {
-                doc1 = (Document)memCache.fetch_reload(s1, null);
-                doc2 = (Document) CUtil.parseXML(s2); // XXX
-            } catch (Exception cfe) {
-		System.err.println("DIFF FAILED - should be an exception thrown here, but I don't have time to fix all this stuff!!!@!!");
-                return;
-            }
-
-	    if(doc1 instanceof TXDocument) {
-		/*	
-		 * This code requires TXDocument and an old version
-		 * of ibm's xml4j parser
-		 */
-		//try { 
-		    XMLDiff.getDiffDoc((TXDocument)doc1.cloneNode(true), 
-				       (TXDocument)doc2.cloneNode(true), 
-				       (TXDocument)resDoc,
-				       tsp);
-		    //} catch (Exception e) {
-		    //e.printStackTrace();
-		    //System.err.println("Diffing get exception: ");
-		    //}	     
-	    } else {
-		throw new InvalidDOMRepException("XMLDiff doesn't work unless you use old version of XML4J");
-	    }
-                
-	    try { 
-		Monitor(s2, false); // fetch new copy.
-	    } catch (IOException ioe) {
-		ioe.printStackTrace();
-	    }
-            memCache.remap(s1, doc2);
-            memCache.remap(s2, doc2);
-        } 
-    }
-
     public Document createDoc(String s) {
         return memCache.createDoc(s);
     }
@@ -439,54 +269,15 @@ public class CacheManager {
                     xmlURLList, dottedPaths);
             FetchThread fth = new FetchThread(newRequest, memCache);
 	} else {
+            // XXX vpapad: we should never get here
+            // what the !@#!@# does isOrdinary() do?
+            assert false;
             // System.err.println("CacheM. getDoc " + tmps);
-            getTrigDocument(tmps, pathExpr, stream);
+            // getTrigDocument(tmps, pathExpr, stream);
         }
         return true;
     }
 
-    private void getTrigDocument(String tmps, 
-				 regExp pathExpr, SinkTupleStream sinkStream) 
-	throws ShutdownException {
-        int id = CacheUtil.tupleGetTrigId(tmps);
-        String fn = CacheUtil.tupleGetTrigFile(tmps);
-
-        Vector vf =  eventDetector.getLastFireTime(fn, id);
-        
-        long from = ((Long)vf.elementAt(0)).longValue();
-        long to = ((Long)vf.elementAt(1)).longValue();
-
-	System.out.println("CM::getTrigDoc: from " + from + " to " + to);
-
-	/* EXTREME HACK!!! EXTREME UGLY HACK !!! */
-	if(from==to) from--;
-	/* This is the ED problem.  ED somehow pass from==to sometime
-	   thus lost result to upper layer trigger.  This solves it,
-	   but it _REALLY_ should be ED do some bug fix.  Will harass Yuan
-	   about this.
-	   */
-        setVClock(to);
-        boolean isVec = CacheUtil.isTrigTmp(fn);
-        try {
-            if(isVec) {
-                Vector vec = scanTuples(fn, from, to);
-		System.out.println("::::: CM:: Pushing up " + vec.size() + " "+sinkStream);
-                for(int i=0; i<vec.size(); i++) {
-		    sinkStream.putTupleNoCtrlMsg((StreamTupleElement)vec.elementAt(i));
-                }
-            }
-            else {
-                Document doc = getDiff(fn, from, to);
-                sinkStream.put(doc);
-            }
-            sinkStream.endOfStream();
-	} catch (InterruptedException e) {
-	    System.err.println("InterruptedException in CacheManager.getTrigDoc");
-            e.printStackTrace();
-	} catch (InvalidDOMRepException idre) {
-	    throw new PEException("Invalid DOM Representation");
-	}
-    }
 
     /** Function to retrieve the most current document associated
      * with an Accumulate File. Finds the document using the global

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCache.java,v 1.4 2002/05/07 03:10:49 tufte Exp $
+  $Id: MemCache.java,v 1.5 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,9 +39,6 @@ import java.io.*;
 import org.w3c.dom.*;
 
 import niagara.ndom.*;
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
-import niagara.data_manager.XMLDiff.*;
 import niagara.utils.*;
 
 abstract class MemCache implements DMCache {

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DataManager.java,v 1.7 2002/05/07 03:10:49 tufte Exp $
+  $Id: DataManager.java,v 1.8 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,11 +36,7 @@ import java.net.*;
 
 import niagara.search_engine.server.*;
 
-import niagara.trigger_engine.*;
 import niagara.utils.*;
-import niagara.query_engine.*;
-import niagara.data_manager.XMLDiff.*;
-import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 /**
@@ -276,30 +272,6 @@ public class DataManager {
         // System.err.println("StoreT. return");
     }
     
-    /////////////  Interface for Yuan /////////////////////////
-    
-    public void setEventDetector(EventDetector ed) {
-        cacheM.setEventDetector(ed);
-    }
-    public boolean monitorTriggerFile(String file, long time, Date d) {
-        boolean isTrigTmp = CacheUtil.isTrigTmp(file);
-        // if(isTrigTmp) System.err.println("A Trigger TMP Monitored.");
-        boolean ret = false;
-        try {
-            ret = cacheM.Monitor(file, isTrigTmp);
-        } catch (IOException ioe) {
-            System.err.println("DataM.monitor/CacheM.monitor FileIO error");
-        }
-        // System.err.println("Setting " + file + " span " + time);
-        cacheM.setFileSpan(file, time, isTrigTmp);
-        return ret;
-    }
-    public void unMonitorTriggerFile(String file) {
-        cacheM.unMonitor(file, CacheUtil.isTrigTmp(file));
-    }
-    public void setTriggerFileSpan(String file, long span) {
-        cacheM.setFileSpan(file, span, CacheUtil.isTrigTmp(file));
-    }
     public boolean getLastModified(String file, Date from, Date to) {
 	boolean ret = cacheM.isModified(file, from.getTime(), to.getTime()); 
         return(ret);

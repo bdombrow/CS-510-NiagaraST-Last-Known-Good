@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheUtil.java,v 1.4 2002/05/07 03:10:49 tufte Exp $
+  $Id: CacheUtil.java,v 1.5 2003/03/08 01:01:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,10 +39,7 @@ import gnu.regexp.*;
 import org.w3c.dom.*;
 
 import niagara.ndom.*;
-import niagara.trigger_engine.*;
-import niagara.query_engine.*;
 import niagara.utils.*;
-import niagara.data_manager.XMLDiff.*;
 
 
 public class CacheUtil {
