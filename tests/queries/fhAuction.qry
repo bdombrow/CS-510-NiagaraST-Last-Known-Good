@@ -4,7 +4,7 @@
 
 <plan top="fh">
 
-<firehosescan id="fh" host="localhost" port="5000" rate="0" datatype="auction" num_gen_calls="3" streaming="yes" desc="" num_tl_elts="2" >
+<firehosescan id="fh" host="localhost" port="5000" rate="0" datatype="auction" num_gen_calls="3" streaming="yes" desc="" num_tl_elts="2" trace="no" >
 </firehosescan>
 
 </plan>
