@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: QueryQueue.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: QueryQueue.java,v 1.2 2003/09/22 00:15:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -45,16 +44,13 @@ import niagara.utils.*;
  *  @see Queue
  */
 public class QueryQueue {
-	
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //   Data members of the QueryQueue Class
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // A synchronized queue for storing the querys
-    //
     private SynchronizedQueue queryQueue;
 
-    
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //   Methods of the QueryQueue Class
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,10 +70,6 @@ public class QueryQueue {
 	// Create a synchronized queue to server as an query queue
 	//
 	queryQueue = new SynchronizedQueue (maxCapacity);
-
-	// End of function
-	//
-	return;
     }
 		     
 
@@ -89,9 +81,7 @@ public class QueryQueue {
     public void addQuery (QueryInfo query) 
     {
 	// Add the query to the end of the queue
-	//
 	queryQueue.put(query, true);
-	return;
     }
 
 
@@ -103,12 +93,7 @@ public class QueryQueue {
     public QueryInfo getQuery () 
     {
 	// Get the query from the queue
-	//
-	QueryInfo tempQuery = (QueryInfo) queryQueue.get();
-
-	// Return the query
-	//
-	return tempQuery;
+	return (QueryInfo) queryQueue.get();
     }
 
     public synchronized String toString()
@@ -116,11 +101,3 @@ public class QueryQueue {
 	return queryQueue.toString();
     }
 }
-
-
-
-
-
-
-
-

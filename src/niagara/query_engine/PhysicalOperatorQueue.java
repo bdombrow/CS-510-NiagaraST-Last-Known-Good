@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalOperatorQueue.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: PhysicalOperatorQueue.java,v 1.2 2003/09/22 00:15:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -58,40 +57,20 @@ package niagara.query_engine;
 import niagara.utils.*;
 
 public class PhysicalOperatorQueue {
-	
-    ///////////////////////////////////////////////////
-    //   Data members of the PhysicalOperatorQueue Class
-    ///////////////////////////////////////////////////
-
     // A synchronized queue for storing the operators
-    //
     private SynchronizedQueue opQueue;
-
     
-    ///////////////////////////////////////////////////
-    //   Methods of the PhysicalOperatorQueue Class
-    ///////////////////////////////////////////////////
-
     /**
      * This is the constructor for the PhysicalOperatorQueue class that initializes
      * it to an empty queue.
      *
      * @param maxCapacity The maximum capacity of the operator queue
      */
-     
-    public PhysicalOperatorQueue (int maxCapacity) {
-
-	// Call the constructor of the super class
-	//
+    public PhysicalOperatorQueue(int maxCapacity) {
 	super();
 
 	// Create a synchronized queue to server as an operator queue
-	//
-	opQueue = new SynchronizedQueue (maxCapacity);
-
-	// End of function
-	//
-	return;
+	opQueue = new SynchronizedQueue(maxCapacity);
     }
 		     
 
@@ -100,17 +79,10 @@ public class PhysicalOperatorQueue {
      *
      * @param operator The operator to be added to the queue
      */
-    public void putOperator (PhysicalOperator operator) {
-
+    public void putOperator(Schedulable operator) {
 	// Add the operator to the end of the queue
-	//
 	opQueue.put(operator, true);
-
-	// End of function
-	//
-	return;
     }
-
 
     /**
      * This function gets an operator from the operator queue
@@ -118,15 +90,9 @@ public class PhysicalOperatorQueue {
      * @return The operator at the head of the queu
      */
 
-    public PhysicalOperator getOperator () {
-
+    public Schedulable getOperator() {
 	// Get the operator from the queue
-	//
-	PhysicalOperator tempOp = (PhysicalOperator) opQueue.get();
-
-	// Return the operator
-	//
-	return tempOp;
+	return (Schedulable) opQueue.get();
     }
 
     public String toString()

@@ -1,4 +1,4 @@
-/* $Id: SchedulablePlan.java,v 1.3 2003/03/03 08:20:13 tufte Exp $ */
+/* $Id: SchedulablePlan.java,v 1.4 2003/09/22 00:15:42 vpapad Exp $ */
 package niagara.query_engine;
 
 import niagara.data_manager.DataManager;
@@ -22,7 +22,7 @@ public interface SchedulablePlan {
     boolean isSchedulable();
     
     boolean isSource();
-    void processSource(SinkTupleStream stream, DataManager dm)
+    void processSource(SinkTupleStream stream, DataManager dm, PhysicalOperatorQueue opQueue)
     throws ShutdownException;
     
     int getNumberOfOutputs();

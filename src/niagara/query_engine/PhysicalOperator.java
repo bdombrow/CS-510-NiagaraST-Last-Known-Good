@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.33 2003/09/16 05:02:42 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.34 2003/09/22 00:15:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,7 +46,7 @@ import niagara.utils.*;
 import org.w3c.dom.Document;
 
 public abstract class PhysicalOperator extends PhysicalOp 
-implements SchemaProducer, SerializableToXML, Initializable {
+implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 
 /*
   The lifecycle of a physical operator can be divided in three 
@@ -205,7 +205,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
      * control messages are handled here.
      *
      */
-    public final void execute () {
+    public final void run() {
 	if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
 	    cpuTimer = new CPUTimer();
 	    cpuTimer.start();

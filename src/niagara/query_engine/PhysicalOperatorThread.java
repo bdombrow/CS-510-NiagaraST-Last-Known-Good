@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperatorThread.java,v 1.7 2003/08/01 17:29:25 tufte Exp $
+  $Id: PhysicalOperatorThread.java,v 1.8 2003/09/22 00:15:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -58,20 +58,16 @@ package niagara.query_engine;
 import niagara.utils.JProf;
 
 public class PhysicalOperatorThread implements Runnable {
-	
     ///////////////////////////////////////////////////
     //   Data members of the PhysicalOperatorThread Class
     ///////////////////////////////////////////////////
 
     // The thread associated with the class
-    //
     private Thread thread;
 
     // The operator queue on which the OperatorThread is to wait
-    //
     private PhysicalOperatorQueue opQueue;
 
-    
     ///////////////////////////////////////////////////
     //   Methods of the Operator Class
     ///////////////////////////////////////////////////
@@ -86,41 +82,28 @@ public class PhysicalOperatorThread implements Runnable {
      */
      
     public PhysicalOperatorThread (PhysicalOperatorQueue opQueue) {
-
-	// Call the constructor of the super class
-	//
 	super();
 
 	// Initialize the Operator Queue
-	//
 	this.opQueue = opQueue;
 
 	// Create a new java thread for running an instance of this object
-	//
 	thread = new Thread (this,"OpThreadUnused");
 
 	thread.start();
-
-	// End of function
-	//
-	return;
     }
-		     
 
     /**
      * This is the run method invoked by the Java thread
      */
     public void run () {
-
 	// Keep waiting on the Operator Queue until there is a new operator to
 	// be scheduled. Then once an operator is obtained, run it to completion.
 	// Then repeat the process.
 	//
 	do {
-
 	    // Get an operator for running
-	    //
-	    PhysicalOperator op = opQueue.getOperator();
+	    Schedulable op = opQueue.getOperator();
 
 	    // Execute the operator
 	    assert op != null : "KT op is null";
@@ -128,10 +111,12 @@ public class PhysicalOperatorThread implements Runnable {
 		                op.getClass().getName();
 	    thread.setName(op.getName());
 	    // KAT check here
-	    if(niagara.connection_server.NiagraServer.RUNNING_NIPROF)
-	      JProf.registerThreadName(op.getName() + 
-	                               "(" + op.getId() +")");
-	    op.execute();
+	    if(niagara.connection_server.NiagraServer.RUNNING_NIPROF && op instanceof PhysicalOperator) {
+              PhysicalOperator physOp = (PhysicalOperator) op;
+	      JProf.registerThreadName(physOp.getName() + 
+	                               "(" + physOp.getId() +")");
+            }
+	    op.run();
 	    
 	    // Garbage collect the memory occupied by the operator
 	    // *now*, instead of waiting for the next time this thread

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.20 2003/03/03 08:20:13 tufte Exp $
+  $Id: ExecutionScheduler.java,v 1.21 2003/09/22 00:15:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -189,7 +189,7 @@ public class ExecutionScheduler {
 	    // streams must reflect GET_PARTIALS 
 	    SinkTupleStream sinkStream = 
 		new SinkTupleStream(outputStream, true);
-            node.processSource(sinkStream, dataManager);
+            node.processSource(sinkStream, dataManager, opQueue);
             // XXX vpapad: we no longer have an operator to put here
             nodesScheduled.put(node, null);
 	} else {
@@ -238,7 +238,6 @@ public class ExecutionScheduler {
     }
 
     private void setStreamFlags(SchedulablePlan node) {
-	
 	int numInputs = node.getArity();
 
 	// we want to do this processing bottom up, so

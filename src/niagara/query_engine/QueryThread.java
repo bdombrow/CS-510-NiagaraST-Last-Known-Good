@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryThread.java,v 1.9 2003/08/01 17:29:25 tufte Exp $
+  $Id: QueryThread.java,v 1.10 2003/09/22 00:15:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -119,8 +119,6 @@ public class QueryThread implements Runnable {
 
 		// Call the query thread run method
 		thread.start();	
-
-		return;
     }
 		     
 

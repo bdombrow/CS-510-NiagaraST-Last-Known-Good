@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryOptimizer.java,v 1.6 2003/09/17 20:03:07 vpapad Exp $
+  $Id: QueryOptimizer.java,v 1.7 2003/09/22 00:15:42 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -97,8 +97,6 @@ public class QueryOptimizer {
 	    System.err.println (e);
 	    proceed = false;
 	}
-
-	 System.out.println(proceed);
 
 	// If there is an error, then return null
 	// Well, Trigger do use weired file names.
