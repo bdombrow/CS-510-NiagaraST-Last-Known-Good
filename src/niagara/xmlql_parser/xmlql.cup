@@ -14,6 +14,7 @@
 package niagara.xmlql_parser;
 
 import niagara.logical.*;
+import niagara.logical.predicates.*;
  
 import java.util.*;
 import java_cup.runtime.*;
