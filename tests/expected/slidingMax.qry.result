@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:results>
+
+<max>
+   <index>1</index>
+   <groupby>      <NUM1>4</NUM1>
+</groupby>
+   1.0
+</max>
+<max>
+   <index>1</index>
+   <groupby>      <NUM1>1</NUM1>
+</groupby>
+   1.0
+</max>
+<max>
+   <index>1</index>
+   <groupby>      <NUM1>2</NUM1>
+</groupby>
+   2.0
+</max>
+<max>
+   <index>1</index>
+   <groupby>      <NUM1>3</NUM1>
+</groupby>
+   3.0
+</max>
+<max>
+   <index>2</index>
+   <groupby>      <NUM1>4</NUM1>
+</groupby>
+   1.0
+</max>
+<max>
+   <index>2</index>
+   <groupby>      <NUM1>5</NUM1>
+</groupby>
+   5.0
+</max>
+<max>
+   <index>2</index>
+   <groupby>      <NUM1>6</NUM1>
+</groupby>
+   6.0
+</max>
+<max>
+   <index>2</index>
+   <groupby>      <NUM1>7</NUM1>
+</groupby>
+   7.0
+</max>
+<max>
+   <index>2</index>
+   <groupby>      <NUM1>8</NUM1>
+</groupby>
+   8.0
+</max>
+<max>
+   <index>2</index>
+   <groupby>      <NUM1>3</NUM1>
+</groupby>
+   3.0
+</max>
+<max>
+   <index>3</index>
+   <groupby>      <NUM1>10</NUM1>
+</groupby>
+   10.0
+</max>
+<max>
+   <index>3</index>
+   <groupby>      <NUM1>9</NUM1>
+</groupby>
+   9.0
+</max>
+<max>
+   <index>3</index>
+   <groupby>      <NUM1>11</NUM1>
+</groupby>
+   11.0
+</max>
+<max>
+   <index>3</index>
+   <groupby>      <NUM1>12</NUM1>
+</groupby>
+   12.0
+</max>
+<max>
+   <index>3</index>
+   <groupby>      <NUM1>7</NUM1>
+</groupby>
+   7.0
+</max>
+<max>
+   <index>3</index>
+   <groupby>      <NUM1>8</NUM1>
+</groupby>
+   8.0
+</max>
+
+</niagara:results>
