@@ -1,1 +1,26 @@
-java -classpath `cat ../classpath` niagara.client.SimpleClient $*
+#!/usr/local/bin/perl
+
+$niagroot = $ENV{"NIAGROOT"};
+
+# if it is already set, leave it alone
+if($niagroot eq "") {
+    $pwd= `pwd`;
+    chomp($pwd);
+    $niagroot = substr($pwd, index($pwd, "niagara_1_0")+11);
+    $niagroot =~ s/\/[^\/]*/..\//g;
+}
+
+# check for demo and lib directories just for security
+if (! -d $niagroot."/demo" || ! -d $niagroot."/lib") {
+    die "ERROR: demo or lib directory did not exist as sub-directory of niagara root $niagroot";
+}
+
+# set classpath path
+$classpath = `cat $niagroot/demo/classpath`;
+$classpath =~ s/\n/ /;
+$classpath =~ s/NIAGROOT\//$niagroot/g; 
+
+$command = "java -classpath " . $classpath . 
+           "niagara.client.SimpleClient " . join(" ", @ARGV) . "\n";
+#print $command;
+exec $command;

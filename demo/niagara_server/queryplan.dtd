@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.23 2003/02/05 22:18:35 jinli Exp $
+<!-- $Id: queryplan.dtd,v 1.24 2003/02/22 08:03:37 tufte Exp $
      DTD for query plans -->
 
 <!-- 
@@ -223,7 +223,6 @@
 	  rate	         CDATA   #REQUIRED 
 	  datatype  (xmlb | subfile | temp | auction | dtd |auction_stream | file | packet) "auction"
 	  num_gen_calls  CDATA   #REQUIRED  
-	  streaming      (yes | no)  "yes"
 	  desc           CDATA   ""
 	  desc2          CDATA   "bidperson"
 	  num_tl_elts    CDATA   "1"   
@@ -242,7 +241,7 @@
            XMLB and AUCTION generators only.
 
            comments on attributes:
-           id, host, port, rate, datatype, num_gen_calls, streaming   - required for all types
+           id, host, port, rate, datatype, num_gen_calls - required for all types
 
 	   rate is in KB/sec
                                                                       (or use defaults)
@@ -259,17 +258,12 @@
 	      currently used
 	   file:    desc is filename, num_tl_elts not used
 
-    also note, streaming is used to indicate to query engine that
-    data should be processed in streaming fashion and also used to
-    indicate to firehose that streaming format should be used -
-    only type of streaming we support now is saxdom style streaming
 -->
 
 
 <!ELEMENT filescan  EMPTY>
 <!ATTLIST filescan 
           id       ID           #REQUIRED
-	  streaming (yes | no) "yes"
           fileName CDATA        #REQUIRED
 	  %PositionAttributes;>
 
