@@ -1,3 +1,4 @@
+/* $Id: EXPR.java,v 1.4 2002/12/17 04:37:55 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 /**
@@ -100,36 +101,4 @@ public class Expr {
         cachedCost = cost.getValue();
         return cost;
     }
-
-    // // Return the string representing the expression
-    // // And meanwhile, output it with indentation
-    // String Dump(int ntabs=0)
-    // {
-    // 	String os;
-    // 	String temp;
-
-    // 	for(int i=0; i<ntabs; i++) os += "\t";
-    // 	os += (*Op).Dump();	
-
-    // 	//OUTPUTN(ntabs, os); 
-
-    //         if ((int) cachedCost == -1) { // XXX Vassilis: weak!
-    //             cachedCost = GetCost().getValue(); 
-    //         }
-
-    // 	temp.Format(", cost=%f\n", cachedCost); 
-    // 	os += temp;
-    // 	for(int i=0; i<arity; i++)
-    // 	{
-    // 	//	OUTPUTN(ntabs, "\r\n"); 
-    // // 		for(int j=0; j<ntabs;j++) os += "\t"; // XXX 
-    // // 		os +="\n";                            // XXX
-    // 		os += Inputs[i].Dump(ntabs+1);
-    // 	}
-
-    // 	// temp.Format("%d ", (int)CostVal); // XXX Vassilis: why do 
-    //                                              // XXX we need this?
-    // 	// os += temp;                       // XXX
-    // 	return os;
-    // }
 }
