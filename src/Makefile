@@ -20,7 +20,7 @@ include make.incl
 #  list and it will be built using 'make all'
 #
 ##############################################################################
-all:	se_server ndom ql_parser con_server qe trigger client mqpclient dm applet type_system saxdom
+all:	se_server ql_parser con_server ndom qe trigger client mqpclient dm applet type_system saxdom
 
 client:
 	$(JAVAC) $(JAVAFLAGS) niagara/client/*.java niagara/client/qpclient/*.java
