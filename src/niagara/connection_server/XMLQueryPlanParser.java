@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.27 2002/09/14 04:56:47 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.28 2002/09/21 10:14:29 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -12,6 +12,7 @@ import java.util.*;
 import gnu.regexp.*;
 
 import niagara.xmlql_parser.op_tree.*;
+import niagara.logical.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.query_engine.MTException;
 import niagara.utils.*;
@@ -171,6 +172,12 @@ public class XMLQueryPlanParser {
 	}
 	else if (e.getNodeName().equals("resource")) {
 	    handleResource(e);
+	}
+	else if (e.getNodeName().equals("incrmax")) {
+	    handleIncrMax(e);
+	}
+	else if (e.getNodeName().equals("incravg")) {
+	    handleIncrAvg(e);
 	}
         else {
             throw new InvalidPlanException("Unknown operator: " + nodeName);
@@ -1117,4 +1124,107 @@ public class XMLQueryPlanParser {
 	}
     }
 
+    void handleIncrMax(Element e) throws InvalidPlanException {
+	IncrementalMax op = new IncrementalMax();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+	String groupby = e.getAttribute("groupby");
+	String maxattr = e.getAttribute("maxattr");
+	String inputAttr = e.getAttribute("input");
+	String emptyGroupValueAttr = e.getAttribute("emptygroupvalue");
+
+	logNode input = (logNode) ids2nodes.get(inputAttr);
+	varTbl oldVarTbl = input.getVarTbl();
+
+	varTbl qpVarTbl = new varTbl();
+	Schema sc = new Schema();
+
+	// Parse the groupby attribute to see what to group on
+	Vector groupbySAs = new Vector();
+	StringTokenizer st = new StringTokenizer(groupby);
+	while (st.hasMoreTokens()) {
+	    String varName = st.nextToken();
+
+	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
+	    
+	    groupbySAs.addElement(oldAttr);
+	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
+	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
+	}
+
+	schemaAttribute maxAttribute = oldVarTbl.lookUp(maxattr);
+
+	op.setSkolemAttributes(new skolem("incrmax", groupbySAs));
+	op.setMaxAttribute(maxAttribute);
+	op.setEmptyGroupValue(Double.valueOf(emptyGroupValueAttr));
+
+	// Old/New result attributes
+	schemaAttribute oldSA = new schemaAttribute(groupbySAs.size(), 
+						    varType.ELEMENT_VAR);
+	schemaAttribute newSA = new schemaAttribute(groupbySAs.size()+1,
+						    varType.ELEMENT_VAR);
+	
+	// Register variables
+	qpVarTbl.addVar("$old" + id, oldSA);
+	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
+	qpVarTbl.addVar("$" + id, newSA);
+	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size() + 1));
+	
+	logNode maxNode = new logNode(op, input);
+	
+	ids2nodes.put(id, maxNode);
+	
+	maxNode.setSchema(sc);
+	maxNode.setVarTbl(qpVarTbl);
+    }
+
+    void handleIncrAvg(Element e) throws InvalidPlanException {
+	IncrementalAverage op = new IncrementalAverage();
+	op.setSelectedAlgoIndex(0);
+
+	String id = e.getAttribute("id");
+	String groupby = e.getAttribute("groupby");
+	String avgattr = e.getAttribute("avgattr");
+	String inputAttr = e.getAttribute("input");
+
+	logNode input = (logNode) ids2nodes.get(inputAttr);
+	varTbl oldVarTbl = input.getVarTbl();
+
+	varTbl qpVarTbl = new varTbl();
+	Schema sc = new Schema();
+
+	// Parse the groupby attribute to see what to group on
+	Vector groupbySAs = new Vector();
+	StringTokenizer st = new StringTokenizer(groupby);
+	while (st.hasMoreTokens()) {
+	    String varName = st.nextToken();
+
+	    schemaAttribute oldAttr = oldVarTbl.lookUp(varName);
+	    
+	    groupbySAs.addElement(oldAttr);
+	    qpVarTbl.addVar(varName, new schemaAttribute(groupbySAs.size()-1));
+	    sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()-1));
+	}
+
+	schemaAttribute avgAttribute = oldVarTbl.lookUp(avgattr);
+
+	op.setSkolemAttributes(new skolem("incravg", groupbySAs));
+	op.setAvgAttribute(avgAttribute);
+
+	// New result attribute
+	schemaAttribute newSA = new schemaAttribute(groupbySAs.size(),
+						    varType.ELEMENT_VAR);
+	
+	// Register variables
+	qpVarTbl.addVar("$" + id, newSA);
+	sc.addSchemaUnit(new SchemaUnit(null, groupbySAs.size()));
+	
+	logNode avgNode = new logNode(op, input);
+	
+	ids2nodes.put(id, avgNode);
+	
+	avgNode.setSchema(sc);
+	avgNode.setVarTbl(qpVarTbl);
+    }
 }
