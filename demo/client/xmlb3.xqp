@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 <plan top="top_cons" x="317" y="43">
-<firehosescan iters="10000" port="5005" type="gen" rate="0" host="state.cse.ogi.edu" desc="http://www.cse.ogi.edu/~vpapad/xml/play.dtd" id="fh" input="" x="376" y="635">
+<firehosescan iters="10000" port="5005" type="gen" rate="0" host="state.cse.ogi.edu" desc="http://king.cse.ogi.edu/xml/play.dtd" id="fh" input="" x="376" y="635">
 </firehosescan>
 <scan root="" type="element" regexp="GAMEDATA" id="gd" input="fh" x="492" y="625">
 </scan>
@@ -72,7 +72,7 @@
 <sum groupby="$player" sumattr="$points" id="sum" input="points" x="380" y="121">
 </sum>
 <dtdscan id="league" x="661" y="372">
-<url value="http://www.cse.ogi.edu/~vpapad/xml/PetesLeague.xml"></url>
+<url value="http://king.cse.ogi.edu/xml/PetesLeague.xml"></url>
 </dtdscan>
 <scan root="" type="element" regexp="LEAGUESYSTEM.LEAGUE.TEAM" id="team" input="league" x="660" y="310">
 </scan>

@@ -5,7 +5,7 @@
 
 <plan top="cons">
 <dtdscan id="dtd">
-<url value="http://www.cse.ogi.edu/~vpapad/xml/a_and_c.xml"/>
+<url value="http://king.cse.ogi.edu/xml/a_and_c.xml"/>
 </dtdscan>
 <scan id="scan" regexp="PLAY.PERSONAE.PERSONA" input="dtd"/>
 <construct id="cons" input="scan">

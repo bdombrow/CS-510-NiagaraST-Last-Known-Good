@@ -7,7 +7,7 @@ of the operator tree -->
 <plan top="select">
 
 <dtdscan id="dtd">
-<url value="http://www.cse.ogi.edu/~vpapad/xml/numbers.xml"/>
+<url value="http://king.cse.ogi.edu/xml/numbers.xml"/>
 </dtdscan>
 
 <scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/>

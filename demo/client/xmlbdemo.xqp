@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 <plan top="accum" x="301" y="31">
-<firehosescan iters="10000" port="5005" type="gen" rate="0" host="localhost" desc="http://www.cse.ogi.edu/~vpapad/xml/play.dtd" id="fh" input="" x="352" y="490">
+<firehosescan iters="10000" port="5005" type="gen" rate="0" host="localhost" desc="http://king.cse.ogi.edu/xml/play.dtd" id="fh" input="" x="352" y="490">
 </firehosescan>
 <dup branch="2" id="dup1" input="fh" x="347" y="433">
 </dup>

@@ -4,13 +4,13 @@
 
 <!-- Get 100 plays, selecting hits -> batters -->
 <firehosescan id="fh" host="state.cse.ogi.edu" port="5005" rate="0" 
-	type="gen" desc="http://www.cse.ogi.edu/~vpapad/xml/play.dtd" iters="10000"/>
+	type="gen" desc="http://king.cse.ogi.edu/xml/play.dtd" iters="10000"/>
 <scan id="hit" regexp="GAMEDATA.PLAY.HIT" input="fh"/>
 <scan id="batter" regexp="BATTER" input="hit"/>
 
 <!-- Get the league data, with player names/ids -->
 <dtdscan id="league">
-<url value="http://www.cse.ogi.edu/~vpapad/xml/PetesLeague.xml"/>
+<url value="http://king.cse.ogi.edu/xml/PetesLeague.xml"/>
 </dtdscan>
 <scan id="team" regexp="LEAGUESYSTEM.LEAGUE.TEAM" input="league"/>
 <scan id="teamname" regexp="NAME" input="team"/> 

@@ -2,10 +2,10 @@
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 <plan top="cons">
 <dtdscan id="dtd">
-<url value="http://www.cse.ogi.edu/~vpapad/xml/a_and_c.xml"/>
+<url value="http://king.cse.ogi.edu/xml/a_and_c.xml"/>
 </dtdscan>
 <dtdscan id="dtd1">
-<url value="http://www.cse.ogi.edu/~vpapad/xml/numbers.xml"/>
+<url value="http://king.cse.ogi.edu/xml/numbers.xml"/>
 </dtdscan>
 <scan id="t" regexp="PLAY.TITLE" input="dtd"/>
 <scan id="n" regexp="PLAY.NUM" input = "dtd1"/>
