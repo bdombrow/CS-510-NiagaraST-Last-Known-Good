@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.18 2002/10/31 03:54:38 vpapad Exp $
+  $Id: PhysicalGroupOperator.java,v 1.19 2003/02/05 21:17:50 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -52,7 +52,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * This is the class that stores the information in an entry of the hash
      * table
      */
-    private class HashEntry {
+    protected class HashEntry {
         // This is the object representing the final results
         private Object finalResult;
 
@@ -165,13 +165,13 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     protected groupOp logicalGroupOperator;
 
     // The list of attributes to group by
-    private Vector groupAttributeList;
+    protected Vector groupAttributeList;
 
     private Hasher hasher;
 
     // This is the hash table for performing grouping efficiently
     //
-    private Hashtable hashtable;
+    protected Hashtable hashtable;
 
     // Store the values that make up a hash key
     private String[] rgstPValues;
@@ -179,7 +179,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
     // This is the current partial id of the operator used to discard previous
     // partial results
-    private int currPartialResultId;
+    protected int currPartialResultId;
 
     protected Document doc;
 
@@ -230,7 +230,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    protected final void blockingProcessSourceTupleElement(
+    protected void blockingProcessSourceTupleElement(
         StreamTupleElement tupleElement,
         int streamId)
         throws UserErrorException, ShutdownException {
@@ -463,7 +463,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * @return A tuple with the grouped result
      */
 
-    private StreamTupleElement createTuple(
+    protected StreamTupleElement createTuple(
         Node groupedResult,
         StreamTupleElement representativeTuple,
         boolean partial) {
