@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperatorThread.java,v 1.9 2003/12/24 01:31:49 vpapad Exp $
+  $Id: PhysicalOperatorThread.java,v 1.10 2004/02/11 01:07:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -90,7 +90,7 @@ public class PhysicalOperatorThread implements Runnable {
 
 	// Create a new java thread for running an instance of this object
 	thread = new Thread (this,"OpThreadUnused");
-
+        thread.setDaemon(true);
 	thread.start();
     }
 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.16 2003/12/24 01:31:48 vpapad Exp $
+  $Id: QueryEngine.java,v 1.17 2004/02/11 01:07:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -87,12 +87,8 @@ public class QueryEngine {
      */
     public QueryEngine(NiagraServer server, int maxQueries, int maxOperators) {
 
-        System.out.println("-----------------------------------------");
-        System.out.println("Starting Query Engine with these parameters");
-        System.out.println("-----------------------------------------");
-        System.out.println("\t-maxQueryThread = " + maxQueries);
-        System.out.println("\t-maxOpThreads = " + maxOperators);
-        System.out.println("-----------------------------------------\n");
+        System.out.println("Query engine starts with " + maxQueries + 
+                " query threads and " + maxOperators + " operator threads");
 
         this.server = server;
 

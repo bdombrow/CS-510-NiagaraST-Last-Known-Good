@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryThread.java,v 1.11 2003/12/24 01:31:44 vpapad Exp $
+  $Id: QueryThread.java,v 1.12 2004/02/11 01:07:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -118,7 +118,7 @@ public class QueryThread implements Runnable {
                 
 		// Create a new java thread for running an instance of this object
 		thread = new Thread (this,"QueryThread");
-
+                thread.setDaemon(true);
 		// Call the query thread run method
 		thread.start();	
     }
