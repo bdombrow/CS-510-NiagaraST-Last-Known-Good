@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.14 2002/10/12 20:10:24 tufte Exp $
+  $Id: ConnectionManager.java,v 1.15 2002/10/31 04:36:24 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -258,12 +258,14 @@ public class ConnectionManager implements QueryExecutionIF {
                     System.out.println("CDATA escaping: regular expression failure");
                     System.exit(-1);
                 }
-	}
-	
-	if(queryType == QueryType.XMLQL || queryType == QueryType.QP) {
-	    getNext(id, nResults);
-	}
-	
+	    }
+	    
+        if (queryType == QueryType.XMLQL
+            || queryType == QueryType.QP
+            || queryType == QueryType.EXPLAIN_QP) {
+            getNext(id, nResults);
+        }
+
 	return id;
     }
     
