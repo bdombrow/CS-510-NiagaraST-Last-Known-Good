@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<plan top="cons">
+<dtdscan id="dtd">
+<url value="http://www.cse.ogi.edu/~vpapad/xml/a_and_c.xml"/>
+</dtdscan>
+<dtdscan id="dtd1">
+<url value="http://www.cse.ogi.edu/~vpapad/xml/numbers.xml"/>
+</dtdscan>
+<scan id="t" index="0" regexp="PLAY.TITLE" input="dtd"/>
+<scan id="n" index="0" regexp="PLAY.NUM" input = "dtd1"/>
+<join id="join" input="n t" physical="niagara.query_engine.PhysicalNLJoinOperator">
+<pred op="gt"><var value="$n"/><number value="18"/></pred></join>
+<construct id="cons" input="join">
+<NUM>$n $t</NUM>
+</construct>
+</plan>
