@@ -1,4 +1,4 @@
-// $Id: xmlql.cup,v 1.5 2002/10/26 21:57:11 vpapad Exp $
+// $Id: xmlql.cup,v 1.6 2002/10/31 04:36:43 vpapad Exp $
 ////////////////////////////////////////////////////////////////////////
 //
 //  xmlql.cup
@@ -394,7 +394,7 @@ Expression ::= NUMBER:n
 	     | IDEN:i
 		  {: RESULT = new StringConstant(i); :}
 	     | VAR:v
-		  {: RESULT = new Variable(v); :}
+		  {: RESULT = new OldVariable(v); :}
 	     | STRING:s
 		  {: RESULT = new StringConstant(s); :}
 	     ;
