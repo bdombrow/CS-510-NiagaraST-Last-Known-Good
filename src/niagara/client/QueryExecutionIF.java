@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryExecutionIF.java,v 1.2 2000/06/26 21:48:12 vpapad Exp $
+  $Id: QueryExecutionIF.java,v 1.3 2000/07/09 05:41:08 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,44 +40,13 @@ import java.util.*;
 
 public interface QueryExecutionIF
 {
-	/**
-	 * Execute a query
-	 * @param s the query string
-	 * @return the id of the query in the registry
-	 */
-	public int executeQuery(String query);
-
     /**
 	 * Execute a query
 	 * @param s the query string
 	 * @param n limit of initial results (after this hitting getnext is required)
 	 * @return the id of the query in the registry
 	 */
-	public int executeQuery(String query, int n);
-	
-	/**
-	 * Execute a trigger query
-	 * @param s the query string
-	 * @param n limit of initial results (after this hitting getnext is required)
-	 * @return the id of the query in the registry
-	 */
-	public int executeTriggerQuery(String query, int n);
-
-        /**
-	 * Execute a query, with the specified query plan
-	 * @param s the query plan in XML format
-	 * @param n limit of initial results (after this hitting getnext is required)
-	 * @return the id of the query in the registry
-	 */
-         public int executeQPQuery(String query, int n);
-
-	/**
-	 * Execute a Search Engine  query
-	 * @param s the query string
-	 * @param n limit of initial results (after this hitting getnext is required)
-	 * @return the id of the query in the registry
-	 */
-	public int executeSEQuery(String query, int n);
+	public int executeQuery(Query query, int n);
 	
 	/**
 	 * Kill the query
