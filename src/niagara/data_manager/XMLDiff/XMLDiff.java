@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: XMLDiff.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: XMLDiff.java,v 1.2 2001/07/17 06:58:48 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,7 +43,7 @@ package niagara.data_manager.XMLDiff;
 import com.ibm.xml.parser.*;
 import com.ibm.xml.xpointer.*;
 import org.w3c.dom.*;
-import org.xml.*;
+//import org.xml.*;
 import java.io.*;
 import java.util.*;
 import niagara.utils.*;
