@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: varType.java,v 1.2 2003/07/27 02:46:31 tufte Exp $
+  $Id: varType.java,v 1.3 2003/08/01 17:29:39 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,7 +37,8 @@ public class varType {
 	public static final int TAG_VAR = 0;     // for tag variable
 	public static final int ELEMENT_VAR = 1; // for element_as
 	public static final int CONTENT_VAR = 2; // for content_as
+        public static final int NULL_VAR = 3;
 	
-	public static String[] names = {"tag", "element", "content"};
+	public static String[] names = {"tag", "element", "content", "null"};
 }
 
