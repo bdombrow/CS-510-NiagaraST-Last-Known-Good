@@ -1,5 +1,5 @@
 /**
- * $Id: SAXEvent.java,v 1.1 2002/03/26 22:07:50 vpapad Exp $
+ * $Id: SAXEvent.java,v 1.2 2002/09/24 23:15:03 ptucker Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -21,4 +21,5 @@ public class SAXEvent {
     public static final byte ATTR_NAME = 5;
     public static final byte ATTR_VALUE = 6;
     public static final byte TEXT = 7;
+    public static final byte NAMESPACE_URI = 8;
 }

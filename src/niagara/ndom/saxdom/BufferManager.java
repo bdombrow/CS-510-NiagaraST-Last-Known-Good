@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.12 2002/05/23 06:31:09 vpapad Exp $
+ * $Id: BufferManager.java,v 1.13 2002/09/24 23:15:03 ptucker Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -224,6 +224,7 @@ public class BufferManager {
             case SAXEvent.ATTR_NAME:
             case SAXEvent.ATTR_VALUE:
             case SAXEvent.TEXT:
+	    case SAXEvent.NAMESPACE_URI:
                 continue;
             case SAXEvent.END_ELEMENT:
             case SAXEvent.END_DOCUMENT:
@@ -237,11 +238,43 @@ public class BufferManager {
     }
 
     public static String getTagName(int index) {
-        return getEventString(index);
+	//If this is a START_ELEMENT, we need to also check if there was a
+	// prefix associated with it
+	if (getEventType(index) == SAXEvent.START_ELEMENT) {
+	    Page page = getPage(index);
+	    int offset = getOffset(index);
+	    if (offset == page.getSize() -1) {
+		page = page.getNext();
+		offset = 0;
+	    } else 
+		offset++;
+
+	    if (page.getEventType(offset) == SAXEvent.NAMESPACE_URI) {
+		return (page.getEventString(offset) + getEventString(index));
+	    } else
+		return getEventString(index);
+	} else
+	    return getEventString(index);
     }
 
     public static String getName(int index) {
-        return getEventString(index);
+	//If this is a START_ELEMENT, we need to also check if there was a
+	// prefix associated with it
+	if (getEventType(index) == SAXEvent.START_ELEMENT) {
+	    Page page = getPage(index);
+	    int offset = getOffset(index);
+	    if (offset == page.getSize() -1) {
+		page = page.getNext();
+		offset = 0;
+	    } else 
+		offset++;
+
+	    if (page.getEventType(offset) == SAXEvent.NAMESPACE_URI) {
+		return (page.getEventString(offset) + getEventString(index));
+	    } else
+		return getEventString(index);
+	} else
+	    return getEventString(index);
     }
 
     public static String getValue(int index) {
@@ -496,6 +529,7 @@ public class BufferManager {
             switch (page.getEventType(offset)) {
             case SAXEvent.ATTR_NAME:
             case SAXEvent.ATTR_VALUE:
+	    case SAXEvent.NAMESPACE_URI:
                 continue;
             case SAXEvent.END_ELEMENT:
             case SAXEvent.END_DOCUMENT:
@@ -533,6 +567,7 @@ public class BufferManager {
             switch (page.getEventType(offset)) {
             case SAXEvent.ATTR_NAME:
             case SAXEvent.ATTR_VALUE:
+	    case SAXEvent.NAMESPACE_URI:
                 continue;
             case SAXEvent.END_ELEMENT:
                 return -1;
@@ -616,6 +651,7 @@ public class BufferManager {
         case SAXEvent.START_ELEMENT:
         case SAXEvent.ATTR_NAME:
         case SAXEvent.ATTR_VALUE:
+	case SAXEvent.NAMESPACE_URI:
             return -1;
         case SAXEvent.END_ELEMENT:
             return page.getNextSibling(offset);
@@ -646,11 +682,23 @@ public class BufferManager {
     }
 
     public static String getPrefix(int index) {
-        throw new PEException("Not Implemented Yet!");
+	Page page = getPage(index);
+	int offset = getOffset(index);
+	if (offset == page.getSize() -1) {
+	    page = page.getNext();
+	    offset = 0;
+	}
+	else 
+	    offset++;
+
+	if (page.getEventType(offset) != SAXEvent.NAMESPACE_URI)
+	    return null;
+	
+	return page.getEventString(offset);
     }
 
     public static String getLocalName(int index) {
-        throw new PEException("Not Implemented Yet!");
+        return getEventString(index);
     }
 
     public static String getNotationName(int index) {
