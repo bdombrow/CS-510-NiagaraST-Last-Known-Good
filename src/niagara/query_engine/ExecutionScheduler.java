@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.2 2000/06/24 16:09:01 tufte Exp $
+  $Id: ExecutionScheduler.java,v 1.3 2000/06/26 22:10:28 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -136,7 +136,8 @@ public class ExecutionScheduler {
 		// Traverse the optimized tree and schedule the operators for
 		// execution
 		//
-		System.err.println("ES:: optimizedTree is " + optimizedTree);
+		System.err.println("ES:: optimizedTree is: ");
+		optimizedTree.dump();
 		scheduleForExecution(optimizedTree, inputStreams[0]);
     }
 
