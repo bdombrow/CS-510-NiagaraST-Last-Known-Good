@@ -1,4 +1,4 @@
-// $Id: xmlql.cup,v 1.8 2003/02/27 07:51:16 vpapad Exp $
+// $Id: xmlql.cup,v 1.9 2003/02/28 04:40:04 vpapad Exp $
 ////////////////////////////////////////////////////////////////////////
 //
 //  xmlql.cup
@@ -168,7 +168,7 @@ non terminal data      DataSource;
 non terminal Vector    DataSourceSet;
 non terminal Vector    DataSourceList;
 non terminal startTag  StartTag;
-non terminal skolem    SkolemId;
+non terminal Object    SkolemOrIdAttr;
 
 precedence left OR;
 precedence left AND;
@@ -450,9 +450,9 @@ Attribute ::= IDEN:i EQ STRING:s
 		  {: RESULT = new attr(i,new data(dataType.STRING,s)); :}
 	    | IDEN:i EQ VAR:v
 		  {: RESULT = new attr(i,new data(dataType.VAR,v)); :}
-        | IDEQ STRING:s
+       | IDEQ STRING:s
 		  {: RESULT = new attr("id",new data(dataType.STRING,s)); :}
-	    | IDEQ VAR:v
+       | IDEQ VAR:v
 		  {: RESULT = new attr("id",new data(dataType.VAR,v)); :}		  
 	    ;
 
@@ -513,17 +513,29 @@ DataSource ::= VAR:v
 	     | IDEN LPAREN RPAREN
 	     ;
 
-StartTag ::= LT IDEN:i SkolemId:s AttributeList:al GT 
-		{: RESULT = new startTag(new data(dataType.IDEN, i), s, al); :}
-	   | LT VAR:v SkolemId:s AttributeList:al GT
-		{: RESULT = new startTag(new data(dataType.VAR, v), s, al); :}
+StartTag ::= LT IDEN:i IDEQ SkolemOrIdAttr:s AttributeList:al GT 
+		{: if (!(s instanceof skolem)) { 
+		      al.insertElementAt(s, 0); s = null;
+		   }
+		   RESULT = new startTag(new data(dataType.IDEN, i), (skolem) s, al); :}
+	   | LT VAR:v IDEQ SkolemOrIdAttr:s AttributeList:al GT
+		{: if (!(s instanceof skolem)) { 
+		      al.insertElementAt(s, 0); s = null;
+		   }
+           RESULT = new startTag(new data(dataType.VAR, v), (skolem) s, al); :}
+       | LT IDEN:i AttributeList:al GT 
+		{: RESULT = new startTag(new data(dataType.IDEN, i), null, al); :}
+	   | LT VAR:v AttributeList:al GT
+		{: RESULT = new startTag(new data(dataType.VAR, v), null, al); :}		
 	   ;
 
-SkolemId ::= IDEQ IDEN:s LPAREN VarList:vl RPAREN
+SkolemOrIdAttr ::= IDEN:s LPAREN VarList:vl RPAREN
 		{: RESULT = new skolem(s, vl); :}
-	   | IDEQ IDEN:s LPAREN RPAREN
+	   | IDEN:s LPAREN RPAREN
 		{: RESULT = new skolem(s, new Vector()); :}
-	   |
-		{: RESULT = null; :}
+       | STRING:s 
+		  {: RESULT = new attr("id",new data(dataType.STRING,s)); :}
+       | VAR:v
+		  {: RESULT = new attr("id",new data(dataType.VAR,v)); :}		  
 	   ;
 
