@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.13 2002/09/24 23:18:45 ptucker Exp $
+  $Id: PhysicalGroupOperator.java,v 1.14 2002/10/24 02:01:22 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,11 +27,8 @@
 
 package niagara.query_engine;
 
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Enumeration;
+import java.util.*;
+
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -49,21 +45,13 @@ import org.w3c.dom.*;
  */
 
 public abstract class PhysicalGroupOperator extends PhysicalOperator {
-
-    /////////////////////////////////////////////////////////////////////////
     // These are private nested classes used within the operator           //
-    /////////////////////////////////////////////////////////////////////////
 
     /**
      * This is the class that stores the information in an entry of the hash
      * table
      */
     private class HashEntry {
-	
-	/////////////////////////////////////////////////////////////////
-	// These are the private members of the class                  //
-	/////////////////////////////////////////////////////////////////
-
 	// This is the object representing the final results
 	//
 	private Object finalResult;
@@ -202,11 +190,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     }
 
 
-    /////////////////////////////////////////////////////////////////////////
-    // These are the private data members of the PhysicalGroupOperator     //
-    // class                                                               //
-    /////////////////////////////////////////////////////////////////////////
-
     // This is the array having information about blocking and non-blocking
     // streams
     //
@@ -237,38 +220,12 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     
     protected Document doc;
 
-    ///////////////////////////////////////////////////////////////////////////
-    // These are the methods of the PhysicalGroupOperator class          //
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * This is the constructor for the PhysicalGroupOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and the responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param responsiveness The responsiveness to control messages, in milli
-     *                       seconds
-     */
-
-    public PhysicalGroupOperator(op logicalOperator,
-				 SourceTupleStream[] sourceStreams,
-				 SinkTupleStream[] sinkStreams,
-				 Integer responsiveness) {
-
-
-	// Call the constructor of the super class
-	//
-	super(sourceStreams,
-	      sinkStreams,
-	      blockingSourceStreams,
-	      responsiveness);
-
+    public PhysicalGroupOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
+    }
+    
+    public void initFrom(op logicalOperator) {
 	// Typecast to a group logical operator
-	//
 	logicalGroupOperator = (groupOp) logicalOperator;
     }
     
