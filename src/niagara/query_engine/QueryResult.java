@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.17 2003/07/27 02:35:16 tufte Exp $
+  $Id: QueryResult.java,v 1.18 2003/08/01 17:29:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -70,6 +70,7 @@ public class QueryResult {
 
     // The output stream to get results from
     private SourceTupleStream outputStream;
+    private PageStream outputPageStream;
 
     // Variable to store whether the output stream is in the process
     // of generating possibly partial results
@@ -85,6 +86,7 @@ public class QueryResult {
 
     public QueryResult(int queryId, PageStream outputPageStream) {
         this.queryId = queryId;
+        this.outputPageStream = outputPageStream;
         this.outputStream = new SourceTupleStream(outputPageStream);
         this.generatingPartialResult = false;
     }
@@ -97,6 +99,10 @@ public class QueryResult {
 
     public int getQueryId() {
         return queryId;
+    }
+    
+    public PageStream getOutputPageStream() {
+    	return outputPageStream;
     }
 
     // KT - hack so I don't have to put ResultObject in it's own class,

@@ -99,9 +99,9 @@ public class MergeTree {
 		       boolean checkAccumConstraints) 
 	throws MTException {
 
+	    niagara.ndom.DOMParser p = DOMFactory.newParser();
 	try {
 
-	    niagara.ndom.DOMParser p = DOMFactory.newParser();
 	    Document mergeTemplate = null;
 	    
 	    /* Parse the mergeTemplate file or string */
@@ -117,7 +117,8 @@ public class MergeTree {
 				  e.getMessage());
 	} catch (org.xml.sax.SAXException e) {
 	    throw new MTException("Error parsing merge template: " +
-				  e.getMessage());
+				  e.getMessage() + " err strs " +
+				  p.getErrorStrings());
 	}
 	return;
     }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.16 2003/07/27 02:35:16 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.17 2003/08/01 17:29:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -171,21 +171,22 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 	if (groupedResult == null) {
 	    resultVec = new NodeVector();
 	    // add root element to the result
-	    resultVec.add(((Node)ungroupedResult).cloneNode(false));
+	    // KT don't think we need this clone...
+	    resultVec.add((Node)ungroupedResult);
 	} else {
 	    resultVec = (NodeVector) groupedResult;
+
+		// The ungrouped result is a node list
+		NodeList ungroupedNodes = ((Node)ungroupedResult).getChildNodes();
+
+		// Add all items in ungrouped result
+		int numNodes = ungroupedNodes.getLength();
+
+		for (int node = 0; node < numNodes; ++node) {
+	    	resultVec.add(ungroupedNodes.item(node));
+		}
 	}
-
-	// The ungrouped result is a node list
-	NodeList ungroupedNodes = ((Node)ungroupedResult).getChildNodes();
-
-	// Add all items in ungrouped result
-	int numNodes = ungroupedNodes.getLength();
-
-	for (int node = 0; node < numNodes; ++node) {
-	    resultVec.add(ungroupedNodes.item(node));
-	}
-
+	
 	// Return the grouped result
 	return resultVec;
     }
@@ -266,6 +267,7 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
 	// ignore node at index 0, that is the root element...
 	for (int node = 1; node < numNodes; ++node) {
+		// TODO KT I'm not sure nest needs to clone!
 	    resultElement.appendChild(((Node)
 			 nodeVector.get(node)).cloneNode(true));
 	}

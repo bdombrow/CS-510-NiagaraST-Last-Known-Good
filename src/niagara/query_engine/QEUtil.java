@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QEUtil.java,v 1.9 2003/07/09 04:59:36 tufte Exp $
+  $Id: QEUtil.java,v 1.10 2003/08/01 17:29:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -23,7 +23,6 @@
   This software was developed with support by DARPA through             
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
-
 
 package niagara.query_engine;
 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalMagicConstruct.java,v 1.2 2003/07/09 04:59:36 tufte Exp $
+  $Id: PhysicalMagicConstruct.java,v 1.3 2003/08/01 17:29:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -120,7 +120,6 @@ public class PhysicalMagicConstruct extends PhysicalOperator {
     // an xml tree which is the result minus any variables 
     // variables will be filled in from incoming tuples
     private void buildTemplate() throws ShutdownException {
-	System.out.println("KT: PMC buildTemplate");
         resultList.quickReset(); // just for safety
 
 	buildTempl(resultList, resultTemplate, true);
@@ -128,7 +127,6 @@ public class PhysicalMagicConstruct extends PhysicalOperator {
 	    resultList.size() + " results - expected only 1";
 
 	magicResult = resultList.get(0);
-	System.out.println("KT: PMC buildTemplate...exiting");
     }
 
     private void buildTempl(NodeVector localResult,

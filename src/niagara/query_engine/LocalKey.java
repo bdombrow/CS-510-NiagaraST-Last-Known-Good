@@ -1,4 +1,4 @@
-// $Id: LocalKey.java,v 1.11 2003/07/03 19:56:51 tufte Exp $
+// $Id: LocalKey.java,v 1.12 2003/08/01 17:29:25 tufte Exp $
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -13,6 +13,8 @@ import niagara.xmlql_parser.syntax_tree.*;
  * primary purpose is to take a set of xml elements and an XML
  * element and find the element in the set that matchs it. 
  */
+
+// hi dad 
 
 /* Notes - expand PathExprEvaluator to handle returning attributes
  * should be easy - just implement the case dataType.ATTR in

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TuplePage.java,v 1.5 2003/07/03 19:31:47 tufte Exp $
+  $Id: TuplePage.java,v 1.6 2003/08/01 17:29:30 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -184,6 +184,13 @@ public class TuplePage {
 
     public int getFlag() {
 	return flag;
+    }
+
+    public boolean hasTuples() {
+        if(tuples == null)
+	    return true;
+        else
+	    return false;
     }
 }
 

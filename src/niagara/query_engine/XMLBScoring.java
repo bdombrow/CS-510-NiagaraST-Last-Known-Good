@@ -1,6 +1,7 @@
-/* $Id: XMLBScoring.java,v 1.6 2003/07/27 02:35:16 tufte Exp $ */
+/* $Id: XMLBScoring.java,v 1.7 2003/08/01 17:29:25 tufte Exp $ */
 package niagara.query_engine;
 
+//hello
 import niagara.xmlql_parser.op_tree.*;
 import niagara.utils.*;
 import niagara.ndom.*;

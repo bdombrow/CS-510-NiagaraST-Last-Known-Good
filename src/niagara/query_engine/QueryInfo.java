@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryInfo.java,v 1.6 2003/07/18 00:58:50 tufte Exp $
+  $Id: QueryInfo.java,v 1.7 2003/08/01 17:29:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,19 +64,15 @@ public class QueryInfo {
     private SourceTupleStream sourceTupleStream;
 
     // The active query list to which the query belongs
-    //
     ActiveQueryList activeQueryList;
 
     // The registration time in millisecs
-    //
     private long regTime;
 
     // The state of this query
-    //
     private int queryState;
 
     // The head operator thread of the query
-    //
     private Thread headOperatorThread;
 
     // Flag to indicate whether this query should be removed by the physical head op.
@@ -101,46 +97,32 @@ public class QueryInfo {
      */
 
     public QueryInfo (String queryString, int queryId,
-		      PageStream outputPageStream,
-		      ActiveQueryList activeQueryList,
-		      boolean remove) 
+		      	      PageStream outputPageStream,
+		              ActiveQueryList activeQueryList,
+		              boolean remove) 
 		throws ActiveQueryList.QueryIdAlreadyPresentException {
 
-		// Init the remove flag
-		//
 		this.removeFromActive = remove;
-
-		// Initialize the query string
-		//
 		this.queryString = queryString;
-
-		// Initialize the query id
-		//
 		this.queryId = queryId;
 
 		// Initialize the source of the output stream
-		//
 		this.outputPageStream = outputPageStream;
 		sourceTupleStream = new SourceTupleStream(outputPageStream);
 
 		// Initialize the active query list
-		//
 		this.activeQueryList = activeQueryList;
 
 		// Add this object to active query list
-		//
 		activeQueryList.addQueryInfo(queryId, this);
 
 		// Initialize the creation time for this query
-		//
 		regTime = new Date().getTime();
 
 		// Initialize the state of the query
-		//
 		queryState = STATE_ACTIVE;
 
 		// Initially, there is no head operator thread
-		//
 		headOperatorThread = null;
     }
 		     
@@ -152,7 +134,6 @@ public class QueryInfo {
      */
 
     public String getQueryString () {
-	
 		return queryString;
     }
 
@@ -197,9 +178,12 @@ public class QueryInfo {
      *
      * @return output stream of the query
      */
-
+	/*
+ 	* this fcn is used to allow people to create a sink tuple stream for
+ 	* the top operator in the tree - should feed into query 
+ 	* result/query info - KT */
     public PageStream getOutputPageStream () {
-	return outputPageStream;
+		return outputPageStream;
     }
 
 
@@ -248,7 +232,7 @@ public class QueryInfo {
 	// Make the state dead
 	//
 	queryState = STATE_DEAD;
-	
+	// KT nice if this didn't need a source tuple stream
 	try {
 	    // Send a shut down control message to the output stream
 	    sourceTupleStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "Query Killed");

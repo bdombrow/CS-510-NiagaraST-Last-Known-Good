@@ -1,4 +1,4 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.23 2003/07/27 02:35:16 tufte Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.24 2003/08/01 17:29:25 tufte Exp $ */
 package niagara.query_engine;
 
 import java.io.ByteArrayInputStream;
@@ -161,8 +161,8 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	    JProf.requestDataDump();
 	    }*/
 
-	System.out.println("Do Accum Cnt " + mergeTree.doAccumCnt +
-			   " Accum Empty Cnt " + mergeTree.accumEmptyCnt);
+	//System.out.println("Do Accum Cnt " + mergeTree.doAccumCnt +
+        //	   " Accum Empty Cnt " + mergeTree.accumEmptyCnt);
 
         if (recdData == false) {
             System.out.println(

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageQueue.java,v 1.3 2003/07/03 19:31:47 tufte Exp $
+  $Id: PageQueue.java,v 1.4 2003/08/01 17:29:30 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -117,20 +117,32 @@ public class PageQueue
 	    tail = (tail + 1) % length;
 	    queue[tail] = page;
 	} else if (expandable) {
-	    expandQueue();
-	    put(page);
+	    if(expandQueue()) {
+	       put(page);
+            } else {
+	       // queue to big, refused to expand
+	       assert !page.hasTuples() : "KT - help dropping tuples";
+	       System.err.println("Dropping control flag " +
+	                           CtrlFlags.name[page.getFlag()] + 
+				   " on stream " + name);
+	    }
 	} 
     }
     
-    private void expandQueue() {
+    private boolean expandQueue() {
+        if(length>=20)
+	    return false; // refuse to expand
+
 	TuplePage[] newQueue = new TuplePage[length*2];
 	for(int i=0; i<length; i++) {
 	    newQueue[i] = queue[i];
 	}
 	queue = newQueue;
 	length = length*2;
-	assert length <= 20 : 
-	    "KT help queue just expanded to 20 slots!! " + name;
+	return true;
+	//if(length > 20) {
+	//        System.err.println("WARNING: KT queue just expanded to 20 slots!! " + name); 
+        // }
     }
 
     public String toString(){

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryThread.java,v 1.8 2003/03/08 02:23:04 vpapad Exp $
+  $Id: QueryThread.java,v 1.9 2003/08/01 17:29:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -109,27 +109,15 @@ public class QueryThread implements Runnable {
 		this.queryQueue = queryQueue;
 	
 		// Initialize the reference to the scheduler
-		//
 		this.scheduler = scheduler;
 
-		// Create a parser for this thread
-		// CANNOT DO NOW
-		// queryParser = new QueryParser();
-
-		// Create a logical plan generator for this thread
-		// CANNOT DO NOW
-		// logicalPlanGenerator = new logPlanGenerator();
-
 		// Create an optimizer for this thread
-		//
 		queryOptimizer = new QueryOptimizer(dataManager);
 
 		// Create a new java thread for running an instance of this object
-		//
 		thread = new Thread (this,"QueryThread");
 
 		// Call the query thread run method
-		//
 		thread.start();	
 
 		return;
@@ -169,12 +157,11 @@ public class QueryThread implements Runnable {
      */
 
     private void execute (QueryInfo queryInfo) throws ShutdownException {
-
 	// Get the string version of the query
 	String queryString = queryInfo.getQueryString();
 	
 	// Create a scanner and query parser on the fly
-	// THIS HAS TO CHANGE TO REUSE SCANNER AND PARSER
+	// TODO: THIS HAS TO CHANGE TO REUSE SCANNER AND PARSER
 	Scanner scanner;
 	
 	scanner = new Scanner(new EscapedUnicodeReader(

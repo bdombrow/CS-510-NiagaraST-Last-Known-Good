@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperatorThread.java,v 1.6 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalOperatorThread.java,v 1.7 2003/08/01 17:29:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -123,13 +123,9 @@ public class PhysicalOperatorThread implements Runnable {
 	    PhysicalOperator op = opQueue.getOperator();
 
 	    // Execute the operator
-	    if(op == null) {
-		System.err.println("KT OP IS NULL");
-	    }
-	    if(op.getName() == null) {
-		System.err.println("KT OP name is null");
-		System.err.println("OP: " + op.getClass().getName());
-	    }
+	    assert op != null : "KT op is null";
+	    assert op.getName() != null : "KT op name is null" +
+		                op.getClass().getName();
 	    thread.setName(op.getName());
 	    // KAT check here
 	    if(niagara.connection_server.NiagraServer.RUNNING_NIPROF)

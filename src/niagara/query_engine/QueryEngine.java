@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.12 2003/07/09 19:12:07 tufte Exp $
+  $Id: QueryEngine.java,v 1.13 2003/08/01 17:29:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -207,10 +207,10 @@ public class QueryEngine
     }
 
     /**
-     *  The function called by trigger manager  to 
-     *  run a trigger query.  A new query information object is created, entered into
+     *  Originally from trigger code. Used by query plan queries now.
+     *  A new query information object is created, entered into
      *  the query queue and active query list, and wrapped in a query result
-     *  object which is returned to the trigger manager 
+     *  object which is returned  
      * 
      *  This interface is used to run a already optimized plan
      *  @param optimized logicalPlan root
@@ -218,37 +218,45 @@ public class QueryEngine
      *  @return QueryResult
      */
 
-    public synchronized QueryResult executeOptimizedQuery(SchedulablePlan planRoot)
-    throws ShutdownException {
+	// KT broke executeOptimizedQuery into two functions, this
+	// function MUST return the queryResult object quickly
+	// otherwise short queries will be killed before queryInfo.transmitter
+	// is set
+    public synchronized QueryResult getNewQueryResult()
+    	throws ShutdownException {	
 
-	// Get the next qid
-	int qid = CUtil.getNextQueryId();
+		// Get the next qid
+		int qid = CUtil.getNextQueryId();
 	
-	// Generate the output streams for each query root
-	PageStream resultStream = new PageStream("To Query Result");
+		// Generate the output streams for each query root
+		PageStream resultStream = new PageStream("To Query Result");
 	    
-	// Create a query information object
-	QueryInfo queryInfo;
+		// Create the query result object to return to the caller
+		QueryResult queryResult = new QueryResult(qid, resultStream);
+		return queryResult;
+    }
+		
+	public synchronized void execOptimizedQuery(SchedulablePlan planRoot,
+													   QueryResult queryResult) 
+		throws ShutdownException {
+			
+		try {
+			// Create a query information object
+			QueryInfo queryInfo;
 	
-	try {
-	    queryInfo = new QueryInfo("",
-				      qid,
-				      resultStream,
-				      activeQueries,
-				      true);		
-	}
-	catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
-	    throw new PEException("Error in Assigning Unique Query Ids!");
-	}
-	
-	// Create the query result object to return to the caller
-	QueryResult queryResult = new QueryResult(qid, resultStream);
-	
-	//call Execution Scheduler to generate the physical
-	//plan and execute the group plan.
-	scheduler.executeOperators(planRoot,queryInfo);
-	
-	return queryResult;
+			queryInfo = new QueryInfo("",
+								  queryResult.getQueryId(),
+								  queryResult.getOutputPageStream(),
+								  activeQueries,
+								  true);	
+								  
+			//call Execution Scheduler to generate the physical
+			//plan and execute the group plan.
+			scheduler.executeOperators(planRoot, queryInfo);
+								  	
+		} catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
+			assert false : "Error in Assigning Unique Query Ids!";
+		}											  	
     }
 
     /**

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSlidingAverageOperator.java,v 1.4 2003/07/27 02:35:16 tufte Exp $
+  $Id: PhysicalSlidingAverageOperator.java,v 1.5 2003/08/01 17:29:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -208,7 +208,7 @@ public class PhysicalSlidingAverageOperator extends PhysicalWindowOperator {
 	if (atomicValues.size() == 0) {
 	    return null;
 	}
-	assert atomicValues.size() == 0 : "KT Bad number of atomic values";	
+	assert atomicValues.size() == 1 : "KT Bad number of atomic values";	
 	
 	// Get the string atomic value
 	    String atomicValue = (String) atomicValues.get(0);

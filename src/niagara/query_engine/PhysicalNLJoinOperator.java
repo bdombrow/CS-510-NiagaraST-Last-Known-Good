@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.14 2003/07/09 04:59:35 tufte Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.15 2003/08/01 17:29:25 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -189,7 +189,6 @@ public class PhysicalNLJoinOperator extends PhysicalJoin {
 		    // needs to be removed once it has joined
 		    // we can return since we know will join with no more tuples
 		    otherSourceTuples.remove(tup);
-		    System.out.println("KT removing tuple " + (1-streamId));
 		    removed = true;
 		}
 		if(extensionJoin[streamId])

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SourceTupleStream.java,v 1.3 2003/03/05 19:28:55 tufte Exp $
+  $Id: SourceTupleStream.java,v 1.4 2003/08/01 17:29:30 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -79,9 +79,9 @@ public final class SourceTupleStream {
      * Default Constructor without parameters to allow subclassing
      */
     public SourceTupleStream(PageStream stream) {
-	pageStream = stream;
-	buffer = null;
-	status = Open;
+		pageStream = stream;
+		buffer = null;
+		status = Open;
     }  
 
     /**
