@@ -35,9 +35,9 @@ public class StreamThread implements Runnable {
     private StreamSpec spec;
     private InputStream inputStream;
     private SourceStream outputStream;
-    //private niagara.ndom.DOMParser parser;
+    private niagara.ndom.DOMParser parser;
     //private javax.xml.parsers.SAXParser parser;
-    private com.microstar.xml.SAXDriver parser;
+    //private com.microstar.xml.SAXDriver parser;
     private Socket firehoseSocket;
     private char c;
     private BufferedReader bufferedInput = null;
@@ -50,8 +50,8 @@ public class StreamThread implements Runnable {
 	//try {
 	    this.spec = spec;
 	    outputStream = outStream;
-	    parser = new com.microstar.xml.SAXDriver();
-	    //parser = DOMFactory.newParser();
+	    //parser = new com.microstar.xml.SAXDriver();
+	    parser = DOMFactory.newParser("saxdom");
 	    //parser = SAXParserFactory.newInstance().newSAXParser();
 	    firehoseSocket = null;
 	    //handler = new StreamSimpleHandler();
@@ -316,8 +316,8 @@ public class StreamThread implements Runnable {
 	InputSource inputSource = 
 	    new InputSource(new CharArrayReader(buffer.getBuf(), 0, idx));
 	parser.parse(inputSource);
-	return true;
-	//return outputStream.put(parser.getDocument());
+	//return true;
+	return outputStream.put(parser.getDocument());
     }
 
     private class EOSException extends Exception {
