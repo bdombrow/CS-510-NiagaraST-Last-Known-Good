@@ -35,7 +35,7 @@ public class DtdScan extends Operator {
 	    org.w3c.dom.Node n = nl.item(i);
 	    if (!(n instanceof Element))
 		continue;
-	    urls = urls + XMLUtils.flatten(n);
+	    urls = urls + XMLUtils.flatten(n, false);
 	}
     }
 }

@@ -36,7 +36,7 @@ public class Construct extends Operator {
 	    org.w3c.dom.Node n = nl.item(i);
 	    if (!(n instanceof Element))
 		continue;
-	    content = content + XMLUtils.flatten(n);
+	    content = content + XMLUtils.flatten(n, false);
 	}
 	setProperty("_result", content);
     }
