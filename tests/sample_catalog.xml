@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.8 2003/01/13 05:17:37 tufte Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.9 2003/02/05 23:42:32 jinli Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -43,6 +43,10 @@
       class="niagara.xmlql_parser.op_tree.averageOp">
       <physical name="PhysicalAverage" class="niagara.query_engine.PhysicalAverageOperator"/>
     </logical>
+    <logical name="slidingAvg"
+      class="niagara.xmlql_parser.op_tree.SlidingAverageOp">
+      <physical name="PhysicalSlidingAverage" class="niagara.query_engine.PhysicalSlidingAverageOperator"/>
+    </logical>
     <logical name="accumulate"
       class="niagara.xmlql_parser.op_tree.AccumulateOp">
       <physical name="PhysicalAccumulate" class="niagara.query_engine.PhysicalAccumulateOperator"/>
@@ -73,9 +77,25 @@
       class="niagara.xmlql_parser.op_tree.SumOp">
       <physical name="PhysicalSum" class="niagara.query_engine.PhysicalSumOperator"/>
     </logical>
+    <logical name="slidingSum"
+      class="niagara.xmlql_parser.op_tree.SlidingSumOp">
+      <physical name="PhysicalSlidingSum" class="niagara.query_engine.PhysicalSlidingSumOperator"/>
+    </logical>
+     <logical name="max"
+      class="niagara.xmlql_parser.op_tree.MaxOp">
+      <physical name="PhysicalMax" class="niagara.query_engine.PhysicalMaxOperator"/>
+    </logical>
+    <logical name="slidingMax"
+      class="niagara.xmlql_parser.op_tree.SlidingMaxOp">
+      <physical name="PhysicalSlidingMax" class="niagara.query_engine.PhysicalSlidingMaxOperator"/>
+    </logical>
     <logical name="count"
       class="niagara.xmlql_parser.op_tree.CountOp">
       <physical name="PhysicalCount" class="niagara.query_engine.PhysicalCountOperator"/>
+    </logical>
+    <logical name="slidingCount"
+      class="niagara.xmlql_parser.op_tree.SlidingCountOp">
+      <physical name="PhysicalSlidingCount" class="niagara.query_engine.PhysicalSlidingCountOperator"/>
     </logical>
     <logical name="dup"
       class="niagara.xmlql_parser.op_tree.dupOp">
@@ -166,13 +186,33 @@
   		<before><logical name="avg"/></before>
  		<after><op name="PhysicalAverage"/></after>
   	</rule>
+  	<rule type="simple" name="slidingAvg to PhysicalSlidingAverage">
+  		<before><logical name="slidingAvg"/></before>
+ 		<after><op name="PhysicalSlidingAverage"/></after>
+  	</rule>
   	<rule type="simple" name="count to PhysicalCount">
   		<before><logical name="count"/></before>
  		<after><op name="PhysicalCount"/></after>
   	</rule>
+  	<rule type="simple" name="slidingCount to PhysicalSlidingCount">
+  		<before><logical name="slidingCount"/></before>
+ 		<after><op name="PhysicalSlidingCount"/></after>
+  	</rule>
   	<rule type="simple" name="sum to PhysicalSum">
   		<before><logical name="sum"/></before>
  		<after><op name="PhysicalSum"/></after>
+  	</rule>
+  	<rule type="simple" name="slidingSum to PhysicalSlidingSum">
+  		<before><logical name="slidingSum"/></before>
+ 		<after><op name="PhysicalSlidingSum"/></after>
+  	</rule>
+  	<rule type="simple" name="max to PhysicalMax">
+  		<before><logical name="max"/></before>
+ 		<after><op name="PhysicalMax"/></after>
+  	</rule>
+  	<rule type="simple" name="slidingMax to PhysicalSlidingMax">
+  		<before><logical name="slidingMax"/></before>
+ 		<after><op name="PhysicalSlidingMax"/></after>
   	</rule>
   	<rule type="simple" name="incravg to PhysicalIncrementalAverage">
   		<before><logical name="incravg"/></before>
