@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.6 2002/03/28 03:06:24 vpapad Exp $
+  $Id: PathExprEvaluator.java,v 1.7 2002/03/31 04:48:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -69,30 +69,30 @@ public class PathExprEvaluator
     public static Vector getReachableNodes(Object inNode, regExp rExp)
     {
         // This cannot be true.
-        if(inNode==null) System.err.println("Null inNode!!!!");
+        if (inNode==null) System.err.println("Null inNode!!!!");
 		
 		Vector nodesReached = new Vector();
 		int i = 0, j = 0;
 		
-		if(rExp == null){
+		if (rExp == null) {
 			
 			// Incoming regular expression is null - just return the inNode
 			//
-			nodesReached.addElement(inNode);
+			nodesReached.add(inNode);
 			
 			return nodesReached;
 		}
 		
 		// If this is a leaf node, just get all child nodes mathching data name and return
 		//
-		if(rExp instanceof regExpDataNode){
+		if (rExp instanceof regExpDataNode) {
 		    
 			regExpDataNode re = (regExpDataNode)rExp;
 			data regExpData = re.getData();
 			Object o  = regExpData.getValue();
 			String val = null;
 			
-			if(o instanceof String)
+			if (o instanceof String)
 				val = (String)o;
 			else{
                 System.err.println("Error: Leaf is " + o);
@@ -105,13 +105,13 @@ public class PathExprEvaluator
 			// made this a 'switch' in case we add diff type later
 			// for now, all types at this point better be strings
 			// 
-			switch(regExpData.getType()){
+			switch(regExpData.getType()) {
 			case dataType.STRING: 
 				
 				Class inNodeClass = inNode.getClass();
 				// if this is not the doc root, get children with name val
 				//
-				if(inNode instanceof Element){
+				if (inNode instanceof Element) {
                                     // Get all child elements 
                                     Element element = (Element)inNode;
                                  
@@ -127,8 +127,8 @@ public class PathExprEvaluator
 
                                     // Add the reachable attribute to the vector
                                     Node attr_node = attrs.getNamedItem(val);
-                                    if(attr_node != null){
-                                        nodesReached.addElement(attrs.getNamedItem(val));
+                                    if (attr_node != null) {
+                                        nodesReached.add(attrs.getNamedItem(val));
                                     }
                                     
                                     return nodesReached;		    
@@ -137,15 +137,15 @@ public class PathExprEvaluator
 				// Else if it is the root of the document, get the doc
 				// element if its name == val
 				//
-				else if(inNode instanceof Document){
+				else if (inNode instanceof Document) {
 					Element docroot = (Element)((Document)inNode).getDocumentElement();
-					if(docroot != null){
-						if(val.equals(docroot.getNodeName()))
-							nodesReached.addElement(docroot);
+					if (docroot != null) {
+						if (val.equals(docroot.getNodeName()))
+							nodesReached.add(docroot);
 					}
 					return nodesReached;
 				}
-				else if(inNode instanceof Attr){
+				else if (inNode instanceof Attr) {
 					// If the inNode is an attribute then the path should 
 					// definitely be null
 					System.out.println("PRED_EV: Bad Attribute Encountered");
@@ -164,7 +164,7 @@ public class PathExprEvaluator
 		
 		// If this is an op node, make the appropriate recursive calls
 		//
-		else if(rExp instanceof regExpOpNode){
+		else if (rExp instanceof regExpOpNode) {
 			
 			regExpOpNode re = (regExpOpNode)rExp;
 			Vector leftNodes = null;
@@ -172,7 +172,7 @@ public class PathExprEvaluator
 			Vector[] all = null;
 			int size;
 			
-			switch(re.getOperator()){
+			switch(re.getOperator()) {
 				
 			case opType.BAR:
 				
@@ -184,13 +184,13 @@ public class PathExprEvaluator
 				// Add the smaller result vector to the larger one
 				// and return the result
 				//
-				if(leftNodes.size() < rightNodes.size()){
-					for(i=0; i<leftNodes.size(); i++)
-						rightNodes.addElement(leftNodes.elementAt(i));
+				if (leftNodes.size() < rightNodes.size()) {
+					for (i=0; i<leftNodes.size(); i++)
+						rightNodes.add(leftNodes.get(i));
 					return rightNodes;
 				}
-				for(i=0; i<rightNodes.size(); i++)
-					leftNodes.addElement(rightNodes.elementAt(i));
+				for (i=0; i<rightNodes.size(); i++)
+					leftNodes.add(rightNodes.get(i));
 				return leftNodes;
 				
 			case opType.DOT:
@@ -202,26 +202,15 @@ public class PathExprEvaluator
 				// for each reachable left node, get all reachable right nodes
 				//
 				int lsize = leftNodes.size();
-				for(i = 0; i < lsize; i++){
+				for (i = 0; i < lsize; i++) {
 					
-				    rightNodes = getReachableNodes(leftNodes.elementAt(i), 
+				    rightNodes = getReachableNodes(leftNodes.get(i), 
 								   re.getRightChild());
 					
-					/*
-					  if(leftNodes.elementAt(i) instanceof Document){
-					  rightNodes = getReachableNodes(
-					  ((Document)leftNodes.elementAt(i)).getDocumentElement(),
-					  re.getRightChild());
-					  } else {
-					  rightNodes = getReachableNodes((Element)leftNodes.elementAt(i), 
-					  re.getRightChild());
-					  }
-					*/
-
 					// Add each reachable right node to the return nodeList
 					//
-					for(j=0; j< rightNodes.size(); j++)
-						nodesReached.addElement(rightNodes.elementAt(j));
+					for (j=0; j< rightNodes.size(); j++)
+						nodesReached.add(rightNodes.get(j));
 				}
 				return nodesReached;
 				
@@ -230,13 +219,13 @@ public class PathExprEvaluator
 				
 				// If it is the root, insert the document element to reachable
 				//
-				if(inNode instanceof Document){
-					nodesReached.addElement( ((Document)inNode).getDocumentElement() );
+				if (inNode instanceof Document) {
+					nodesReached.add( ((Document)inNode).getDocumentElement() );
 				}
 				
 				// Otherwise put all child elements in reachable
 				//
-				else if(inNode instanceof Element){
+				else if (inNode instanceof Element) {
 					
 					// Get all child elements
 					//
@@ -248,7 +237,7 @@ public class PathExprEvaluator
 					for (i = 0; i < size; i++) {
 					    Node n = nl.item(i);
 					    if (n instanceof Element)
-						nodesReached.addElement(n);
+						nodesReached.add(n);
 					}
 				}
 				
@@ -263,10 +252,10 @@ public class PathExprEvaluator
 				
 				// Append the inNode to this set and return it
 				//
-				if(inNode instanceof Document)
-					leftNodes.addElement(((Document)inNode).getDocumentElement());
+				if (inNode instanceof Document)
+					leftNodes.add(((Document)inNode).getDocumentElement());
 				else
-					leftNodes.addElement(inNode);
+					leftNodes.add(inNode);
 				return leftNodes;		
 				
 			case opType.STAR:
@@ -274,28 +263,22 @@ public class PathExprEvaluator
 				//int size;		
 				//Vector [] all;
 				
-				nodesReached.addElement(inNode);
-				/*if(inNode instanceof Document){
-					nodesReached.addElement(((Document)inNode).getDocumentElement()); 
-				} else { 
-					nodesReached.addElement(inNode); 
-					}*/
-				
+				nodesReached.add(inNode);
 				leftNodes = getReachableNodes(inNode, re.getLeftChild());
-				while(leftNodes.size( ) != 0)
+				while(leftNodes.size() != 0)
 				{
 					size = leftNodes.size();			
-					for(i=0; i<size; i++)
-						nodesReached.addElement(leftNodes.elementAt(i));
+					for (i=0; i<size; i++)
+						nodesReached.add(leftNodes.get(i));
 					
 					all = new Vector[size];			
-					for(i=0; i<size; i++)
-						all[i] = getReachableNodes(leftNodes.elementAt(i), re.getLeftChild());
+					for (i=0; i<size; i++)
+						all[i] = getReachableNodes(leftNodes.get(i), re.getLeftChild());
 					
-					leftNodes = new Vector( );
-					for(i=0; i<size; i++)
-						for(j = 0; j < all[i].size( ); ++j)
-							leftNodes.addElement(all[i].elementAt(j));
+					leftNodes = new Vector();
+					for (i=0; i<size; i++)
+						for (j = 0; j < all[i].size(); ++j)
+							leftNodes.add(all[i].get(j));
 				}		
 				
 				return nodesReached;
@@ -306,20 +289,20 @@ public class PathExprEvaluator
 				//Vector [] all;
 				
 				leftNodes = getReachableNodes(inNode, re.getLeftChild());
-				while(leftNodes.size( ) != 0)
+				while(leftNodes.size() != 0)
 				{
 					size = leftNodes.size();			
-					for(i=0; i<size; i++)
-						nodesReached.addElement(leftNodes.elementAt(i));
+					for (i=0; i<size; i++)
+						nodesReached.add(leftNodes.get(i));
 					
 					all = new Vector[size];			
-					for(i=0; i<size; i++)
-						all[i] = getReachableNodes(leftNodes.elementAt(i), re.getLeftChild());
+					for (i=0; i<size; i++)
+						all[i] = getReachableNodes(leftNodes.get(i), re.getLeftChild());
 					
-					leftNodes = new Vector( );
-					for(i=0; i<size; i++)
-						for(j = 0; j < all[i].size( ); ++j)
-							leftNodes.addElement(all[i].elementAt(j));
+					leftNodes = new Vector();
+					for (i=0; i<size; i++)
+						for (j = 0; j < all[i].size(); ++j)
+							leftNodes.add(all[i].get(j));
 				}		
 				
 				return nodesReached;

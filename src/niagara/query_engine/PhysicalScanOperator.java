@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.7 2002/03/26 23:52:31 tufte Exp $
+  $Id: PhysicalScanOperator.java,v 1.8 2002/03/31 04:48:15 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -90,10 +90,8 @@ public class PhysicalScanOperator extends PhysicalOperator {
 
 	// Call the constructor on the super class
 	//
-	super(sourceStreams,
-	      destinationStreams,
-	      blockingSourceStreams,
-	      responsiveness);
+	super(sourceStreams, destinationStreams, 
+              blockingSourceStreams, responsiveness);
 
 	// Type cast the logical operator to a scan operator
 	//
@@ -142,11 +140,8 @@ public class PhysicalScanOperator extends PhysicalOperator {
                 System.err.println("Got you!, NULL Root of DOC");
             }
         }
-        else if(attribute instanceof Element) {
-				// KT: Is this OK - can we delete this else if??
-        }
 	
-	Vector elementList = PathExprEvaluator.getReachableNodes(attribute,this.rExp);	
+	Vector elementList = PathExprEvaluator.getReachableNodes(attribute, rExp);	
 		
 	// Append all the nodes returned to the inputTuple and add these
 	// to the result
