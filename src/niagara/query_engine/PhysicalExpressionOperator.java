@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.2 2000/08/28 21:57:54 vpapad Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.3 2000/10/07 01:08:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -116,9 +116,8 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
 		    source += " int "  + vname + " = XMLUtils.getInt(ste, " + attrpos + ");\n";
 		}
 		source += "int result; " + expression;
-		source += "com.ibm.xml.parser.TXElement txe = new com.ibm.xml.parser.TXElement(\"result\");\n" 
-		    + "txe.appendChild(new com.ibm.xml.parser.TXText(Integer.toString(result)));\n"
-		    + "return txe; }} new UserExpression();";
+  		source += "return new com.ibm.xml.parser.TXText(Integer.toString(result));\n"
+  		    + "}} new UserExpression();";
 
 		// System.out.println("XXX Source is: " + source);
 		Interpreter interpreter = new TreeInterpreter(new JavaCCParserFactory());

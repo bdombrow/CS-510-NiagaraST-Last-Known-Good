@@ -15,7 +15,6 @@ public class PropertyEditor extends JDialog {
     public PropertyEditor(JFrame parent, String title, QPNode _qpn) {
 	super(parent, title);
 	qpn = _qpn;
-	setLocation(400, 400);
 	Container cp = getContentPane();
 	int size = qpn.getNumProperties() + 1; // +1 for save/cancel buttons
 	String layoutstr = "<table rows=" + size + " cols=2>";
@@ -64,6 +63,8 @@ public class PropertyEditor extends JDialog {
 	cp.add("save", save);
 	cp.add("cancel", cancel);
 	pack();
+	
+	setLocation(100, 100);
 	setVisible(true);
     }
 }

@@ -103,11 +103,13 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	    = logicalAccumulateOperator.getInitialAccumFile();
 	String afName = logicalAccumulateOperator.getAccumFileName();
 
-	if(!initialAccumFile.equals("")) {
+	boolean clear = logicalAccumulateOperator.getClear();
+
+	if(clear && !initialAccumFile.equals("")) {
 	    createAccumulatorFromDisk(initialAccumFile);
-	    // System.out.println("crfromdsk done");
+	    //System.out.println("crfromdsk done");
 	} else if(!afName.equals("") && CacheUtil.isAccumFile(afName)) {
-	    if(logicalAccumulateOperator.getClear() == false) {
+	    if (!clear) {
 		createAccumulatorFromDoc(afName);
 	    } else {
 		/* delete existing accumulated file and prepare

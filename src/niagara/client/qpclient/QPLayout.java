@@ -23,13 +23,17 @@ public class QPLayout implements GlobalLayout {
 	    QPNode qpn = (QPNode) n;
 	    String xattr = qpn.getDOMElement().getAttribute("x");
 	    String yattr = qpn.getDOMElement().getAttribute("y");
-	    double x = Math.random() * vp.getWidth(); 
-	    double y = Math.random() * vp.getHeight();
+	    double x, y;
+
 	    if (!(xattr.equals("") || yattr.equals(""))) {
 		x  = Double.parseDouble(xattr);
 		y  = Double.parseDouble(yattr);
 	    }
-	    
+	    else {
+		x = Math.random() * vp.getWidth(); 
+		y = Math.random() * vp.getHeight();
+	    }
+
 	    LayoutUtilities.place(target, n, x, y);
         }
     }

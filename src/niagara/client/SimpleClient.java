@@ -12,6 +12,10 @@ public class SimpleClient implements UIDriverIF {
 	cm = new ConnectionManager(host, port, this, true);
     }
 
+    public SimpleClient(String host) {
+	this(host, ConnectionManager.SERVER_PORT);
+    }
+
     public SimpleClient() {
 	this("localhost", ConnectionManager.SERVER_PORT);
     }
@@ -19,6 +23,7 @@ public class SimpleClient implements UIDriverIF {
     public interface ResultsListener {
 	void notifyNewResults(String results);
 	void notifyError(String error);
+	void notifyFinal();
     }
 
     Vector resultListeners = new Vector();
@@ -41,6 +46,11 @@ public class SimpleClient implements UIDriverIF {
     public void notifyFinalResult(int id) {
 	if (resultListeners.size() == 0) 
 	    System.exit(0);
+	else {
+	    for (int i=0; i < resultListeners.size(); i++) {
+		((ResultsListener) resultListeners.elementAt(i)).notifyFinal();
+	    }
+	}
     }
 
     public void errorMessage(String err) {

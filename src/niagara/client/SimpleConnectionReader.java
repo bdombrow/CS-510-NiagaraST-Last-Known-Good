@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.2 2000/08/28 22:08:34 vpapad Exp $
+  $Id: SimpleConnectionReader.java,v 1.3 2000/10/07 01:07:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,6 +64,7 @@ class SimpleConnectionReader extends AbstractConnectionReader
      * The run method accumulates result strings
      */
     public void run()   {
+	int local_id = -1, server_id = -1;
 	// Read the connection and throw the callbacks
 	
 	try {
@@ -71,7 +72,6 @@ class SimpleConnectionReader extends AbstractConnectionReader
 	    String line;
 	    RE re = new RE("<responseMessage localID\\s*=\\s*\"([0-9]*)\"\\s*serverID\\s*=\\s*\"([0-9]*)\"\\s*responseType\\s*=\\s*\"server_query_id\"");
 	    boolean registered = false;
-	    int local_id = -1, server_id = -1;
 	    do {
 		line = br.readLine();
 		if (line.indexOf("<response") == 0  || line.indexOf("</response") == 0) {
@@ -91,11 +91,13 @@ class SimpleConnectionReader extends AbstractConnectionReader
 		    addResult(line);
 		    ((SimpleClient) ui).notifyNew(local_id);
 		}
+		System.out.println("XXX " + line);
 	    } while (line != null);
 	}
 	catch(Exception e){
 	    System.err.println("An exception in the server connection");
 	    ui.errorMessage("An exception in the server connection");
+	    ui.notifyFinalResult(local_id);
 	}
     }
 }

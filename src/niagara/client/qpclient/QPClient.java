@@ -23,7 +23,8 @@ import java.io.*;
 import java.util.Iterator;
 import htmllayout.*;
 
-public class QPClient extends JFrame implements ActionListener, SimpleClient.ResultsListener {
+public class QPClient extends JFrame implements ActionListener, 
+						SimpleClient.ResultsListener {
     QPGraphController qgc;
     QPGraphImpl qgi;
     GraphPane gp;
@@ -140,6 +141,12 @@ public class QPClient extends JFrame implements ActionListener, SimpleClient.Res
 	return gm;
     }
 
+    class QPClientThread extends Thread {
+	public void run() {
+	    new QPClient("QPClient");
+	}
+    }
+
     public void constructMenuBar() {
 	JMenuBar jmb = new JMenuBar();
 
@@ -152,7 +159,8 @@ public class QPClient extends JFrame implements ActionListener, SimpleClient.Res
 						 ActionEvent.CTRL_MASK));
 	mi.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-		    new QPClient("");
+		    QPClientThread qpct = new QPClientThread();
+		    qpct.start();
 		}
 	    });
 	file.add(mi);
@@ -214,20 +222,31 @@ public class QPClient extends JFrame implements ActionListener, SimpleClient.Res
     JScrollPane jsp;    
     SimpleClient sc;
     JButton again;
+    StringBuffer resultsBuffer = new StringBuffer();
+
     public void notifyNewResults(String results) {
-	jta.append(results + "\n");
+	resultsBuffer.append(results + "\n");
     }
 
     public void notifyError(String error) {
 	JOptionPane.showMessageDialog(this, error, "Error", JOptionPane.ERROR_MESSAGE);
+	resultsBuffer.setLength(0);
+	again.setEnabled(true);
+    }
+
+    public void notifyFinal() {
+	jta.setText(resultsBuffer.toString());
+	resultsBuffer.setLength(0);
+	again.setEnabled(true);
     }
 
     public void run() {
 	if (results == null) {
-	    jta = new JTextArea(40, 50);
+	    jta = new JTextArea(20, 40);
 	    results = new JFrame("Results: " + current_file);
+	    results.setLocation(200, 200);
 	    jsp = new JScrollPane(jta);
-	    jsp.setPreferredSize(new Dimension(500, 500));
+	    jsp.setPreferredSize(new Dimension(500, 300));
 	    jta.setEditable(false);
 	    again = new JButton("Run again!");
 	    again.addActionListener(new ActionListener() {
@@ -240,29 +259,34 @@ public class QPClient extends JFrame implements ActionListener, SimpleClient.Res
 	    c.add("ta", jsp);
 	    c.add("again", again);
 	}
+	again.setEnabled(false);
 	jta.setText("");
 
 	StringWriter sw = new StringWriter();
 	PrintWriter pw = new PrintWriter(sw);
 	root_node.save(pw, gp.getGraphView());
 
-	SimpleClient sc = new SimpleClient();
+	SimpleClient sc = new SimpleClient(server_host);
 	sc.addResultsListener(this);
 	sc.processQuery(sw.toString());
 	results.pack();
-	results.move(450, 400);
 	results.setVisible(true);
     }
     
+    static String server_host = "localhost";
+    
+    static int instancesRunning = 0;
+
     public QPClient(String title) {
 	super(title);
-	setSize(750, 800);
-
+	instancesRunning++;
 
 	//Handle the close window event
 	addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                System.exit(0);
+		instancesRunning--;
+		if (instancesRunning == 0)
+                	System.exit(0);
             }
         });
 
@@ -279,25 +303,27 @@ public class QPClient extends JFrame implements ActionListener, SimpleClient.Res
 	gp = new GraphPane(gm, qgc);
 	gp.getGraphView().setNodeRenderer(new OperatorRenderer());
 	jg.setGraphPane(gp);
+  	cp.add(jg, BorderLayout.CENTER);
 
-	JPanel jp = new JPanel();
-	MyButton j1 = new MyButton("j1");
-	MyButton j2 = new MyButton("j1");
-	MyButton j3 = new MyButton("j1");
-	MyButton j4 = new MyButton("j1");
-	bg = new ButtonGroup();
-	bg.add(j1); jp.add(j1);
-	bg.add(j2);jp.add(j2);
-	bg.add(j3);jp.add(j3);
-	bg.add(j4);jp.add(j4);
-	j1.addActionListener(this);
-	cp.add(jg, BorderLayout.CENTER);
+//  	JPanel jp = new JPanel();
+//  	MyButton j1 = new MyButton("j1");
+//  	MyButton j2 = new MyButton("j1");
+//  	MyButton j3 = new MyButton("j1");
+//  	MyButton j4 = new MyButton("j1");
+//  	bg = new ButtonGroup();
+//  	bg.add(j1); jp.add(j1);
+//  	bg.add(j2);jp.add(j2);
+//  	bg.add(j3);jp.add(j3);
+//  	bg.add(j4);jp.add(j4);
+//  	j1.addActionListener(this);
 
-	JToolBar jtb = new JToolBar();
-	addButtons(jtb);
+//  	JToolBar jtb = new JToolBar();
+//  	addButtons(jtb);
        
 	//	cp.add(jtb, BorderLayout.NORTH);
 
+	jg.setPreferredSize(new Dimension(680, 530));
+	pack();
 	setVisible(true);
     }
 
@@ -317,9 +343,17 @@ public class QPClient extends JFrame implements ActionListener, SimpleClient.Res
 
     public static void main(String args[]) {
 	QPClient qpc = new QPClient("QPClient");
-	if (args.length > 0) { 
-	    qpc.current_file = new File(args[0]);
+	int i = 0;
+
+	if (args.length >= 2 && args[0].equals("-h")) {
+	    server_host = args[1];
+	    i = 2;
+	}
+
+	if (args.length > i) { 
+	    qpc.current_file = new File(args[i]);
 	    qpc.loadFile(qpc.current_file);
+	    qpc.gp.repaint();
 	}
     }
 
