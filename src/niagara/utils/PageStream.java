@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.4 2003/03/03 08:26:15 tufte Exp $
+  $Id: PageStream.java,v 1.5 2003/03/05 19:28:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -83,6 +83,7 @@ public class PageStream {
     private String shutdownMsg;
 
     private final int STREAM_CAPACITY = 5;
+    public static int MAX_DELAY = 1000;
 
     // keep extra pages around that can be reused 
     private TuplePage[] dataPageBuffer;
@@ -92,7 +93,7 @@ public class PageStream {
     private String name;
 
     // instrumentation code
-    private static boolean INSTRUMENT = false;
+    public static boolean VERBOSE = false;
     private int timeouts;
     //private int existingDataPagesUsed;
     //private int dataPagesAllocd;
@@ -115,7 +116,7 @@ public class PageStream {
 	shutdown = false;
 	this.name = name;
 
-	if(INSTRUMENT) {
+	if(VERBOSE) {
 	    // instrumentation
 	    timeouts = 0;
 	    //existingDataPagesUsed = 0;
@@ -128,6 +129,10 @@ public class PageStream {
 	}
     }  
 
+    public String getName() {
+	return name;
+    }
+    
     // ----------------------------------------------------------------------
     // FUNCTIONS FOR USE BY SourceTupleStream ONLY
     // ----------------------------------------------------------------------
@@ -185,7 +190,7 @@ public class PageStream {
 		wait(timeout);
 		if(toConsumerQueue.isEmpty()) {
 		    // I timed out...
-		    if(INSTRUMENT)
+		    if(VERBOSE)
 			timeouts++;
 		    return null;
 		}
@@ -215,7 +220,7 @@ public class PageStream {
 	}
 
 	if(notifyProducer) {
-	    if(INSTRUMENT)
+	    if(VERBOSE)
 		notifiedProducer++;
 	    notify();
 	}
@@ -266,7 +271,7 @@ public class PageStream {
 	//		   CtrlFlags.name[ctrlMsgId]);
 	toProducerQueue.put(getCtrlPage(ctrlMsgId, ctrlMsgStr));
 	if(notify) {
-	    if(INSTRUMENT)
+	    if(VERBOSE)
 		notifiedOnCtrl++;
 	    notify();
 	}
@@ -410,7 +415,7 @@ public class PageStream {
 	    toConsumerQueue.put(page);
 
 	    if(notifyConsumer) {
-		if(INSTRUMENT)
+		if(VERBOSE)
 		    notifiedConsumer++;
 		notify();
 	    }
@@ -430,9 +435,9 @@ public class PageStream {
 	if (eos) 
 	    throw new PEException("KT end of stream received twice");
 	eos = true;
-	if(INSTRUMENT) {
-	    System.out.println("PageStream: " + name + " had " + timeouts +
-			       " Timeouts ");
+	if(VERBOSE) {
+	    System.out.println("PageStream: " + name + " results.");
+	    System.out.println("   Timeouts: " + timeouts);
 	    //System.out.println("Existing Data Pages Used " 
 	    // +existingDataPagesUsed);
 	    //System.out.println("Data Pages Allocd " + dataPagesAllocd);
@@ -440,9 +445,9 @@ public class PageStream {
 	    //+existingCtrlPagesUsed);
 	    //System.out.println("Ctrl Pages Used " + ctrlPagesAllocd);
 	    //System.out.println(name);
-	    System.out.println("notified consumer " + notifiedConsumer);
-	    System.out.println("notified producer " + notifiedProducer);
-	    System.out.println("notified on control " + notifiedOnCtrl);
+	    System.out.println("   Notified Consumer: " + notifiedConsumer);
+	    System.out.println("   Notified Producer " + notifiedProducer);
+	    System.out.println("   Notified on Control " + notifiedOnCtrl);
 	    //System.out.println();
 	}
     }
@@ -477,9 +482,10 @@ public class PageStream {
     }
 
     private void returnCtrlPage(TuplePage returnPage) {
-	if(extraCtrlPage == null)
+	if(extraCtrlPage != null)
 	    System.out.println("KT dropping extra control page");
 	returnPage.setFlag(CtrlFlags.NULLFLAG);
+	extraCtrlPage = returnPage;
     }
 
     /**

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TuplePage.java,v 1.3 2003/02/26 06:35:33 tufte Exp $
+  $Id: TuplePage.java,v 1.4 2003/03/05 19:28:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -97,7 +97,7 @@ public class TuplePage {
     }
 
     public void setFlag(int flag) {
-	if(flag < CtrlFlags.NULLFLAG || flag > CtrlFlags.EOS) {
+	if(flag < CtrlFlags.NULLFLAG || flag > CtrlFlags.REQUEST_BUF_FLUSH) {
 	    throw new PEException("KT invalid control flag in createControlPage");
 	}
 	this.flag = flag;

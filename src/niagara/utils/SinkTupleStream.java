@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.6 2003/03/03 08:26:15 tufte Exp $
+  $Id: SinkTupleStream.java,v 1.7 2003/03/05 19:28:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -97,7 +97,8 @@ public final class SinkTupleStream {
 	// pageStream sends an EOS up stream and sets an isClosed flag
 	status = Closed;
         int ctrlFlag = putCtrlMsg(CtrlFlags.EOS, "End of Stream");
-	if(ctrlFlag == CtrlFlags.GET_PARTIAL) {
+	if(ctrlFlag == CtrlFlags.GET_PARTIAL ||
+	   ctrlFlag == CtrlFlags.REQUEST_BUF_FLUSH) {
 	    // ignore since we just sent eos
 	} else if (ctrlFlag != CtrlFlags.NULLFLAG) {
 	    throw new PEException("Unexpected ctrl flag " 
@@ -123,12 +124,8 @@ public final class SinkTupleStream {
 	// we have to handle getpartials in case the operator or
 	// stream below us can't handle them (or isn't supposed
 	// to get getPartials for optimization reasons)
-	if(ctrlFlag != CtrlFlags.GET_PARTIAL || !reflectPartial) {
-	    return ctrlFlag;
-	} else {
-	    reflectPartial();
-	    return CtrlFlags.NULLFLAG;
-	}
+	// Also, we handle REQ_BUF_FLUSH
+	return processCtrlFlag(ctrlFlag);
     }
 
     /**
@@ -162,7 +159,7 @@ public final class SinkTupleStream {
 	   
 	buffer.put(tuple);
 	if(buffer.isFull() || sendImmediate) {
-	    return flushBuffer();
+	    return flushBuffer(); // flushBuffer returns GET_PARTIAL or NULLFLAG
 	} else {
 	    return CtrlFlags.NULLFLAG; // success
 	}
@@ -206,6 +203,16 @@ public final class SinkTupleStream {
         // Add the object as an attribute of the tuple
         tuple.appendAttribute(node);
         int ctrlFlag = putTuple(tuple);
+
+	if(ctrlFlag == CtrlFlags.GET_PARTIAL) {
+	    // stream above an operator using this put should
+	    // always reflect partials
+	    throw new PEException("KT unexpected get partial request");
+	}
+
+	// handle a flush buffer request
+	ctrlFlag = processCtrlFlag(ctrlFlag);
+
 	if(ctrlFlag != CtrlFlags.NULLFLAG) {
 	    // stream above an operator using this put should
 	    // always reflect partials
@@ -248,28 +255,66 @@ public final class SinkTupleStream {
      * 
      * @return NULLFLAG on success, control flag if a control element
      * was encountered during buffer flushing
+     * only ctrl flag returned by pageStream.putPageToSink is GET_PARTIAL
+     * or NULLFLAG
      */
-    // only ctrl flag returned by pageStream.putPageToSink is GET_PARTIAL
-    public int flushBuffer() throws ShutdownException, InterruptedException {
+    private int flushBuffer() throws ShutdownException, InterruptedException {
 	if(buffer.isEmpty() && buffer.getFlag() == CtrlFlags.NULLFLAG) {
 	    // don't flush an empty buffer...
 	    return CtrlFlags.NULLFLAG;
 	} else {
 	    int ctrlFlag = pageStream.putPageToSink(buffer);
-	    if(ctrlFlag == CtrlFlags.GET_PARTIAL && reflectPartial) {
-		reflectPartial(); // this will always put the buffer to the sink
-		ctrlFlag = CtrlFlags.NULLFLAG;
-	    }
-	    
 	    if(ctrlFlag == CtrlFlags.NULLFLAG) {
 		// success
 		// get new empty buffer to write in
 		buffer = pageStream.getTuplePage();
 		buffer.startPutMode();
+	    } else {
+		ctrlFlag = processCtrlFlag(ctrlFlag);
 	    }
+	    if(ctrlFlag != CtrlFlags.NULLFLAG &&
+	       ctrlFlag != CtrlFlags.GET_PARTIAL)
+		throw new PEException("Bad ctrl flag");
 	    return ctrlFlag;
 	}
     }
+
+    /**
+     * SinkTupleStream handles some control messages - this function
+     * makes sure the handling is uniform. SinkTupleStream handles
+     * some GET_PARTIALS and some REQ_BUF_FLUSHES
+     * 
+     * @param ctrlFlag The control flag received
+     *
+     * @returns The ctrl flag to be returned to PhysicalOperator.
+     *          Should be either NULLFLAG OR GET_PARTIAL
+     */
+    private int processCtrlFlag(int ctrlFlag) 
+	throws ShutdownException, InterruptedException {
+
+	switch(ctrlFlag) {
+	case CtrlFlags.REQUEST_BUF_FLUSH:
+	    if(PageStream.VERBOSE)
+		System.out.println(pageStream.getName() + 
+				   " received request for buffer flush ");
+	    return flushBuffer(); // returns NULLFLAG or GET_PARTIAL
+	    
+	case CtrlFlags.GET_PARTIAL:
+	    if(reflectPartial) {
+		reflectPartial(); // void
+		return CtrlFlags.NULLFLAG;
+	    } else {
+		return CtrlFlags.GET_PARTIAL;
+	    }
+
+	case CtrlFlags.NULLFLAG:
+	    return CtrlFlags.NULLFLAG;
+	    
+	default:
+	    throw new PEException("Unexpected control flag");
+	}
+    }
+
 
     /**
      * put a SYNC_PARTIAL into the sink stream (upstream). This function

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CtrlFlags.java,v 1.1 2002/04/29 19:54:57 tufte Exp $
+  $Id: CtrlFlags.java,v 1.2 2003/03/05 19:28:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,15 +40,20 @@ package niagara.utils;
 
 public class CtrlFlags {
 
-    // flag values - upstream means message of that type can
-    // travel upstream (from bottom of tree up to top)
+    // flag values - downstream means message of that type can
+    // travel downstream - in the same direction as data (from
+    // bottom of tree to top) 
+    // downstream is producer -> consumer, upstream is consumer->producer
     // see notes on meanings of these flags after end of class
     public final static int NULLFLAG = 0; 
     public final static int SHUTDOWN = 1; // upstream & downstream
-    public final static int GET_PARTIAL = 2; // downstream only
-    public final static int SYNCH_PARTIAL = 3; // upstream only
-    public final static int END_PARTIAL = 4; // upstream only
-    public final static int EOS = 5;   // upstream only
+    public final static int GET_PARTIAL = 2; // upstream only
+    public final static int SYNCH_PARTIAL = 3; // downstream only
+    public final static int END_PARTIAL = 4; // downstream only
+    public final static int EOS = 5;   // downstream only
+    public final static int REQUEST_BUF_FLUSH = 6; // upstream only
+
+    public final static int TIMED_OUT = 7; // for returning status only
 
     // flag names - order MUST match order of values -
     // value (from above) is used as an index into the name
@@ -59,7 +64,9 @@ public class CtrlFlags {
 	  "GetPartial",
 	  "SynchPartial",
 	  "EndPartial",
-	  "EndOfStream" };
+	  "EndOfStream",
+	  "RequestBufferFlush",
+	  "TimedOut" };
     
 }
 
@@ -88,3 +95,8 @@ public class CtrlFlags {
 // EOS - EOS is used for normal shutdown due to end of stream. When
 //       an operator completes processing, it puts an EOS into the
 //       stream to indicate it is done.
+// REQUEST_BUF_FLUSH This is sent by a consumer to a producer when
+//       the consumer times out on the producer's stream many times.
+//       It requests that the producer flush its possibly partially-full 
+//       buffer. This is for the case where the producer is producing
+//       tuples slowly - to make sure we still get data in this case.

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SourceTupleStream.java,v 1.2 2003/02/26 06:35:33 tufte Exp $
+  $Id: SourceTupleStream.java,v 1.3 2003/03/05 19:28:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -45,9 +45,6 @@ public final class SourceTupleStream {
 
     private PageStream pageStream;
     private TuplePage buffer;
-
-    // indicates if getTuple() timed out or not
-    private boolean timedOut;
 
     // flag of most recent control message received
     private int ctrlFlag;
@@ -96,8 +93,7 @@ public final class SourceTupleStream {
      * then read from PageStream and return the first tuple from that page.
      *
      * Function returns a tuple, if found. If timeout or control elt found,
-     * returns null. timedOut() function can be used to determine if
-     * timeout occurred.
+     * returns null. ctrlFlag set to TIMED_OUT if timeout occurred.
      *
      * If the stream is closed and
      * all the data items have been returned in previous "gets", then the 
@@ -115,7 +111,6 @@ public final class SourceTupleStream {
     public StreamTupleElement getTuple(int timeout)  
 	throws java.lang.InterruptedException, ShutdownException {
 	
-	timedOut = false;
 	ctrlFlag = CtrlFlags.NULLFLAG; // for safety
 
 	// get allowed after eos
@@ -124,14 +119,15 @@ public final class SourceTupleStream {
 	    buffer = pageStream.getPageFromSource(timeout);
 	    // if getPageFromSource returns null, it means it timed out
 	    if(buffer == null) {
-		timedOut = true;
+		ctrlFlag = CtrlFlags.TIMED_OUT;
 		return null;
 	    }
 
 	    // switch buffer flag, so we can read tuples
 	    buffer.startGetMode();
 	} else {
-	    // check for shutdown
+	    // check for shutdown - this code here just helps
+	    // propagate shutdown ASAP
 	    if(pageStream.shutdownReceived()) 
 		throw new ShutdownException(pageStream.getShutdownMsg());
 	}
@@ -157,8 +153,8 @@ public final class SourceTupleStream {
 		buffer = null;
 		return null;
 	    } else {
-		// case 3 is not allowed
-		throw new PEException("KT detected page with no data and no control");
+		assert false : "KT detected page with no data and no control";
+		return null;
 	    }
 	}
     }
@@ -178,23 +174,9 @@ public final class SourceTupleStream {
     }    
 
     /**
-     * Simply indicates if stream timed out on previous getNextTuple
-     * function. Used for distinguishing between receiving control
-     * element and time out during getNextTuple (both cause getNextTuple
-     * to fail
-     *
-     * @return true if previous getNextTuple timed out, false otherwise
-     */
-    public boolean timedOut() {
-	return timedOut;
-    }
-
-    /**
      * Returns the controlFlag detected during previous getNextTuple call
      */
     public int getCtrlFlag() {
-	if(timedOut)
-	    throw new PEException("KT calling getControlFlag after timeout");
 	return ctrlFlag;
     }
 
@@ -207,7 +189,8 @@ public final class SourceTupleStream {
     {
 	String retStr = new String ("\nTuple Buffer\n");
 	retStr += buffer.toString();
-	retStr += "\nstatus: " + status + " timedOut: " + timedOut + "\n";
+	retStr += "\nstatus: " + status + " ctrlFlag " + 
+	    CtrlFlags.name[ctrlFlag] + "\n";
 	return retStr;
     }
 
