@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SEQueryHandler.java,v 1.1 2000/05/30 21:03:28 tufte Exp $
+  $Id: SEQueryHandler.java,v 1.2 2001/08/08 21:28:32 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,20 +28,20 @@
 
 package niagara.search_engine.server;
 
+import org.w3c.dom.*;
+import org.xml.sax.InputSource;
 import java.io.*;
 import java.net.*;
 import java.util.*;
 import java_cup.runtime.*;
+
+import niagara.ndom.*;
 import niagara.search_engine.seql.*;
 import niagara.search_engine.util.*;
 import niagara.search_engine.operators.*;
 import niagara.search_engine.indexmgr.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
-
-import com.ibm.xml.parser.*;
-import org.w3c.dom.*;
-
 
 /** 
  * Query Handler for the SEServer.
@@ -116,7 +116,7 @@ public class SEQueryHandler implements Runnable {
 	    String query;
 	    while((request=getRequest()) != null) {
 
-		TXDocument doc = parseXML(request);
+		Document doc = parseXML(request);
 
 		int type = getRequestType(doc);
 		
@@ -386,7 +386,7 @@ public class SEQueryHandler implements Runnable {
 	}
     }
     
-    public static int getRequestType(TXDocument doc) {
+    public static int getRequestType(Document doc) {
 	NodeList nodes = doc.getElementsByTagName(TYPE);
 	int n = nodes.getLength();
 	
@@ -399,7 +399,7 @@ public class SEQueryHandler implements Runnable {
 	return typen;
     }
 
-    public static String getQueryString(TXDocument doc) {
+    public static String getQueryString(Document doc) {
 	NodeList nodes = doc.getElementsByTagName(QUERY);
 	int n = nodes.getLength();
 	
@@ -415,35 +415,41 @@ public class SEQueryHandler implements Runnable {
 	return result;
     }
 
-    public static TXDocument parseXML(Reader reader) {
-        Parser p   = new Parser("request.xml");
-        TXDocument doc = new TXDocument();
-        p.setElementFactory(doc);
+    public static Document parseXML(Reader reader) {
+        niagara.ndom.DOMParser p = DOMFactory.newParser(); 
+	Document doc = DOMFactory.newDocument();
 
-        try {
-	    p.readStream(reader);
-        }   catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+	// KT: remove when new code works p.setElementFactory(doc);
+	    
+	try {
+	    p.parse(new InputSource(reader));
+	    // KT: code from before ndom - remove when new stuff works:p.readStream(reader);
+	}   catch (Exception e) {
+	    e.printStackTrace();
+	    return null;
+	}
 	return doc;
     }
 
-    public static TXDocument parseXML(String str) {
-        Parser p   = new Parser("request.xml");
-        p.setWarningNoDoctypeDecl(false);
-        p.setWarningNoXMLDecl(false);
-        p.setKeepComment(false);
-        TXDocument doc = new TXDocument();
-        p.setElementFactory(doc);
+    public static Document parseXML(String str) {
+	niagara.ndom.DOMParser p = DOMFactory.newParser();
 
-        try {
-	    p.readStream(new StringReader(str));
-        }   catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-	return doc;
+	/* KT - code from before ndom - remove when new stuff works
+	 * p.setWarningNoDoctypeDecl(false);
+	 *  p.setWarningNoXMLDecl(false);
+	 *  p.setKeepComment(false);
+	 */
+	Document doc = DOMFactory.newDocument();
+	// KT - remove p.setElementFactory(doc);
+	    
+	    try {
+		p.parse(new InputSource(new StringReader(str)));
+		// KT - remove: p.readStream(new StringReader(str));
+	    }   catch (Exception e) {
+		e.printStackTrace();
+		return null;
+	    }
+	    return doc;
     }
 
     public static String openTag(String tag) {

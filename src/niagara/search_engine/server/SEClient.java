@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SEClient.java,v 1.1 2000/05/30 21:03:28 tufte Exp $
+  $Id: SEClient.java,v 1.2 2001/08/08 21:28:32 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,7 +33,6 @@ import java.net.*;
 import java.util.*;
 import niagara.search_engine.util.*;
 
-import com.ibm.xml.parser.*;
 import org.w3c.dom.*;
 
 /** 
@@ -306,7 +305,7 @@ public class SEClient implements Const {
 	    return;
 	}
 
-	TXDocument doc = SEQueryHandler.parseXML(result);
+	Document doc = SEQueryHandler.parseXML(result);
 		
 	NodeList nodes = doc.getElementsByTagName(SEQueryHandler.ITEM);
 	int n = nodes.getLength();
@@ -351,7 +350,7 @@ public class SEClient implements Const {
 	String result = getResponse();
 	if (result == null) 
 	    return;
-	TXDocument doc = SEQueryHandler.parseXML(result);
+	Document doc = SEQueryHandler.parseXML(result);
 		
 	NodeList nodes = doc.getElementsByTagName(SEQueryHandler.ITEM);
 	int n = nodes.getLength();
@@ -377,12 +376,12 @@ public class SEClient implements Const {
 	if(response == null)
 	    return v;
 	
-	TXDocument responseDoc = SEQueryHandler.parseXML(response);
+	Document responseDoc = SEQueryHandler.parseXML(response);
 	
 	return parseList(responseDoc);
     }
 
-    public static Vector parseList(TXDocument listDoc) {
+    public static Vector parseList(Document listDoc) {
 	Vector v = new Vector();
 
 	if(listDoc == null)
@@ -404,12 +403,12 @@ public class SEClient implements Const {
 	if(response == null)
 	    return null;
 	
-	TXDocument responseDoc = SEQueryHandler.parseXML(response);
+	Document responseDoc = SEQueryHandler.parseXML(response);
 	
 	return getMessage(responseDoc);
     }
 
-    public static String getMessage(TXDocument listDoc) {
+    public static String getMessage(Document listDoc) {
 	String message=null;
 
 	if(listDoc == null)
