@@ -1,4 +1,4 @@
-/* $Id: SSP.java,v 1.7 2003/06/03 07:56:51 vpapad Exp $
+/* $Id: SSP.java,v 1.8 2003/09/13 03:33:19 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -72,7 +72,7 @@ public class SSP {
     //  INFBOUND: When optimizing a group, ignore the initial upper bound; use infinity instead
     public boolean INFBOUND = false;
 
-    public boolean Pruning = false; // global pruning flag
+    public boolean Pruning = true; // global pruning flag
 
     // **************  include physcial mexpr in group or not *****************
     public boolean NO_PHYS_IN_GROUP = false;
@@ -91,7 +91,7 @@ public class SSP {
     ////otherwise, this value will be reset in main
     Cost GlobalEpsBound = new Cost(0);
 
-    public boolean CuCardPruning = false; // global cucard pruning flag
+    public boolean CuCardPruning = true; // global cucard pruning flag
 
     public static final int NEW_GRPID = -1;
     //     // use by CopyIn and MExpr::MExpr

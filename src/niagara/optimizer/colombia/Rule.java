@@ -1,4 +1,4 @@
-/* $Id: Rule.java,v 1.6 2003/06/03 07:56:51 vpapad Exp $
+/* $Id: Rule.java,v 1.7 2003/09/13 03:33:18 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -191,7 +191,14 @@ public abstract class Rule {
     // Argument "MExpr * mexpr" is added in by QUAN WANG in DEC/99
     // to let the substitute function access groupid of the current expression.
 
-    public abstract Expr next_substitute(
+    // XXX Vassilis: It is often the case that determining whether a rule applies 
+    // to an expression takes almost as much work as it does to actually 
+    // apply the rule. This code and effort would have to be duplicated between 
+    // condition and nextSubstitute (for example to check whether a join reordering 
+    // produces a cartesian product or not). We now allow nextSubstitute to return 
+    // null, to signify that we discovered within nextSubstitute that a rule does not 
+    // actually apply.   
+    public abstract Expr nextSubstitute(
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp);

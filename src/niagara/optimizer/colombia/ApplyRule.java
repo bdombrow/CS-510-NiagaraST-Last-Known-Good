@@ -1,4 +1,4 @@
-/* $Id: ApplyRule.java,v 1.7 2003/06/03 07:56:51 vpapad Exp $
+/* $Id: ApplyRule.java,v 1.8 2003/09/13 03:33:19 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -178,9 +178,8 @@ public class ApplyRule extends Task {
                 //            Conditions[rule.get_index()]++;
                 //#endif
                 // try to derive a new substitute expression
-                after = rule.next_substitute(before, mexpr, ReqdProp);
-
-                assert after != null;
+                after = rule.nextSubstitute(before, mexpr, ReqdProp);
+                if (after == null) continue;
 
                 //            PTRAClE0("substitute expr is : " + after.Dump());
 
@@ -319,10 +318,9 @@ public class ApplyRule extends Task {
                 //PTRACE ("Binding SATISFIES condition function.  Mexpr: %s",mexpr.Dump());
 
                 // try to derive a new substitute expression
-                after = rule.next_substitute(before, mexpr, ReqdProp);
-
-                assert(after != null);
-
+                after = rule.nextSubstitute(before, mexpr, ReqdProp);
+                if (after == null) continue;
+                
                 //PTRACE("substitute expr is : %s", after.Dump());
 
                 // include substitute in MEMO, find duplicates, etc.

@@ -1,4 +1,4 @@
-/* $Id: O_INPUTS.java,v 1.6 2003/06/03 07:56:51 vpapad Exp $
+/* $Id: O_INPUTS.java,v 1.7 2003/09/13 03:33:19 vpapad Exp $
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -54,7 +54,6 @@ public class O_INPUTS extends Task {
     private Cost epsBound;
     // if global eps pruning is on, this is the eps bound for eps pruning
     // else it is zero
-    private int contNo; // keep track of number of contexts 
 
     //Costs and properties of input winners and groups.  Computed incrementally
     // by this method.
@@ -62,26 +61,20 @@ public class O_INPUTS extends Task {
     LogicalProperty[] inputLogProp;
 
     public O_INPUTS(MExpr MExpr, Context context, boolean last) {
-        this(MExpr, context, last, null, 0);
-    }
-
-    public O_INPUTS(MExpr MExpr, Context context, boolean last, Cost bound) {
-        this(MExpr, context, last, bound, 0);
+        this(MExpr, context, last, null);
     }
 
     public O_INPUTS(
         MExpr MExpr,
         Context context,
         boolean last,
-        Cost bound,
-        int contNo) {
+        Cost bound) {
         super(MExpr.getGroup().getSSP(), context);
         this.mexpr = MExpr;
         inputNo = -1;
         this.last = last;
         prevInputNo = -1;
         epsBound = bound;
-        this.contNo = contNo;
 
         assert(MExpr.getOp().is_physical() || MExpr.getOp().is_item());
         //We can only calculate cost for physical operators
@@ -419,7 +412,6 @@ public class O_INPUTS extends Task {
 
                 //push this task
                 ssp.addTask(this);
-                //PTRACE("push myself, %s", "O_INPUT");
 
                 //Build a context for the input group task
                 //First calculate the upper bound for search of input group.
