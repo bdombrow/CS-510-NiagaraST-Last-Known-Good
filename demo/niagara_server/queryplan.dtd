@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.38 2003/12/06 06:56:04 jinli Exp $
+<!-- $Id: queryplan.dtd,v 1.39 2003/12/24 02:33:08 vpapad Exp $
      DTD for query plans -->
 
 <!-- 
@@ -17,7 +17,8 @@
 		    firehosescan | filescan | construct | 
 		    bucket | partitionavg | partitionmax |
 		    accumulate | nest | magic_construct | 
-		    windowCount | windowMax | windowAverage )+>
+		    windowCount | windowMax | windowAverage  |
+		    store | load )+>
 		    
 <!ATTLIST plan top IDREF        #REQUIRED
           %PositionAttributes;>
@@ -417,3 +418,17 @@
 <!ATTLIST nest 
 	  neston    CDATA	       #REQUIRED
           %StandardAttributes;>
+
+<!ELEMENT store EMPTY>
+<!ATTLIST store 
+	  root CDATA  #REQUIRED
+	  resource CDATA  #REQUIRED
+          %StandardAttributes;>
+
+<!ELEMENT load EMPTY>
+<!ATTLIST load 
+       id       ID           #REQUIRED
+	  variable CDATA  #REQUIRED
+	  resource CDATA  #REQUIRED
+          %PositionAttributes;>
+          
