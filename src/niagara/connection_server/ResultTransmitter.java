@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.23 2003/07/09 19:12:02 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.24 2003/07/27 02:28:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -78,7 +78,9 @@ public class ResultTransmitter implements Runnable {
     private boolean killThread = false;
     private CPUTimer cpuTimer;
 
-    public static boolean QUIET = false;    
+    public static boolean QUIET = false;
+    public static boolean OUTPUT_FULL_TUPLE = false;
+        
     /** Constructor
 	@param handler The request handler that created this transmitter
 	@param queryInfo The info about the query to be executed

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.27 2003/07/18 01:03:10 tufte Exp $
+  $Id: NiagraServer.java,v 1.28 2003/07/27 02:28:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -141,6 +141,8 @@ public class NiagraServer {
 		// nothing to do
 	    } else if (args[i].equals("-quiet")) {
 		ResultTransmitter.QUIET = true;
+	    } else if (args[i].equals("-full-tuple")){
+	    	ResultTransmitter.OUTPUT_FULL_TUPLE = true;
 	    } else if (args[i].equals("-dtd-hack")) {
 		dtd_hack = true;
 	    } else if (args[i].equals("-console")) {
