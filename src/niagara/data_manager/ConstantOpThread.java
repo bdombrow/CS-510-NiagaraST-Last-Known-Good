@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOpThread.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
+ * $Id: ConstantOpThread.java,v 1.3 2002/04/29 19:48:41 tufte Exp $
  *
  */
 
@@ -21,11 +21,11 @@ import niagara.utils.*;
 import niagara.ndom.*;
 
 public class ConstantOpThread implements Runnable {
-    private SourceStream outputStream;
+    private SinkTupleStream outputStream;
 
     private String content;
 
-    public ConstantOpThread(String content, SourceStream outStream) {
+    public ConstantOpThread(String content, SinkTupleStream outStream) {
 	this.content = content;
 	outputStream = outStream;
     }
@@ -38,7 +38,7 @@ public class ConstantOpThread implements Runnable {
 	// Our work is finished
 	try {
             processDocument();
-	    outputStream.close();
+	    outputStream.endOfStream();
 	}
 	catch (Exception e) {
 	    System.err.println("The output stream for the firehose thread was already closed.");
@@ -51,8 +51,8 @@ public class ConstantOpThread implements Runnable {
      * buffer - this means parse it and put the resulting Document
      * in the output stream
      */
-    private boolean processDocument() {
-	boolean succeed = true;
+    private void processDocument() 
+	throws SAXException, ShutdownException, IOException {
 	try {
             niagara.ndom.DOMParser parser = DOMFactory.newParser();
 
@@ -72,27 +72,16 @@ public class ConstantOpThread implements Runnable {
                     for (int j = 0; j < attrs.getLength(); j++) {
                         ste.appendAttribute(attrs.item(j).getFirstChild());
                     }
-                    succeed = outputStream.steput(ste);
+                    outputStream.putTupleNoCtrlMsg(ste);
                 }
             }
             else // A regular costant doc.
-                succeed = outputStream.put(doc);
+		outputStream.put(doc);
 
 	} catch(java.lang.InterruptedException e) {
 	    System.err.println("Thread interrupted in ConstantOpThread::processMessageBuffer");
-	    return false;
-	} catch (NullElementException e) {
-	    System.err.println("NullElementException in ConstantOpThread::processMessageBuffer");
-	    return false;
-	} catch (StreamPreviouslyClosedException e) {
-	    System.err.println("StreamPreviouslyClosedException in ConstantOpThread::processMessageBuffer");
-	    return false;
 	}
-	catch (Exception ex) {
-	    ex.printStackTrace();
-	    return false;
-	}
-	return succeed;
+	return;
     }
 
     void processStreamDoc(Element root, Hashtable elements) {

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheManager.java,v 1.4 2001/08/08 21:25:48 tufte Exp $
+  $Id: CacheManager.java,v 1.5 2002/04/29 19:48:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -420,8 +420,8 @@ public class CacheManager {
 
     public synchronized boolean getDocuments(Vector xmlURLList, 
 					     regExp pathExpr,   
-					     SourceStream stream) 
-    {
+					     SinkTupleStream stream) 
+    throws ShutdownException {
         int numFetches = xmlURLList.size();
         // System.err.println("Getting " + numFetches + " docs");
         // Put in the fetchInfo object in service queue
@@ -443,7 +443,7 @@ public class CacheManager {
     }
 
     private void getTrigDocument(String tmps, 
-            regExp pathExpr, SourceStream s) {
+				 regExp pathExpr, SinkTupleStream sinkStream) {
         int id = CacheUtil.tupleGetTrigId(tmps);
         String fn = CacheUtil.tupleGetTrigFile(tmps);
 
@@ -466,17 +466,16 @@ public class CacheManager {
         try {
             if(isVec) {
                 Vector vec = scanTuples(fn, from, to);
-		System.out.println("::::: CM:: Pushing up " + vec.size() + " "+s);
+		System.out.println("::::: CM:: Pushing up " + vec.size() + " "+sinkStream);
                 for(int i=0; i<vec.size(); i++) {
-		    
-                    s.steput((StreamTupleElement)vec.elementAt(i));
+		    sinkStream.putTupleNoCtrlMsg((StreamTupleElement)vec.elementAt(i));
                 }
             }
             else {
                 Document doc = getDiff(fn, from, to);
-                s.put(doc);
+                sinkStream.put(doc);
             }
-            s.close();
+            sinkStream.endOfStream();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -491,15 +490,12 @@ public class CacheManager {
      *
      */
     private void getAccumFile(String afName, 
-			      SourceStream outputStream) {
+			      SinkTupleStream outputStream) 
+	throws ShutdownException {
 	try {
 	    Document accumDoc = (Document)DataManager.AccumFileDir.get(afName);
 	    outputStream.put(accumDoc);
-	    outputStream.close();
-	} catch (niagara.utils.NullElementException e) {
-	    throw new PEException("What happened?!" + e.getMessage());
-	} catch (niagara.utils.StreamPreviouslyClosedException e) {
-	    throw new PEException("What happened?!" + e.getMessage());
+	    outputStream.endOfStream();
 	} catch (java.lang.InterruptedException e) {
 	    throw new PEException("What happened?!" + e.getMessage());
 	}

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: MemCache.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
+  $Id: MemCache.java,v 1.3 2002/04/29 19:48:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -173,11 +173,9 @@ abstract class MemCache implements DMCache {
         FetchThread fth = (FetchThread)th;
         String key = CacheUtil.normalizePath(k);
         MemCacheEntry ret = (MemCacheEntry)_entryHash.get(key);
-	// System.out.println("******** MemCache::Fetch : " + k);
-        // boolean cacheMiss = false;
+	//System.out.println("******** MemCache::Fetch : " + k);
         if(ret==null) { // Cache Miss.
-            // System.err.println("MemCache Miss");
-            // cacheMiss = true;
+            //System.err.println("MemCache Miss");
             _mutex.lock(); // LOCK mutex befor update _entryHash.
             ret = (MemCacheEntry)_entryHash.get(key);
             if(ret == null) { // Nobody else mess with this key.
@@ -195,7 +193,7 @@ abstract class MemCache implements DMCache {
                     nret = DOMFactory.newDocument();
                 }
                 if(nret == null) { // Miss bad.  Goto web and return null
-                    // System.err.println("MemCache Miss BAD.  Return NULL");
+                    //System.err.println("MemCache Miss BAD.  Return NULL");
                     if(fth==null) { // No fetching Thread. 
                         // This is really bad miss.  No fetching 
                         // thread means the fetch is called _WITHIN_
@@ -212,7 +210,7 @@ abstract class MemCache implements DMCache {
                     return null;
                 }
                 else { // Hijacked locally.  Happily return.
-		    // System.err.println("MC:: DISK HIT");
+		    //System.err.println("MC:: DISK HIT");
                     _mutex.lock();
                     ret.setval(nret);
                     Element root = ((Document)nret).getDocumentElement();
@@ -224,13 +222,11 @@ abstract class MemCache implements DMCache {
                     }
 
                     if(ret.isOnce()) {
-			System.out.println("MC:: DISK HIT ONCE FILE");
+			//System.out.println("MC:: DISK HIT ONCE FILE");
 			_entryHash.put(key, ret);
 		    } else {
-			// System.err.println("MC:: Test Waiting ");
 			boolean testW = ret._notifyWaitingThreads();
 			if(!testW) {
-			    // System.err.println("MC:: Test Waiting True");
 			    this.addentry(ret);
 			}
 		    }

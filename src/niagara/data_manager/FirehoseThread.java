@@ -28,11 +28,11 @@ import niagara.xmlql_parser.op_tree.FirehoseSpec;
 
 public class FirehoseThread implements Runnable {
     private FirehoseSpec spec;
-    private SourceStream outputStream;
+    private SinkTupleStream outputStream;
     private FirehoseClient fhClient;
     private ByteArrayInputStream messageStream;
 
-    public FirehoseThread(FirehoseSpec spec, SourceStream outStream) {
+    public FirehoseThread(FirehoseSpec spec, SinkTupleStream outStream) {
 	this.spec = spec;
 	outputStream = outStream;
     }
@@ -43,51 +43,59 @@ public class FirehoseThread implements Runnable {
      */
     public void run() {
 
-	boolean messageEOF = false;
-	boolean streamShutdown = false;
-	fhClient = new FirehoseClient(spec.getListenerPortNum(),
-				      spec.getListenerHostName());
-	int err = fhClient.open_stream(spec.getRate(), spec.getType(),
-				       spec.getDescriptor(), spec.getIters(),
-				       spec.getDocCount());
-
-        long mem = Runtime.getRuntime().totalMemory();
-	System.out.println("Firehose - starting mem size " + mem);
-
-	while(err == 0 && messageEOF == false && streamShutdown == false) {
-	    err = fhClient.get_document(); // force client to return whole doc
-	    if(err == 0) {
-		messageEOF = fhClient.get_eof();
-
-		/* buffer assumed to contain exactly one document
-		 * certainly true if get_document used 
-		 * Note the last doc should be waiting when we get
-		 * the eof notification
-		 */
-		messageStream = fhClient.get_doc_stream();
-
-		/* processMessageBuffer returns false when
-		 * the stream gets a shutdown message (from
-		 * an operator above
-		 */
-		streamShutdown = ! processMessageBuffer();
-	    }
-	}
-
-	// Our work is finished
 	try {
-	    outputStream.close();
-	}
-	catch (Exception e) {
-	    System.err.println("The output stream for the firehose thread was already closed.");
-	}
-
-	// err is not 0 = print out an error message??
+	    boolean messageEOF = false;
+	    fhClient = new FirehoseClient(spec.getListenerPortNum(),
+					  spec.getListenerHostName());
+	    int err = fhClient.open_stream(spec.getRate(), spec.getType(),
+					   spec.getDescriptor(), spec.getIters(),
+					   spec.getDocCount());
+	    
+	    long mem = Runtime.getRuntime().totalMemory();
+	    System.out.println("Firehose - starting mem size " + mem);
+	    
+	    while(err == 0 && messageEOF == false) {
+		err = fhClient.get_document(); // force client to return whole doc
+		if(err == 0) {
+		    messageEOF = fhClient.get_eof();
+		    
+		    /* buffer assumed to contain exactly one document
+		     * certainly true if get_document used 
+		     * Note the last doc should be waiting when we get
+		     * the eof notification
+		     */
+		    messageStream = fhClient.get_doc_stream();
+		    
+		    /* processMessageBuffer returns false when
+		     * the stream gets a shutdown message (from
+		     * an operator above
+		     */
+		    processMessageBuffer();
+		}
+	    }
+	// Our work is finished
+	if(!outputStream.isClosed())
+	    outputStream.endOfStream();
 	spec = null;
 	outputStream = null;
 	fhClient = null;
 	messageStream = null;
-	
+
+	} catch (InterruptedException e) {
+	    throw new PEException("think this shouldn't happen");
+	} catch (ShutdownException e) {
+	    spec = null;
+	    outputStream = null;
+	    fhClient = null;
+	    messageStream = null;
+	} catch (SAXException se) {
+	    System.err.println("SAXException in FirehoseThread: " +
+			       se.getMessage());
+	} catch (java.io.IOException ioe) {
+	    System.err.println("IOException in FirehoseThread: " +
+			       ioe.getMessage());
+	}
+
 	return;
     }
 
@@ -95,35 +103,16 @@ public class FirehoseThread implements Runnable {
      * buffer - this means parse it and put the resulting Document
      * in the output stream
      */
-    private boolean processMessageBuffer() {
+    private void processMessageBuffer() 
+	throws InterruptedException, ShutdownException,
+	       SAXException, IOException {
 	Document parsedDoc = parseMessageBuffer();
 
 	if(parsedDoc == null) {
-	    return false; /* shut down operator */
+	    throw new PEException("null doc found");
 	}
 
-	boolean succeed;
-	try {
-	    succeed = outputStream.put(parsedDoc);
-	} catch(java.lang.InterruptedException e) {
-	    System.err.println("Thread interrupted in FirehoseThread::processMessageBuffer");
-	    close_firehose_stream();
-	    return false;
-	} catch (NullElementException e) {
-	    System.err.println("NullElementException in FirehoseThread::processMessageBuffer");
-	    close_firehose_stream();
-	    return false;
-	} catch (StreamPreviouslyClosedException e) {
-	    System.err.println("StreamPreviouslyClosedException in FirehoseThread::processMessageBuffer");
-	    close_firehose_stream();
-	    return false;
-	}
-
-	if(succeed == false) {
-	    /* means we got a shutdown message from the operator above */
-	    close_firehose_stream();
-	}
-	return succeed;
+	outputStream.put(parsedDoc);
     }
 
     // We are trusting the firehose to return valid documents
@@ -134,23 +123,18 @@ public class FirehoseThread implements Runnable {
      *
      * @return returns the parsed Document
      */
-    private Document parseMessageBuffer() {
+    private Document parseMessageBuffer() 
+	throws SAXException, IOException {
 	/* parse the messageBuffer 
 	 * Note: messageBuffer may be longer than actual message 
 	 */
 
-	try {
-	    if (parser == null) {
-  		parser = DOMFactory.newParser();
-	    }
-	    parser.parse(new InputSource(messageStream));
-	    Document doc = parser.getDocument();
-	    return doc;
+	if (parser == null) {
+	    parser = DOMFactory.newParser();
 	}
-	catch (Exception ex) {
-	    ex.printStackTrace();
-	    return null;
-	}
+	parser.parse(new InputSource(messageStream));
+	Document doc = parser.getDocument();
+	return doc;
     }
 	    
     /* need a new function on fhClient to say - I'm going away

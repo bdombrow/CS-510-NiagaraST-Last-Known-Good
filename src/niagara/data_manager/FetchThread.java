@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: FetchThread.java,v 1.6 2002/04/19 20:47:44 tufte Exp $
+  $Id: FetchThread.java,v 1.7 2002/04/29 19:48:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -60,81 +60,60 @@ class FetchThread implements Runnable {
         Vector tmpUrl = new Vector();
         Object ret = null;
         blockCount = 0;
-        for(int i=0; i<req.urls.size(); i++) {
-            try {
+	try {
+	    for(int i=0; i<req.urls.size(); i++) {
                 ret = cache.fetch(req.urls.elementAt(i), this);
-
-            } catch(CacheFetchException cfe) {
-                System.err.println(" !!! *** Fetch Failed");
-            }
-            if(ret == null) {
-		// System.out.println("FT:: One Bad Miss " + req.urls.elementAt(i));
-                blockCount++;
-                tmpUrl.add(req.urls.elementAt(i));
-            } else {
-                // System.out.println("FT:: MEM/Disk Cache Hit 1" + req.urls.elementAt(i));
-                try {
-                    Element tmpele = ((Document)ret).getDocumentElement();
-                    if(tmpele==null) {
-                        // System.err.println("A dummy caught");
-                    }
-                    else {
-                        // System.err.println(" ****************** ");
-                        // CUtil.printTree(tmpele, "");
-                        // System.err.println(" ****************** ");
-                    }
-		    // KT REMOVE CAST
-                    req.s.put((Node)ret);
-                } catch (Exception se) {
-                    System.err.println("Closed Stream in Fetch");
-                }
-            }
-        }
-outer:  while(tmpUrl.size()!=0) {
+		if(ret == null) {
+		    blockCount++;
+		    tmpUrl.add(req.urls.elementAt(i));
+		} else {
+		    Element tmpele = ((Document)ret).getDocumentElement();
+		    if(tmpele==null) {
+			throw new PEException("Null document found");
+		    }
+		    req.s.put((Node)ret);
+		}
+	    }
+	outer:	while(tmpUrl.size()!=0) {
 	    if(!notified) _wait();
-	    /*
-            if(blockCount == tmpUrl.size()) {
-		System.err.println("Waiting on blockCount " + blockCount);
-                _wait();
-            }
-	    else {
-	    */
-inner:      for(int i=0; i<tmpUrl.size(); i++) {
+	    
+	    for(int i=0; i<tmpUrl.size(); i++) {
 		ret = null;
-		// try {
 		Object obj = tmpUrl.elementAt(i);
 		ret = MemCache._entryHash.get(obj);
 		if(ret != null) { 
-		    // System.err.println("Got back blocked result!");
-
-		    try { 
-			// System.err.println("A blocked result " + obj);
-			Object val = ((MemCacheEntry)ret).val;
-			if(val!=null)
-			    req.s.put((Node)val);
-			else {
-			    // System.out.println("HOW DO YOU GET HERE?" + obj);
-			    continue inner;
-			}
-		    } catch (Exception se) {
-			System.err.println("In FetchThread");
+		    Object val = ((MemCacheEntry)ret).val;
+		    if(val!=null) {
+			req.s.put((Node)val);
+		    } else {
+			System.err.println("HOW DO YOU GET HERE? " + obj.toString());
 		    }
 		    blockCount--;			
 		    tmpUrl.removeElement(obj);
-
 		    cache._add(obj, this);
-		    
 		    continue outer;
 		}
 	    }
 	    notified = false;	
-	}
+        }
+	} catch(CacheFetchException cfe) {
+	    throw new PEException(" !!! *** Fetch Failed");
+	} catch (InterruptedException ie) {
+	    try {
+		req.s.putCtrlMsg(CtrlFlags.SHUTDOWN);
+	    } catch (ShutdownException se) {  // ignore
+	    } catch (InterruptedException ine) {} // ignore
+	} catch (ShutdownException se) {
+	    // nothing to do since our one output stream already got shutdown
+	} 
+
 	// All Fetch Done!
-	try { 
-	    req.s.close();
-	} catch (Exception se) {
-	    System.err.println("sourceStream close err");
-	    se.printStackTrace();
+	try {
+	    req.s.endOfStream();
+	} catch (InterruptedException e) { 
+	    // ignore...
+	} catch (ShutdownException se) {
+	    // ignore...
 	}
     }
 

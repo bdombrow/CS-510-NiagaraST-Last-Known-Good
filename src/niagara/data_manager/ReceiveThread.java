@@ -1,5 +1,5 @@
 /**
- * $Id: ReceiveThread.java,v 1.2 2001/08/08 21:25:48 tufte Exp $
+ * $Id: ReceiveThread.java,v 1.3 2002/04/29 19:48:41 tufte Exp $
  *
  */
 
@@ -25,11 +25,11 @@ import niagara.ndom.*;
 import niagara.xmlql_parser.op_tree.ReceiveOp;
 
 public class ReceiveThread implements Runnable {
-    private SourceStream outputStream;
+    private SinkTupleStream outputStream;
 
     private ReceiveOp op;
 
-    public ReceiveThread(ReceiveOp op, SourceStream outStream) {
+    public ReceiveThread(ReceiveOp op, SinkTupleStream outStream) {
 	this.op = op;
 	outputStream = outStream;
     }
@@ -69,7 +69,7 @@ public class ReceiveThread implements Runnable {
                     }
                 }
             }
-	    outputStream.close();
+	    outputStream.endOfStream();
             //System.out.println("XXX received : " + counter + " tuples.");
             
 	}
@@ -79,8 +79,7 @@ public class ReceiveThread implements Runnable {
 	}
     }
 
-    private boolean processReceive(String tuplestr) {
-	boolean succeed;
+    private void processReceive(String tuplestr) {
 	try {
             niagara.ndom.DOMParser parser = DOMFactory.newParser();
 
@@ -100,23 +99,16 @@ public class ReceiveThread implements Runnable {
                 Element elt = (Element) nl.item(i).getFirstChild();
                 ste.appendAttribute(elt);
             }
-	    succeed = outputStream.steput(ste);
+	    outputStream.putTupleNoCtrlMsg(ste);
 	} catch(java.lang.InterruptedException e) {
 	    System.err.println("Thread interrupted in ReceiveThread::processMessageBuffer");
-	    return false;
-	} catch (NullElementException e) {
-	    System.err.println("NullElementException in ReceiveThread::processMessageBuffer");
-	    return false;
-	} catch (StreamPreviouslyClosedException e) {
-	    System.err.println("StreamPreviouslyClosedException in ReceiveThread::processMessageBuffer");
-	    return false;
-	}
+	} 
 	catch (Exception ex) {
 	    ex.printStackTrace();
             System.out.println("erroneous string was:#" + tuplestr + "#");
-	    return false;
+	    return;
 	}
-	return succeed;
+	return;
     }
 
     Hashtable elements = new Hashtable();

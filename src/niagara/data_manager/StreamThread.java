@@ -34,7 +34,7 @@ import niagara.connection_server.NiagraServer;
 public class StreamThread implements Runnable {
     private StreamSpec spec;
     private InputStream inputStream;
-    private SourceStream outputStream;
+    private SinkTupleStream outputStream;
     private niagara.ndom.DOMParser parser;
     //private javax.xml.parsers.SAXParser parser;
     //private com.microstar.xml.SAXDriver parser;
@@ -45,7 +45,7 @@ public class StreamThread implements Runnable {
     private int idx;
     private StreamSimpleHandler handler;
 
-    public StreamThread(StreamSpec spec, SourceStream outStream) {
+    public StreamThread(StreamSpec spec, SinkTupleStream outStream) {
 
 	//	try {
 	    this.spec = spec;
@@ -83,14 +83,12 @@ public class StreamThread implements Runnable {
 		parser.parse(inputSource);
 	    } else if(NiagraServer.STREAM && parser.supportsStreaming()) {
 		// stream is done when inputStream.read() returns -1
-		boolean keepgoing = true;
 		InputSource inputSource = new InputSource(inputStream);
 		sourcecreated=true;
-		while(keepgoing) {
-		    //System.out.println();
-		    //System.out.println("KT StreamThread calling Parse");
+		while(true) {
+		    // IOException is thrown when done - handled below
 		    parser.parse(inputSource);
-		    keepgoing = outputStream.put(parser.getDocument());
+		    outputStream.put(parser.getDocument());
 		}
 	    } else {
 		try {
@@ -110,7 +108,7 @@ public class StreamThread implements Runnable {
 		    
 		    int cbufLen = 0;
 		    
-		    while(keepgoing) {
+		    while(true) {
 			idx = 0;
 			startOfDoc = false;
 			cbufLen = 0;
@@ -165,7 +163,7 @@ public class StreamThread implements Runnable {
 			
 			// parse the buffer and put the resulting document
 			// in the output stream
-			keepgoing = parseAndSendBuffer(buffer, idx);
+			parseAndSendBuffer(buffer, idx);
 		    }
 		} catch(EOSException eosE) {
 		    // parse final doc and put in output stream, then return
@@ -179,9 +177,6 @@ public class StreamThread implements Runnable {
 	} catch (java.lang.InterruptedException intE) {
 	    System.err.println("StreamThread::Interruped Exception::run. Message: " 
 			       + intE.getMessage());
-	} catch (niagara.utils.StreamPreviouslyClosedException spcE) {
-	    System.err.println("StreamThread::Stream previously closed exception::run Message: " 
-			       + spcE.getMessage());
 	} catch (java.io.FileNotFoundException fnfE) {
 	    System.err.println("StreamThread::File not found: filename: " 
 			       + spec.getFileName() +
@@ -195,13 +190,14 @@ public class StreamThread implements Runnable {
 	    }
 	    // if source was created IOException tends to mean end
 	    // of stream and should be ignored
-	} catch(niagara.utils.NullElementException neE) {
-	    System.err.println("StreamThread::Null element exception. Message " +
-			       neE.getMessage());
 	} catch(niagara.data_manager.DMException dmE) {
 	    System.err.println("StreamThread::Stream Exception. Message " +
 			       dmE.getMessage());
-	} 
+	} catch (ShutdownException se) {
+	    System.err.println("StreamThread::ShutdownException. Message " +
+			       se.getMessage());
+	    // let cleanup proceed - nothing else to do
+	}
 
 	cleanUp();
 
@@ -217,8 +213,10 @@ public class StreamThread implements Runnable {
 	}
 
 	try {
-	    outputStream.close();
-	} catch(niagara.utils.StreamPreviouslyClosedException e) {
+	    outputStream.endOfStream();
+	} catch (java.lang.InterruptedException ie) {
+	    /* do nothing */
+	} catch (ShutdownException se) {
 	    /* do nothing */
 	}
 
@@ -317,14 +315,13 @@ public class StreamThread implements Runnable {
 	    return false;
     }
 
-    private boolean parseAndSendBuffer(MyArray buffer, int idx) 
+    private void parseAndSendBuffer(MyArray buffer, int idx) 
 	throws org.xml.sax.SAXException, java.lang.InterruptedException,
-	       java.io.IOException, niagara.utils.NullElementException,
-	       niagara.utils.StreamPreviouslyClosedException {
+	       java.io.IOException, ShutdownException {
 	InputSource inputSource = 
 	    new InputSource(new CharArrayReader(buffer.getBuf(), 0, idx));
 	parser.parse(inputSource);
-	return outputStream.put(parser.getDocument());
+	outputStream.put(parser.getDocument());
     }
 
     private class EOSException extends Exception {

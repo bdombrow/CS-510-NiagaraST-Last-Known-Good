@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DataManager.java,v 1.5 2002/04/19 20:47:44 tufte Exp $
+  $Id: DataManager.java,v 1.6 2002/04/29 19:48:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -319,8 +319,8 @@ public class DataManager {
 
     public boolean getDocuments(Vector xmlURLList, 
 				regExp pathExpr,   
-				SourceStream stream) 
-    {
+				SinkTupleStream stream) 
+    throws ShutdownException {
         return cacheM.getDocuments(xmlURLList, pathExpr, stream);
     }
 

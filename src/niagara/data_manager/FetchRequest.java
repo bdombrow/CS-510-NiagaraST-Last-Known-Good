@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: FetchRequest.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: FetchRequest.java,v 1.2 2002/04/29 19:48:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,11 +31,11 @@ import java.util.*;
 import niagara.utils.*;
 
 class FetchRequest {
-    SourceStream s;
+    SinkTupleStream s;
     Vector urls;
      Vector paths;
     
-    FetchRequest(SourceStream s, Vector urls, Vector paths) {
+    FetchRequest(SinkTupleStream s, Vector urls, Vector paths) {
 	this.s = s;
 	this.urls = urls;
 	this.paths = paths;
