@@ -36,8 +36,6 @@ public class CPUTimer {
     }
 
     private void calculateTimeUsed() {
-	System.out.println("KT: calculating time used start: " + start_time +
-			   "stop " + stop_time);
 	used_time = stop_time - start_time;
     }
 

@@ -67,6 +67,7 @@ public class XMLUtils {
             }
             NodeList nl = n.getChildNodes();
             int nChildren = nl.getLength();
+	    int nDecendents = nChildren; // not quite right, but works OK for now KT
 	    boolean onekid = false;
 
             if (nChildren == 0) {
@@ -76,14 +77,16 @@ public class XMLUtils {
 	    } else {
                 sb.append(">");
 		if(prettyprint) {
-		    int nDecendents = nChildren; // not quite right, but works OK
-		    if(nDecendents > 1)
+		    if(nDecendents > 1 && prettyprint)
 			sb.append("\n");
 		}
 		if(nChildren == 1)
 		    onekid = true;
                 for (int i = 0; i < nChildren; i++)
                     flatten(nl.item(i), sb, explode, prettyprint, level+1, onekid);
+		if(nDecendents > 1 && prettyprint) {
+		    sb.append(indent[level]);
+		}
                 sb.append("</").append(n.getNodeName()).append(">");
 		if(prettyprint)
 		    sb.append("\n");
