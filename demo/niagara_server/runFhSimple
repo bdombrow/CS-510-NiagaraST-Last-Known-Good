@@ -1,3 +1,14 @@
-rm -rf CACHE/*
-rm -rf SYS/*
-java -classpath `cat ../classpath` niagara.firehose.SimpleClient $*
+#!/usr/bin/perl -w
+
+system("rm -rf CACHE/*");
+system("rm -rf SYS/*");
+
+$classpath = `cat ../classpath`;
+$classpath =~ s/\n/ /g;
+$classpath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
+
+$command = "java -classpath " . $classpath . 
+           " niagara.firehose.SimpleClient " . join(" ", @ARGV) ."\n";
+
+#print $command;
+exec $command;
