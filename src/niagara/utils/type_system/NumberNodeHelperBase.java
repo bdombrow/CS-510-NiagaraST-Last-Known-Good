@@ -10,27 +10,24 @@ package niagara.utils.type_system;
  * @author Kristin Tufte
  */
 
-import niagara.utils.nitree.NINode;
-import niagara.utils.nitree.NITreeException;
+import org.w3c.dom.*;
 
 public abstract class NumberNodeHelperBase implements NumberNodeHelper {
-    public abstract boolean average(NINode lNode, NINode rNode, 
-				    NINode resultNode)
-	throws NITreeException;
-    public abstract boolean sum(NINode lNode, NINode rNode, NINode resultNode)
-	throws NITreeException;
-    public abstract boolean lessThan(NINode lNode, NINode rNode);
-    public abstract boolean nodeEquals(NINode lNode, NINode rNode);
+    public abstract boolean average(Node lNode, Node rNode, 
+				    Node resultNode);
+    public abstract boolean sum(Node lNode, Node rNode, Node resultNode);
+    public abstract boolean lessThan(Node lNode, Node rNode);
+    public abstract boolean nodeEquals(Node lNode, Node rNode);
 
-    public boolean greaterThan(NINode lNode, NINode rNode) {
+    public boolean greaterThan(Node lNode, Node rNode) {
 	return !lessThan(lNode, rNode);
     }
     
-    public boolean greaterOrEqual(NINode lNode, NINode rNode) {
+    public boolean greaterOrEqual(Node lNode, Node rNode) {
 	return (greaterThan(lNode,rNode) || nodeEquals(lNode, rNode));
     }
 	
-    public boolean lessOrEqual(NINode lNode, NINode rNode) {
+    public boolean lessOrEqual(Node lNode, Node rNode) {
 	return (lessThan(lNode,rNode) || nodeEquals(lNode, rNode));
     }
 }

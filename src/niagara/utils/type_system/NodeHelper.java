@@ -9,16 +9,15 @@ package niagara.utils.type_system;
  * @author Kristin Tufte
  */
 
-
-import niagara.utils.nitree.*;
+import org.w3c.dom.*;
 
 public interface NodeHelper {
-    public boolean nodeEquals(NINode lNode, NINode rNode);
+    public boolean nodeEquals(Node lNode, Node rNode);
 
     public Class getNodeClass();
 
     /* converts a Node into an object of the appropriate type */
-    public Object valueOf(NINode node);
+    public Object valueOf(Node node);
 
     public String getName();
 }

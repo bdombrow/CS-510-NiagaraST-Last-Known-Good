@@ -7,7 +7,8 @@ package niagara.utils.type_system;
  * $Author:
  */
 
-import niagara.utils.nitree.*;
+import org.w3c.dom.*;
+
 import niagara.utils.PEException;
 
 /**
@@ -36,12 +37,12 @@ public class StringNodeHelper implements NodeHelper {
 
     public Class getNodeClass() { return myClass;}
 
-    public Object valueOf(NINode node) {
-	return node.myGetNodeValue();
+    public Object valueOf(Node node) {
+	return node.getNodeValue();
     }
 
-    public boolean nodeEquals(NINode lNode, NINode rNode) {
-	return lNode.myGetNodeValue().equals(rNode.myGetNodeValue());
+    public boolean nodeEquals(Node lNode, Node rNode) {
+	return lNode.getNodeValue().equals(rNode.getNodeValue());
     }
     public String getName() {
         return "StringNodeHelper";

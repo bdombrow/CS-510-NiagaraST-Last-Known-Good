@@ -7,7 +7,8 @@ package niagara.utils.type_system;
  * $Author:
  */
 
-import niagara.utils.nitree.*;
+import org.w3c.dom.*;
+
 import niagara.utils.PEException;
 
 /**
@@ -37,13 +38,13 @@ public class DoubleNodeHelper extends NumberNodeHelperBase
 
     public Class getNodeClass() { return myClass; }
 
-    public Object valueOf(NINode node) {
-	return Double.valueOf(node.myGetNodeValue().trim());
+    public Object valueOf(Node node) {
+	return Double.valueOf(node.getNodeValue().trim());
     }
     
-    public boolean nodeEquals(NINode lNode, NINode rNode) {
+    public boolean nodeEquals(Node lNode, Node rNode) {
 	/* should I do some optimization here and try to store
-	   a local value in the NINodes??
+	   a local value in the Nodes??
 	   Double lVal = (Double)lNode.getLocalValue();
 	   Double rVal = (Double)rNode.getLocalValue();
 	   if(lVal != null && rVal != null) {
@@ -55,25 +56,23 @@ public class DoubleNodeHelper extends NumberNodeHelperBase
 	    equals(valueOf(rNode));
     }
     
-    public boolean lessThan(NINode lNode, NINode rNode) {
+    public boolean lessThan(Node lNode, Node rNode) {
 	return ((Double)valueOf(lNode)).doubleValue() <
 	    ((Double)valueOf(rNode)).doubleValue();
     }
     
-    public boolean average(NINode lNode, NINode rNode, 
-				  NINode resultNode) 
-	throws NITreeException {
+    public boolean average(Node lNode, Node rNode, 
+			   Node resultNode) {
 	double lVal = ((Double)valueOf(lNode)).doubleValue();
 	double rVal = ((Double)valueOf(rNode)).doubleValue();
-	resultNode.mySetNodeValue(String.valueOf((lVal+rVal)/2));
+	resultNode.setNodeValue(String.valueOf((lVal+rVal)/2));
 	return true;
     }
 
-    public boolean sum(NINode lNode, NINode rNode, NINode resultNode) 
-	throws NITreeException {
+    public boolean sum(Node lNode, Node rNode, Node resultNode) {
 	double lVal = ((Double)valueOf(lNode)).doubleValue();
 	double rVal = ((Double)valueOf(rNode)).doubleValue();
-	resultNode.mySetNodeValue(String.valueOf(lVal+rVal));
+	resultNode.setNodeValue(String.valueOf(lVal+rVal));
 	return true;
     }
 

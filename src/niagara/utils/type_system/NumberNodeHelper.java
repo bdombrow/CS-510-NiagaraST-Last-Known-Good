@@ -10,18 +10,15 @@ package niagara.utils.type_system;
  * @author Kristin Tufte
  */
 
-import niagara.utils.nitree.NINode;
-import niagara.utils.nitree.NITreeException;
+import org.w3c.dom.*;
 
 public interface NumberNodeHelper extends NodeHelper {
-    boolean average(NINode lNode, NINode rNode, NINode resultNode)
-	throws NITreeException;
-    boolean sum(NINode lNode, NINode rNode, NINode resultNode)
-	throws NITreeException;
-    boolean nodeEquals(NINode lNode, NINode rNode);
-    boolean lessThan(NINode lNode, NINode rNode);
-    boolean greaterThan(NINode lNode, NINode rNode);    
-    boolean greaterOrEqual(NINode lNode, NINode rNode);	
-    boolean lessOrEqual(NINode lNode, NINode rNode);
+    boolean average(Node lNode, Node rNode, Node resultNode);
+    boolean sum(Node lNode, Node rNode, Node resultNode);
+    boolean nodeEquals(Node lNode, Node rNode);
+    boolean lessThan(Node lNode, Node rNode);
+    boolean greaterThan(Node lNode, Node rNode);    
+    boolean greaterOrEqual(Node lNode, Node rNode);	
+    boolean lessOrEqual(Node lNode, Node rNode);
 }
 
