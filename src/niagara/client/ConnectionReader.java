@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionReader.java,v 1.1 2000/05/30 21:03:24 tufte Exp $
+  $Id: ConnectionReader.java,v 1.2 2000/07/09 05:40:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,6 +27,7 @@
 
 
 package niagara.client;
+
 import com.microstar.xml.XmlParser;
 import java.net.*;
 import java.io.*;
@@ -41,188 +42,62 @@ import java.io.*;
  *
  */
 
-class ConnectionReader implements Runnable
+class ConnectionReader extends AbstractConnectionReader implements Runnable
 {
-	// constants
-	public static final String REQUEST = "request";
-
-	// member variables
-	/**
-	 * the stream from which to read
-	 */
-	private Reader cReader;
+    // member variables
+    
     /**
-	 * the stream to which you write
-	 */
-	private Writer cWriter;
-	/**
-	 * The socket of the connection
-	 */
-	private Socket socket;
-	/**
-	 * This object handles callbacks for the session document.
-	 */
-	private ResponseHandler responseHandler;
-	/**
-	 * This is the parser
-	 */
-	private XmlParser parser = new XmlParser();
-	/**
-	 * This is the queryRegistry of the connection reader
-	 */
-	private QueryRegistry queryRegistry;
-	
-	// Constructors
-	/**
-	 * Constructor: This creates a connection to the server side
-	 * @param hostame Server host name
-	 * @param port Server port
-	 * @param 
-	 */
-	public ConnectionReader(String hostname, int port, UIDriverIF ui, DTDCache dtdCache)
-		{
-			// Set up the connection
-			try{
-				socket = new Socket(hostname, port);
-				
-				cReader = new InputStreamReader(socket.getInputStream());
-				cWriter = new OutputStreamWriter(socket.getOutputStream());
-			}
-			catch(UnknownHostException e){
-				System.err.println("Unknown host");
-			}
-			catch(IOException e){
-				e.printStackTrace();
-			}
-
-			initializeConnectionReader(ui, dtdCache);
-		}
-	
-	/**
-	 * Constructor: This creates a Reader that reads from any reader
-	 * even from a file and is used for debugging purposes. Also it 
-	 * needs a writer to return to threads requesting a channel to 
-	 * talk to the server
-	 * @param reader Some reader
-	 * @param writer Some writer
-	 */
-	public ConnectionReader(Reader reader, Writer writer, UIDriverIF ui, DTDCache dtdCache)
-		{
-			// initialize the input streams
-			cReader = reader;
-			cWriter = writer;
-			initializeConnectionReader(ui, dtdCache);
-		}
-
-	// Public MemberFunctions
-	/**
-	 * @return a Writer object for writing information to the server
-	 */
-	public Writer getWriter()
-		{
-			return cWriter;
-		}
-	
+     * This is the parser
+     */
+    private XmlParser parser;
+    
     /**
-	 * @return a PrintWriter object for writing formatted information to the server
-	 */
-	public PrintWriter getPrintWriter()
-		{
-			return new PrintWriter(cWriter, true);
-		}	
-	
-	/**
-	 * @return a refernce to the this objects QueryRegistry
-	 */
-	public QueryRegistry getQueryRegistry()
-		{
-			return queryRegistry;
-		}
+     * This object handles callbacks for the session document.
+     */
+    private ResponseHandler responseHandler;
 
-	/**
-	 * The run method that invokes the parser
-	 */
-	public void run()
-		{
-			// Read the connection and throw the callbacks
-			try{
-				System.err.println("Parsing started");
-				parser.parse(null, null, cReader);
-				System.err.println("Parsing finished. Client Exiting.");
-			}
-			catch(EOFException e){
-				System.err.println("Server side ended the session");
-				try{
-					socket.close();
-				}
-				catch(IOException ee){
-					ee.printStackTrace();
-				}
-				return;
-			}
-			catch(SocketException e){
-				System.err.println("Parser Closed down the socket");
-				return;
-			}
-			catch(Exception e){
-				e.printStackTrace();
-				// Parser exceptions will be caught and handled here
-			}
-			System.exit(0);
-		}
-	
+    public ConnectionReader(String hostname, int port, UIDriverIF ui, DTDCache dtdCache) {
+	super(hostname, port, ui, dtdCache);
+	initialize(ui, dtdCache);
+    }
+
     /**
-	 * End the request session upon Client shutdown
-	 */
-	public void endRequestSession() throws IOException
-		{
-			// end the session by writing an end element
-			cWriter.write("</" + REQUEST +">");
-			cWriter.flush();
-		}
+     * The run method that invokes the parser
+     */
+    public void run()   {
+	// Read the connection and throw the callbacks
+	try {
+	    System.err.println("Parsing started");
+	    parser.parse(null, null, cReader);
+	    System.err.println("Parsing finished. Client Exiting.");
+	}
+	catch(EOFException e){
+	    System.err.println("Server side ended the session");
+	    try {
+		socket.close();
+	    }
+	    catch(IOException ee) {
+		ee.printStackTrace();
+	    }
+	    return;
+	}
+	catch(SocketException e){
+	    System.err.println("Parser Closed down the socket");
+	    return;
+	}
+	catch(Exception e){
+	    e.printStackTrace();
+	    // Parser exceptions will be caught and handled here
+	}
+	System.exit(0);
+    }
 
-	// PRIVATE FUNCTIONS
-	/**
-	 * Start the request session. This writes the following to the 
-	 * out put stream:
-	 *<code>
-	 * <?xml version="1.0"?>
-	 * <!DOCTYPE request ...
-     * <request>
-	 * ...
-	 *</code>
-	 */
-	private void startRequestSession() throws IOException
-		{
-			// This function initializes the session document
-			String s = "<"+ REQUEST +">\n";
-			cWriter.write(s);
-		}
-
-	/**
-	 * Common constructor initializations
-	 */
-	private void initializeConnectionReader(UIDriverIF ui, DTDCache dtdCache)
-		{
-			// Construct a registry
-			queryRegistry = new QueryRegistry();
-			try{
-				// send initial header to server
-				startRequestSession();
-			}
-			catch(IOException e){
-				e.printStackTrace();
-			}
-			// create a response handler and pass to it the registry
-			responseHandler = new ResponseHandler(queryRegistry, ui, dtdCache);
-			parser.setHandler(responseHandler);
-		}
-
-	// Entry Point (debug main)
-	public static void main(String argv[]) throws Exception
-		{
-			
-		}	
+    void initialize(UIDriverIF ui, DTDCache dtdCache) {
+	// create a response handler and pass to it the registry
+	responseHandler = new ResponseHandler(queryRegistry, ui, dtdCache);
+	parser = new XmlParser();
+	parser.setHandler(responseHandler);
+    }
 }
 
 
