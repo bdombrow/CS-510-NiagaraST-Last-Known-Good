@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.14 2003/03/19 00:33:20 tufte Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.15 2003/03/19 22:40:06 tufte Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -259,6 +259,10 @@
 		<before><logical name="punctuate"/></before>
 		<after><op name="PhysicalPunctuate"/></after>
 	</rule>
+	<rule type="simple" name="nest to PhysicalNest">
+	        <before><logical name="nest"/></before>
+		<after><op name="PhysicalNest"/></after>
+        </rule>
 	
   	<rule type="constructed" name="select-unnest to PhysicalPredicatedUnnest"
   		condition="isPushableInto" argument="unn">
