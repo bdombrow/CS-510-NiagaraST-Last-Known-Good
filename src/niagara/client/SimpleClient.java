@@ -71,6 +71,7 @@ public class SimpleClient implements UIDriverIF {
     }
 
     public void errorMessage(String err) {
+	queryDone();
         if (resultListeners.size() == 0)
             System.err.println("SimpleClient error:" + err);
         else {
@@ -78,6 +79,7 @@ public class SimpleClient implements UIDriverIF {
                 ((ResultsListener) resultListeners.get(i)).notifyError(err);
             }
         }
+	System.exit(-1);
     }
 
     protected static void usage() {
@@ -161,9 +163,15 @@ public class SimpleClient implements UIDriverIF {
                     query = query + line;
                     line = br.readLine();
                 } while (line != null);
-                processQuery(query);
-                return;
-
+		try {
+		    synchronized(this) {
+                        processQuery(query);
+		        wait();
+		    }
+		} catch (InterruptedException e) {
+			System.err.println("Unexpected interruption");
+		}
+		System.exit(-1);
             } else {
 		int nQueries = queryFiles.size();
                 for (int i = 0; i < nQueries; i++) {
@@ -178,7 +186,7 @@ public class SimpleClient implements UIDriverIF {
                                 Thread.sleep(delay);
                             synchronized (this) {
                                 processQuery(query);
-                                this.wait();
+                                wait();
                             }
                         }
                         if (i < nQueries - 1 && wait > 0)
