@@ -1,1 +1,1 @@
-../../../firehose_1_0:../../src:../../lib/gnu-regexp.jar:../../lib/xml4j.jar:../../lib/aelfred.jar:../../lib/java_cup.jar:../../lib/JLex.jar:../../lib/cup_runtime.jar:../../lib/diva.jar:../../lib/djava.jar:../../lib/htmllayout.jar
+../../lib/xerces.jar:../../../firehose_1_0:../../src:../../lib/gnu-regexp.jar:../../lib/xml4j.jar:../../lib/aelfred.jar:../../lib/java_cup.jar:../../lib/JLex.jar:../../lib/cup_runtime.jar:../../lib/diva.jar:../../lib/djava.jar:../../lib/htmllayout.jar:../../lib/com.mortbay.jetty.jar:../../lib/javax.servlet.jar
