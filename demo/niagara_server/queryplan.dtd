@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.33 2003/07/10 21:57:54 ptucker Exp $
+<!-- $Id: queryplan.dtd,v 1.34 2003/07/23 23:14:17 jinli Exp $
      DTD for query plans -->
 
 <!-- 
@@ -14,7 +14,8 @@
 		    incravg | select | dup | union | join |
 		    dtdscan | resource | constant | timer |
 		    prefix | punctuate | send | display | topn |
-		    firehosescan | filescan | construct |
+		    firehosescan | filescan | construct | 
+		    bucket | partitionavg |
 		    accumulate | nest | magic_construct )+>
 		    
 <!ATTLIST plan top IDREF        #REQUIRED
@@ -132,6 +133,14 @@
 <!ATTLIST incravg 
 	  groupby  CDATA	       #REQUIRED
 	  avgattr  CDATA	       #REQUIRED
+	  %StandardAttributes;>
+
+<!ELEMENT partitionavg EMPTY>
+<!ATTLIST partitionavg
+	  groupby CDATA		       #REQUIRED
+	  avgattr CDATA		       #REQUIRED
+	  landmark CDATA	       #REQUIRED	
+	  range	  CDATA		       "" 	
 	  %StandardAttributes;>
 
 <!ELEMENT select  (and | or | not | pred)>
@@ -255,6 +264,15 @@
 	  timer    CDATA        #REQUIRED
 	  input    IDREFS       #REQUIRED
 	  %PositionAttributes;>
+
+<!ELEMENT bucket EMPTY>
+<!ATTLIST bucket 
+	  id	   ID		#REQUIRED
+	  range	   CDATA	#REQUIRED
+	  slide	   CDATA	#REQUIRED
+	  wintype  CDATA	#REQUIRED
+	  winattr  CDATA	#REQUIRED
+	  %StandardAttributes;>
 
 <!ELEMENT describe EMPTY>
 <!ATTLIST describe
