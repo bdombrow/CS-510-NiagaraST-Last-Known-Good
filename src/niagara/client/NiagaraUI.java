@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagaraUI.java,v 1.4 2000/06/26 21:48:12 vpapad Exp $
+  $Id: NiagaraUI.java,v 1.5 2000/07/09 05:39:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -689,32 +689,20 @@ public class NiagaraUI extends JFrame implements ActionListener, ChangeListener,
 	   else
 	       getNResults = Integer.parseInt(getNextTextField.getText());
 
-	   if ( queryText.getText().indexOf("CREATE TRIGGER") != -1 ) {
-	       queryId = qeIF.executeTriggerQuery(queryText.getText(), getNResults);  
-	       queryType.setQueryType("Trigger");
-	   }
-	   else
-	       if ( queryText.getText().startsWith("<?xml")) {
-		   queryId = qeIF.executeQPQuery(queryText.getText(), getNResults);
-		   queryType.setQueryType("QP");
-	       }
-	       else if ( queryText.getText().toUpperCase().indexOf("WHERE") != -1 ) {
-		   queryId = qeIF.executeQuery(queryText.getText(), getNResults);
-		   queryType.setQueryType("XMLQL");
-	       }
-	       else {
-		   queryId = qeIF.executeSEQuery(queryText.getText(), getNResults);
-		   queryType.setQueryType("SE");
-	       }
+	   String text = queryText.getText();
+	   Query q = QueryFactory.makeQuery(text);
+
+	   queryId = qeIF.executeQuery(q, getNResults);
 	   
 	   queryType.setQueryID(queryId);
+	   queryType.setQueryType(q.getDescription());
 	   
 	   queryListBox.addItem(queryType);
 	   queryListBox.setSelectedItem(queryType);
 	   
 	   if ( triggerNow ) {
 	       QueryInfo qType = new QueryInfo();
-	       queryId = qeIF.executeQuery(queryText.getText(), getNResults);
+	       queryId = qeIF.executeQuery(new TriggerQuery(queryText.getText()), getNResults);
 	       qType.setQueryID(queryId);
 	       qType.setQueryType("XMLQL T");
 	       queryListBox.addItem(qType);

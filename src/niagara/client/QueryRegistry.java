@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryRegistry.java,v 1.1 2000/05/30 21:03:24 tufte Exp $
+  $Id: QueryRegistry.java,v 1.2 2000/07/09 05:39:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -117,8 +117,7 @@ class QueryRegistry
 			
 			public String toString()
 			{
-				resultTree.setUserObject("isFinal = " 
-										 + isFinal
+			    resultTree.setUserObject("isFinal = " + isFinal
 					+ " server ID = " + serverId);
 				new JTreeShowThread(resultTree);
 				return ".";

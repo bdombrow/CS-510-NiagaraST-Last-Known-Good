@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.2 2000/06/26 21:48:11 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.3 2000/07/09 05:39:46 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -52,11 +52,6 @@ public class ConnectionManager implements QueryExecutionIF
 	public static final String SERVER_ID = "serverID";
 	public static final String REQUEST_TYPE = "requestType";
 	
-	public static final String EXECUTE_QE_QUERY = "execute_qe_query";
-	public static final String EXECUTE_TRIGGER_QUERY = "execute_trigger_query";
-	public static final String EXECUTE_QP_QUERY = "execute_qp_query";
-
-	public static final String EXECUTE_SE_QUERY = "execute_se_query";
 	public static final String KILL_QUERY = "kill_query";
 	public static final String GET_NEXT = "get_next";
 	public static final String GET_DTD_LIST = "get_dtd_list";
@@ -76,7 +71,7 @@ public class ConnectionManager implements QueryExecutionIF
 	 * The connection reader that parses the input
 	 * (Is a thread)
 	 */
-	private ConnectionReader connectionReader;
+	private AbstractConnectionReader connectionReader;
 
 	/**
 	 * The dtd cache for the client
@@ -99,32 +94,38 @@ public class ConnectionManager implements QueryExecutionIF
 	 */
 	private UIDriverIF ui;
 
-	// Constructor
-	public ConnectionManager(String hostname, int port, UIDriverIF ui)
-		{
-			// create a cache for the dtd's
-			dtdCache = new DTDCache();
+    // Constructors
+    public ConnectionManager(String hostname, int port, UIDriverIF ui) {
+	this(hostname, port, ui, false);
+    }
 
-			// Create a ConnectionReader object
-			connectionReader = new ConnectionReader(hostname, port, ui, dtdCache);
+    public ConnectionManager(String hostname, int port, UIDriverIF ui, boolean simple) {
+	// create a cache for the dtd's
+	dtdCache = new DTDCache();
 
-			// initialize the call back interface of the client
-			this.ui = ui;
+	// Create a ConnectionReader object
+	if (simple)
+	    connectionReader = new SimpleConnectionReader(hostname, port, ui, dtdCache);
+	else 
+	    connectionReader = new ConnectionReader(hostname, port, ui, dtdCache);
+
+	// initialize the call back interface of the client
+	this.ui = ui;
 			
-			// Get the output writer from the connection reader
-			writer = connectionReader.getPrintWriter();
+	// Get the output writer from the connection reader
+	writer = connectionReader.getPrintWriter();
 
-			// Get the registry from the connection reader
-			reg = connectionReader.getQueryRegistry();
+	// Get the registry from the connection reader
+	reg = connectionReader.getQueryRegistry();
 
-			// start up the threads and finish
-			Thread crThread = new Thread(connectionReader);
+	// start up the threads and finish
+	Thread crThread = new Thread(connectionReader);
 			
-			crThread.start();
-			
-			// Send a request to get the DTD's
-			sendDTDRequest();
-		}
+	crThread.start();
+	
+	// Send a request to get the DTD's
+	sendDTDRequest();
+    }
 
 	// Public interface
 	
@@ -228,60 +229,6 @@ public class ConnectionManager implements QueryExecutionIF
 	
 
 	/**
-	 * Execute a query (default: 10 first results)
-	 * @param s the query string
-	 * @return the id of the query in the registry
-	 */
-	public int executeQuery(String query)
-		{
-			return this.executeQuery(query, 10, QueryType.XMLQL, EXECUTE_QE_QUERY);
-		}
-
-    /**
-	 * Execute a query
-	 * @param s the query string
-	 * @param n limit of initial results (after this hitting getnext is required)
-	 * @return the id of the query in the registry
-	 */
-	public int executeQuery(String query, int n)
-		{
-			return this.executeQuery(query, n, QueryType.XMLQL, EXECUTE_QE_QUERY);
-		}
-	
-	/**
-	 * Execute a trigger query
-	 * @param s the query string
-	 * @param n limit of initial results (after this hitting getnext is required)
-	 * @return the id of the query in the registry
-	 */
-	public int executeTriggerQuery(String query, int n)
-		{
-			return this.executeQuery(query, n, QueryType.TRIG, EXECUTE_TRIGGER_QUERY);
-		}
-
-	/**
-	 * Execute a query, with the specified query plan
-	 * @param s the query plan in XML format
-	 * @param n limit of initial results (after this hitting getnext is required)
-	 * @return the id of the query in the registry
-	 */
-	public int executeQPQuery(String query, int n)
-		{
-			return this.executeQuery(query, n, QueryType.QP, EXECUTE_QP_QUERY);
-		}
-
-	/**
-	 * Execute a Search Engine  query
-	 * @param s the query string
-	 * @param n limit of initial results (after this hitting getnext is required)
-	 * @return the id of the query in the registry
-	 */
-	public int executeSEQuery(String query, int n)
-		{
-			return this.executeQuery(query, n, QueryType.SEQL, EXECUTE_SE_QUERY);
-		}
-
-	/**
 	 * The back end to the different executeQuery calls
 	 * @param s the query string
 	 * @param nResults limit of initial results (after this hitting getnext is required)
@@ -289,60 +236,59 @@ public class ConnectionManager implements QueryExecutionIF
 	 * @param attr the string to be sent to the server determing the type of the execution
 	 * @return the id of the query in the registry
 	 */
-	private int executeQuery(String query, int nResults, int queryType, String attr)
-		{
-			int id = getID();
+	public int executeQuery(Query query, int nResults) {
+	    int id = getID();
+	    String attr = query.getCommand();
+	    int queryType = query.getType();
 
-			System.err.println("Executing " + attr);
-			
-			// Register the query
-			final QueryRegistry.Entry e = 
-				reg.registerQuery(id, query, queryType);
-			// Set the query type
-			e.type = queryType;
-			
-			synchronized(writer){
+	    // Register the query
+	    final QueryRegistry.Entry e = 
+		reg.registerQuery(id, query.getText(), query.getType());
+	    // Set the query type
+	    e.type = queryType;
+	    
+	    synchronized(writer){
 				// Send the query to the server
-				writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" + id +"\" "+ SERVER_ID +"=\"-1\""
-							   + " " + REQUEST_TYPE +"= \"" + attr + "\">");
-				writer.println("<" + REQUEST_DATA + ">");
-				writer.println("<![CDATA[");
+		writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" + id +"\" "+ SERVER_ID +"=\"-1\""
+			       + " " + REQUEST_TYPE +"= \"" + attr + "\">");
+		writer.println("<" + REQUEST_DATA + ">");
+		writer.println("<![CDATA[");
 				// the actual query
-				writer.println(query);
-				writer.println("]]>");
-				writer.println("</" + REQUEST_DATA + ">");
-				writer.println("</" + REQUEST_MESSAGE + ">");
+		writer.println(query.getText());
+		writer.println("]]>");
+		writer.println("</" + REQUEST_DATA + ">");
+		writer.println("</" + REQUEST_MESSAGE + ">");
+	    }
+	    
+	    // TODO wait for server qid to come accross.
+	    
+	    //this.getNext(id, nResults);
+	    if(queryType == QueryType.XMLQL || queryType == QueryType.QP){
+		final ConnectionManager cm = this;
+		final int nRes = nResults;
+		final int qid = id;
+		Thread t = new Thread(){
+			public void run(){
+			    synchronized(this){
+				while(e.serverId == -1){
+				    try{
+					this.wait(500);
+				    }
+				    catch(InterruptedException ee){
+					ee.printStackTrace();
+				    }
+				}
+				cm.getNext(qid, nRes);
+			    }
 			}
-			
-			// TODO wait for server qid to come accross.
-
-			//this.getNext(id, nResults);
-			if(queryType == QueryType.XMLQL || queryType == QueryType.QP){
-				final ConnectionManager cm = this;
-				final int nRes = nResults;
-				final int qid = id;
-				Thread t = new Thread(){
-					public void run(){
-						synchronized(this){
-							while(e.serverId == -1){
-								try{
-									this.wait(500);
-								}
-								catch(InterruptedException ee){
-									ee.printStackTrace();
-								}
-							}
-							cm.getNext(qid, nRes);
-						}
-					}
-				};
+		    };
 				// Start up the thread to send the getNext.
-				t.start();
-			}
-			
-			
-			return id;
-		}
+		t.start();
+	    }
+	    
+	    
+	    return id;
+	}
 
 	/**
 	 * Kill the query
@@ -457,8 +403,8 @@ public class ConnectionManager implements QueryExecutionIF
 				return new DefaultMutableTreeNode("NULL in registry. RECODE!!");
 			}
 		}
-		
-	/**
+
+    /**
 	 * Get the query string
 	 * @param id the id of the query
 	 * @return the query string
