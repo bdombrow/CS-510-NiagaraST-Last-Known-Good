@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
-<!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd">
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
 
-<!-- This query tests having a construct operator in the middle
-of the operator tree -->
+<!-- This is a query to test select -->
 
 <plan top="select">
 

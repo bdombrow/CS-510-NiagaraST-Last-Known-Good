@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 $temp = "tempresults";
 if(-e $temp) {
@@ -44,6 +44,12 @@ system("./runSimple < queries/sort.qry >> $temp");
 
 print "Sum query\n";
 system("./runSimple < queries/sum.qry >> $temp");
+
+print "XMLB firehose scan \n";
+system("./runSimple < queries/fhXMLB.qry >> $temp");
+
+#print "Auction firehose scan \n";
+#system("./runSimple < queries/fhAuction.qry >> $temp");
 
 print "Test have been run - differences below.\n";
 

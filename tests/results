@@ -1,11 +1,9 @@
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY" input="dtd"/><scan id="scan1" regexp="NUM" input="scan"/><avg id="avg" groupby="$scan" avgattr="$scan1" input="scan1"/> <construct id="cons" input="avg"><Average>$avg</Average></construct></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY" input="dtd"/><scan id="scan1" regexp="NUM" input="scan"/><avg id="avg" groupby="$scan" avgattr="$scan1" input="scan1"/> <construct id="cons" input="avg"><Average>$avg</Average></construct></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
 
 <Average>1.875</Average>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><!-- This query tests having a construct operator in the middleof the operator tree --><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/><construct id="cons" input="scan"><newnum>$scan</newnum></construct> </plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><!-- This query tests having a construct operator in the middleof the operator tree --><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/><construct id="cons" input="scan"><newnum>$scan</newnum></construct> </plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
 
 <newnum>1</newnum>
 <newnum>4</newnum>
@@ -15,9 +13,8 @@ Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.e
 <newnum>1</newnum>
 <newnum>1</newnum>
 <newnum>1</newnum>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><!-- This query tests having a construct operator in the middleof the operator tree --><plan top="select"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/><construct id="cons" input="scan"><num>$scan</num></construct> <select id="select" input="cons"><pred op="ne"><var value="$scan"/><string value="xx"/></pred></select></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><!-- This query tests having a construct operator in the middleof the operator tree --><plan top="select"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/><construct id="cons" input="scan"><num>$scan</num></construct> <select id="select" input="cons"><pred op="ne"><var value="$scan"/><string value="xx"/></pred></select></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
 
 <num>1</num>
 <num>4</num>
@@ -27,14 +24,12 @@ Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.e
 <num>1</num>
 <num>1</num>
 <num>1</num>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY" input="dtd"/><scan id="scan1" regexp="NUM" input="scan"/><count id="count" groupby="$scan" countattr="$scan1" input="scan1"/><construct id="cons" input="count"><Count>$count</Count></construct></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY" input="dtd"/><scan id="scan1" regexp="NUM" input="scan"/><count id="count" groupby="$scan" countattr="$scan1" input="scan1"/><construct id="cons" input="count"><Count>$count</Count></construct></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
 
 <Count>8</Count>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan1" regexp="PLAY.NUM" input = "dtd" type="content"/><dup id="dup" branch="3" input="scan1"/><union id="union" input="dup dup dup"/><construct id="cons" input="union"><num>$scan1</num></construct></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan1" regexp="PLAY.NUM" input = "dtd" type="content"/><dup id="dup" branch="3" input="scan1"/><union id="union" input="dup dup dup"/><construct id="cons" input="union"><num>$scan1</num></construct></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
 
 <num>1</num>
 <num>1</num>
@@ -60,10 +55,9 @@ Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.e
 <num>1</num>
 <num>1</num>
 <num>1</num>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"/></dtdscan><scan id="scan" regexp="PLAY.(PERSONAE.PERSONA|TITLE)" input="dtd"/><expression id="expr" class="niagara.query_engine.TestExpression" input="scan"/><construct id="cons" input="expr"><title>$expr</title></construct></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"/></dtdscan><scan id="scan" regexp="PLAY.(PERSONAE.PERSONA|TITLE)" input="dtd"/><expression id="expr" class="niagara.query_engine.TestExpression" input="scan"/><construct id="cons" input="expr"><title>$expr</title></construct></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
-
 <title><aNumber>100</aNumber></title>
 <title><aNumber>100</aNumber></title>
 <title><aNumber>100</aNumber></title>
@@ -75,21 +69,18 @@ Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.e
 <title><aNumber>100</aNumber></title>
 <title><aNumber>100</aNumber></title>
 <title><aNumber>100</aNumber></title>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><plan top="cons"><dtdscan id="acdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"></url></dtdscan><dtdscan id="jcdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml"></url></dtdscan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 	  id="acscan"           input="acdtdscan"></scan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA"           id="jcscan"           input="jcdtdscan"></scan><join id="join" left="$acscan" right="$jcscan"           physical="niagara.query_engine.PhysicalHashJoinOperator"           input="acscan jcscan"></join><construct clear="no" id="cons" input="join"><PERSONA>$acscan</PERSONA></construct></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="acdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"></url></dtdscan><dtdscan id="jcdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml"></url></dtdscan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 	  id="acscan"           input="acdtdscan"></scan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA"           id="jcscan"           input="jcdtdscan"></scan><join id="join" left="$acscan" right="$jcscan"           physical="niagara.query_engine.PhysicalHashJoinOperator"           input="acscan jcscan"></join><construct clear="no" id="cons" input="join"><PERSONA>$acscan</PERSONA></construct></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
 
 <PERSONA>OCTAVIUS CAESAR</PERSONA>
 <PERSONA>M. AEMILIUS LEPIDUS</PERSONA>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><plan top="cons"><dtdscan id="acdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"></url></dtdscan><dtdscan id="jcdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml"></url></dtdscan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 	  id="acscan"           input="acdtdscan"></scan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA"           id="jcscan"           input="jcdtdscan"></scan><join physical="niagara.query_engine.PhysicalNLJoinOperator"               id="join" input="acscan jcscan"><pred op="eq">       <var value="$acscan"></var><var value ="$jcscan"></var></pred></join><construct clear="no" id="cons" input="join"><PERSONA>$acscan</PERSONA></construct></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="acdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"></url></dtdscan><dtdscan id="jcdtdscan"><url value="http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml"></url></dtdscan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 	  id="acscan"           input="acdtdscan"></scan><scan root="" type="content"         regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA"           id="jcscan"           input="jcdtdscan"></scan><join physical="niagara.query_engine.PhysicalNLJoinOperator"               id="join" input="acscan jcscan"><pred op="eq">       <var value="$acscan"></var><var value ="$jcscan"></var></pred></join><construct clear="no" id="cons" input="join"><PERSONA>$acscan</PERSONA></construct></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
 
 <PERSONA>OCTAVIUS CAESAR</PERSONA>
 <PERSONA>M. AEMILIUS LEPIDUS</PERSONA>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><!-- This query tests having a construct operator in the middleof the operator tree --><plan top="select"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/><select id="select" input="scan"><pred op="ne"><var value="$scan"/><string value="5"/></pred></select></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><!-- This is a query to test select --><plan top="select"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/><select id="select" input="scan"><pred op="ne"><var value="$scan"/><string value="5"/></pred></select></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
 
 <NUM>1</NUM>
 <NUM>4</NUM>
@@ -98,9 +89,8 @@ Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.e
 <NUM>1</NUM>
 <NUM>1</NUM>
 <NUM>1</NUM>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><plan top="sort"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" input="dtd"/><sort id="sort" input="scan" comparison="numeric" order="ascending" sort_by="$scan"/></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="sort"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY.NUM" input="dtd"/><sort id="sort" input="scan" comparison="numeric" order="ascending" sort_by="$scan"/></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
 
 <NUM>1</NUM>
 <NUM>1</NUM>
@@ -110,8 +100,126 @@ Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.e
 <NUM>1</NUM>
 <NUM>4</NUM>
 <NUM>5</NUM>
-Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY" input="dtd"/><scan id="scan1" regexp="NUM" input="scan"/><sum id="sum" groupby="$scan" sumattr="$scan1" input="scan1"/><construct id="cons" input="sum"><sum>$sum</sum></construct></plan>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><plan top="cons"><dtdscan id="dtd"><url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/></dtdscan><scan id="scan" regexp="PLAY" input="dtd"/><scan id="scan1" regexp="NUM" input="scan"/><sum id="sum" groupby="$scan" sumattr="$scan1" input="scan1"/><construct id="cons" input="sum"><sum>$sum</sum></construct></plan>
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
-
 <sum>15.0</sum>
+Executing query <?xml version="1.0"?><!DOCTYPE plan SYSTEM "queryplan.dtd"><!-- "http://www.cse.ogi.edu/~tufte/xml/dtds/queryplan.dtd" --><plan top="fh"><firehosescan id="fh" host="localhost" port="5000" rate="0" datatype="xmlb" num_gen_calls="5" streaming="yes" desc="garbage" num_tl_elts="3" ></firehosescan></plan>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<GAMEDATA>
+<GAME_START>
+<GAMEID> CAL198908100 </GAMEID>
+<VISITING_TEAM> SEA </VISITING_TEAM>
+<HOME_TEAM> CAL </HOME_TEAM>
+</GAME_START>
+<GAME_START>
+<GAMEID> CHA198908100 </GAMEID>
+<VISITING_TEAM> OAK </VISITING_TEAM>
+<HOME_TEAM> CHA </HOME_TEAM>
+</GAME_START>
+<GAME_START>
+<GAMEID> CLE198908100 </GAMEID>
+<VISITING_TEAM> MIL </VISITING_TEAM>
+<HOME_TEAM> CLE </HOME_TEAM>
+</GAME_START>
+</GAMEDATA>
+<GAMEDATA>
+<GAME_START>
+<GAMEID> TEX198908100 </GAMEID>
+<VISITING_TEAM> DET </VISITING_TEAM>
+<HOME_TEAM> TEX </HOME_TEAM>
+</GAME_START>
+<GAME_START>
+<GAMEID> CHN198908100 </GAMEID>
+<VISITING_TEAM> PHI </VISITING_TEAM>
+<HOME_TEAM> CHN </HOME_TEAM>
+</GAME_START>
+<GAME_START>
+<GAMEID> NYN198908101 </GAMEID>
+<VISITING_TEAM> SLN </VISITING_TEAM>
+<HOME_TEAM> NYN </HOME_TEAM>
+</GAME_START>
+</GAMEDATA>
+<GAMEDATA>
+<GAME_START>
+<GAMEID> SDN198908100 </GAMEID>
+<VISITING_TEAM> HOU </VISITING_TEAM>
+<HOME_TEAM> SDN </HOME_TEAM>
+</GAME_START>
+<GAME_START>
+<GAMEID> SFN198908100 </GAMEID>
+<VISITING_TEAM> CIN </VISITING_TEAM>
+<HOME_TEAM> SFN </HOME_TEAM>
+</GAME_START>
+<PLAY>
+<GAMEID> CHN198908100 </GAMEID>
+<PUTOUT>
+<BATTER> dyksl001 </BATTER>
+</PUTOUT>
+<BASE_RUNNERS>
+</BASE_RUNNERS>
+
+</PLAY>
+</GAMEDATA>
+<GAMEDATA>
+<PLAY>
+<NEW_INNING></NEW_INNING>
+<GAMEID> NYN198908101 </GAMEID>
+<PUTOUT>
+<BATTER> colev001 </BATTER>
+</PUTOUT>
+<BASE_RUNNERS>
+</BASE_RUNNERS>
+
+</PLAY>
+<PLAY>
+<NEW_INNING></NEW_INNING>
+<GAMEID> SDN198908100 </GAMEID>
+<STRIKEOUT>
+<BATTER> yelde001 </BATTER>
+<PITCHER> harrg002 </PITCHER>
+</STRIKEOUT>
+<BASE_RUNNERS>
+</BASE_RUNNERS>
+
+</PLAY>
+<PLAY>
+<GAMEID> SFN198908100 </GAMEID>
+<PUTOUT>
+<BATTER> quinl001 </BATTER>
+</PUTOUT>
+<BASE_RUNNERS>
+</BASE_RUNNERS>
+
+</PLAY>
+</GAMEDATA>
+<GAMEDATA>
+<PLAY>
+<GAMEID> CHN198908100 </GAMEID>
+<PUTOUT>
+<BATTER> thond001 </BATTER>
+</PUTOUT>
+<BASE_RUNNERS>
+</BASE_RUNNERS>
+
+</PLAY>
+<PLAY>
+<GAMEID> NYN198908101 </GAMEID>
+<PUTOUT>
+<BATTER> smito001 </BATTER>
+</PUTOUT>
+<BASE_RUNNERS>
+</BASE_RUNNERS>
+
+</PLAY>
+<PLAY>
+<GAMEID> SDN198908100 </GAMEID>
+<PUTOUT>
+<BATTER> reync001 </BATTER>
+</PUTOUT>
+<BASE_RUNNERS>
+</BASE_RUNNERS>
+
+</PLAY>
+</GAMEDATA>
