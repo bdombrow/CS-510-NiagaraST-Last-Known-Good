@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.28 2002/09/21 10:14:29 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.29 2002/10/12 20:11:06 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -95,7 +95,7 @@ public class XMLQueryPlanParser {
      * @exception InvalidPlanException the description of the plan was invalid
      */
     void parseOperator(Element e) throws InvalidPlanException {
-	String id = e.getAttribute("id"); // VPAPAD/KT hangs here if id does not match input
+	String id = e.getAttribute("id"); 
 
 	// If we already visited this node, just return 
 	if (ids2nodes.containsKey(id)) 
@@ -111,6 +111,9 @@ public class XMLQueryPlanParser {
 
 	for (int i=0; i < inputs.size(); i++) {
 	    Element el = (Element) ids2els.get(inputs.get(i));
+	    if(el == null) {
+	    	throw new InvalidPlanException("Operator " + id + " has invalid input");
+	    }
 	    parseOperator(el);
 	}
 

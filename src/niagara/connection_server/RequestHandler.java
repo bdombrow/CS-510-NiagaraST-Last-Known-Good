@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.14 2002/09/14 04:56:46 vpapad Exp $
+  $Id: RequestHandler.java,v 1.15 2002/10/12 20:11:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,8 +34,7 @@ import niagara.query_engine.*;
 import niagara.trigger_engine.*;
 import niagara.xmlql_parser.op_tree.logNode;
 import niagara.data_manager.DataManager;
-import niagara.utils.PEException;
-import niagara.utils.ShutdownException;
+import niagara.utils.*;
 
 /**There is one request handler per client and receives all the requests from that client
    Then that request is further dispatched to the appropriate module and results sent back
@@ -47,7 +46,6 @@ public class RequestHandler {
     
     // The parser which listens to the stream coming from client
     RequestParser requestParser;
-
     // The Writer to which all the results have to go
     private BufferedWriter outputWriter;
 
@@ -116,290 +114,267 @@ public class RequestHandler {
     /**Handle the request that just came in from the client
        @param request The request that needs to be handled
      */
-    public void handleRequest(RequestMessage request) {
-	try{
-	    // Handle the request according to requestType
-	    switch(request.getIntRequestType()){
+    public void handleRequest(RequestMessage request) throws InvalidQueryIDException, 
+					   XMLQueryPlanParser.InvalidPlanException, 
+					   QueryResult.ResultsAlreadyReturnedException, 
+					   QueryResult.AlreadyReturningPartialException, 
+							     ShutdownException,
+							     TRIGException,
+							     IOException
+    {
+	// Handle the request according to requestType
+	switch(request.getIntRequestType()){
 	    //   EXECUTE_QUERY request
 	    //-------------------------------------
-	    case RequestMessage.EXECUTE_QP_QUERY:
-	       processQPQuery(request); 	
- 	       //send the query ID out
-               sendQueryId(request);
-               break;
-
-	    case RequestMessage.EXECUTE_QE_QUERY:
-		// assign a new query id to this request
-		int qid = getNextConnServerQueryId();
-		
-		// now give the query to the query engine
-		QueryResult qr = server.qe.executeQuery(request.requestData);
-		
-		request.serverID = qid;
-
-		// create and populate the query info
-		ServerQueryInfo queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.QueryEngine);
-		queryInfo.queryResult = qr;
-		queryList.put(qid,queryInfo);
-
-		// start the transmitter thread for sending results back
-		queryInfo.transmitter = 
-			new ResultTransmitter(this,queryInfo,request);
-
-		
-		//send the query ID out
-		sendQueryId(request);
-		break;
+	case RequestMessage.EXECUTE_QP_QUERY:
+	    processQPQuery(request); 	
+	    //send the query ID out
+	    sendQueryId(request);
+	    break;
 	    
-
-	    case RequestMessage.EXECUTE_TRIGGER_QUERY:
-			
-		// Get the next qid
-		qid = getNextConnServerQueryId();
-		
-		request.serverID = qid;
-
-		queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.TriggerEngine);
-
-		// now enqueue the query to the query engine
-		queryInfo.triggerName = server.triggerManager.createTrigger(request.requestData,
-									    queryInfo.queryResultQueue);
-		    
-		// if some error happened
-		if (queryInfo.triggerName == null) {
-		    ResponseMessage response = new ResponseMessage(request,ResponseMessage.ERROR);
-		    response.setData("The trigger could not be installed");
-		    sendResponse(response);
-		    break;
-		}
-
-		// start the transmitter thread for sending results back		    
-		queryInfo.transmitter = 
-		    new ResultTransmitter(this,queryInfo,request);
-				    		
-		queryList.put(qid,queryInfo);
-    
-		System.out.println("Trigger name is "+queryInfo.triggerName);
-		//send the query ID out
-		sendQueryId(request);
-		
-		break;
-
-	 case RequestMessage.EXECUTE_SE_QUERY:
-		// Get the next qid
-		qid = getNextConnServerQueryId();
-		request.serverID = qid;
-		
-		// Create a query info object
-		queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.SearchEngine);
-		queryInfo.searchEngineQuery = request.requestData;		    
-
-		// start the transmitter thread for sending results back
-		queryInfo.transmitter = 
-		    new ResultTransmitter(this,queryInfo,request);
-		
-		//send the query ID out
-		sendQueryId(request);
-		break;
-	
-	    case RequestMessage.GET_DTD:
-		// Get the next qid
-		qid = getNextConnServerQueryId();
-		request.serverID = qid;
-		
-		queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.GetDTD);
-		// start the transmitter thread for sending results back
-		queryInfo.transmitter = 
-		    new ResultTransmitter(this,queryInfo,request);
-		break;
-
- 	    case RequestMessage.SUSPEND_QUERY:
-		// get the queryInfo of this query
- 		queryInfo = queryList.get(request.serverID);
-		// Respond to invalid queryID
-		if(queryInfo == null) {
-		    System.out.println("QID Recvd "+request.serverID);
-		    throw new InvalidQueryIDException();
-		}
-
- 		if (queryInfo.transmitter != null)
- 		    queryInfo.transmitter.suspend();
- 		break;
-
- 	    case RequestMessage.RESUME_QUERY:
-		// get the queryInfo of this query
- 		queryInfo = queryList.get(request.serverID);
-		// Respond to invalid queryID
-		if(queryInfo == null) {
-		    System.out.println("QID Recvd "+request.serverID);
-		    throw new InvalidQueryIDException();
-		}
-
- 		if (queryInfo.transmitter != null)
- 		    queryInfo.transmitter.resume();
- 		break;
-	
-		//-------------------------------------
-		//   KILL_QUERY request
-		//-------------------------------------
-	    case RequestMessage.KILL_QUERY:		
-		killQuery(request.serverID);
-		break;
-		
-	    case RequestMessage.GET_DTD_LIST:
-		sendDTDList(request);
-		break;
-
-		//-------------------------------------
-		//   GET_NEXT request
-		//-------------------------------------
-	    case RequestMessage.GET_NEXT:
-		// get the queryInfo of this query
-		queryInfo = queryList.get(request.serverID);
-		
-		// Respond to invalid queryID
-		if(queryInfo == null) {
-		    System.out.println("QID Recvd "+request.serverID);
-		    throw new InvalidQueryIDException();
-		}
-
-		queryInfo.transmitter.handleRequest(request);
-				
-		break;
-
-		//-------------------------------------
-		//   GET_PARTIAL request
-		//-------------------------------------
-	    case RequestMessage.GET_PARTIAL:		
-		// Get the queryInfo object for this request
-		queryInfo = queryList.get(request.serverID);
-
-		// Respond to invalid queryID
-		if(queryInfo == null)
-		    throw new InvalidQueryIDException();
-
-		// Put a get partial message downstream
-		queryInfo.queryResult.returnPartialResults();
-		break;
-            
-            case RequestMessage.RUN_GC:
-	    	    System.out.println("Starting Garbage Collection");
-		    long startime = System.currentTimeMillis();
-                    System.gc();
-		    long stoptime = System.currentTimeMillis();
-		    double executetime = (stoptime-startime)/1000.0;
-		    System.out.println("Garbage Collection Completed." +
-		    " Time: " + executetime + " seconds.");
-	            ResponseMessage doneMesg = 
-		         new ResponseMessage(request,
-			               ResponseMessage.END_RESULT);
-	            sendResponse(doneMesg);
-                    break;
-
-            case RequestMessage.SHUTDOWN:
-		System.out.println("Shutdown message received");
-	            ResponseMessage shutMesg = 
-		         new ResponseMessage(request,
-			               ResponseMessage.END_RESULT);
-	            sendResponse(shutMesg);
-		    // boy this is ugly
-		    System.exit(0);
-		    break;
-            case RequestMessage.SYNCHRONOUS_QP_QUERY :
-                processQPQuery(request);
-                // get the queryInfo of this query
-                queryInfo = queryList.get(request.serverID);
-                queryInfo.transmitter.handleSynchronousRequest();
-                break;
-            
-		//-------------------------------------
-		//   Ooops 
-		//-------------------------------------
-	    default:
-		System.out.println("ConnectionThread: INVALID_REQUEST");
-		break;		
+	case RequestMessage.EXECUTE_QE_QUERY:
+	    // assign a new query id to this request
+	    int qid = getNextConnServerQueryId();
+	    
+	    // now give the query to the query engine
+	    QueryResult qr = server.qe.executeQuery(request.requestData);
+	    
+	    request.serverID = qid;
+	    
+	    // create and populate the query info
+	    ServerQueryInfo queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.QueryEngine);
+	    queryInfo.queryResult = qr;
+	    queryList.put(qid,queryInfo);
+	    
+	    // start the transmitter thread for sending results back
+	    queryInfo.transmitter = 
+		new ResultTransmitter(this,queryInfo,request);
+	    
+	    
+	    //send the query ID out
+	    sendQueryId(request);
+	    break;
+	    
+	    
+	case RequestMessage.EXECUTE_TRIGGER_QUERY:
+	    
+	    // Get the next qid
+	    qid = getNextConnServerQueryId();
+	    request.serverID = qid;
+	    queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.TriggerEngine);
+	    
+	    // now enqueue the query to the query engine
+	    queryInfo.triggerName = server.triggerManager.createTrigger(request.requestData,
+									queryInfo.queryResultQueue);
+	    
+	    // if some error happened
+	    if (queryInfo.triggerName == null) {
+		throw new TRIGException("The trigger could not be installed");
 	    }
-
-	} catch(InvalidQueryIDException e) {
-	    System.out.println("KT: Sending error message to client");
-	    ResponseMessage errMesg = 
-		new ResponseMessage(request,ResponseMessage.INVALID_SERVER_ID);
-	    sendResponse(errMesg);
-	} catch (XMLQueryPlanParser.InvalidPlanException ipe) {
-	    // KT THIS and other exceptions should be sent back
-	    // to client instead of being handled here...!!!
-	    System.out.println("Invalid Plan: " + ipe.getMessage());
-	    sendResponse(new ResponseMessage(request, ResponseMessage.PARSE_ERROR));
-	} catch(niagara.query_engine.QueryResult.ResultsAlreadyReturnedException re) {
-	    System.err.println("RequestHandler: ResultsAlready Returned " + re.getMessage());
-	    re.printStackTrace();
-	} catch (niagara.query_engine.QueryResult.AlreadyReturningPartialException arpe) {
-	    System.err.println("RequestHandler: AlreadyReturningPartial: " 
-			       + arpe.getMessage());
-	    arpe.printStackTrace();
-	} catch(niagara.utils.ShutdownException se) {
-	    System.err.println("Shutdown exception received in RequestHandler.handleRequest " + se.getMessage());
+	    
+	    // start the transmitter thread for sending results back		    
+	    queryInfo.transmitter = 
+		new ResultTransmitter(this,queryInfo,request);
+	    
+	    queryList.put(qid,queryInfo);
+	    
+	    System.out.println("Trigger name is "+queryInfo.triggerName);
+	    //send the query ID out
+	    sendQueryId(request);
+	    
+	    break;
+	    
+	case RequestMessage.EXECUTE_SE_QUERY:
+	    // Get the next qid
+	    qid = getNextConnServerQueryId();
+	    request.serverID = qid;
+	    
+	    // Create a query info object
+	    queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.SearchEngine);
+	    queryInfo.searchEngineQuery = request.requestData;		    
+	    
+	    // start the transmitter thread for sending results back
+	    queryInfo.transmitter = 
+		new ResultTransmitter(this,queryInfo,request);
+	    
+	    //send the query ID out
+	    sendQueryId(request);
+	    break;
+	    
+	case RequestMessage.GET_DTD:
+	    // Get the next qid
+	    qid = getNextConnServerQueryId();
+	    request.serverID = qid;
+	    
+	    queryInfo = new ServerQueryInfo(qid,ServerQueryInfo.GetDTD);
+	    // start the transmitter thread for sending results back
+	    queryInfo.transmitter = 
+		new ResultTransmitter(this,queryInfo,request);
+	    break;
+	    
+	case RequestMessage.SUSPEND_QUERY:
+	    // get the queryInfo of this query
+	    queryInfo = queryList.get(request.serverID);
+	    // Respond to invalid queryID
+	    if(queryInfo == null) {
+		System.out.println("QID Recvd "+request.serverID);
+		throw new InvalidQueryIDException();
+	    }
+	    
+	    if (queryInfo.transmitter != null)
+		queryInfo.transmitter.suspend();
+	    break;
+	    
+	case RequestMessage.RESUME_QUERY:
+	    // get the queryInfo of this query
+	    queryInfo = queryList.get(request.serverID);
+	    // Respond to invalid queryID
+	    if(queryInfo == null) {
+		System.out.println("QID Recvd "+request.serverID);
+		throw new InvalidQueryIDException();
+	    }
+	    
+	    if (queryInfo.transmitter != null)
+		queryInfo.transmitter.resume();
+	    break;
+	    
+	    //-------------------------------------
+	    //   KILL_QUERY request
+	    //-------------------------------------
+	case RequestMessage.KILL_QUERY:		
+	    killQuery(request.serverID);
+	    break;
+	    
+	case RequestMessage.GET_DTD_LIST:
+	    sendDTDList(request);
+	    break;
+	    
+	    //-------------------------------------
+	    //   GET_NEXT request
+	    //-------------------------------------
+	case RequestMessage.GET_NEXT:
+	    // get the queryInfo of this query
+	    queryInfo = queryList.get(request.serverID);
+	    
+	    // Respond to invalid queryID
+	    if(queryInfo == null) {
+		System.out.println("QID Recvd "+request.serverID);
+		throw new InvalidQueryIDException();
+	    }
+	    
+	    queryInfo.transmitter.handleRequest(request);
+	    
+	    break;
+	    
+	    //-------------------------------------
+	    //   GET_PARTIAL request
+	    //-------------------------------------
+	case RequestMessage.GET_PARTIAL:		
+	    // Get the queryInfo object for this request
+	    queryInfo = queryList.get(request.serverID);
+	    
+	    // Respond to invalid queryID
+	    if(queryInfo == null)
+		throw new InvalidQueryIDException();
+	    
+	    // Put a get partial message downstream
+	    queryInfo.queryResult.returnPartialResults();
+	    break;
+            
+	case RequestMessage.RUN_GC:
+	    System.out.println("Starting Garbage Collection");
+	    long startime = System.currentTimeMillis();
+	    System.gc();
+	    long stoptime = System.currentTimeMillis();
+	    double executetime = (stoptime-startime)/1000.0;
+	    System.out.println("Garbage Collection Completed." +
+			       " Time: " + executetime + " seconds.");
+	    ResponseMessage doneMesg = 
+		new ResponseMessage(request,
+				    ResponseMessage.END_RESULT);
+	    sendResponse(doneMesg);
+	    break;
+	    
+	case RequestMessage.SHUTDOWN:
+	    System.out.println("Shutdown message received");
+	    ResponseMessage shutMesg = 
+		new ResponseMessage(request,
+				    ResponseMessage.END_RESULT);
+	    sendResponse(shutMesg);
+	    // boy this is ugly
+	    System.exit(0);
+	    break;
+	case RequestMessage.SYNCHRONOUS_QP_QUERY :
+	    processQPQuery(request);
+	    // get the queryInfo of this query
+	    queryInfo = queryList.get(request.serverID);
+	    queryInfo.transmitter.handleSynchronousRequest();
+	    break;
+            
+	    //-------------------------------------
+	    //   Ooops 
+	    //-------------------------------------
+	default:
+	    throw new PEException("ConnectionThread: INVALID_REQUEST " +
+				  request.getIntRequestType());
 	}
     }    
 
     private void processQPQuery(RequestMessage request)
-    throws XMLQueryPlanParser.InvalidPlanException, ShutdownException {
-            // assign a new query id to this request
-            int qid = getNextConnServerQueryId();
-
-            XMLQueryPlanParser xp = new XMLQueryPlanParser();
-            logNode topNode = xp.parse(request.requestData);
+	throws XMLQueryPlanParser.InvalidPlanException, ShutdownException {
+	// assign a new query id to this request
+	int qid = getNextConnServerQueryId();
+	
+	XMLQueryPlanParser xp = new XMLQueryPlanParser();
+	logNode topNode = xp.parse(request.requestData);
         
-            QueryResult qr = 
+	QueryResult qr = 
             server.qe.executeOptimizedQuery(topNode);
-            
-            request.serverID = qid;
-            
-            /* create and populate the query info
-             * We assume that if the top node is Accumulate
-             * operator, then we should run Accumulate file
-             * query
-             * Oh boy, this is ugly - I use the fact that the
-             * query has already been parsed to help set up
-             * the query info. What will I do when I have to
-             * deal with a real query?? Modify queryInfo after
-             * the fact?? Ugly!!!
-             */
-            ServerQueryInfo serverQueryInfo;
-            boolean isSynchronous = (request.getIntRequestType() == request.SYNCHRONOUS_QP_QUERY);
-            if(topNode.isAccumulateOp()) {
+	
+	request.serverID = qid;
+	
+	/* create and populate the query info
+	 * We assume that if the top node is Accumulate
+	 * operator, then we should run Accumulate file
+	 * query
+	 * Oh boy, this is ugly - I use the fact that the
+	 * query has already been parsed to help set up
+	 * the query info. What will I do when I have to
+	 * deal with a real query?? Modify queryInfo after
+	 * the fact?? Ugly!!!
+	 */
+	ServerQueryInfo serverQueryInfo;
+	boolean isSynchronous = (request.getIntRequestType() == request.SYNCHRONOUS_QP_QUERY);
+	if(topNode.isAccumulateOp()) {
             System.out.println("top node is accumulate: " +
-                       topNode.getAccumFileName());
+			       topNode.getAccumFileName());
             serverQueryInfo = new ServerQueryInfo(qid,
-                    ServerQueryInfo.AccumFile, isSynchronous);
+						  ServerQueryInfo.AccumFile, isSynchronous);
             serverQueryInfo.accumFileName = topNode.getAccumFileName();
-            } else {
+	} else {
             serverQueryInfo = new ServerQueryInfo(qid,
-                       ServerQueryInfo.QueryEngine, isSynchronous);
-            }
-            serverQueryInfo.queryResult = qr;
-            queryList.put(qid,serverQueryInfo);
-
-            // start the transmitter thread for sending results back
-            serverQueryInfo.transmitter = 
+						  ServerQueryInfo.QueryEngine, isSynchronous);
+	}
+	serverQueryInfo.queryResult = qr;
+	queryList.put(qid,serverQueryInfo);
+	
+	// start the transmitter thread for sending results back
+	serverQueryInfo.transmitter = 
             new ResultTransmitter(this,serverQueryInfo,request);
     }   
-     
+    
     /**Method used by everyone to send responses to the client
        @param mesg The message that needs to be sent
     */
-    public synchronized void sendResponse(ResponseMessage mesg) {
-	try {
-            mesg.toXML(outputWriter, !queryList.get(mesg.serverID).isSynchronous()); 
-            mesg.clearData();
-	    outputWriter.flush();
-	}
-	catch (IOException e) {
-	    //looks like connection stream got disconnected
-	    //gracefully shutdown the whole client connection
-            System.out.println("XXX sendResponse got an IOException - closing client connection (KT)");
-	    closeConnection();
-	}
+    public synchronized void sendResponse(ResponseMessage mesg) throws IOException {
+	ServerQueryInfo sqi = queryList.get(mesg.serverID);
+	boolean padding = true; // is this the correct default?
+	if(sqi != null) {
+	    padding = !sqi.isSynchronous();
+	} 
+	mesg.toXML(outputWriter, padding);
+	mesg.clearData();
+	outputWriter.flush();
     }
 
     /**
@@ -434,7 +409,7 @@ public class RequestHandler {
 
         if (queryInfo.isSynchronous()) {
             try {
-            outputWriter.close();
+		outputWriter.close();
             } catch (IOException e) {
                 ; // XXX vpapad: don't know what to do here
             }
@@ -472,7 +447,7 @@ public class RequestHandler {
     /**Sends the DTD List to the client
        @param request The client sent this request
     */
-    public void sendDTDList(RequestMessage request) {
+    public void sendDTDList(RequestMessage request) throws IOException{
 	ResponseMessage resp = new ResponseMessage(request,ResponseMessage.DTD_LIST);
 	Vector dtdlist = getDTDList();
 	if (dtdlist == null)
@@ -488,7 +463,7 @@ public class RequestHandler {
        is sent to the client after a query is received
        @param request The initial request
     */
-    private void sendQueryId(RequestMessage request) {
+    private void sendQueryId(RequestMessage request) throws IOException {
 	ResponseMessage resp = new ResponseMessage(request,ResponseMessage.SERVER_QUERY_ID);
 	sendResponse(resp);
     }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.3 2002/09/14 04:56:46 vpapad Exp $
+  $Id: ResponseMessage.java,v 1.4 2002/10/12 20:11:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -51,6 +51,7 @@ class ResponseMessage
     public static final int SERVER_QUERY_ID = 6;
     public static final int SE_QUERY_RESULT = 7;
     public static final int DTD = 8;
+    public static final int EXECUTION_ERROR = 9;
 
     /**
      * local query ID
@@ -134,10 +135,11 @@ class ResponseMessage
 	case DTD_LIST : return "dtd_list";
 	case INVALID_SERVER_ID : return "invalid_server_id";
 	case PARSE_ERROR : return "parse_error";
-	case ERROR : return "No URLS found";
+	case ERROR : return "server_error";
 	case SERVER_QUERY_ID: return "server_query_id";
 	case SE_QUERY_RESULT: return "se_query_result";
 	case DTD: return "dtd";
+	case EXECUTION_ERROR: return "execution_error";
 	}
 	System.out.println("Invalid type"+type);
 	return "";

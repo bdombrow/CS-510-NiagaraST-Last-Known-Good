@@ -1,5 +1,5 @@
 /*
- * $Id: CommunicationServlet.java,v 1.3 2002/05/23 06:30:47 vpapad Exp $
+ * $Id: CommunicationServlet.java,v 1.4 2002/10/12 20:11:06 tufte Exp $
  *
  */
 
@@ -99,7 +99,7 @@ public class CommunicationServlet extends HttpServlet {
                 out.println("-1");
                 out.close();
                 return;
-            }
+            } 
 
             top = Optimizer.optimize(top);
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.12 2002/09/14 04:56:47 vpapad Exp $
+  $Id: ResultTransmitter.java,v 1.13 2002/10/12 20:11:06 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -109,20 +109,20 @@ public class ResultTransmitter implements Runnable {
 	    // don't think there is anything to do
 	} catch (InterruptedException ie) {
 	    // ditto...
+	} catch (IOException ioe) {
+	    // probably means there was a problem sending message
+	    // to client
+	    System.err.println("KT ResultTransmitter - IO exception - likely problem sending message to client");
 	}
     }
     
-    private void handleDTDQuery() {
+    private void handleDTDQuery() throws IOException {
     	ResponseMessage response = new ResponseMessage(request,ResponseMessage.DTD);
 	try {
 	    URL url = new URL(request.requestData);
 	    BufferedReader rd = new BufferedReader(new InputStreamReader(url.openStream()));
 	    response.appendData("<![CDATA[");
-	    //  	    while (rd.ready()) {
-	    //  		response.responseData += rd.readLine()+"\n";
-	    //  	    }
 	    response.appendData(assembleDTD(rd) + "]]>");
-	    //  	    response.responseData += "]]>";
 	}
 	catch (MalformedURLException e1) {
 	    response = new ResponseMessage(request,ResponseMessage.ERROR);
@@ -171,7 +171,7 @@ public class ResultTransmitter implements Runnable {
     /** Handles SE Query.
 	Contacts the SE Server and sends back results to the client 
     */
-    private void handleSEQuery() {
+    private void handleSEQuery() throws IOException{
 	// submit the query to the client
 	String result = handler.server.seClient.query(queryInfo.searchEngineQuery);
 	// create the response message
@@ -193,7 +193,7 @@ public class ResultTransmitter implements Runnable {
     /** Handles QE Query.
      */
     private void handleQEQuery() 
-	throws ShutdownException, InterruptedException {
+	throws ShutdownException, InterruptedException, IOException {
 	QueryResult queryResult = queryInfo.queryResult;
 
         // XXX vpapad: Taking this out of the loop
@@ -291,7 +291,7 @@ public class ResultTransmitter implements Runnable {
 		query result queue for a query result for each firing
     */
     private void handleTriggerQuery() 
-	throws ShutdownException {
+	throws ShutdownException, IOException {
 		// first get the query result
 	QueryResult queryResult = (QueryResult) queryInfo.queryResultQueue.get();
 	while (true) {
@@ -360,7 +360,7 @@ public class ResultTransmitter implements Runnable {
      * the Accumulate File Directory.
      */
     private void handleAccumQuery() 
-	throws ShutdownException, InterruptedException{
+	throws ShutdownException, InterruptedException, IOException{
 	QueryResult queryResult = queryInfo.queryResult;
 	QueryResult.ResultObject resultObject;
 	boolean alreadyReturningPartial = false;
@@ -545,7 +545,7 @@ public class ResultTransmitter implements Runnable {
      *
      */
 
-    private void processError () {
+    private void processError () throws IOException {
 	System.out.println("Request for shut down. Sending error message");
 	ResponseMessage response = new ResponseMessage(request,ResponseMessage.ERROR);
 	response.setData("Internal Error in Query Engine");
@@ -560,7 +560,7 @@ public class ResultTransmitter implements Runnable {
     }
 
     // send the results collected so far
-    private void sendResults() {
+    private void sendResults() throws IOException {
 	if (response.dataSize() != 0)
 	    handler.sendResponse(response);
 	response.clearData();
