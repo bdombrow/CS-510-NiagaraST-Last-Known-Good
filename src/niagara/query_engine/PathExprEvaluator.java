@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.14 2003/02/25 06:10:25 vpapad Exp $
+  $Id: PathExprEvaluator.java,v 1.15 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -81,8 +81,9 @@ public class PathExprEvaluator {
 
             // If the state is accepting, add node to results,
             // if it's not already there
-            if (s.accepting && matches.add(n))
+            if (s.accepting && matches.add(n)) {
                     results.add(n);
+	    }
 
 
 	    // Put any attribute that matches a transition from
@@ -90,7 +91,6 @@ public class PathExprEvaluator {
 	    // If the transition leads to a non-accepting state,
 	    // we know that it's useless to follow it on attributes,
 	    // since they don't have any descendants.
-
 	    if (n.getNodeType() == Node.ELEMENT_NODE) {
 		HashMap transitions = s.transitions;
 		DFAState onWildcard = s.onWildcard;

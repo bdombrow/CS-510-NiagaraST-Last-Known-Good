@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.29 2003/03/19 22:43:36 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.30 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,6 +38,8 @@ package niagara.query_engine;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.PhysicalOp;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.Op;
 import niagara.optimizer.rules.Initializable;
 
 import niagara.utils.*;
@@ -289,8 +291,10 @@ implements SchemaProducer, SerializableToXML, Initializable {
         for (idx = 0; idx < sinkStreams.length; idx++)
             if (sinkStreams[idx] == null)
                 break;
-        if (idx == sinkStreams.length) 
-            throw new PEException("Attempt to add output stream to an " + getClass() + " operator that's already full" + "(" + idx +"/" + sinkStreams.length + ")");
+        assert idx < sinkStreams.length : 
+            "Attempt to add output stream to an " + getClass() 
+	    + " operator that's already full" + "(" + idx 
+	    + "/" + sinkStreams.length + ")";
         sinkStreams[idx] = newStream;
     }
     
@@ -586,7 +590,8 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    return;
 
 	    default:
-		throw new PEException("KT unexpected control message from source " + CtrlFlags.name[ctrlFlag]);
+		assert false : "KT unexpected control message from source " + 
+		    CtrlFlags.name[ctrlFlag];
 	}
     }
 
@@ -697,7 +702,8 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    processGetPartialFromSink(streamId);
 	    break;
 	default:
-	    throw new PEException("KT unexpected control message from sink " + CtrlFlags.name[ctrlFlag]);
+	    assert false : "KT unexpected control message from sink " 
+		+ CtrlFlags.name[ctrlFlag];
 	}
     }
 
@@ -760,9 +766,8 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	// If the required stream is already closed, throw an error
 	// KT - not sure what to do here, the previous code in
 	// putToSinkStreams ignored this error
-	if (sinkStreams[streamId].isClosed()) {
-	    throw new PEException("KT putting tuple to closed stream - can I ignore this? previous code ignored it");
-	}
+	assert !sinkStreams[streamId].isClosed() :
+	    "KT putting tuple to closed stream - can I ignore this? previous code ignored it";
 
 	boolean sent = false;
 	
@@ -965,7 +970,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 					StreamTupleElement tuple,
 					int streamId) 
 	throws ShutdownException, InterruptedException, OperatorDoneException {
-	throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
+	assert false : "KT should not get here - this function shouldn't have been called or subclass should have overwritten it";
     }
 
 
@@ -984,7 +989,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 						 StreamTupleElement tuple,
 						 int streamId) 
 	throws ShutdownException {
-	throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
+	assert false : "KT should not get here - this function shouldn't have been called or subclass should have overwritten it";
     }
 
 
@@ -1001,7 +1006,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
     // BLOCKING OPs should implement this
     protected void flushCurrentResults(boolean partial) 
 	throws ShutdownException, InterruptedException {
-	throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
+	assert false : "KT should not get here - this function shouldn't have been called or subclass should have overwritten it";
     }
 
     /**
@@ -1013,11 +1018,8 @@ implements SchemaProducer, SerializableToXML, Initializable {
      */
     // all operators that keep state should implement this function
     protected void removeEffectsOfPartialResult (int streamId) {
-	if(isStateful()) {
-	    throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
-	} else {
-	    return; // nothing to be done...
-	}
+	assert !isStateful() : "KT should not get here - this function shouldn't have been called or subclass should have overwritten it";
+	return; // if it is not stateful, nothing to be done...
     }
 
     /**
@@ -1047,7 +1049,8 @@ implements SchemaProducer, SerializableToXML, Initializable {
     private void internalCleanUp(String msg) {
 	if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
 	    cpuTimer.stop();
-	    cpuTimer.print(getName() + " shutdown: " + msg);
+	    cpuTimer.print(getName() + "(" + id + ")" + 
+			   " (shutdown: " + msg + ")");
 	}
         if(isHeadOperator) {
 	    // Remove the query info object from the active query list
@@ -1061,9 +1064,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
     }
     public void setAsHead(QueryInfo queryInfo) {
 	this.queryInfo = queryInfo;
-	if(queryInfo == null) {
-	    throw new PEException("null query info in PhysOp.setAsHead");
-	}
+	assert queryInfo != null : "KT null query info in PhysOp.setAsHead";
 	isHeadOperator = true;
     }
 
@@ -1142,8 +1143,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	}
 
 	public int get(int idx) {
-	    if(idx >= currSize)
-		throw new PEException("KT in ReadSourceStreams bad get");
+	    assert idx < currSize : "KT in ReadSourceStreams bad get";
 	    return streamIds[idx];
 	}
 
@@ -1175,4 +1175,11 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    return currSize == 0;
 	}
     } 
+
+    public final void initFrom(LogicalOp op) {
+	this.id = op.getId();
+	opInitFrom(op);
+    }
+
+    protected abstract void opInitFrom(LogicalOp op);
 }

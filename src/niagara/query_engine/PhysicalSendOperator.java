@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalSendOperator.java,v 1.6 2003/02/25 06:10:26 vpapad Exp $
+ * $Id: PhysicalSendOperator.java,v 1.7 2003/07/03 19:56:52 tufte Exp $
  *
  */
 
@@ -49,7 +49,7 @@ public class PhysicalSendOperator extends UnoptimizablePhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
     
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         SendOp send = (SendOp) logicalOperator;
         query_id = send.getQueryId();
         cs = send.getCS();

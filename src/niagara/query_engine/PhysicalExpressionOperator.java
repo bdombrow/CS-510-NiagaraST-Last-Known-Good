@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.11 2003/03/03 08:20:13 tufte Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.12 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -57,7 +57,7 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
 
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         // Type cast the logical operator to a Expression operator
         expressionOp = (ExpressionOp) logicalOperator;
     }
@@ -154,7 +154,7 @@ public class PhysicalExpressionOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         PhysicalExpressionOperator op = new PhysicalExpressionOperator();
         op.expressionOp = expressionOp;
         return op;

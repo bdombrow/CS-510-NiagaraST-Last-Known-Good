@@ -68,7 +68,7 @@ abstract class NodeMerge {
 	    includeRightOuter = false;
 	    break;
 	default:
-	    throw new PEException("Invalid Merge Type");
+	    assert false : "KT: Invalid Merge Type";
 	}
 	return;
     }

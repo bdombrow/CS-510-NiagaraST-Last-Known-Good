@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalUnionOperator.java,v 1.9 2003/02/25 06:10:26 vpapad Exp $
+  $Id: PhysicalUnionOperator.java,v 1.10 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,8 +29,10 @@ package niagara.query_engine;
 
 
 import java.util.ArrayList;
+import java.lang.reflect.Array;
 
 import niagara.optimizer.colombia.*;
+import niagara.xmlql_parser.op_tree.UnionOp;
 import niagara.utils.*;
 
 
@@ -43,19 +45,34 @@ import niagara.utils.*;
 public class PhysicalUnionOperator extends PhysicalOperator {
     private ArrayList[] rgPunct;
     private int[] rgnRemove;
+    private Attrs[] inputAttrs;
+    private int[][] attributeMaps;
+    private boolean hasMappings;
+    private int outSize;
 
     public PhysicalUnionOperator() {
         // XXX vpapad: here we have to initialize blockingSourceStreams
         // but we don't know how many input streams we have yet. 
         // We postpone it until initFrom - is that too late?
+	// KT - I think that should be ok, blockingSourceStreams
+	// isn't used until execution - I think...
     }
     
     public PhysicalUnionOperator(int arity) {
         setBlockingSourceStreams(new boolean[arity]);
     }
     
-    public void initFrom(LogicalOp logicalOperator) {
-        setBlockingSourceStreams(new boolean[logicalOperator.getArity()]);
+    public void opInitFrom(LogicalOp logicalOperator) {
+	UnionOp logicalOp = (UnionOp)logicalOperator;
+
+        setBlockingSourceStreams(new boolean[logicalOp.getArity()]);
+	hasMappings = false;
+	if(logicalOp.numMappings() > 0)
+	    hasMappings = true;
+	inputAttrs = logicalOp.getInputAttrs();
+	
+	assert logicalOp.getArity() == Array.getLength(inputAttrs) :
+	    "Arity doesn't match num input attrs ";
     }
 
     public void opInitialize() {
@@ -79,10 +96,18 @@ public class PhysicalUnionOperator extends PhysicalOperator {
      * @exception ShutdownException query shutdown by user or execution error
      */
     protected void nonblockingProcessSourceTupleElement (
-						 StreamTupleElement inputTuple,
-						 int streamId)
+					    StreamTupleElement inputTuple,
+					    int streamId)
 	throws ShutdownException, InterruptedException {
-	putTuple(inputTuple, 0);
+
+	if (hasMappings) { // We need to move some attributes
+	    putTuple(inputTuple.copy(outSize, 
+				     attributeMaps[streamId]), 0);
+	} else {
+	    // just send the original tuple along
+	    putTuple(inputTuple,0);
+
+	}
     }
 
     /**
@@ -147,8 +172,13 @@ public class PhysicalUnionOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
-        return new PhysicalUnionOperator(getArity());
+    public Op opCopy() {
+        PhysicalUnionOperator newOp = new PhysicalUnionOperator(getArity());
+	newOp.inputAttrs = inputAttrs;
+	newOp.attributeMaps = attributeMaps;
+	newOp.hasMappings = hasMappings;
+	newOp.outSize = outSize;
+	return newOp;
     }
 
     /**
@@ -159,10 +189,39 @@ public class PhysicalUnionOperator extends PhysicalOperator {
             return false;
         if (o.getClass() != PhysicalUnionOperator.class)
             return o.equals(this);
-        return getArity() == ((PhysicalUnionOperator) o).getArity();
+	return getArity() == ((PhysicalUnionOperator) o).getArity() &&
+	    inputAttrs.equals(((PhysicalUnionOperator)o).inputAttrs);
     }
 
     public int hashCode() {
-        return getArity();
+	if(hasMappings)
+	    return getArity() ^
+		inputAttrs.hashCode();
+	else
+	    return getArity();
     }
+
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        super.constructTupleSchema(inputSchemas);
+	outSize = outputTupleSchema.getLength();
+
+	// if no mapping is specified input schemas must have
+	// same length and that length is same as length of output schema
+	if(hasMappings) {
+	    int inputArity = Array.getLength(inputAttrs);
+	    
+	    assert inputArity == Array.getLength(inputSchemas) :
+		" input arity not equal to number of input schemas";
+
+	    attributeMaps = new int[inputArity][];
+	    for(int i = 0; i<inputArity; i++) {
+		attributeMaps[i] = new int[outSize];
+		for(int j = 0; j< outSize; j++) {
+		    attributeMaps[i][j] = inputSchemas[i].
+			getPosition(inputAttrs[i].GetAt(j).getName());
+		}
+	    }
+	}
+    }
+
 }

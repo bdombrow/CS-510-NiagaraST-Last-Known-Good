@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.16 2003/02/25 06:10:25 vpapad Exp $
+  $Id: PhysicalScanOperator.java,v 1.17 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -57,7 +57,7 @@ public class PhysicalScanOperator extends UnoptimizablePhysicalOperator {
     private PathExprEvaluator pev;
     private NodeVector elementList;
 
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
 	// Type cast the logical operator to a scan operator
 	scanOp logicalScanOperator = (scanOp) logicalOperator;
  

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalPunctuateOperator.java,v 1.1 2003/03/15 17:57:56 ptucker Exp $
+  $Id: PhysicalPunctuateOperator.java,v 1.2 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -91,7 +91,7 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 	attrDataRoot = aRoot;
     }
     
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         setBlockingSourceStreams(new boolean[cInput]);
 
 	punctuateOp pop = (punctuateOp) logicalOperator;
@@ -299,7 +299,7 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         return new  PhysicalPunctuateOperator(iDataInput, attrTimer,
 					      stDataTimer,
 					      attrDataRoot);

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.23 2003/03/19 22:43:36 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.24 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -182,14 +182,14 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
 
-    public final void initFrom(LogicalOp logicalOperator) {
+    public final void opInitFrom(LogicalOp logicalOperator) {
         skolem grouping = ((groupOp)logicalOperator).getSkolemAttributes();
         groupAttributeList = grouping.getVarList();
 	// have subclass do initialization
 	localInitFrom(logicalOperator);
     }
 
-    public final Op copy() {
+    public final Op opCopy() {
 	PhysicalGroupOperator op = localCopy();
 	op.groupAttributeList = groupAttributeList;
 	return op;

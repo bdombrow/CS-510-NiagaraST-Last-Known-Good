@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.12 2003/03/03 08:20:13 tufte Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.13 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -397,7 +397,7 @@ public Cost findLocalCost(
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         PhysicalHashJoinOperator op = new PhysicalHashJoinOperator();
         op.pred = pred;
         op.joinPredicate = joinPredicate;

@@ -41,6 +41,10 @@ public class MergeTree {
     private HashSet       tagList;
     private ArrayStack    tempStringBuffers;
     private ArrayStack    tempArrayStacks;
+
+    // for debugging
+    public  int           doAccumCnt = 0;
+    public  int           accumEmptyCnt = 0;
     
     /* values for MergeType and DominantSide */
     public static final int MT_OUTER = 1;
@@ -55,6 +59,7 @@ public class MergeTree {
     public static final String DEF_ATTR_STRING = "ATTR_DEFAULT";
 
     public static boolean TRACE = false;
+    private boolean track = false;
     protected Document accumDoc;
 
     /*
@@ -239,6 +244,14 @@ public class MergeTree {
 	throws ShutdownException {
 
 	/*
+	  System.out.println("--------------------------------------------------");
+	  System.out.println("MergeTree.accumulate. Input element ");
+	  DOMHelper.printElt(fragment);
+	  System.out.println();
+	  System.out.println();
+	*/
+
+	/*
          * make it left and right frag and make treewalking code
 	 * general enough to handle the join code?
 	 */
@@ -301,6 +314,7 @@ public class MergeTree {
 				  MergeTreeNode mergeTreeNode)
 	throws ShutdownException {
 
+	doAccumCnt++;
 	boolean isBottom = true;
 	Element accumElt = accumEltArg;
 
@@ -312,18 +326,11 @@ public class MergeTree {
 	/* calls the merger (MergeObject) in the MergeTreeNode
 	 * to do the merge, just does locally what is needed to
 	 * merge these two objects - recursion is done below
-	 */
-	if(TRACE) {
-	    if(accumElt != null)
-		System.out.println("KT: do_accumulate: " +
-				   DOMHelper.nameAndValue(accumElt));
-	    else
-		System.out.println(
-                       "KT: do_accumulate: empty accumulate element");
-	}
-	
+	 */       
+
 	boolean newAccumElt = false;
 	if(accumElt == null) {
+	    accumEmptyCnt++;
 	    newAccumElt = true;
 	    accumElt = mergeTreeNode.accumulateEmpty(fragElt, 
 				           mergeTreeNode.getAccumTagName());
@@ -345,11 +352,8 @@ public class MergeTree {
 	     */
 
 	    Element nextFragElt = DOMHelper.getFirstChildElement(fragElt);
-	    if(TRACE) {
-		System.out.println("   KT: next frag elt: "
-				   + DOMHelper.nameAndValue(fragElt));
-	    }
 	    Element nextAccumElt;
+
 	    while(nextFragElt != null) {
 		String nextFragTagName = nextFragElt.getTagName();
 		
@@ -365,18 +369,12 @@ public class MergeTree {
 		    String nextAccumTagName 
 			= nextMergeTreeNode.getAccumTagName();
 
-		    /* this function checks to make sure that kids with tag
-		     * nextAccumTagName for this accumElt haven't already
-		     * been added to the rooted key map.
-		     */
 		    if(nextMergeTreeNode.isNever()) {
-			if(TRACE) {
-			    System.out.println(
-                                        "    KT: appending");
-			}
 			// KT - I was cloning before appending here -
 			// I removed it because it seems unnecessary
-			accumElt.appendChild(nextFragElt);
+			// need to clone and import...
+			accumElt.appendChild(DOMFactory.importNode(accumDoc,
+								nextFragElt));
 		    } else {
 			if(!nextMergeTreeNode.isTag()) {
 			    addChildrenToRootedKeyMap(accumElt, 
@@ -409,33 +407,13 @@ public class MergeTree {
 			 * otherwise just use the tag
 			 */
 			if(!nextMergeTreeNode.isTag()) {
-			    if(TRACE) {	
-				System.out.println(
-                                    "   KT: Looking in RootedKeyMap for: " +
-				    nextAccumEltKeyVal);
-			    }
 			    nextAccumElt = 
                                 (Element)rootedKeyMap.get(
                                           nextAccumEltKeyVal);
 			} else {
-			    if(TRACE) {
-				System.out.println(
-                          "    KT: getting first child " + nextAccumTagName);
-			    }
 			    nextAccumElt = 
 				DOMHelper.getFirstChildEltByTagName(accumElt,
 							   nextAccumTagName);
-			}
-
-			if(TRACE) {
-			    if(nextAccumElt == null) {
-				System.out.println(
-                                     "   KT: Next accum elt is null");
-			    } else {
-				System.out.println(
-                                     "   KT: Next accum elt is " +
-				     DOMHelper.nameAndValue(nextAccumElt));
-			    }
 			}
 
 			boolean expectNew = false;
@@ -446,11 +424,10 @@ public class MergeTree {
 			Element newNextAccumElt =
 			    do_accumulate(nextAccumElt, nextAccumEltKeyVal, 
 				      nextFragElt, nextMergeTreeNode);
-		
-			if((newNextAccumElt == nextAccumElt && expectNew) ||
-			   (newNextAccumElt != nextAccumElt && !expectNew))
-			    throw new PEException(
-                                "KT - problem with empty accumulator case");
+	       
+			assert (newNextAccumElt != nextAccumElt && expectNew) 
+			  || (newNextAccumElt == nextAccumElt && !expectNew) :
+			    "KT - problem with empty accumulator case";
 			
 			/* have to add to the rooted key map after we do the
 			 * recursive call since we don't have the key until
@@ -462,6 +439,8 @@ public class MergeTree {
 			/* done with child */
 			returnTempStringBuffer(nextAccumEltKeyVal);
 			if(expectNew) {
+			    // no need to import - we created new
+			    // elt using accumDoc!
 			    accumElt.appendChild(newNextAccumElt);
 			    addChildToRootedKeyMap(newNextAccumElt, 
 						   accumEltKeyVal,
@@ -472,11 +451,6 @@ public class MergeTree {
 		/* now process the next sibling element */
 		nextFragElt = DOMHelper.getNextSiblingElement(nextFragElt);
 	    }
-	}
-	if(TRACE) {
-	    System.out.println("KT: do_accumulate return: " + 
-			       accumElt.getTagName() + "(" + 
-			       DOMHelper.getTextValue(accumElt) + ")");	
 	}
 	return accumElt;
     }
@@ -502,21 +476,12 @@ public class MergeTree {
 	    return;
 	}
 
-	if(TRACE) {
-	    System.out.println("   KT: Adding children with tag " + tagName +
-			       " of " + DOMHelper.nameAndValue(parent) +
-			       " to rooted key map");
-	}
-
 	/* check if already done, if so, just return */
 	MyStringBuffer childTag = getTempStringBuffer();
 	childTag.append(tagName);
 	childTag.append(LocalKey.PARENT_SEPARATOR);
 	childTag.append(parentKeyVal);
-	if(TRACE) {
-	    System.out.println("KT: Checking in tag list for " 
-			       + childTag.hashCode() + " " + childTag);
-	}
+
 	if(tagList.contains(childTag)) {
 	    returnTempStringBuffer(childTag);
 	    return; 
@@ -534,10 +499,6 @@ public class MergeTree {
 
 	/* when done with all kids - add the tagName to the tagname list */
 	tagList.add(childTag);
-	if(TRACE) {
-	    System.out.println("KT: Adding to tag list: " 
-			       + childTag.hashCode() + " " + childTag);
-	}
 	returnTempStringBuffer(childTag);
     }
 
@@ -558,15 +519,8 @@ public class MergeTree {
 					MergeTreeNode mergeTreeNode,
 					boolean multiKey) 
 	throws ShutdownException {
-
-	if(TRACE) {
-	    System.out.println("KT AddChildToRootedKeyMap " + 
-			       DOMHelper.nameAndValue(child));
-	}
     
-	if(child == null) {
-	    throw new PEException("null child in addChildToRootedKeyMap");
-	}
+	assert child != null : "null child in addChildToRootedKeyMap";
 
 	if(!mergeTreeNode.isTag()) {
 	    if(!multiKey) {
@@ -576,11 +530,6 @@ public class MergeTree {
 		mergeTreeNode.createLocalKeyValue(child, rkv);
 		rkv.append(LocalKey.PARENT_SEPARATOR);
 		rkv.append(parentKeyVal);
-		
-		if(TRACE) {
-		    System.out.println("KT: Putting in rooted Key map: "
-				       + rkv);
-		}
 		rootedKeyMap.put(rkv, child);
 		returnTempStringBuffer(rkv);
 	    } else {
@@ -594,20 +543,12 @@ public class MergeTree {
 		    rkv.append(lKVList.get(i));
 		    rkv.append(LocalKey.PARENT_SEPARATOR);
 		    rkv.append(parentKeyVal);
-		    if(TRACE) {
-			System.out.println("KT: Putting in rooted Key map " 
-					   +rkv);
-		    }
 		    rootedKeyMap.put(rkv, child);
 		}
 		returnTempStringBuffer(rkv);
 		returnTempArrayStack(lKVList);
 	    }
 	} else {
-	    if(TRACE) {
-		System.out.println("KT: Skipping putting in rootedKeyMap: " 
-				   + DOMHelper.nameAndValue(child));
-	    }
 	}
 	return;
     }
@@ -624,6 +565,7 @@ public class MergeTree {
      */
 
     Document merge(Document lDoc, Document rDoc) {
+	assert false : "KT: Shouldn't get here";
 	return lDoc;  /* make the compiler happy for now */
     }
 
@@ -647,7 +589,7 @@ public class MergeTree {
 	    os.print("inner");
 	    break;
 	default:
-	    throw new PEException("Invalid merge type");
+	    assert false : "KT: Invalid merge type";
 	}
 	os.print(", Dominant Side:");
 	switch(treeDomSide) {
@@ -661,7 +603,7 @@ public class MergeTree {
 	    os.print("exactmatch");
 	    break;
 	default:
-	    throw new PEException("Invalid dominant side");
+	    assert false : "KT: Invalid dominant side";
 	}
 	os.println();
 	

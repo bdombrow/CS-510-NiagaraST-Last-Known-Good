@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.12 2003/03/03 08:20:13 tufte Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.13 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -241,7 +241,7 @@ public class PhysicalNLJoinOperator extends PhysicalJoin {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         PhysicalNLJoinOperator op = new PhysicalNLJoinOperator();
         op.joinPredicate = joinPredicate;
         op.predEval = predEval;

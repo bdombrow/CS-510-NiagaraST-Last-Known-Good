@@ -77,10 +77,8 @@ class ShallowContentMerge extends MergeObject {
 		attrNodeMerge=createNodeMerge(attrShallowContElt, 
 					      treeDomSide, treeMergeType);
 		/* just for safety */
-		if(DOMHelper.getNextSiblingElement(attrMergeElt)
-		   != null) {
-		    throw new PEException("Unexpected sibling");
-		}
+		assert DOMHelper.getNextSiblingElement(attrMergeElt) == null:
+		   "KT: Unexpected sibling";
 	    } else {
 		/* attribute is listed, but no merge method specified -
 		 * exactMatch is the default
@@ -135,9 +133,8 @@ class ShallowContentMerge extends MergeObject {
 						comparator);
 	} else if (fcn.equals("sum") || fcn.equals("average") ||
 		   fcn.equals("max") || fcn.equals("min")) {
-	    if(!(comparator instanceof NumberNodeHelper)) {
-		throw new PEException("Invalid Node Helper - need NumberNodeHelper here");
-	    }
+	    assert comparator instanceof NumberNodeHelper :
+		"Invalid Node Helper - need NumberNodeHelper here";
 	    /* oh, forgive me for this one... */
 	    if(fcn.equals("average")) {
 		comparator = NodeHelpers.DOUBLEHELPER;
@@ -330,6 +327,7 @@ class ShallowContentMerge extends MergeObject {
 
 	/* left attrs which have been processed */
 	procLeftAttrs.clear();
+
 	int numLAttrs = lAttrsMap.getLength();
 	int numRAttrs = rAttrsMap.getLength();
 
@@ -349,10 +347,10 @@ class ShallowContentMerge extends MergeObject {
 	     * found - then proceed to merge the matching attributes - if no
 	     * match found, process the "outer" attribute appropriately
 	     */
+
 	    /* iterate through right(fragment) and probe left (accum)
 	     */
-	    int rLen = rAttrsMap.getLength();
-	    for(int i=0; i<rLen; i++) {
+	    for(int i=0; i<numRAttrs; i++) {
 		Attr rAttr = (Attr)(rAttrsMap.item(i));
 		
 		/* Ignore all attributes without any merge information  -
@@ -389,11 +387,13 @@ class ShallowContentMerge extends MergeObject {
 			boolean new_result;
 			new_result = nodeMerge.merge(lAttr, rAttr, 
 						     tempResultAttr);
-			
-			if((rightIsResult || leftIsResult) && new_result) {
-			    changeAttrs.add(tempResultAttr);
-			} else {
-			    addAttrs.add(tempResultAttr);
+		
+			if(new_result) {
+			    if(rightIsResult || leftIsResult){
+				changeAttrs.add(tempResultAttr);
+			    } else {
+				addAttrs.add(tempResultAttr);
+			    }
 			}
 		    
 			/* keep a list of the left attrs that have been

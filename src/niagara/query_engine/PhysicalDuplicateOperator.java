@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalDuplicateOperator.java,v 1.8 2003/02/25 06:10:26 vpapad Exp $
+  $Id: PhysicalDuplicateOperator.java,v 1.9 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,7 +49,7 @@ public class PhysicalDuplicateOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
 
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         numOutputStreams = ((dupOp) logicalOperator).getNumberOfOutputs();
     }
 
@@ -90,7 +90,7 @@ public class PhysicalDuplicateOperator extends PhysicalOperator {
         return numOutputStreams;
     }
 
-    public Op copy() {
+    public Op opCopy() {
         PhysicalDuplicateOperator op = new PhysicalDuplicateOperator();
         op.numOutputStreams = numOutputStreams;
         return op;

@@ -1,4 +1,4 @@
-/* $Id: PhysicalJoin.java,v 1.2 2003/03/03 08:20:13 tufte Exp $ */
+/* $Id: PhysicalJoin.java,v 1.3 2003/07/03 19:56:52 tufte Exp $ */
 package niagara.query_engine;
 
 import niagara.logical.Predicate;
@@ -20,7 +20,7 @@ abstract public class PhysicalJoin extends PhysicalOperator {
     protected Predicate joinPredicate;
     protected boolean extensionJoin[];
 
-    public final void initFrom(LogicalOp logicalOperator) {
+    public final void opInitFrom(LogicalOp logicalOperator) {
         joinOp join = (joinOp) logicalOperator;
         initJoin(join);
     }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.14 2003/03/05 19:28:30 tufte Exp $
+  $Id: QueryResult.java,v 1.15 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -250,13 +250,48 @@ public class QueryResult {
 
     private Document extractXMLDocument (StreamTupleElement tupleElement) {
 	// First get the last attribute of the tuple
-	Node lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
+	// KT HACK
+	/* for outputting foraccum
+
+	Node attr1 = tupleElement.getAttribute(1);
+	
+	if(attr1 instanceof Document) {
+	    return (Document)attr1;
+	} else {
+	    Document resultDocument = DOMFactory.newDocument();
+	    Element docElt = resultDocument.createElement("docElt");
+	    resultDocument.appendChild(docElt);
+
+	    assert attr1 instanceof Element : attr1.getClass().getName();
+	    Node n1 = DOMFactory.importNode(resultDocument, 
+					    attr1);
+	    docElt.appendChild(n1);
+	    
+	    Node attr2 = tupleElement.getAttribute(2);
+	    assert attr2 instanceof Attr;
+	    
+	    Element n2 = 
+		resultDocument.createElement(((Attr)attr2)
+					     .getName());
+	    Text txt =
+		resultDocument.createTextNode(((Attr)attr2)
+					      .getValue());
+	    n2.appendChild(txt);
+	    docElt.appendChild(n2);
+	    
+	    return resultDocument;
+	}
+	*/
+
+	//orig code
+	Node lastAttribute = 
+	    tupleElement.getAttribute(tupleElement.size() - 1);
 	
 	if(lastAttribute instanceof Document) {
 	    return (Document)lastAttribute;
 	} else if (lastAttribute instanceof Element) {
 	    // Create a Document and add add the result to the Doc
-	    Document resultDocument = DOMFactory.newDocument();
+ 	    Document resultDocument = DOMFactory.newDocument();
 	    Node n = DOMFactory.importNode(resultDocument, 
 					   lastAttribute);
 	    resultDocument.appendChild(n);
@@ -284,8 +319,9 @@ public class QueryResult {
 	    resultDocument.appendChild(newElt);
 	    return resultDocument;
 	} else {
-	    throw new PEException("KT What did I get?? " +
-				  lastAttribute.getClass().getName());
+	    assert false : "KT What did I get?? " +
+		lastAttribute.getClass().getName();
+	    return null;
 	}
     }
     

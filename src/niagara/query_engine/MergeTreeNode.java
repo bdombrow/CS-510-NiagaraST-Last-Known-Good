@@ -112,7 +112,7 @@ class MergeTreeNode {
 	} else if(mergeMethod.equals("NoContentNoAttrs")) {
 	    merger = new NoContentNoAttrsMerge(mergeTree);
 	} else {
-	    throw new PEException("Invalid Merge Method");
+	    assert false: "KT: Invalid Merge Method: " + mergeMethod;
 	}
 
 	/* The rest of the elements are MergeNodes for the children -
@@ -219,13 +219,7 @@ class MergeTreeNode {
      * fragName.
      */
     MergeTreeNode getChildWithFragTagName(String fragName) {
-	
-	MergeTreeNode child = children.getHead();
-
-	while(child != null && !child.getFragTagName().equals(fragName)) {
-	    child = child.next;
-	}
-	return child;
+	return children.getItemWithFragTagName(fragName);
     }
 
     /**
@@ -352,11 +346,13 @@ class MergeTreeNode {
 		   ", r:" + rInputTagName);
 	merger.dump(os);
 	localKey.dump(os);
+	/*
 	MergeTreeNode child = children.getHead();
 	while(child != null) {
 	    child.dump(os);
 	    child = child.next;
 	}
+	*/
     }
 
     public String toString() {

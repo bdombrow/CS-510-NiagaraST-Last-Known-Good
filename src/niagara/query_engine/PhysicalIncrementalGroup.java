@@ -1,4 +1,4 @@
-/* $Id: PhysicalIncrementalGroup.java,v 1.6 2003/03/03 08:20:13 tufte Exp $ */
+/* $Id: PhysicalIncrementalGroup.java,v 1.7 2003/07/03 19:56:52 tufte Exp $ */
 package niagara.query_engine;
 
 import java.util.*;
@@ -36,7 +36,7 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
 
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         // Typecast to a group logical operator
         logicalGroupOperator = (IncrementalGroup) logicalOperator;
     }

@@ -1,4 +1,4 @@
-/* $Id: PhysicalIncrementalAverage.java,v 1.6 2003/02/25 06:10:26 vpapad Exp $ */
+/* $Id: PhysicalIncrementalAverage.java,v 1.7 2003/07/03 19:56:52 tufte Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -21,8 +21,8 @@ public class PhysicalIncrementalAverage extends PhysicalIncrementalGroup {
 	double sum;
     }
 
-    public void initFrom(LogicalOp logicalOperator) {
-        super.initFrom(logicalOperator);
+    public void opInitFrom(LogicalOp logicalOperator) {
+        super.opInitFrom(logicalOperator);
         // Get the averaging attribute from the logical operator
         avgAttribute = ((IncrementalAverage) logicalOperator).getAvgAttribute();
     }
@@ -88,7 +88,7 @@ public class PhysicalIncrementalAverage extends PhysicalIncrementalGroup {
         return doc.createTextNode(String.valueOf(avg));
     }
     
-    public Op copy() {
+    public Op opCopy() {
         PhysicalIncrementalAverage op = new PhysicalIncrementalAverage();
         if (logicalGroupOperator != null) 
             op.initFrom(logicalGroupOperator);

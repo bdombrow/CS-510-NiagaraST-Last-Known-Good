@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.7 2003/02/28 05:27:34 vpapad Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.8 2003/07/03 19:56:52 tufte Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -38,7 +38,7 @@ public class PhysicalUnnest extends PhysicalOperator {
      *
      * @param logicalOperator The logical operator that this operator implements
      */
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         Unnest logicalUnnest = (Unnest) logicalOperator;
         this.path = logicalUnnest.getPath();
         this.root = logicalUnnest.getRoot();
@@ -139,7 +139,7 @@ public class PhysicalUnnest extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         PhysicalUnnest op = new PhysicalUnnest();
         op.path = path;
         op.root = root;

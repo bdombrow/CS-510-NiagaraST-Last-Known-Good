@@ -1,4 +1,4 @@
-/* $Id: PhysicalIncrementalMax.java,v 1.5 2002/11/01 01:56:59 vpapad Exp $ */
+/* $Id: PhysicalIncrementalMax.java,v 1.6 2003/07/03 19:56:52 tufte Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -16,8 +16,8 @@ public class PhysicalIncrementalMax extends PhysicalIncrementalGroup {
     private ArrayList values;
     private Double emptyGroupValue;
 
-    public void initFrom(LogicalOp logicalOperator) {
-        super.initFrom(logicalOperator);
+    public void opInitFrom(LogicalOp logicalOperator) {
+        super.opInitFrom(logicalOperator);
         // Get the max attribute 
         maxAttribute = ((IncrementalMax) logicalOperator).getMaxAttribute();
         emptyGroupValue = ((IncrementalMax) logicalOperator).getEmptyGroupValue();
@@ -67,7 +67,7 @@ public class PhysicalIncrementalMax extends PhysicalIncrementalGroup {
         return doc.createTextNode(String.valueOf(groupInfo));
     }
 
-    public Op copy() {
+    public Op opCopy() {
         PhysicalIncrementalMax op = new PhysicalIncrementalMax();
         if (logicalGroupOperator != null)
             op.initFrom(logicalGroupOperator);

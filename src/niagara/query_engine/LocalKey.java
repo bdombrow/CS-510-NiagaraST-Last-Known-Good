@@ -1,4 +1,4 @@
-// $Id: LocalKey.java,v 1.10 2003/03/03 08:20:13 tufte Exp $
+// $Id: LocalKey.java,v 1.11 2003/07/03 19:56:51 tufte Exp $
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -202,6 +202,7 @@ public class LocalKey {
 		atomicKey.getMatches(elt, reachableNodes);
 		
 		if(reachableNodes.size() == 0) {
+		    System.out.println("The following element is not key-complete");
 		    DOMHelper.printElt(elt);
 		    throw new ShutdownException("Document is not key-complete. Elt tagname " + tagName + " " + elt.getTagName());
 		} else  if(reachableNodes.size() != 1) {

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.13 2003/03/19 22:43:36 tufte Exp $
+  $Id: PhysicalSelectOperator.java,v 1.14 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -50,12 +50,12 @@ public class PhysicalSelectOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
     
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         pred = ((Select)logicalOperator).getPredicate();	
         predEval =  pred.getImplementation();
     }
 
-    public Op copy() {
+    public Op opCopy() {
         PhysicalSelectOperator p = new PhysicalSelectOperator();
         p.pred = pred;
         p.predEval = predEval;

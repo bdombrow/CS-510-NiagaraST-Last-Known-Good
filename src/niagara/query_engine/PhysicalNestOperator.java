@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.12 2003/03/19 22:43:36 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.13 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -45,16 +45,14 @@ import niagara.optimizer.colombia.*;
 
 public class PhysicalNestOperator extends PhysicalGroupOperator {
 
-    // KT - This was false - think this should be true...
     private static final boolean[] blockingSourceStreams = { true };
 
-    // This has the result template for the nest operator
+    // The result template for the nest operator
     private constructBaseNode resultTemplate;
 
     // The root tag of the constructed results
     private String rootTag;
 
-    // The number of grouping attributes
     private int numGroupingAttributes;
 
     // temporary result list storage place
@@ -118,16 +116,12 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      */
 
     protected final void initializeForExecution () {
-
-        // Get the root tag of the constructed results
 	rootTag = (String) ((constructInternalNode)
 			 resultTemplate).getStartTag().getSdata().getValue();
-
-	// Get the number of grouping attributes
 	numGroupingAttributes = groupAttributeList.size();
-	
 	resultList = new NodeVector();
-	// old code - am not using skolem anymore...
+
+	// old code - am not using skolem anymore... KT
 	//skolem grouping = ((constructInternalNode) resultTemplate).getSkolem();
 	//numGroupingAttributes = grouping.getVarList().size();
     }
@@ -236,7 +230,6 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 
     protected final Node constructResult (Object partialResult,
 					  Object finalResult) {
-	//Element resultElement = doc.createElement(rootTag);
 	// first element in finalResult and partial result 
 	// should be the same
 	Element resultElement;

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.21 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalMagicConstruct.java,v 1.1 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,30 +29,31 @@ package niagara.query_engine;
 import java.util.Vector;
 
 import org.w3c.dom.*;
+import org.apache.xerces.dom.CoreDocumentImpl;
 
-import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
+import niagara.utils.*; // NodeVector, StreamTupleElement, etc
+import niagara.magic.*;
 import niagara.xmlql_parser.syntax_tree.*;
-import niagara.ndom.*;
 import niagara.optimizer.colombia.*;
+import niagara.logical.MagicConstruct;
 
 /**
- * <code>PhysicalConstructOperator</code> is an implementation of 
+ * <code>PhysicalMagicConstruct</code> is an implementation of 
  * the Construct operator.
  */
-public class PhysicalConstructOperator extends PhysicalOperator {
+public class PhysicalMagicConstruct extends PhysicalOperator {
     // No blocking inputs
     private static final boolean[] blockingSourceStreams = { false };
 
-    /** Output variable */
-    private Attribute variable;
     /** Are we projecting attributes away? */
     private boolean projecting;
-    /** Maps shared attribute positions between incoming and outgoing tuples */
+
+    /** Maps shared attribute positions between incoming 
+	and outgoing tuples */
     private int[] attributeMap;
 
-    // The result template to construct from
     private constructBaseNode resultTemplate;
+    private Node magicResult;
 
     // We will use this Document as the "owner" of all the DOM nodes
     // we create
@@ -61,23 +62,24 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     // temporary result list storage place
     private NodeVector resultList;
     private int outSize; // save a fcn call each time through
+    private MagicBaseNode magicRoot;
 
-    public PhysicalConstructOperator() {
+    public PhysicalMagicConstruct() {
         setBlockingSourceStreams(blockingSourceStreams);
         resultList = new NodeVector();
     }
 
     public void opInitFrom(LogicalOp logicalOperator) {
         // Typecast to a construct logical operator
-        constructOp constructLogicalOp = (constructOp) logicalOperator;
+        MagicConstruct constructLogicalOp = (MagicConstruct) logicalOperator;
 
         // Initialize the result template 
         this.resultTemplate = constructLogicalOp.getResTemp();
-        this.variable = constructLogicalOp.getVariable();
     }
 
-    public void opInitialize() {
+    public void opInitialize() throws ShutdownException {
         outSize = outputTupleSchema.getLength();
+        buildTemplate();
     }
 
     /**
@@ -95,64 +97,56 @@ public class PhysicalConstructOperator extends PhysicalOperator {
         StreamTupleElement tupleElement,
         int streamId)
         throws InterruptedException, ShutdownException {
-        // Recurse down the result template to construct result
-        resultList.quickReset(); // just for safety
-        constructResult(tupleElement, resultTemplate, resultList, doc);
 
-        // Add all the results in the result list as result tuples
-        int numResults = resultList.size();
-	assert numResults == 1 : "HELP numResults is " + numResults;
-        for (int res = 0; res < numResults; ++res) {
-            // Clone the input tuple 
-            StreamTupleElement outputTuple;
 
-            if (projecting) // We can project some attributes away
-                outputTuple = tupleElement.copy(outSize, attributeMap);
-            else // Just clone
-                outputTuple = tupleElement.copy(outSize);
-            
-            // Append the constructed result to end of newly created tuple
-            outputTuple.appendAttribute(resultList.get(res));
-
-            // Add the new tuple to the result
-            putTuple(outputTuple, 0);
-        }
+	// add the template to the input tuple and send it 
+	// on its way
+	
+	StreamTupleElement outputTuple;
+	if (projecting) // We can project some attributes away
+	    outputTuple = tupleElement.copy(outSize, attributeMap);
+	else // Just clone
+	    outputTuple = tupleElement.copy(outSize);
+	
+	// Append the template to end of newly created tuple
+	outputTuple.appendAttribute(magicResult);
+	
+	// Add the new tuple to the result
+	putTuple(outputTuple, 0);
 
         resultList.clear();
     }
 
-    /**
-     * This function constructs results given a tuple and a result template
-     *
-     * @param tupleElement the tuple to construct results from
-     * @param templateRoot the root of the result template
-     *
-     * @return a list of nodes constructed as per the template
-     */
+    // takes the resultTemplate (created from parsing the construct
+    // xml specification in the query file) and converts it into
+    // an xml tree which is the result minus any variables 
+    // variables will be filled in from incoming tuples
+    private void buildTemplate() throws ShutdownException {
+	System.out.println("KT: PMC buildTemplate");
+        resultList.quickReset(); // just for safety
 
-    public static void constructResult(
-        StreamTupleElement tupleElement,
-        constructBaseNode templateRoot,
-        NodeVector localResult,
-	Document localDoc) 
-    throws ShutdownException {
-        // Check if the template root is an internal node or a leaf node
-        // and process accordingly
-        //
-        if (templateRoot instanceof constructLeafNode) {
-            processLeafNode(
-                tupleElement,
-                (constructLeafNode) templateRoot,
-                localResult, localDoc);
-        } else if (templateRoot instanceof constructInternalNode) {
-            processInternalNode(
-                tupleElement,
-                (constructInternalNode) templateRoot,
-                localResult, localDoc);
+	buildTempl(resultList, resultTemplate, true);
+	assert resultList.size() == 1 : "HELP got " +
+	    resultList.size() + " results - expected only 1";
+
+	magicResult = resultList.get(0);
+	System.out.println("KT: PMC buildTemplate...exiting");
+    }
+
+    private void buildTempl(NodeVector localResult,
+			    constructBaseNode constructNode,
+			    boolean isRoot) throws ShutdownException {
+        if (constructNode instanceof constructLeafNode) {
+            buildLeafNodeTempl((constructLeafNode) constructNode,
+			       localResult, isRoot);
+        } else if (constructNode instanceof constructInternalNode) {
+            buildInternalNodeTempl((constructInternalNode) constructNode,
+				   localResult, isRoot);
         } else {
             assert false: "Unknown construct node type!";
         }
     }
+
 
     /**
      * This function processes a leaf node during the construction process
@@ -163,54 +157,52 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return The list of results constructed
      */
 
-    private static void processLeafNode(StreamTupleElement tupleElement,
-					constructLeafNode leafNode,
-					NodeVector localResult,
-					Document localDoc) {
+    private void buildLeafNodeTempl(constructLeafNode leafNode,
+				    NodeVector localResult,
+				    boolean isRoot) {
 	data leafData = leafNode.getData();
 
 	switch(leafData.getType()) {
 
 	case dataType.STRING:
-            // Add the string value to the result
-            localResult.add(localDoc.createTextNode((String) 
-						    leafData.getValue()));
+	    // Leaf node consists of a string value
+	    assert !isRoot : "Root of construct can't be a string";
+	    localResult.add(doc.createTextNode((String) 
+					       leafData.getValue()));
 	    break;
 
 	case dataType.ATTR:
-            // First get the schema attribute
+	    // Leaf node is to be taken from some attribute in the tuple
+	    // either we take that attribute as is - or we take
+	    // that attribute's content
             schemaAttribute schema = (schemaAttribute) leafData.getValue();
 
-            // Now construct result based on whether it is to be interpreted
-            // as an element or a parent
-	    int attributeId;
+	    // figure out which attribute we should use
+	    int attrIdx =
+                    ((schemaAttribute) leafData.getValue()).getAttrId();
+
 	    switch(schema.getType()) {
 	    case varType.ELEMENT_VAR:
-                // The value of the leafData is a schema attribute - from it
-                // get the attribute id in the tuple to construct from
-                attributeId =
-                    ((schemaAttribute) leafData.getValue()).getAttrId();
-		
-                // Add the attribute as the result
-                localResult.add(tupleElement.getAttribute(attributeId));
+		// KT - major hack - this could be an element or text
+		// for now we assume element - fix once we make sure
+		// this actually saves time,
+		MagicNode magicNode = new MagicNode(attrIdx, magicRoot,
+						    Node.ELEMENT_NODE);
+		if(isRoot) {
+		    magicRoot = magicNode;
+		    magicNode.youAreTheRoot(doc);
+		}
+
+		// put a magic node pointing to this
+		// attribute in the result
+                localResult.add(magicNode);
 		break;
 
             case varType.CONTENT_VAR:
-                // The value of the leafData is a schema attribute - from it
-                // get the attribute id in the tuple to construct from
-                attributeId =
-                    ((schemaAttribute) leafData.getValue()).getAttrId();
-
-                // Get the children of the attribute
-                NodeList nodeList =
-                    tupleElement.getAttribute(attributeId).getChildNodes();
-
-                // Add all the children to the result
-                int numChildren = nodeList.getLength();
-
-                for (int child = 0; child < numChildren; ++child) {
-                    localResult.add(nodeList.item(child));
-                }
+		// do not know tag name here...
+		MagicContentElement magicContent =
+		    new MagicContentElement(attrIdx, magicRoot, null);
+		localResult.add(magicContent);
 		break;
 	    default:
 		assert false: "Unknown schema attribute type in construct leaf node";
@@ -231,129 +223,113 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @return The list of results constructed
      */
 
-    private static void processInternalNode(
-        StreamTupleElement tupleElement,
+    private void buildInternalNodeTempl(
         constructInternalNode internalNode,
         NodeVector localResult,
-	Document localDoc) 
+	boolean isRoot)
     throws ShutdownException {
 
         // Create a new element node with the required tag name
-        // taking care of tagvariables
         data tagData = internalNode.getStartTag().getSdata();
         String tagName;
 
         if (tagData.getType() == dataType.ATTR) {
-            schemaAttribute sattr = (schemaAttribute) tagData.getValue();
-            int attrId = sattr.getAttrId();
-            tagName = tupleElement.getAttribute(attrId).getNodeName();
+	    assert false : "Magic tag names are not allowed";
+	    tagName = null; // make compiler happy
         } else
             tagName = (String) tagData.getValue();
 
-        Element resultElement = localDoc.createElement(tagName);
-
-	// appends any appropriate attributes to the resultElement
-	addAttributes(tupleElement, internalNode, resultElement);
+	MagicBaseNode resultElement = 
+	    new MagicShellElement(tagName, magicRoot);
+	if(isRoot) {
+	    magicRoot = resultElement;
+	    resultElement.youAreTheRoot(doc);
+	}
 
         // Recurse on all children and construct result
-        //
         Vector children = internalNode.getChildren();
-
         int numChildren = children.size();
-
-        for (int child = 0; child < numChildren; ++child) {
+	MagicBaseNode prevChild = null;
+        for (int i = 0; i < numChildren; i++) {
             // Get constructed results from child
             int prevSize = localResult.size();
-            constructResult(
-                tupleElement,
-                (constructBaseNode) children.get(child),
-                localResult, localDoc);
+            buildTempl(localResult, 
+		       (constructBaseNode) children.get(i),
+		       false);
 
             // Add each constructed result to the result element
             int numResults = localResult.size() - prevSize;
 
-	    Node res;
-            for (int i = 0; i < numResults; i++) {
-		res = localResult.get(prevSize + i);
-		Node n = DOMFactory.importNode(localDoc, res);
-		resultElement.appendChild(n);
+	    MagicBaseNode child;
+            for (int j = 0; j < numResults; j++) {
+		child = (MagicBaseNode)localResult.get(prevSize + j);
+		if(child instanceof MagicContentElement) {
+		    assert numResults == 1 : "Should have only 1 result. Had "
+			+ numResults;
+		    ((MagicContentElement)child).setTagName(tagName);
+		    resultElement = child;
+		    assert !isRoot;
+		} else {
+		    resultElement.appendChildDNS(child);
+		}
+		if(prevChild != null)
+		    prevChild.setNextSibling(child);
+		prevChild = child;
             }
             localResult.setSize(prevSize);
         }
+
+	// appends any appropriate attributes to the resultElement
+	// must happen after recursion on children due
+	// to magic element stuff...
+	addAttributes(internalNode, (Element)resultElement);
 
         // Construct the result array list
         localResult.add(resultElement);
     }
 
-    public static void addAttributes(StreamTupleElement tupleElement,
-				     constructInternalNode internalNode,
-				     Element resultElement) 
+    public void addAttributes(constructInternalNode internalNode,
+			      Element resultElement) 
     throws ShutdownException {
 
         Vector attrs = internalNode.getStartTag().getAttrList();
 	
         for (int i = 0; i < attrs.size(); i++) {
             attr attribute = (attr) attrs.get(i);
-            String name = attribute.getName();
+            String attrName = attribute.getName();
             data attrData = attribute.getValue();
-	    int attributeId;
 
 	    switch(attrData.getType()) {
 	    case dataType.STRING:
                 // Add the string value to the result
-                resultElement.setAttribute(name, (String) attrData.getValue());
+		Attr a = doc.createAttribute(attrName);
+		a.setValue((String)attrData.getValue());
+                resultElement.setAttributeNode(a);
 		break;
 
 	    case dataType.ATTR:
                 // First get the schema attribute
                 schemaAttribute schema = (schemaAttribute) attrData.getValue();
-		assert schema != null : "Schema null for attribute " + name;
+		assert schema != null : "Schema null for attribute " + attrName;
+
+		int attrIdx =
+                        ((schemaAttribute) attrData.getValue()).getAttrId();
 
                 // Now construct result based on whether it is to be 
 		// interpreted as an element or a parent
                 switch(schema.getType()) {
 		case varType.ELEMENT_VAR:
-                    // The value of the leafData is a schema attribute
-		    // - from it get the attribute id in the tuple 
-		    // to construct from
-		    attributeId =
-                        ((schemaAttribute) attrData.getValue()).getAttrId();
-
-                    // Add the attribute as the result
-                    // This better BE an attribute!
-		    Node na = tupleElement.getAttribute(attributeId);
-		    if(!(na instanceof Attr)) {
-			throw new ShutdownException("Can not use element type variable to create attribute");
-		    }
-                    Attr a = (Attr) na;
-                    resultElement.setAttribute(name, a.getValue());
+		    MagicNode magicAttr = new MagicNode(attrIdx, magicRoot,
+							Node.ATTRIBUTE_NODE);
+                    resultElement.setAttributeNode(magicAttr);
 		    break;
 
 		case varType.CONTENT_VAR:
-		    attributeId =
-                        ((schemaAttribute) attrData.getValue()).getAttrId();
-
-		    Node attr = tupleElement.getAttribute(attributeId);
-		    if(attr instanceof Element) {
-			Element elt = (Element)attr;
-			
-			// Concatenate the node values of 
-			// the element's children
-			StringBuffer attrValue = new StringBuffer("");
-			Node n = elt.getFirstChild();
-			while (n != null) {
-			    attrValue.append(n.getNodeValue());
-			    n = n.getNextSibling();
-			}
-			resultElement.setAttribute(name, attrValue.toString());
-		    } else if (attr instanceof Attr) {
-			// KT used to require that this be an element,
-			// but I think attribute is valid also
-			resultElement.setAttribute(name, 
-						   ((Attr)attr).getValue());
-		    } else {
-			assert false : "KT: what did I get here??";
-		    }
+		    MagicContentAttr magicContentAttr =
+			new MagicContentAttr(attrIdx, magicRoot,
+					     attrName);
+                    resultElement.setAttributeNode(magicContentAttr);
+		    // magiccontent node has no attributes in this case
 		    break;
 
 		default:
@@ -377,19 +353,19 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 
     public int hashCode() {
         return resultTemplate.hashCode()
-            ^ variable.hashCode()
+            //^ variable.hashCode()
             ^ hashCodeNullsAllowed(getLogProp());
     }
 
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalConstructOperator))
+        if (o == null || !(o instanceof PhysicalMagicConstruct))
             return false;
         if (o.getClass() != getClass())
             return o.equals(this);
-        PhysicalConstructOperator other = (PhysicalConstructOperator) o;
+        PhysicalMagicConstruct other = (PhysicalMagicConstruct) o;
         // XXX vpapad TODO constructBaseNode doesn't override equals
         return resultTemplate.equals(other.resultTemplate)
-            && variable.equals(other.variable)
+            //&& variable.equals(other.variable)
             && equalsNullsAllowed(getLogProp(), other.getLogProp());
     }
 
@@ -397,10 +373,10 @@ public class PhysicalConstructOperator extends PhysicalOperator {
      * @see niagara.optimizer.colombia.Op#copy()
      */
     public Op opCopy() {
-        PhysicalConstructOperator op = new PhysicalConstructOperator();
+        PhysicalMagicConstruct op = new PhysicalMagicConstruct();
         // XXX vpapad: We treat resultTemplate as an immutable object
         op.resultTemplate = resultTemplate;
-        op.variable = variable;
+        //op.variable = variable;
 	op.outSize = outSize;
         return op;
     }
@@ -420,8 +396,10 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     public void constructTupleSchema(TupleSchema[] inputSchemas) {
         super.constructTupleSchema(inputSchemas);
         resultTemplate.replaceVar(new varTbl(inputSchemas[0]));        
-        // Without projection, (length of output tuple) = (length of input tuple + 1)
-        projecting = (inputSchemas[0].getLength() + 1 != outputTupleSchema.getLength());
+        // Without projection, (length of output tuple) 
+	//                        = (length of input tuple + 1)
+        projecting = (inputSchemas[0].getLength() + 1 
+		      != outputTupleSchema.getLength());
         if (projecting)
             attributeMap = inputSchemas[0].mapPositions(outputTupleSchema);
     }

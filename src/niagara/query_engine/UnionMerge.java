@@ -71,7 +71,8 @@ class UnionMerge extends MergeObject {
      */
     Element merge(Element rElt, Element lElt, Document resDoc,
 		  String tagName) {
-	throw new PEException("KT: Shouldn't call merge on union - can't find where this is called");
+	assert false : "KT: Shouldn't call merge on union - can't find where this is called";
+	return null;
     }
 
     /**

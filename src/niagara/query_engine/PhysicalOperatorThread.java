@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperatorThread.java,v 1.5 2003/01/13 05:09:47 tufte Exp $
+  $Id: PhysicalOperatorThread.java,v 1.6 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -133,7 +133,8 @@ public class PhysicalOperatorThread implements Runnable {
 	    thread.setName(op.getName());
 	    // KAT check here
 	    if(niagara.connection_server.NiagraServer.RUNNING_NIPROF)
-	      JProf.registerThreadName(op.getName());
+	      JProf.registerThreadName(op.getName() + 
+	                               "(" + op.getId() +")");
 	    op.execute();
 	    
 	    // Garbage collect the memory occupied by the operator

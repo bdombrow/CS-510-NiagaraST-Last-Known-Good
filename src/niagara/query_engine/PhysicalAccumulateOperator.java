@@ -1,4 +1,4 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.19 2003/03/03 08:20:13 tufte Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.20 2003/07/03 19:56:52 tufte Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
@@ -40,8 +40,8 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     private int mergeIndex;
     private String initialAccumFile;
     private String afName;
-    private boolean clear;
     private int tupleCount;
+    private boolean clear;
 
     /* The object into which things are being accumulated */
     private Document accumDoc;
@@ -51,7 +51,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
 
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         // Type cast the logical operator to a Accumulate operator
         AccumulateOp logicalAccumulateOperator = (AccumulateOp) logicalOperator;
 
@@ -59,10 +59,12 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
         mergeAttr = logicalAccumulateOperator.getMergeAttr();
         initialAccumFile = logicalAccumulateOperator.getInitialAccumFile();
         afName = logicalAccumulateOperator.getAccumFileName();
-        clear = logicalAccumulateOperator.getClear();
+	clear = logicalAccumulateOperator.getClear();
     }
 
-    public void opInitialize() {
+    public void opInitialize() 
+	throws ShutdownException {
+	mergeIndex = inputTupleSchemas[0].getPosition(mergeAttr.getName());
         if (clear && !initialAccumFile.equals("")) {
             createAccumulatorFromDisk(initialAccumFile);
         } else if (!afName.equals("") && CacheUtil.isAccumFile(afName)) {
@@ -102,6 +104,10 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	if(MergeTree.TRACE)
 	    System.out.println("KT: Phys Accum Processing Tuple");
 
+	// set the tuple pointer for the magic elements
+	tupleElement.setMagicTuple();
+
+	/*
 	if((tupleCount % 1000) == 0) {
 	    Runtime r = Runtime.getRuntime();
 	    System.out.println("KT: PhysAccum " + tupleCount + " tuples " +
@@ -109,7 +115,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 			       " Total mem " + r.totalMemory() +
 			       " Used mem " + (r.totalMemory() -
 					       r.freeMemory()));
-	}
+					       }*/
 
         /* get the fragment to be merged from the tuple, convert it
          * to an element if necessary, then pass the work off to the 
@@ -151,14 +157,15 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     protected void flushCurrentResults(boolean partial)
         throws ShutdownException, InterruptedException {
-
-	System.out.println("KT PhysAccumOp flushCurrentResults called");
-
+	/*
 	if(NiagraServer.RUNNING_NIPROF) {
 	    System.out.println("KT requesting data dump");
 	    System.gc();
 	    JProf.requestDataDump();
-	}
+	    }*/
+
+	System.out.println("Do Accum Cnt " + mergeTree.doAccumCnt +
+			   " Accum Empty Cnt " + mergeTree.accumEmptyCnt);
 
         if (recdData == false) {
             System.out.println(
@@ -198,7 +205,8 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
             }
 
         } else {
-            throw new ShutdownException("Invalid instance type");
+            throw new ShutdownException("Invalid instance type " + 
+					mergeIndex);
         }
 
         return domElt;
@@ -206,20 +214,18 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     private void createEmptyAccumulator() {
         accumDoc = DOMFactory.newDocument();
-	if(accumDoc == null)
-	    throw new PEException("num accumulator");
+	assert accumDoc != null : "KT null accumulator";
         return;
     }
 
     private void createAccumulatorFromDoc(String afName) {
         accumDoc = (Document) DataManager.AccumFileDir.get(afName);
-        if (accumDoc == null) {
-            throw new PEException("AccumFileDir.get returned null in createAccumulatorFromDoc");
-        }
+	assert accumDoc != null : "AccumFileDir.get returned null in createAccumulatorFromDoc";
         return;
     }
 
-    private void createAccumulatorFromDisk(String initialAF) {
+    private void createAccumulatorFromDisk(String initialAF) 
+	throws ShutdownException {
 
         try {
             niagara.ndom.DOMParser p = DOMFactory.newParser();
@@ -235,21 +241,12 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
             }
 
             accumDoc = p.getDocument();
-            if (accumDoc.getDocumentElement() == null) {
-                System.out.println("Doc elt null");
-            }
+	    assert accumDoc.getDocumentElement() != null : "Doc elt of accum doc is null";
             return;
         } catch (java.io.IOException e) {
-            System.err.println(
-                "Initial Accumulate File Corrupt - creating empty accumulator "
-                    + e.getMessage());
-            createEmptyAccumulator();
-            return;
+	    throw new ShutdownException("Initial Accumulate File Corrupt");
         } catch (org.xml.sax.SAXException e) {
-            System.err.println(
-                "Initial Accumulate File Corrupt - creating empty accumulator");
-            createEmptyAccumulator();
-            return;
+	    throw new ShutdownException("Initial Accumulate File Corrupt");
         }
     }
 
@@ -264,10 +261,11 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         PhysicalAccumulateOperator op = new PhysicalAccumulateOperator();
         op.mergeTree = mergeTree;
-        op.mergeAttr = mergeAttr;
+	op.mergeAttr = mergeAttr;
+        op.mergeIndex = mergeIndex;
         op.initialAccumFile = initialAccumFile;
         op.afName = afName;
         op.clear = clear;

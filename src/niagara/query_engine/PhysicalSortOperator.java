@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSortOperator.java,v 1.6 2002/10/31 03:54:39 vpapad Exp $
+  $Id: PhysicalSortOperator.java,v 1.7 2003/07/03 19:56:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,7 +76,7 @@ public class PhysicalSortOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
     }
 
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         // Type cast the logical operator to a Sort operator
         SortOp logicalSortOperator = (SortOp) logicalOperator;
         sortingField = logicalSortOperator.getAttr();
@@ -248,7 +248,7 @@ public class PhysicalSortOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         PhysicalSortOperator op = new PhysicalSortOperator();
         op.sortingField = sortingField;
         op.comparisonMethod = comparisonMethod;

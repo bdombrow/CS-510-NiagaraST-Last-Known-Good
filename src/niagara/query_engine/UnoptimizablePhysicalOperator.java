@@ -1,4 +1,4 @@
-/* $Id: UnoptimizablePhysicalOperator.java,v 1.6 2003/02/25 06:10:25 vpapad Exp $ */
+/* $Id: UnoptimizablePhysicalOperator.java,v 1.7 2003/07/03 19:56:52 tufte Exp $ */
 package niagara.query_engine;
 
 
@@ -46,13 +46,13 @@ public abstract class UnoptimizablePhysicalOperator extends PhysicalOperator {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
      */
-    public void initFrom(LogicalOp op) {
+    public void opInitFrom(LogicalOp op) {
     }
 
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public final Op copy() {
+    public final Op opCopy() {
         throw new PEException("Optimization is not supported for this operator");
     }
     

@@ -48,7 +48,7 @@ class ReplaceNodeMerge extends NodeMerge {
 	    leftIsDominant = false;
 	    break;
 	default:
-	    throw new PEException("Invalid dominant side");
+	    assert false : "KT: Invalid dominant side";
 	}
 
 	/* set up for the merge type - inner,outer, etc */

@@ -1,5 +1,5 @@
 /*
-  $Id: PhysicalPrefix.java,v 1.3 2003/03/03 08:20:13 tufte Exp $
+  $Id: PhysicalPrefix.java,v 1.4 2003/07/03 19:56:52 tufte Exp $
 */
 
 package niagara.query_engine;
@@ -28,12 +28,12 @@ public class PhysicalPrefix extends PhysicalOperator {
         tuplesPassed = 0;
     }
 
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         Prefix p = (Prefix) logicalOperator;
         this.length = p.getLength();
     }
 
-    public Op copy() {
+    public Op opCopy() {
         PhysicalPrefix p = new PhysicalPrefix();
         p.length = length;
         return p;

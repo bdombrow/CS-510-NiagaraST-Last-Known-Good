@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalDisplayOperator.java,v 1.9 2003/03/03 08:20:13 tufte Exp $
+ * $Id: PhysicalDisplayOperator.java,v 1.10 2003/07/03 19:56:52 tufte Exp $
  *
  */
 
@@ -48,10 +48,10 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
         toDisplay = new StringBuffer();
     }
     
-    public Op copy() {
+    public Op opCopy() {
         return new PhysicalDisplayOperator(query_id, url_location);
     }
-    public void initFrom(LogicalOp logicalOperator) {
+    public void opInitFrom(LogicalOp logicalOperator) {
         DisplayOp display = (DisplayOp) logicalOperator;
         query_id = display.getQueryId();
         url_location = display.getClientLocation();
