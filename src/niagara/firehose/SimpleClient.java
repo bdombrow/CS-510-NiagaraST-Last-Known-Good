@@ -49,6 +49,7 @@ class ClientMain {
     int numTLElts = 1;
     boolean streaming = true;
     boolean prettyPrint = false;
+    boolean trace = false;
     boolean quiet = false;
     boolean shutdown = false;
 
@@ -161,6 +162,13 @@ class ClientMain {
 		idx++;
 		ok = true;
 	    }
+
+            // get trace
+	    if(idx < args.length && args[idx].compareTo("-tr") == 0) {
+               trace = true;
+	       idx++;
+	       ok = true;
+	    }
 	    
 	    //get shutdown
 	    if (idx < args.length && args[idx].compareTo("-shutdown") == 0) {
@@ -176,7 +184,7 @@ class ClientMain {
       stUsage.append(" [-h host_name] [-ng numGenCalls]");
       stUsage.append(" [-tl numTopLevelElts] [-cw client_wait]");
       stUsage.append(" [-ns ] (no streaming) [-q] (quiet)");
-      stUsage.append(" [-pp ] (prettyprint) [-shutdown]");
+      stUsage.append(" [-pp ] (prettyprint) [-tr] (trace) [-shutdown]");
       System.out.println(stUsage.toString());
     }
 
@@ -197,7 +205,8 @@ class ClientMain {
 					     stype, stream_descriptor,
 					     stream_descriptor2,
 					     1, 1,
-					     1, streaming, prettyPrint);
+					     1, streaming, prettyPrint,
+					     trace);
 
       InputStream is = fhclient.open_stream(fhSpec);
       byte buffer[] = new byte[1024];
