@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.4 2000/08/09 23:53:47 tufte Exp $
+  $Id: NiagraServer.java,v 1.5 2000/08/11 22:29:27 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -246,6 +246,11 @@ public class NiagraServer
 				    dtd_hack = true;
 				    valid_args = true;
 				}
+				else if (args[i].equals("-console")) {
+				    Console console = new Console(System.in);
+				    console.start();
+				    valid_args = true;
+				}
 			    }
 			    if (valid_args) return;
 			}
@@ -343,6 +348,8 @@ public class NiagraServer
 				System.out.println("\t-init   create (re-create) the .niagra_config file");
 				System.out.println("\t-se <host name> use the the search engine on <host name>");
 				System.out.println("\t-without-se Do not try to connect to a search engine");
+				System.out.println("\t-dtd-hack   Add HTML entity definitions to results");
+				System.out.println("\t-console    Rudimentary control of the server from stdin");
 
 				System.out.println("\t-help   print detailed help screen");
 			}
