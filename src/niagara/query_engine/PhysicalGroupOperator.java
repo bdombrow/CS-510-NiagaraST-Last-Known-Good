@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.14 2002/10/24 02:01:22 vpapad Exp $
+  $Id: PhysicalGroupOperator.java,v 1.15 2002/10/24 02:15:41 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,6 +29,7 @@ package niagara.query_engine;
 
 import java.util.*;
 
+import niagara.logical.Variable;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -196,7 +197,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     private static final boolean[] blockingSourceStreams = { true };
 
     // The logical operator for grouping
-    //
     private groupOp logicalGroupOperator;
 
     // The list of attributes to group by
@@ -238,9 +238,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      */
 
     protected final void opInitialize () {
-
 	// Get the grouping attributes
-	//
 	skolem grouping = logicalGroupOperator.getSkolemAttributes();
 
 	groupAttributeList = grouping.getVarList();
@@ -635,4 +633,21 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     public boolean isStateful() {
 	return true;
     }
+
+    // XXX vpapad: not ready yet
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+    }
+    /*    
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        inputTupleSchemas = inputSchemas;
+        outputTupleSchema = new TupleSchema();
+        Vector gbyAttrs = logicalGroupOperator.getSkolemAttributes().getVarList();
+
+        // The resulting schema contains the groupby attributes
+        // plus the new aggregate field
+        for (int i = 0; i < gbyAttrs.size(); i++) {
+            outputTupleSchema.addMapping(new Variable((String) gbyAttrs.get(i)));
+        }
+    }
+    */
 }
