@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Schema.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: Schema.java,v 1.2 2000/07/08 05:16:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -47,6 +47,12 @@ public class Schema {
    public Schema() {
 	tupleDes = new Vector();
    }
+
+
+    // constructor from an existing schema
+    public Schema(Schema sc) {
+	tupleDes = new Vector(sc.getVector());
+    }
 
    /**
     * This function gives the depth of a Nth schema unit
