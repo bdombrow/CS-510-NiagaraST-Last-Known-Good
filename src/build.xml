@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.16 2003/10/23 18:15:07 tufte Exp $ -->
+<!-- $Id: build.xml,v 1.17 2003/12/24 01:10:08 vpapad Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -12,49 +12,49 @@
 
     <!-- Check if the lexer/parser files are up to date -->
     <dependset>
-      <srcfilelist dir="${src}/niagara/xmlql_parser/syntax_tree"
+      <srcfilelist dir="${src}/niagara/xmlql_parser/"
         files="xmlql.cup,xmlql.flex"/>
-      <targetfilelist dir="${src}/niagara/xmlql_parser/syntax_tree"
+      <targetfilelist dir="${src}/niagara/xmlql_parser/"
         files="sym.java,Scanner.java,QueryParser.java,re.cup,construct.cup"/>
     </dependset>
-    <available property="cups.ok" file="${src}/niagara/xmlql_parser/syntax_tree/re.cup"/>
+    <available property="cups.ok" file="${src}/niagara/xmlql_parser/re.cup"/>
 
   </target>
 
   <!-- Run the lexer and parser generators -->
   <target name="create.cups" unless="cups.ok">
-    <exec executable="/bin/sh" dir="${src}/niagara/xmlql_parser/syntax_tree">
+    <exec executable="/bin/sh" dir="${src}/niagara/xmlql_parser">
       <arg value="-c"/>
       <arg value="sed -e 's!start with Xmlql!start with RegularExpression!' -e 's!QueryParser!REParser!g' &lt; xmlql.cup &gt; re.cup"/>
     </exec>
 
-    <exec executable="/bin/sh" dir="${src}/niagara/xmlql_parser/syntax_tree">
+    <exec executable="/bin/sh" dir="${src}/niagara/xmlql_parser/">
       <arg value="-c"/>
       <arg value="sed -e 's!start with Xmlql!start with QueryInConstruct!' -e 's!QueryParser!ConstructParser!g' &lt; xmlql.cup &gt; construct.cup"/>
     </exec>
 
-    <java fork="yes" dir="${src}/niagara/xmlql_parser/syntax_tree"
+    <java fork="yes" dir="${src}/niagara/xmlql_parser/"
       classpath="${lib}/JFlex.1_3_5.jar"
       classname="JFlex.Main">
       <arg value="xmlql.flex"/>
     </java>
 
     <exec executable="/bin/sh"
-    	dir="${src}/niagara/xmlql_parser/syntax_tree">
+    	dir="${src}/niagara/xmlql_parser/">
 	<arg value="-c"/>
-      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 8 -parser QueryParser -package niagara.xmlql_parser.syntax_tree &lt; xmlql.cup"/>
+      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 8 -parser QueryParser -package niagara.xmlql_parser &lt; xmlql.cup"/>
     </exec>
 
     <exec executable="/bin/sh"
-    	dir="${src}/niagara/xmlql_parser/syntax_tree">
+    	dir="${src}/niagara/xmlql_parser/">
 	<arg value="-c"/>
-      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 8 -parser REParser -symbols RESym -package niagara.xmlql_parser.syntax_tree &lt; re.cup"/>
+      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 8 -parser REParser -symbols RESym -package niagara.xmlql_parser &lt; re.cup"/>
     </exec>
 
     <exec executable="/bin/sh"
-    	dir="${src}/niagara/xmlql_parser/syntax_tree">
+    	dir="${src}/niagara/xmlql_parser/">
 	<arg value="-c"/>
-      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 8 -parser ConstructParser -symbols ConstructSym -package niagara.xmlql_parser.syntax_tree &lt; construct.cup"/>
+      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 8 -parser ConstructParser -symbols ConstructSym -package niagara.xmlql_parser &lt; construct.cup"/>
     </exec>
   </target>
 
@@ -77,7 +77,7 @@
         <pathelement location="${lib}/javax.servlet.jar"/>
         <pathelement location="${lib}/JFlex.1_3_5.jar"/>
         <pathelement location="${lib}/JLex.jar"/>
-	<pathelement location="${lib}/jpcap.jar"/>
+        <pathelement location="${lib}/jpcap.jar"/>
         <pathelement location="${lib}/junit.jar"/>
         <pathelement location="${lib}/PerlTools.jar"/>
         <pathelement location="${lib}/w4f.jar"/>
