@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.18 2004/02/10 03:29:08 vpapad Exp $ -->
+<!-- $Id: build.xml,v 1.19 2004/02/10 03:54:39 vpapad Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -62,14 +62,12 @@
   <target name="compile" depends="init,create.cups">
     <javac srcdir="${src}" destdir="${build}" source="1.4" debug="true"
     	excludes="niagara/client/qbe/**,niagara/client/qpclient/**,NEXMarkGenerator">
-      <compilerarg line=" -Xbootclasspath/p:${lib}/xercesImpl.xerces-2_6_1.jar:${lib}/xmlAPIs.xerces-2_6_1.jar"/>
+      <compilerarg line=" -Xbootclasspath/p:${lib}/xercesImpl.xerces-2_6_1.jar:${lib}/xmlParserAPIs.xerces-2_6_1.jar"/>
       <classpath refid="compilation.classpath"/>
     </javac>
   </target>    
   <path id="compilation.classpath">
         <!-- In alpha order -->
-        <pathelement location="${lib}/xmlParserAPIs.xerces-2_6_1.jar"/>
-        <pathelement location="${lib}/xercesImpl.xerces-2_6_1.jar"/>
         <pathelement location="${lib}/aelfred.jar"/>
         <pathelement location="${lib}/com.mortbay.jetty.jar"/>
         <pathelement location="${lib}/cup_all.jar"/>
@@ -86,6 +84,8 @@
         <pathelement location="${lib}/w4f.jar"/>
         <pathelement location="${lib}/xml4j.jar"/>
         <pathelement location="${lib}/XMLGenerator.jar"/>
+        <pathelement location="${lib}/xmlParserAPIs.xerces-2_6_1.jar"/>
+        <pathelement location="${lib}/xercesImpl.xerces-2_6_1.jar"/>
   </path>
   <target name="javadoc">
     <javadoc packagenames="niagara.*,niagara.*.*,niagara.*.*.*" 
