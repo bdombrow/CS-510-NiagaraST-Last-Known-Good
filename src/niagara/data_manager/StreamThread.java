@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.27 2003/03/12 22:43:42 tufte Exp $
+ * $Id: StreamThread.java,v 1.28 2003/07/03 19:36:29 tufte Exp $
  */
 
 package niagara.data_manager;
@@ -32,11 +32,12 @@ public class StreamThread extends SourceThread {
     private FirehoseClient firehoseClient;
     private BufferedReader bufferedInput = null;
     private MyArray buffer; 
+    private CPUTimer cpuTimer;
 
     // Optimization-time attributes
     private Attribute variable;
 
-    public void initFrom(LogicalOp lop) {
+    public void opInitFrom(LogicalOp lop) {
         StreamOp op = (StreamOp) lop;
         spec = op.getSpec();
         variable = op.getVariable();
@@ -61,6 +62,11 @@ public class StreamThread extends SourceThread {
 	if(niagara.connection_server.NiagraServer.RUNNING_NIPROF)
 	    JProf.registerThreadName(this.getName());
 
+	if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+	    cpuTimer = new CPUTimer();
+	    cpuTimer.start();
+	}
+
         if (NiagraServer.usingSAXDOM())
             parser = DOMFactory.newParser("saxdom");
         else
@@ -68,7 +74,7 @@ public class StreamThread extends SourceThread {
 
 	boolean sourcecreated = false;
 	boolean shutdown = false;
-	String message =  null;
+	String message =  "normal";
 
 	try {
 	    inputStream = createInputStream();
@@ -232,6 +238,11 @@ public class StreamThread extends SourceThread {
 	    closeInputStream();
 	} catch(java.io.IOException ioe) {
 	    /* do nothing */
+	}
+
+	if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+	    cpuTimer.stop();
+	    cpuTimer.print(getName() + "(shutdown: " + message + ")");
 	}
 
 	try {
@@ -432,7 +443,7 @@ public class StreamThread extends SourceThread {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         StreamThread st = new StreamThread();
         st.spec = spec;
         st.variable = variable;

@@ -1,5 +1,5 @@
 /**
- * $Id: TimerThread.java,v 1.4 2003/03/03 08:23:39 tufte Exp $
+ * $Id: TimerThread.java,v 1.5 2003/07/03 19:36:29 tufte Exp $
  *
  */
 
@@ -93,7 +93,7 @@ public class TimerThread extends SourceThread {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
      */
-    public void initFrom(LogicalOp op) {
+    public void opInitFrom(LogicalOp op) {
         Timer t = (Timer) op;
         this.relative = t.getRelative();
         this.period = t.getPeriod();
@@ -107,7 +107,7 @@ public class TimerThread extends SourceThread {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         return new TimerThread(
             relative,
             period,

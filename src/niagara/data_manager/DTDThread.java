@@ -68,7 +68,7 @@ public class DTDThread extends SourceThread {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
      */
-    public void initFrom(LogicalOp op) {
+    public void opInitFrom(LogicalOp op) {
         dtdScanOp dop = (dtdScanOp) op;
         urls = dop.getDocs();
         variable = dop.getVariable();
@@ -77,7 +77,7 @@ public class DTDThread extends SourceThread {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         return new DTDThread(variable, urls);
     }
 

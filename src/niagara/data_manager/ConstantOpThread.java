@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantOpThread.java,v 1.8 2003/02/25 06:14:21 vpapad Exp $
+ * $Id: ConstantOpThread.java,v 1.9 2003/07/03 19:36:29 tufte Exp $
  *
  */
 
@@ -154,7 +154,7 @@ public class ConstantOpThread extends SourceThread {
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
      */
-    public void initFrom(LogicalOp op) {
+    public void opInitFrom(LogicalOp op) {
         ConstantOp cop = (ConstantOp) op;
         this.vars = cop.getVars();
         this.content = cop.getContent();
@@ -163,7 +163,7 @@ public class ConstantOpThread extends SourceThread {
     /**
      * @see niagara.optimizer.colombia.Op#copy()
      */
-    public Op copy() {
+    public Op opCopy() {
         return new ConstantOpThread(content, vars);
     }
 

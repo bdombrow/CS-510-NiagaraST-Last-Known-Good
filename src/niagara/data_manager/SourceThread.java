@@ -1,4 +1,4 @@
-/* $Id: SourceThread.java,v 1.3 2002/10/31 03:26:48 vpapad Exp $ */
+/* $Id: SourceThread.java,v 1.4 2003/07/03 19:36:29 tufte Exp $ */
 package niagara.data_manager;
 
 import niagara.connection_server.NiagraServer;
@@ -19,4 +19,12 @@ public abstract class SourceThread
     }
     
     public int getArity() { return 0; }
+
+    public final void initFrom(LogicalOp op) {
+	this.id = op.getId();
+	opInitFrom(op);
+    }
+
+    // do local initialization
+    protected abstract void opInitFrom(LogicalOp op);
 }
