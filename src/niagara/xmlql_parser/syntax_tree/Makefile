@@ -17,6 +17,8 @@ NIAGROOT    = ../../../..
 API         = /p/niagra/api
 LIBDIR      = $(NIAGROOT)/lib
 TARG_LIB    = xmlql_parser.jar
+JAVAC       = javac
+JAVA        = java
 
 
 #-------------------------------------
@@ -71,7 +73,7 @@ OBJ = EscapedUnicodeReader.class   \
 
 ###############################################################################
 
-all: sym.class Scanner.class QueryParser.class $(OBJ)
+all: sym.class Scanner.class construct_parser/ConstructParser.class re_parser/REParser.class QueryParser.class $(OBJ)
 
 %.class: %.java
 	$(JAVAC) $(JAVAFLAGS) $<
@@ -86,9 +88,14 @@ sym.java: xmlql.cup
 Scanner.java: xmlql.flex sym.class
 	$(JAVA) $(JAVAFLAGS) JFlex.Main xmlql.flex
 
+# Generate REParser.java 
+	mkdir -p re_parser && cat xmlql.cup | sed -e 's!.*package.*!import niagara.xmlql_parser.syntax_tree.*;!' -e 's!^.*start with.*!start with RegularExpression;!' -e 's!QueryParser!REParser!g'  > re_parser/re.cup && $(JAVA) $(JAVAFLAGS) java_cup.Main -expect 5 -parser REParser -package niagara.xmlql_parser.syntax_tree.re_parser < re_parser/re.cup && mv REParser.java sym.java re_parser
 
+# Generate ConstructParser.java 
+construct_parser/ConstructParser.java: xmlql.cup
+	mkdir -p construct_parser && cat xmlql.cup | sed -e 's!.*package.*!import niagara.xmlql_parser.syntax_tree.*;!' -e 's!^.*start with.*!start with QueryInConstruct;!' -e 's!QueryParser!ConstructParser!g'  > construct_parser/construct.cup && $(JAVA) $(JAVAFLAGS) java_cup.Main -expect 5 -parser ConstructParser -package niagara.xmlql_parser.syntax_tree.construct_parser < construct_parser/construct.cup && mv ConstructParser.java sym.java construct_parser
 
-install: sym.class Scanner.class QueryParser.class $(OBJ)
+install: sym.class Scanner.class ConstructParser.class QueryParser.class $(OBJ)
 	cd ../../..;$(JAR) -cfv ../lib/$(TARG_LIB) niagara/xmlql_parser/syntax_tree/*.class
 
 
@@ -99,5 +106,5 @@ classpath:
 
 clean:
 	rm -f *.class *~
-	rm -f QueryParser.java sym.java Scanner.java
+	rm -f re_parser/REParser.java construct_parser/ConstructParser.java QueryParser.java sym.java Scanner.java
 
