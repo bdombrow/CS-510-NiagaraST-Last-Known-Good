@@ -1,3 +1,4 @@
+/** $Id: TestSAXParser.java,v 1.3 2002/12/10 01:10:20 vpapad Exp $ */
 import java.io.*; 
 import javax.xml.parsers.*;
 import org.xml.sax.SAXException;
