@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalTrigActionOperator.java,v 1.5 2002/05/07 03:10:55 tufte Exp $
+  $Id: PhysicalTrigActionOperator.java,v 1.6 2002/10/24 01:08:27 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -50,7 +49,7 @@ import niagara.ndom.*;
  *
  */
 
-public class PhysicalTrigActionOperator extends PhysicalOperator {
+public class PhysicalTrigActionOperator extends UnoptimizablePhysicalOperator {
 	
     ////////////////////////////////////////////////////////
     // Data members of the PhysicalDuplicateOperator Class
