@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: punctuateOp.java,v 1.4 2003/07/10 22:14:47 ptucker Exp $
+  $Id: punctuateOp.java,v 1.5 2003/07/18 00:57:04 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,7 +35,6 @@ import niagara.connection_server.InvalidPlanException;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.logical.Variable;
 import niagara.optimizer.colombia.Attribute;
-import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
