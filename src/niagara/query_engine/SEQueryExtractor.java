@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: SEQueryExtractor.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: SEQueryExtractor.java,v 1.2 2002/10/27 02:23:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -47,6 +46,17 @@ package niagara.query_engine;
 
 import java.util.*;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.logical.And;
+import niagara.logical.Atom;
+import niagara.logical.BinaryPredicate;
+import niagara.logical.Comparison;
+import niagara.logical.Constant;
+import niagara.logical.Not;
+import niagara.logical.OldVariable;
+import niagara.logical.Or;
+import niagara.logical.Predicate;
+import niagara.logical.Variable;
+import niagara.utils.PEException;
 import niagara.xmlql_parser.op_tree.*;
 
 /**
@@ -226,7 +236,7 @@ public class SEQueryExtractor {
 		logNode selectNode, Vector containUnits) {
 
 		op operator = selectNode.getOperator();
-		predicate pred = ((selectOp)operator).getPredicate();
+		Predicate pred = ((selectOp)operator).getPredicate();
 
 		Boolean[] hasNegation = new Boolean[1];
 		ContainTreeNode tree = makeContainmentTree (
@@ -251,16 +261,15 @@ public class SEQueryExtractor {
 	 * @return a containment tree
 	 */
 	private static ContainTreeNode makeContainmentTree (
-		predicate pred, Vector containUnits, Boolean[] hasNegation) {
+		Predicate pred, Vector containUnits, Boolean[] hasNegation) {
 
 		if (pred == null) {
 			hasNegation[0] = new Boolean(false);
 			return null;
 		}
 
-		if (pred instanceof predArithOpNode) {
-
-			int predOp = pred.getOperator();
+		if (pred instanceof Comparison) {
+			int predOp = ((Comparison) pred).getOperator();
 
 			// If this predicate has a negation, ignore it
 			if (predOp == opType.NEQ) {
@@ -268,22 +277,21 @@ public class SEQueryExtractor {
 				return null;
 			}
 
-			data lexp = ((predArithOpNode)pred).getLeftExp();
-			data rexp = ((predArithOpNode)pred).getRightExp();
+			Atom lexp = ((Comparison)pred).getLeft();
+			Atom rexp = ((Comparison)pred).getRight();
 
 			// 'lexp' contains info that we can use to bind the 
 			// predicate to a contain unit. we find out that contain 
 			// unit and get its tag.
 
-			Object attr = lexp.getValue();
-			if (! (attr instanceof schemaAttribute)) {
+			if (! (lexp instanceof Variable)) {
 				System.err.print ("BUG in logical query plan tree: ");
 				System.err.println ("lexp.value() not schemaAttribute!!");
 				hasNegation[0] = new Boolean(false);
 				return null;
 			}
 
-			int contain_unit_idx = ((schemaAttribute)attr).getAttrId();
+			int contain_unit_idx = ((schemaAttribute)((OldVariable) lexp).getSA()).getAttrId();
 			ContainUnit contain_unit = (ContainUnit)containUnits.elementAt (
 								contain_unit_idx);
 			if (contain_unit == null) {
@@ -305,32 +313,30 @@ public class SEQueryExtractor {
 			// check to see if the rexp is another variable, if so,
 			// we ignore this predicate
 
-			Object rvalue = rexp.getValue();
-			if (! (rvalue instanceof String)) {
+			if (! (rexp instanceof Constant)) {
 				hasNegation[0] = new Boolean(false);
 				return null;
 			}
 
 			// numerical predicate
 			try {
-				Double dummy = new Double((String)rexp.getValue());
+				Double dummy = new Double((String)((Constant)rexp).getValue());
 				tree_of_rvalue = new ContainTreeNode (
-					(String)rexp.getValue(),
+					(String)((Constant) rexp).getValue(),
 					contain_unit.getParent());
 			}
 
 			// non-numerical predicate
 			catch (NumberFormatException e) {
-
 				rvalueIsNumber = false; // it is a string
 				if (predOp == opType.EQ) {
 					tree_of_rvalue = new ContainTreeNode (
-						"\""+ (String)rexp.getValue() +"\"", // value
+						"\""+ ((Constant) rexp).getValue() +"\"", // value
 						contain_unit.getParent());			// ancestor
 				}
 				else {
 					tree_of_rvalue = new ContainTreeNode (
-						(String)rexp.getValue(),
+						((Constant) rexp).getValue(),
 						contain_unit.getParent());
 				}
 			}
@@ -362,16 +368,16 @@ public class SEQueryExtractor {
 			return tree;
 		}
 
-		else if (pred instanceof predLogOpNode) {
+		else if (!(pred instanceof Comparison)) {
 
 			// if this is a "NOT" predicate, we ignore it
-			if (pred.getOperator() == opType.NOT) {
+			if (pred instanceof Not) {
 				hasNegation[0] = new Boolean(true);
 				return null;
 			}
 
-			predicate lchild = ((predLogOpNode)pred).getLeftChild();
-			predicate rchild = ((predLogOpNode)pred).getRightChild();
+			Predicate lchild = ((BinaryPredicate)pred).getLeft();
+			Predicate rchild = ((BinaryPredicate)pred).getRight();
 
 			// make a tree from the left child
 			Boolean[] leftHasNegation = new Boolean[1];
@@ -403,12 +409,10 @@ public class SEQueryExtractor {
 				ContainTreeNode non_neg_child = 
 					leftHasNegation[0].booleanValue() ? rtree : ltree;
 
-				switch (pred.getOperator()) {
-				case opType.AND:
+				if (pred instanceof And) {
 					hasNegation[0] = new Boolean(false);
 					return non_neg_child;
-
-				case opType.OR:
+                                } else if (pred instanceof Or) {
 					hasNegation[0] = new Boolean(true);
 					return null;
 				}
@@ -417,7 +421,12 @@ public class SEQueryExtractor {
 			// neither child has negation, connect the two children
 			else {
 				hasNegation[0] = new Boolean(false);
-				return makeContainTreeNode (pred.getOperator(), ltree, rtree);
+                                // XXX vpapad: really ugly
+                                int type;
+                                if (pred instanceof And) type = opType.AND;
+                                else if (pred instanceof Or) type = opType.OR;
+                                else throw new PEException("Cannot convert this predicate to an optype");
+				return makeContainTreeNode (type, ltree, rtree);
 			}
 		}
 
