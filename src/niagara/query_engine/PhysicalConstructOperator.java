@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.3 2000/08/21 00:59:19 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.4 2000/08/23 09:10:48 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,8 +30,8 @@ package niagara.query_engine;
 
 import java.util.ArrayList;
 import java.util.Vector;
-import com.ibm.xml.parser.TXElement;
-import com.ibm.xml.parser.TXText;
+import com.ibm.xml.parser.*;
+
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import niagara.utils.*;
@@ -65,6 +65,10 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 
     // "Clear the output tuple" flag
     boolean clear;
+
+    // We will use this TXDocument as the "owner" of all the DOM nodes
+    // we create
+    private static TXDocument txd = new TXDocument();
 
     ///////////////////////////////////////////////////////////////////////////
     // These are the methods of the PhysicalConstructOperator class          //
@@ -222,7 +226,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 
 	    // Add the string value to the result
 	    //
-	    result.add(new TXText((String) leafData.getValue()));
+	    result.add(txd.createTextNode((String) leafData.getValue()));
 	}
 	else if (type == dataType.ATTR) {
 
@@ -308,8 +312,7 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	else
 	   tagName = (String)tagData.getValue();
 
-	TXElement resultElement = 
-	    new TXElement(tagName);
+	TXElement resultElement = (TXElement) txd.createElement(tagName);
 
 	// Recurse on all children and construct result
 	//
