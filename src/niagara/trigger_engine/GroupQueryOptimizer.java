@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: GroupQueryOptimizer.java,v 1.3 2002/05/23 06:31:59 vpapad Exp $
+  $Id: GroupQueryOptimizer.java,v 1.4 2002/10/24 00:41:55 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -298,7 +298,7 @@ public class GroupQueryOptimizer {
         op currOp = node.getOperator();
 	
         if(!(currOp instanceof dtdScanOp)) {
-            for(int i=0; i<node.numInputs(); i++) {
+            for(int i=0; i<node.getArity(); i++) {
                 calcSignatures(node.input(i), childPlanStrings, i, node, idV, nodeV, srcV);
 		
 	    }
