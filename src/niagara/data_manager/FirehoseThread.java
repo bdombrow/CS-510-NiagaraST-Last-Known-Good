@@ -36,7 +36,6 @@ public class FirehoseThread implements Runnable {
     public FirehoseThread(FirehoseSpec spec, SourceStream outStream) {
 	this.spec = spec;
 	outputStream = outStream;
-	return;
     }
 
     /**
@@ -52,8 +51,6 @@ public class FirehoseThread implements Runnable {
 	int err = fhClient.open_stream(spec.getRate(), spec.getType(),
 			     spec.getDescriptor(), spec.getIters());
 	while(err == 0 && messageEOF == false && streamShutdown == false) {
-	    System.out.println("XXX In the loop");
-
 	    err = fhClient.get_data();
 	    if(err == 0) {
 		messageEOF = fhClient.get_eof();
@@ -65,11 +62,16 @@ public class FirehoseThread implements Runnable {
 		     * an operator above
 		     */
 		    streamShutdown = ! processMessageBuffer();
-		    System.out.println("XXX after processMessageBuffer");
-		    System.out.println("XXX err is: " + err);
-		    System.out.println("XXX stream shutdown is: " + streamShutdown);
 		}
 	    }
+	}
+
+	// Our work is finished
+	try {
+	    outputStream.close();
+	}
+	catch (Exception e) {
+	    System.err.println("The output stream for the firehose thread was already closed.");
 	}
 
 	// err is not 0 = print out an error message??
@@ -77,6 +79,7 @@ public class FirehoseThread implements Runnable {
 	outputStream = null;
 	fhClient = null;
 	messageBuffer = null;
+	
 	return;
     }
 
@@ -106,7 +109,6 @@ public class FirehoseThread implements Runnable {
 	if(succeed == false) {
 	    /* means we got a shutdown message from the operator above */
 	    close_firehose_stream();
-	    System.out.println("XXX shutdown message from the operator above");
 	}
 	return succeed;
     }
@@ -133,8 +135,6 @@ public class FirehoseThread implements Runnable {
 	// Get rid of 0x0's
   	if (messageBuffer.indexOf(0) != -1)
  	    messageBuffer = messageBuffer.substring(0, messageBuffer.indexOf(0));	
-	System.out.println("DEBUG: " + messageBuffer);
-
 	try {
 	    TXDOMParser parser = new TXDOMParser();
 	    parser.parse(new InputSource(new ByteArrayInputStream(messageBuffer.getBytes())));
@@ -153,8 +153,6 @@ public class FirehoseThread implements Runnable {
      */
     private void close_firehose_stream() {
 	// this is the best we can do for now
-	System.out.println("XXX close_firehose_stream requested");
-
 	fhClient.request_stream_close();
 	return;
     }
