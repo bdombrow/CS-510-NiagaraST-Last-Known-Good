@@ -5,7 +5,7 @@ import java.util.*;
 
 public class SimpleClient implements UIDriverIF {
     ConnectionManager cm; 
-    static final int MAX_QUERY_LEN = 3096;
+    static final int MAX_QUERY_LEN = 10000;
     static String queryFilePath = "/disk/hopper/projects/disc/niagara/query_files/";
 
     public SimpleClient(String host, int port) {
@@ -139,7 +139,7 @@ public class SimpleClient implements UIDriverIF {
 	/* read the file into the buffer */
 	int qLen = br.read(cbuf, 0, MAX_QUERY_LEN);
 	if(qLen == MAX_QUERY_LEN) {
-	    System.out.println("Query exceeds maximum length (2048)");
+	    System.out.println("Query exceeds maximum length (4096)");
 	    return null;
 	}
 	return new String(cbuf, 0, qLen); /* copies cbuf */
