@@ -3,6 +3,8 @@
 package niagara.firehose;
 
 class XMLFirehose {
+    public static boolean verbose = false;
+
     public static void main(String[] args) {
 	// get port number
 	int i=0;
@@ -13,21 +15,25 @@ class XMLFirehose {
 	    ok = false;
 
 	    //Let the user set the port to listen on
-	    if(i<args.length && args[i].equals("-p")) {
+	    if(args[i].equals("-p")) {
 		try {
 		    port_num = Integer.decode(args[i+1]);
 		} catch (NumberFormatException e) {
-		    System.out.println("Conversion error " + e.getMessage());
+		    System.err.println("Conversion error " + e.getMessage());
 		    return;
 		}
 		i+=2;
 		ok = true;
+	    } else if(args[i].equals("-verbose")) {
+		verbose = true;
+		ok = true;
+		i++;
 	    }
 	}
 
 	if(!ok) {
-	    System.out.println("Usage: FirehoseGenerator " + 
-			       "[-p port_num]");
+	    System.err.println("Usage: FirehoseGenerator " + 
+			       "[-p port_num][-verbose]");
 	    return;
 	}
 

@@ -48,7 +48,7 @@ class OpenAuction {
     private void checkClosed(SimpleCalendar cal) {
 	if(!closed && (cal.getTimeInSecs())
 	   > endTime) {
-	    //System.out.println("KT closing auction. Number of Bids: " + numBids);
+	    //System.err.println("KT closing auction. Number of Bids: " + numBids);
 	    closed = true;
 	}
 	// KT - here is where we could create a closed_auction element

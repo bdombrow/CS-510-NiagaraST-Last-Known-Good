@@ -79,11 +79,15 @@ class XMLBGenerator extends XMLFirehoseGen {
 		
 		while (stLine.indexOf(stEnd) == -1) {
 		    stb.append(stLine);
+		    if(usePrettyPrint)
+			stb.append('\n');
 		    stLine = m_brdr.readLine();
 		}
 		
 		//Get the end token
 		stb.append(stLine);
+		if(usePrettyPrint)
+		    stb.append('\n');
 	    }
 	    stb.append("</GAMEDATA>\n");
 
@@ -92,9 +96,6 @@ class XMLBGenerator extends XMLFirehoseGen {
 	    System.out.println("Guilty XML: ");
 	    System.out.println("\t" + stb.toString());
 	}
-
-	String ret = stb.toString();
-	return ret;
-	//return stb.toString();
+	return stb.toString();
     }
 }

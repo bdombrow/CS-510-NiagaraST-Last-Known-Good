@@ -72,9 +72,9 @@ class OpenAuctions {
 	do {
 	    // generates an id between 0 and ITEM_DISTR_SIZE
 	    // need to scramble (so 1st item isn't most popular, followed by 2nd, etc.)
-	    //id = openAuctionZipf.nextInt();  
-	    id = rnd.nextInt(ITEM_DISTR_SIZE);
-	    //id = scrambler[id]; // still have id between 0 and ITEM_DISTR_SIZE
+	    id = openAuctionZipf.nextInt();  
+	    //id = rnd.nextInt(ITEM_DISTR_SIZE);
+	    id = scrambler[id]; // still have id between 0 and ITEM_DISTR_SIZE
 
 	    // convert to offset somewhere in physical array which may be bigger than
 	    // ITEM_DISTR_SIZE

@@ -44,7 +44,7 @@ class PersonGen {
     public Profile m_profile = new Profile();
     public Vector m_vctWatches = new Vector();
     
-    private Random m_rnd = new Random();
+    private Random m_rnd = new Random(20934);
     public static int NUM_CATEGORIES = 1000;
 
     

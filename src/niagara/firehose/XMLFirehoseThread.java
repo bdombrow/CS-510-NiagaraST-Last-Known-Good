@@ -24,6 +24,7 @@ class XMLFirehoseThread extends Thread {
     private long startTime;
 
     private int totalBytes = 0; // count total number of bytes written
+    private int byteDiff = 0;
 
     public XMLFirehoseThread(String str, MsgQueue _queue) {
 	super(str);
@@ -84,7 +85,7 @@ class XMLFirehoseThread extends Thread {
 								  bwTrace);
 		    break;
 		case FirehoseConstants.PACKET:
-		    System.out.println("Generating Packets");
+		    System.err.println("Generating Packets");
 		    xml_generator = new XMLPacketGenerator(fhSpec.getDescriptor(),
 							   fhSpec.getDescriptor2(),
 							   fhSpec.getNumTLElts(),
@@ -167,7 +168,7 @@ class XMLFirehoseThread extends Thread {
 	    // prepare for next message
 	    xml_generator = null; 
 	    try {
-		System.out.println("Closing connection wrote " + totalBytes + " bytes");
+		System.err.println("Closing connection wrote " + totalBytes + " bytes.");
 		if(client_out != null) {
 		    client_out.close();
 		    client_out = null;
@@ -220,6 +221,10 @@ class XMLFirehoseThread extends Thread {
 	if(client_writer == null)
 	    throw new PEException("write chars may only be called by generators that generate chars - check generatesChars() method");
 
+	if(XMLFirehose.verbose) {
+	    System.out.print(str); 
+	}
+
 	totalBytes += len; // keep track of the total number of bytes written
 
 	if(!useRate) {
@@ -241,14 +246,14 @@ class XMLFirehoseThread extends Thread {
 		long curTime = System.currentTimeMillis();
 		if((curTime - startTime) < 1000) { // 1000 milliseconds in one second
 		    try {
-			System.out.println("sleeping");
+			System.err.println("sleeping");
 			Thread.sleep(1000 - (curTime-startTime));
 		    } catch (java.lang.InterruptedException e) {
 			// 
 			System.err.println("KT: HELP Got Interrupted Exception in XMLFirehoseThread - IGNORING IT"); // uugh, don't know what else to do
 		    }
 		} else {
-		    System.out.println("KT: WARNING: Data generation is too slow to keep up with rate");
+		    System.err.println("KT: WARNING: Data generation is too slow to keep up with rate");
 		}
 		// start another second
 		startTime = System.currentTimeMillis();
@@ -272,6 +277,16 @@ class XMLFirehoseThread extends Thread {
 	    throw new PEException("write chars may only be called by generators that generate chars - check generatesChars() method");
 
 	totalBytes += len; // keep track of the total number of bytes written
+	
+	byteDiff += (Array.getLength(cbuf) - len);
+
+	if(XMLFirehose.verbose) {
+	    // KT - have to loop since I can't do
+	    // System.out.print(cbuf, len)
+	    for(int i = 0; i<len; i++) {
+		System.out.print(Array.get(cbuf, i));
+	    }
+	}
 
 	if(!useRate) {
 	    client_writer.write(cbuf, 0, len);
@@ -292,14 +307,14 @@ class XMLFirehoseThread extends Thread {
 		long curTime = System.currentTimeMillis();
 		if((curTime - startTime) < 1000) { // 1000 milliseconds in one second
 		    try {
-			System.out.println("sleeping");
+			System.err.println("sleeping");
 			Thread.sleep(1000 - (curTime-startTime));
 		    } catch (java.lang.InterruptedException e) {
 			// 
 			System.err.println("KT: HELP Got Interrupted Exception in XMLFirehoseThread - IGNORING IT"); // uugh, don't know what else to do
 		    }
 		} else {
-		    System.out.println("KT: WARNING: Data generation is too slow to keep up with rate");
+		    System.err.println("KT: WARNING: Data generation is too slow to keep up with rate");
 		}
 		// start another second
 		startTime = System.currentTimeMillis();
@@ -344,14 +359,14 @@ class XMLFirehoseThread extends Thread {
 		long curTime = System.currentTimeMillis();
 		if((curTime - startTime) < 1000) { // 1000 milliseconds in one second
 		    try {
-			System.out.println("sleeping");
+			System.err.println("sleeping");
 			Thread.sleep(1000 - (curTime-startTime));
 		    } catch (java.lang.InterruptedException e) {
 			// 
 			System.err.println("KT: HELP Got Interrupted Exception in XMLFirehoseThread - IGNORING IT"); // uugh, don't know what else to do
 		    }
 		} else {
-		    System.out.println("KT: WARNING: Data generation is too slow to keep up with rate");
+		    System.err.println("KT: WARNING: Data generation is too slow to keep up with rate");
 		}
 		// start another second
 		startTime = System.currentTimeMillis();

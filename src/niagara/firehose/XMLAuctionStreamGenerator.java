@@ -108,9 +108,6 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
     private void writeMyBuf() throws IOException {
 	myBuf.append("</site>");
 	myBuf.append(nl);
-	/*for(int i = 0; i<myBuf.length(); i++)
-	    System.out.print(Array.get(myBuf.array(), i));
-	    System.out.println();*/
 	writer.write_chars(myBuf.array(), myBuf.length());
     } 
     

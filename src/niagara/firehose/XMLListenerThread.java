@@ -1,4 +1,4 @@
-/** $Id: XMLListenerThread.java,v 1.3 2002/12/10 01:22:22 vpapad Exp $ */
+/** $Id: XMLListenerThread.java,v 1.4 2003/01/25 20:58:39 tufte Exp $ */
 package niagara.firehose;
 
 import java.lang.*;
@@ -29,12 +29,12 @@ class XMLListenerThread extends Thread {
 	try {
 	    listener_socket = new ServerSocket(_port_num);
 	} catch (IOException e) {
-	    System.out.println("Listener socket creation error Port: " + _port_num);
+	    System.err.println("Listener socket creation error Port: " + _port_num);
 	    shutdown_system();
 	    return;
 	}
 
-	System.out.println("Listening on port " + _port_num);
+	System.err.println("Listening on port " + _port_num);
 	while(true) {
 	    // get a message from the socket
 	    try {
@@ -53,11 +53,11 @@ class XMLListenerThread extends Thread {
 		msg_queue.put(message);
 
 	    } catch (IOException e) {
-		System.out.println("Listener socket accept failure");
+		System.err.println("Listener socket accept failure");
 		shutdown_system();
 		return;
 	    } catch (ShutdownSystemException s) {
-		System.out.println("Shutdown message received");
+		System.err.println("Shutdown message received");
 		shutdown_system();
 		return;
 	    } catch (CorruptMsgException e) {
