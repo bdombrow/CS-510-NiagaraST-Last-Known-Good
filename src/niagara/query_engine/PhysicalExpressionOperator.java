@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: PhysicalExpressionOperator.java,v 1.7 2002/05/07 03:10:55 tufte Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.8 2002/10/24 23:27:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,6 +28,7 @@
 package niagara.query_engine;
 
 import niagara.ndom.*;
+import niagara.optimizer.colombia.LogicalOp;
 
 import org.w3c.dom.*;
 import java.util.*;
@@ -49,52 +49,20 @@ import koala.dynamicjava.parser.wrapper.*;
  */
 
 public class PhysicalExpressionOperator extends PhysicalOperator {
-
-    //////////////////////////////////////////////////////////////////////////
-    // These are the private data members of the PhysicalExpressionOperator class //
-    //////////////////////////////////////////////////////////////////////////
-
     // This is the array having information about blocking and non-blocking
     // streams
     //
     private static final boolean[] blockingSourceStreams = { false };
 
-    private ExpressionIF expressionObject; // An object of a clas that implements ExpressionIF
+    private ExpressionIF expressionObject; // An object of a class that implements ExpressionIF
     private String expression; // A string to be interpreted for every tuple
     boolean interpreted;
 
-    ///////////////////////////////////////////////////////////////////////////
-    // These are the methods of the PhysicalExpressionOperatorClass                //
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * This is the constructor for the PhysicalExpressionOperator class that
-     * initializes it with the appropriate logical operator, source streams,
-     * sink streams, and responsiveness to control information.
-     *
-     * @param logicalOperator The logical operator that this operator implements
-     * @param sourceStreams The Source Streams associated with the operator
-     * @param sinkStreams The Sink Streams associated with the
-     *                           operator
-     * @param blocking True if the operator is blocking and false if it is
-     *                 non-blocking
-     * @param responsiveness The responsiveness, in milliseconds, to control
-     *                       messages
-     */
-
-    public PhysicalExpressionOperator (op logicalOperator,
-				       SourceTupleStream[] sourceStreams,
-				       SinkTupleStream[] sinkStreams,
-				       Integer responsiveness) 
-	throws UserErrorException{
-
-	// Call the constructor on the super class
-	//
-	super(sourceStreams,
-	      sinkStreams,
-	      blockingSourceStreams,
-	      responsiveness);
-
+    public PhysicalExpressionOperator() {
+        setBlockingSourceStreams(blockingSourceStreams);
+    }
+    
+    public void initFrom(LogicalOp logicalOperator) {
 	// Type cast the logical operator to a Expression operator
 	//
 	ExpressionOp logicalExpressionOperator = (ExpressionOp) logicalOperator;
