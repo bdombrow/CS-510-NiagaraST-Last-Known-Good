@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.19 2002/10/31 03:54:38 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.20 2002/10/31 06:09:03 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -808,6 +808,14 @@ implements SchemaProducer, SerializableToXML, Initializable {
         for (int i = 0; i < attrs.size(); i++) {
             outputTupleSchema.addMapping(attrs.get(i));
         }
+    }
+    
+    public void constructMinimalTupleSchema(TupleSchema[] inputSchemas) {
+        // XXX vpapad: this is so ugly!
+        // Create empty tuple schemas so that we don't get null pointer
+        // exceptions all over the place every time we run XML-QL queries
+        inputTupleSchemas = inputSchemas;
+        outputTupleSchema = new TupleSchema();
     }
     
     /**
