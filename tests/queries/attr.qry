@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- This query tests unnesting attributes, and using them in construct 
+     Note that for construct, the variable must have type="content" -->
+<plan top="cons">
+
+<constant id="const">
+<![CDATA[
+<list>
+<person name="Me"/>
+<person name="Myself"/>
+<person name="I"/>
+</list>
+]]>
+</constant>
+
+<unnest id="name" type="content" regexp="list.person.name" input="const"/>
+<construct id="cons" input="name">
+<name>
+$name
+</name>
+</construct>
+</plan>

@@ -16,7 +16,7 @@
 ]]>
 </constant>
 <unnest id="item" regexp="xxx.item" input="const"/>
-<unnest id="group" regexp="group" input="item"/>
+<unnest id="group" type="content" regexp="group" input="item"/>
 <unnest id="value" root="$item" regexp="value" input="group"/>
 <incravg id="avg" groupby="$group" avgattr="$value" input="value"/>
 

@@ -20,14 +20,14 @@
 ]]>
 </constant>
 <unnest id="item" regexp="xxx.item" input="const"/>
-<unnest id="group" regexp="group" input="item"/>
+<unnest id="group" type="content" regexp="group" input="item"/>
 <unnest id="value" root="$item" regexp="value" input="group"/>
 <incrmax id="max" groupby="$group" emptygroupvalue="0" maxattr="$value" input="value"/>
 
 <construct id="cons" input="max">
 <maximum> 
-<group>$group</group><
-prev> $oldmax </prev>
+<group> $group </group>
+<prev> $oldmax </prev>
 <new> $max </new>
 </maximum>
 </construct>
