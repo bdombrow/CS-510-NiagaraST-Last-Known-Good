@@ -1,11 +1,33 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:results>
 
-<group><name>1</name><avg>10.0</avg></group>
-<group><name>2</name><avg>5.0</avg></group>
-<group><name>3</name><avg>15.0</avg></group>
-<group><name>1</name><avg>15.0</avg></group>
-<group><name>2</name><avg>0.0</avg></group>
-<group><name>1</name><avg>16.666666666666668</avg></group>
-<group><name>4</name><avg>20.0</avg></group>
+<group>
+   <name>1</name>
+   <avg>10.0</avg>
+</group>
+<group>
+   <name>2</name>
+   <avg>5.0</avg>
+</group>
+<group>
+   <name>3</name>
+   <avg>15.0</avg>
+</group>
+<group>
+   <name>1</name>
+   <avg>15.0</avg>
+</group>
+<group>
+   <name>2</name>
+   <avg>0.0</avg>
+</group>
+<group>
+   <name>1</name>
+   <avg>16.666666666666668</avg>
+</group>
+<group>
+   <name>4</name>
+   <avg>20.0</avg>
+</group>
+
 </niagara:results>
-

@@ -1,6 +1,13 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:results>
 
-<result><title>The Tragedy of Julius Caesar</title><number>4</number></result>
-<result><title>The Tragedy of Julius Caesar</title><number>5</number></result>
+<result>
+   <title>The Tragedy of Julius Caesar</title>
+   <number>4</number>
+</result>
+<result>
+   <title>The Tragedy of Julius Caesar</title>
+   <number>5</number>
+</result>
+
 </niagara:results>
-

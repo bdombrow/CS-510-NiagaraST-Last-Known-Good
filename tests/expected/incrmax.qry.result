@@ -1,10 +1,35 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:results>
 
-<maximum><group>1</group><prev>0.0</prev><new>10.0</new></maximum>
-<maximum><group>2</group><prev>0.0</prev><new>5.0</new></maximum>
-<maximum><group>3</group><prev>0.0</prev><new>15.0</new></maximum>
-<maximum><group>1</group><prev>10.0</prev><new>20.0</new></maximum>
-<maximum><group>1</group><prev>20.0</prev><new>30.0</new></maximum>
-<maximum><group>4</group><prev>0.0</prev><new>20.0</new></maximum>
+<maximum>
+   <group>1</group>
+   <prev>0.0</prev>
+   <new>10.0</new>
+</maximum>
+<maximum>
+   <group>2</group>
+   <prev>0.0</prev>
+   <new>5.0</new>
+</maximum>
+<maximum>
+   <group>3</group>
+   <prev>0.0</prev>
+   <new>15.0</new>
+</maximum>
+<maximum>
+   <group>1</group>
+   <prev>10.0</prev>
+   <new>20.0</new>
+</maximum>
+<maximum>
+   <group>1</group>
+   <prev>20.0</prev>
+   <new>30.0</new>
+</maximum>
+<maximum>
+   <group>4</group>
+   <prev>0.0</prev>
+   <new>20.0</new>
+</maximum>
+
 </niagara:results>
-
