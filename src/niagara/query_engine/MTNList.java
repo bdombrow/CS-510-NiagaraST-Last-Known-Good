@@ -7,16 +7,6 @@
 
 package niagara.query_engine;
 
-/** <code> MTNList </code> a simple linked list of Merge Tree Nodes
- * implemented to avoid allocation in ArrayList.getIterator
- *
- * @version 1.0
- *
- * @author Kristin Tufte
- */
-
-import java.util.HashMap;
-
 class MTNList {
     static private int TABLE_SIZE = 30;
     private MergeTreeNode head;

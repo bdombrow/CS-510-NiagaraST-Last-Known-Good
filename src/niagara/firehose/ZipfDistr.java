@@ -12,7 +12,6 @@ package niagara.firehose;
 // C = (numItems*avgNumEvents)/(sum(i=i to N) 1/i^exp)
 
 import java.util.*;
-import java.io.*;
 
 class ZipfDistr {
 

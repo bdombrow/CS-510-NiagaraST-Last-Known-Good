@@ -1,13 +1,11 @@
 /**
- * $Id: SAXDOM.java,v 1.4 2003/07/03 19:40:23 tufte Exp $
+ * $Id: SAXDOM.java,v 1.5 2003/07/09 04:59:37 tufte Exp $
  *
  */
 
 package niagara.ndom;
 
 import org.w3c.dom.*;
-import niagara.utils.XMLUtils;
-import niagara.utils.PEException;
 
 
 /**

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSortOperator.java,v 1.7 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalSortOperator.java,v 1.8 2003/07/09 04:59:35 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -26,15 +26,27 @@
 
 package niagara.query_engine;
 
-import org.w3c.dom.*;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.TreeSet;
 
-import java.util.*;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Cost;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
+import niagara.optimizer.colombia.Order;
+import niagara.optimizer.colombia.PhysicalProperty;
+import niagara.optimizer.colombia.Strings;
+import niagara.utils.PEException;
+import niagara.utils.ShutdownException;
+import niagara.utils.StreamTupleElement;
+import niagara.xmlql_parser.op_tree.SortOp;
 
-import niagara.logical.OldVariable;
-import niagara.optimizer.colombia.*;
-import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 /**
  * The <code>PhysicalSortOperator</code> class is derived from the abstract class

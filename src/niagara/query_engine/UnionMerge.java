@@ -18,10 +18,11 @@ package niagara.query_engine;
  * @author Kristin Tufte
  */
 
-import org.w3c.dom.*;
-import java.io.*;
+import java.io.PrintStream;
 
-import niagara.utils.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 class UnionMerge extends MergeObject {
 

@@ -1,7 +1,6 @@
 package niagara.firehose;
 
 import java.io.*;
-import niagara.utils.*;
 
 // similar to a generator, but just reads from a file. Yes, ugly, but will be really fast.
 

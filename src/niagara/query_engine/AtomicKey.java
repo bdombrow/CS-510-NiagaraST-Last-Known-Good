@@ -11,7 +11,6 @@ import niagara.xmlql_parser.syntax_tree.*;
 import niagara.utils.*;
 import niagara.utils.type_system.*;
 import org.w3c.dom.Node;
-import java.util.ArrayList;
 
 /**
  * Implementation <code> AtomicKey </code> class which 

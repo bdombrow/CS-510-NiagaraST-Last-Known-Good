@@ -19,14 +19,11 @@ package niagara.query_engine;
  * @author Kristin Tufte
  */
 
-import java.lang.*;
-import java.lang.reflect.*;
-import java.io.*;
+import java.io.PrintStream;
 
-import org.w3c.dom.*;
+import niagara.utils.ShutdownException;
 
-import niagara.utils.*;
-import niagara.utils.type_system.*;
+import org.w3c.dom.Node;
 
 /** Base class for three types of node merges - 
  * 1) take the dominant content

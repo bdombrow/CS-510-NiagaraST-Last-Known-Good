@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.14 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalSelectOperator.java,v 1.15 2003/07/09 04:59:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,8 +28,6 @@
 package niagara.query_engine;
 
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
-
 import niagara.logical.Predicate;
 import niagara.logical.Select;
 import niagara.optimizer.colombia.*;

@@ -1,6 +1,5 @@
 package niagara.firehose;
 
-import java.io.*;
 import java.nio.*;
 
 // Think char buf was the fastest..., or faster than using the writer

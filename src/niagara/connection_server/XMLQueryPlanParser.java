@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.43 2003/07/03 19:35:22 tufte Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.44 2003/07/09 04:59:40 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -13,7 +13,6 @@ import java.util.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.logical.*;
 
-import niagara.logical.*;
 import niagara.ndom.*;
 import niagara.optimizer.Plan;
 import niagara.optimizer.colombia.*;

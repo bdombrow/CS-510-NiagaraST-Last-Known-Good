@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ContainTreeNode.java,v 1.3 2000/06/01 06:23:00 tufte Exp $
+  $Id: ContainTreeNode.java,v 1.4 2003/07/09 04:59:35 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,7 +29,6 @@
 package niagara.query_engine;
 
 import java.util.*;
-import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 /**

@@ -17,14 +17,13 @@ package niagara.query_engine;
  * @author Kristin Tufte
  */
 
-import java.lang.*;
-import java.lang.reflect.*;
-import java.io.*;
+import java.io.PrintStream;
 
-import org.w3c.dom.*;
+import niagara.utils.DOMHelper;
+import niagara.utils.ShutdownException;
+import niagara.utils.type_system.NodeHelper;
 
-import niagara.utils.*;
-import niagara.utils.type_system.*;
+import org.w3c.dom.Node;
 
 class ExactMatchNodeMerge extends NodeMerge {
 

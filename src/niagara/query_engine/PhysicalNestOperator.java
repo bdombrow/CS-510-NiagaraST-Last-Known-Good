@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.13 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.14 2003/07/09 04:59:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,7 +31,6 @@ import org.w3c.dom.*;
 import niagara.utils.*;
 import niagara.logical.Nest;
 import niagara.xmlql_parser.syntax_tree.*;
-import niagara.ndom.*;
 import niagara.optimizer.colombia.*;
 
 /**

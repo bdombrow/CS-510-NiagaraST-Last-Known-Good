@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.7 2003/07/03 19:31:47 tufte Exp $
+  $Id: PageStream.java,v 1.8 2003/07/09 04:59:40 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,26 +27,6 @@
 
 
 package niagara.utils;
-
-/**
- *
- * PageStream is the bottom-level class for communicating between 
- * operators. It passes TuplePages between operators. Right now
- * it is implemented as an in-memory queue, although that could
- * be changed.
- *
- * IMPORTANT: functions in this class are divided between functions
- * for use by SourceTupleStreams and SinkTupleStreams. SourceTupleStream
- * functions have Source in their name, SinkTupleStream functions have
- * Sink in their name.
- *
- * @version 1.0
- *
- *
- * @see PhysicalOperator
- */
-
-import java.util.LinkedList;
 
 // Note on removal of upStreamContrlQueue (now toConsumerQueue) and priority put
 // instead of priority put, we have  PageStream check

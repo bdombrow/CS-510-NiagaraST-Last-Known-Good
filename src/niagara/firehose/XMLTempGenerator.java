@@ -1,9 +1,6 @@
 package niagara.firehose;
 
-import org.w3c.dom.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.util.Random;
 
 class XMLTempGenerator extends XMLFirehoseGen {
     private int m_iTempCurr;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalAggregateOperator.java,v 1.2 2003/03/19 22:43:36 tufte Exp $
+  $Id: PhysicalAggregateOperator.java,v 1.3 2003/07/09 04:59:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,7 +36,6 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.LogicalOp;
-import niagara.optimizer.colombia.Op;
 
 
 /**

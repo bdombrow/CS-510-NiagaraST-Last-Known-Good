@@ -1,12 +1,19 @@
 package niagara.firehose;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
-import org.xml.sax.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Random;
+
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.AttributeList;
+import org.xml.sax.HandlerBase;
+import org.xml.sax.SAXException;
 
 class XMLAuctionGenerator extends XMLFirehoseGen {
     private static AuctionValues m_av = null;

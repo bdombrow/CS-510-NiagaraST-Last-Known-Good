@@ -1,5 +1,5 @@
 /**
- * $Id: XercesJ2.java,v 1.5 2003/03/07 23:45:30 vpapad Exp $
+ * $Id: XercesJ2.java,v 1.6 2003/07/09 04:59:37 tufte Exp $
  *
  */
 
@@ -7,7 +7,6 @@ package niagara.ndom;
 
 import org.apache.xerces.dom.*;
 import org.w3c.dom.*;
-import niagara.utils.XMLUtils;
 import javax.xml.parsers.*;
 
 /**

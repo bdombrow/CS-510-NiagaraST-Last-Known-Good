@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: BMStorageManager.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: BMStorageManager.java,v 1.2 2003/07/09 04:59:42 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,13 +29,9 @@
 
 package niagara.search_engine.crawler;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
-import java.text.*;
-
-import niagara.search_engine.indexmgr.*;
-import niagara.search_engine.server.*;
+import java.net.URL;
+import java.util.BitSet;
+import java.util.StringTokenizer;
 
 
 /**

@@ -1,6 +1,5 @@
 package niagara.firehose;
 
-import java.lang.*;
 import java.io.*;
 import java.net.*;
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Nest.java,v 1.3 2003/07/03 19:39:02 tufte Exp $
+  $Id: Nest.java,v 1.4 2003/07/09 04:59:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -45,7 +45,6 @@ import niagara.utils.XMLUtils;
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.syntax_tree.*;
-import niagara.xmlql_parser.op_tree.groupOp;
 
 // KT ooooh is this UUUGLY!!!!!!!
 public class Nest extends niagara.xmlql_parser.op_tree.groupOp {

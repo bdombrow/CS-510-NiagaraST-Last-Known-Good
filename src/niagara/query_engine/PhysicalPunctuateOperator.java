@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalPunctuateOperator.java,v 1.2 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalPunctuateOperator.java,v 1.3 2003/07/09 04:59:35 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,13 +33,8 @@ import org.w3c.dom.*;
 
 import niagara.optimizer.colombia.*;
 import niagara.utils.*;
-import niagara.xmlql_parser.syntax_tree.*;
 import niagara.xmlql_parser.op_tree.punctuateOp;
 import niagara.logical.Predicate;
-import niagara.logical.Comparison;
-import niagara.logical.Variable;
-import niagara.logical.NodeDomain;
-import niagara.logical.NumericConstant;
 
 /**
  * <code>PhysicalPunctuateOperator</code> implements a punctuate operator for

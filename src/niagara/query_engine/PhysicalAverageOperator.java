@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.16 2003/03/19 22:43:36 tufte Exp $
+  $Id: PhysicalAverageOperator.java,v 1.17 2003/07/09 04:59:35 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,14 +27,12 @@
 
 package niagara.query_engine;
 
-import java.util.ArrayList;
+import niagara.utils.ShutdownException;
+import niagara.utils.StreamTupleElement;
 
-import niagara.optimizer.colombia.*;
-
-import org.w3c.dom.*;
-
-import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 
 /**

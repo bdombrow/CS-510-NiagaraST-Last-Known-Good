@@ -2,19 +2,19 @@
 
 package niagara.data_manager;
 
-import org.w3c.dom.*;
-import java.io.*;
-import java.util.*;
+import java.util.Vector;
 
-import org.xml.sax.*;
-
-import niagara.query_engine.*;
-import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.ResourceOp;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Cost;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
+import niagara.query_engine.TupleSchema;
+import niagara.utils.PEException;
+import niagara.utils.ShutdownException;
+import niagara.utils.SinkTupleStream;
 import niagara.xmlql_parser.op_tree.dtdScanOp;
-import niagara.connection_server.NiagraServer;
-import niagara.ndom.*;
-import niagara.optimizer.colombia.*;
 
 /** DTDThread provides a SourceThread compatible interface to the 
  *  DM fetch functionality */

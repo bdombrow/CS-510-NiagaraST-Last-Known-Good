@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SEQueryHandler.java,v 1.2 2001/08/08 21:28:32 tufte Exp $
+  $Id: SEQueryHandler.java,v 1.3 2003/07/09 04:59:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,20 +28,32 @@
 
 package niagara.search_engine.server;
 
-import org.w3c.dom.*;
-import org.xml.sax.InputSource;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java_cup.runtime.*;
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.net.Socket;
+import java.net.URL;
+import java.util.Vector;
 
-import niagara.ndom.*;
-import niagara.search_engine.seql.*;
-import niagara.search_engine.util.*;
-import niagara.search_engine.operators.*;
-import niagara.search_engine.indexmgr.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.ndom.DOMFactory;
+import niagara.search_engine.indexmgr.IVLEntry;
+import niagara.search_engine.indexmgr.IndexMgr;
+import niagara.search_engine.operators.AbstractOperator;
+import niagara.search_engine.seql.Optimizer;
+import niagara.search_engine.seql.QueryPlan;
+import niagara.search_engine.util.Header;
+import niagara.search_engine.util.Table;
+import niagara.search_engine.util.Tuple;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 /** 
  * Query Handler for the SEServer.

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.24 2003/03/08 00:57:05 vpapad Exp $
+  $Id: NiagraServer.java,v 1.25 2003/07/09 04:59:40 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,8 +38,6 @@ import niagara.ndom.DOMFactory;
 import niagara.utils.*;
 
 import niagara.ndom.saxdom.BufferManager;
-
-import java.net.InetAddress;
 
 
 /**The main Niagra Server which receives all the client requests

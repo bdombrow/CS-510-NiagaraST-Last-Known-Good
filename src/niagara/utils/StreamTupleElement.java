@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.10 2003/07/03 19:31:47 tufte Exp $
+  $Id: StreamTupleElement.java,v 1.11 2003/07/09 04:59:40 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,10 +37,12 @@ package niagara.utils;
  * @see Stream
  */
 
-import java.util.Vector;
-import org.w3c.dom.*;
-import java.lang.reflect.Array;
 import niagara.magic.MagicBaseNode;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 public class StreamTupleElement {
 

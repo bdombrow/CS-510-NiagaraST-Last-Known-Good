@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalMagicConstruct.java,v 1.1 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalMagicConstruct.java,v 1.2 2003/07/09 04:59:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,8 +29,6 @@ package niagara.query_engine;
 import java.util.Vector;
 
 import org.w3c.dom.*;
-import org.apache.xerces.dom.CoreDocumentImpl;
-
 import niagara.utils.*; // NodeVector, StreamTupleElement, etc
 import niagara.magic.*;
 import niagara.xmlql_parser.syntax_tree.*;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.15 2003/07/03 19:56:52 tufte Exp $
+  $Id: QueryResult.java,v 1.16 2003/07/09 04:59:35 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,7 +32,6 @@ import org.w3c.dom.*;
 
 import niagara.utils.*;
 import niagara.ndom.*;
-import niagara.connection_server.NiagraServer;
 
 /**
  * QueryResult is the class at the client that interacts with the

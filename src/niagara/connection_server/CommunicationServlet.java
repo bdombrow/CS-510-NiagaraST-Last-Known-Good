@@ -1,26 +1,22 @@
 /*
- * $Id: CommunicationServlet.java,v 1.5 2002/10/31 04:20:30 vpapad Exp $
+ * $Id: CommunicationServlet.java,v 1.6 2003/07/09 04:59:40 tufte Exp $
  */
 
 package niagara.connection_server;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Hashtable;
 
-import niagara.query_engine.*;
-import niagara.data_manager.ConstantOpThread;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import niagara.optimizer.Optimizer;
-import niagara.optimizer.Plan;
-import niagara.optimizer.colombia.Attrs;
-import niagara.optimizer.colombia.Expr;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.utils.*;
+import niagara.query_engine.PhysicalSendOperator;
+import niagara.utils.UnrecoverableException;
 
 public class CommunicationServlet extends HttpServlet {
     private NiagraServer server;

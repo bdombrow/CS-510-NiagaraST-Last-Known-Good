@@ -1,19 +1,25 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.21 2003/07/07 18:41:15 tufte Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.22 2003/07/09 04:59:35 tufte Exp $ */
 package niagara.query_engine;
 
-import org.w3c.dom.*;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 
-import niagara.ndom.*;
-import niagara.optimizer.colombia.*;
+import niagara.data_manager.CacheUtil;
+import niagara.data_manager.DataManager;
+import niagara.ndom.DOMFactory;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Cost;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
+import niagara.utils.ShutdownException;
+import niagara.utils.StreamTupleElement;
+import niagara.xmlql_parser.op_tree.AccumulateOp;
 
-import org.xml.sax.*;
-import java.io.*;
-
-import niagara.ndom.*;
-import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.data_manager.*;
-import niagara.connection_server.NiagraServer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
 
 /* This is a test */
 

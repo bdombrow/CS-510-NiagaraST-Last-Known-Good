@@ -14,23 +14,21 @@ public class CPUTimer {
     long stop_time;
     long used_time;
 
-    private JProf jprof;
     private boolean timerRunning = false;
 
     public CPUTimer() {
-	jprof = new JProf();
     }
     
     public void start() {
 	assert !timerRunning : 
 	    "Attempt to start timer when it is already running";
-	start_time = jprof.getCurrentThreadCpuTime();
+	start_time = JProf.getCurrentThreadCpuTime();
 	timerRunning = true;
     }
 
     public void stop() {
 	assert timerRunning : "Attempt to stop timer that is not running";
-	stop_time = jprof.getCurrentThreadCpuTime();
+	stop_time = JProf.getCurrentThreadCpuTime();
 	timerRunning = false;
 	calculateTimeUsed();
     }

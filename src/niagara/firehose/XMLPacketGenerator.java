@@ -1,13 +1,11 @@
 package niagara.firehose;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import com.ibm.XMLGenerator.*;
-import net.sourceforge.jpcap.capture.*;
-import net.sourceforge.jpcap.simulator.*;
-import net.sourceforge.jpcap.net.*;
-import net.sourceforge.jpcap.util.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 public class XMLPacketGenerator extends XMLFirehoseGen {
     private static PacketHandler m_ph = null;

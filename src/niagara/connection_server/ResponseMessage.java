@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.9 2003/03/12 22:43:39 tufte Exp $
+  $Id: ResponseMessage.java,v 1.10 2003/07/09 04:59:40 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,7 +33,6 @@ import java.io.Writer;
 
 import org.w3c.dom.Node;
 
-import niagara.ndom.saxdom.BufferManager;
 import niagara.ndom.saxdom.NodeImpl;
 import niagara.query_engine.QueryResult;
 import niagara.utils.XMLUtils;

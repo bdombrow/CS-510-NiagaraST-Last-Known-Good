@@ -1,7 +1,5 @@
 package niagara.firehose;
 
-import java.net.*;
-
 // synchronized queue for communication between XMLListenerThread
 // and XMLFirehoseThreads
 

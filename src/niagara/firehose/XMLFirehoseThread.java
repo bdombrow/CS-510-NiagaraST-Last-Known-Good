@@ -1,12 +1,20 @@
 package niagara.firehose;
 
-import java.lang.*;
-import java.io.*;
-import java.net.*;
-import java.util.Vector;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import niagara.utils.*;
+import niagara.utils.PEException;
 
 class XMLFirehoseThread extends Thread {
     private XMLFirehoseGen xml_generator;

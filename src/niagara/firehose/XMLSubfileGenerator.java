@@ -1,12 +1,14 @@
 package niagara.firehose;
 
-import org.w3c.dom.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import org.xml.sax.*;
+import java.util.Vector;
+
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.AttributeList;
+import org.xml.sax.HandlerBase;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 class XMLSubfileGenerator extends XMLFirehoseGen {
 

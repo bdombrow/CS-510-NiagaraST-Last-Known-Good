@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: joinOp.java,v 1.11 2003/07/03 19:29:59 tufte Exp $
+  $Id: joinOp.java,v 1.12 2003/07/09 04:59:38 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,12 +30,11 @@
  */
 package niagara.xmlql_parser.op_tree;
 
-import java.util.*;
+import gnu.regexp.RE;
+import gnu.regexp.REException;
+import gnu.regexp.REMatch;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import gnu.regexp.*;
+import java.util.ArrayList;
 
 import niagara.connection_server.InvalidPlanException;
 import niagara.logical.And;
@@ -43,13 +42,14 @@ import niagara.logical.EquiJoinPredicateList;
 import niagara.logical.Predicate;
 import niagara.logical.True;
 import niagara.logical.Variable;
-import niagara.optimizer.Plan;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
-import niagara.xmlql_parser.syntax_tree.*;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class joinOp extends binOp {
     // values for extension join...

@@ -1,5 +1,5 @@
 /**
- * $Id: ReceiveThread.java,v 1.5 2002/10/31 03:26:48 vpapad Exp $
+ * $Id: ReceiveThread.java,v 1.6 2003/07/09 04:59:43 tufte Exp $
  *
  */
 
@@ -18,11 +18,8 @@ import java.net.*;
 import java.util.*;
 
 
-import niagara.query_engine.*;
 import niagara.utils.*;
 import niagara.ndom.*;
-import niagara.optimizer.colombia.Op;
-
 import niagara.xmlql_parser.op_tree.ReceiveOp;
 
 //  XXX vpapad: hack to get CVS to compile

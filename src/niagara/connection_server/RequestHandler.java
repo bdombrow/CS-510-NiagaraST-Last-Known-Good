@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.24 2003/07/03 19:35:22 tufte Exp $
+  $Id: RequestHandler.java,v 1.25 2003/07/09 04:59:40 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -26,21 +26,28 @@
 
 package niagara.connection_server;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
+import niagara.data_manager.ConstantOpThread;
+import niagara.data_manager.StreamThread;
 import niagara.optimizer.Optimizer;
 import niagara.optimizer.Plan;
-import niagara.optimizer.TracingOptimizer;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Op;
-import niagara.query_engine.*;
-import niagara.xmlql_parser.op_tree.logNode;
-import niagara.data_manager.ConstantOpThread;
-import niagara.data_manager.DataManager;
-import niagara.data_manager.StreamThread;
-import niagara.utils.*;
+import niagara.query_engine.PhysicalAccumulateOperator;
+import niagara.query_engine.QueryResult;
+import niagara.utils.CPUTimer;
+import niagara.utils.JProf;
+import niagara.utils.PEException;
+import niagara.utils.ShutdownException;
 
 /**There is one request handler per client and receives all the requests from that client
    Then that request is further dispatched to the appropriate module and results sent back

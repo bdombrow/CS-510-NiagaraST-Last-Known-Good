@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.10 2003/03/19 00:36:09 tufte Exp $
+  $Id: QueryEngine.java,v 1.11 2003/07/09 04:59:35 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,8 +32,6 @@ package niagara.query_engine;
 import java.util.Vector;
 import niagara.data_manager.*;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
-
 import niagara.connection_server.NiagraServer;
 
 /**

@@ -1,4 +1,4 @@
-/* $Id: Project.java,v 1.6 2003/07/03 19:39:02 tufte Exp $ */
+/* $Id: Project.java,v 1.7 2003/07/09 04:59:41 tufte Exp $ */
 package niagara.logical;
 
 import niagara.optimizer.colombia.Attribute;
@@ -6,7 +6,6 @@ import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
-import niagara.optimizer.colombia.Strings;
 import niagara.xmlql_parser.op_tree.unryOp;
 
 /** Project operator (without duplicate elimination) */

@@ -1,4 +1,4 @@
-/* $Id: PhysicalIncrementalMax.java,v 1.6 2003/07/03 19:56:52 tufte Exp $ */
+/* $Id: PhysicalIncrementalMax.java,v 1.7 2003/07/09 04:59:35 tufte Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import niagara.logical.IncrementalMax;
 import niagara.optimizer.colombia.*;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.op;
-
 import org.w3c.dom.Node;
 
 public class PhysicalIncrementalMax extends PhysicalIncrementalGroup {

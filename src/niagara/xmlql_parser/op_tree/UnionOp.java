@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: UnionOp.java,v 1.7 2003/07/03 19:29:59 tufte Exp $
+  $Id: UnionOp.java,v 1.8 2003/07/09 04:59:38 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,7 +41,6 @@ import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Domain;
 import niagara.optimizer.colombia.Attribute;
 import niagara.logical.Variable;
-import niagara.xmlql_parser.syntax_tree.*;
 import niagara.utils.DOMHelper;
 
 /**

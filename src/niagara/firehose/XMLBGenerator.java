@@ -1,7 +1,6 @@
 package niagara.firehose;
 
 import java.io.*;
-import java.net.*;
 
 
 class XMLBGenerator extends XMLFirehoseGen {

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.13 2003/07/03 19:56:52 tufte Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.14 2003/07/09 04:59:35 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,8 +27,6 @@
 package niagara.query_engine;
 
 import java.util.ArrayList;
-
-import org.w3c.dom.*;
 
 import niagara.logical.And;
 import niagara.optimizer.colombia.*;

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: logNode.java,v 1.14 2003/03/08 02:23:57 vpapad Exp $
+  $Id: logNode.java,v 1.15 2003/07/09 04:59:38 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,20 +31,23 @@
  */
 package niagara.xmlql_parser.op_tree;
 
-import java.util.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import niagara.xmlql_parser.syntax_tree.*;
-import niagara.connection_server.NiagraServer;
-import niagara.data_manager.*;
-import niagara.logical.Variable;
+import niagara.data_manager.DataManager;
 import niagara.optimizer.colombia.Op;
 import niagara.query_engine.PhysicalOperator;
 import niagara.query_engine.SchedulablePlan;
 import niagara.query_engine.TupleSchema;
-import niagara.utils.*;
+import niagara.utils.PEException;
+import niagara.utils.ShutdownException;
+import niagara.utils.SinkTupleStream;
+import niagara.xmlql_parser.syntax_tree.Schema;
+import niagara.xmlql_parser.syntax_tree.varTbl;
 
 public class logNode implements SchedulablePlan, java.io.Serializable {
     protected op operator; // operator

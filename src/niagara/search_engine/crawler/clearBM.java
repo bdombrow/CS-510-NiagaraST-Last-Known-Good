@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: clearBM.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: clearBM.java,v 1.2 2003/07/09 04:59:42 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,8 +29,6 @@
 
 package niagara.search_engine.crawler;
 
-import java.util.*;
-import java.lang.*;
 
  /**
   * Routine that periodically cleans the bitmaps.

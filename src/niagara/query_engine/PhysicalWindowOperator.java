@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowOperator.java,v 1.2 2003/03/03 08:20:13 tufte Exp $
+  $Id: PhysicalWindowOperator.java,v 1.3 2003/07/09 04:59:35 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,21 +28,18 @@
 
 package niagara.query_engine;
 
-import niagara.optimizer.colombia.*;
-
-import java.util.Vector;
-import java.util.Hashtable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Enumeration;
-import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
-import java.util.ArrayList;
-import niagara.logical.Variable;
-import niagara.logical.NodeDomain;
 
-import org.w3c.dom.*;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Attrs;
+import niagara.utils.ShutdownException;
+import niagara.utils.StreamTupleElement;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 /**
  * This is the <code>PhysicalWindowOperator</code> that extends

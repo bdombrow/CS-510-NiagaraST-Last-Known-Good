@@ -1,10 +1,9 @@
-/* $Id: PhysicalPredicatedUnnest.java,v 1.4 2003/07/03 19:56:52 tufte Exp $ */
+/* $Id: PhysicalPredicatedUnnest.java,v 1.5 2003/07/09 04:59:36 tufte Exp $ */
 package niagara.query_engine;
 
 import org.w3c.dom.*;
 import java.util.ArrayList;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 import niagara.logical.Predicate;

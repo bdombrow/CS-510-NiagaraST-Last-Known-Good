@@ -18,12 +18,15 @@ package niagara.query_engine;
  * @author Kristin Tufte
  */
 
-import java.util.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import java.io.*;
+import java.io.PrintStream;
 
-import niagara.utils.*;
+import niagara.utils.ArrayStack;
+import niagara.utils.DOMHelper;
+import niagara.utils.MyStringBuffer;
+import niagara.utils.ShutdownException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 
 class MergeTreeNode {

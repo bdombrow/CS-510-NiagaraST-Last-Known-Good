@@ -1,9 +1,9 @@
 package niagara.firehose;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.lang.reflect.Array;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Random;
 
 class XMLAuctionStreamGenerator extends XMLFirehoseGen {
     String tab = "";

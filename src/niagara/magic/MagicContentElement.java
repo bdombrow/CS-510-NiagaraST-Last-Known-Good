@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: MagicContentElement.java,v 1.1 2003/07/03 19:47:02 tufte Exp $
+  $Id: MagicContentElement.java,v 1.2 2003/07/09 04:59:39 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -26,15 +26,13 @@
 
 package niagara.magic;
 
-import java.util.Vector;
-
-import org.w3c.dom.*;
-
-import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
-import niagara.ndom.*;
-import niagara.optimizer.colombia.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 /**
  * MagicContentElement - holds the place of magic element content -

@@ -1,7 +1,6 @@
-/** $Id: XMLListenerThread.java,v 1.4 2003/01/25 20:58:39 tufte Exp $ */
+/** $Id: XMLListenerThread.java,v 1.5 2003/07/09 04:59:38 tufte Exp $ */
 package niagara.firehose;
 
-import java.lang.*;
 import java.io.*;
 import java.net.*;
 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestParser.java,v 1.11 2003/07/03 19:35:22 tufte Exp $
+  $Id: RequestParser.java,v 1.12 2003/07/09 04:59:40 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,18 +27,20 @@
 
 package niagara.connection_server;
 
-import java.io.*;
-import java.util.*;
+import gnu.regexp.RE;
 
-import gnu.regexp.*;
+import java.io.IOException;
+import java.io.InputStream;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-import com.microstar.xml.SAXDriver;
-
-import niagara.utils.*;
 import niagara.query_engine.QueryResult;
+import niagara.utils.ShutdownException;
+
+import org.xml.sax.AttributeList;
+import org.xml.sax.HandlerBase;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.microstar.xml.SAXDriver;
 
 /** This class is responsible for creating a SAX Parser for parsing incoming
  * request messages as well as implementing DocumentHandler interface

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSlidingMaxOperator.java,v 1.3 2003/03/19 22:43:36 tufte Exp $
+  $Id: PhysicalSlidingMaxOperator.java,v 1.4 2003/07/09 04:59:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,15 +30,15 @@ package niagara.query_engine;
 
 import java.util.ArrayList;
 
-import org.w3c.dom.*;
-
-import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
-import niagara.xmlql_parser.syntax_tree.*;
-import niagara.ndom.*;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.LogicalOp;
-import niagara.optimizer.colombia.Op;
+import niagara.utils.PEException;
+import niagara.utils.StreamTupleElement;
+import niagara.xmlql_parser.op_tree.SlidingMaxOp;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 
 

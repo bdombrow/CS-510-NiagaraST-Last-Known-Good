@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QEUtil.java,v 1.8 2003/03/08 02:23:04 vpapad Exp $
+  $Id: QEUtil.java,v 1.9 2003/07/09 04:59:36 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,13 +27,11 @@
 
 package niagara.query_engine;
 
-import org.w3c.dom.*;
 import java.io.*;
 import java.util.*;
 
 import niagara.logical.Predicate;
 import niagara.utils.*;
-import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 /**
