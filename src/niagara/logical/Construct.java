@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: MagicConstruct.java,v 1.2 2003/12/24 02:08:30 vpapad Exp $
+  $Id: Construct.java,v 1.1 2003/12/24 02:08:30 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -24,6 +24,11 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
+/**
+ * This operator is used to construct XML results. This is analogous to SELECT
+ * of SQL.
+ *
+ */
 package niagara.logical;
 
 import java.io.StringReader;
@@ -36,53 +41,53 @@ import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.*;
 
-public class MagicConstruct extends UnaryOperator {
-
+public class Construct extends UnaryOperator {
     private Variable variable;
 
-    // template for constructing result
-    constructBaseNode resultTemplate; 
+    constructBaseNode resultTemplate; // internal node or leaf node
+    // if it is the internal node, then
+    // all its children are leaf node that
+    // represents the schemaAttributes
 
     /** The attributes we're projecting on (null means keep all attributes) */
     private Attrs projectedAttrs;
 
-    public MagicConstruct() {}
+    public Construct() {
+    }
 
-    public MagicConstruct(Variable variable,
-			  constructBaseNode resultTemplate,
-			  Attrs projectedAttrs) {
-	this.variable = variable;
+    public Construct(Variable variable, constructBaseNode resultTemplate, Attrs projectedAttrs) {
+        this.variable = variable;
         this.resultTemplate = resultTemplate;
         this.projectedAttrs = projectedAttrs;
     }
 
-    public MagicConstruct(MagicConstruct op) {
+    public Construct(Construct op) {
         this(op.variable, op.resultTemplate, op.projectedAttrs);
     }
 
     public Op opCopy() {
-        return new MagicConstruct(this);
+        return new Construct(this);
     }
 
     /**
      * @see java.lang.Object#equals(Object)
      */
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof MagicConstruct))
+        if (obj == null || !(obj instanceof Construct))
             return false;
-        if (obj.getClass() != MagicConstruct.class)
+        if (obj.getClass() != Construct.class)
             return obj.equals(this);
-        MagicConstruct other = (MagicConstruct) obj;
-        return equalsNullsAllowed(variable, other.variable) 
-	    && equalsNullsAllowed(projectedAttrs, other.projectedAttrs)
-	    // XXX vpapad: constructBaseNode.equals is still Object.equals
-	    && this.resultTemplate.equals(other.resultTemplate);
+        Construct other = (Construct) obj;
+        return equalsNullsAllowed(variable, other.variable)
+            && equalsNullsAllowed(projectedAttrs, other.projectedAttrs)
+        // XXX vpapad: constructBaseNode.equals is still Object.equals
+        && this.resultTemplate.equals(other.resultTemplate);
     }
 
     public int hashCode() {
         // XXX vpapad: constructBaseNode.hashCode is still Object.hashCode
         return hashCodeNullsAllowed(variable)
-	    ^ hashCodeNullsAllowed(projectedAttrs)
+            ^ hashCodeNullsAllowed(projectedAttrs)
             ^ resultTemplate.hashCode();
     }
 
@@ -107,7 +112,7 @@ public class MagicConstruct extends UnaryOperator {
      * print the operator to the standard output
      */
     public void dump() {
-        System.out.println("Magic Construct : ");
+        System.out.println("Construct : ");
         resultTemplate.dump(1);
     }
 
@@ -117,7 +122,7 @@ public class MagicConstruct extends UnaryOperator {
      * @return String representation of this operator
      */
     public String toString() {
-        return "MagicConstruct";
+        return "ConstructOp";
     }
 
     public LogicalProperty findLogProp(

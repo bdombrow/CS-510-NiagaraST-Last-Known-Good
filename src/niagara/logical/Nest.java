@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Nest.java,v 1.6 2003/07/27 02:31:28 tufte Exp $
+  $Id: Nest.java,v 1.7 2003/12/24 02:08:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,12 +42,13 @@ import java.util.Vector;
 import org.w3c.dom.*;
 
 import niagara.utils.XMLUtils;
+import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.xmlql_parser.*;
 
 // KT ooooh is this UUUGLY!!!!!!!
-public class Nest extends niagara.xmlql_parser.op_tree.groupOp {
+public class Nest extends Group {
 
     // This stores the template of the result
     // KT - we require a root node be specified in a nest construct template
@@ -119,7 +120,7 @@ public class Nest extends niagara.xmlql_parser.op_tree.groupOp {
 	System.out.println("Nest");
     }
 
-    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
         throws InvalidPlanException {
 
         NodeList children = e.getChildNodes();

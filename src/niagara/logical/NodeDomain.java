@@ -1,10 +1,9 @@
-/* $Id: NodeDomain.java,v 1.4 2003/08/01 17:28:45 tufte Exp $ */
+/* $Id: NodeDomain.java,v 1.5 2003/12/24 02:08:29 vpapad Exp $ */
 
 package niagara.logical;
 
 import niagara.optimizer.colombia.Domain;
-import niagara.utils.PEException;
-import niagara.xmlql_parser.syntax_tree.varType;
+import niagara.xmlql_parser.varType;
 
 /**
  * A domain representing Domain nodes

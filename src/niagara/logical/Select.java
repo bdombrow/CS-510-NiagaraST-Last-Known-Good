@@ -1,4 +1,4 @@
-/* $Id: Select.java,v 1.2 2003/07/03 19:39:02 tufte Exp $ */
+/* $Id: Select.java,v 1.3 2003/12/24 02:08:30 vpapad Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -7,14 +7,15 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
+import niagara.logical.predicates.*;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.op_tree.unryOp;
 
 /** The <code>Select</code> operator does a selection - so much for
  * useful comments! */
 
-public class Select extends unryOp {
+public class Select extends UnaryOperator {
 
     /** Number of tuples to allow through */
     private Predicate pred;
@@ -56,7 +57,7 @@ public class Select extends unryOp {
         sb.append("</select>");
     }
 
-    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
         throws InvalidPlanException {
 
         NodeList children = e.getChildNodes();
@@ -125,7 +126,7 @@ public class Select extends unryOp {
     * KT - this is used by the trigger_engine *@#$*
     */
    public void setSelect(Vector _preds) {
-	pred = niagara.xmlql_parser.syntax_tree.Util.andPredicates(_preds);
+	pred = niagara.xmlql_parser.Util.andPredicates(_preds);
    }
 
 }

@@ -1,14 +1,15 @@
-/* $Id: Variable.java,v 1.9 2003/09/16 04:53:35 vpapad Exp $ */
+/* $Id: Variable.java,v 1.10 2003/12/24 02:08:27 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.connection_server.InvalidPlanException;
+import niagara.logical.predicates.*;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Domain;
 import niagara.optimizer.colombia.LogicalProperty;
-import niagara.query_engine.AtomicEvaluator;
-import niagara.query_engine.SimpleAtomicEvaluator;
-import niagara.xmlql_parser.syntax_tree.regExp;
-import niagara.xmlql_parser.syntax_tree.varType;
+import niagara.physical.AtomicEvaluator;
+import niagara.physical.SimpleAtomicEvaluator;
+import niagara.xmlql_parser.regExp;
+import niagara.xmlql_parser.varType;
 
 public class Variable implements Atom, Attribute {
     private String name;

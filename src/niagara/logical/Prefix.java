@@ -1,15 +1,15 @@
-/* $Id: Prefix.java,v 1.2 2003/07/03 19:39:02 tufte Exp $ */
+/* $Id: Prefix.java,v 1.3 2003/12/24 02:08:29 vpapad Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
 
+import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.op_tree.unryOp;
 
 /** The <code>Prefix</code> operator's output is a finite prefix of
  * its input stream */
-public class Prefix extends unryOp {
+public class Prefix extends UnaryOperator {
 
     /** Number of tuples to allow through */
     private int length;
@@ -44,7 +44,7 @@ public class Prefix extends unryOp {
         sb.append(" length='").append(length).append("'");
     }
 
-    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
         throws InvalidPlanException {
         String lengthStr = e.getAttribute("length");
         try {

@@ -4,10 +4,9 @@ package niagara.logical;
 import java.util.Vector;
 
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.op_tree.unryOp;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.xmlql_parser.*;
 
-public abstract class PartitionGroup extends unryOp {
+public abstract class PartitionGroup extends UnaryOperator {
 	// The skolem attributes associated with the group operator
 	protected skolem skolemAttributes;
 

@@ -1,4 +1,4 @@
-/* $Id: Timer.java,v 1.3 2003/07/03 19:39:02 tufte Exp $ */
+/* $Id: Timer.java,v 1.4 2003/12/24 02:08:27 vpapad Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -8,6 +8,7 @@ import java.util.StringTokenizer;
 import java.text.DateFormat;
 import java.text.ParseException;
 
+import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
@@ -15,7 +16,7 @@ import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
 
 /** A <code>Timer</code> produces a stream of tuples with the current time */
-public class Timer extends NullaryOp {
+public class Timer extends NullaryOperator {
     /** The epoch we're using to report time. Empty string means
      * use the default Java timestamp (milliseconds after midnight,
      * January 1, 1970), "now" means start from when the query plan
@@ -52,7 +53,7 @@ public class Timer extends NullaryOp {
     private final static int HOUR_AS_MILLISECS = 60 * MIN_AS_MILLISECS;
     private final static int DAY_AS_MILLISECS = 24 * HOUR_AS_MILLISECS;
 
-    public void loadFromXML(Element e, LogicalProperty inputs[])
+    public void loadFromXML(Element e, LogicalProperty inputs[], Catalog catalog)
         throws InvalidPlanException {
         name = e.getAttribute("id");
 
@@ -241,7 +242,7 @@ public class Timer extends NullaryOp {
             return obj.equals(this);
         Timer other = (Timer) obj;
         return name.equals(other.name)
-            && relative == other.relative
+            && relative.equals(other.relative)
             && period == other.period
             && slack == other.slack
             && granularity == other.granularity

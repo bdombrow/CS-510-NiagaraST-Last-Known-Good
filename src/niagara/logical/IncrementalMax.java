@@ -5,9 +5,10 @@ import org.w3c.dom.Element;
 
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.Attribute;
+import niagara.connection_server.Catalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.xmlql_parser.*;
 
 import java.util.Vector;
 import java.util.StringTokenizer;
@@ -57,7 +58,7 @@ public class IncrementalMax extends IncrementalGroup {
         return skolemAttributes.hashCode() ^ maxAttribute.hashCode();
     }
  
-    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
         throws InvalidPlanException {
         String id = e.getAttribute("id");
         String groupby = e.getAttribute("groupby");

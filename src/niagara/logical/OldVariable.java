@@ -1,11 +1,11 @@
-/* $Id: OldVariable.java,v 1.3 2002/12/10 01:21:22 vpapad Exp $ */
+/* $Id: OldVariable.java,v 1.4 2003/12/24 02:08:31 vpapad Exp $ */
 package niagara.logical;
 
-import niagara.query_engine.AtomicEvaluator;
-import niagara.query_engine.SimpleAtomicEvaluator;
+import niagara.physical.AtomicEvaluator;
+import niagara.physical.SimpleAtomicEvaluator;
 import niagara.utils.PEException;
-import niagara.xmlql_parser.syntax_tree.regExp;
-import niagara.xmlql_parser.syntax_tree.schemaAttribute;
+import niagara.xmlql_parser.regExp;
+import niagara.xmlql_parser.schemaAttribute;
 
 public class OldVariable extends Variable {
     /** This class is for compatibility with the old  logical data structures, 

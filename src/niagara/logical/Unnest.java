@@ -1,25 +1,26 @@
-/* $Id: Unnest.java,v 1.9 2003/08/01 17:28:45 tufte Exp $ */
+/* $Id: Unnest.java,v 1.10 2003/12/24 02:08:30 vpapad Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
 
 import java.io.StringReader;
 
+import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.op_tree.unryOp;
-import niagara.xmlql_parser.syntax_tree.REParser;
-import niagara.xmlql_parser.syntax_tree.Scanner;
-import niagara.xmlql_parser.syntax_tree.regExp;
-import niagara.xmlql_parser.syntax_tree.varType;
+import niagara.xmlql_parser.REParser;
+import niagara.xmlql_parser.Scanner;
+import niagara.xmlql_parser.regExp;
+import niagara.xmlql_parser.varType;
+import niagara.logical.path.RE;
 
-public class Unnest extends unryOp {
+public class Unnest extends UnaryOperator {
     /** Variable name of the result */
     private Attribute variable;
     /** atribute to unnest */
     private Attribute root;
     /** path to unnest */
-    private regExp path;
+    private RE path;
     /** The attributes we're projecting on (null means keep all attributes) */
     private Attrs projectedAttrs;
     /** keep or not tuples that do not have a match to the path expression */
@@ -31,7 +32,7 @@ public class Unnest extends unryOp {
     public Unnest(
         Attribute variable,
         Attribute root,
-        regExp path,
+        RE path,
         Attrs projectedAttrs,
         boolean outer) {
         this.variable = variable;
@@ -127,16 +128,14 @@ public class Unnest extends unryOp {
     }
 
     public int hashCode() {
-        // XXX vpapad: need hashCode for regExp
         return variable.hashCode() ^ root.hashCode() ^ path.hashCode() 
         ^ hashCodeNullsAllowed(projectedAttrs);
     }
 
     /**
      * Returns the path.
-     * @return regExp
      */
-    public regExp getPath() {
+    public RE getPath() {
         return path;
     }
 
@@ -162,7 +161,7 @@ public class Unnest extends unryOp {
     	return outer;
     }
 
-    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
         throws InvalidPlanException {
         String id = e.getAttribute("id");
         String typeAttr = e.getAttribute("type");
@@ -186,7 +185,7 @@ public class Unnest extends unryOp {
         try {
             scanner = new Scanner(new StringReader(regexpAttr));
             REParser rep = new REParser(scanner);
-            path  = (regExp) rep.parse().value;
+            path  = regExp.regExp2RE((regExp) rep.parse().value);
             rep.done_parsing();
         } catch (Exception ex) { // ugh cup throws "Exception!!!"
             ex.printStackTrace();

@@ -1,10 +1,9 @@
-/* $Id: StreamOp.java,v 1.1 2002/12/10 01:21:22 vpapad Exp $ */
+/* $Id: Stream.java,v 1.1 2003/12/24 02:08:28 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.optimizer.colombia.Attribute;
-import niagara.xmlql_parser.op_tree.StreamSpec;
 
-abstract public class StreamOp extends NullaryOp {
+abstract public class Stream extends NullaryOperator {
     protected StreamSpec streamSpec;
     protected Attribute variable;
     

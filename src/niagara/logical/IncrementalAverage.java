@@ -6,11 +6,12 @@ import org.w3c.dom.Element;
 import java.util.Vector;
 import java.util.StringTokenizer;
 
+import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
-import niagara.xmlql_parser.syntax_tree.*;
+import niagara.xmlql_parser.*;
 
 public class IncrementalAverage extends IncrementalGroup {
     private Attribute avgAttribute;
@@ -51,7 +52,7 @@ public class IncrementalAverage extends IncrementalGroup {
         return skolemAttributes.hashCode() ^ avgAttribute.hashCode();
     }
 
-    public void loadFromXML(Element e, LogicalProperty[] inputProperties)
+    public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
         throws InvalidPlanException {
         String id = e.getAttribute("id");
         String groupby = e.getAttribute("groupby");

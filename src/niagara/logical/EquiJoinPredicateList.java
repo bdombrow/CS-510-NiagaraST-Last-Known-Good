@@ -1,11 +1,12 @@
-/* $Id: EquiJoinPredicateList.java,v 1.4 2003/09/16 04:53:35 vpapad Exp $ */
+/* $Id: EquiJoinPredicateList.java,v 1.5 2003/12/24 02:08:29 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.*;
 
+import niagara.logical.predicates.*;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
-import niagara.xmlql_parser.syntax_tree.opType;
+import niagara.xmlql_parser.opType;
 
 /** A conjunction of equality predicates */
 public class EquiJoinPredicateList {
@@ -31,7 +32,7 @@ public class EquiJoinPredicateList {
         for (int i = left.size() - 1; i >= 0; i--) {
             Variable la = (Variable) left.get(i);
             Variable ra = (Variable) right.get(i);
-            p = And.conjunction(new VarToVarComparison(opType.EQ, la, ra), p);
+            p = And.conjunction(Comparison.newComparison(opType.EQ, la, ra), p);
         }
         return p;
     }
