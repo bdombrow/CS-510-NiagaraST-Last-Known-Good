@@ -30,7 +30,7 @@ public class XMLUtils {
     public static void flatten(Node n, StringBuffer sb, boolean explode) {
 	short type = n.getNodeType();
 	if (type == Node.ELEMENT_NODE) {
-	    sb.append("<" + n.getNodeName());
+	    sb.append("<").append(n.getNodeName());
 	    NamedNodeMap attrs = n.getAttributes();	    
 	    for (int i=0; i < attrs.getLength(); i++) {
 		Attr a = (Attr) attrs.item(i);
@@ -40,19 +40,23 @@ public class XMLUtils {
 			namespaceURI.equals("http://www.cse.ogi.edu/dot/niagara/")
 			&& a.getLocalName().equals("explode")) {
 			// Replace the attribute with its content
-			sb.append(" " + a.getValue());
+			sb.append(" ").append(a.getValue());
 		    }
-		    else sb.append(" " + a.getName() + "=\"" + a.getValue() + "\"");
+		    else sb.append(" ").append(a.getName()).append("=\"").append(a.getValue()).append("\"");
 		}
 		else 
-		    sb.append(" " + a.getName() + "=\"" + a.getValue() + "\"");
+		    sb.append(" ").append(a.getName()).append("=\"").append(a.getValue()).append("\"");
 	    }
-	    sb.append(">");
 	    NodeList nl = n.getChildNodes();
-	    for (int i=0; i < nl.getLength(); i++) {
-                flatten(nl.item(i), sb, explode);
-	    }
-	    sb.append("</" + n.getNodeName() + ">");
+            int nChildren = nl.getLength();
+            if (nChildren == 0) 
+                sb.append("/>");
+            else {
+                sb.append(">");
+                for (int i = 0; i < nChildren; i++)
+                    flatten(nl.item(i), sb, explode);
+                sb.append("</").append(n.getNodeName()).append(">");
+            }
 	}
 	else if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE) {
 	    sb.append(n.getNodeValue());
