@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryThread.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: QueryThread.java,v 1.2 2002/04/29 19:51:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -210,22 +210,6 @@ public class QueryThread implements Runnable {
 			queryInfo.killQueryWithoutOperators();
 			return;
 		}
-
-		//       	if (1 == 1) {
-		//	
-		//	  queryInfo.killQueryWithoutOperators();
-		//	
-		//	  queryInfo.removeFromActiveQueryList();
-		//	  
-		//	  return;
-		//	}
-		//
-		//	try {
-		//	    Thread.sleep(1000);
-		//	}
-		//	catch (java.lang.InterruptedException e) {
-		//
-		//	}
 
 		// Get the query representation from the parse tree
 		//

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryInfo.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: QueryInfo.java,v 1.2 2002/04/29 19:51:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,24 +48,20 @@ public class QueryInfo {
 	
     public static final int STATE_ACTIVE = 0;
     public static final int STATE_DEAD = 1;
-    
-    
 
     ///////////////////////////////////////////////////////////
     // These are the private data members of the class       //
     ///////////////////////////////////////////////////////////
 
     // The query as a string
-    //
     private String queryString;
 
     // The query id
-    //
     private int queryId;
 
     // The source of the output stream of the query
-    //
-    private Stream outputStream;
+    private PageStream outputPageStream;
+    private SourceTupleStream sourceTupleStream;
 
     // The active query list to which the query belongs
     //
@@ -96,7 +92,7 @@ public class QueryInfo {
      *
      * @param queryString the query as a string
      * @param queryId a unique query id
-     * @param outputStream the output stream of the query
+     * @param outputPageStream the output stream of the query
      * @param activeQueryList the active query list the query info is to
      *                        be part of
      *
@@ -104,11 +100,10 @@ public class QueryInfo {
      *            query id for the query is already present in activeQueryList
      */
 
-    public QueryInfo (String queryString,
-					  int queryId,
-					  Stream outputStream,
-					  ActiveQueryList activeQueryList,
-					  boolean remove) 
+    public QueryInfo (String queryString, int queryId,
+		      PageStream outputPageStream,
+		      ActiveQueryList activeQueryList,
+		      boolean remove) 
 		throws ActiveQueryList.QueryIdAlreadyPresentException {
 
 		// Init the remove flag
@@ -125,7 +120,8 @@ public class QueryInfo {
 
 		// Initialize the source of the output stream
 		//
-		this.outputStream = outputStream;
+		this.outputPageStream = outputPageStream;
+		sourceTupleStream = new SourceTupleStream(outputPageStream);
 
 		// Initialize the active query list
 		//
@@ -202,9 +198,8 @@ public class QueryInfo {
      * @return output stream of the query
      */
 
-    public Stream getOutputStream () {
-
-		return outputStream;
+    public PageStream getOutputPageStream () {
+	return outputPageStream;
     }
 
 
@@ -243,37 +238,23 @@ public class QueryInfo {
 
     public synchronized void killQueryWithoutOperators () {
 
-		// There should not be a test to do nothing if the state is dead.
-		// This is because a killQueryWithOperator may be invoked without
-		// knowing the exact state of the system. If the above call was
-		// invoked before operators were created for the query, then
-		// even though the state is dead, it is still necessary to
-		// to continue and close the stream and send error messages etc.
-
-		// Make the state dead
-		//
-		queryState = STATE_DEAD;
-
-		// Send a shut down control message to the output stream
-		// and close the stream
-		//
-		try {
-
-			// Sending shut down message
-			//
-			outputStream.priorityPutControlElementUpStream(
-				new StreamControlElement(StreamControlElement.ShutDown));
-
-			// Closing the stream
-			//
-			outputStream.close();
-		}
-		catch (NullElementException e) {
-			// Impossible
-		}
-		catch (StreamPreviouslyClosedException e) {
-			System.err.println("Error: Live query with closed output stream");
-		}
+	// There should not be a test to do nothing if the state is dead.
+	// This is because a killQueryWithOperator may be invoked without
+	// knowing the exact state of the system. If the above call was
+	// invoked before operators were created for the query, then
+	// even though the state is dead, it is still necessary to
+	// to continue and close the stream and send error messages etc.
+	
+	// Make the state dead
+	//
+	queryState = STATE_DEAD;
+	
+	try {
+	    // Send a shut down control message to the output stream
+	    sourceTupleStream.putCtrlMsg(CtrlFlags.SHUTDOWN);
+	} catch (ShutdownException e) {
+	    // ignore since we are shutting down anyway...
+	}
     }
 
 

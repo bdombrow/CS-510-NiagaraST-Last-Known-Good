@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.5 2002/04/19 20:49:15 tufte Exp $
+  $Id: PhysicalSelectOperator.java,v 1.6 2002/04/29 19:51:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,11 +63,11 @@ public class PhysicalSelectOperator extends PhysicalOperator {
     /**
      * This is the constructor for the PhysicalSelectOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and the responsiveness to control information.
+     * sink streams, and the responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
@@ -75,26 +75,22 @@ public class PhysicalSelectOperator extends PhysicalOperator {
      */
      
     public PhysicalSelectOperator (op logicalOperator,
-                                   Stream[] sourceStreams,
-                                   Stream[] destinationStreams,
+                                   SourceTupleStream[] sourceStreams,
+                                   SinkTupleStream[] sinkStreams,
                                    Integer responsiveness) {
 		
-		// Call the constructor of the super class
-		//
-		super(sourceStreams,
-			  destinationStreams,
-			  blockingSourceStreams,
-			  responsiveness);
-		
-		// Type cast logical operator to a select operator
-		//
-		selectOp logicalSelectOperator = (selectOp) logicalOperator;
-		
-		predEval =  new PredicateEvaluator(logicalSelectOperator.
-                                                   getPredicate());
-
-		// XXX hack
-                clear = ((selectOp) logicalOperator).getClear();
+	// Call the appropriate constructor of the super class
+	super(sourceStreams, sinkStreams, 
+	      blockingSourceStreams, responsiveness);
+	
+	// Type cast logical operator to a select operator
+	selectOp logicalSelectOperator = (selectOp) logicalOperator;
+	
+	predEval =  new PredicateEvaluator(logicalSelectOperator.
+					   getPredicate());
+	
+	// XXX hack
+	clear = ((selectOp) logicalOperator).getClear();
     }
 		     
     // XXX hack
@@ -107,36 +103,34 @@ public class PhysicalSelectOperator extends PhysicalOperator {
      *
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
-     * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected boolean nonblockingProcessSourceTupleElement (
-		StreamTupleElement tupleElement,
-		int streamId,
-		ResultTuples result) {
-		    
+    protected void nonblockingProcessSourceTupleElement (
+			     StreamTupleElement inputTuple, int streamId)
+	throws ShutdownException, InterruptedException {
 	// Evaluate the predicate on the desired attribute of the tuple
-	if (predEval.eval(tupleElement)) {
+	if (predEval.eval(inputTuple)) {
 	    // If the predicate is satisfied, add the tuple to the result
-	    //
 	    // XXX hack
 	    StreamTupleElement newTuple = 
-		new StreamTupleElement(tupleElement.isPartial());
+		new StreamTupleElement(inputTuple.isPartial());
 	    for (int i = 0; i < clear.length; i++) {
 		if (clear[i] || i == 0) { // XXX hack on hack. doc is not variable
 		    newTuple.appendAttribute(null);
 		} else {
-		    newTuple.appendAttribute(tupleElement.getAttribute(i));
+		    newTuple.appendAttribute(inputTuple.getAttribute(i));
 		}
 	    }
-	    result.add(newTuple, 0);
+	    putTuple(newTuple, 0);
+	} else {
+	    return;
 	}
-	// No problem - continue execution
-	//
-	return true;
+    }
+
+    public boolean isStateful() {
+	return false;
     }
 }
 

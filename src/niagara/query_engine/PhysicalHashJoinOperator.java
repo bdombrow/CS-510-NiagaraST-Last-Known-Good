@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.4 2002/04/08 19:03:09 vpapad Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.5 2002/04/29 19:51:23 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -75,25 +75,25 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
     /**
      * This is the constructor for the PhysicalHashJoinOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and the responsiveness to control information.
+     * sink streams, and the responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
      */
      
     public PhysicalHashJoinOperator (op logicalOperator,
-				     Stream[] sourceStreams,
-				     Stream[] destinationStreams,
+				     SourceTupleStream[] sourceStreams,
+				     SinkTupleStream[] sinkStreams,
 				     Integer responsiveness) {
 
 	// Call the constructor of the super class
 	//
 	super(sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      blockingSourceStreams,
 	      responsiveness);
 
@@ -133,16 +133,14 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
      *
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
-     * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected boolean nonblockingProcessSourceTupleElement (
+    protected void nonblockingProcessSourceTupleElement (
 				     StreamTupleElement tupleElement,
-						 int streamId,
-						 ResultTuples result) {
+				     int streamId) 
+	throws ShutdownException, InterruptedException {
 	// Get the hash code corresponding to the tuple element
 	//
 	String hashKey = hashers[streamId].hashKey(tupleElement);
@@ -161,35 +159,16 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 	int otherStreamId = 1 - streamId;
 	
 	// Now loop over all the partial elements of the other source 
-	// and evaluate the predicate and construct a result tuple if the predicate
-	// is satisfied
-	//
-	boolean proceed = constructJoinResult(tupleElement,
-					      streamId,
-					      hashKey,
-					      partialSourceTuples[otherStreamId],
-					      result);
-	
-	if (!proceed) {
-	    
-	    // Ask operator to quit
-	    //
-	    return false;
-	}
+	// and evaluate the predicate and construct a result tuple if 
+	// the predicate is satisfied
+	constructJoinResult(tupleElement, streamId, hashKey,
+			    partialSourceTuples[otherStreamId]);
 	
 	// Now loop over all the final elements of the other source 
-	// and evaluate the predicate and construct a result tuple if the predicate
-	// is satisfied
-	//
-	proceed = constructJoinResult(tupleElement,
-				      streamId,
-				      hashKey,
-				      finalSourceTuples[otherStreamId],
-				      result);
-	
-	// Continue execution or quit based on return value
-	//
-	return proceed;
+	// and evaluate the predicate and construct a result tuple if 
+	// the predicate is satisfied
+	constructJoinResult(tupleElement, streamId, hashKey,
+			    finalSourceTuples[otherStreamId]);
     }
 
 
@@ -201,18 +180,12 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
      * @param streamId The id of the source streams the partial result of
      *                 which are to be removed.
      *
-     * @return True if the operator is to proceed and false otherwise.
      */
 
-    protected boolean removeEffectsOfPartialResult (int streamId) {
+    protected void removeEffectsOfPartialResult (int streamId) {
 
 	// Clear the list of tuples in the appropriate stream
-	//
 	partialSourceTuples[streamId].clear();
-
-	// No problem - continue with operator
-	//
-	return true;
     }
 
 
@@ -226,16 +199,13 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
      * @param streamId The stream id of tupleElement
      * @param hashCode The join hash code
      * @param otherStreamTuples The tuples to be joined with tupleElement
-     * @param result The joined result tuples
-     *
-     * @return True if the operator is to proceed and false otherwise
      */
 
-    private boolean constructJoinResult (StreamTupleElement tupleElement,
-					 int streamId,
-					 String hashKey,
-					 DuplicateHashtable otherStreamTuples,
-					 ResultTuples result) {
+    private void constructJoinResult (StreamTupleElement tupleElement,
+				      int streamId,
+				      String hashKey,
+				      DuplicateHashtable otherStreamTuples) 
+	throws ShutdownException, InterruptedException{
 
 	// Get the list of tuple elements having the same hash code in
 	// otherStreamTuples
@@ -290,13 +260,12 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 		resultTuple.appendAttributes(rightTuple);
 
 		// Add the result to the output
-		//
-		result.add(resultTuple, 0);
+		putTuple(resultTuple, 0);
 	    }
 	}
+    }
 
-	// No problem - continue execution
-	//
+    public boolean isStateful() {
 	return true;
     }
 }

@@ -1,6 +1,6 @@
  
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.11 2002/04/18 23:14:13 vpapad Exp $
+  $Id: ExecutionScheduler.java,v 1.12 2002/04/29 19:51:23 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -127,44 +127,45 @@ public class ExecutionScheduler {
     public synchronized void executeOperators (logNode optimizedTree,
 					       QueryInfo queryInfo) {
 
-		// First create a Physical Head Operator to handle this query
-		// in the system
-		//
-		Stream[] outputStreams = new Stream[1];
-		outputStreams[0] = queryInfo.getOutputStream();
+	// KT - we should only put a head operator in when we
+	// need one - i.e. the query contains only a DTDScan
+	// or StreamScan, etc
 
-		Stream[] inputStreams = new Stream[1];
-		inputStreams[0] = new Stream();
-
-		PhysicalHeadOperator headOperator = 
-			new PhysicalHeadOperator(queryInfo,
-						 inputStreams,
-						 outputStreams,
-						 responsiveness);
-
-		// Put this operator in the execution queue
-		//
-		opQueue.putOperator(headOperator);
+	// First create a Physical Head Operator to handle this query
+	// in the system
+	//
+	SinkTupleStream[] outputStreams = new SinkTupleStream[1];
+	outputStreams[0]= new SinkTupleStream(queryInfo.getOutputPageStream());
+	
+	PageStream outputPageStream = new PageStream("To: Head");
+	SourceTupleStream[] inputStreams = new SourceTupleStream[1];
+	inputStreams[0] = new SourceTupleStream(outputPageStream);
+	
+	PhysicalHeadOperator headOperator = 
+	    new PhysicalHeadOperator(queryInfo,
+				     inputStreams,
+				     outputStreams,
+				     responsiveness);
+	
+	// Put this operator in the execution queue
+	opQueue.putOperator(headOperator);
 				     
-		// Traverse the optimized tree and schedule the operators for
-		// execution
-		//
-		//System.err.println("ES:: optimizedTree is: ");
-		//optimizedTree.dump();
-
-		scheduleForExecution(optimizedTree, inputStreams[0], 
-				     new Hashtable(), DOMFactory.newDocument());
+	// Traverse the optimized tree and schedule the operators for
+	// execution
+	scheduleForExecution(optimizedTree, outputPageStream,
+			     new Hashtable(), DOMFactory.newDocument());
     }
 
-    public Stream scheduleSubPlan(logNode rootNode) {
+    public PageStream scheduleSubPlan(logNode rootNode) {
         if (debug) {
             System.err.println("Scheduling: "); 
             rootNode.dump();
         }
         
         if (rootNode.isSchedulable()) {
-            Stream results = new Stream();
-            scheduleForExecution(rootNode, results, new Hashtable(), DOMFactory.newDocument());
+            PageStream results = new PageStream("SubPlan");
+            scheduleForExecution(rootNode, results, new Hashtable(), 
+				 DOMFactory.newDocument());
             return results;
         }
         else { // A mutant query plan
@@ -188,17 +189,11 @@ public class ExecutionScheduler {
      */
 
     private void scheduleForExecution (logNode rootLogicalNode,
-				       Stream outputStream,
+				       PageStream outputStream,
 				       Hashtable nodesScheduled,
                                        Document doc) {
 	
 	// Get the operator corresponding to the logical node
-	//
-
-        // Check if this is the root of a subplan meant to run
-        // on a different engine
-        //System.out.println("XXX Scheduling node: " + rootLogicalNode);
-        
         String location = rootLogicalNode.getLocation();
 
         if (location != null && !location.equals(server.getLocation())) {
@@ -225,15 +220,10 @@ public class ExecutionScheduler {
                     new InputStreamReader(
                         connection.getInputStream()));
                 query_id = in.readLine();
-
-                //System.err.println("ES: Id of remote plan is: " + query_id);
-
                 in.close();
             }
             catch (Exception e) {
-                System.out.println("ES: Exception while requesting id from remote engine:");
-                e.printStackTrace();
-                System.exit(-1);
+                throw new PEException("ES: Exception while requesting id from remote engine:");
             }
             
             // Replace the subplan with a ReceiveOp
@@ -256,115 +246,104 @@ public class ExecutionScheduler {
 	if (nodesScheduled.containsKey(rootLogicalNode)) {
 	    // This operator was already scheduled
 	    // Just add outputStream to its output streams
-	    PhysicalOperator physOp = (PhysicalOperator) nodesScheduled.get(rootLogicalNode);
-	    Stream s = null;
+	    PhysicalOperator physOp = 
+		(PhysicalOperator) nodesScheduled.get(rootLogicalNode);
 	    int i;
+	    // UUUUGLY - KT FIX
 	    for (i = 0; i < operator.getNumberOfOutputStreams(); i++) {
-		if (physOp.getDestinationStream(i) == null)
+		if (physOp.getSinkStream(i) == null)
 		    break;
 	    }
-	    physOp.setDestinationStream(i, outputStream);
+	    physOp.setSinkStream(i, new SinkTupleStream(outputStream));
 	    if (i == operator.getNumberOfOutputStreams() -1)
 		opQueue.putOperator(physOp);
 	    return;
 	}
 
-		// If this is a DTD Scan operator, then process accordingly
-		//
-		if (operator instanceof dtdScanOp) {
-		    processDTDScanOperator((dtdScanOp) operator, outputStream);
-		} else if (operator instanceof FirehoseScanOp) {
-		    processFirehoseScanOperator((FirehoseScanOp) operator, 
-						outputStream);
-		} else if (operator instanceof StreamScanOp) {
-		    processStreamScanOperator((StreamScanOp) operator, 
-					      outputStream);
-		} else if (operator instanceof ConstantOp) {
-                    processConstantOp((ConstantOp) operator, outputStream);
-		} else if (operator instanceof ReceiveOp) {
-                    processReceiveOp((ReceiveOp) operator, outputStream);
-                }
+	// Handle the scan operators differently - these are operators
+	// that can only appear at the very bottom of a query try and
+	// provide input for the query
+	if (operator instanceof dtdScanOp) {
+	    processDTDScanOperator((dtdScanOp) operator, outputStream);
+	} else if (operator instanceof FirehoseScanOp) {
+	    processFirehoseScanOperator((FirehoseScanOp) operator, 
+					outputStream);
+	} else if (operator instanceof StreamScanOp) {
+	    processStreamScanOperator((StreamScanOp) operator, 
+				      outputStream);
+	} else if (operator instanceof ConstantOp) {
+	    processConstantOp((ConstantOp) operator, outputStream);
+	} else if (operator instanceof ReceiveOp) {
+	    processReceiveOp((ReceiveOp) operator, outputStream);
+	} else {
+	    // This is a regular operator node ... Create the output streams
+	    // array
+	    SinkTupleStream[] outputStreams = 
+		new SinkTupleStream[operator.getNumberOfOutputStreams()];
+	    outputStreams[0] = new SinkTupleStream(outputStream);
+	    
+	    // Recurse over all children and create input streams array
+	    int numInputs = rootLogicalNode.numInputs();
+	    
+	    SourceTupleStream[] inputStreams = 
+		new SourceTupleStream[numInputs];
+	    
+	    for (int child = 0; child < numInputs; ++child) {
+		// Create a new input stream
+		PageStream inputPageStream = new PageStream("To: " +
+						  rootLogicalNode.getName());
+		inputStreams[child] = new SourceTupleStream(inputPageStream);
+		
+		// Recurse on child
+		scheduleForExecution(rootLogicalNode.input(child),
+				     inputPageStream,
+				     nodesScheduled, doc);
+	    }
+	    
+	    // Instantiate operator with input and output streams.
+	    // The selected algorithm is instantiated
+	    Class physicalOperatorClass = operator.getSelectedAlgo();
+	    
+	    // If there is no selected algo, error
+	    //
+	    if (physicalOperatorClass == null) {
+		throw new PEException("No algorithm selected during execution scheduling");
+	    }
+	    
+	    // Create a new instance of the class with the logical operator,
+	    // input, output streams and responsiveness. First get the
+	    // constructors
+	    Constructor[] constructors = physicalOperatorClass.getConstructors();
+	    
+	    // Now create an object array of the parameters for the
+	    // constructor
+	    Object[] parameters = new Object[] {operator, inputStreams,
+						outputStreams, responsiveness};
+	    
+	    // Create a new physical operator object
+	    PhysicalOperator physicalOperator;
+	    
+	    try {
+		physicalOperator = 
+		    (PhysicalOperator) constructors[0].newInstance(parameters);
+	    }
+	    catch (DOMException de) {
+		System.err.println("DOMException "+"Error code is" + de.code);
+		throw new PEException("Error in Instantiating Physical Operator");
+	    } catch (Exception e) {
+		throw new PEException("Error in Instantiating Physical Operator");
+	    }
 
-                else {
-			// This is a regular operator node ... Create the output streams
-			// array
-			//
-			Stream[] outputStreams = new Stream[operator.getNumberOfOutputStreams()];
-			outputStreams[0] = outputStream;
-
-			// Recurse over all children and create input streams array
-			//
-			int numInputs = rootLogicalNode.numInputs();
-
-			Stream[] inputStreams = new Stream[numInputs];
-
-			for (int child = 0; child < numInputs; ++child) {
-
-				// Create a new input stream
-				//
-				inputStreams[child] = new Stream();
-
-				// Recurse on child
-				//
-				scheduleForExecution(rootLogicalNode.input(child),
-						     inputStreams[child],
-						     nodesScheduled, doc);
-			}
-
-			// Instantiate operator with input and output streams.
-			// The selected algorithm is instantiated
-			//
-			Class physicalOperatorClass = operator.getSelectedAlgo();
-
-			// If there is no selected algo, error
-			//
-			if (physicalOperatorClass == null) {
-				System.err.println("Error: No algorithm selected during execution scheduling");
-				return;
-			}
-
-			//System.out.println("Algorithm Name = " + physicalOperatorClass);
-
-			// Create a new instance of the class with the logical operator,
-			// input, output streams and responsiveness. First get the
-			// constructors
-			//
-			Constructor[] constructors = physicalOperatorClass.getConstructors();
-
-			// Now create an object array of the parameters for the
-			// constructor
-			//
-			Object[] parameters = new Object[] {operator, inputStreams,
-                                                            outputStreams, responsiveness};
-
-			// Create a new physical operator object
-			//
-			PhysicalOperator physicalOperator;
-
-			try {
-				physicalOperator = 
-					(PhysicalOperator) constructors[0].newInstance(parameters);
-			}
-			catch (Exception e) {
-				System.err.println("Error in Instantiating Physical Operator");
-			    if(e instanceof DOMException) {
-				System.err.println("e is a DOMException");
-				System.err.println("Error code is" + ((DOMException)e).code);
-			    }
-
-				e.printStackTrace();
-				return;
-			}
-
-			if (physicalOperator.isReady()) {
-                            physicalOperator.setResultDocument(doc);
-			    // Put the new created physical operator in the operator queue
-			    opQueue.putOperator(physicalOperator);
-			}
-			nodesScheduled.put(rootLogicalNode, physicalOperator);
-			return;
-		}
-		nodesScheduled.put(rootLogicalNode, po);
+	    if (physicalOperator.isReady()) {
+		// KT FIX - call this only if necessary
+		physicalOperator.setResultDocument(doc);
+		// Put the new created physical operator in the operator queue
+		opQueue.putOperator(physicalOperator);
+	    }
+	    nodesScheduled.put(rootLogicalNode, physicalOperator);
+	    return;
+	}
+	nodesScheduled.put(rootLogicalNode, po);
     }
 
 
@@ -379,40 +358,22 @@ public class ExecutionScheduler {
      */
 
     protected void processDTDScanOperator (dtdScanOp dtdScanOperator,
-					    Stream outputStream) {
-		// For now, we have the partial operator to add - THIS WILL GO
-		//
-		Stream[] outputStreams = new Stream[1];
-		outputStreams[0] = outputStream;
-
-		Stream[] inputStreams = new Stream[1];
-		inputStreams[0] = new Stream();
-
-		PhysicalPartialOperator partialOp = 
-		    new PhysicalPartialOperator(null, inputStreams,
-						outputStreams, 
-						responsiveness);
-
-		opQueue.putOperator(partialOp);
-
+					   PageStream outputStream) {
 		// Ask the data manager to start filling the output stream with
 		// the parsed XML documents
 		//
 		try {
-		    //System.err.println("XXX Try to scan " +
-                    //	       dtdScanOperator.getDocs().elementAt(0));
 		    boolean scan = 
-			dataManager.getDocuments(dtdScanOperator.getDocs(), null,
-						 new SourceStream(inputStreams[0]));
+			dataManager.getDocuments(dtdScanOperator.getDocs(), 
+						 null,
+				    new SinkTupleStream(outputStream, true));
 		    if(!scan) 
 			System.err.println("dtdScan FAILURE! " 
 					   + dtdScanOperator.getDocs().elementAt(0));
 		}
 		catch (Exception e) {
-		    e.printStackTrace();
-		    System.err.println("Data Manager Already Closed!!!");
+		    throw new PEException("Data Manager Already Closed!!!");
 		}
-                //System.out.println("XXX returning from handleDtdScan");
     }
 
     /**
@@ -427,28 +388,14 @@ public class ExecutionScheduler {
      */
 
     protected void processFirehoseScanOperator (FirehoseScanOp fhScanOp,
-						Stream outputStream) {
-	Stream[] outputStreams = new Stream[1];
-	outputStreams[0] = outputStream;
-	
-	Stream[] inputStreams = new Stream[1];
-	inputStreams[0] = new Stream();
-	
-	PhysicalPartialOperator partialOp = 
-	    new PhysicalPartialOperator(null,inputStreams, 
-					outputStreams, responsiveness);
-	
-	opQueue.putOperator(partialOp);
-	
-	
+						PageStream outputStream) {
 	/* Create a FirehoseThread which will connect to the appropriate
 	 * firehose and start reading documents from that firehose and
 	 * putting them into the output stream
+	 * make the SinkTupleStream reflect partials
 	 */
-	//System.err.println("Attempting to start firehose ");
-
 	FirehoseThread firehose = new FirehoseThread(fhScanOp.getSpec(),
-				      new SourceStream(inputStreams[0]));
+				     new SinkTupleStream(outputStream, true));
 	
 	// start the thread
 	Thread fhthread = new Thread(firehose);
@@ -468,15 +415,15 @@ public class ExecutionScheduler {
      */
 
     protected void processStreamScanOperator (StreamScanOp sScanOp,
-					      Stream outputStream) {
+					      PageStream outputStream) {
 	
 	/* Create a StreamThread which will connect to the appropriate
 	 * stream (file or socket) and start reading documents from that 
 	 * stream and put them into the output stream
+	 * make the sink tuple stream reflect partials
 	 */
-
 	StreamThread stream = new StreamThread(sScanOp.getSpec(),
-				     new SourceStream(outputStream));
+				     new SinkTupleStream(outputStream, true));
 	
 	// start the thread
 	Thread sthread = new Thread(stream);
@@ -484,24 +431,11 @@ public class ExecutionScheduler {
     }
 
     protected void processConstantOp (ConstantOp op,
-						Stream outputStream) {
-	Stream[] outputStreams = new Stream[1];
-	outputStreams[0] = outputStream;
-	
-	Stream[] inputStreams = new Stream[1];
-	inputStreams[0] = new Stream();
-	
-	PhysicalPartialOperator partialOp = 
-	    new PhysicalPartialOperator(null,inputStreams, 
-					outputStreams, responsiveness);
-	
-	opQueue.putOperator(partialOp);
-	
-	
+				      PageStream outputStream) {
 	/* Create a ConstantOpThread */
-
+	// make the sinkTupleStream reflect partials
 	ConstantOpThread cot = new ConstantOpThread(op.getContent(),
-				      new SourceStream(inputStreams[0]));
+				    new SinkTupleStream(outputStream, true));
 	
 	// start the thread
 	Thread t = new Thread(cot);
@@ -509,27 +443,14 @@ public class ExecutionScheduler {
     }
 
     protected void processReceiveOp (ReceiveOp op,
-                                     Stream outputStream) {
-	Stream[] outputStreams = new Stream[1];
-	outputStreams[0] = outputStream;
-	
-	Stream[] inputStreams = new Stream[1];
-	inputStreams[0] = new Stream();
-	
-	PhysicalPartialOperator partialOp = 
-	    new PhysicalPartialOperator(null,inputStreams, 
-					outputStreams, responsiveness);
-	
-	opQueue.putOperator(partialOp);
-	
-	
+                                     PageStream outputStream) {
 	/* Create a ReceiveThread which will connect to the appropriate
 	 * Niagara engine and start reading tuples and putting them 
          * into the output stream
 	 */
-
+	// sink tuple stream should reflect partials
 	ReceiveThread rt = new ReceiveThread(op,
-                                             new SourceStream(inputStreams[0]));
+                                    new SinkTupleStream(outputStream, true));
 	
 	// start the thread
 	Thread t = new Thread(rt);

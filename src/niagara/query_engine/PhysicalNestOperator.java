@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.4 2002/04/19 20:49:15 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.5 2002/04/29 19:51:23 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,26 +76,26 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
     /**
      * This is the constructor for the PhysicalNestOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and the responsiveness to control information.
+     * sink streams, and the responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
      */
 
     public PhysicalNestOperator(op logicalOperator,
-				Stream[] sourceStreams,
-				Stream[] destinationStreams,
+				SourceTupleStream[] sourceStreams,
+				SinkTupleStream[] sinkStreams,
 				Integer responsiveness) {
 
 	// Call the constructor of the super class
 	//
 	super(logicalOperator,
 	      sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      responsiveness);
 
 	// Get the result template of the nest logical operator

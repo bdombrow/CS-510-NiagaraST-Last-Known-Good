@@ -43,10 +43,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     
     /* The object into which things are being accumulated */
     private Document accumDoc;
-    
-    /* map table to use for accumDoc */
-    /* MTND private MapTable mapTable; */
-
     private boolean recdData;
 
     /*
@@ -56,48 +52,33 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
     /**
      * Constructor for PhysicalAccumulateOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and the responsiveness to control information.
+     * sink streams, and the responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
      */
      
     public PhysicalAccumulateOperator (op logicalOperator,
-				       Stream[] sourceStreams,
-				       Stream[] destinationStreams,
+				       SourceTupleStream[] sourceStreams,
+				       SinkTupleStream[] sinkStreams,
 				       Integer responsiveness) 
         {
 	// Call the constructor of the super class
-	//
 	super(sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      blockingSourceStreams,
 	      responsiveness);
 
-	//System.out.println("PhysAccumOp: constructor called");
-
 	// Type cast the logical operator to a Accumulate operator
-	//
 	AccumulateOp logicalAccumulateOperator = 
 	    (AccumulateOp) logicalOperator;
 
 	mergeTree = logicalAccumulateOperator.getMergeTree();
 	mergeIndex = logicalAccumulateOperator.getMergeAttr().getAttrId();
-
-	/* for now, just create a new map table for the accumulate
-	 * operator.  Ideally, we would have a MapTable per stream
-	 * which might be shared by multiple operators, but since I
-	 * don't like this MapTable stuff and since there is no good
-	 * way to get a particular MapTable instance in here from
-	 * the ExecutionScheduler (putting a MapTable in the logical
-	 * operator seems too ugly), I will do this and punt on the
-	 * problem
-	 */
-	/* MTND mapTable = new MapTable();  */
 
 	String initialAccumFile 
 	    = logicalAccumulateOperator.getInitialAccumFile();
@@ -107,7 +88,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
 	if(clear && !initialAccumFile.equals("")) {
 	    createAccumulatorFromDisk(initialAccumFile);
-	    //System.out.println("crfromdsk done");
 	} else if(!afName.equals("") && CacheUtil.isAccumFile(afName)) {
 	    if (!clear) {
 		createAccumulatorFromDoc(afName);
@@ -135,29 +115,23 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected boolean blockingProcessSourceTupleElement (StreamTupleElement tupleElement,
-							 int streamId) {
-	//System.out.println("PhysAccumOp: blkProcSTE called");
+    protected void blockingProcessSourceTupleElement (
+					StreamTupleElement tupleElement,
+							 int streamId) 
+	throws ShutdownException, OpExecException {
+
 	/* get the fragment to be merged from the tuple, convert it
 	 * to an element if necessary, then pass the work off to the merge tree
 	 */
-	try {
-	    Element fragment = convertAttrToElement(tupleElement);
-	    
-	    // merge the fragment into the accumulated document
-	    mergeTree.accumulate(accumDoc, fragment);
-	    
-	    recdData = true;
-	    return true;
-	} catch (OpExecException e) {
-	    System.out.println("WARNING: Operator Execution Error " +
-			       e.getMessage());
-	    e.printStackTrace();
-	    return false; /* I think there's nothing better to do!! yeuch!!! */
-	} 
+	Element fragment = convertAttrToElement(tupleElement);
+	
+	// merge the fragment into the accumulated document
+	mergeTree.accumulate(accumDoc, fragment);
+	
+	recdData = true;
     }
 
     
@@ -168,11 +142,9 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
      *
      * @param streamId The id of the source streams the partial result of
      *                 which are to be removed.
-     *
-     * @return True if the operator is to proceed and false otherwise.
      */
 
-    protected boolean removeEffectsOfPartialResult (int streamId) {
+    protected void removeEffectsOfPartialResult (int streamId) {
 
 	/* delete the results accumulated so far?? - what
 	 * about a combo of partial and final tuples coming in??
@@ -186,32 +158,15 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	 * accumulate is a unary operator 
 	 */
         createEmptyAccumulator();
-        return true;
     }
 
-    protected boolean getCurrentOutput (ResultTuples resultTuples, 
-					boolean partial) {
+    protected void flushCurrentResults(boolean partial) 
+	throws ShutdownException, InterruptedException{
 	if(recdData == false) {
 	    System.out.println("PhysAccumOp: WARNING - OUTPUTTING BEFORE DATA RECEIVED");
 	}
 
-	/* set the writeable bits in the accumulated tree so
-	 * that all nodes will have to be copied to be changed,
-	 * then put the accumulated tree into the resultTuples
-	 * Eventually might not need to do this - might want
-	 * to pass on the write permissions - but there are problems
-	 * with this - see notes in cloneNode
-	 */
-	// MTND - DELETED: accumDoc.globalSetWriteableFalse();
-
-	/* now need to clone document so that I can work on it -
-	 * but use a shallow clone - only clone the document - 
-	 * none of the elements - new doc's children are the
-	 * same as the clonee's children
-	 */
-	// MTND - Deleted: accumDoc = accumDoc.cloneDocRefDocElt(false);
-
-	/* finally, put the accumulated tree into the results */
+	/* put the accumulated tree into the results */
 	StreamTupleElement result = new StreamTupleElement(partial);
 
 	/* think it is most intuitive to have the result of this
@@ -219,9 +174,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	 * result work intuitively. KT was accumDoc.getDocumentElement()
 	 */
 	result.appendAttribute(accumDoc);
-	resultTuples.add(result, 0);
-
-	return true;
+	putTuple(result, 0);
     }
 
 
@@ -326,6 +279,10 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	    createEmptyAccumulator();
 	    return;
 	}
+    }
+
+    public boolean isStateful() {
+	return true;
     }
 
 }

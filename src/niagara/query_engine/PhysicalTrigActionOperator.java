@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalTrigActionOperator.java,v 1.3 2001/08/08 21:27:57 tufte Exp $
+  $Id: PhysicalTrigActionOperator.java,v 1.4 2002/04/29 19:51:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -61,7 +61,7 @@ public class PhysicalTrigActionOperator extends PhysicalOperator {
     //
     private static final boolean[] blockingSourceStreams = { false };
 
-    // The number of destination streams for the operator
+    // The number of sink streams for the operator
     //
     Vector action;
     String mailto;
@@ -73,25 +73,25 @@ public class PhysicalTrigActionOperator extends PhysicalOperator {
     /**
      * This is the constructor for the PhysicalDuplicateOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and the responsiveness to control information.
+     * sink streams, and the responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
      */
      
     public PhysicalTrigActionOperator (op logicalOperator,
-				   Stream[] sourceStreams,
-				   Stream[] destinationStreams,
-				   Integer responsiveness) {
+				       SourceTupleStream[] sourceStreams,
+				       SinkTupleStream[] sinkStreams,
+				       Integer responsiveness) {
 
 	// Call the constructor of the super class
 	//
 	super(sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      blockingSourceStreams,
 	      responsiveness);
         action = ((trigActionOp)logicalOperator).getAction();
@@ -105,20 +105,15 @@ public class PhysicalTrigActionOperator extends PhysicalOperator {
      *
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
-     * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected boolean nonblockingProcessSourceTupleElement (
-						 StreamTupleElement tupleElement,
-						 int streamId,
-						 ResultTuples result) {
-
-	// Copy the input tuple to the destination stream
-	//
-        // System.err.println("TrigAction Fired!");
+    protected void nonblockingProcessSourceTupleElement (
+				   	 StreamTupleElement tupleElement,
+					 int streamId)
+	throws ShutdownException, InterruptedException {
+	// Copy the input tuple to the sink stream
 	mailto = null;
         for(int i=0; i<action.size(); i++) {
 	    String act = (String)action.elementAt(i);
@@ -126,17 +121,9 @@ public class PhysicalTrigActionOperator extends PhysicalOperator {
 		mailto = act.substring(8);
 		break;
 	    }
-	    // System.err.println("Action: " + action.elementAt(i));
         }
-	/*
-        for(int i=0; i<tupleElement.size(); i++) {
-            System.err.println("TupleElement At " + i + " " +
-                    ((Node)tupleElement.getAttribute(i)).getNodeName());
-        }
-	*/
-        // System.err.println("Debug triggaction done!");
 	if(mailto==null)
-	    result.add(tupleElement, 0); 
+	    putTuple(tupleElement, 0);
 	else if(tupleElement.getAttribute(0) instanceof Document)
 	    mailDoc = (Document)tupleElement.getAttribute(0);
 	else {
@@ -157,8 +144,8 @@ public class PhysicalTrigActionOperator extends PhysicalOperator {
 	    }
 	    mailDoc.getDocumentElement().appendChild(tele);
 	}
-	return true;
     }
+
     protected void shutdownTrigOp() {
 	if(mailto!=null) {
 
@@ -178,9 +165,13 @@ public class PhysicalTrigActionOperator extends PhysicalOperator {
 		    ioe.printStackTrace();
 		}
               } else {
-	    System.err.println("Trigger Send Mail did not complete - works only with old version of XML4J");
+		  throw new PEException("Trigger Send Mail did not complete - works only with old version of XML4J");
 	    }
 	}
+    }
+
+    public boolean isStateful() {
+	return true;
     }
 }
 

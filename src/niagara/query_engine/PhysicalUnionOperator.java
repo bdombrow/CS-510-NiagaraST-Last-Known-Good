@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalUnionOperator.java,v 1.3 2001/08/08 21:27:57 tufte Exp $
+  $Id: PhysicalUnionOperator.java,v 1.4 2002/04/29 19:51:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -53,11 +53,11 @@ public class PhysicalUnionOperator extends PhysicalOperator {
     /**
      * This is the constructor for the PhysicalUnionOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and responsiveness to control information.
+     * sink streams, and responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param blocking True if the operator is blocking and false if it is
      *                 non-blocking
@@ -66,14 +66,14 @@ public class PhysicalUnionOperator extends PhysicalOperator {
      */
 
     public PhysicalUnionOperator (op logicalOperator,
-				 Stream[] sourceStreams,
-				 Stream[] destinationStreams,
-				 Integer responsiveness) {
+				  SourceTupleStream[] sourceStreams,
+				  SinkTupleStream[] sinkStreams,
+				  Integer responsiveness) {
 
 	// Call the constructor on the super class
 	//
 	super(sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      new boolean[sourceStreams.length],
 	      responsiveness);
 
@@ -89,22 +89,19 @@ public class PhysicalUnionOperator extends PhysicalOperator {
      *
      * @param inputTuple The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
-     * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
      *
-     * @return true if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected boolean nonblockingProcessSourceTupleElement (
+    protected void nonblockingProcessSourceTupleElement (
 						 StreamTupleElement inputTuple,
-						 int streamId,
-						 ResultTuples result) {
+						 int streamId)
+	throws ShutdownException, InterruptedException {
         counter++;
-	    result.add(inputTuple, 0);
-	    /*count++;
-	    if(count%100 == 0) {
-		System.out.print("U("+String.valueOf(count/100)+")");
-	    }*/
-	    return true;
+	putTuple(inputTuple, 0);
 	}
+
+    public boolean isStateful() {
+	return false;
+    }
 }

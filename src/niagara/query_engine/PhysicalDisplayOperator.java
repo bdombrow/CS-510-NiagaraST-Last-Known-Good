@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalDisplayOperator.java,v 1.1 2001/07/17 07:03:46 vpapad Exp $
+ * $Id: PhysicalDisplayOperator.java,v 1.2 2002/04/29 19:51:23 tufte Exp $
  *
  */
 
@@ -47,26 +47,26 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
     /**
      * This is the constructor for the PhysicalDisplayOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and the responsiveness to control information.
+     * sink streams, and the responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
      */
 
     public PhysicalDisplayOperator(op logicalOperator,
-				     Stream[] sourceStreams,
-				     Stream[] destinationStreams,
-				     Integer responsiveness) {
+				   SourceTupleStream[] sourceStreams,
+				   SinkTupleStream[] sinkStreams,
+				   Integer responsiveness) {
 
 
 	// Call the constructor of the super class
 	//
 	super(sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      blockingSourceStreams,
 	      responsiveness);
         
@@ -86,18 +86,16 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
      *
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
-     * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
 
 
     int counter = 0;
-    protected boolean nonblockingProcessSourceTupleElement (
-						 StreamTupleElement tupleElement,
-						 int streamId,
-						 ResultTuples result) {
+    protected void nonblockingProcessSourceTupleElement (
+		     			 StreamTupleElement tupleElement,
+						 int streamId) 
+	throws ShutdownException{
         if (counter == 0) {
             try {
                 URL url = new URL(url_location);
@@ -126,10 +124,6 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
         serialize(attribute, toDisplay);
         pw.println(toDisplay.toString());
         toDisplay.setLength(0);
-
-	// The operator can now continue
-	//
-	return true;
     }
 
     protected void serialize(Object o, StringBuffer sb) {
@@ -168,6 +162,10 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
               e.printStackTrace();
               System.exit(-1);
           }
+    }
+
+    public boolean isStateful() {
+	return false;
     }
 }
 

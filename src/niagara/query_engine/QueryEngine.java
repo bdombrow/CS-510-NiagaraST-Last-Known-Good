@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.4 2002/03/26 23:52:32 tufte Exp $
+  $Id: QueryEngine.java,v 1.5 2002/04/29 19:51:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -202,15 +202,12 @@ public class QueryEngine
     public synchronized QueryResult executeQuery(String query){
 	
 		// Get the next qid
-		//
 		int qid = CUtil.getNextQueryId();
 
 		// Generate the output stream
-		//
-		Stream resultStream = new Stream();
+		PageStream resultStream = new PageStream("To QueryResult");
 	
 		// Create a query information object
-		//
 		QueryInfo queryInfo;
 
 		try {
@@ -304,19 +301,14 @@ public class QueryEngine
      */
 
     public synchronized QueryResult executeOptimizedQuery(logNode planRoot){
-        //System.out.println("XXX executeOptimizedQuery called");
         
-	//
 	// Get the next qid
-	//		
 	int qid = CUtil.getNextQueryId();
 	
 	// Generate the output streams for each query root
-	//
-	Stream resultStream = new Stream();
+	PageStream resultStream = new PageStream("To Query Result");
 	    
 	// Create a query information object
-	//
 	QueryInfo queryInfo;
 	
 	try {
@@ -370,7 +362,7 @@ public class QueryEngine
 		    
 		    // Generate the output streams for each query root
 		    //
-		    Stream resultStream = new Stream();
+		    PageStream resultStream = new PageStream("Some trigger thing");
 		    
 		    // Create a query information object
 		    //

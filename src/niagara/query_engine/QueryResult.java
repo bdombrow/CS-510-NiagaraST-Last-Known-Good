@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.6 2002/04/19 20:49:15 tufte Exp $
+  $Id: QueryResult.java,v 1.7 2002/04/29 19:51:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -141,7 +141,7 @@ public class QueryResult {
 
     // The output stream to get results from
     //
-    private Stream outputStream;
+    private SourceTupleStream outputStream;
 
     // Variable to store whether end of stream has been detected
     //
@@ -174,7 +174,7 @@ public class QueryResult {
      * @param outputStream The output stream of the query
      */
 
-    public QueryResult (int queryId, Stream outputStream) {
+    public QueryResult (int queryId, PageStream outputPageStream) {
 
 		// Initialize the query id
 		//
@@ -182,7 +182,7 @@ public class QueryResult {
 
 		// Initialize the output stream
 		//
-		this.outputStream = outputStream;
+		this.outputStream = new SourceTupleStream(outputPageStream);
 
 		// Initially, no end of stream
 		//
@@ -235,7 +235,8 @@ public class QueryResult {
 
     public ResultObject getNext ()
 	throws java.lang.InterruptedException,
-	       ResultsAlreadyReturnedException {
+	       ResultsAlreadyReturnedException,
+	       ShutdownException {
 	
 	// Call the internal getNext operator without a timeout
 	//
@@ -264,17 +265,11 @@ public class QueryResult {
      */
 
     public ResultObject getNext (int timeout)
-	throws ResultsAlreadyReturnedException {
+	throws ResultsAlreadyReturnedException,
+	       ShutdownException, InterruptedException {
 	
 	// Call the internal getNext operator with the timeout
-	//
-	try {
-	    return internalGetNext(timeout);
-	} catch (java.lang.InterruptedException e) {
-	    // KT - previous code commented "This will never happen" and
-	    // returned null
-	    throw new PEException("KT: interrupted during ResultObject:getNext - not supposed to happen");
-	}
+	return internalGetNext(timeout);
     }
 
 
@@ -289,36 +284,25 @@ public class QueryResult {
 
     public void returnPartialResults ()
 		throws ResultsAlreadyReturnedException,
-		AlreadyReturningPartialException {
+		AlreadyReturningPartialException,
+		ShutdownException {
 
 		// If end of stream, throw exception
-		//
 		if (endOfStream) {
-
-			throw new ResultsAlreadyReturnedException();
+		    throw new ResultsAlreadyReturnedException();
 		}
-
-		// If partial results are already invoked, then raise an exception
-		//
+		
+		// If partial results are already invoked, 
+		// then raise an exception
 		if (generatingPartialResult) {
-
 			throw new AlreadyReturningPartialException();
 		}
 
-		// Send a request for a partial result
-		//
-		try {
-		    System.out.println("QR putting partial request down stream");
-			outputStream.putControlElementDownStream(
-				new StreamControlElement(StreamControlElement.GetPartialResult));
-		}
-		catch (NullElementException e) {
-		}
-		catch (StreamPreviouslyClosedException e) {
-		}
+		// Send a request for a partial result		
+		System.out.println("QR putting partial request down stream");
+		outputStream.putCtrlMsg(CtrlFlags.GET_PARTIAL);
 
 		// Set the status of generating partial results
-		//
 		generatingPartialResult = true;
     }
 
@@ -328,26 +312,17 @@ public class QueryResult {
      */
 
     public void kill() { 
-	
-		// If the query is still active then kill it
-		//
-		if (!errorInExecution && !endOfStream) {
-
-			// Dont worry about error, just attempt to put control message
-			//
-			try {
-				outputStream.putControlElementDownStream(
-					new StreamControlElement(StreamControlElement.ShutDown));
-			}
-			catch (NullElementException e) {
-			}
-			catch (StreamPreviouslyClosedException e) {
-			}
-
-			// Note that the query is in error
-			//
-			errorInExecution = true;
-		}
+	try {
+	    // If the query is still active then kill it
+	    if (!errorInExecution && !endOfStream) {	    
+		// Dont worry about error, just attempt to put control message
+		outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN);	 
+		// Note that the query is in error
+		errorInExecution = true;
+	    }
+	} catch(ShutdownException e) {
+	    // ignore since we are killing query...
+	}
     }
 
      
@@ -372,7 +347,8 @@ public class QueryResult {
 
     public ResultObject internalGetNext (int timeout) 
 	throws java.lang.InterruptedException,
-	       ResultsAlreadyReturnedException {
+	       ResultsAlreadyReturnedException,
+	       ShutdownException {
 	
 	// Create a new result object
 	//
@@ -398,57 +374,34 @@ public class QueryResult {
 
 	// Get the next element from the output stream
 	//
-	StreamElement resultElement;
+	StreamTupleElement tuple;
 	
-	if (timeout >= 0) {
-	    
-	    // There is a valid timeout - so use it
-	    //
-	    resultElement = outputStream.getUpStreamElement(timeout);
-	} else {
-	    
-	    // Block till the next result is got
-	    //
-	    resultElement = outputStream.getUpStreamElement();
+	if(timeout < 0) {
+	    // neg or 0 implies no timeout, getTuple will block
+	    // until next result received
+	    timeout = 0; 
 	}
-	
+	tuple = outputStream.getTuple(timeout);	
 	
 	// Now handle the various types of results
-	//
-	if (resultElement == null) {
-	    
-	    // Nothing read - so had timed out
-	    //
-	    processNullElement(resultObject);
-	} else if (resultElement instanceof StreamControlElement) {
-	    
-	    // Process a control element read
-	    //
-	    processControlElement(resultObject, 
-				  (StreamControlElement) resultElement);
-	    
-	} else if (resultElement instanceof StreamTupleElement) {
-
+	if (tuple ==  null) {
+	    if(outputStream.timedOut()) {
+		// timed out 
+		processNullElement(resultObject);
+	    } else {
+		// get and process the control message
+		int ctrlFlag = outputStream.getCtrlFlag();
+		processCtrlMessage(resultObject, ctrlFlag);
+	    }
+	} else {
+	    // got a tuple
 	    if(!NiagraServer.QUIET) {
 		// Process a stream tuple element read
-		//
-		processTupleElement(resultObject,
-				    (StreamTupleElement) resultElement);
+		processTupleElement(resultObject,tuple);
 	    }
-	} else if (resultElement instanceof StreamEosElement) {
-	    
-	    // Process a end of stream element
-	    //
-	    processEosElement(resultObject,
-			      (StreamEosElement) resultElement);
-	} else {
-	    
-	    System.err.println("Unknown result element from stream");
-	    System.exit(-1);
-	}
+	} 
 	
 	// Return the resultObject
-	//
 	return resultObject;
     }
 
@@ -473,62 +426,44 @@ public class QueryResult {
      * @param resultObject The result to be returned to the client
      */
 
-    private void processControlElement (ResultObject resultObject,
-										StreamControlElement controlElement) {
-
-		// Act based on the type of the control element
-		//
-		if (controlElement.type() == StreamControlElement.ShutDown) {
-
-			// There is an error in the query
-			//
-			resultObject.status = QueryError;
-
-			// Note the presence of error
-			//
-			errorInExecution = true;
-		}
-		else if (controlElement.type() ==
-				 StreamControlElement.EndPartialResult) {
-
-			// This is the end of a partial result
-			//
-			if (!generatingPartialResult) {
-				System.err.println("Error: Partial Result when not expecting");
-				System.exit(-1);
-			}
+    private void processCtrlMessage (ResultObject resultObject, 
+				     int ctrlFlag) {
+	// Act based on the type of the control message
+	if (ctrlFlag == CtrlFlags.SHUTDOWN) {
+	    // There is an error in the query
+	    resultObject.status = QueryError;
 	    
-			// No more generating partial result
-			//
-			generatingPartialResult = false;
+	    // Note the presence of error
+	    errorInExecution = true;
+	} else if (ctrlFlag == CtrlFlags.END_PARTIAL) {
+	    // This is the end of a partial result
+	    if (!generatingPartialResult) {
+		throw new PEException("Error: Partial Result when not expecting");
+	    }
 	    
-			// Inform client
-			//
-			resultObject.status = EndOfPartialResult;
-		}
-		else if (controlElement.type() ==
-				 StreamControlElement.SynchronizePartialResult) {
+	    // No more generating partial result
+	    generatingPartialResult = false;
 	    
+	    // Inform client
+	    resultObject.status = EndOfPartialResult;
+	} else if (ctrlFlag == CtrlFlags.SYNCH_PARTIAL) {
 			// This is a non-blocking result
-			//
-			if (!generatingPartialResult) {
-				System.err.println("Error: Partial Result when not expecting");
-				System.exit(-1);
-			}
+	    if (!generatingPartialResult) {
+		throw new PEException("Error: Partial Result when not expecting");
+	    }
 	    
-			// No more generating partial result
-			//
-			generatingPartialResult = false;
+	    // No more generating partial result
+	    generatingPartialResult = false;
 	    
-			// Inform client
-			//
-			resultObject.status = NonBlockingResult;
-		}
-		else {
-	    
-			System.err.println("Unknown Control Element");
-			System.exit(-1);
-		}
+	    // Inform client=
+	    resultObject.status = NonBlockingResult;
+	} else if (ctrlFlag == CtrlFlags.EOS) {
+	    // This is the end
+	    resultObject.status = EndOfResult;
+	    endOfStream = true;
+	} else {
+	    throw new PEException("unexpected control element");
+	}
     }
 
 
@@ -554,27 +489,6 @@ public class QueryResult {
 	//
 	resultObject.result = extractXMLDocument(tupleElement);
     }
-
-
-    /**
-     * This function processes a end of stream element
-     *
-     * @param resultObject The result to be returned to the client
-     * @param tupleElement The end of stream element read from the output stream
-     */
-
-    private void processEosElement (ResultObject resultObject,
-									StreamEosElement eosElement) {
-
-		// This is the end
-		//
-		resultObject.status = EndOfResult;
-
-		// Note the end of results
-		//
-		endOfStream = true;
-    }
-
 
     /**
      * This function extracts an XML document result from a tuple element

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.4 2002/04/08 19:03:09 vpapad Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.5 2002/04/29 19:51:23 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -80,11 +80,11 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
     /**
      * This is the constructor for the PhysicalNLJoinOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and the responsiveness to control information.
+     * sink streams, and the responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
@@ -92,16 +92,16 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
      */
      
     public PhysicalNLJoinOperator (op logicalOperator,
-								   Stream[] sourceStreams,
-								   Stream[] destinationStreams,
-								   Integer responsiveness) {
+				   SourceTupleStream[] sourceStreams,
+				   SinkTupleStream[] sinkStreams,
+				   Integer responsiveness) {
 
 		// Call the constructor of the super class
 		//
 		super(sourceStreams,
-			  destinationStreams,
-			  blockingSourceStreams,
-			  responsiveness);
+		      sinkStreams,
+		      blockingSourceStreams,
+		      responsiveness);
 
 		// Type cast the logical operator to a join operator
 		//
@@ -138,17 +138,13 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
      *
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
-     * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected boolean nonblockingProcessSourceTupleElement (
-		StreamTupleElement tupleElement,
-		int streamId,
-		ResultTuples result) {
-
+    protected void nonblockingProcessSourceTupleElement (
+	    		 StreamTupleElement tupleElement, int streamId)
+	throws ShutdownException, InterruptedException {
 		// First add the tuple element to the appropriate source stream
 		//
 		if (tupleElement.isPartial()) {
@@ -163,33 +159,18 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
 		int otherStreamId = 1 - streamId;
 
 		// Now loop over all the partial elements of the other source 
-		// and evaluate the predicate and construct a result tuple if the predicate
-		// is satisfied
-		//
-		boolean proceed = constructJoinResult(tupleElement,
-											  streamId,
-											  partialSourceTuples[otherStreamId],
-											  result);
+		// and evaluate the predicate and construct a result tuple 
+		// if the predicate is satsfied
+		constructJoinResult(tupleElement, streamId,
+				    partialSourceTuples[otherStreamId]);
 	
-		if (!proceed) {
-
-			// Ask operator to quit
-			//
-			return false;
-		}
-
 		// Now loop over all the final elements of the other source 
-		// and evaluate the predicate and construct a result tuple if the predicate
+		// and evaluate the predicate and construct a result tuple 
+		// if the predicate is satisfied
 		// is satisfied
 		//
-		proceed = constructJoinResult(tupleElement,
-									  streamId,
-									  finalSourceTuples[otherStreamId],
-									  result);
-
-		// Continue execution or quit based on return value
-		//
-		return proceed;
+		constructJoinResult(tupleElement, streamId,
+				    finalSourceTuples[otherStreamId]);
     }
 
     
@@ -200,19 +181,12 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
      *
      * @param streamId The id of the source streams the partial result of
      *                 which are to be removed.
-     *
-     * @return True if the operator is to proceed and false otherwise.
      */
 
-    protected boolean removeEffectsOfPartialResult (int streamId) {
+    protected void removeEffectsOfPartialResult (int streamId) {
 
 		// Clear the list of tuples in the appropriate stream
-		//
 		partialSourceTuples[streamId].clear();
-
-		// No problem - continue with operator
-		//
-		return true;
     }
 
 
@@ -225,62 +199,56 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
      * @param tupleElement The tuple to be joined with tuples in other stream
      * @param streamId The stream id of tupleElement
      * @param sourceTuples The tuples to be joined with tupleElement
-     * @param result The joined result tuples
      *
-     * @return True if the operator is to proceed and false otherwise
      */
 
-    private boolean constructJoinResult (StreamTupleElement tupleElement,
-										 int streamId,
-										 ArrayList sourceTuples,
-										 ResultTuples result) {
+    private void constructJoinResult (StreamTupleElement tupleElement, 
+				      int streamId, ArrayList sourceTuples) 
+    throws ShutdownException, InterruptedException {
+	// Loop over all the elements of the other source stream and
+	// evaluate the predicate and construct a result tuple if the
+	// predicate is satisfied
+	//
+	int numTuples = sourceTuples.size();
+	
+	for (int tup = 0; tup < numTuples; ++tup) {
+	    StreamTupleElement otherTupleElement = 
+		(StreamTupleElement) sourceTuples.get(tup);
+	    
+	    // Make the right order for predicate evaluation
+	    StreamTupleElement leftTuple;
+	    StreamTupleElement rightTuple;
+	    
+	    if (streamId == 0) {
+		leftTuple = tupleElement;
+		rightTuple = otherTupleElement;
+	    }
+	    else {
+		leftTuple = otherTupleElement;
+		rightTuple = tupleElement;
+	    }
+	    // Check whether the predicate is satisfied
+	    //
+	    if (predEval.eval(leftTuple, rightTuple)) {
+		// Yes, it is satisfied - so create a result. The result is
+		// potentially partial if either of the tuples is potentially
+		// partial
+		StreamTupleElement resultTuple = 
+		    new StreamTupleElement(leftTuple.isPartial() ||
+					   rightTuple.isPartial(),
+				   leftTuple.size() + rightTuple.size());
 
-		// Loop over all the elements of the other source stream and
-		// evaluate the predicate and construct a result tuple if the
-		// predicate is satisfied
-		//
-		int numTuples = sourceTuples.size();
+		resultTuple.appendAttributes(leftTuple);
+		resultTuple.appendAttributes(rightTuple);
+		
+    		// Add the result to the output
+		putTuple(resultTuple, 0);
+	    }
+	}
+    }
 
-		for (int tup = 0; tup < numTuples; ++tup) {
-			StreamTupleElement otherTupleElement = 
-				(StreamTupleElement) sourceTuples.get(tup);
-
-			// Make the right order for predicate evaluation
-			//
-			StreamTupleElement leftTuple;
-			StreamTupleElement rightTuple;
-
-			if (streamId == 0) {
-				leftTuple = tupleElement;
-				rightTuple = otherTupleElement;
-			}
-			else {
-				leftTuple = otherTupleElement;
-				rightTuple = tupleElement;
-			}
-			// Check whether the predicate is satisfied
-			//
-			if (predEval.eval(leftTuple, rightTuple)) {
-
-				// Yes, it is satisfied - so create a result. The result is
-				// potentially partial if either of the tuples is potentially
-				// partial
-				//
-				StreamTupleElement resultTuple = 
-					new StreamTupleElement(leftTuple.isPartial() ||
-										   rightTuple.isPartial(),
-										   leftTuple.size() + rightTuple.size());
-
-				resultTuple.appendAttributes(leftTuple);
-				resultTuple.appendAttributes(rightTuple);
-
-				// Add the result to the output
-				result.add(resultTuple, 0);
-			}
-		}
-
-		// No problem - continue execution
-		//
-		return true;
+    public boolean isStateful() {
+	return true;
     }
 }
+

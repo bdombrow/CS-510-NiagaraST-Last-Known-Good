@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSortOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalSortOperator.java,v 1.3 2002/04/29 19:51:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -82,11 +82,11 @@ public class PhysicalSortOperator extends PhysicalOperator {
     /**
      * This is the constructor for the PhysicalSortOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and responsiveness to control information.
+     * sink streams, and responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param blocking True if the operator is blocking and false if it is
      *                 non-blocking
@@ -95,14 +95,14 @@ public class PhysicalSortOperator extends PhysicalOperator {
      */
 
     public PhysicalSortOperator (op logicalOperator,
-				 Stream[] sourceStreams,
-				 Stream[] destinationStreams,
+				 SourceTupleStream[] sourceStreams,
+				 SinkTupleStream[] sinkStreams,
 				 Integer responsiveness) {
 
 	// Call the constructor on the super class
 	//
 	super(sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      blockingSourceStreams,
 	      responsiveness);
 
@@ -127,33 +127,31 @@ public class PhysicalSortOperator extends PhysicalOperator {
      * @param inputTuple The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
      * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
+     *               to sink streams
      *
      * @return true if the operator is to continue and false otherwise
      */
 
-    protected boolean blockingProcessSourceTupleElement (StreamTupleElement inputTuple,
+    protected void blockingProcessSourceTupleElement (StreamTupleElement inputTuple,
 							 int streamId) {
 	ts.add(new BoxedElement(inputTuple, incomingTupleOrder++));
-	return true;
     }    
 
-    protected boolean removeEffectsOfPartialResult(int streamId) {
+    protected void removeEffectsOfPartialResult(int streamId) {
 	Iterator iter = ts.iterator();
 	while (iter.hasNext()) {
 	    StreamTupleElement ste = ((BoxedElement) iter.next()).getSTE();
 	    if (ste.isPartial())
 		iter.remove();
 	}
-	return true;
     }
 
-    protected boolean getCurrentOutput(ResultTuples resultTuples, boolean partial) {
+    protected void flushCurrentResults(boolean partial) 
+	throws ShutdownException, InterruptedException {
 	Iterator iter = ts.iterator();
 	while (iter.hasNext()) {
-	    resultTuples.add(((BoxedElement) iter.next()).getSTE(), 0);
+	    putTuple(((BoxedElement) iter.next()).getSTE(), 0);
 	}
-	return true;
     }
 
     class SortComparator implements Comparator {
@@ -224,6 +222,10 @@ public class PhysicalSortOperator extends PhysicalOperator {
 	public boolean equals(Object o) {
 	    return this == o;
 	}
+    }
+
+    public boolean isStateful() {
+	return true;
     }
 }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TrigExecutionScheduler.java,v 1.3 2002/03/26 23:52:32 tufte Exp $
+  $Id: TrigExecutionScheduler.java,v 1.4 2002/04/29 19:51:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -142,11 +142,13 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 	// in the system
 	//
 	for (int i=0; i<trigPlanRoots.size(); i++) {	    
-	    Stream[] outputStreams = new Stream[1];
-	    outputStreams[0] = ((QueryInfo)queryInfos.elementAt(i)).getOutputStream();
 
-	    Stream[] inputStreams = new Stream[1];
-	    inputStreams[0] = new Stream();
+	    SinkTupleStream[] outputStreams = new SinkTupleStream[1];
+	    outputStreams[0] = new SinkTupleStream(((QueryInfo)queryInfos.elementAt(i)).getOutputPageStream());
+
+	    PageStream outputPageStream = new PageStream("Trigger");
+	    SourceTupleStream[] inputStreams = new SourceTupleStream[1];
+	    inputStreams[0] = new SourceTupleStream(outputPageStream);
 
 	    PhysicalHeadOperator headOperator = 
 		new PhysicalHeadOperator((QueryInfo)queryInfos.elementAt(i),
@@ -157,11 +159,12 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 	    // Put this operator in the execution queue
 	    //
 	    opQueue.putOperator(headOperator);
-	    
+
 	    // Traverse the optimized tree and schedule the operators for
 	    // execution
 	    //
-	    scheduleForExecution(null,(logNode)trigPlanRoots.elementAt(i), inputStreams[0]);
+	    scheduleForExecution(null,(logNode)trigPlanRoots.elementAt(i), 
+				 outputPageStream);
 	}
 	
     }
@@ -182,19 +185,18 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 
     private void scheduleForExecution (logNode parentLogicalNode,
 				       logNode rootLogicalNode,
-				       Stream outputStream) {
+				       PageStream outputPageStream) {
         
 	// Get the operator corresponding to the logical node
 	op operator = rootLogicalNode.getOperator();
         
 	// If this is a DTD Scan operator, then process accordingly
 	if (operator instanceof dtdScanOp) {
-	    processDTDScanOperator((dtdScanOp) operator, outputStream);
+	    processDTDScanOperator((dtdScanOp) operator, outputPageStream);
 	} else {
 	    // This is a regular operator node ... Create the output streams
 	    // array
-            // System.err.println("Scheduling a operator!");
-	    Stream[] outputStreams;
+	    SinkTupleStream[] outputStreams;
 	    
 	    if ((operator instanceof dupOp) || (operator instanceof splitOp)) {
 		//check whether this duplicate or split operator has been 
@@ -213,17 +215,13 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 			outputStreamNo=((dupOp)operator).getNumDestinationStreams();
 		    else
 			outputStreamNo=((splitOp)operator).getNumDestinationStreams();
-                    // System.err.println("outputStreamNo is " + outputStreamNo);
-		    outputStreams = new Stream[outputStreamNo];		
+		    outputStreams = new SinkTupleStream[outputStreamNo]; 
 		} else { 
 		    //we don't need to go down, since the part under this
 		    //split or dup op has been instantiated by previous
 		    //round.
 		    //find the right output stream corresponding to this parent
-		    //and return it
-                    // System.err.println("Seeing a old " + ((operator
-                    //            instanceof dupOp) ? "Dup" : "Split"));
-                    
+		    //and return it                    
 		    PhysicalOperator phyOp=pOpInfo.phyOp;
 		    int id;
 		    if (operator instanceof dupOp) {
@@ -236,31 +234,34 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 		    //set the output stream to its right position in 
 		    //output stream array for split and duplicate operator
                     //System.err.println("Old split/dup: channel id " + id);
-		    phyOp.setDestinationStream(id, outputStream);
+		    phyOp.setSinkStream(id, 
+				       new SinkTupleStream(outputPageStream));
 		    return;		    
 		}
 	    } else { //normal operators other than Duplicate and Split	
-		outputStreams = new Stream[1];
-		outputStreams[0] = outputStream;
+		outputStreams = new SinkTupleStream[1];
+		outputStreams[0] = new SinkTupleStream(outputPageStream);
 	    }
 	    
 	    // Recurse over all children and create input streams array
 	    //
 	    int numInputs = rootLogicalNode.numInputs();
 
-	    Stream[] inputStreams = new Stream[numInputs];
+	    SourceTupleStream[] inputStreams = 
+		new SourceTupleStream[numInputs];
 
 	    for (int child = 0; child < numInputs; ++child) {
 
 		// Create a new input stream
-		//
-		inputStreams[child] = new Stream();
+		PageStream inputPageStream = new PageStream("To: " +
+						    rootLogicalNode.getName());
+		inputStreams[child] = new SourceTupleStream(inputPageStream);
 
 		// Recurse on child
 		//
 		scheduleForExecution(rootLogicalNode, 
 				     rootLogicalNode.input(child),
-				     inputStreams[child]);
+				     inputPageStream);
 	    }
 
 	    // Instantiate operator with input and output streams.
@@ -323,10 +324,8 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 		    id=((splitOp)operator).getCh(parentLogicalNode);
 		}	
                 
-               // System.err.println(operator + " : channel id is " + id);
-               // System.err.println("Trying to find chanel for java Obj. "
-               //                    + parentLogicalNode);
-                physicalOperator.setDestinationStream(id, outputStream);
+                physicalOperator.setSinkStream(id, 
+				  new SinkTupleStream(outputPageStream));
 		phyOpMapInfo pOpInfo = new phyOpMapInfo(physicalOperator,0);
 		allocOps.put(operator,pOpInfo);		    
 	    } 

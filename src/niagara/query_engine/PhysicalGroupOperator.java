@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.9 2002/04/19 20:49:15 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.10 2002/04/29 19:51:23 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -239,26 +239,26 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     /**
      * This is the constructor for the PhysicalGroupOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and the responsiveness to control information.
+     * sink streams, and the responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
      */
 
     public PhysicalGroupOperator(op logicalOperator,
-				 Stream[] sourceStreams,
-				 Stream[] destinationStreams,
+				 SourceTupleStream[] sourceStreams,
+				 SinkTupleStream[] sinkStreams,
 				 Integer responsiveness) {
 
 
 	// Call the constructor of the super class
 	//
 	super(sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      blockingSourceStreams,
 	      responsiveness);
 
@@ -275,7 +275,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * @return True if the operator is to continue and false otherwise
      */
 
-    protected final boolean initialize () {
+    protected final void opInitialize () {
 
 	// Get the grouping attributes
 	//
@@ -297,9 +297,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	//
 	this.initializeForExecution();
 
-	// The operator continues
-	//
-	return true;
     }
 
 
@@ -311,13 +308,13 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected final boolean blockingProcessSourceTupleElement (
+    protected final void blockingProcessSourceTupleElement (
 					 StreamTupleElement tupleElement,
 					 int streamId) 
-    throws OpExecException {
+    throws OpExecException, ShutdownException {
 
 	// First get the hash code for the grouping attributes
 	//
@@ -384,10 +381,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	    //
 	    prevResult.setFinalResult(newFinalResult);
 	}
-    
-	// The operator can continue
-	//
-	return true;
     }
 
 
@@ -396,52 +389,36 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * function is invoked only when the operator is blocking. This
      * over-rides the corresponding function in the base class.
      *
-     * @param resultTuples The output array list to be filled with the
-     *                     results computed and the destination streams
-     *                     to which they are to be sent.
      * @param partial If this function call is due to a request for a
      *                partial result
      *
      * @return True if the operator is to continue and false otherwise
      */
 
-    protected final boolean getCurrentOutput (ResultTuples resultTuples, boolean partial) {
-	// Get all the values in the hashtable
-	//
+    protected final void flushCurrentResults(boolean partial) 
+    throws InterruptedException, ShutdownException {
+	// Get all the values in the hashtable and an iterator over the values
 	Collection values = hashtable.values();
-
-	// Get an iterator to the values
-	//
 	Iterator iter = values.iterator();
 
 	// If the iterator does not have any values, then call empty construct
-	//
 	if (!iter.hasNext()) {
-
-	    // Get the result object
-	    //
-	    Node emptyResult = this.constructEmptyResult();
+	    Node emptyResult = constructEmptyResult();
 
 	    // If there is a non- empty result, then create tuple and add to
 	    // result
-	    //
 	    if (emptyResult != null) {
 
 		// Create tuple
-		//
 		StreamTupleElement tupleElement = 
 		    createTuple(emptyResult,
 				null,          // No representative tuple
 				partial);
 
 		// Add the tuple to the result
-		//
-		resultTuples.add(tupleElement, 0);
+		putTuple(tupleElement, 0);
 	    }
-
-	    // Done and the operator can continue
-	    //
-	    return true;
+	    return;
 	}
 
 	// For each group, construct results
@@ -481,14 +458,10 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 				partial);
 
 		// Add the tuple to the result
-		//
-		resultTuples.add(tupleElement, 0);
+		putTuple(tupleElement, 0);
 	    }
 	}
-
-	// The operator can continue
-	//
-	return true;
+	return;
     }
 
 
@@ -500,18 +473,11 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * @param streamId The id of the source streams the partial result of
      *                 which are to be removed.
      *
-     * @return True if the operator is to proceed and false otherwise.
      */
-
-    protected final boolean removeEffectsOfPartialResult (int streamId) {
+    protected final void removeEffectsOfPartialResult (int streamId) {
 
 	// Just increment the current partial id
-	//
 	++currPartialResultId;
-
-	// The operator can continue
-	//
-	return true;
     }
 
     
@@ -635,4 +601,8 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
     protected abstract Node constructResult (Object partialResult,
 					     Object finalResult);
+
+    public boolean isStateful() {
+	return true;
+    }
 }

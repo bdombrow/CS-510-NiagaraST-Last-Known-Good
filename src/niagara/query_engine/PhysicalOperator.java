@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.9 2002/04/08 19:03:09 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.10 2002/04/29 19:51:23 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,7 +37,6 @@ package niagara.query_engine;
  */
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.io.*;
 
 import niagara.utils.*;
@@ -46,90 +45,38 @@ import niagara.data_manager.*;
 import org.w3c.dom.Document;
 
 public abstract class PhysicalOperator {
-	
-    ////////////////////////////////////////////////////////
-    //   Data members private to the PhysicalOperator Class
-    ////////////////////////////////////////////////////////
 
-    /**
-     * The list of source Streams
-     */
-    private Stream[] sourceStreams;
-
-    /**
-     * Information about the current status of the source streams
-     */
-    private int[] sourceStreamsStatus;
-
-    /**
-     * Information about which source streams an operator blocks on
-     */
-
+    // Source streams and information about them
+    // blocking indicates if the operator blocks on that source stream or not
+    private SourceTupleStream[] sourceStreams;
     private boolean[] blockingSourceStreams;
+    int numSourceStreams;
 
-    /**
-     * The list destination Streams
-     */
-    private Stream[] destinationStreams;
+    // Sink streams and information about them
+    // partial result count is the counts of the duplicated
+    // partial result request message expected for each stream
+    private SinkTupleStream[] sinkStreams;
+    private int[] sinkStreamsPartialResultCount;
+    int numSinkStreams;
 
-    /**
-     * Information about the current status of destination streams
-     */
-    private int[] destinationStreamsStatus;
-
-    /**
-     * Counts of duplicated partial result request messages expected in each
-     * of the destination streams
-     */
-    private int[] destinationStreamsPartialResultCount;
-
-    /**
-     * The required responsiveness to control messages
-     */
+    //The required responsiveness to control messages
     private int responsiveness;
 
-    /**
-     * The vector of source streams to read from
-     */
-    private ArrayList readSourceStreams;
+    //  The vector of open source streams to read from 
+    // active means we are currently reading from that stream,
+    // note a stream can be open but not active - this is due
+    // to partial result processing
+    private StreamIdList activeSourceStreams;
 
-    /**
-     * The index (in readInputStreams) of the last source stream read
-     */
+    // The index (in readInputStreams) of the last source stream read
     private int lastReadSourceStream;
 
-    /**
-     * The reference to the data manager
-     */
-    static DataManager DM; //Trigger 
+    // move head operator functionality into PhysOp
+    private boolean isHeadOperator;
+    private QueryInfo queryInfo;
 
-    ///////////////////////////////////////////////////
-    // Nested classes private to Physical Operator
-    ///////////////////////////////////////////////////
-
-    /**
-     * This class defines the possible status of source streams
-     */
-
-    private static class SourceStreamStatus {
-
-	public static final int Open = 0;
-	public static final int SynchronizePartialResult = 1;
-	public static final int EndOfPartialResult = 2;
-	public static final int Closed = 3;
-    }
-
-
-    /**
-     * This class defines the possible status of destination streams
-     */
-
-    private static class DestinationStreamStatus {
-
-	public static final int Open = 0;
-	public static final int Closed = 1;
-    }
-
+    // for triggers
+    protected static DataManager DM;
 
     /**
      * This class is used to store the result of a read operation from
@@ -138,118 +85,18 @@ public abstract class PhysicalOperator {
      */
 
     private class SourceStreamsObject {
-
-	public StreamTupleElement element;
+	public StreamTupleElement tuple;
 	public int streamId;
     }
-
-
-    ////////////////////////////////////////////////////////////////////
-    // Nested classes visible to derived classes of Physical Operator //
-    ////////////////////////////////////////////////////////////////////
-
-    /**
-     * This class stores the tuples to be sent to destination streams, along
-     * with the id of the destination stream
-     */
-
-    protected class ResultTuples {
-
-	// Storage for tuples
-	//
-	private ArrayList tuples;
-	
-	// Storage for destination stream ids
-	//
-	private ArrayList streams;
-
-
-	/**
-	 * This is the constructor that initializes the storage
-	 */
-
-	public ResultTuples () {
-
-	    this.tuples = new ArrayList();
-	    this.streams = new ArrayList();
-	}
-
-
-	/**
-	 * This function adds a tuple element along with a destination stream
-	 * id
-	 *
-	 * @param tuple The tuple to be added
-	 * @param streamId The id of the destination stream for the tuple
-	 */
-
-	public void add (StreamTupleElement tuple, int streamId) {
-
-	    tuples.add(tuple);
-	    streams.add(new Integer(streamId));
-	}
-
-
-	/**
-	 * This function return the number of tuples in the result
-	 *
-	 * @return The number of tuples in this result object
-	 */
-
-	public int size () {
-	    return tuples.size();
-	}
-
-
-	/**
-	 * This function return the tuple given its index
-	 *
-	 * @param index The index of the tuple to be retrieved
-	 *
-	 * @return The desired tuple
-	 */
-
-	public StreamTupleElement getTuple (int index) {
-	    return (StreamTupleElement) tuples.get(index);
-	}
-
-
-	/**
-	 * This function return the destination stream id, given its index
-	 *
-	 * @param index The index of the stream id to be retrieved
-	 *
-	 * @return The desired stream id
-	 */
-
-	public int getStreamId (int index) {
-	    return ((Integer) streams.get(index)).intValue();
-	}
-
-
-	/**
-	 * This function clears the entries in the object
-	 */
-
-	public void clear () {
-	    tuples.clear();
-	    streams.clear();
-	}
-    }
-
-
-    ///////////////////////////////////////////////////
-    //   Methods of the PhysicalOperator Class
-    ///////////////////////////////////////////////////
 
     /**
      * This is the constructor for the Operator class that initializes
      * it with the appropriate logical operator, source streams,
-     * destination streams, whether the operator is blocking or non-blocking
+     * sink streams, whether the operator is blocking or non-blocking
      * and the responsiveness of the operator to control information.
      *
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param blockingSourcetreams A boolean array that specifies the source
      *                             streams due to which the operator blocks.
@@ -257,82 +104,45 @@ public abstract class PhysicalOperator {
      *                       messages
      */
      
-    public PhysicalOperator (Stream[] sourceStreams,
-			     Stream[] destinationStreams,
+    public PhysicalOperator (SourceTupleStream[] sourceStreams,
+			     SinkTupleStream[] sinkStreams,
 			     boolean[] blockingSourceStreams,
 			     Integer responsiveness) {
-
-	// Call the constructor of the super class
-	//
-	super();
-
-	// Initialize the source Streams
-	//
 	this.sourceStreams = sourceStreams;
-
-	// Set the status of every source stream to blocked
-	//
-	int numSourceStreams = Array.getLength(sourceStreams);
-
-	sourceStreamsStatus = new int[numSourceStreams];
-
-	for (int src = 0; src < numSourceStreams; ++src) {
-	    sourceStreamsStatus[src] = SourceStreamStatus.Open;
-	}
-
-	// Initialize the destination Streams
-	//
-	this.destinationStreams = destinationStreams;
-
-	// Set the status of every destination stream to open
-	//
-	int numDestStreams = Array.getLength(destinationStreams);
-
-	destinationStreamsStatus = new int[numDestStreams];
-
-	for (int dest = 0; dest < numDestStreams; ++dest) {
-	    destinationStreamsStatus[dest] = DestinationStreamStatus.Open;
-	}
+	numSourceStreams = sourceStreams.length;
+	this.sinkStreams = sinkStreams;
+	numSinkStreams = sinkStreams.length;
 
 	// Initialize which source streams the operator blocks on
-	//
 	this.blockingSourceStreams = blockingSourceStreams;
 
-	// Get the number of duplicate partial request messages in each
-	// destination stream to 0
-	//
-	destinationStreamsPartialResultCount = new int[numDestStreams];
-
-	for (int dest = 0; dest < numDestStreams; ++dest) {
-	    destinationStreamsPartialResultCount[dest] = 0;
+	// Set the number of duplicate partial request messages in each
+	// sink stream to 0
+	sinkStreamsPartialResultCount = new int[numSinkStreams];
+	for (int i = 0; i < numSinkStreams; i++) {
+	    sinkStreamsPartialResultCount[i] = 0;
 	}
 
-	// Initialize the responsiveness
-	//
 	this.responsiveness = responsiveness.intValue();
 
-	// Initially, have to read from all input streams
-	//
-	readSourceStreams = new ArrayList(numSourceStreams);
-
-	for (int src = 0; src < numSourceStreams; ++src) {
-	    readSourceStreams.add(new Integer(src));
+	// Initially, have to read from all input streams (all input streams
+	// are open)
+	activeSourceStreams = new StreamIdList(numSourceStreams);
+	for (int src = 0; src < numSourceStreams; src++) {
+	    activeSourceStreams.add(src);
 	}
 
 	// Start reading from the first input stream
-	//
-	//lastReadSourceStream = numSourceStreams - 1;
 	lastReadSourceStream = 0;
     }
 
-
     /**
-     * Is this operator ready for execution (All destination
+     * Is this operator ready for execution (All sink
      * streams in place?)
      */
     public boolean isReady() {
-	for (int i = 0; i < destinationStreams.length; i++) {
-	    if (destinationStreams[i] == null)
+	for (int i = 0; i < sinkStreams.length; i++) {
+	    if (sinkStreams[i] == null)
 		return false;
 	}
 	return true;
@@ -340,240 +150,94 @@ public abstract class PhysicalOperator {
 
     /**
      * This function sets up the flow of control for the operator by
-     * reading from input streams and writing to destination streams. All
+     * reading from input streams and writing to sink streams. All
      * control messages are handled here.
+     *
+     * @exception OpExecException This should be a user error
      */
-
     public final void execute () 
 	throws OpExecException {
-	// Flag that indicates whether the operator is to proceed or quit
-	//
-	boolean proceed = false;
-	boolean timerstarted = false;
-	long starttime = 0;
-	long stoptime = 0;
-
-	// Storage for tuples to be put in destination streams
-	//
-	ResultTuples resultTuples = new ResultTuples();
 
 	// Set up an object for reading from source streams
-	//
 	SourceStreamsObject sourceObject = new SourceStreamsObject();
 
 	try {
 	    // First initialize any necessary data structures etc. for the
-	    // operator
-	    //
-	    proceed = this.initialize();
-            
-	    // If not proceeding, shut down operator
-	    //
-	    if (!proceed) {
-
-		shutDownOperator();
-	    }
+	    // operator, shut down if this fails
+	    initialize();
 
 	    // Loop by reading inputs and processing them until there is at
 	    // least one open input stream
-	    //
-	    while (!Thread.currentThread().isInterrupted() &&
-		   proceed && 
-		   numUnClosedSourceStreams() > 0) {
-		
+	    while (existsUnClosedSourceStream()) {	
 		// Read the object from any of the valid input streams,
 		// timing out if nothing available in any input stream
-		//
-		proceed = getFromSourceStreams(sourceObject);
+		getFromSourceStreams(sourceObject);
 
-		if (proceed && sourceObject.element != null) {
-		   
-		    if(!timerstarted) {
-			starttime = System.currentTimeMillis();
-			timerstarted = true;
-		    }
-		    // There was some tuple element read, so process it and get
-		    // the output elements to be sent
-		    //
+		if (!(sourceObject.tuple == null)) {
+		    // There was some tuple element read, so process it
+		    // using the appropriate method 
 		    if (isBlocking()) {
-
-			// Process tuple element in a blocking fashion
-			//
-			proceed = this.blockingProcessSourceTupleElement(
-				       (StreamTupleElement) sourceObject.element,
-				       sourceObject.streamId);
-
-			// Shut down operator if necessary
-			//
-			if (!proceed) {
-
-			    shutDownOperator();
-			}
-		    }
-		    else {
-
-			// Process tuple element in a non-blocking fashion
-			//
-			proceed = this.nonblockingProcessSourceTupleElement(
-				        (StreamTupleElement) sourceObject.element,
-					sourceObject.streamId,
-					resultTuples);
-
-			// If the operators wants to shut down, do so
-			//
-			if (!proceed) {
-
-			    shutDownOperator();
-			}
-			else if (resultTuples.size() > 0) {
-
-			    // Write elements to destination streams and handle
-			    // destination control elements if any
-			    //
-			    proceed = putToDestinationStreams(resultTuples);
-
-			    // Clear resultTuples for next loop
-			    //
-			    resultTuples.clear();
-			}
-		    }
+			blockingProcessSourceTupleElement(sourceObject.tuple,
+						      sourceObject.streamId);
+		    } else {
+			nonblockingProcessSourceTupleElement(
+				        sourceObject.tuple,
+					sourceObject.streamId);
+		    } 
 		}
 
 		// Now check to see whether there are any control elements from
-		// the destination streams and process them if so.
-		//
-		if (proceed) {
-		    proceed = checkDestinationControlElements();
-		}
+		// the sink streams and process them if so.
+		checkForSinkCtrlMsg();
 	    } // end of while loop
-	    if(timerstarted) {
-		stoptime = System.currentTimeMillis();
-		long executetime=stoptime-starttime;
-		//System.out.println(this.getClass().getName()+":"+starttime+":"+stoptime+":"+executetime);
-	    }
-
-	    // If the thread was interrupted, throw an interrupted exception
-	    //
-	    if (proceed && Thread.currentThread().isInterrupted()) {
-		throw new java.lang.InterruptedException();
-	    }
-	}
-	catch (java.lang.InterruptedException e) {
-
-	    // The thread has been interrupted - so shut down operator
-	    //
+	} catch (java.lang.InterruptedException e) {
 	    shutDownOperator();
-	}
-	catch (NullElementException e) {
-
-	    // This must be due to a programming error
-	    //
-	    System.err.println("Programming Error in Operator");
-
+	    this.cleanUp();
+	    return;
+	} catch (ShutdownException see) {
 	    shutDownOperator();
-	}
-	catch (StreamPreviouslyClosedException e) {
-
-	    // This must be due to a programming error
-	    //
-	    System.err.println("Programming Error in Operator");
-
-	    shutDownOperator();
+	    cleanUp();
+	    return;
 	}
 
-	// Close all open destination streams
-	//
-	try {
-	    closeDestinationStreams();
-	}
-	catch (StreamPreviouslyClosedException e) {
-	    System.err.println("Error in Operator: Closing a Closed Stream");
-	}
-
-	// Do cleaning up for operator, if any
-	//
-	this.cleanUp();
+	// shut down normally by closing sink streams and do
+	// any necessary clean up
+	closeSinkStreams();
+	cleanUp();
     }
 
+    /** 
+     * get stream at index idx - yeuch, I hate this function and
+     * the one below KT
+     */
+    public final SinkTupleStream getSinkStream(int idx) {
+	return sinkStreams[idx];
+    }
 
-    /////////////////////////////////////////////////////////////////////
-    // The following functions are utility functions used for setting  //
-    // up the flow of control of an operator.                          //
-    /////////////////////////////////////////////////////////////////////
+    /** 
+     * add this stream to sink streams at index i - boy, I do not
+     * like this function or its use in ExecutionScheduler, but
+     * I don't want to change it now - just need to get the
+     * batching working KT
+     */
+    public final void setSinkStream(int idx, SinkTupleStream newStream) {
+	sinkStreams[idx] = newStream;
+    }
 
     /**
-     * This function returns the number of source streams that are not closed
+     * This function returns true if there is at least one unclosed
+     * source stream, false otherwise.
      *
-     * @return The number of un-closed source streams
+     * @return true if >=1 unclosed source stream, false otherwise
      */
-
-    private int numUnClosedSourceStreams () {
-
-	// Intialize the result
-	//
-	int result = 0;
-
-	// Loop over all source streams counting the number of unclosed ones
-	//
-	int numSourceStreams = sourceStreams.length;
-
-	for (int src = 0; src < numSourceStreams; ++src) {
-	    if (getSourceStreamStatus(src) != SourceStreamStatus.Closed) {
-		++result;
+    private boolean existsUnClosedSourceStream () {
+	for (int i = 0; i<numSourceStreams; i++) {
+	    if (!sourceStreams[i].isClosed()) {
+		return true;
 	    }
 	}
-
-	// Return the result
-	//
-	return result;
+	return false;
     }
-
-
-    /**
-     * This functions writes the current output to the destination streams
-     *
-     * @param partial If the output is to be tagged as partial
-     *
-     * @return True if the operator is to continue and false otherwise
-     *
-     * @exception java.lang.InterruptedException Thread is interrupted
-     *            during execution
-     * @exception NullElementException An attempt is made to put a null
-     *            element to output
-     * @exception StreamPreviouslyClosedException An attempt is made to
-     *            write to a previously closed stream
-     */
-
-    private boolean putCurrentOutput (boolean partial)
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	ResultTuples resultTuples = new ResultTuples();
-
-	// Get the current output of the operator
-	//
-	boolean proceed = this.getCurrentOutput(resultTuples, partial);
-
-	// If the operator is not to proceed, then shut down operator
-	//
-	if (!proceed) {
-
-	    shutDownOperator();
-	}
-	else {
-
-	    // Write elements to destination streams and handle
-	    // destination control elements if any
-	    //
-	    proceed = putToDestinationStreams(resultTuples);
-	}
-
-	// Return information about whether operator is to proceed or not
-	//
-	return proceed;
-    }
-
 
     /**
      * This function returns true if the operator is blocking and false
@@ -581,94 +245,53 @@ public abstract class PhysicalOperator {
      *
      * @return True if the operator is blocking and false otherwise
      */
-
     private boolean isBlocking () {
-
 	// If any blocking source stream is not closed, then return false
 	// else return true
-	//
-	int numSourceStreams = Array.getLength(sourceStreams);
-
-	for (int src = 0; src < numSourceStreams; ++src) {
-
-	    if (blockingSourceStreams[src] &&
-		sourceStreamsStatus[src] != SourceStreamStatus.Closed) {
-
+	for (int src = 0; src < numSourceStreams; src++) {
+	    if (blockingSourceStreams[src] && !sourceStreams[src].isClosed()) {
 		// Operator is blocking
-		//
 		return true;
 	    }
 	}
-
 	// Operator is non-blocking
-	//
 	return false;
     }
 
 
     /**
-     * This function propagates shut down messages to all source
-     * and destination streams
+     * This function sends (best effort) shutdown messages to all
+     * source and sink streams
      */
+    private void shutDownOperator () {	
+	shutdownTrigOp();
 
-    protected void shutdownTrigOp() {
-        // System.err.println("### --- %%%% shutdown called");
-        return;
-    }
-
-    private void shutDownOperator () {
-	
-	try {
-            shutdownTrigOp();
-	    propagateOperatorShutDownElement(new StreamControlElement(
-					      StreamControlElement.ShutDown));
+	// try to close each sink stream, even if we get an error closing
+	// one stream, we still try to close all the rest
+	// ignore all errors since we are shutting down (this is
+	// abnormal shutdown - some error has occurred or user requested this)
+	for(int i = 0; i<numSourceStreams; i++) {
+	    if(!sourceStreams[i].isClosed()) {
+		try {
+		    sendCtrlMsgToSource(CtrlFlags.SHUTDOWN, i);
+		} catch(ShutdownException e) {
+		}
+	    }
 	}
-	catch (java.lang.InterruptedException e) {
-	}
-	catch (NullElementException e) {
-	    System.err.println("NonNull Element is Sent!");
-	}
-	catch (StreamPreviouslyClosedException e) {
-	    System.err.println("Programming Error in Operator");
+	for(int i = 0; i<numSinkStreams; i++) {
+	    if(!sinkStreams[i].isClosed()) {
+		try {
+		    sendCtrlMsgToSink(CtrlFlags.SHUTDOWN, i);
+		} catch (ShutdownException e) {
+		} catch (InterruptedException e) {
+		}
+	    }
 	}
     }
-
-
-
-    ////////////////////////////////////////////////////////////////////////
-    // The following functions are used to provide easy access to streams //
-    // within this class.                                                 //
-    ////////////////////////////////////////////////////////////////////////
-
-    /**
-     * This function sets the status of a source stream
-     *
-     * @param streamId The id of the stream whose status is to be set
-     * @param status The status to which the stream is to be set
-     */
-
-    private void setSourceStreamStatus (int streamId, int status) {
-
-	sourceStreamsStatus[streamId] = status;
-    }
-
-
-    /**
-     * This function sets the status of a destination stream
-     *
-     * @param streamId The id of the stream whose status is to be set
-     * @param status The status to which the stream is to be set
-     */
-
-    private void setDestinationStreamStatus (int streamId, int status) {
-
-	destinationStreamsStatus[streamId] = status;
-    }
-
 
     /**
      * This function reads from a set of source streams specified by
-     * the variable readSourceStreams and modifies sourceObject that
+     * the variable activeSourceStreams and modifies sourceObject that
      * contains the source element read and the stream from which it was
      * read. If no source element was read, the the element field in
      * sourceObject is set to null. This operation splits the
@@ -676,759 +299,321 @@ public abstract class PhysicalOperator {
      * can read from. If this responsiveness time is exceeded, it returns null
      * in the element field of sourceObject.
      *
-     * @return True if the operator is to continue and false otherwise
-     *
      * @exception java.lang.InterruptedException Thrown if the thread is
      *            interrupted during execution
-     * @exception NullElementException An attempt is made to put a null
-     *            element to a stream
-     * @exception StreamPreviouslyClosedException An attempt is made to
      *            write to a previously closed stream
+     * @exception ShutdownException query shutdown by user or execution error
      */
-
-    private boolean getFromSourceStreams (SourceStreamsObject sourceObject)
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
+    private void getFromSourceStreams (SourceStreamsObject sourceObject)
+	throws java.lang.InterruptedException, ShutdownException {
 	
-	// Get the number of source streams to choose from
-	//
-	int numReadSourceStreams = readSourceStreams.size();
-
-	// Calculate the time out for each stream
-	//
-	int timeout = responsiveness/numReadSourceStreams;
+	// Get the number of source streams to read from
+	// and calculate the time out for each stream
+	int numActiveSourceStreams = activeSourceStreams.size();
+	int timeout = responsiveness/numActiveSourceStreams;
 	
 	// Make sure the last read source stream is a valid index
-	//
-	if (lastReadSourceStream >= numReadSourceStreams) {
-	    //lastReadSourceStream = numReadSourceStreams - 1;
+	if (lastReadSourceStream >= numActiveSourceStreams) {
 	    lastReadSourceStream = 0;
 	}
 	
 	// Start from next source stream
-	//
 	lastReadSourceStream = 
-	    (lastReadSourceStream + 1)%numReadSourceStreams;
+	    (lastReadSourceStream + 1)%numActiveSourceStreams;
 	
 	// Store this stream index
-	//
 	int startReadSourceStream = lastReadSourceStream;
-	
+
 	// Loop over all source streams, until a full round is completed
-	//
 	do {
-	    
 	    // Get the next stream id to read from
-	    //
-	    int streamId = 
-		((Integer)
-		 readSourceStreams.get(lastReadSourceStream)).intValue();
+	    int streamId = activeSourceStreams.get(lastReadSourceStream);
 	    
 	    // Wait for input from a source stream until the time out
-	    //
-	    StreamElement sourceElement = 
-		sourceStreams[streamId].getUpStreamElement(timeout);
-	    
-	    // If there was an element read, return it
-	    //
-	    if (sourceElement != null) {
-		
-		if (sourceElement instanceof StreamControlElement) {
-		    
-		    // This is a control element, so process it
-		    //
-		    boolean proceed = processSourceControlElement(
-			      (StreamControlElement) sourceElement,
-			      streamId);
-				
-		    // No tuple element to be returned
-		    //
-		    sourceObject.element = null;
-		    
-		    // Return whether operator is to proceed
-		    //
-		    return proceed;
-		}
-		else if (sourceElement instanceof StreamEosElement) {
-				
-		    // This is the end of stream, so mark the stream as closed
-		    //
-		    setSourceStreamStatus(streamId,
-					  SourceStreamStatus.Closed);
-				
-		    // Remove the stream id from the list
-		    //
-		    readSourceStreams.remove(lastReadSourceStream);
-				
-		    // No element to return
-		    //
-		    sourceObject.element = null;
-				
-		    boolean proceed = true;
-		    
-		    // If this causes the operator to become non-blocking, then
-		    // put out the current output and clear the current output
-		    //
-		    if (blockingSourceStreams[streamId] && !isBlocking()) {
-			
-			// Put out the current output (which is not partial anymore)
-			//
-			proceed = putCurrentOutput(false);
-			
-			if (proceed) {
-			    
-			    // Clear the current output
-			    //
-			    proceed = this.clearCurrentOutput();
-			    
-			    // Shut down operator if necessary
-			    //
-			    if (!proceed) {
-				
-				shutDownOperator();
-			    }
-			}
-		    }
-		    
-		    // Update partial result creation if any. This is necessary because
-		    // partial result creation may terminate when all input streams
-		    // are either synchronized or closed.
-		    //
-		    if (proceed) {
-			proceed = updatePartialResultCreation();
-		    }
-		    
-		    // Return whether the operator is to proceed
-		    //
-		    shutdownTrigOp();
-		    return proceed;
-		}
-		else {
-				
-		    // This has to be a tuple element - set the appropriate
-		    // values for the result
-		    //
-		    sourceObject.element = (StreamTupleElement) sourceElement;
-		    sourceObject.streamId = streamId;
-		    
-		    // The operator can continue
-		    //
-		    return true;
-		}
+	    StreamTupleElement tuple = 
+		sourceStreams[streamId].getTuple(timeout);
+
+	    if (!(tuple == null)) {
+		// We have a tuple, set appropriate values for result
+		// and return indicating the operator can continue
+		sourceObject.tuple = tuple;
+		sourceObject.streamId = streamId;
+		return; 
 	    } else {
-		// Try the next source stream
-		//
-		lastReadSourceStream = (lastReadSourceStream + 1)%numReadSourceStreams;
-	    }
+		// getNextTuple returned null, meaning we got a control
+		// message or the call timed out
+
+		// if we timed out, try the next stream
+		if(sourceStreams[streamId].timedOut()) {
+		    lastReadSourceStream = 
+			(lastReadSourceStream + 1)%numActiveSourceStreams;
+		    continue;
+		}
+		    
+		// ok, we got a ctrl message, so process it
+		int ctrlFlag = sourceStreams[streamId].getCtrlFlag();
+
+		// No tuple element to be returned
+		sourceObject.tuple = null;
+		processCtrlMsgFromSource(ctrlFlag, streamId);
+	    } 
 	} while (startReadSourceStream != lastReadSourceStream);
 	
-	// No luck with any source stream
-	//
-	sourceObject.element = null;
-	
-	// Operator can continue
-	//
-	return true;
+	// No luck with any source stream, operator can still continue
+	sourceObject.tuple = null;
+	return;
     }
 
 
     /**
-     * This function takes in an ArrayList of DestinationStreamsObjects
-     * and puts the stream tuple element in each object in the array list
-     * to the appropriate destination stream
-     *
-     * @param result The result tuples to be sent to destination streams  
-     *
-     * @return True if operator is to continue; false otherwise
-     *
-     * @exception java.lang.InterruptedException Thread is interrupted during
-     *            execution
-     * @exception NullElementException One of the destination objects has a
-     *            null element
-     * @exception StreamPreviouslyClosedException An attempt is made to send
-     *            an element to previously closed stream
-     */
-
-    private boolean putToDestinationStreams (ResultTuples resultTuples)
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	// Loop over all the result tuples and send them to appropriate
-	// destination streams
-	//
-	int numResultTuples = resultTuples.size();
-
-	boolean proceed = true;
-
-	for (int dest = 0; proceed && dest < numResultTuples; ++dest) {
-
-	    // Get the appropriate tuple and stream id
-	    //
-	    StreamTupleElement resultTuple = resultTuples.getTuple(dest);
-	    int resultStreamId = resultTuples.getStreamId(dest);
-
-	    // If the required stream is already closed, continue with rest
-	    // of output
-	    //
-	    if (getDestinationStreamStatus(resultStreamId) ==
-		DestinationStreamStatus.Closed) {
-		continue;
-	    }
-
-	    // Set up looping variable
-	    //
-	    boolean sent = false;
-
-	    // Loop until either the required element is sent or the operator
-	    // is to quit
-	    //
-	    while (!sent && proceed) {
-
-		// Try to send to the required destination stream
-			//        if(destinationStreams[resultStreamId]==null) continue;
-		StreamControlElement controlElement = 
-		    destinationStreams[resultStreamId].putTupleElementUpStream(
-							             resultTuple);
-
-		// Check if it was successfull
-		//
-		if (controlElement == null) {
-		    sent = true;
-		}
-		else {
-		    // Propagate the control element read
-		    //
-		    proceed = processDestinationControlElement(controlElement,
-							    resultStreamId);
-		}
-	    }
-	}
-
-	// The operator is to continue if proceed is true
-	//
-	return proceed;
-    }
-
-
-    /**
-     * This function checks the destionation streams for any control messages
+     * This function checks the sink streams for any control messages
      * and processes them if necessary
-     *
-     * @return True if the operator is to continue; false otherwise
      *
      * @exception java.lang.InterruptedException If the thread is interrupted
      *            during execution
-     * @exception StreamPreviouslyClosedException If a control element
-     *            is checked for in a previously closed stream
-     * @exception NullElementException If a null element is attempted to
-     *            be put in a stream
+     * @exception ShutdownException query shutdown by user or execution error
      */
-
-    private boolean checkDestinationControlElements () 
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	// Loop over all destination streams, checking for control elements
-	//
-	int numDestinationStreams = getNumDestinationStreams();
-
-	for (int dest = 0; dest < numDestinationStreams; ++dest) {
-
+    private void checkForSinkCtrlMsg()
+	throws java.lang.InterruptedException, ShutdownException {
+	// Loop over all sink streams, checking for control elements
+	for (int sinkId = 0; sinkId < numSinkStreams; sinkId++) {
 	    // Make sure the stream is not closed before checking is done
-	    //
-        //    if(destinationStreams[dest]==null) continue;
-	    if (getDestinationStreamStatus(dest) !=
-		DestinationStreamStatus.Closed) {
+	    if (!sinkStreams[sinkId].isClosed()) {
+		int ctrlFlag = sinkStreams[sinkId].getCtrlMsg();
 
-		StreamControlElement controlElement = 
-		    destinationStreams[dest].getDownStreamControlElement();
-
-		// If a control element is read, process it
-		//
-		if (controlElement != null) {
-
-		    boolean proceed = processDestinationControlElement(
-							       controlElement,
-							       dest);
-
-		    // If the operator is to be quit, return
-		    //
-		    if (!proceed) return false;
-		}
+		// If got a ctrl message, process it
+		if (ctrlFlag !=  CtrlFlags.NULLFLAG) 
+		    processCtrlMsgFromSink(ctrlFlag, sinkId);
 	    }
 	}
-
-	// The operator can continue
-	//
-	return true;
     }
-
 
     /**
-     * This function closes all destination streams that have not previously
+     * This function closes all sink streams that have not previously
      * been closed.
-     *
-     * @exception StreamPreviouslyClosedException An attempt is made to close
-     *            a previously closed stream
      */
-
-    private void closeDestinationStreams () 
-	throws StreamPreviouslyClosedException {
-
-	boolean error = false;
-
-	// Loop over all unclosed destination streams and close
-	// them
-	//
-	int numDestinationStreams = getNumDestinationStreams();
-
-	for (int dest = 0; dest < numDestinationStreams; ++dest) {
-            
-		//if(destinationStreams[dest]==null) continue;
-	    if (getDestinationStreamStatus(dest) !=
-		DestinationStreamStatus.Closed) {
-			//System.err.println("Trying to close upStream");
+    private void closeSinkStreams ()  {
+	// Loop over all unclosed sink streams and close them
+	// this will send EOS messages up all the sink streams
+	for (int sinkId = 0; sinkId < numSinkStreams; sinkId++) {
+	    if (!sinkStreams[sinkId].isClosed()) {
 		try {
-		    destinationStreams[dest].close();
-		}
-		catch (StreamPreviouslyClosedException e) {
-		    error = true;
+		    sinkStreams[sinkId].endOfStream();
+		} catch (InterruptedException e) {
+		    // ignore since we are closing the stream
+		} catch (ShutdownException e) {
+		    // ignore since we are closing the stream anyway
 		}
 	    }
 	}
-
-	// If there is an error, throw an exception
-	//
-	if (error) {
-	    throw new StreamPreviouslyClosedException();
-	}
     }
-
-
-    /////////////////////////////////////////////////////////////////////
-    // The following functions process the control elements got from   //
-    // the source streams.                                             //
-    /////////////////////////////////////////////////////////////////////
 
     /**
      * This function processes a control element from a source stream.
      *
-     * @param controlElement The control element read
+     * @param ctrlFlag The id of the control message received
      * @param streamId The id of the source stream from which the control
-     *                 element was read
-     *
-     * @return True if the operator is to continue and false otherwise
+     *                 message was read
      *
      * @exception java.lang.InterruptedException Thread is interrupted
      *            during execution
-     * @exception NullElementException An attempt is made to put a
-     *            null element to a stream
-     * @exception StreamPreviouslyClosedException An attempt is made to
-     *            write to a previously closed stream
+     * @exception ShutdownException query shutdown by user or execution error
      */
+    private void processCtrlMsgFromSource (int ctrlFlag, int streamId)
+	throws java.lang.InterruptedException, ShutdownException {
+	// upstream control messages are SYNCH_PARTIAL
+	// END_PARTIAL and EOS. We should not get GET_PARTIAL,
+	// NULLFLAG or SHUTDOWN here (SHUTDOWN handled with exceptions)
 
-    protected boolean processSourceControlElement (
-				      StreamControlElement controlElement,
-				      int streamId)
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
+	switch (ctrlFlag) {
+	case CtrlFlags.SYNCH_PARTIAL:
+	    // This stream should no longer be active and should be
+	    // in sychronizing partial state
+	    activeSourceStreams.remove(streamId);
+	    sourceStreams[streamId].setStatus(SourceTupleStream.SynchPartial);
+	    // Need to handle the creation of partial results
+	    updatePartialResultCreation ();
+	    return;
 
-	//printMessage("PO: processing source control elt");
-	switch (controlElement.type()) {
+	case CtrlFlags.END_PARTIAL:
+	    // End of partial result, so stop reading from this stream
+	    // and set status appropriately
+	    activeSourceStreams.remove(streamId);
+	    sourceStreams[streamId].setStatus(SourceTupleStream.EndPartial);
+	    // Need to handle the creation of partial results
+	    updatePartialResultCreation ();
+	    return;
 
-	case StreamControlElement.ShutDown:
-	    //printMessage("PO: received shutdown request");
-	    // Propagate the shut down element to other streams if necessary
-	    //
- 	    return this.propagateSourceShutDownElement(controlElement, streamId);
-
-	case StreamControlElement.SynchronizePartialResult:
-	    //printMessage("PO: received synch partial result elt");
-	    // Remove the stream id from the set of source streams to read from
-	    //
-	    readSourceStreams.remove(readSourceStreams.indexOf(new Integer(streamId)));
+	case CtrlFlags.EOS:		    
+	    // This is the end of stream, so mark the stream as closed
+	    // and remove it from the list of streams to read from
+	    sourceStreams[streamId].setStatus(SourceTupleStream.Closed);
+	    activeSourceStreams.remove(streamId);
 	    
-	    // Set the status of the source stream to synchronizing partial results
-	    //
-	    setSourceStreamStatus(streamId, 
-				  SourceStreamStatus.SynchronizePartialResult);
+	    // If this causes the operator to become non-blocking, then
+	    // put out the current output and clear the current output
+	    if (blockingSourceStreams[streamId] && !isBlocking()) {
+		// Output the current results (which are not partial anymore)
+		// and indicate to operator that it should clear the
+		// current results since we are transition to nonblocking
+		flushCurrentResults(false);
+		    
+		// Update partial result creation if any. This is necessary 
+		// because partial result creation may terminate when all 
+		// input streams are either synchronized or closed.
+		updatePartialResultCreation();
 
-	    // Need to handle the creation of partial results
-	    //
-	    return updatePartialResultCreation ();
+		shutdownTrigOp();
+	    }
+	    return;
 
-	case StreamControlElement.EndPartialResult:
-	    //printMessage("PO: received end partial result elt");
-	    // Remove the stream id from the set of source streams to read from
-	    //
-	    readSourceStreams.remove(readSourceStreams.indexOf(new Integer(streamId)));
-
-	    // Set the status of the source stream to end of partial results
-	    //
-	    setSourceStreamStatus(streamId,
-				  SourceStreamStatus.EndOfPartialResult);
-
-	    // Need to handle the creation of partial results
-	    //
-	    return updatePartialResultCreation ();
-
-	default:
-	    // Unhandled control element, just ignore
-	    //
-	    return true;
+	    default:
+		throw new PEException("KT unexpected control message from source " + CtrlFlags.name[ctrlFlag]);
 	}
     }
-
 
     /**
      * This function handles the creation of partial results
      *
-     * @return True if the operator is to continue execution and false
-     *         otherwise.
-     *
      * @exception java.lang.InterruptedException Thrown if the thread is
      *            interrupted during execution
-     * @exception NullElementException An attempt is made to put a null
-     *            element into an output stream
-     * @exception StreamPreviouslyClosedException An attempt is made to
-     *            write to a previously closed stream
+     * @exception ShutdownException query shutdown by user or execution error
      */
+    private final void updatePartialResultCreation ()
+	throws java.lang.InterruptedException, ShutdownException {
 
-    private boolean updatePartialResultCreation ()
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	// If readSourceStreams is not empty, then synchronization has not
-	// happened yet
-	//
-	if (!readSourceStreams.isEmpty()) {
-
-	    // The operator can continue
-	    //
-	    return true;
-	}
-	else {
-
+	// If activeSourceStreams is not empty, then synchronization has not
+	// happened yet, so just return and continue processing
+	if (!activeSourceStreams.isEmpty()) {
+	    return;
+	} else {
 	    // Synchronization has happened, check whether partial results are
-	    // required at all
-	    //
+	    // required at all - note that both blocking and non-blocking
+	    // operators synchronize on partial results
 	    boolean isPartialResult = false;
 
-	    int numSourceStreams = getNumSourceStreams();
-
-	    for (int src = 0; src < numSourceStreams && !isPartialResult; ++src) {
-
-		int streamStatus = getSourceStreamStatus(src);
-
-		if (streamStatus == SourceStreamStatus.SynchronizePartialResult ||
-		    streamStatus == SourceStreamStatus.EndOfPartialResult) {
-		    
+	    // KT - SynchPartial comes from non-blocking sources,
+	    // EndPartial from blocking sources
+	    for (int src=0; src<numSourceStreams && !isPartialResult; src++) {
+		int streamStatus = sourceStreams[src].getStatus();
+		if (streamStatus == SourceTupleStream.SynchPartial ||
+		    streamStatus == SourceTupleStream.EndPartial) {
 		    isPartialResult = true;
 		}
 	    }
 
-	    // If there are no partial results, then nothing to do
-	    //
-	    if (!isPartialResult) {
-
-		// Operator can continue
-		//
-		return true;
-	    }
+	    // If all streams are closed, then there are no partial results
+	    // so just return
+	    if (!isPartialResult) 
+		return;
 
 	    // There are partial results, so write them out
-	    //
-	    boolean proceed = true;
-
-	    // Write out the (partial) current output, if this is a blocking operator
-	    //
-	    if (isBlocking()) {
-		proceed = putCurrentOutput(true);
-	    }
-
-	    if (!proceed) return false;
+	    // Write out the (partial) current output, if this is 
+	    // a blocking operator
+	    if (isBlocking()) 
+		flushCurrentResults(true);
 
 	    // Variable to check whether the partial output is partial or
 	    // just synchronized
-	    //
+	    // output is partial if 1) this operator is blocking or 
+	    // 2) some of the input is partial
 	    boolean isPartialOutput = isBlocking();
 
 	    // Loop over all the source streams and change all streams
 	    // with partial results to Open
-	    //
 	    for (int src = 0; src < numSourceStreams; ++src) {
-
-		if (getSourceStreamStatus(src) == 
-		    SourceStreamStatus.SynchronizePartialResult) {
-
+		if (sourceStreams[src].getStatus() ==
+		    SourceTupleStream.SynchPartial) {
 		    // This is a non-blocking stream, so first make it
-		    // open 
-		    //
-		    setSourceStreamStatus(src, SourceStreamStatus.Open);
-
-		    // Now add it to the list of source streams to read from
-		    //
-		    readSourceStreams.add(new Integer(src));
-		}
-		else if (getSourceStreamStatus(src) ==
-			 SourceStreamStatus.EndOfPartialResult) {
+		    // open and then add it to the list of streams to read from
+		    sourceStreams[src].setStatus(SourceTupleStream.Open);
+		    activeSourceStreams.add(src);
+		} else if (sourceStreams[src].getStatus() ==
+			   SourceTupleStream.EndPartial) {
 
 		    // This is a blocking stream, so remove traces of
 		    // partial result
-		    //
-		    proceed = this.removeEffectsOfPartialResult (src);
+		    removeEffectsOfPartialResult(src);
 
-		    // Shut down and return if operator is not to proceed
-		    //
-		    if (!proceed) {
-
-			shutDownOperator();
-			return false;
-		    }
-
-		    // Make the stream open
-		    //
-		    setSourceStreamStatus(src, SourceStreamStatus.Open);
-
-		    // Add it to the list of source streams to read from
-		    //
-		    readSourceStreams.add(new Integer(src));
+		    // Make the stream open and add it to the list
+		    // of streams to read from
+		    sourceStreams[src].setStatus(SourceTupleStream.Open);
+		    activeSourceStreams.add(src);
 
 		    // The result is a partial result
-		    //
 		    isPartialOutput = true;
 		}
 	    }
 
 	    // If the output is a partial result, then put the appropriate
-	    // control element, else just put a SynchronizePartial control
-	    // element
-	    //
+	    // control msg, else send a synchronize partial message
 	    if (isPartialOutput) {
-		proceed = putControlElementToDestinationStreams(new
-		   StreamControlElement(StreamControlElement.EndPartialResult));
+		sendCtrlMsgToSinks(CtrlFlags.END_PARTIAL);
+	    } else {
+		sendCtrlMsgToSinks(CtrlFlags.SYNCH_PARTIAL);
 	    }
-	    else {
-		proceed = putControlElementToDestinationStreams(new
-		   StreamControlElement(
-				 StreamControlElement.SynchronizePartialResult));
-	    }
-
-	    return proceed;
 	}
     }
 
-
-    /////////////////////////////////////////////////////////////////////
-    // The following functions process the control elements got from   //
-    // the destination streams.                                        //
-    /////////////////////////////////////////////////////////////////////
-
     /**
-     * This function processes a control element from a destination stream.
+     * This function processes a control element from a sink stream.
      *
-     * @param controlElement The control element read
-     * @param streamId The id of the destination stream from which the control
-     *                 element was read
-     *
-     * @return True if the operator is to continue and false otherwise
+     * @param ctrlFlag the id of the control message received
+     * @param streamId The id of the sink stream from which the control
+     *                 message was read
      *
      * @exception java.lang.InterruptedException If the thread is interrupted
      *            during execution
-     * @exception NullElementException Thrown if controlElement is null
-     * @exception StreamPreviouslyClosedException If an attempt is made to
-     *            put a control element in a previously closed stream
+     * @exception ShutdownException query shutdown by user or execution error
      */
+    private void processCtrlMsgFromSink(int ctrlFlag, int streamId)
+	throws java.lang.InterruptedException, ShutdownException {
+	// downstream control message is GET_PARTIAL
+	// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG 
+	// here (SHUTDOWN is handled with exceptions)
 
-    private boolean processDestinationControlElement (
-				      StreamControlElement controlElement,
-				      int streamId)
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	//printMessage("PO: processing dest control elt");
-
-	switch (controlElement.type()) {
-
-	case StreamControlElement.ShutDown:
-
-	    // Propagate the shut down element to other streams if necessary
-	    //
-            System.err.println("***************************");
-            System.err.println("Got Shutting down " + this);
-            System.err.println("***************************");
-	    return propagateDestinationShutDownElement(controlElement, streamId);
-
-	case StreamControlElement.GetPartialResult:
-	//printMessage("PO: received get partial result elt");
-
-	    // Handle the get partial result request appropriately
-	    //
-	    return processDestinationGetPartialResultElement(controlElement,
-							     streamId);
+	switch (ctrlFlag) {
+	case CtrlFlags.GET_PARTIAL:
+	    processGetPartialFromSink(streamId);
+	    break;
 
 	default:
-
-	    // Unhandled control element, just ignore
-	    //
-	    return true;
+	    throw new PEException("KT unexpected control message from sink " + CtrlFlags.name[ctrlFlag]);
 	}
     }
-
-
-    /**
-     * This function propagates Shut Down control messages received from
-     * a destination stream.
-     *
-     * @param controlElement The shut down control element to be propagated
-     * @param streamId The id of the destination stream from which the control
-     *                 element was read.
-     *
-     * @return True if the operator is to continue and false otherwise
-     *
-     * @exception NullElementException Thrown when controlElement is null
-     */
-
-    protected boolean propagateDestinationShutDownElement (
-					StreamControlElement controlElement,
-					int streamId) 
-	throws NullElementException {
-
-	// Mark the appropriate destination stream as closed
-	//
-	setDestinationStreamStatus(streamId, DestinationStreamStatus.Closed);
-
-	// If at least one destination stream is unclosed, then continue
-	//
-	int numDestinationStreams = getNumDestinationStreams();
-
-	for (int dest = 0; dest < numDestinationStreams; ++dest) {
-
-	    if (getDestinationStreamStatus(dest) != 
-		DestinationStreamStatus.Closed) {
-		
-		return true;
-	    }
-	}
-
-	// No destination streams are unclosed - propagate control message to all
-	// unclosed source streams
-	//
-	boolean proceed = putControlElementToSourceStreams(controlElement);
-
-	// Quit the operator
-	//
-	return false;
-    }
-
 
     /**
      * This function processes a GetPartialResult control element received
-     * from a destination stream. If the control element is not a duplicate
-     * previously received from some other destination stream, then it is
-     * propagated using the propagation function 
-     * <code>propagateDestinationGetPartialResultElement</code>. Else it
-     * is suppressed.
+     * from a sink stream. If the control element is not a duplicate
+     * previously received from some other sink stream, then it is
+     * sent to all open source streams.
      *
-     * @param controlElement The control element read from a destination
-     *                       stream
-     * @param streamId The id of the destination stream from which the control
+     * @param streamId The id of the sink stream from which the getpartial
      *                 element was read
-     *
-     * @return True if the operator is to proceed and false otherwise
      *
      * @exception java.lang.InterruptedException If the thread is interrupted
      *            during execution
-     * @exception NullElementException If controlElement is null
-     * @exception StreamPreviouslyClosedException If an attempt is made to put
-     *            a control element into a previously closed stream
+     * @exception ShutdownException query shutdown by user or execution error
      */
+    private void processGetPartialFromSink(int streamId)
+	throws java.lang.InterruptedException, ShutdownException {
 
-    private boolean processDestinationGetPartialResultElement (
-				      StreamControlElement controlElement,
-				      int streamId)
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	if (destinationStreamsPartialResultCount[streamId] == 0) {
-
+	if (sinkStreamsPartialResultCount[streamId] == 0) {
 	    // This is not a duplicate control element - so update
-	    // counts on all other destination streams
-	    //
-	    int numDestStreams = getNumDestinationStreams();
-
-	    for (int dest = 0; dest < numDestStreams; ++dest) {
-
-		if (dest != streamId) {
-		    ++destinationStreamsPartialResultCount[dest];
+	    // counts on all other sink streams
+	    for(int i=0; i < numSinkStreams; i++) {
+		if (i != streamId) {
+		    sinkStreamsPartialResultCount[i]++;
 		}
 	    }
-
-	    // Propagate the control element
-	    //
-	    return this.propagateDestinationGetPartialResultElement(controlElement,
-								    streamId);
-	}
-	else {
-
+	    // Send the control element to all the open source streams
+	    if(existsUnClosedSourceStream())
+		sendCtrlMsgToSources(CtrlFlags.GET_PARTIAL);
+	    // else ignore GET_PARTIAL, final results are coming soon KT
+	} else {
 	    // This is a duplicate control element
-	    //
-	    --destinationStreamsPartialResultCount[streamId];
-
-	    // The operator can continue
-	    //
-	    return true;
+	    sinkStreamsPartialResultCount[streamId]--;
 	}
-    }
-
-						       
-    /////////////////////////////////////////////////////////////////////
-    // The following functions process the control elements got from   //
-    // the operator.                                                   //
-    /////////////////////////////////////////////////////////////////////
-
-    /**
-     * This function propagates a shut down control element from the
-     * operator. All unclosed source and destination streams are shut down.
-     *
-     * @param controlElement The control element to be propagated.
-     *
-     * @return False (as operator is to be shut down)
-     *
-     * @exception java.lang.InterruptedException Thrown if the thread is
-     *            interrupted in the middle of execution
-     * @exception NullElementException Thrown if controlElement is null
-     * @exception StreamPreviouslyClosedException Attempt to put a control
-     *            element in a previously closed stream
-     */
-
-    private boolean propagateOperatorShutDownElement (
-				   StreamControlElement controlElement)
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	// Propagate the shut down control element to all unclosed source
-	// streams
-	//
-	boolean proceed = putControlElementToSourceStreams(controlElement);
-
-	// Propagate the shud down control element to all unclosed destination
-	// streams
-	//
-	proceed = priorityPutControlElementToDestinationStreams(
-							    controlElement);
-
-	// Operator is to be shut down
-	//
-	return false;
     }
 
 
@@ -1439,308 +624,126 @@ public abstract class PhysicalOperator {
     //////////////////////////////////////////////////////////////////
 
     /**
-     * This function returns the number of source streams
+     * Puts a tuple into a specified sink stream. To be called
+     * by the operator implementations themselves. (sort of
+     * replaced putToDestinationStreams)
      *
-     * @return The number of source streams
+     * @param tuple The tuple to be put in the stream
+     * @param streamId the id of the stream where the tuple is to go
+     *
+     * @exception java.lang.InterruptedException Thread is interrupted during
+     *            execution
+     * @exception ShutdownException query shutdown by user or execution error
      */
+    public final void putTuple(StreamTupleElement tuple, int streamId)
+	throws java.lang.InterruptedException, ShutdownException {
 
-    protected final int getNumSourceStreams () {
+	// If the required stream is already closed, throw an error
+	// KT - not sure what to do here, the previous code in
+	// putToSinkStreams ignored this error
+	if (sinkStreams[streamId].isClosed()) {
+	    throw new PEException("KT putting tuple to closed stream - can I ignore this? previous code ignored it");
+	}
 
-	return Array.getLength(sourceStreams);
+	boolean sent = false;
+	
+	// Loop until the required element is sent 
+	while (!sent) {
+	    // Try to send to the required sink stream
+	    int ctrlFlag = sinkStreams[streamId].putTuple(tuple);
+
+	    // Check if it was successfull
+	    if (ctrlFlag == CtrlFlags.NULLFLAG) {
+		sent = true;
+	    } else {
+		// process the control message
+		processCtrlMsgFromSink(ctrlFlag, streamId);
+	    }
+	}
     }
-
-
-    /**
-     * This function returns the number of destination streams
-     *
-     * @return The number of destination streams
-     */
-
-    protected final int getNumDestinationStreams () {
-
-	return Array.getLength(destinationStreams);
-    }
-
-    /**
-     * This function returns the ith destination streams
-     *
-     * @return The ith destination streams
-     */
-
-    protected final Stream getDestinationStream (int i) {
-	return destinationStreams[i];
-    }
-
-    /**
-     * This function set the ith destination streams
-     *
-     * @param index and the outputStream
-     * 
-     */
-
-    protected final void setDestinationStream (int i, Stream outputStream) {
-	destinationStreams[i]=outputStream;
-    }
-
-    /**
-     * This function returns the status of a source stream given its id
-     *
-     * @param streamId The id of the source streams whose status is to be
-     *                 determined
-     *
-     * @return The status of the source stream with id streamId
-     */
-
-    protected final int getSourceStreamStatus (int streamId) {
-
-	return sourceStreamsStatus[streamId];
-    }
-
-
-    /**
-     * This function returns the status of a destination stream given its id
-     *
-     * @param streamId The id of the destination stream whose status is to be
-     *                 determined
-     *
-     * @return The status of the destination stream with id streamId
-     */
-
-    protected final int getDestinationStreamStatus (int streamId) {
-
-	return destinationStreamsStatus[streamId];
-    }
-
 
     /**
      * This function puts a control element to a source stream
      *
-     * @param controlElement The control element to be put
+     * @param ctrlFlag The id of the control message to be sent
      * @param streamId The source stream to which the control element
      *                 is to be put
      *
      * @return True if the operator is to continue and false otherwise
-     *
-     * @exception NullElementException controlElement is null
+     * @exception ShutdownException query shutdown by user or execution error
      */
+    private void sendCtrlMsgToSource (int ctrlFlag, int streamId)
+	throws ShutdownException{
+	int retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag);
 
-    protected final boolean putControlElementToSourceStream (
-					  StreamControlElement controlElement,
-					  int streamId) 
-	throws NullElementException {
-
-	// Dont worry if the stream has been closed already
-	//
-	try {
-	    sourceStreams[streamId].putControlElementDownStream(controlElement);
+	// only control flag putCtrlMsg may return is EOS
+	if(retCtrlFlag != CtrlFlags.NULLFLAG) {
+	    throw new PEException("Unexpected ctrl flag in sendCtrlMsgToSource " + CtrlFlags.name[ctrlFlag]);
 	}
-	catch (StreamPreviouslyClosedException e) {
-	}
-
-	// Continue with the operator
-	//
-	return true;
+	return;
     }
 
 
     /**
      * This function puts a control element to all source streams
      *
-     * @param controlElement The control element to be sent
+     * @param ctrlFlag The id of the control message to be sent
      *
-     * @return True if the operator is to continue and false otherwise
-     *
-     * @exception NullElementException controlElement is null
+     * @exception ShutdownException query shutdown by user or execution error
      */
-
-    protected final boolean putControlElementToSourceStreams(
-				       StreamControlElement controlElement)
-	throws NullElementException {
-
+    private void sendCtrlMsgToSources(int ctrlFlag)
+	throws ShutdownException {
 	// Loop over all source streams and put the control
 	// element in all open ones
-	//
-	int numSourceStreams = getNumSourceStreams();
-
-	for (int src = 0; src < numSourceStreams; ++src) {
-
-	    
-	    if (getSourceStreamStatus(src) != SourceStreamStatus.Closed) {
-		boolean proceed = 
-		    putControlElementToSourceStream(controlElement, src);
-
-		if (!proceed) return false;
+	for (int i = 0; i < numSourceStreams; i++) {
+	    if (!sourceStreams[i].isClosed()) {
+		sendCtrlMsgToSource(ctrlFlag, i);
 	    }
 	}
-
-	// Continue with the operator
-	//
-	return true;
     }
 
 
     /**
-     * This function puts a control element to a destination stream
+     * This function puts a control element to a sink stream
      *
-     * @param controlElement The control element to be put
-     * @param streamId The destination stream to which the control element
+     * @param ctrlFlag The ide of the ctrl message to be sent
+     * @param streamId The sink stream to which the control message
      *                 is to be put
      *
-     * @return True if the operator is to continue and false otherwise
-     *
-     * @exception java.lang.InterruptedException Thread is interrupted
-     *            during execution
-     * @exception NullElementException controlElement is null
-     * @exception StreamPreviouslyClosedException Attempt to put controlElement
-     *            in a previously closed stream
+     * @exception ShutdownException query shutdown by user or execution error
      */
-
-    protected final boolean putControlElementToDestinationStream (
-					  StreamControlElement controlElement,
-					  int streamId) 
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	// Put the control element up the stream
-	//
-        if(destinationStreams[streamId]==null) return true;
-	StreamControlElement sce; boolean cont = true;
+    private void sendCtrlMsgToSink(int ctrlFlag, int streamId)
+	throws java.lang.InterruptedException, ShutdownException {
+	int newCtrlFlag;
 	do {
-	    // Gasp!!! This code was silently dropping control elements!!!! 
-	     sce = destinationStreams[streamId].putControlElementUpStream(controlElement);
-	    if (sce != null) {
-		cont = processDestinationControlElement(sce, streamId);
+	     newCtrlFlag = sinkStreams[streamId].putCtrlMsg(ctrlFlag);
+	     if (newCtrlFlag != CtrlFlags.NULLFLAG) {
+		 processCtrlMsgFromSink(newCtrlFlag, streamId);
 	    }
 	}
-	while (sce != null); // *NEVER* give up!
-
-	// Continue with the operator
-	//
-	return cont;
+	while (newCtrlFlag != CtrlFlags.NULLFLAG); // *NEVER* give up!
     }
 
 
     /**
-     * This function puts a control element to all destination streams that
+     * This function puts a control element to all sink streams that
      * have not been previously closed
      *
-     * @param controlElement The control element to be sent
+     * @param ctrlFlag The id of the control message to be sent
      *
-     * @return True if the operator is to continue and false otherwise
-     *
-     * @exception java.lang.InterruptedException Thread is interrupted
-     *            during execution
-     * @exception NullElementException controlElement is null
-     * @exception StreamPreviouslyClosedException Attempt to put a control
-     *            element in a previously closed stream
+     * @exception ShutdownException query shutdown by user or execution error
      */
+    private void sendCtrlMsgToSinks(int ctrlFlag)
+	throws java.lang.InterruptedException, ShutdownException {
 
-    protected final boolean putControlElementToDestinationStreams(
-				       StreamControlElement controlElement)
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	// Loop over all destination streams and put the control
+	// Loop over all sink streams and put the control
 	// element in all open ones
-	//
-	int numDestinationStreams = getNumDestinationStreams();
-
-	for (int dest = 0; dest < numDestinationStreams; ++dest) {
-
-
-	    if (getDestinationStreamStatus(dest) !=
-		DestinationStreamStatus.Closed) {
-		boolean proceed = 
-		    putControlElementToDestinationStream(controlElement, dest);
-
-		if (!proceed) return false;
+	for (int sinkId = 0; sinkId < numSinkStreams; sinkId++) {
+	    if (!sinkStreams[sinkId].isClosed()) {
+		sendCtrlMsgToSink(ctrlFlag, sinkId);
 	    }
 	}
-
-	// Continue with the operator
-	//
-	return true;
     }
-
-
-    /**
-     * This function puts a control element to a destination stream with
-     * priority
-     *
-     * @param controlElement The control element to be put
-     * @param streamId The destination stream to which the control element
-     *                 is to be put
-     *
-     * @return True if the operator is to continue and false otherwise
-     *
-     * @exception NullElementException controlElement is null
-     * @exception StreamPreviouslyClosedException Attempt to put controlElement
-     *            in a previously closed stream
-     */
-
-    protected final boolean priorityPutControlElementToDestinationStream (
-					  StreamControlElement controlElement,
-					  int streamId) 
-	throws NullElementException,
-	       StreamPreviouslyClosedException {
-
-	// Put the control element to the destination stream with priority
-	//
-        //if(destinationStreams[streamId]==null) return true;
-	destinationStreams[streamId].priorityPutControlElementUpStream(
-							     controlElement);
-
-	// Continue with the operator
-	//
-	return true;
-    }
-
-
-    /**
-     * This function puts a control element with priority to all destination
-     * streams that have not been previously closed
-     *
-     * @param controlElement The control element to be put
-     *
-     * @return True if the operator is to continue and false otherwise
-     *
-     * @exception java.lang.InterruptedException Thread is interrupted
-     *            during execution
-     * @exception NullElementException controlElement is null
-     * @exception StreamPreviouslyClosedException Attempt to put a control
-     *            element in a previously closed stream
-     */
-
-    protected final boolean priorityPutControlElementToDestinationStreams(
-				       StreamControlElement controlElement)
-	throws NullElementException,
-	       StreamPreviouslyClosedException {
-
-	// Loop over all destination streams and put the control
-	// element in all open ones
-	//
-	int numDestinationStreams = getNumDestinationStreams();
-
-	for (int dest = 0; dest < numDestinationStreams; ++dest) {
-
-	    if (getDestinationStreamStatus(dest) !=
-		DestinationStreamStatus.Closed) {
-
-		boolean proceed = 
-		    priorityPutControlElementToDestinationStream(controlElement,
-								 dest);
-
-		if (!proceed) return false;
-	    }
-	}
-
-	// Continue with the operator
-	//
-	return true;
-    }
-
 
     ////////////////////////////////////////////////////////////////////
     // The following functions provide the hooks to write actual      //
@@ -1751,16 +754,28 @@ public abstract class PhysicalOperator {
     /**
      * This function initializes the data structures for an operator
      *
-     * @return True if the operator is to continue and false otherwise
      */
-
-    protected boolean initialize () {
-
-	// Currently, no initialization and the operator continues
-	//
-	return true;
+    private void initialize() {
+	if(isHeadOperator)
+	    // Set this thread in the query info object
+	    queryInfo.setHeadOperatorThread(Thread.currentThread());
+	opInitialize();
+	return;
     }
 
+    /**
+     * if an operator needs to do initialization, it should override
+     * this function
+     */
+    protected void opInitialize() {
+	return;
+    }
+
+    /**
+     * does operator keep state??
+     */
+    // all operators must implement this
+    public abstract boolean isStateful();
 
     /**
      * This function processes a tuple element read from a source stream
@@ -1768,20 +783,15 @@ public abstract class PhysicalOperator {
      *
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
-     * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
-
-    protected boolean nonblockingProcessSourceTupleElement (
-						 StreamTupleElement tupleElement,
-						 int streamId,
-						 ResultTuples result) {
-
-	// By default does nothing and asks the operator to continue
-	//
-	return true;
+    // NONBLOCKING ops should implement this
+    protected void nonblockingProcessSourceTupleElement (
+					StreamTupleElement tuple,
+					int streamId) 
+	throws ShutdownException, InterruptedException {
+	throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
     }
 
 
@@ -1792,56 +802,34 @@ public abstract class PhysicalOperator {
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception OpExecException This should be a user error
+     * @exception ShutdownException Shutdown due to execution error or 
+     *            client request
      */
-
-    protected boolean blockingProcessSourceTupleElement (
-						 StreamTupleElement tupleElement,
+    // BLOCKING ops should implement this
+    protected void blockingProcessSourceTupleElement (
+						 StreamTupleElement tuple,
 						 int streamId) 
-	throws OpExecException {
-
-	// By default does nothing and asks the operator to continue
-	//
-	return true;
+	throws OpExecException, ShutdownException {
+	throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
     }
 
 
     /**
-     * This function returns the current output of the operator. This
-     * function is invoked only when the operator is blocking.
+     * Requests that a (blocking) operator flush the current version
+     * of its results to the sink. This flush request may be do
+     * to a GET_PARTIAL request or due to end of stream.
      *
-     * @param resultTuples The output array list to be filled with the
-     *                     results computed and the destination streams
-     *                     to which they are to be sent.
-     * @param partial If this function call is due to a request for a
-     *                partial result
+     * @param partial true if this is partial result output, false if
+     * this is the final result output
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
-
-    protected boolean getCurrentOutput (ResultTuples resultTuples, boolean partial) {
-
-	// By default does nothing and asks the operator to continue
-	//
-	return true;
+    // BLOCKING OPs should implement this
+    protected void flushCurrentResults(boolean partial) 
+	throws ShutdownException, InterruptedException {
+	throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
     }
-
-
-    /**
-     * This function clears the current output of the operator. This
-     * function is invoked only when the operator is transitioning
-     * from blocking to non-blocking.
-     *
-     * @return True if the operator is to continue and false otherwise
-     */
-
-    protected boolean clearCurrentOutput () {
-
-	// By default does nothing and asks the operator to continue
-	//
-	return true;
-    }
-
 
     /**
      * This function removes the effects of the partial results in a given
@@ -1849,127 +837,33 @@ public abstract class PhysicalOperator {
      *
      * @param streamId The id of the source streams the partial result of
      *                 which are to be removed.
-     *
-     * @return True if the operator is to proceed and false otherwise.
      */
-
-    protected boolean removeEffectsOfPartialResult (int streamId) {
-
-	// Currently, no effects removed and the operator continues ...
-	//
-	return true;
+    // all operators that keep state should implement this function
+    protected void removeEffectsOfPartialResult (int streamId) {
+	if(isStateful()) {
+	    throw new PEException("KT should not get here - this function shouldn't have been called or subclass should have overwritten it");
+	} else {
+	    return; // nothing to be done...
+	}
     }
-
 
     /**
      * This function cleans up after the operator.
      */
-
-    protected void cleanUp () {
-	// Currently no clean up
-	//
+    private void cleanUp () {
+	if(isHeadOperator) {
+	    // Remove the query info object from the active query list
+	    // Hack added so client server queries are not removed
+	    // from their respective connections activeQuery list
+	    if(queryInfo.removeFromActiveQueries())
+		queryInfo.removeFromActiveQueryList();
+	}   
     }
 
-
-    ///////////////////////////////////////////////////////////////////////
-    // These functions can also be over-riden by the derived classes in  //
-    // case a different propagation mechanism for control messages is    //
-    // is required.                                                      //
-    //                                                                   //
-    // NOTE: In the realm of control message propagation, it is the      //
-    // responsibility of this function to send shut down messages if any //
-    // necessary to shut down other operators. Merely returning false to //
-    // function will not sent shut down messages to other operators.     //
-    ///////////////////////////////////////////////////////////////////////
-
-    /**
-     * This function propagates Shut Down control messages received from
-     * a source stream.
-     *
-     * @param controlElement The shut down control element to be propagated
-     * @param streamId The id of the source stream from which the control
-     *                 element was read.
-     *
-     * @return True if the operator is to continue and false otherwise.
-     *
-     * @exception java.lang.InterruptedException If the thread is interrupted
-     *            during execution
-     * @exception NullElementException If controlElement is null
-     * @exception StreamPreviouslyClosedException Attempt to propagate
-     *            a control element to a previously closed stream
-     */
-
-    protected boolean propagateSourceShutDownElement (
-					StreamControlElement controlElement,
-					int streamId) 
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	// Propagate the control element to all unclosed source streams but the
-	// source stream from which it was read
-	//
-	int numSourceStreams = getNumSourceStreams();
-
-	for (int src = 0; src < numSourceStreams; ++src) {
-
-	    if (src != streamId &&
-		getSourceStreamStatus(src) != SourceStreamStatus.Closed) {
-
-		boolean proceed = putControlElementToSourceStream(controlElement,
-								  src);
-	    }
-	}
-
-	// Propagate the control element to all unclosed destination streams
-	//
-	boolean proceed = priorityPutControlElementToDestinationStreams(
-							      controlElement);
-
-	// Currently, always quit the operator
-	//
-	return false;
+    public void setAsHead(QueryInfo queryInfo) {
+	this.queryInfo = queryInfo;
+	isHeadOperator = true;
     }
-
-
-    /**
-     * This function propagates a GetPartialResult control element from a
-     * destination stream
-     *
-     * @param controlElement The control element to be propagated
-     * @param streamId The destination stream from which the control element
-     *                 was read
-     *
-     * @return True if the operator is to proceed and false otherwise
-     *
-     * @exception java.lang.InterruptedException If the thread is interrupted
-     *            during execution
-     * @exception NullElementException If controlElement is null
-     * @exception StreamPreviouslyClosedException If an attempt is made to
-     *            put a control element into a previously closed stream
-     */
-
-    protected boolean propagateDestinationGetPartialResultElement(
-					  StreamControlElement controlElement,
-					  int streamId)
-	throws java.lang.InterruptedException,
-	       NullElementException,
-	       StreamPreviouslyClosedException {
-
-	// Send the control element to all the open source streams
-	//
-	boolean proceed = putControlElementToSourceStreams(controlElement);
-
-	// Return whether operator can continue or not
-	//
-	return proceed;
-    }
-
-    /*this function sets the data manager--Trigger*/
-    public static void setDataManager(DataManager dm) {
-	DM=dm;
-    }
-
 
     /**
      * <code>setResultDocument</code> provides an
@@ -1979,7 +873,18 @@ public abstract class PhysicalOperator {
      * @param doc a <code>Document</code> 
      */
     public void setResultDocument(Document doc) {
+	return; // do nothing by default
+	// KT FIX - code should be once ExecutionScheduler is fixed
         // The default physical operator does not create new XML nodes
+	//throw new PEException("KT shouldn't get here");
+    }
+
+    protected void shutdownTrigOp() {
+	return;
+    }
+
+    public static void setDataManager(DataManager d) {
+	DM = d;
     }
 
     /**
@@ -1995,4 +900,52 @@ public abstract class PhysicalOperator {
 	System.out.print(msg);
 	System.out.println();
     }
-}    
+
+    class StreamIdList {
+	int streamIds[];
+	int allocSize;
+	int currSize;
+
+	public StreamIdList(int maxSize) {
+	    allocSize = maxSize;
+	    streamIds = new int[allocSize];
+	    currSize = 0;
+	}
+	
+	public void add(int val) {
+	    streamIds[currSize] = val;
+	    currSize++;
+	}
+
+	public int size() {
+	    return currSize;
+	}
+
+	public int get(int idx) {
+	    if(idx >= currSize)
+		throw new PEException("KT in ReadSourceStreams bad get");
+	    return streamIds[idx];
+	}
+
+	public void remove(int streamId) {
+	    // find the index of thi stream, the remove the stream
+	    // from the list
+	    int idx = indexOf(streamId);
+	    for(int i = idx; i<currSize-1; i++)
+		streamIds[i] = streamIds[i+1];
+	    currSize--;
+	}
+
+	private int indexOf(int streamId) {
+	    for(int i = 0; i<currSize; i++) {
+		if(streamIds[i] == streamId)
+		    return i;
+	    }
+	    return -1;
+	}
+
+	public boolean isEmpty() {
+	    return currSize == 0;
+	}
+    } 
+}

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSplitOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalSplitOperator.java,v 1.3 2002/04/29 19:51:24 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,9 +55,9 @@ public class PhysicalSplitOperator extends PhysicalOperator {
     //
     private static final boolean[] blockingSourceStreams = { false };
 
-    // The number of destination streams for the operator
+    // The number of sink streams for the operator
     //
-    int numDestinationStreams;
+    int numSinkStreams;
 
     // The vector to store all the output tuples which will be 
     //write out when the operator is shutdown.
@@ -73,32 +73,32 @@ public class PhysicalSplitOperator extends PhysicalOperator {
     /**
      * This is the constructor for the PhysicalSplitOperator class that
      * initializes it with the appropriate logical operator, source streams,
-     * destination streams, and the responsiveness to control information.
+     * sink streams, and the responsiveness to control information.
      *
      * @param logicalOperator The logical operator that this operator implements
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
      */
      
     public PhysicalSplitOperator (op logicalOperator,
-				   Stream[] sourceStreams,
-				   Stream[] destinationStreams,
-				   Integer responsiveness) {
+				  SourceTupleStream[] sourceStreams,
+				  SinkTupleStream[] sinkStreams,
+				  Integer responsiveness) {
 
 	// Call the constructor of the super class
 	//
 	super(sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      blockingSourceStreams,
 	      responsiveness);
 
         outputTupleV = new Vector();
-	// Get the number of destination streams
+	// Get the number of sink streams
 	//
-	this.numDestinationStreams = Array.getLength(destinationStreams);
+	this.numSinkStreams = Array.getLength(sinkStreams);
 
 	destFileName = ((splitOp)logicalOperator).getDestFileName();
     }
@@ -119,66 +119,23 @@ public class PhysicalSplitOperator extends PhysicalOperator {
      *
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
-     * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected boolean nonblockingProcessSourceTupleElement (
-						 StreamTupleElement tupleElement,
-						 int streamId,
-						 ResultTuples result) {
-	
+    protected void nonblockingProcessSourceTupleElement (
+				     StreamTupleElement tupleElement,
+				     int streamId)
+	throws ShutdownException {
 	outputTupleV.addElement(tupleElement);
+    }
 
-	//the following code to exetract the destFileName is moved to 
-	//data manager.
-
-	/*
-	// Copy the input tuple to corresponding destination streams
-	//
-        // First get the node of destFileName
-        //
-        // System.err.println("Split Now In EXECUTION " + tupleElement.size());
-        Node node = (Element)tupleElement.getAttribute(tupleElement.size()-1);
-
-        // Now get its first child
-        //
-        //for(int i=0; i<tupleElement.size(); i++) {
-        // System.err.println("TupleElement At " + i + " " + 
-        //        ((Node)tupleElement.getAttribute(i)).getNodeName());
-        //}
-        //System.err.println("Split debug print finished");
-        Node firstChild = node.getFirstChild();
-
-        // If such a child exists, then add its value to the result
-        //
-	String destFileName;
-	Vector outputTuples = new Vector();
-	
-        if (firstChild != null) {
-	    destFileName=firstChild.getNodeValue();
-		
-	    // need to modify the joined tuple to the original left input tuple
-	    // element, since we don't want the hacked join and split affects the
-	    // original logical plan
-	    tupleElement.removeLastNAttributes(3);
-            
-	    DM.write(tupleElement,destFileName);
-	    //result.add(tupleElement, dest);
-	    // System.err.println("Happy!!!! Split got result!!" + 
-            //        " put into destination " + dest);
-	    // No problem - continue execution
-	    //
-	    return true;
-	}
-	else {
-	    System.err.println("wrong constant table");
-	    return false;
-	}
-	*/
-	return true;
+    public boolean isStateful() {
+	return false;
     }
 }
+
+
+
+
 

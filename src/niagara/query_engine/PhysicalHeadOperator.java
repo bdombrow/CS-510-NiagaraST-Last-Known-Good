@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalHeadOperator.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: PhysicalHeadOperator.java,v 1.2 2002/04/29 19:51:23 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,25 +63,25 @@ public class PhysicalHeadOperator extends PhysicalOperator {
     /**
      * This is the constructor for the PhysicalSelectOperator class that
      * initializes it with the appropriate query info, source streams,
-     * destination streams, and the responsiveness to control information.
+     * sink streams, and the responsiveness to control information.
      *
      * @param queryInfo The information about the query
      * @param sourceStreams The Source Streams associated with the operator
-     * @param destinationStreams The Destination Streams associated with the
+     * @param sinkStreams The Sink Streams associated with the
      *                           operator
      * @param responsiveness The responsiveness to control messages, in milli
      *                       seconds
      */
      
     public PhysicalHeadOperator (QueryInfo queryInfo,
-				 Stream[] sourceStreams,
-				 Stream[] destinationStreams,
+				 SourceTupleStream[] sourceStreams,
+				 SinkTupleStream[] sinkStreams,
 				 Integer responsiveness) {
 
 	// Call the constructor of the super class
 	//
 	super(sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      blockingSourceStreams,
 	      responsiveness);
 
@@ -98,15 +98,10 @@ public class PhysicalHeadOperator extends PhysicalOperator {
      * @return True if the operator is to continue and false otherwise
      */
 
-    protected boolean initialize () {
-
+    protected void opInitialize () {
 	// Set this thread in the query info object
-	//
 	queryInfo.setHeadOperatorThread(Thread.currentThread());
 
-	// Operator can continue
-	//
-	return true;
     }
 
 
@@ -117,24 +112,16 @@ public class PhysicalHeadOperator extends PhysicalOperator {
      *
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
-     * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected boolean nonblockingProcessSourceTupleElement (
-						 StreamTupleElement tupleElement,
-						 int streamId,
-						 ResultTuples result) {
-
+    protected void nonblockingProcessSourceTupleElement (
+			     		 StreamTupleElement tupleElement,
+					 int streamId) 
+	throws ShutdownException, InterruptedException {
 	// Just put the input to the output
-	//
-	result.add(tupleElement, 0);
-
-	// No problem - continue execution
-	//
-	return true;
+	putTuple(tupleElement, 0);
     }
 
 
@@ -146,12 +133,13 @@ public class PhysicalHeadOperator extends PhysicalOperator {
     protected void cleanUp () {
 
 	// Remove the query info object from the active query list
-	//
-	
 	// Hack added so client server queries are not removed
 	// from their respective connections activeQuery list
-	//
 	if(queryInfo.removeFromActiveQueries())
 	    queryInfo.removeFromActiveQueryList();
+    }
+
+    public boolean isStateful() {
+	return false;
     }
 }

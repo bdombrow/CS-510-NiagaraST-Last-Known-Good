@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalSendOperator.java,v 1.1 2001/07/17 07:03:47 vpapad Exp $
+ * $Id: PhysicalSendOperator.java,v 1.2 2002/04/29 19:51:24 tufte Exp $
  *
  */
 
@@ -61,15 +61,14 @@ public class PhysicalSendOperator extends PhysicalOperator {
      */
 
     public PhysicalSendOperator(op logicalOperator,
-				     Stream[] sourceStreams,
-				     Stream[] destinationStreams,
-				     Integer responsiveness) {
-
+				SourceTupleStream[] sourceStreams,
+				SinkTupleStream[] sinkStreams,
+				Integer responsiveness) {
+	
 
 	// Call the constructor of the super class
-	//
 	super(sourceStreams,
-	      destinationStreams,
+	      sinkStreams,
 	      blockingSourceStreams,
 	      responsiveness);
         
@@ -93,29 +92,20 @@ public class PhysicalSendOperator extends PhysicalOperator {
      *
      * @param tupleElement The tuple element read from a source stream
      * @param streamId The source stream from which the tuple was read
-     * @param result The result is to be filled with tuples to be sent
-     *               to destination streams
      *
-     * @return True if the operator is to continue and false otherwise
+     * @exception ShutdownException query shutdown by user or execution error
      */
-
-
     int counter; // XXX
-    protected boolean nonblockingProcessSourceTupleElement (
-						 StreamTupleElement tupleElement,
-						 int streamId,
-						 ResultTuples result) {
+    protected void nonblockingProcessSourceTupleElement (
+				 StreamTupleElement tupleElement,
+				 int streamId)
+	throws ShutdownException, InterruptedException{
         counter++;
 
         // block until connection is established
         while (pw == null) {
             System.err.println("XXX waiting for connection...");
-            try {
-                Thread.sleep(200);
-            }
-            catch (InterruptedException ie) {
-                ;
-            }
+	    Thread.sleep(200);
         }
 
         boolean useStreamMaterializer = true;
@@ -149,9 +139,6 @@ public class PhysicalSendOperator extends PhysicalOperator {
         // Signal end of tuple
         pw.println("\0");
         pw.flush();
-	// The operator can now continue
-	//
-	return true;
     }
 
     protected void serialize(Object o, StringBuffer sb) {
@@ -193,6 +180,10 @@ public class PhysicalSendOperator extends PhysicalOperator {
     public void setOutputStream(OutputStream outputStream) {
         this.outputStream = outputStream;
         pw = new PrintWriter(outputStream);
+    }
+
+    public boolean isStateful() {
+	return false;
     }
 }
 
