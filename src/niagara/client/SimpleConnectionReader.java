@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.13 2003/01/13 05:04:56 tufte Exp $
+  $Id: SimpleConnectionReader.java,v 1.14 2003/01/25 20:54:55 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,8 +76,7 @@ class SimpleConnectionReader extends AbstractConnectionReader
 	    boolean registered = false;
 	    line = br.readLine();
 	    while (line != null) {
-		if (line.indexOf("<response") == 0  || 
-		    line.indexOf("</response") == 0) {
+		if (line.indexOf("<response") == 0) {
 		    if (!registered && line.indexOf("\"server_query_id\"") != -1) {
 			REMatch m = re.getMatch(line);
 			local_id = Integer.parseInt(m.substituteInto("$1"));
@@ -96,12 +95,15 @@ class SimpleConnectionReader extends AbstractConnectionReader
                         ui.notifyNew(local_id);
 			ui.notifyFinalResult(local_id);
                     }
+		} else if (line.indexOf("</response") == 0) {
+		    // ignore line
 		} else if (line.indexOf("ServerError") != -1) {
 		    //  handle the non-padded stuff
 			REMatch m = reLidNoPad.getMatch(line);
 		    local_id = Integer.parseInt(m.substituteInto("$1"));
 		    ui.errorMessage(local_id, line + "\n");
 		} else {
+		    // KT - HERE IS WHERE CLIENT RESULTS ARE PRODUCED
 		    addResult(line);
                     if (line.indexOf("<?xml") != -1)
                         addResult("\n<niagara:results>\n");
