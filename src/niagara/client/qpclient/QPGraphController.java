@@ -1,5 +1,5 @@
 /*
- * $Id: QPGraphController.java,v 1.2 2000/10/07 01:08:07 vpapad Exp $
+ * $Id: QPGraphController.java,v 1.3 2000/11/01 00:32:04 vpapad Exp $
  *
  * Copyright (c) 1998 The Regents of the University of California.
  * All rights reserved.  See the file COPYRIGHT for details.
@@ -48,7 +48,7 @@ import java.util.HashMap;
  * sets up some simple interaction on its view's pane.
  *
  * @author 	Michael Shilman (michaels@eecs.berkeley.edu)
- * @version	$Revision: 1.2 $
+ * @version	$Revision: 1.3 $
  * @rating      Red
  */
 public class QPGraphController extends AbstractGraphController {
@@ -141,7 +141,7 @@ public class QPGraphController extends AbstractGraphController {
 
 	PropertyEditorInteractor _propertyEditor = 
 	    new PropertyEditorInteractor();
-	_propertyEditor.setMouseFilter(new MouseFilter(2));
+	_propertyEditor.setMouseFilter(new MouseFilter(3));
 	getNodeInteractor().addInteractor(_propertyEditor);
     }
 
