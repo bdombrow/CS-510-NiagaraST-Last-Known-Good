@@ -32,6 +32,8 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
     private XMLFirehoseThread writer;
     private int numGenCalls;
 
+    public boolean LIMIT_ATTRIBUTES = false;
+
     public XMLAuctionStreamGenerator(int numTLElts,
 				     int numGenCalls, boolean streaming,
 				     boolean prettyPrint, BufferedWriter wrtTrace) {
@@ -54,15 +56,23 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
     public void generateStream(XMLFirehoseThread writer) throws IOException {
 	myBuf = new MyBuffer();
 	this.writer = writer;
+
+	if(LIMIT_ATTRIBUTES)
+	    System.out.println("WARNING: LIMITING ATTRIBUTES");
 	
 	// first do startup - generate some people and open auctions that
 	// can be bid on
-	
+
+	//System.out.println("WARNING: USING LIMITED PERSONS");
+	//for(int i = 0;i<5; i++) {
 	for(int i = 0;i<50; i++) {
 	    initMyBuf();
 	    generatePerson(myBuf, 1);
 	    writeMyBuf();
 	}
+
+	//System.out.println("WARNING: USING LIMITED ITEMS");
+	//for(int i = 0; i<5; i++) {
 	for(int i = 0; i<50; i++) {
 	    initMyBuf();
 	    generateOpenAuction(myBuf, 1);
@@ -195,30 +205,31 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 	    myb.append(nl);
 
 	    // no initial - does not fit our scenario
-	    
-	    // reserve 
-	    if(rnd.nextBoolean()) {
-		myb.append(tab2);
-		myb.append("<reserve>");
-		// was generated using an exponential distribution, but I changed
-		// it to uniform KT
-		// HERE - TODO
-		myb.append((int)Math.round((openAuctions.getCurrPrice(auctionId))*(1.2+(rnd.nextDouble()+1))));
-		myb.append("</reserve>");
-		myb.append(nl);
-	    }
-	    
-	    // no bidders
-	    
-	    // no current - do with accumlator
-	    
-	    // privacy 
-	    if(rnd.nextBoolean()) {
-		myb.append(tab2);
-		myb.append("<privacy>");
-		myb.append(yesno[rnd.nextInt(2)]);
-		myb.append("</privacy>");
-		myb.append(nl);
+
+	    if(!LIMIT_ATTRIBUTES) {
+		// reserve 
+		if(rnd.nextBoolean()) {
+		    myb.append(tab2);
+		    myb.append("<reserve>");
+		    // was generated using an exponential distribution, but I changed
+		    // it to uniform KT
+		    // HERE - TODO
+		    myb.append((int)Math.round((openAuctions.getCurrPrice(auctionId))*(1.2+(rnd.nextDouble()+1))));
+		    myb.append("</reserve>");
+		    myb.append(nl);
+		}
+		// no bidders
+		
+		// no current - do with accumlator
+		
+		// privacy 
+		if(rnd.nextBoolean()) {
+		    myb.append(tab2);
+		    myb.append("<privacy>");
+		    myb.append(yesno[rnd.nextInt(2)]);
+		    myb.append("</privacy>");
+		    myb.append(nl);
+		}
 	    }
 	    
 	    // itemref
@@ -247,35 +258,36 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 	    myb.append("</category>");
 	    myb.append(nl);
 
-	    // quantity
-	    myb.append(tab2);
-	    myb.append("<quantity>");
-	    int quantity = 1+rnd.nextInt(10);
-	    myb.append(quantity);
-	    myb.append("</quantity>");
-	    myb.append(nl);
-	    
-	    // type
-	    myb.append(tab2);
-	    myb.append("<type>");
-	    myb.append(auction_type[rnd.nextInt(2)]);
-	    if(quantity>1 && rnd.nextBoolean())
-		myb.append(", Dutch"); // 
-	    myb.append("</type>");
-	    myb.append(nl);
-	    
-	    // interval
-	    myb.append(tab2);
-	    myb.append("<interval>");
-	    myb.append("<start>");
-	    myb.append(cal.getTimeInSecs());
-	    myb.append("</start>");
-	    myb.append("<end>");
-	    myb.append(openAuctions.getEndTime(auctionId));
-	    myb.append("</end>");
-	    myb.append("</interval>");
-	    myb.append(nl);
-	
+	    if(!LIMIT_ATTRIBUTES) {
+		// quantity
+		myb.append(tab2);
+		myb.append("<quantity>");
+		int quantity = 1+rnd.nextInt(10);
+		myb.append(quantity);
+		myb.append("</quantity>");
+		myb.append(nl);
+		
+		// type
+		myb.append(tab2);
+		myb.append("<type>");
+		myb.append(auction_type[rnd.nextInt(2)]);
+		if(quantity>1 && rnd.nextBoolean())
+		    myb.append(", Dutch"); // 
+		myb.append("</type>");
+		myb.append(nl);
+		
+		// interval
+		myb.append(tab2);
+		myb.append("<interval>");
+		myb.append("<start>");
+		myb.append(cal.getTimeInSecs());
+		myb.append("</start>");
+		myb.append("<end>");
+		myb.append(openAuctions.getEndTime(auctionId));
+		myb.append("</end>");
+		myb.append("</interval>");
+		myb.append(nl);
+	    }
 	    myb.append(tab);
 	    myb.append("</open_auction>");
 	    myb.append(nl);
@@ -322,127 +334,129 @@ class XMLAuctionStreamGenerator extends XMLFirehoseGen {
 	    myb.append("</emailaddress>");
 	    myb.append(nl);
 
-	    if (p.has_phone) {
-		myb.append(tab2);
-		myb.append("<phone>");
-		myb.append(p.m_stPhone);
-		myb.append("</phone>");
-		myb.append(nl);
-	    }
-	    if (p.has_address) {
-		myb.append(tab2);
-		myb.append("<address>");
-		myb.append(nl);
-		
-		myb.append(tab3);
-		myb.append("<street>");
-		myb.append(p.m_address.m_stStreet);
-		myb.append("</street>");
-		myb.append(nl);
-		
-		myb.append(tab3);
-		myb.append("<city>");
-		myb.append(p.m_address.m_stCity);
-		myb.append("</city>");
-		myb.append(nl);
-		
-		myb.append(tab3);
-		myb.append("<country>");
-		myb.append(p.m_address.m_stCountry);
-		myb.append("</country>");
-		myb.append(nl);
-		
-		myb.append(tab3);
-		myb.append("<province>");
-		myb.append(p.m_address.m_stProvince);
-		myb.append("</province>");
-		myb.append(nl);
-		
-		myb.append(tab3);
-		myb.append("<zipcode>");
-		myb.append(p.m_address.m_stZipcode);
-		myb.append("</zipcode>");
-		myb.append(nl);
-		
-		myb.append(tab2);
-		myb.append("</address>");
-		myb.append(nl);
-	    }
-	    if (p.has_homepage) {
-		myb.append(tab2);
-		myb.append("<homepage>");
-		myb.append(p.m_stHomepage);
-		myb.append("</homepage>");
-		myb.append(nl);
-	    }
-	    if (p.has_creditcard) {
-		myb.append(tab2);
-		myb.append("<creditcard>");
-		myb.append(p.m_stCreditcard);
-		myb.append("</creditcard>");
-		myb.append(nl);
-	    }
-	    
-	    if (p.has_profile) {
-		myb.append(tab2);
-		myb.append("<profile income=\"");
-		myb.append(p.m_profile.m_stIncome);
-		myb.append("\">");
-		myb.append(nl);
-
-		for (int j=0; j < p.m_profile.m_vctInterest.size(); j++) {
-		    myb.append(tab3);
-		    myb.append("<interest category=\"");
-		    myb.append((String)p.m_profile.m_vctInterest.get(j));
-		    myb.append("\"/>");
+	    if(!LIMIT_ATTRIBUTES) {
+		if (p.has_phone) {
+		    myb.append(tab2);
+		    myb.append("<phone>");
+		    myb.append(p.m_stPhone);
+		    myb.append("</phone>");
 		    myb.append(nl);
 		}
-		if (p.m_profile.has_education) {
+		if (p.has_address) {
+		    myb.append(tab2);
+		    myb.append("<address>");
+		    myb.append(nl);
+		    
 		    myb.append(tab3);
-		    myb.append("<education>");
-		    myb.append(p.m_profile.m_stEducation);
-		    myb.append("</education>");
+		    myb.append("<street>");
+		    myb.append(p.m_address.m_stStreet);
+		    myb.append("</street>");
+		    myb.append(nl);
+		    
+		    myb.append(tab3);
+		    myb.append("<city>");
+		    myb.append(p.m_address.m_stCity);
+		    myb.append("</city>");
+		    myb.append(nl);
+		    
+		    myb.append(tab3);
+		    myb.append("<country>");
+		    myb.append(p.m_address.m_stCountry);
+		    myb.append("</country>");
+		    myb.append(nl);
+		    
+		    myb.append(tab3);
+		    myb.append("<province>");
+		    myb.append(p.m_address.m_stProvince);
+		    myb.append("</province>");
+		    myb.append(nl);
+		    
+		    myb.append(tab3);
+		    myb.append("<zipcode>");
+		    myb.append(p.m_address.m_stZipcode);
+		    myb.append("</zipcode>");
+		    myb.append(nl);
+		    
+		    myb.append(tab2);
+		    myb.append("</address>");
 		    myb.append(nl);
 		}
-		if (p.m_profile.has_gender) {
-		    myb.append(tab3);
-		    myb.append("<gender>");
-		    myb.append(p.m_profile.m_stGender);
-		    myb.append("</gender>");
+		if (p.has_homepage) {
+		    myb.append(tab2);
+		    myb.append("<homepage>");
+		    myb.append(p.m_stHomepage);
+		    myb.append("</homepage>");
+		    myb.append(nl);
+		}
+		if (p.has_creditcard) {
+		    myb.append(tab2);
+		    myb.append("<creditcard>");
+		    myb.append(p.m_stCreditcard);
+		    myb.append("</creditcard>");
 		    myb.append(nl);
 		}
 		
-		myb.append(tab3);
-		myb.append("<business>");
-		myb.append(p.m_profile.m_stBusiness);
-		myb.append("</business>");
-		myb.append(nl);
-		
-		if (p.m_profile.has_age) {
+		if (p.has_profile) {
+		    myb.append(tab2);
+		    myb.append("<profile income=\"");
+		    myb.append(p.m_profile.m_stIncome);
+		    myb.append("\">");
+		    myb.append(nl);
+		    
+		    for (int j=0; j < p.m_profile.m_vctInterest.size(); j++) {
+			myb.append(tab3);
+			myb.append("<interest category=\"");
+			myb.append((String)p.m_profile.m_vctInterest.get(j));
+			myb.append("\"/>");
+			myb.append(nl);
+		    }
+		    if (p.m_profile.has_education) {
+			myb.append(tab3);
+			myb.append("<education>");
+			myb.append(p.m_profile.m_stEducation);
+			myb.append("</education>");
+			myb.append(nl);
+		    }
+		    if (p.m_profile.has_gender) {
+			myb.append(tab3);
+			myb.append("<gender>");
+			myb.append(p.m_profile.m_stGender);
+			myb.append("</gender>");
+			myb.append(nl);
+		    }
+		    
 		    myb.append(tab3);
-		    myb.append("<age>");
-		    myb.append(p.m_profile.m_stAge);
-		    myb.append("</age>");
+		    myb.append("<business>");
+		    myb.append(p.m_profile.m_stBusiness);
+		    myb.append("</business>");
+		    myb.append(nl);
+		    
+		    if (p.m_profile.has_age) {
+			myb.append(tab3);
+			myb.append("<age>");
+			myb.append(p.m_profile.m_stAge);
+			myb.append("</age>");
+			myb.append(nl);
+		    }
+		    myb.append(tab2);
+		    myb.append("</profile>");
 		    myb.append(nl);
 		}
-		myb.append(tab2);
-		myb.append("</profile>");
-		myb.append(nl);
-	    }
-	    if (p.has_watches) {
-		myb.append(tab2);
-		myb.append("<watches>");
-		myb.append(nl);
-		for (int j=0; j<p.m_vctWatches.size(); j++) {
-		    myb.append(tab3);
-		    myb.append("<watch>");
-		    myb.append((String)p.m_vctWatches.get(j));
-		    myb.append("</watch>");
+		if (p.has_watches) {
+		    myb.append(tab2);
+		    myb.append("<watches>");
+		    myb.append(nl);
+		    for (int j=0; j<p.m_vctWatches.size(); j++) {
+			myb.append(tab3);
+			myb.append("<watch>");
+			myb.append((String)p.m_vctWatches.get(j));
+			myb.append("</watch>");
+			myb.append(nl);
+		    }
+		    myb.append(tab2);
+		    myb.append("</watches>");
 		    myb.append(nl);
 		}
-		myb.append(tab2);
-		myb.append("</watches>");
-		myb.append(nl);
 	    }
 	    
 	    myb.append(tab);

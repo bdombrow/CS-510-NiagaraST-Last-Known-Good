@@ -37,7 +37,7 @@ class Persons {
 	int id = rnd.nextInt(PERSON_DISTR_SIZE);
 	//id = scrambler[id];
 	id += getRandomChunkOffset();
-	return id;
+	return id%currId;
     }
 
     private void initializeScrambler() {
