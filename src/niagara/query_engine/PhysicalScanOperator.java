@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.13 2002/09/24 23:18:46 ptucker Exp $
+  $Id: PhysicalScanOperator.java,v 1.14 2002/10/24 02:53:06 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,7 +42,7 @@ import niagara.xmlql_parser.syntax_tree.*;
  * @version 1.0
  */
 
-public class PhysicalScanOperator extends PhysicalOperator {
+public class PhysicalScanOperator extends UnoptimizablePhysicalOperator {
 
     //////////////////////////////////////////////////////////////////////////
     // These are the private data members of the PhysicalScanOperator class //
