@@ -1,5 +1,5 @@
 /**
- * $Id: TimerThread.java,v 1.2 2003/02/26 06:34:51 tufte Exp $
+ * $Id: TimerThread.java,v 1.3 2003/02/26 23:21:57 vpapad Exp $
  *
  */
 
@@ -16,14 +16,17 @@ import niagara.query_engine.*;
 import niagara.utils.*;
 import niagara.logical.Variable;
 import niagara.logical.Timer;
+
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Locale;
 import java.util.TimerTask;
+
 import niagara.optimizer.colombia.*;
 
 public class TimerThread extends SourceThread {
-    /** In relative reporting, we start reporting time from 0, 
-     * otherwise we report time as milliseconds after midnight,
-     * January 1, 1970. */
-    protected boolean relative;
+    protected String relative;
 
     /** Approximate time between clock ticks, in milliseconds */
     protected int period;
@@ -52,7 +55,7 @@ public class TimerThread extends SourceThread {
     }
 
     public TimerThread(
-        boolean relative,
+        String relative,
         int period,
         int slack,
         int granularity,
@@ -70,7 +73,7 @@ public class TimerThread extends SourceThread {
 
     public void plugIn(SinkTupleStream outputStream, DataManager dm) {
         this.outputStream = outputStream;
-	outputStream.setSendImmediate();
+        outputStream.setSendImmediate();
     }
 
     /**
@@ -90,7 +93,7 @@ public class TimerThread extends SourceThread {
      */
     public void initFrom(LogicalOp op) {
         Timer t = (Timer) op;
-        this.relative = t.isRelative();
+        this.relative = t.getRelative();
         this.period = t.getPeriod();
         this.slack = t.getSlack();
         this.granularity = t.getGranularity();
@@ -139,7 +142,7 @@ public class TimerThread extends SourceThread {
             ^ granularity
             ^ delay
             ^ warp
-            ^ (relative ? 0 : 1);
+            ^ relative.hashCode();
     }
 
     /**
@@ -191,8 +194,26 @@ public class TimerThread extends SourceThread {
         public TimerThreadTask(TimerThread tt) {
             this.tt = tt;
             doc = niagara.ndom.DOMFactory.newDocument();
-            if (tt.relative)
+            if (tt.relative.equalsIgnoreCase("now"))
                 offset = System.currentTimeMillis();
+            else if (tt.relative.length() == 0)
+                offset = 0;
+            else {
+                    // Check that the string provided is a valid date string
+                    DateFormat df =
+                        DateFormat.getDateTimeInstance(
+                            DateFormat.MEDIUM,
+                            DateFormat.MEDIUM,
+                            Locale.US);
+                    Date d;                            
+                    try {
+                        d = df.parse(tt.relative);
+                    } catch (ParseException pe) {
+                            throw new PEException("Invalid date string passed to TimerThread!");
+                            
+                    }
+                    offset = d.getTime();                    
+            }
         }
         public void run() {
             // XXX vpapad TODO: we should handle
@@ -204,21 +225,21 @@ public class TimerThread extends SourceThread {
             // to create text nodes here, we really need a LongDomain
             long currentTime =
                 (System.currentTimeMillis() - offset) * tt.warp - tt.slack;
-            currentTime = currentTime - (currentTime % granularity); 
+            currentTime = currentTime - (currentTime % granularity);
             System.err.println("XXX vpapad: producing value");
             Node node = doc.createTextNode(String.valueOf(currentTime));
             do {
                 try {
                     tt.outputStream.put(node);
-		    cnt++;
+                    cnt++;
                     System.err.println("XXX vpapad: timer tuple sent " + cnt);
                     return;
                 } catch (InterruptedException ie) {
                     // Do nothing
                 } catch (ShutdownException se) {
-                        System.err.println("XXX vpapad: cancelling");
-                        cancel();
-                        return;
+                    System.err.println("XXX vpapad: cancelling");
+                    cancel();
+                    return;
                 }
             } while (true);
         }

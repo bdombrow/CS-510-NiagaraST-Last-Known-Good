@@ -4,7 +4,7 @@
 <!-- This query tests the timer -->
 <plan top="cons">
 <timer id="timer" period="1 minute" warp="60" delay="5 minutes" 
-		slack="5 seconds" granularity="5 seconds" relative="yes"/>
+		slack="5 seconds" granularity="5 seconds" relative="October 27, 1973 11:00:00 PM EET"/>
 
 <prefix id="prefix" length="50" input="timer"/>
 <construct id="cons" input="prefix">

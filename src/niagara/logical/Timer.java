@@ -1,8 +1,12 @@
-/* $Id: Timer.java,v 1.1 2003/02/25 06:13:16 vpapad Exp $ */
+/* $Id: Timer.java,v 1.2 2003/02/26 23:22:00 vpapad Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
+
+import java.util.Locale;
 import java.util.StringTokenizer;
+import java.text.DateFormat;
+import java.text.ParseException;
 
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.Attrs;
@@ -12,10 +16,12 @@ import niagara.optimizer.colombia.Op;
 
 /** A <code>Timer</code> produces a stream of tuples with the current time */
 public class Timer extends NullaryOp {
-    /** In relative reporting, we start counting from 0, 
-     * otherwise we report time as milliseconds after midnight,
-     * January 1, 1970. */
-    private boolean relative;
+    /** The epoch we're using to report time. Empty string means
+     * use the default Java timestamp (milliseconds after midnight,
+     * January 1, 1970), "now" means start from when the query plan
+     * started executing, anything else is a String representation
+     * of a date and time. */
+    private String relative;
 
     /** Clock starts ticking after <code>delay</code> */
     private int delay;
@@ -49,10 +55,29 @@ public class Timer extends NullaryOp {
     public void loadFromXML(Element e, LogicalProperty inputs[])
         throws InvalidPlanException {
         name = e.getAttribute("id");
-        // Default is relative
-        relative = e.getAttribute("relative").equalsIgnoreCase("yes");
-        String attrStr = "";
 
+        String attrStr = e.getAttribute("relative");
+
+        if (attrStr.length() == 0 || attrStr.equalsIgnoreCase("now"))
+            relative = attrStr;
+        else {
+            // Check that the string provided is a valid date string
+            DateFormat df =
+                DateFormat.getDateTimeInstance(
+                    DateFormat.MEDIUM,
+                    DateFormat.MEDIUM,
+                    Locale.US);
+            try {
+                df.parse(attrStr);
+            } catch (ParseException pe) {
+                throw new InvalidPlanException(
+                    "Could not parse '"
+                        + attrStr
+                        + "' as a valid date description");
+
+            }
+            relative = attrStr;
+        }
         attrStr = e.getAttribute("period");
         if (attrStr.length() == 0)
             throw new InvalidPlanException("Period is a required attribute for timer");
@@ -95,11 +120,10 @@ public class Timer extends NullaryOp {
     }
 
     public void dumpAttributesInXML(StringBuffer sb) {
-        sb.append("relative='");
-        sb.append(relative ? "yes' " : "no' ");
-        sb.append("period='");
+        sb.append(" relative='").append(relative);
+        sb.append("' period='");
         formatTimeInterval(period, sb);
-        sb.append("delay='");
+        sb.append("' delay='");
         formatTimeInterval(delay, sb);
         sb.append("' slack='");
         formatTimeInterval(slack, sb);
@@ -235,13 +259,13 @@ public class Timer extends NullaryOp {
             ^ granularity
             ^ warp
             ^ delay
-            ^ (relative ? 0 : 1);
+            ^ relative.hashCode();
     }
 
     public int getDelay() {
-            return delay;
+        return delay;
     }
-    
+
     public int getGranularity() {
         return granularity;
     }
@@ -250,7 +274,7 @@ public class Timer extends NullaryOp {
         return period;
     }
 
-    public boolean isRelative() {
+    public String getRelative() {
         return relative;
     }
 

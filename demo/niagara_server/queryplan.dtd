@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.25 2003/02/23 04:59:31 tufte Exp $
+<!-- $Id: queryplan.dtd,v 1.26 2003/02/26 23:22:01 vpapad Exp $
      DTD for query plans -->
 
 <!-- 
@@ -192,6 +192,37 @@
           id       ID           #REQUIRED
 	  %PositionAttributes;>
 
+<!-- Timer produces a stream of timestamp tuples. The syntax for
+     time intervals (period, slack, and granularity) is
+     one or more (<number>, <time term>) pairs, for example:
+     "3 hours" and "1 hour 10 minutes" are valid time intervals
+     
+	 period:      time between clock ticks
+	 relative:    the date we measure time relative to
+	              empty string  ->  regular Java/POSIX epoch
+	              "now"         ->  time the query plan starts executing
+	              anything else ->  a date string
+	 slack:       time to wait before reporting a clock tick
+	 warp:        simulated time runs "warp" times faster than normal
+	 granularity: reported time is rounded down to a multiple of "granularity"
+-->
+<!ELEMENT timer EMPTY>
+<!ATTLIST timer 
+          id       ID           #REQUIRED
+          period   CDATA		#REQUIRED
+          relative CDATA		"now"
+          slack	   CDATA	    ""  
+          delay    CDATA		""
+          warp     CDATA		"1" 
+          granularity CDATA     "1 second"
+	  %PositionAttributes;>
+
+<!-- Timer passes through up to "length" tuples from its input stream -->
+<!ELEMENT prefix EMPTY>
+<!ATTLIST prefix
+          id       ID           #REQUIRED
+          length   CDATA		#REQUIRED
+	  %PositionAttributes;>
 
 <!ELEMENT send EMPTY>
 <!ATTLIST send 
