@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: AbstractConnectionReader.java,v 1.1 2000/07/09 05:38:54 vpapad Exp $
+  $Id: AbstractConnectionReader.java,v 1.2 2001/07/10 04:42:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -81,6 +81,10 @@ public abstract class AbstractConnectionReader implements Runnable
 				cReader = new InputStreamReader(socket.getInputStream());
 				cWriter = new OutputStreamWriter(socket.getOutputStream());
 			}
+                        catch (ConnectException ce) {
+                            System.err.println("Could not connect to " + hostname + ":" + port);
+                            System.exit(-1);
+                        }
 			catch(UnknownHostException e){
 				System.err.println("Unknown host");
 			}
