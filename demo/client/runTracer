@@ -1,1 +1,1 @@
-java -classpath `cat ../classpath` niagara.client.TracingClient $*
+java -server -mx128m -classpath `cat ../classpath` niagara.client.TracingClient $*
