@@ -43,9 +43,10 @@ public class XMLPacketGenerator extends XMLFirehoseGen {
 	}
     }
 
-    public byte[] generateXMLBytes() {
-	if (m_stb == null)
+    public String generateXMLString() {
+	if (m_stb == null) {
 	    m_stb = new StringBuffer(1000*numTLElts);
+	}
 
 	m_ph.init(m_stFile, m_stSource);
 	m_stb.append(XMLPacketGenerator.nl);
@@ -67,7 +68,7 @@ public class XMLPacketGenerator extends XMLFirehoseGen {
 
 	String stOut = m_stb.toString();
 	m_stb.setLength(0);
-	return stOut.getBytes();
+	return stOut;
     }
 
     public void getEndPunctuation() {

@@ -1,266 +1,239 @@
 package niagara.firehose;
 
 import java.lang.*;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 
-class ClientMain {
-  class Timer {
-    private long start_tp;
-    private long stop_tp;
-    private boolean running;
-
-    Timer() {running = false; }
-    void start() {
-      running = true;
-      start_tp = System.currentTimeMillis();
-    }
-    void stop() {
-      stop_tp = System.currentTimeMillis();
-      running = false;
-    }
-    void print() {
-      if (running == true) {
-        System.err.println("Must stop timer before printing");
-        return;
-      }
-
-      long total = stop_tp - start_tp;
-      StringBuffer stTime = new StringBuffer("Seconds: ");
-      stTime.append(String.valueOf(total / 1000));
-      stTime.append(".");
-      long msTotal = total % 1000;
-      if (msTotal < 10)
-        stTime.append("0");
-      if (msTotal < 100)
-        stTime.append("0");
-      stTime.append(String.valueOf(msTotal));
-      System.out.println(stTime.toString());
-    }
-  }
-    
-    String host_name;
-    int port_num = FirehoseConstants.LISTEN_PORT;
-    int stype = FirehoseConstants.AUCTION;
-    String stream_descriptor = "";
-    String stream_descriptor2 = "bidperson";
-    int client_wait = -1;
-    int numGenCalls = 1;
-    int numTLElts = 1;
-    boolean streaming = true;
-    boolean prettyPrint = false;
-    int rate = 0;
-    String trace = ""; 
-    boolean quiet = false;
-    boolean shutdown = false;
-
-    boolean init(String args[]) {
-	int idx = 0;
-	boolean ok = true;
-	Integer temp;
-	
-	try {
-	    host_name = InetAddress.getLocalHost().getHostName();
-	} catch (UnknownHostException ex) {
-	    host_name = new String("chinook.cse.ogi.edu");
-	}
-	
-	//Iterate through the arguments
-	while (idx < args.length && ok == true) {
-	    ok = false;
-	    
-	    //get port number
-	    if ((idx+1) < args.length && args[idx].compareTo("-p") == 0) {
-		temp = new Integer(args[idx+1]);
-		port_num = temp.intValue();
-		idx += 2;
-		ok = true;
-	    }
-
-	    //get host name
-	    if ((idx+1) < args.length && args[idx].compareTo("-h") == 0) {
-		host_name = args[idx+1];
-		idx += 2;
-		ok = true;
-	    }
-	    
-	    //get type 
-	    if ((idx+1) < args.length && args[idx].compareTo("-s") == 0) {
-		for(int j = 0; j<FirehoseConstants.numDataTypes && !ok; j++) {
-		    if (args[idx+1].compareTo(FirehoseConstants.typeNames[j]) == 0) {
-			stype = j;
-			ok = true;
-			idx += 2;
-		    }
-		} 
-	    }
-	    
-	    //get descriptor
-	    if ((idx+1) < args.length && args[idx].compareTo("-d") == 0) {
-		stream_descriptor = args[idx+1];
-		idx += 2;
-		ok = true;
-		if(stype == FirehoseConstants.XMLB) {
-		    System.err.println("WARNING: stream descriptor ignored for XMLB");
-		}
-	    }
-
-	    //get descriptor2
-	    if ((idx+1) < args.length && args[idx].compareTo("-d2") == 0) {
-		stream_descriptor2 = args[idx+1];
-		idx += 2;
-		ok = true;
-		if(stype == FirehoseConstants.XMLB) {
-		    System.err.println("WARNING: stream descriptor ignored for XMLB");
-		}
-	    }
-
-	    //get numgencalls
-	    if ((idx+1) < args.length && args[idx].compareTo("-ng") == 0) {
-		temp = new Integer(args[idx+1]);
-		numGenCalls = temp.intValue();
-		idx += 2;
-		ok = true;
-	    }
-	    
-	    //get num top level elts
-	    if ((idx+1) < args.length && args[idx].compareTo("-tl") == 0) {
-		if(stype != FirehoseConstants.XMLB && 
-		   stype != FirehoseConstants.AUCTION) {
-		    System.err.println("Warning -tl numTopLevelElts will be ignored");
-		}
-		temp = new Integer(args[idx+1]);
-		numTLElts = temp.intValue();
-		idx += 2;
-		ok = true;
-	    }
-	    
-	    //get client wait
-	    if ((idx+1) < args.length && args[idx].compareTo("-cw") == 0) {
-		temp = new Integer(args[idx+1]);
-		client_wait = temp.intValue();
-		idx += 2;
-		ok = true;
-	    }
-	    
-	    //get quiet mode
-	    if (idx < args.length && args[idx].compareTo("-q") == 0) {
-		quiet = true;
-		idx++;
-		ok = true;
-	    }
-
-	    //get streaming mode
-	    if (idx < args.length && args[idx].compareTo("-ns") == 0) {
-		streaming = false;
-		idx++;
-		ok = true;
-	    }
-	    
-	    // get prettyprint mode
-	    if (idx < args.length && args[idx].compareTo("-pp") == 0) {
-		prettyPrint = true;
-		idx++;
-		ok = true;
-	    }
-    
-            //get rate
-            if ((idx+1) < args.length && args[idx].equals("-r")) {
-                temp = new Integer(args[idx+1]);
-                rate = temp.intValue();
-                idx += 2;
-                ok = true;
-            }
-
-            // get trace
-	    if(idx < args.length && args[idx].compareTo("-tr") == 0) {
-               trace = args[idx+1];
-	       idx += 2;
-	       ok = true;
-	    }
-	    
-	    //get shutdown
-	    if (idx < args.length && args[idx].compareTo("-shutdown") == 0) {
-		shutdown = true;
-		idx++;
-		ok = true;
-	    }
-	}
-
-    if (ok == false) {
-      StringBuffer stUsage = new StringBuffer("Usage: \n\t");
-      stUsage.append("SimpleClient -s type [-d descriptor] [-p port_number]");
-      stUsage.append(" [-h host_name] [-ng numGenCalls]");
-      stUsage.append(" [-tl numTopLevelElts] [-cw client_wait]");
-      stUsage.append(" [-ns ] (no streaming) [-q] (quiet)");
-      stUsage.append(" [-pp ] (prettyprint) [-r rate] [-tr trace_filename] (trace) [-shutdown]");
-      System.out.println(stUsage.toString());
-    }
-
-  return ok;
-  }
-
-  void run() {
-    try {
-      Timer tm = new Timer();
-      FirehoseClient fhclient = new FirehoseClient();
-      if (shutdown == true) {
-        shutdown_server(port_num, host_name);
-        return;
-      }
-
-      tm.start();
-      FirehoseSpec fhSpec = new FirehoseSpec(port_num, host_name,
-					     stype, stream_descriptor,
-					     stream_descriptor2,
-					     numGenCalls, numTLElts,
-					     rate, streaming, prettyPrint,
-					     trace);
-
-      InputStream is = fhclient.open_stream(fhSpec);
-      byte buffer[] = new byte[1024];
-      int numRead = 0;
-      int count = 0;
-
-      // KT - not sure if this is the right way to transfer from
-      // is to output - use char reader?? or buffered reader??
-      numRead = is.read(buffer, 0, 1024);
-      while (numRead >0) {
-	  if(!quiet)
-	      System.out.write(buffer, 0, numRead);
-	  count++;
-          if (count == client_wait && client_wait != -1) {
-	      fhclient.close_stream();
-          } else {
-	      numRead = is.read(buffer, 0, 1024);
-	  }
-      }
-
-      tm.stop();
-      tm.print();
-
-      System.out.println("Received " + count + " messages");
-    } catch (Exception ex) {
-      System.out.print("SimpleClient.run() - Exception caught : '");
-      System.out.print(ex.getMessage());
-      System.out.println("'");
-    }
-  }
-
-  int shutdown_server(int _port_num, String _host_name) {
-    FirehoseClient fhclient = new FirehoseClient();
-    fhclient.shutdown_server();
-    return 0;
-  }
-}
+import niagara.utils.*;
 
 class SimpleClient {
-  public static void main(String args[]) {
-    ClientMain cm = new ClientMain();
+    public static void main(String args[]) {
+	ClientMain cm = new ClientMain();
+	if (cm.init(args))
+	    cm.run();
+    }
+}
 
-    if (cm.init(args) == true)
-      cm.run();
-  }
+// ClientMain is currently not reusable
+class ClientMain {
+    class Timer {
+	private long start_tp;
+	private long stop_tp;
+	private boolean running;
+	
+	Timer() {running = false; }
+	void start() {
+	    running = true;
+	    start_tp = System.currentTimeMillis();
+	}
+	void stop() {
+	    stop_tp = System.currentTimeMillis();
+	    running = false;
+	}
+	void print() {
+	    if (running == true) {
+		System.err.println("Must stop timer before printing");
+		return;
+	    }
+	    
+	    long total = stop_tp - start_tp;
+	    StringBuffer stTime = new StringBuffer("Seconds: ");
+	    stTime.append(String.valueOf(total / 1000));
+	    stTime.append(".");
+	    long msTotal = total % 1000;
+	    if (msTotal < 10)
+		stTime.append("0");
+	    if (msTotal < 100)
+		stTime.append("0");
+	    stTime.append(String.valueOf(msTotal));
+	    System.out.println(stTime.toString());
+	}
+    }
+    
+    // config file uses same attributes as in the queryplan
+    // plus a few additional ones - quiet and client-wait
+    private String host; // default to localhost
+    private int port = FirehoseConstants.LISTEN_PORT;
+    private int rate = 0; // as fast as possible
+    private int datatype = FirehoseConstants.AUCTION_STREAM;
+    private int num_gen_calls = 50;
+    private boolean streaming = true;
+    private String desc = "";
+    private String desc2 = "";
+    private int num_tl_elts = 1;
+    private boolean prettyprint = true;
+    private String trace = "";
+    
+    private boolean quiet = false;
+    private boolean shutdown = false;
+    
+    private String fileString;
+    
+    protected boolean init(String args[]) {
+	try {
+	    // set host name default
+	    host = InetAddress.getLocalHost().getHostName();
+
+	    if(args.length != 1) 
+		throw new InvalidUsageException("Usage: SimpleClient initfile|shutdown");
+
+	    if(args[0].equalsIgnoreCase("shutdown")) {
+		shutdown = true;
+	    } else {
+		// read the configuration file
+		readFile(args[0]);
+		StringTokenizer tokenizer = new StringTokenizer(fileString, "\r\n\t:");
+		while(tokenizer.hasMoreTokens()) {
+		    String attribute = tokenizer.nextToken();
+		    String value = tokenizer.nextToken();
+		    
+		    if(attribute.equalsIgnoreCase("host")) {
+			host = value;
+		    } else if(attribute.equalsIgnoreCase("port")) {
+			port = Integer.parseInt(value);
+		    } else if(attribute.equalsIgnoreCase("rate")) {
+			rate = Integer.parseInt(value);
+		    } else if(attribute.equalsIgnoreCase("datatype")) {
+			boolean found = false;
+			for(int j = 0; j<FirehoseConstants.numDataTypes && !found; j++) {
+			    if (value.equalsIgnoreCase(FirehoseConstants.typeNames[j])) {
+				datatype = j;
+				found = true;
+			    }
+			}
+			if(found == false) {
+			    throw new InvalidUsageException("Invalid stream type " + value);
+			}
+		    } else if(attribute.equalsIgnoreCase("num_gen_calls")) {
+			num_gen_calls = Integer.parseInt(value);
+		    } else if(attribute.equalsIgnoreCase("streaming")) {
+			if(value.equalsIgnoreCase("yes"))
+			    streaming = true;
+			else
+			    streaming = false;
+		    } else if(attribute.equalsIgnoreCase("desc")) {
+			desc = value;
+		    } else if(attribute.equalsIgnoreCase("desc2")) {
+			desc2 = value;
+		    } else if(attribute.equalsIgnoreCase("num_tl_elts")) {
+			num_tl_elts = Integer.parseInt(value);
+		    } else if(attribute.equalsIgnoreCase("prettyprint")) {
+			if(value.equalsIgnoreCase("yes"))
+			    prettyprint = true;
+			else
+			    prettyprint = false;
+		    } else if(attribute.equalsIgnoreCase("trace")) {
+			trace = value;
+		    } else if(attribute.equalsIgnoreCase("quiet")) {
+			if(value.equalsIgnoreCase("yes"))
+			    quiet = true;
+			else
+			    quiet = false;
+		    } else if(attribute.equalsIgnoreCase("shutdown")) {
+			if(value.equalsIgnoreCase("yes"))
+			    shutdown = true;
+			else
+			    shutdown = false;
+		    } else {
+			throw new InvalidUsageException("Invalid Attribute Name: " + attribute);
+		    }
+		}
+	    }
+
+	    if(shutdown) {
+		shutdown_server();
+		return false;  
+	    }
+	} catch (InvalidUsageException iue) {
+	    System.err.println(iue.getMessage());
+	    return false;
+	} catch (UnknownHostException uhe) {
+	    System.err.println(uhe.getMessage());
+	    return false;
+	} catch (FileNotFoundException fnfe) {
+	    System.err.println(fnfe.getMessage());
+	    return false;
+	} catch (IOException ioe) {
+	    System.err.println(ioe.getMessage());
+	    return false;
+	}
+
+	return true;
+    }
+
+    protected void run() {
+	try {
+	    Timer tm = new Timer();
+	    FirehoseClient fhclient = new FirehoseClient();
+	    
+	    tm.start();
+	    
+	    FirehoseSpec fhSpec = new FirehoseSpec(port, host, datatype, desc, desc2,
+						   num_gen_calls, num_tl_elts, rate,
+						   streaming, prettyprint, trace);
+	    
+	    InputStreamReader isr = new InputStreamReader(fhclient.open_stream(fhSpec));
+	    PrintWriter pw = new PrintWriter(System.out);
+	    char buffer[] = new char[1024];
+	    int numRead = 0;
+	    int count = 0;
+	    
+	    // KT - not sure if this is the right way to transfer from
+	    // is to output - use char reader?? or buffered reader??
+	    numRead = isr.read(buffer, 0, 1024);
+	    while (numRead >0) {
+		if(!quiet) {
+		    pw.write(buffer, 0, numRead);
+		}
+		count+= numRead;
+		numRead = isr.read(buffer, 0, 1024);
+	    }
+
+	    System.out.println();
+	    System.out.println("read " + count + " bytes");
+	    tm.stop();
+	    tm.print();
+	} catch (IOException ioe) {
+	    System.err.println(ioe.getMessage());
+	}
+    }
+
+    private int shutdown_server() {
+	FirehoseClient fhclient = new FirehoseClient();
+	FirehoseSpec fhSpec = new FirehoseSpec(port, host, datatype, desc, desc2,
+					       num_gen_calls, num_tl_elts, rate,
+					       streaming, prettyprint, trace);
+	fhclient.shutdown_server(fhSpec);
+	return 0;
+    }
+
+    // reads the configuration file into a string - file is expected to be short
+    // so no problem, also no problem if slow
+    private void readFile(String fileName) throws FileNotFoundException, IOException {
+	char[] cbuf = new char[1024];
+	FileReader reader = new FileReader(fileName);
+	StringBuffer sbuf =  new StringBuffer();
+	int numRead = reader.read(cbuf, 0, 1024);
+	sbuf.append(cbuf, 0, numRead);
+
+	// make sure nothing is left in the file - these files should be really short
+	numRead = reader.read(cbuf, 0, 1024);
+	if(numRead != -1)
+	    throw new PEException("KT config file longer than expected, make quick fix here");	
+
+	fileString = sbuf.toString();
+    }
+
+    class InvalidUsageException extends Exception {
+	InvalidUsageException() {
+	    super("Invalid usage");
+	}
+
+	InvalidUsageException(String message) {
+	    super(message);
+	}
+    }
 }
 
 

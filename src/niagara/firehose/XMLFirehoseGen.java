@@ -1,7 +1,7 @@
 package niagara.firehose;
 
 import java.io.IOException;
-import niagara.utils.EOSException;
+import niagara.utils.*;
 
 /* base class for all generators used by the Firehose */
 abstract class XMLFirehoseGen {
@@ -9,11 +9,18 @@ abstract class XMLFirehoseGen {
     protected int numTLElts;
     protected boolean useStreamingFormat;
     protected boolean usePrettyPrint;
-    protected boolean trace;
 
     //Get the XML
-    public abstract byte[] generateXMLBytes() throws IOException, EOSException;
+    public String generateXMLString() throws IOException {
+	throw new PEException("KT: Invalid call");
+    }
 
     //Is the stream generator done?
     public boolean getEOF() { return false; }
+
+    public boolean generatesStream() { return false;}
+    public boolean generatesChars() { return true;}
+    public void generateStream(XMLFirehoseThread writer) throws IOException {
+	throw new PEException("KT: Invalid call");
+    }
 }

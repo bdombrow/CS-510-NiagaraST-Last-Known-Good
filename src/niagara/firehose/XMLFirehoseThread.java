@@ -13,10 +13,18 @@ class XMLFirehoseThread extends Thread {
     private MsgQueue msg_queue;
     private XMLGenMessage msg;
     private BufferedOutputStream client_out;
+    private BufferedWriter client_writer;
     private FirehoseSpec fhSpec;
     private File temp_file;
 
-    
+    // for managing the rate
+    private int writtenBytes = 0;
+    private boolean useRate;
+    private int bytesPerSec;
+    private long startTime;
+
+    private int totalBytes = 0; // count total number of bytes written
+
     public XMLFirehoseThread(String str, MsgQueue _queue) {
 	super(str);
 	msg_queue = _queue;
@@ -28,12 +36,16 @@ class XMLFirehoseThread extends Thread {
 		// get a message from the queue
 		msg = msg_queue.get();
 
-		// set up a writer associated with the socket
-		client_out = new BufferedOutputStream(msg.get_client_socket().getOutputStream());
-
 		fhSpec = msg.getSpec();
 		boolean useStreamingFormat = fhSpec.isStreaming();
 		boolean usePrettyPrint = fhSpec.isPrettyPrint();
+		int numGenCalls = fhSpec.getNumGenCalls();
+
+		bytesPerSec = fhSpec.getRate()*1024; // rate in KB/sec
+		useRate = true;
+		if(bytesPerSec == 0)
+		    useRate = false;
+
 		String trace = fhSpec.getTrace();
 		BufferedWriter bwTrace = null;
 		if (trace.length() != 0)
@@ -63,6 +75,13 @@ class XMLFirehoseThread extends Thread {
 							    usePrettyPrint,
 							    bwTrace);
 		    break;
+		case FirehoseConstants.AUCTION_STREAM:
+		    xml_generator = new XMLAuctionStreamGenerator(fhSpec.getNumTLElts(),
+								  numGenCalls,
+								  useStreamingFormat, 
+								  usePrettyPrint,
+								  bwTrace);
+		    break;
 		case FirehoseConstants.PACKET:
 		    System.out.println("Generating Packets");
 		    xml_generator = new XMLPacketGenerator(fhSpec.getDescriptor(),
@@ -84,79 +103,43 @@ class XMLFirehoseThread extends Thread {
 		    }
 		    xml_generator = new XMLDTDGenerator(dtdName, useStreamingFormat, usePrettyPrint);
 		    break;
+		case FirehoseConstants.FILE:
+		    xml_generator = new XMLFileReader(fhSpec.getDescriptor(),
+						      useStreamingFormat);
 		default:
 		    throw new PEException("KT unexpected stream data type");
 		}
 
+		if(xml_generator.generatesChars()) {
+		    client_writer = new BufferedWriter(new OutputStreamWriter(msg.get_client_socket().getOutputStream()));
+		    client_out = null;
+		} else { // must generate bytes
+		    // set up a writer associated with the socket
+		    client_out = new BufferedOutputStream(msg.get_client_socket().getOutputStream());
+		    client_writer = null;
+		}
+		
 
-		int numGenCalls = fhSpec.getNumGenCalls();
 
-		// generate a and send the documents 
-		int count = 0;
-		int writtenBytes = 0;
-		byte[] genBytes;
-		int numGenBytes;
-		int leftToWrite;
+		int count = 0; // keep track of number of calls to generator
+		startTime = System.currentTimeMillis();
 
-		int bytesPerSec = fhSpec.getRate()*1024; // rate in KB/sec
-		boolean useRate = true;
-		if(bytesPerSec == 0)
-		    useRate = false;
-		long startTime = System.currentTimeMillis();
-
+		// generate and and send the documents 
 		if(useStreamingFormat)
-		    client_out.write(FirehoseConstants.OPEN_STREAM.getBytes());
-		while((count < numGenCalls || numGenCalls == -1) &&
-		      xml_generator.getEOF() == false) {
-
-		    genBytes = xml_generator.generateXMLBytes();
-		    count++;
-
-		    if(!useRate) {
-			client_out.write(genBytes);		
-		    } else {
-			numGenBytes = Array.getLength(genBytes);
-			
-			if(numGenBytes+writtenBytes > bytesPerSec) {
-			    int toWrite = bytesPerSec - writtenBytes;
-			    client_out.write(genBytes, 0, toWrite);
-			    leftToWrite = numGenBytes-toWrite;
-			    writtenBytes += toWrite;
-			} else {
-			    client_out.write(genBytes);
-			    leftToWrite = 0;
-			    writtenBytes += numGenBytes;
-			}
-			
-			if(writtenBytes == bytesPerSec) {
-			    long curTime = System.currentTimeMillis();
-			    if((curTime - startTime) < 1000) { // 1000 milliseconds in one second
-				try {
-				    Thread.sleep(1000 - (curTime-startTime));
-				} catch (java.lang.InterruptedException e) {
-				    // 
-				    System.err.println("KT: HELP Got Interrupted Exception in XMLFirehoseThread - IGNORING IT"); // uugh, don't know what else to do
-				}
-			    } else {
-				System.out.println("KT: WARNING: Data generation is too slow to keep up with rate");
-			    }
-			    // start another second
-			    startTime = System.currentTimeMillis();
-			    writtenBytes = 0;
-			}
-
-			if(leftToWrite != 0) {
-			    if(leftToWrite <= bytesPerSec) {
-				client_out.write(genBytes, numGenBytes-leftToWrite, leftToWrite);
-				writtenBytes += leftToWrite;
-			    } else {
-				throw new PEException("KT: uugh, generated more than one seconds worth of data!!");
-			    }
-			}
-		    }	
+		    write_string(FirehoseConstants.OPEN_STREAM);
+		
+		if(xml_generator.generatesStream()) {
+		    xml_generator.generateStream(this);
+		} else {
+		    while((count < numGenCalls || numGenCalls == -1) &&
+			  xml_generator.getEOF() == false) {
+			// write the generated data respecting the rate
+			write_string(xml_generator.generateXMLString());
+			count++;
+		    }
 		}
 		if(useStreamingFormat)
-		    client_out.write(FirehoseConstants.CLOSE_STREAM.getBytes());
+		    write_string(FirehoseConstants.CLOSE_STREAM);
 
 		if (bwTrace != null)
 		    bwTrace.close();
@@ -178,15 +161,19 @@ class XMLFirehoseThread extends Thread {
 		// problem opening temp.xml
 		System.err.println("ERROR: Security Violation: "
 				   + e.getMessage());
-	    } catch (EOSException e) {
-		// do nothing, just go on
-	    }
+	    } 
 
 	    // prepare for next message
-	    xml_generator = null;
+	    xml_generator = null; 
 	    try {
-		client_out.close();
-		client_out = null;
+		System.out.println("Closing connection wrote " + totalBytes + " bytes");
+		if(client_out != null) {
+		    client_out.close();
+		    client_out = null;
+		} else {
+		    client_writer.close();
+		    client_writer = null;
+		}
 		msg.get_client_socket().close();
 		if(temp_file != null && temp_file.exists()) {
 		   temp_file.delete();
@@ -194,6 +181,7 @@ class XMLFirehoseThread extends Thread {
 		}
 	    } catch (IOException e2) {
 		// nothing to do... we just continue and hope for the best
+		System.err.println("Ignoring error..." + e2.getMessage());
 	    }
 	}
     }
@@ -223,6 +211,162 @@ class XMLFirehoseThread extends Thread {
 	return;
     }
 
+    protected void write_string(String str) throws IOException {
+	write_string(str, str.length());
+    }
+
+    protected void write_string(String str, int len) throws IOException {
+	if(client_writer == null)
+	    throw new PEException("write chars may only be called by generators that generate chars - check generatesChars() method");
+
+	totalBytes += len; // keep track of the total number of bytes written
+
+	if(!useRate) {
+	    client_writer.write(str, 0, len);
+	} else {
+	    int leftToWrite;
+	    if(len+writtenBytes > bytesPerSec) {
+		int toWrite = bytesPerSec - writtenBytes;
+		client_writer.write(str, 0, toWrite);
+		leftToWrite = len-toWrite;
+		writtenBytes += toWrite;
+	    } else {
+		client_writer.write(str, 0 , len);
+		leftToWrite = 0;
+		writtenBytes += len;
+	    }
+	    
+	    if(writtenBytes == bytesPerSec) {
+		long curTime = System.currentTimeMillis();
+		if((curTime - startTime) < 1000) { // 1000 milliseconds in one second
+		    try {
+			System.out.println("sleeping");
+			Thread.sleep(1000 - (curTime-startTime));
+		    } catch (java.lang.InterruptedException e) {
+			// 
+			System.err.println("KT: HELP Got Interrupted Exception in XMLFirehoseThread - IGNORING IT"); // uugh, don't know what else to do
+		    }
+		} else {
+		    System.out.println("KT: WARNING: Data generation is too slow to keep up with rate");
+		}
+		// start another second
+		startTime = System.currentTimeMillis();
+		writtenBytes = 0;
+	    }
+	    
+	    if(leftToWrite != 0) {
+		if(leftToWrite <= bytesPerSec) {
+		    client_writer.write(str, len-leftToWrite, leftToWrite);
+		    writtenBytes += leftToWrite;
+		} else {
+		    throw new PEException("KT: uugh, generated more than one seconds worth of data!!");
+		}
+	    }
+	}		
+		
+    }
+
+    protected void write_chars(char[] cbuf, int len) throws IOException {
+	if(client_writer == null)
+	    throw new PEException("write chars may only be called by generators that generate chars - check generatesChars() method");
+
+	totalBytes += len; // keep track of the total number of bytes written
+
+	if(!useRate) {
+	    client_writer.write(cbuf, 0, len);
+	} else {
+	    int leftToWrite;
+	    if(len+writtenBytes > bytesPerSec) {
+		int toWrite = bytesPerSec - writtenBytes;
+		client_writer.write(cbuf, 0, toWrite);
+		leftToWrite = len-toWrite;
+		writtenBytes += toWrite;
+	    } else {
+		client_writer.write(cbuf, 0 , len);
+		leftToWrite = 0;
+		writtenBytes += len;
+	    }
+	    
+	    if(writtenBytes == bytesPerSec) {
+		long curTime = System.currentTimeMillis();
+		if((curTime - startTime) < 1000) { // 1000 milliseconds in one second
+		    try {
+			System.out.println("sleeping");
+			Thread.sleep(1000 - (curTime-startTime));
+		    } catch (java.lang.InterruptedException e) {
+			// 
+			System.err.println("KT: HELP Got Interrupted Exception in XMLFirehoseThread - IGNORING IT"); // uugh, don't know what else to do
+		    }
+		} else {
+		    System.out.println("KT: WARNING: Data generation is too slow to keep up with rate");
+		}
+		// start another second
+		startTime = System.currentTimeMillis();
+		writtenBytes = 0;
+	    }
+	    
+	    if(leftToWrite != 0) {
+		if(leftToWrite <= bytesPerSec) {
+		    client_writer.write(cbuf, len-leftToWrite, leftToWrite);
+		    writtenBytes += leftToWrite;
+		} else {
+		    throw new PEException("KT: uugh, generated more than one seconds worth of data!!");
+		}
+	    }
+	}		
+		
+    }
+
+    // writes bytes to stream obeying the proper rate
+    protected void write_bytes(byte[] genBytes, int numGenBytes) throws IOException {
+	if(client_out == null)
+	    throw new PEException("KT invalid call");
+
+	totalBytes += numGenBytes; // keep track of the total number of bytes written
+
+	if(!useRate) {
+	    client_out.write(genBytes, 0, numGenBytes);		
+	} else {
+	    int leftToWrite;
+	    if(numGenBytes+writtenBytes > bytesPerSec) {
+		int toWrite = bytesPerSec - writtenBytes;
+		client_out.write(genBytes, 0, toWrite);
+		leftToWrite = numGenBytes-toWrite;
+		writtenBytes += toWrite;
+	    } else {
+		client_out.write(genBytes, 0, numGenBytes);
+		leftToWrite = 0;
+		writtenBytes += numGenBytes;
+	    }
+	    
+	    if(writtenBytes == bytesPerSec) {
+		long curTime = System.currentTimeMillis();
+		if((curTime - startTime) < 1000) { // 1000 milliseconds in one second
+		    try {
+			System.out.println("sleeping");
+			Thread.sleep(1000 - (curTime-startTime));
+		    } catch (java.lang.InterruptedException e) {
+			// 
+			System.err.println("KT: HELP Got Interrupted Exception in XMLFirehoseThread - IGNORING IT"); // uugh, don't know what else to do
+		    }
+		} else {
+		    System.out.println("KT: WARNING: Data generation is too slow to keep up with rate");
+		}
+		// start another second
+		startTime = System.currentTimeMillis();
+		writtenBytes = 0;
+	    }
+	    
+	    if(leftToWrite != 0) {
+		if(leftToWrite <= bytesPerSec) {
+		    client_out.write(genBytes, numGenBytes-leftToWrite, leftToWrite);
+		    writtenBytes += leftToWrite;
+		} else {
+		    throw new PEException("KT: uugh, generated more than one seconds worth of data!!");
+		}
+	    }
+	}	
+    }
 }
 
 

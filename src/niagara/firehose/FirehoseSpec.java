@@ -66,9 +66,8 @@ public class FirehoseSpec extends StreamSpec {
 	this.trace = trace;
     }
 
-    public FirehoseSpec() {
-
-    }
+    // for use with unmarshall
+    public FirehoseSpec() {}
 
     public int getListenerPortNum() {
 	return listenerPortNum;

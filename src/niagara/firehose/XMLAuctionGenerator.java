@@ -56,7 +56,7 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
 				 "<time>'hh:mm:ss'</time>'");
   }
   
-  public byte[] generateXMLBytes() {
+  public String generateXMLString() {
       // KT - appears we can ignore useStreamingFormat - don't see
       // the xml header being added anywhere
 
@@ -79,7 +79,7 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     stringBuf.append("</site>");
     stringBuf.append(nl);
 
-    return stringBuf.toString().getBytes();
+    return stringBuf.toString();
   }
 
   private void generateBid(StringBuffer stb, int numBids) {

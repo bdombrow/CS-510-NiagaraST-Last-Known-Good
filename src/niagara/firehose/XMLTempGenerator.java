@@ -26,7 +26,7 @@ class XMLTempGenerator extends XMLFirehoseGen {
 	usePrettyPrint = prettyprint;
     }
 
-    public byte[] generateXMLBytes() {
+    public String generateXMLString() {
 	//The parameter contains the id for this sensor, and
 	// the time offset.
 	if (stFile.length() != 0) {
@@ -88,7 +88,7 @@ class XMLTempGenerator extends XMLFirehoseGen {
 
 	stbRet.append("</TEMPDATA>");
 
-	return stbRet.toString().getBytes();
+	return stbRet.toString();
     }
 }
 

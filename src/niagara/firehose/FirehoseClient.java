@@ -51,13 +51,14 @@ public class FirehoseClient {
     }
 
     
-    public void shutdown_server() {
+    public void shutdown_server(FirehoseSpec fhSpec) {
 	try {
 	    if (stream_state == FCSTREAMSTATE_OPEN) {
 		System.err.println("WARNING: shutting down server before closing connection");
 		close_stream();
 	    }
 	    
+	    this.fhSpec = fhSpec;
 	    open_socket();	
 	    String s = FirehoseConstants.SHUTDOWN + " ";
 	    
