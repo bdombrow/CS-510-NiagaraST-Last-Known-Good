@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DataManager.java,v 1.8 2003/03/08 01:01:53 vpapad Exp $
+  $Id: DataManager.java,v 1.9 2003/03/08 02:21:40 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -227,66 +227,6 @@ public class DataManager {
     public void disableCache() {
         return;
     }
-
-    // Interface exported by CacheManager.
-    public Document createDoc(String s) {
-        return cacheM.createDoc(s);
-    }
-    public void modifyDoc(Object key, Object val) {
-        cacheM.modifyDoc(key, val);
-    }
-    public void flushDoc(String s) {
-        cacheM.flushDoc(s);
-    }
-    public void deleteDoc(String s) {
-        cacheM.deleteDoc(s);
-    }
-    
-    public void storeTuples(Vector tv, String fn) {
-	cacheM.storeTuples(fn, tv);
-    }
-
-    public void storeTuples(Vector tv) {
-        // System.out.println("DM.storeTuple : DM get Vec from ShutD " + tv.size());
-        Hashtable vhash = new Hashtable();
-        for(int i=0; i<tv.size(); i++) {
-            StreamTupleElement ste = (StreamTupleElement) tv.elementAt(i);
-            Node n = (Element)ste.getAttribute(ste.size()-1);
-            Node firstChild = n.getFirstChild();
-            String fn = firstChild.getNodeValue();
-            Vector v = (Vector)vhash.get(fn);
-            if(v==null) {
-                v = new Vector();
-                vhash.put(fn, v);
-            } 
-            ste.removeLastNAttributes(5);
-            v.addElement(ste);
-        }
-        for(Enumeration en = vhash.keys(); en.hasMoreElements() ; ) {
-            String k = (String)en.nextElement();
-            Vector val = (Vector)vhash.get(k);
-            // System.err.println("Tring to store Tuple in " + k);
-            cacheM.storeTuples(k, val);
-            // System.err.println("end Store Tuple " + k);
-        }
-        // System.err.println("StoreT. return");
-    }
-    
-    public boolean getLastModified(String file, Date from, Date to) {
-	boolean ret = cacheM.isModified(file, from.getTime(), to.getTime()); 
-        return(ret);
-    }
-    //////////////////////////////////////////////////////////////////
-    public Vector getLastModified(Vector files, Date from, Date to) {
-	Vector ret = new Vector();
-	for(int i=0; i<files.size(); i++) {
-	    if(cacheM.isModified((String)files.elementAt(i), from.getTime(), 
-			to.getTime() )) 
-		ret.addElement(files.elementAt(i));
-	}
-	return ret;
-    }
-    //////////////  End //////////////////////////////////////
 
     public boolean getDocuments(Vector xmlURLList, 
 				regExp pathExpr,   

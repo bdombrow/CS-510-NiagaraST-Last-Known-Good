@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CacheUtil.java,v 1.5 2003/03/08 01:01:53 vpapad Exp $
+  $Id: CacheUtil.java,v 1.6 2003/03/08 02:21:39 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -115,17 +115,6 @@ public class CacheUtil {
         return ret.replace(':', '#');
     }
     
-    public static int tupleGetTrigId(String s) {
-        // System.err.println("CacheUtil... getTrigId, input " +s);
-        int index = s.lastIndexOf("&");
-        String tmp = s.substring(index+1, s.length());
-        // System.err.println("Got int as " + tmp);
-        return Integer.parseInt(tmp);
-    }
-    public static String tupleGetTrigFile(String s) {
-        int index = s.lastIndexOf("&");
-        return s.substring(0, index);
-    }
     public static String normalizePath(Object k) {
         String f = (String)k;
         if(isUrl(f)) return f;

@@ -1,12 +1,8 @@
-package niagara.utils;
-
 /*
- * $RCSfile:
- * $Revision:
- * $Date:
- * $Author:
+ * $Id: ArrayStack.java,v 1.2 2003/03/08 02:23:23 vpapad Exp $
  */
 
+package niagara.utils;
 
 /**
  * Definition of class <code> ArrayStack </code>. Just a
@@ -19,8 +15,6 @@ package niagara.utils;
  *
  * @author Kristin Tufte
  */
-
-import java.util.*;
 
 public class ArrayStack {
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.8 2003/02/23 05:03:14 tufte Exp $
+  $Id: StreamTupleElement.java,v 1.9 2003/03/08 02:23:23 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -261,22 +261,6 @@ public class StreamTupleElement {
     public String toString () {
 	return (tuple.toString() + "; Partial = " + partial);
     }
-
-    /**
-     * This function removes all the last N attributes of the tuple element
-     * used only in Trigger Grouping. 
-     *
-     * @param the number of last elements which are going to be removed. 
-     */
-
-    public void removeLastNAttributes (int N) {
-
-        for (int i = tupleSize-1; i >= tupleSize-N; i--) {
-		tuple[i] = null;
-        }
-	tupleSize = tupleSize-N;
-    }
-
 
     public Element toEle(Document doc) {
         Element ret = doc.createElement("StreamTupleElement");
