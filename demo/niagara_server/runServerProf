@@ -1,0 +1,5 @@
+# $Id: runServerProf,v 1.1 2003/01/13 05:03:37 tufte Exp $
+rm -rf SYS/*
+rm -rf CACHE/*
+setenv LD_LIBRARY_PATH ../../lib
+java -server -Xmx192m -Xrunprofni:profile=yes -classpath `cat ../classpath` niagara.connection_server.NiagraServer $* -without-se -run-niprof
