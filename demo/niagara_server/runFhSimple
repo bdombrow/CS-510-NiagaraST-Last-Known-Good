@@ -7,7 +7,11 @@ $classpath = `cat ../classpath`;
 $classpath =~ s/\n/ /g;
 $classpath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
 
-$command = "java -classpath " . $classpath . 
+$bootclasspath = `cat ../bootclasspath`;
+$bootclasspath =~ s/\n/ /g;
+$bootclasspath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
+
+$command = "java -Xbootclasspath/p:$bootclasspath -classpath " . $classpath . 
            " niagara.firehose.SimpleClient " . join(" ", @ARGV) ."\n";
 
 #print $command;

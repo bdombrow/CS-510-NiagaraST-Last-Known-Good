@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: runServer,v 1.16 2003/07/18 19:36:48 tufte Exp $
+# $Id: runServer,v 1.17 2004/02/10 03:25:44 vpapad Exp $
 system("rm -rf SYS/*");
 system("rm -rf CACHE/*");
 
@@ -7,7 +7,11 @@ $classpath = `cat ../classpath`;
 $classpath =~ s/\n/ /g;
 $classpath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
 
-$command = "java -server -Xmx192m -classpath " . $classpath . 
+$bootclasspath = `cat ../bootclasspath`;
+$bootclasspath =~ s/\n/ /g;
+$bootclasspath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
+ 
+$command = "java -Xbootclasspath/p:$bootclasspath -server -Xmx192m -classpath " . $classpath . 
            " niagara.connection_server.NiagraServer " . 
 	   join(" ", @ARGV) . "\n";
 exec $command;

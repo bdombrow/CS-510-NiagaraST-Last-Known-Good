@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: runServerProf,v 1.3 2003/07/03 19:24:57 tufte Exp $
+# $Id: runServerProf,v 1.4 2004/02/10 03:25:44 vpapad Exp $
 system("rm -rf SYS/*");
 system("rm -rf CACHE/*");
 
@@ -8,10 +8,13 @@ $classpath = `cat ../classpath`;
 $classpath =~ s/\n/ /g;
 $classpath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
 
-
+$bootclasspath = `cat ../bootclasspath`;
+$bootclasspath =~ s/\n/ /g;
+$bootclasspath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
+ 
 $ENV{"LD_LIBRARY_PATH"} = "../../lib";
 
-$command = "java -ea -server -Xrunprofni:profile=yes,depth=4 " .
+$command = "java -Xbootclasspath/p:$bootclasspath -ea -server -Xrunprofni:profile=yes,depth=4 " .
 	   "-classpath " . $classpath . 
 	   " niagara.connection_server.NiagraServer " .
 	   join(" ", @ARGV) . " -without-se -run-niprof\n";

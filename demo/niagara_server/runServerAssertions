@@ -1,2 +1,17 @@
-# $Id: runServerAssertions,v 1.1 2002/09/24 00:51:26 vpapad Exp $
-java -enableassertions -server -Xmx192m -classpath `cat ../classpath` niagara.connection_server.NiagraServer $*
+#!/usr/bin/perl -w
+# $Id: runServerAssertions,v 1.2 2004/02/10 03:25:44 vpapad Exp $
+system("rm -rf SYS/*");
+system("rm -rf CACHE/*");
+
+$classpath = `cat ../classpath`;
+$classpath =~ s/\n/ /g;
+$classpath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
+
+$bootclasspath = `cat ../bootclasspath`;
+$bootclasspath =~ s/\n/ /g;
+$bootclasspath =~ s/NIAGROOT\//\.\.\/\.\.\//g;
+ 
+$command = "java -enableassertions -Xbootclasspath/p:$bootclasspath -server -Xmx192m -classpath " . $classpath . 
+           " niagara.connection_server.NiagraServer " . 
+	   join(" ", @ARGV) . "\n";
+exec $command;
