@@ -1,5 +1,5 @@
 #######################################################################
-#  $Id: make.incl,v 1.7 2002/08/16 17:55:33 tufte Exp $
+#  $Id: make.incl,v 1.8 2002/08/17 17:05:37 tufte Exp $
 #
 #  Make include file - for common constant info
 #  Added 1-17-02 by Kristin Tufte - remove the fact that some 
@@ -64,9 +64,10 @@ export XMLGEN       = $(LIBDIR)/XMLGenerator.jar
 export CLASSPATH     = .:$(XERCES2):$(REGEXPLIB):$(CUPLIB):$(DIFF):$(DIVA):$(JUNIT):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET):$(JFLEX):$(NIAGSRC):$(XMLGEN):$(SAX):$(XML4J)
 
 export DEBUG = -O
+export SOURCE = -source 1.4
 
 export JAVAFLAGS     = -classpath $(CLASSPATH)
-export JAVACFLAGS     = $(JAVAFLAGS) $(DEBUG)
+export JAVACFLAGS     = $(JAVAFLAGS) $(DEBUG) $(SOURCE)
 
 # local stuff
 APPLET_DIR = /p/niagara/public/html
