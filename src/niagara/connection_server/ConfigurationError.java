@@ -1,4 +1,4 @@
-/* $Id: ConfigurationError.java,v 1.1 2002/10/23 22:33:59 vpapad Exp $ */
+/* $Id: ConfigurationError.java,v 1.2 2003/09/23 23:10:25 vpapad Exp $ */
 package niagara.connection_server;
 
 public class ConfigurationError extends RuntimeException {
