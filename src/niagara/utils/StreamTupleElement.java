@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.6 2002/09/24 23:19:37 ptucker Exp $
+  $Id: StreamTupleElement.java,v 1.7 2002/12/10 00:59:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,9 +76,7 @@ public class StreamTupleElement {
      *                else it represents a final result
      * @param capacity The initial capacity of the tuple
      */
-
     public StreamTupleElement (boolean partial, int capacity) {
-
 	// Initialize the tuple vector with the capacity
 	createTuple(capacity);
         timeStamp = 0;
@@ -186,8 +184,7 @@ public class StreamTupleElement {
      *                     the current tuple
      */
 
-    public void appendAttributes (StreamTupleElement otherTuple) {
-
+    public void appendTuple(StreamTupleElement otherTuple) {
 	// Loop over all the attributes of the other tuple and append them
 	while(tupleSize+otherTuple.tupleSize > allocSize) {
 	    expandTuple();
@@ -214,11 +211,11 @@ public class StreamTupleElement {
 
 
     public void setAttribute(int position, Node value) {
-	while(position >= allocSize) {
+	while(position >= allocSize)
 	    expandTuple();
-	    tupleSize = position+1;
-	}
-
+        if (tupleSize <= position)
+            tupleSize = position+1;
+            
         tuple[position] = value;
     }
 
@@ -239,32 +236,63 @@ public class StreamTupleElement {
      *
      * @return a clone of the stream tuple element
      */
-
     public Object clone() {
-
-	// Create a new stream tuple element with the same partial semantics
-	//
-	StreamTupleElement returnElement = 
-	    new StreamTupleElement(this.partial, tupleSize);
-
-	// Add all the attributes of the current tuple to the clone
-	//
-	returnElement.appendAttributes(this);
-        returnElement.setTimeStamp(timeStamp);
-
-	// Return the clone
-	//
-	return returnElement;
+        return copy(tupleSize);
     }
 
+    /** Copy of this tuple, with space reserved for up to `size` attributes */
+    public StreamTupleElement copy(int size) {
+        // XML-QL query plans will come in with size = 0
+        if (tupleSize > size) size = tupleSize;
+        // Create a new stream tuple element with the same partial semantics
+        StreamTupleElement returnElement = 
+            new StreamTupleElement(partial, size);
+        returnElement.setTimeStamp(timeStamp);
+        
+        // Add all the attributes of the current tuple to the clone
+        System.arraycopy(tuple, 0, returnElement.tuple, 0, tupleSize);
+        returnElement.tupleSize = tupleSize;
+    
+        // Return the clone
+        return returnElement;
+    }
+    
+    /** Copy parts of this tuple to a new tuple, with space reserved for up to
+     * `size` attributes */
+    public StreamTupleElement copy(int size, int attributeMap[]) {
+        assert size >= attributeMap.length : "Insufficient tuple capacity";
+        // Create a new stream tuple element with the same partial semantics
+        StreamTupleElement returnElement = 
+            new StreamTupleElement(partial, size);
+        
+        // XXX vpapad: what are we supposed to do about timestamp?
+        
+        for (int i = 0; i < attributeMap.length; i++)
+            returnElement.tuple[i] = tuple[attributeMap[i]];
+        returnElement.tupleSize = attributeMap.length;
+                
+        return returnElement;
+    }
 
+    /** Copy parts of this tuple into another tuple, starting at offset */
+    public void copyInto(StreamTupleElement ste, int offset, int attributeMap[]) {
+        // If this tuple is partial, the result should be partial        
+        if (partial)
+            ste.partial = true;
+            
+        // XXX vpapad: what are we supposed to do about timestamp?
+        
+        for (int i = 0; i < attributeMap.length; i++)
+            ste.tuple[offset + i] = tuple[attributeMap[i]];
+        ste.tupleSize += attributeMap.length;
+    }
+    
     /**
      * This function returns a string representation of the stream tuple element
      *
      * @return The string representation
      */
     public String toString () {
-
 	return (tuple.toString() + "; Partial = " + partial);
     }
 
