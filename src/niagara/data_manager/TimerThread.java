@@ -1,5 +1,5 @@
 /**
- * $Id: TimerThread.java,v 1.3 2003/02/26 23:21:57 vpapad Exp $
+ * $Id: TimerThread.java,v 1.4 2003/03/03 08:23:39 tufte Exp $
  *
  */
 
@@ -52,6 +52,7 @@ public class TimerThread extends SourceThread {
     protected int cnt;
 
     public TimerThread() {
+	isSendImmediate = true;
     }
 
     public TimerThread(
@@ -69,11 +70,12 @@ public class TimerThread extends SourceThread {
         this.warp = warp;
         this.delay = delay;
         this.name = name;
+	isSendImmediate = true;
     }
 
     public void plugIn(SinkTupleStream outputStream, DataManager dm) {
         this.outputStream = outputStream;
-        outputStream.setSendImmediate();
+	outputStream.setSendImmediate();
     }
 
     /**
@@ -228,9 +230,12 @@ public class TimerThread extends SourceThread {
             currentTime = currentTime - (currentTime % granularity);
             System.err.println("XXX vpapad: producing value");
             Node node = doc.createTextNode(String.valueOf(currentTime));
+	    Element elt = doc.createElement("Time");
+	    elt.appendChild(node);
+	    
             do {
                 try {
-                    tt.outputStream.put(node);
+                    tt.outputStream.put(elt);
                     cnt++;
                     System.err.println("XXX vpapad: timer tuple sent " + cnt);
                     return;

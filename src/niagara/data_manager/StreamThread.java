@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.24 2003/02/25 06:14:21 vpapad Exp $
+ * $Id: StreamThread.java,v 1.25 2003/03/03 08:23:39 tufte Exp $
  */
 
 package niagara.data_manager;
@@ -67,6 +67,8 @@ public class StreamThread extends SourceThread {
             parser = DOMFactory.newParser();
 
 	boolean sourcecreated = false;
+	boolean shutdown = false;
+	String message =  null;
 
 	try {
 	    inputStream = createInputStream();
@@ -96,7 +98,9 @@ public class StreamThread extends SourceThread {
 		// means only one document
 		InputSource inputSource = 
 		    new InputSource(inputStream);
+		System.out.println("calling parse");
 		parser.parse(inputSource);
+		System.out.println("putting in output stream");
 		outputStream.put(parser.getDocument());
 	    } else {
 		throw new PEException("KT: Unsupported");
@@ -177,20 +181,35 @@ public class StreamThread extends SourceThread {
 		
 	} catch (org.xml.sax.SAXException saxE){
 	    System.err.println("StreamThread::SAX exception parsing document. Message: " 
-			       + saxE.toString());
+			       + saxE.getMessage());
+	    shutdown = true;
+	    message = "SAX Exception " + saxE.getMessage();
 	} catch (java.lang.InterruptedException intE) {
 	    System.err.println("StreamThread::Interruped Exception::run. Message: " 
 			       + intE.getMessage());
+	    shutdown = true;
+	    message = "StreamThread-Interrupted " + intE.getMessage();
 	} catch (java.io.FileNotFoundException fnfE) {
 	    System.err.println("StreamThread::File not found: filename: " +
 			       "Message" + fnfE.getMessage());
+	    shutdown = true;
+	    message = "StreamThread " + fnfE.getMessage();
 	} catch (java.net.UnknownHostException unhE) {
 	    System.err.println("StreamThread::Unknown Host: host: " +
 			       "Message" + unhE.getMessage());
+	    shutdown = true;
+	    message = "StreamThread " + unhE.getMessage();
 	} catch(java.io.IOException ioe) {
-	    System.out.println("IO error");
 	    if(!sourcecreated) {
-	       System.err.println("StreamThread::IOException. Message: " + ioe.getMessage());
+	       System.err.println("StreamThread::IOException. Message: " 
+				  + ioe.getMessage());
+	       shutdown = true;
+	       message = "StreamThread::IOException " + ioe.getMessage();
+	    } else {
+		System.out.println("KT Stream Thread IOException " +
+				   ioe.getMessage());
+		shutdown = false;
+		message = null;
 	    }
 	    // if source was created IOException tends to mean end
 	    // of stream and should be ignored
@@ -201,15 +220,15 @@ public class StreamThread extends SourceThread {
 	} catch (ShutdownException se) {
 	    System.err.println("StreamThread::ShutdownException. Message " +
 			       se.getMessage());
-	    // let cleanup proceed - nothing else to do
+	    shutdown = true;
+	    message = se.getMessage();
 	}
 
-	cleanUp();
-
+	cleanUp(shutdown, message);
 	return;
     }
 
-    private void cleanUp() {
+    private void cleanUp(boolean shutdown, String message) {
 
 	try {
 	    closeInputStream();
@@ -218,7 +237,10 @@ public class StreamThread extends SourceThread {
 	}
 
 	try {
-	    outputStream.endOfStream();
+	    if(!shutdown)
+		outputStream.endOfStream();
+	    else 
+		outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, message);
 	} catch (java.lang.InterruptedException ie) {
 	    /* do nothing */
 	} catch (ShutdownException se) {
@@ -282,7 +304,7 @@ public class StreamThread extends SourceThread {
 	} else if (spec instanceof FirehoseSpec) {
 	    closeFirehoseStream();
 	} else {
-	    throw new PEException("Invalid Stream Type");
+	    throw new PEException("Invalid Stream Type ");
 	}
 
 	return;
