@@ -1,21 +1,21 @@
 <!-- DTD for query plans -->
 
-<!ENTITY % NLJoin '"niagara.query_engine.PhysicalNLJoinOperator"'>
-<!ENTITY % HashJoin '"niagara.query_engine.PhysicalHashJoinOperator"'>
+<!ENTITY  NLJoin 'niagara.query_engine.PhysicalNLJoinOperator' >
+<!ENTITY  HashJoin 'niagara.query_engine.PhysicalHashJoinOperator' >
 
 <!-- 
      Plan is a dummy node, representing the output of a query plan.
      top is a ref to the topmost operator, usually a construct.
 -->
+<!ENTITY % PositionAttributes "x CDATA #IMPLIED
+          y CDATA #IMPLIED">
 
 <!ELEMENT plan     (scan | select | join | avg | construct | 
                     dtdscan | firehosescan | accumulate | expression | 
 		    sort | dup | union)+>
 
-<!ATTLIST plan top IDREF        #REQUIRED>
-
-<!ENTITY % PositionAttributes "X CDATA #IMPLIED
-          Y CDATA #IMPLIED">
+<!ATTLIST plan top IDREF        #REQUIRED
+          %PositionAttributes;>
 
 <!-- 
      For all operators, an "id" attribute is required, so that other 
@@ -54,6 +54,7 @@
 <!ATTLIST expression 
 
 	  class   CDATA               #REQUIRED
+	  expression CDATA	      ""
 	  %StandardAttributes;>
 
 
@@ -67,7 +68,7 @@
 <!ATTLIST sum 
 	  groupby  CDATA	       #REQUIRED
 	  sumattr  CDATA	       #REQUIRED
-	  %StandardAttributes;;>
+	  %StandardAttributes;>
 
 <!ELEMENT count     EMPTY>
 <!ATTLIST count 
@@ -137,7 +138,7 @@
 	  host	   CDATA	#REQUIRED
 	  port	   CDATA	#REQUIRED
 	  rate	   CDATA	#REQUIRED
-	  type	   (gen | file) gen
+	  type	   (gen | file) "gen"
 	  desc     CDATA        #REQUIRED
 	  iters    CDATA        #REQUIRED
 	  %PositionAttributes;>
