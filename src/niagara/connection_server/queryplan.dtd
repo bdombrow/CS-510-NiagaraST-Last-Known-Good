@@ -75,7 +75,3 @@
           id       ID           #REQUIRED
 	  input   IDREF         #REQUIRED
           physical CDATA        #IMPLIED>
-
-
-
-
