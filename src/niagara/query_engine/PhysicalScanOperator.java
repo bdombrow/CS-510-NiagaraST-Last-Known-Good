@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.8 2002/03/31 04:48:15 vpapad Exp $
+  $Id: PhysicalScanOperator.java,v 1.9 2002/03/31 15:57:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -126,7 +126,7 @@ public class PhysicalScanOperator extends PhysicalOperator {
 						 StreamTupleElement inputTuple,
 						 int streamId,
 						 ResultTuples result) {
-
+	
 	// Get the attribute to scan on
 	//
 	Object attribute = inputTuple.getAttribute(scanField);
@@ -134,6 +134,7 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	// Get the nodes reachable using the path expression scanned
 	//
         
+	// KT - think this below is just for debugging
         if(attribute instanceof Document) {
             String rootName = ((Document) attribute).getDocumentElement().getTagName();
             if(rootName==null) {
@@ -148,6 +149,7 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	//
 	// KT - why this copy???
 	int numNodes = elementList.size();	
+
 	for(int node = 0; node < numNodes; ++node) {
 
 	    // Clone the input tuple to create an output tuple

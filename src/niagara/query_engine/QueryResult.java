@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.4 2002/03/26 23:52:32 tufte Exp $
+  $Id: QueryResult.java,v 1.5 2002/03/31 15:57:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +34,7 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
+import niagara.connection_server.NiagraServer;
 
 /**
  * QueryResult is the class at the client that interacts with the
@@ -155,6 +156,11 @@ public class QueryResult {
     //
     private boolean generatingPartialResult;
 
+    // for use when not sending results back to client, KT
+    // actually, it isn't good to create new result objects
+    // for every tuple anyway, but that is the least of our 
+    // problems!!!
+    private ResultObject dummyResultObject;
 
     /////////////////////////////////////////////////////////////
     // These are the methods of the class                      //
@@ -189,6 +195,10 @@ public class QueryResult {
 		// Initially, not generating partial results
 		//
 		this.generatingPartialResult = false;
+
+		// for QUIET
+		dummyResultObject = new ResultObject();
+		dummyResultObject.status = FinalQueryResult;
     }
 
 
@@ -224,12 +234,12 @@ public class QueryResult {
      */
 
     public ResultObject getNext ()
-		throws java.lang.InterruptedException,
-		ResultsAlreadyReturnedException {
-
-		// Call the internal getNext operator without a timeout
-		//
-		return internalGetNext(-1);
+	throws java.lang.InterruptedException,
+	       ResultsAlreadyReturnedException {
+	
+	// Call the internal getNext operator without a timeout
+	//
+	return internalGetNext(-1);
     }
 
 
@@ -254,19 +264,17 @@ public class QueryResult {
      */
 
     public ResultObject getNext (int timeout)
-		throws ResultsAlreadyReturnedException {
-
-		// Call the internal getNext operator with the timeout
-		//
-		try {
-			return internalGetNext(timeout);
-		}
-		catch (java.lang.InterruptedException e) {
-
-			// This will never happen
-			//
-			return null;
-		}
+	throws ResultsAlreadyReturnedException {
+	
+	// Call the internal getNext operator with the timeout
+	//
+	try {
+	    return internalGetNext(timeout);
+	} catch (java.lang.InterruptedException e) {
+	    // KT - previous code commented "This will never happen" and
+	    // returned null
+	    throw new PEException("KT: interrupted during ResultObject:getNext - not supposed to happen");
+	}
     }
 
 
@@ -363,83 +371,85 @@ public class QueryResult {
      */
 
     public ResultObject internalGetNext (int timeout) 
-		throws java.lang.InterruptedException,
-		ResultsAlreadyReturnedException {
+	throws java.lang.InterruptedException,
+	       ResultsAlreadyReturnedException {
+	
+	// Create a new result object
+	//
+	ResultObject resultObject;
+	if(!NiagraServer.QUIET) {
+	    resultObject = new ResultObject();
+	} else {
+	    resultObject = dummyResultObject;
+	}
 
-		// Create a new result object
+	// Check to make sure that stream has not been previously closed
+	//
+	if (endOfStream) {
+	    throw new ResultsAlreadyReturnedException();
+	}
+	
+	// If there has been an error in execution, notify
+	//
+	if (errorInExecution) {
+	    resultObject.status = QueryError;
+	    return resultObject;
+	}
+
+	// Get the next element from the output stream
+	//
+	StreamElement resultElement;
+	
+	if (timeout >= 0) {
+	    
+	    // There is a valid timeout - so use it
+	    //
+	    resultElement = outputStream.getUpStreamElement(timeout);
+	} else {
+	    
+	    // Block till the next result is got
+	    //
+	    resultElement = outputStream.getUpStreamElement();
+	}
+	
+	
+	// Now handle the various types of results
+	//
+	if (resultElement == null) {
+	    
+	    // Nothing read - so had timed out
+	    //
+	    processNullElement(resultObject);
+	} else if (resultElement instanceof StreamControlElement) {
+	    
+	    // Process a control element read
+	    //
+	    processControlElement(resultObject, 
+				  (StreamControlElement) resultElement);
+	    
+	} else if (resultElement instanceof StreamTupleElement) {
+
+	    if(!NiagraServer.QUIET) {
+		// Process a stream tuple element read
 		//
-		ResultObject resultObject = new ResultObject();
-
-		// Check to make sure that stream has not been previously closed
-		//
-		if (endOfStream) {
-			throw new ResultsAlreadyReturnedException();
-		}
-
-		// If there has been an error in execution, notify
-		//
-		if (errorInExecution) {
-			resultObject.status = QueryError;
-			return resultObject;
-		}
-
-		// Get the next element from the output stream
-		//
-		StreamElement resultElement;
-
-		if (timeout >= 0) {
-
-			// There is a valid timeout - so use it
-			//
-			resultElement = outputStream.getUpStreamElement(timeout);
-		}
-		else {
-
-			// Block till the next result is got
-			//
-			resultElement = outputStream.getUpStreamElement();
-		}
-
-
-		// Now handle the various types of results
-		//
-		if (resultElement == null) {
-
-			// Nothing read - so had timed out
-			//
-			processNullElement(resultObject);
-		}
-		else if (resultElement instanceof StreamControlElement) {
-
-			// Process a control element read
-			//
-			processControlElement(resultObject, 
-								  (StreamControlElement) resultElement);
-
-		}
-		else if (resultElement instanceof StreamTupleElement) {
-
-			// Process a stream tuple element read
-			//
-			processTupleElement(resultObject,
-								(StreamTupleElement) resultElement);
-		}
-		else if (resultElement instanceof StreamEosElement) {
-
-			// Process a end of stream element
-			//
-			processEosElement(resultObject,
-					  (StreamEosElement) resultElement);
-		}
-		else {
-
-			System.err.println("Unknown result element from stream");
-			System.exit(-1);
-		}
-
-		// Return the resultObject
-		//
-		return resultObject;
+		processTupleElement(resultObject,
+				    (StreamTupleElement) resultElement);
+	    }
+	} else if (resultElement instanceof StreamEosElement) {
+	    
+	    // Process a end of stream element
+	    //
+	    processEosElement(resultObject,
+			      (StreamEosElement) resultElement);
+	} else {
+	    
+	    System.err.println("Unknown result element from stream");
+	    System.exit(-1);
+	}
+	
+	// Return the resultObject
+	//
+	return resultObject;
     }
 
 
@@ -530,20 +540,19 @@ public class QueryResult {
      */
 
     private void processTupleElement (ResultObject resultObject,
-									  StreamTupleElement tupleElement) {
+				      StreamTupleElement tupleElement) {
 
-		// This is a result element, check if partial or final
-		//
-		if (tupleElement.isPartial()) {
-			resultObject.status = PartialQueryResult;
-		}
-		else {
-			resultObject.status = FinalQueryResult;
-		}
-
-		// Extract XML result
-		//
-		resultObject.result = extractXMLDocument(tupleElement);
+	// This is a result element, check if partial or final
+	//
+	if (tupleElement.isPartial()) {
+	    resultObject.status = PartialQueryResult;
+	} else {
+	    resultObject.status = FinalQueryResult;
+	}
+	
+	// Extract XML result
+	//
+	resultObject.result = extractXMLDocument(tupleElement);
     }
 
 
