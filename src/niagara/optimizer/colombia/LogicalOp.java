@@ -1,7 +1,5 @@
-/* $Id: LogicalOp.java,v 1.6 2002/10/31 04:23:00 vpapad Exp $ */
+/* $Id: LogicalOp.java,v 1.7 2003/02/08 02:12:03 vpapad Exp $ */
 package niagara.optimizer.colombia;
-
-import java.util.ArrayList;
 
 /** Logical operators */
 public abstract class LogicalOp extends Op {

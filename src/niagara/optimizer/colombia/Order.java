@@ -1,3 +1,4 @@
+/* $Id: Order.java,v 1.2 2003/02/08 02:12:04 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 // One-layered order model

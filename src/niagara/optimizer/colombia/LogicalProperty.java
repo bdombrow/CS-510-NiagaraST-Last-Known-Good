@@ -1,3 +1,4 @@
+/* $Id: LogicalProperty.java,v 1.6 2003/02/08 02:12:04 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 /** Logical properties */

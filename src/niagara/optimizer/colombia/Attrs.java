@@ -1,4 +1,4 @@
-/* $Id: Attrs.java,v 1.4 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: Attrs.java,v 1.5 2003/02/08 02:12:03 vpapad Exp $ */
 package niagara.optimizer.colombia;
 import java.util.ArrayList;
 

@@ -1,7 +1,5 @@
-/* $Id: PhysicalOp.java,v 1.5 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: PhysicalOp.java,v 1.6 2003/02/08 02:12:04 vpapad Exp $ */
 package niagara.optimizer.colombia;
-
-import java.util.ArrayList;
 
 /**
  *   PHYSICAL OPERATOR - class PhysicalOp

@@ -1,4 +1,4 @@
-/* $Id: Op.java,v 1.9 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: Op.java,v 1.10 2003/02/08 02:12:03 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 /** Abstract superclass for all operators, logical or physical */

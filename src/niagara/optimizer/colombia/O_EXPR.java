@@ -1,3 +1,4 @@
+/* $Id: O_EXPR.java,v 1.4 2003/02/08 02:12:03 vpapad Exp $ */
 package niagara.optimizer.colombia;
 
 import java.util.Arrays;
@@ -77,7 +78,6 @@ public class O_EXPR extends Task {
         //            explore ? "exploring" : "optimizing",
         //            (const char *) MExpr.Dump());
         if (ssp.IRPROP) {
-            int GrpNo = MExpr.getGrpID();
             //        PTRACE2 ("ContextID: %d, %s", ContextID, (MultiWinner::mc[GrpNo].GetPhysProp(ContextID)).Dump());
         } else {
             //        PTRACE2 ("Context ID: %d , %s", ContextID, 

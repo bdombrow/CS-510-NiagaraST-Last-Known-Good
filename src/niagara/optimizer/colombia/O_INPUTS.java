@@ -1,6 +1,5 @@
+/* $Id: O_INPUTS.java,v 1.4 2003/02/08 02:12:04 vpapad Exp $ */
 package niagara.optimizer.colombia;
-
-import java.util.ArrayList;
 
 /*
  
