@@ -1,11 +1,12 @@
-#include <string.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <stdio.h>
+#include <string>
+#include <iostream>
+#include <fstream>
 
 #include <niag_profiler.h>
 #include <np_consts.h>
 #include <np_funcs.h>
+
+using namespace std;
 
 extern void notifyEvent(JVMPI_Event* event);
 
@@ -13,9 +14,11 @@ jint Niag_Profiler::initialize(JavaVM* jvm, char* options) {
   
   // get jvmpi interface pointer
   if ((jvm->GetEnv((void **)&(jvmpiInterface), JVMPI_VERSION_1)) < 0) {
-    fprintf(stderr, "myprofiler> error in obtaining jvmpi interface pointer\n");
+    cerr << "myprofiler> error in obtaining jvmpi interface pointer\n";
     return JNI_ERR;
   } 
+
+  traceDepth = 4; // default
   
   if(processOptions(options) != JNI_OK) {
     barf(NULL);
@@ -77,7 +80,8 @@ jint Niag_Profiler::initialize(JavaVM* jvm, char* options) {
   return JNI_OK;
 }
 
-jint Niag_Profiler::registerThreadName(JNIEnv* env, jclass cls, jstring threadName) {
+jint Niag_Profiler::registerThreadName(JNIEnv* env, jclass cls, 
+	                               jstring threadName) {
 
   const char *name = env->GetStringUTFChars(threadName, 0);
   threadList->setName(env, name);
@@ -207,6 +211,8 @@ void Niag_Profiler::releaseAllocObjListLatch() {
 }
 
 jlong Niag_Profiler::getCurrentThreadCpuTime() {
+  //jlong time = jvmpiInterface->GetCurrentThreadCpuTime();
+  //return jvmpiInterface == NULL ? 0 : time;
   return jvmpiInterface == NULL ? 0 : jvmpiInterface->GetCurrentThreadCpuTime();
 }
 

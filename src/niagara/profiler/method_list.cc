@@ -1,8 +1,10 @@
 #include <method_list.h>
 #include <np_funcs.h>
 
-#include <string.h>
-#include <iostream.h>
+#include <string>
+#include <iostream>
+
+using namespace std;
 
 Method_List::Method_List() {
   numMAlloc = 1000;

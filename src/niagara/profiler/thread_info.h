@@ -1,8 +1,10 @@
 #ifndef THREAD_INFO_H
 #define THREAD_INFO_H
 
-#include <iostream.h>
+#include <iostream>
 #include <trace_list.h>
+
+using namespace std;
 
 const int NLEN = 50;
 

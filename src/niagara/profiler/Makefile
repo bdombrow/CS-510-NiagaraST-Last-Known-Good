@@ -1,4 +1,5 @@
-JDK_HOME = /disk/hopper/projects/disc/niagara/install/j2sdk1.4.0_01
+JDK_HOME = /disk/hopper/projects/disc/niagara/install/IBMJava2-14
+JDK_HOME = /disk/hopper/projects/disc/niagara/install/j2sdk1.4.1_02
 
 INCLUDES = -I. -I$(JDK_HOME)/include -I$(JDK_HOME)/include/linux
 

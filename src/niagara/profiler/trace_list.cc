@@ -46,8 +46,9 @@ void Trace_List::addAlloc(JVMPI_CallTrace* trace, int bytes, char* threadName) {
 }
 
 void Trace_List::print(ostream& os, char* threadName) {
+  cout << "printing traces " << numTraces << " thr:" << threadId << endl;
   sortTraces();
-  for(int i = 0; i<numTraces; i++) {
+  for(int i = 0; i<numTraces && traceList[i]->memAllocd >= 5000; i++) {
     os << "   TRACE:" << traceList[i]->traceNum 
        << "  Allocd: " << traceList[i]->memAllocd << " (bytes)" 
        << " Live: " << traceList[i]->memAllocd - traceList[i]->freedMem << " (bytes)"
@@ -137,7 +138,7 @@ int Trace_List::traceEquals(const JVMPI_CallTrace* const trace1,
 			    const JVMPI_CallTrace* const trace2) {
   if(trace1->num_frames != trace2->num_frames)
     return NP_FALSE;
-  
+
   for(int i = 0; i<trace1->num_frames; i++) {
     if(trace1->frames[i].lineno != trace2->frames[i].lineno)
       return NP_FALSE;

@@ -1,9 +1,12 @@
+#include <string>
+#include <iostream>
+
 #include <thread_info.h>
 #include <np_consts.h>
 #include <np_funcs.h>
-#include <string.h>
 #include <niag_profiler.h>
-#include <iostream.h>
+
+using namespace std;
 
 extern Niag_Profiler profiler;
 

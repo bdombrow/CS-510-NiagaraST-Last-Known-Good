@@ -1,9 +1,11 @@
 #ifndef THREAD_LIST_H
 #define THREAD_LIST_H
 
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include <jvmpi.h>
+
+using namespace std;
 
 #include <thread_info.h>
 

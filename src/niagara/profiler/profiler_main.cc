@@ -32,6 +32,8 @@ extern "C" {
 // function for handling event notification
 void notifyEvent(JVMPI_Event *event) {
   bool found;
+
+  //cout << "KT received event " << event->event_type << endl;
   
   //switch(event->event_type & !JVMPI_REQUESTED_EVENT) {
   switch(event->event_type) {
@@ -45,10 +47,12 @@ void notifyEvent(JVMPI_Event *event) {
     break;
 
   case JVMPI_EVENT_GC_START:
+    // start timer!
     profiler.getFreedObjListLatch();
     break;
     
   case JVMPI_EVENT_GC_FINISH:
+    // end timer and sum!
     profiler.releaseFreedObjListLatch();
     break;
 

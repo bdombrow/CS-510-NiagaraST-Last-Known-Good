@@ -1,9 +1,11 @@
 #ifndef TRACE_LIST_H
 #define TRACE_LIST_H
 
-#include <iostream.h>
+#include <iostream>
 #include <jvmpi.h>
 #include <method_list.h>
+
+using namespace std;
 
 class Trace_List {
 

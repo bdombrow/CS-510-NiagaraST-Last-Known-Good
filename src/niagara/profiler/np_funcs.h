@@ -2,7 +2,9 @@
 #define NP_FUNCS_H
 
 #include <stdlib.h>
-#include <iostream.h>
+#include <iostream>
+
+using namespace std;
 
 static void barf(char* message) {
   if(message != NULL)
