@@ -55,7 +55,6 @@ public class FirehoseThread implements Runnable {
 	System.out.println("Firehose - starting mem size " + mem);
 
 	while(err == 0 && messageEOF == false && streamShutdown == false) {
-	    //err = fhClient.get_data();
 	    err = fhClient.get_document(); // force client to return whole doc
 	    if(err == 0) {
 		messageEOF = fhClient.get_eof();
@@ -139,19 +138,6 @@ public class FirehoseThread implements Runnable {
 	/* parse the messageBuffer 
 	 * Note: messageBuffer may be longer than actual message 
 	 */
-
-	// Bug in IBM's XMLGenerator
-	/*	int i1 = messageBuffer.indexOf("SYSTEM \"\"");
-	if (i1 !=  -1) {
-	    messageBuffer = messageBuffer.substring(0, i1) + 
-		"SYSTEM \"http://www.cse.ogi.edu/~vpapad/xml/play.dtd\"" +
-		messageBuffer.substring(i1 + "SYSTEM \"\"".length());
-	}
-
-	// Get rid of 0x0's - this is using too much time!!
-  	if (messageBuffer.indexOf(0) != -1)
- 	    messageBuffer = messageBuffer.substring(0, messageBuffer.indexOf(0));	
-	*/
 
 	try {
 	    if (parser == null) {

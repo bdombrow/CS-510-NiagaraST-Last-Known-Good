@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DataManager.java,v 1.3 2001/08/08 21:25:48 tufte Exp $
+  $Id: DataManager.java,v 1.4 2002/03/26 23:51:56 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -166,7 +166,7 @@ public class DataManager {
 	    responseDoc = parseXML(response);
 	}
 	catch (Exception e) { 
-	    System.out.println("DM Error: "+e);
+	    System.out.println("DM Error: Unable to get DTD Info: "+e);
 	    responseDoc = null; 
 	}
 
@@ -190,7 +190,7 @@ public class DataManager {
 	    responseDoc = parseXML(response);
 	}
 	catch (Exception e) { 
-	    System.out.println("DM Error: "+e);
+	    System.out.println("DM Error: Unable to get DTD List: "+e);
 	    responseDoc = null; 
 	}
 

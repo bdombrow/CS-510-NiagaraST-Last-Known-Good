@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: FetchThread.java,v 1.4 2001/08/08 21:25:48 tufte Exp $
+  $Id: FetchThread.java,v 1.5 2002/03/26 23:51:56 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,7 +48,6 @@ class FetchThread implements Runnable {
     private MemCache cache;
 
     FetchThread(FetchRequest req, MemCache dmc) {
-        // System.err.println("New a FETCH Thread");
         this.req = req;
         this.cache = dmc;
         blockCount = 0;
@@ -129,14 +128,13 @@ inner:      for(int i=0; i<tmpUrl.size(); i++) {
 	    }
 	    notified = false;	
 	}
-	System.err.println("All Fetch Done!");
+	// All Fetch Done!
 	try { 
 	    req.s.close();
 	} catch (Exception se) {
 	    System.err.println("sourceStream close err");
 	    se.printStackTrace();
 	}
-	System.err.println("SourceStream closed");
     }
 
     volatile boolean notified = false;
