@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: logNode.java,v 1.11 2002/12/10 00:51:53 vpapad Exp $
+  $Id: logNode.java,v 1.12 2003/03/03 08:26:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -414,5 +414,14 @@ public class logNode implements SchedulablePlan, java.io.Serializable {
 
     public void setOperator(Op operator) {
         this.operator = (op) operator;
+    }
+
+    public boolean isSendImmediate() {
+	assert false : "Should not ask this of a log node";
+	return false;
+    }
+
+    public void setSendImmediate() {
+	assert false : "Should not ask this of a log node";
     }
 }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: joinOp.java,v 1.8 2002/12/10 00:51:53 vpapad Exp $
+  $Id: joinOp.java,v 1.9 2003/03/03 08:26:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,6 +43,12 @@ import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class joinOp extends binOp {
+    // values for extension join...
+    public static final int NONE = 0;
+    public static final int LEFT = 1;
+    public static final int RIGHT = 2;
+    public static final int BOTH = 3;
+
     private Predicate pred; // non-equijoin part of the predicate
 
     // for equi-join represents the attributes of the left relation
@@ -52,20 +58,26 @@ public class joinOp extends binOp {
     /** The attributes we're projecting on (null means keep all attributes) */
     private Attrs projectedAttrs;
 
+    private int extensionJoin;
+
     public joinOp() {
+	extensionJoin = NONE; // default
     }
 
     public joinOp(
         Predicate pred,
         EquiJoinPredicateList equiJoinPredicates,
-        Attrs projectedAttrs) {
+        Attrs projectedAttrs,
+	int extensionJoin) {
         this.pred = pred;
         this.equiJoinPredicates = equiJoinPredicates;
         this.projectedAttrs = projectedAttrs;
+	this.extensionJoin = extensionJoin;
     }
 
-    public joinOp(Predicate pred, EquiJoinPredicateList equiJoinPredicates) {
-        this(pred, equiJoinPredicates, null);
+    public joinOp(Predicate pred, EquiJoinPredicateList equiJoinPredicates,
+		  int extensionJoin) {
+        this(pred, equiJoinPredicates, null, extensionJoin);
     }
 
     public EquiJoinPredicateList getEquiJoinPredicates() {
@@ -74,6 +86,10 @@ public class joinOp extends binOp {
 
     public Predicate getNonEquiJoinPredicate() {
         return pred;
+    }
+
+    public int getExtensionJoin(){
+	return extensionJoin;
     }
 
     /**
@@ -96,12 +112,14 @@ public class joinOp extends binOp {
      * @param left attributes of the equi-join
      * @param right attributes of the equi-join
      */
-    public void setJoin(Predicate p, ArrayList left, ArrayList right) {
+    public void setJoin(Predicate p, ArrayList left, ArrayList right,
+			int extensionJoin) {
         equiJoinPredicates = new EquiJoinPredicateList(left, right);
         if (p != null)
             pred = p;
         else
             pred = True.getTrue();
+	this.extensionJoin = extensionJoin;
     }
 
     public void setCartesian(Predicate p) {
@@ -197,7 +215,8 @@ public class joinOp extends binOp {
         return new joinOp(
             pred.copy(),
             equiJoinPredicates.copy(),
-            (projectedAttrs == null)?null:projectedAttrs.copy());
+            (projectedAttrs == null)?null:projectedAttrs.copy(),
+	    extensionJoin);
     }
 
     public boolean equals(Object obj) {
@@ -208,7 +227,8 @@ public class joinOp extends binOp {
         joinOp other = (joinOp) obj;
         return pred.equals(other.pred)
             && equiJoinPredicates.equals(other.equiJoinPredicates)
-            && equalsNullsAllowed(projectedAttrs, other.projectedAttrs);
+            && equalsNullsAllowed(projectedAttrs, other.projectedAttrs)
+	    && (extensionJoin == other.extensionJoin);
     }
 
     public int hashCode() {

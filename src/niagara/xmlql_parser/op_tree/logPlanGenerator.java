@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: logPlanGenerator.java,v 1.4 2002/10/31 04:17:06 vpapad Exp $
+  $Id: logPlanGenerator.java,v 1.5 2003/03/03 08:26:41 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -357,7 +357,8 @@ public class logPlanGenerator {
 	 * @param list of common variables
 	 */
 	
-	private logNode joinTree(logNode leftTree, logNode rightTree, Vector comVar)  {
+	private logNode joinTree(logNode leftTree, logNode rightTree, 
+				 Vector comVar)  {
 		Vector leftJoinAttr, rightJoinAttr;
 		varTbl leftVarTbl, rightVarTbl, newVarTbl;
 		Schema leftSchema, rightSchema, newSchema;
@@ -454,7 +455,8 @@ public class logPlanGenerator {
                 // creates a predicate for the equi-join
                 Predicate equiJoinPred = Util.makePredicate(leftJoinAttr,rightJoinAttr);
         
-		join.setJoin(joinPredicate,left,right);
+		// ??? KT - VPAPAD is the setting of ext join right???
+		join.setJoin(joinPredicate,left,right,joinOp.NONE);
 		newTree = new logNode(join,leftTree,rightTree);
 		newTree.setVarTbl(newVarTbl);
 		newTree.setSchema(newSchema);
