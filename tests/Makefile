@@ -9,11 +9,15 @@ export CLASSPATH = ${FIREHOSE_ROOT}:${SRC}:${LIB}/gnu-regexp.jar:${LIB}/xml4j.ja
 %.class : %.java
 	javac -classpath ${CLASSPATH} $<
 
-tests: ndom
+tests: ndom catalog
 
 ndom: TestNDOM.class
 	@echo "Testing sanity of DOM implementations"
 	@java -classpath ${CLASSPATH} TestNDOM
+
+catalog: TestCatalog.class
+	@echo "Testing sanity of catalog parsing"
+	@java -classpath ${CLASSPATH} TestCatalog
 
 classpath:
 	@echo ${CLASSPATH}

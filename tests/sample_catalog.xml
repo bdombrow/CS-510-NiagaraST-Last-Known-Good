@@ -1,0 +1,25 @@
+<catalog>
+<resource name="urn:niagara:comedies">
+<url location="http://www.cse.ogi.edu/~vpapad/xml/all_well.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/as_you.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/com_err.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/cymbelin.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/dream.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/lll.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/m_for_m.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/m_wives.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/merchant.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/much_ado.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/pericles.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/t_night.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/taming.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/tempest.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/troilus.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/win_tale.xml"/>
+<url location="http://www.cse.ogi.edu/~vpapad/xml/win_tale.xml"/>
+</resource>
+
+<resource name="urn:niagara:tragedies">
+	<resolver location="king.cse.ogi.edu:9090"/>
+</resource>
+</catalog>
