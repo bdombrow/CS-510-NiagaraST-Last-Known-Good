@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PathExprEvaluator.java,v 1.2 2000/08/07 02:00:48 vpapad Exp $
+  $Id: PathExprEvaluator.java,v 1.3 2000/08/21 00:59:19 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -249,8 +249,11 @@ public class PathExprEvaluator
 					
 					// add each item from node list to the return vector, return it
 					//		
-					for (i = 0; i < size; i++)
-						nodesReached.addElement(nl.item(i));
+					for (i = 0; i < size; i++) {
+					    Node n = nl.item(i);
+					    if (n instanceof Element)
+						nodesReached.addElement(n);
+					}
 				}
 				
 				return nodesReached;

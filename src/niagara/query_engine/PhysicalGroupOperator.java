@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.3 2000/08/03 04:39:28 vpapad Exp $
+  $Id: PhysicalGroupOperator.java,v 1.4 2000/08/21 00:59:19 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -560,6 +560,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	// Add the grouped result as the attribute
 	//
 	tupleElement.appendAttribute(groupedResult);
+
 
 	// Return the result tuple
 	//

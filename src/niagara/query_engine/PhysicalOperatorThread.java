@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperatorThread.java,v 1.1 2000/05/30 21:03:27 tufte Exp $
+  $Id: PhysicalOperatorThread.java,v 1.2 2000/08/21 00:59:20 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -125,6 +125,10 @@ public class PhysicalOperatorThread implements Runnable {
 	    //
 	    op.execute();
 
+	    // Garbage collect the memory occupied by the operator
+	    // *now*, instead of waiting for the next time this thread
+	    // executes an operator
+	    op = null;
 	} while (true);
     }
 }

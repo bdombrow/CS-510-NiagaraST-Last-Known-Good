@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.5 2000/08/09 23:53:59 tufte Exp $
+  $Id: ExecutionScheduler.java,v 1.6 2000/08/21 00:59:18 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -138,40 +138,63 @@ public class ExecutionScheduler {
 		//
 		System.err.println("ES:: optimizedTree is: ");
 		optimizedTree.dump();
-		scheduleForExecution(optimizedTree, inputStreams[0]);
+
+		scheduleForExecution(optimizedTree, inputStreams[0], 
+				     new Hashtable());
     }
 
 
     /**
-     * This function schedules the tree rooted at "rootLogicalNode" for
+     * This function schedules the DAG rooted at "rootLogicalNode" for
      * execution
      *
      * @param rootLogicalNode The root of the the logical tree to be
      *                        scheduled for execution
-     * @param outputStream The stream to which the output is to be sent
+     * @param outputStream    The stream to which the output is to be sent
+     * @param nodesScheduled  A hashtable containing all the logical plan nodes
+     *                        that are already scheduled, since 
+     *                        the plan is not necessarily a tree.
      */
 
     private void scheduleForExecution (logNode rootLogicalNode,
-				       Stream outputStream) {
+				       Stream outputStream,
+				       Hashtable nodesScheduled) {
 
 		// Get the operator corresponding to the logical node
 		//
-		op operator = rootLogicalNode.getOperator();
+
+	op operator = rootLogicalNode.getOperator();
+	Object po = operator;		
+
+	if (nodesScheduled.containsKey(rootLogicalNode)) {
+	    // This operator was already scheduled
+	    // Just add outputStream to its output streams
+	    PhysicalOperator physOp = (PhysicalOperator) nodesScheduled.get(rootLogicalNode);
+	    Stream s = null;
+	    int i;
+	    for (i = 0; i < operator.getNumberOfOutputStreams(); i++) {
+		if (physOp.getDestinationStream(i) == null)
+		    break;
+	    }
+	    physOp.setDestinationStream(i, outputStream);
+	    if (i == operator.getNumberOfOutputStreams() -1)
+		opQueue.putOperator(physOp);
+	    return;
+	}
 
 		// If this is a DTD Scan operator, then process accordingly
 		//
 		if (operator instanceof dtdScanOp) {
-
+		    
 		    processDTDScanOperator((dtdScanOp) operator, outputStream);
 
 		} else if (operator instanceof FirehoseScanOp) {
-
 		    processFirehoseScanOperator((FirehoseScanOp) operator, outputStream);
 		} else {
 			// This is a regular operator node ... Create the output streams
 			// array
 			//
-			Stream[] outputStreams = new Stream[1];
+			Stream[] outputStreams = new Stream[operator.getNumberOfOutputStreams()];
 			outputStreams[0] = outputStream;
 
 			// Recurse over all children and create input streams array
@@ -189,7 +212,8 @@ public class ExecutionScheduler {
 				// Recurse on child
 				//
 				scheduleForExecution(rootLogicalNode.input(child),
-									 inputStreams[child]);
+						     inputStreams[child],
+						     nodesScheduled);
 			}
 
 			// Instantiate operator with input and output streams.
@@ -235,10 +259,14 @@ public class ExecutionScheduler {
 				return;
 			}
 
-			// Put the new created physical operator in the operator queue
-			//
-			opQueue.putOperator(physicalOperator);
+			if (physicalOperator.isReady()) {
+			    // Put the new created physical operator in the operator queue
+			    opQueue.putOperator(physicalOperator);
+			}
+			nodesScheduled.put(rootLogicalNode, physicalOperator);
+			return;
 		}
+		nodesScheduled.put(rootLogicalNode, po);
     }
 
 

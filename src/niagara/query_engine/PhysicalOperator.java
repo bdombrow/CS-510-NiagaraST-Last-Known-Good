@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.2 2000/08/09 23:53:59 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.3 2000/08/21 00:59:19 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -322,7 +322,19 @@ public abstract class PhysicalOperator {
 	//lastReadSourceStream = numSourceStreams - 1;
 	lastReadSourceStream = 0;
     }
-		     
+
+
+    /**
+     * Is this operator ready for execution (All destination
+     * streams in place?)
+     */
+    public boolean isReady() {
+	for (int i = 0; i < destinationStreams.length; i++) {
+	    if (destinationStreams[i] == null)
+		return false;
+	}
+	return true;
+    }
 
     /**
      * This function sets up the flow of control for the operator by
@@ -489,7 +501,7 @@ public abstract class PhysicalOperator {
 
 	// Loop over all source streams counting the number of unclosed ones
 	//
-	int numSourceStreams = Array.getLength(sourceStreams);
+	int numSourceStreams = sourceStreams.length;
 
 	for (int src = 0; src < numSourceStreams; ++src) {
 	    if (getSourceStreamStatus(src) != SourceStreamStatus.Closed) {

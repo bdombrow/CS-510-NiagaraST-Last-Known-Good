@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QEUtil.java,v 1.3 2000/05/31 17:22:54 tufte Exp $
+  $Id: QEUtil.java,v 1.4 2000/08/21 00:59:20 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,7 +33,6 @@ import org.w3c.dom.*;
 import java.lang.*;
 import java.io.*;
 import java.util.*;
-import com.sun.java.swing.*;
 import com.ibm.xml.parser.util.*;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PredicateEvaluator.java,v 1.2 2000/07/08 05:22:54 vpapad Exp $
+  $Id: PredicateEvaluator.java,v 1.3 2000/08/21 00:59:20 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -373,7 +373,8 @@ public class PredicateEvaluator {
 	    // Now get the path expression
 	    //
 	    regExp pathExpr = schema.getPath();
-		// Invoke the path expression evaluator to get the nodes reachable
+
+	    // Invoke the path expression evaluator to get the nodes reachable
 	    // using the path expression
 	    //
 	    Vector reachableNodes =

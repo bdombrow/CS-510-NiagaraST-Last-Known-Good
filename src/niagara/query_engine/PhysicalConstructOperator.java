@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.2 2000/08/16 06:47:23 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.3 2000/08/21 00:59:19 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,6 +63,8 @@ public class PhysicalConstructOperator extends PhysicalOperator {
     //
     private constructBaseNode resultTemplate;
 
+    // "Clear the output tuple" flag
+    boolean clear;
 
     ///////////////////////////////////////////////////////////////////////////
     // These are the methods of the PhysicalConstructOperator class          //
@@ -98,9 +100,9 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	//
 	constructOp constructLogicalOp = (constructOp) logicalOperator;
 
-	// Initialize the result template
-	//
+	// Initialize the result template and the "clear" flag
 	this.resultTemplate = constructLogicalOp.getResTemp();
+	this.clear = constructLogicalOp.isClear();
     }
     
 
@@ -135,11 +137,17 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 	    // Clone the input tuple element to create a new output tuple
 	    //element
 	    //
-	    StreamTupleElement outputTuple = 
-		              (StreamTupleElement) tupleElement.clone();
+	    StreamTupleElement outputTuple;
+
+	    if (clear) {
+		// Start a completely new tuple
+		outputTuple = new StreamTupleElement(tupleElement.isPartial());
+	    }
+	    else {
+		outputTuple = (StreamTupleElement) tupleElement.clone();
+	    }
 
 	    // Append the constructed result to end of newly created tuple
-	    //
 	    outputTuple.appendAttribute(resultList.get(res));
 
 	    // Add the new tuple to the result

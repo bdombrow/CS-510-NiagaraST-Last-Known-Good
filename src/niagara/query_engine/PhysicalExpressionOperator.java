@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.4 2000/08/21 00:59:20 vpapad Exp $
+  $Id: PhysicalExpressionOperator.java,v 1.1 2000/08/21 00:59:19 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,17 +36,17 @@ import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 /**
- * The <code>PhysicalScanOperator</code> class is derived from the abstract class
- * <code>PhysicalOperator</code>. It implements a scan on a incoming tuple,
- * producing a new wider outgoing tuple.
+ * The <code>PhysicalExpressionOperator</code> class is derived from the abstract class
+ * <code>PhysicalOperator</code>. It implements evaluating an arbitrary Expression 
+ * on an incoming tuple, producing a new wider outgoing tuple.
  *
  * @version 1.0
  */
 
-public class PhysicalScanOperator extends PhysicalOperator {
+public class PhysicalExpressionOperator extends PhysicalOperator {
 
     //////////////////////////////////////////////////////////////////////////
-    // These are the private data members of the PhysicalScanOperator class //
+    // These are the private data members of the PhysicalExpressionOperator class //
     //////////////////////////////////////////////////////////////////////////
 
     // This is the array having information about blocking and non-blocking
@@ -54,21 +54,15 @@ public class PhysicalScanOperator extends PhysicalOperator {
     //
     private static final boolean[] blockingSourceStreams = { false };
 
-    // The path expression to scan
-    //
-    private regExp rExp;
-
-    // The attribute on which the scan is to be performed
-    //
-    private int scanField;
-    
+    private ExpressionIF expressionObject; 
+    // An object of a clas that implements ExpressionIF
 
     ///////////////////////////////////////////////////////////////////////////
-    // These are the methods of the PhysicalScanOperatorClass                //
+    // These are the methods of the PhysicalExpressionOperatorClass                //
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * This is the constructor for the PhysicalScanOperator class that
+     * This is the constructor for the PhysicalExpressionOperator class that
      * initializes it with the appropriate logical operator, source streams,
      * destination streams, and responsiveness to control information.
      *
@@ -80,11 +74,9 @@ public class PhysicalScanOperator extends PhysicalOperator {
      *                 non-blocking
      * @param responsiveness The responsiveness, in milliseconds, to control
      *                       messages
-     * @param rExp the path expression to evaluate for this scan
-     * @param scanField the tuple field to begin the scan at
      */
 
-    public PhysicalScanOperator (op logicalOperator,
+    public PhysicalExpressionOperator (op logicalOperator,
 				 Stream[] sourceStreams,
 				 Stream[] destinationStreams,
 				 Integer responsiveness) {
@@ -96,20 +88,19 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	      blockingSourceStreams,
 	      responsiveness);
 
-	// Type cast the logical operator to a scan operator
+	// Type cast the logical operator to a Expression operator
 	//
-	scanOp logicalScanOperator = (scanOp) logicalOperator;
- 
-	// Sets the regular expression to scan for
-	//
-	this.rExp = logicalScanOperator.getRegExpToScan();
-
-	// Sets the field to scan on
-	//
-	this.scanField = logicalScanOperator.getParent().getAttrId();
-
-	
+	ExpressionOp logicalExpressionOperator = (ExpressionOp) logicalOperator;
+	Class expressionClass = logicalExpressionOperator.getExpressionClass();
+	// Create an object of the class specified in the logical op
+	try {
+	    expressionObject = (ExpressionIF) expressionClass.newInstance();
 	}
+	catch (Exception e) {
+	    System.err.println("ExpressionOp: An error occured while constructing an object of the class:\n" 
+			       + expressionClass);
+	}
+    }
 
 
     /**
@@ -129,52 +120,13 @@ public class PhysicalScanOperator extends PhysicalOperator {
 						 StreamTupleElement inputTuple,
 						 int streamId,
 						 ResultTuples result) {
-	// Get the attribute to scan on
-	//
-	Object attribute = inputTuple.getAttribute(scanField);
-	
-	// Get the nodes reachable using the path expression scanned
-	//
-        
-        if(attribute instanceof TXDocument) {
-            // System.err.println( ((TXDocument)attribute).getText());
-            String rootName = ((TXDocument)attribute).getRootName();
-            if(rootName==null) {
-                System.err.println("Got you!, NULL Root of DOC");
-            }
-        }
-        else if(attribute instanceof TXElement) {
-            // System.err.println( ((TXElement)attribute).getText());
-        }
-	//System.out.println("SCAN:Node scanned is " + ((Node)attribute).getNodeName());
-		
-	Vector elementList = PathExprEvaluator.getReachableNodes(attribute,this.rExp);
-		
-		
-
-	// Append all the nodes returned to the inputTuple and add these
-	// to the result
-	//
-	int numNodes = elementList.size();	
-
-	for(int node = 0; node < numNodes; ++node) {
-
-	    // Clone the input tuple to create an output tuple
-	    //
-	    StreamTupleElement outputTuple = 
-		                   (StreamTupleElement) inputTuple.clone();
-
-	    // Append a reachable node to the output tuple
-	    //
-	    outputTuple.appendAttribute(elementList.elementAt(node));
-
-	    // Add the output tuple to the result
-	    //
-	    result.add(outputTuple, 0);
-	}
+	Node res = expressionObject.processTuple(inputTuple);
+	StreamTupleElement outputTuple = (StreamTupleElement) inputTuple.clone();
+	outputTuple.appendAttribute(res);
+	// Add the output tuple to the result
+	result.add(outputTuple, 0);
 
 	// No problem - continue execution
-	//
 	return true;
     }    
 }
