@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.25 2003/03/03 08:20:13 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.26 2003/03/03 16:07:37 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,8 +64,11 @@ implements SchemaProducer, SerializableToXML, Initializable {
 
     //The required responsiveness to control messages
     private int responsiveness;
-    private int timeouts;
-    private int numTimeoutsToFlushBuffer;
+
+    // providing guarantee on longest time a tuple can be
+    // delayed in the streem - in milleseconds
+    private int sleepTime;
+    private int maxDelay;
 
     //  The vector of open source streams to read from 
     // active means we are currently reading from that stream,
@@ -149,9 +152,9 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    }
 	}
 
-	// set up timeouts to ensure timely buffer flushing
-	timeouts = 0; 
-	numTimeoutsToFlushBuffer = 5;
+	// set up to ensure timely buffer flushing
+	sleepTime = 0; 
+	maxDelay = 1000;
 
 	// Start reading from the first input stream
 	lastReadSourceStream = 0;
@@ -199,10 +202,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    // Loop by reading inputs and processing them until there is at
 	    // least one open input stream
 	    while (existsUnClosedSourceStream()) {	
-		numTimeoutsToFlushBuffer = 5* activeSourceStreams.size();
-		if(numTimeoutsToFlushBuffer == 0)
-		    throw new PEException("KT FIX THIS!!!");
-
 		// Read the object from any of the valid input streams,
 		// timing out if nothing available in any input stream
 		// does use a timeout
@@ -238,8 +237,8 @@ implements SchemaProducer, SerializableToXML, Initializable {
 		// no timeout here
 		checkForSinkCtrlMsg();
 
-		if(timeouts == numTimeoutsToFlushBuffer) {
-		    timeouts = 0;
+		if(sleepTime >= maxDelay) {
+		    sleepTime = 0;
 		    int ctrlFlag = CtrlFlags.NULLFLAG;
 		    int sinkId = 0;
 		    for (; sinkId < numSinkStreams && 
@@ -456,7 +455,7 @@ implements SchemaProducer, SerializableToXML, Initializable {
 
 		// if we timed out, try the next stream
 		if(sourceStreams[streamId].timedOut()) {
-		    timeouts++;
+		    sleepTime += timeout;
 		    lastReadSourceStream = 
 			(lastReadSourceStream + 1)%numActiveSourceStreams;
 		    continue;
@@ -774,6 +773,14 @@ implements SchemaProducer, SerializableToXML, Initializable {
 		processCtrlMsgFromSink(ctrlFlag, streamId);
 	    }
 	}
+    }
+
+    /**
+     * Set the maximum amount of time a tuple can be delayed
+     * in the stream. In milliseconds.
+     */
+    public void setMaxDelay(int ms) {
+	maxDelay = ms;
     }
 
     /**
