@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.9 2002/12/10 01:03:25 vpapad Exp $ -->
+<!-- $Id: build.xml,v 1.10 2003/02/27 07:50:37 vpapad Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -50,19 +50,19 @@
     <exec executable="/bin/sh"
     	dir="${src}/niagara/xmlql_parser/syntax_tree">
 	<arg value="-c"/>
-      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 5 -parser QueryParser -package niagara.xmlql_parser.syntax_tree &lt; xmlql.cup"/>
+      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 8 -parser QueryParser -package niagara.xmlql_parser.syntax_tree &lt; xmlql.cup"/>
     </exec>
 
     <exec executable="/bin/sh"
     	dir="${src}/niagara/xmlql_parser/syntax_tree">
 	<arg value="-c"/>
-      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 5 -parser REParser -symbols RESym -package niagara.xmlql_parser.syntax_tree &lt; re.cup"/>
+      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 8 -parser REParser -symbols RESym -package niagara.xmlql_parser.syntax_tree &lt; re.cup"/>
     </exec>
 
     <exec executable="/bin/sh"
     	dir="${src}/niagara/xmlql_parser/syntax_tree">
 	<arg value="-c"/>
-      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 5 -parser ConstructParser -symbols ConstructSym -package niagara.xmlql_parser.syntax_tree &lt; construct.cup"/>
+      <arg value="java -classpath ${lib}/cup_all.jar java_cup.Main -expect 8 -parser ConstructParser -symbols ConstructSym -package niagara.xmlql_parser.syntax_tree &lt; construct.cup"/>
     </exec>
   </target>
 
