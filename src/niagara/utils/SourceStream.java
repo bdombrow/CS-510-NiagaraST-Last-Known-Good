@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SourceStream.java,v 1.2 2002/04/18 23:14:45 vpapad Exp $
+  $Id: SourceStream.java,v 1.3 2002/04/19 20:49:54 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,6 +27,8 @@
 
 
 package niagara.utils;
+
+import org.w3c.dom.Node;
 
 /**
  * This is the <code>SourceStream</code> class the provides the interface
@@ -113,7 +115,7 @@ public class SourceStream {
 	} while (true);
     }
 
-    public boolean put (Object object) 
+    public boolean put (Node node) 
         throws java.lang.InterruptedException,
     NullElementException,
     StreamPreviouslyClosedException {
@@ -124,7 +126,7 @@ public class SourceStream {
 
         // Add the object as an attribute of the tuple
         //
-        tuple.appendAttribute(object);
+        tuple.appendAttribute(node);
 
         // Repeatedly try to put tuple in the stream
         //

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.3 2001/08/08 21:30:32 tufte Exp $
+  $Id: StreamTupleElement.java,v 1.4 2002/04/19 20:49:54 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,7 +30,7 @@ package niagara.utils;
 
 /**
  * This is the <code>StreamTupleElement</code> class that is the unit
- * of transfer of tuples across a stream.
+ * of transfer of tuples across a stream. Tuples are arrays of Nodes.
  *
  * @version 1.0
  *
@@ -42,28 +42,16 @@ import org.w3c.dom.*;
 
 public final class StreamTupleElement extends StreamElement {
 
-    ///////////////////////////////////////////////////
-    //   Data members of the StreamTupleElement Class
-    ///////////////////////////////////////////////////
-
-    // A vector of the attributes of the tuple
-    //
-    private Vector tuple;
+    // Members to create an expandable array of nodes
+    private Node tuple[];
+    private int allocSize;
+    private int tupleSize;
 
     // A boolean flag that indicates whether this tuple represents
     // a (potentially) partial result
     //
     private boolean partial;
     private long timeStamp;
-
-    // The old version of the tuple (if any)
-    //
-    private StreamTupleElement oldVersion;
-
-
-    ///////////////////////////////////////////////////
-    //   Methods of the StreamTupleElement Class
-    ///////////////////////////////////////////////////
 
     /*
      * Constructor that initializes a tuple
@@ -73,19 +61,10 @@ public final class StreamTupleElement extends StreamElement {
      */
 
     public StreamTupleElement (boolean partial) {
-
-	// Intialize the tuple vector
-	//
-	tuple = new Vector();
+	// Initialize the tuple vector with the capacity
+	createTuple(8);
         timeStamp = 0;
-
-	// Initialize whether the tuple is a partial result
-	//
 	this.partial = partial;
-
-	// Initialize the old version of the tuple to null
-	//
-	this.oldVersion = null;
     }
 
 
@@ -100,19 +79,20 @@ public final class StreamTupleElement extends StreamElement {
     public StreamTupleElement (boolean partial, int capacity) {
 	
 	// Initialize the tuple vector with the capacity
-	//
-	tuple = new Vector (capacity);
+	createTuple(capacity);
         timeStamp = 0;
-
-	// Initialize whether the tuple is a partial result
-	//
 	this.partial = partial;
 
 	// Initialize the old version of the tuple to null
 	//
-	this.oldVersion = null;
+	//this.oldVersion = null;
     }
 
+    private void createTuple(int capacity) {
+	allocSize = capacity;
+	tuple = new Node[allocSize];
+	tupleSize = 0;
+    }
      
     /**
      * The constructor that initializes the tuple and stores the old version
@@ -122,7 +102,7 @@ public final class StreamTupleElement extends StreamElement {
      *                else it represents a final result
      * @param oldVersion The old version of the current tuple
      */
-
+    /*
     public StreamTupleElement (boolean partial, StreamTupleElement oldVersion) {
 
 	// Initialize the tuple vector with capacity equal to size of old
@@ -147,7 +127,7 @@ public final class StreamTupleElement extends StreamElement {
 	this.oldVersion = oldVersion;
         this.timeStamp = 0;
     }
-     
+    */
 
     /**
      * This function return the number of attributes in the tuple element
@@ -156,7 +136,7 @@ public final class StreamTupleElement extends StreamElement {
      */
 
     public int size () {
-	return tuple.size();
+	return tupleSize;
     }
 
 
@@ -184,9 +164,12 @@ public final class StreamTupleElement extends StreamElement {
      * @param attribute The attribute to be appended
      */
 
-    public void appendAttribute (Object attribute) {
-
-	tuple.addElement(attribute);
+    public void appendAttribute (Node attribute) {
+	if(tupleSize == allocSize) {
+	    expandTuple();
+	}
+	tuple[tupleSize] = attribute;
+	tupleSize++;
     }
 
 
@@ -198,16 +181,17 @@ public final class StreamTupleElement extends StreamElement {
      *                     the current tuple
      */
 
-    public void appendAttributes (StreamTupleElement tupleElement) {
+    public void appendAttributes (StreamTupleElement otherTuple) {
 
-	// Loop over all the attributes of the tupleElement and append them
-	//
-	int numAtts = tupleElement.size();
-
-	for (int att = 0; att < numAtts; ++att) {
-
-	    this.appendAttribute(tupleElement.getAttribute(att));
+	// Loop over all the attributes of the other tuple and append them
+	while(tupleSize+otherTuple.tupleSize > allocSize) {
+	    expandTuple();
 	}
+
+	for (int i = 0; i< otherTuple.tupleSize; i++) {
+	    tuple[tupleSize+i] = otherTuple.tuple[i];
+	}
+	tupleSize+=otherTuple.tupleSize;;
     }
 
 
@@ -219,16 +203,18 @@ public final class StreamTupleElement extends StreamElement {
      * @return The desired attribute
      */
 
-    public Object getAttribute (int position) {
-
-        // System.err.println("STE.getAttr is " + this.toString());
-        // System.err.println("Getting " + position);
-	return tuple.elementAt(position);
+    public Node getAttribute (int position) {
+	return tuple[position];
     }
 
 
-    public void setAttribute(int position, Object value) {
-        tuple.insertElementAt(value, position);
+    public void setAttribute(int position, Node value) {
+	while(position >= allocSize) {
+	    expandTuple();
+	    tupleSize = position+1;
+	}
+
+        tuple[position] = value;
     }
 
     /**
@@ -236,12 +222,12 @@ public final class StreamTupleElement extends StreamElement {
      *
      * @return Old version of the tuple; If no old version, returns null.
      */
-
+    /*
     public StreamTupleElement getOldVersion () {
 
 	return oldVersion;
     }
-
+    */
 
     /**
      * This function clones a stream tuple element and returns the clone
@@ -254,8 +240,7 @@ public final class StreamTupleElement extends StreamElement {
 	// Create a new stream tuple element with the same partial semantics
 	//
 	StreamTupleElement returnElement = 
-	    new StreamTupleElement(this.isPartial(),
-				   tuple.size());
+	    new StreamTupleElement(this.partial, tupleSize);
 
 	// Add all the attributes of the current tuple to the clone
 	//
@@ -287,35 +272,32 @@ public final class StreamTupleElement extends StreamElement {
 
     public void removeLastNAttributes (int N) {
 
-        int numAtts = tuple.size();
-
-        for (int att = numAtts-1; att >= numAtts-N; --att) {
-		tuple.removeElementAt(att);	
+        for (int i = tupleSize-1; i >= tupleSize-N; i--) {
+		tuple[i] = null;
         }
+	tupleSize = tupleSize-N;
     }
+
 
     public Element toEle(Document doc) {
         Element ret = doc.createElement("StreamTupleElement");
-        if(partial) ret.setAttribute("PARTIAL", "TRUE");
-        else ret.setAttribute("PARTIAL", "FALSE");
+        if(partial) 
+	    ret.setAttribute("PARTIAL", "TRUE");
+        else 
+	    ret.setAttribute("PARTIAL", "FALSE");
         ret.setAttribute("TIMESTAMP", ""+timeStamp);
         
-        for(int i=0; i<tuple.size(); i++) {
+        for(int i=0; i<tupleSize; i++) {
             Element tele = doc.createElement("Entry");
-            Object tmp = tuple.elementAt(i);
+            Node tmp = tuple[i];
             if(tmp instanceof Element) {
                 tele.setAttribute("Type", "Element");
-                tele.appendChild((Element)tmp);
-            }
-            else if(tmp instanceof Text) {
+                tele.appendChild(tmp);
+            } else if(tmp instanceof Text) {
                 tele.setAttribute("Type", "Text");
-            }
-            else if(tmp instanceof String) {
-                tele.setAttribute("Type", "String");
-                tele.appendChild(doc.createTextNode((String)tmp));
-            } 
-            else {
-                System.err.println("Non Elemen/String Attr in TupleElement");
+		tele.appendChild(tmp); //KT -added this, think it is needed
+            }  else {
+		throw new PEException("Non Elem/String Attr in TupleElement");
             }
             ret.appendChild(tele);
         }
@@ -330,19 +312,28 @@ public final class StreamTupleElement extends StreamElement {
         String ts = ele.getAttribute("TIMESTAMP");
         timeStamp = Long.parseLong(ts);
 
-        tuple = new Vector();
+	createTuple(8);
+
         for(Node c = ele.getFirstChild(); c!=null; c=c.getNextSibling()) {
             Element e = (Element)c;
             String type = e.getAttribute("Type");
             if(type.equals("Element") || type.equals("Text")) {
-                tuple.addElement(e.getFirstChild());
-            }
-            else { // type.equals("String")
-                tuple.addElement(((Text) e.getFirstChild()).getData());
-            }
+                appendAttribute(e.getFirstChild());
+            } else {
+                throw new PEException("KT this shouldn't happen!");
+	    }
         }
     }
-	
+
+    private void expandTuple() {
+	Node[] newTuple = new Node[allocSize*2];
+	for(int i=0; i<tupleSize; i++) {
+	    newTuple[i] = tuple[i];
+	}
+	tuple = newTuple;
+	allocSize = allocSize*2;
+    }
+
 }
 
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Stream.java,v 1.2 2002/03/26 23:53:34 tufte Exp $
+  $Id: Stream.java,v 1.3 2002/04/19 20:49:54 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -93,18 +93,6 @@ public class Stream {
 	    isClosed = false;
 	    
 	}  
-
-    /**
-     * Constructor that initializes a stream with the up stream
-     * buffer size
-     *   
-     * @param upStreamBufferSize The size of upward tuple channel
-     */
-     /* KT - removed this constructor to make sure that
-      * everything was using the default, we can put it
-      * back in if we need it
-      */
-    
 
     /** This function tells whether the stream is empty or not.
 	@return true if the stream is empty, false otherwise
@@ -448,11 +436,11 @@ public class Stream {
 	    StreamElement firstElement = 
 		               (StreamElement) upStreamTupleBuffer.get();
 
-	    // If the element is an end of stream element, this signifies the end of
-	    // stream. So, add it to up stream buffer again for correct operation of
-	    // future gets. If it is not the end of stream, then notify potential
-	    // thread waiting to put in the up stream buffer.
-	    //
+	    // If the element is an end of stream element, this signifies 
+	    // the end of stream. So, add it to up stream buffer again 
+	    // for correct operation of future gets. If it is not the end 
+	    // of stream, then notify potential thread waiting to put in 
+	    // the up stream buffer.
 	    if (firstElement instanceof StreamEosElement) {
 		upStreamControlBuffer.add(firstElement);
 	    }
@@ -536,7 +524,6 @@ public class Stream {
 	    upStreamTupleBuffer.put(outputElement);
 
 	    // Notify potential waiting thread
-	    //
 	    notify();
 
 	    // Return null to indicate success of putting outputElement
