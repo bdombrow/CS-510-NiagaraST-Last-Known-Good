@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperatorThread.java,v 1.4 2002/05/07 03:10:55 tufte Exp $
+  $Id: PhysicalOperatorThread.java,v 1.5 2003/01/13 05:09:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,6 +55,7 @@ package niagara.query_engine;
 //
 /////////////////////////////////////////////////////////////////////////
 
+import niagara.utils.JProf;
 
 public class PhysicalOperatorThread implements Runnable {
 	
@@ -96,7 +97,7 @@ public class PhysicalOperatorThread implements Runnable {
 
 	// Create a new java thread for running an instance of this object
 	//
-	thread = new Thread (this,"PhysicalOperator");
+	thread = new Thread (this,"OpThreadUnused");
 
 	thread.start();
 
@@ -122,7 +123,17 @@ public class PhysicalOperatorThread implements Runnable {
 	    PhysicalOperator op = opQueue.getOperator();
 
 	    // Execute the operator
-	    //
+	    if(op == null) {
+		System.err.println("KT OP IS NULL");
+	    }
+	    if(op.getName() == null) {
+		System.err.println("KT OP name is null");
+		System.err.println("OP: " + op.getClass().getName());
+	    }
+	    thread.setName(op.getName());
+	    // KAT check here
+	    if(niagara.connection_server.NiagraServer.RUNNING_NIPROF)
+	      JProf.registerThreadName(op.getName());
 	    op.execute();
 	    
 	    // Garbage collect the memory occupied by the operator

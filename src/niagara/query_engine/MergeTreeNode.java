@@ -66,7 +66,7 @@ class MergeTreeNode {
      *         are violated 
      */
     MergeTreeNode(Element eMElt, int treeMergeType, int treeDomSide,
-		  boolean checkAccumConstraints)
+		  boolean checkAccumConstraints, MergeTree mergeTree)
 	throws MTException {
 
 	children = new ArrayList();
@@ -99,16 +99,16 @@ class MergeTreeNode {
 	String mergeMethod = contentMerge.getNodeName();
 	if(mergeMethod.equals("ShallowContent")) {
 	    merger = new ShallowContentMerge(contentMerge, treeDomSide,
-					     treeMergeType);
+					     treeMergeType, mergeTree);
 	} else if(mergeMethod.equals("DeepReplace")) {
-	    merger = new DeepReplaceMerge(treeDomSide);
+	    merger = new DeepReplaceMerge(treeDomSide, mergeTree);
 	} else if(mergeMethod.equals("Union")) {
-	    throw new PEException("Union not supported");
+	    merger = new UnionMerge(mergeTree);
 	} else if(mergeMethod.equals("ExactMatch")) {
 	    merger = new ShallowContentMerge(contentMerge, treeDomSide,
-					     treeMergeType);
-	} else if(mergeMethod.equals("DoNotCare")) {
-	    merger = new DoNotCareMerge();
+					     treeMergeType, mergeTree);
+	} else if(mergeMethod.equals("NoContentNoAttrs")) {
+	    merger = new NoContentNoAttrsMerge(mergeTree);
 	} else {
 	    throw new PEException("Invalid Merge Method");
 	}
@@ -125,7 +125,8 @@ class MergeTreeNode {
 	    MergeTreeNode temp = new MergeTreeNode(childEMElt,
 						   treeMergeType,
 						   treeDomSide,
-						   checkAccumConstraints);
+						   checkAccumConstraints,
+						   mergeTree);
 	    children.add(temp);
 
 	    /* and continue on */
@@ -273,6 +274,12 @@ class MergeTreeNode {
 	throws UserErrorException{
 	merger.accumulate(accumElt, fragElt);
     }
+
+    Element accumulateEmpty(Element fragElt, String accumTagName) 
+	throws UserErrorException {
+	return merger.accumulateEmpty(fragElt, accumTagName);
+    }
+
 
     /**
      * Creates a local key value for an element. Will search the

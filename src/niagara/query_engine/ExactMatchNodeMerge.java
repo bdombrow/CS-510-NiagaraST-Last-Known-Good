@@ -50,9 +50,23 @@ class ExactMatchNodeMerge extends NodeMerge {
     boolean merge(Node lNode, Node rNode, Node resultNode) 
 	throws UserErrorException {
 
+	if(lNode == null) {
+	    if(rNode == null) {
+		return false; // OK
+	    } else {
+		DOMHelper.setTextValue(resultNode,
+				       DOMHelper.getTextValue(rNode));
+		return false;
+	    }
+	}
+	
+
 	if(!comparator.nodeEquals(lNode, rNode)) {
 	    throw new 
-		UserErrorException("Non-matching elements in ExactMatchMerge");
+		UserErrorException("Non-matching elements in ExactMatchMerge. lNode: " 
+		   + lNode.getNodeName() + "(" + DOMHelper.getTextValue(lNode) +")" +
+				   "  rNode: "
+		   + rNode.getNodeName() + "(" + DOMHelper.getTextValue(rNode) +")");
 	} else {
 	    /* everything is OK */
 	    return false;

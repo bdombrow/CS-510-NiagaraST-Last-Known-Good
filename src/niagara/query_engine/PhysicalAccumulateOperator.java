@@ -1,4 +1,4 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.14 2002/10/31 03:54:38 vpapad Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.15 2003/01/13 05:09:47 tufte Exp $ */
 package niagara.query_engine;
 
 import java.util.Vector;
@@ -57,10 +57,8 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
         mergeTree = logicalAccumulateOperator.getMergeTree();
         mergeAttr = logicalAccumulateOperator.getMergeAttr();
-
         initialAccumFile = logicalAccumulateOperator.getInitialAccumFile();
         afName = logicalAccumulateOperator.getAccumFileName();
-
         clear = logicalAccumulateOperator.getClear();
     }
 
@@ -81,7 +79,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
             /* create an empty accumulator */
             createEmptyAccumulator();
         }
-
+	mergeTree.setAccumulator(accumDoc);
         recdData = false;
     }
 
@@ -95,7 +93,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-
     protected void blockingProcessSourceTupleElement(
         StreamTupleElement tupleElement,
         int streamId)
@@ -107,7 +104,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
         Element fragment = convertAttrToElement(tupleElement);
 
         // merge the fragment into the accumulated document
-        mergeTree.accumulate(accumDoc, fragment);
+        mergeTree.accumulate(fragment);
 
         recdData = true;
     }

@@ -22,12 +22,13 @@ import java.io.*;
 
 import org.w3c.dom.*;
 
-class DoNotCareMerge extends MergeObject {
+class NoContentNoAttrsMerge extends MergeObject {
 
     /**
      * Constructor - does nothing
      */
-    DoNotCareMerge() {
+    NoContentNoAttrsMerge(MergeTree mergeTree) {
+	this.mergeTree = mergeTree;
 	return;
     }
 
@@ -38,16 +39,25 @@ class DoNotCareMerge extends MergeObject {
      *
      * @return Returns nothing.
      */
-    void accumulate(Element accumElt, Element fragElt) {
-	/* Return without doing anything.  Since this is a DoNotCare,
-	 * means there are no attributes or content to deal with
+     void accumulate(Element accumElt, Element fragElt) {
+	/* Return without doing anything.  Since this is a NoContentNoAttrs,
+	 * means there is no content to deal with, 
+	 * but we should create an empty element, if necessary
 	 */
-	return;
+	 return;
+    }
+
+    Element accumulateEmpty(Element fragElt, String accumTagName) {
+	/* Return without doing anything.  Since this is a NoContentNoAttrs,
+	 * means there is no content to deal with, 
+	 * but we should create an empty element, if necessary
+	 */
+	return createNewAccumElt(accumTagName);
     }
 
     /**
      * Just need a result element with the appropriate tag name,
-     * since this is DoNotCare - means there are no attributes
+     * since this is NoContentNoAttrs - means there are no attributes
      * or content to deal with
      *
      * @param rElt "right" element to be merged

@@ -89,11 +89,13 @@ class ReplaceNodeMerge extends NodeMerge {
 	    /* set the value of resultNode only if we absolutly
 	     * have to
 	     */
-	    if(!comparator.nodeEquals(dominantNode, resultNode)) { 
-		/* HERE - this won't work */
-		resultNode.setNodeValue(dominantNode.getNodeValue());
+	    if(dominantNode != null &&
+	       !comparator.nodeEquals(dominantNode, resultNode)) { 
+		DOMHelper.setTextValue(resultNode, 
+				       DOMHelper.getTextValue(dominantNode));
+		return true;
 	    }
-	    return true;
+	    return false;
 	} else { 
 	    /* else nothing to do - result is already dominant or
 	       dominant and submissive values are the same */

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.9 2002/12/10 01:17:45 vpapad Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.10 2003/01/13 05:09:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -354,7 +354,6 @@ public Cost findLocalCost(
         //Initialize the punctuation lists
         rgPunct[0] = new ArrayList();
         rgPunct[1] = new ArrayList();
-
     }
 
     /**

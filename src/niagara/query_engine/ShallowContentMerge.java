@@ -45,7 +45,7 @@ class ShallowContentMerge extends MergeObject {
      * DOM element from the XML merge tree 
      */
     ShallowContentMerge(Element shallowContElt, int treeDomSide,
-			int treeMergeType) 
+			int treeMergeType, MergeTree mergeTree)
 	throws MTException {
 	if(shallowContElt.getNodeName().equals("ExactMatch")) {
 	    createExactMatchMerge();
@@ -66,7 +66,7 @@ class ShallowContentMerge extends MergeObject {
 	Element attrMergeElt = 
 	    DOMHelper.getFirstChildElement(shallowContElt);
 	while(attrMergeElt != null) {
-	    attrName = attrMergeElt.getAttribute("AttrName");
+	    attrName = attrMergeElt.getAttribute("Name");
 	    attrShallowContElt = 
 		DOMHelper.getFirstChildElement(attrMergeElt);
 	    if(attrShallowContElt != null) {
@@ -91,6 +91,8 @@ class ShallowContentMerge extends MergeObject {
 		DOMHelper.getNextSiblingElement(attrMergeElt);
 	}
 
+	this.mergeTree = mergeTree;
+
 	return;
     }
 
@@ -98,8 +100,14 @@ class ShallowContentMerge extends MergeObject {
 	throws MTException {
 	String lValueType = shallowContElt.getAttribute("LValueType");
 	String rValueType = shallowContElt.getAttribute("RValueType");
-	
-	return NodeHelpers.getAppropriateNodeHelper(lValueType, rValueType);
+	try {
+	    NodeHelper ret = NodeHelpers.getAppropriateNodeHelper(lValueType, rValueType);
+	    return ret;
+	} catch (MTException mte) {
+	    throw new MTException("Shallow Content Merge (" 
+				  + shallowContElt.getTagName() + ") " 
+				  + mte.getMessage());
+	}
     }
 
     private NodeMerge createNodeMerge(Element shallowContElt, 
@@ -110,11 +118,12 @@ class ShallowContentMerge extends MergeObject {
 	NodeHelper comparator = getAppropriateNodeHelper(shallowContElt);
 	NodeMerge contentMerge;
 
-	if(fcn.equals("replace")) {
+	if(shallowContElt.getTagName().equals("ExactMatch") ||
+	   fcn.equals("exactMatch")) {
+	    contentMerge = new ExactMatchNodeMerge(comparator);
+	} else if(fcn.equals("replace")) {
 	    contentMerge = new ReplaceNodeMerge(treeDomSide, treeMergeType,
 						comparator);
-	} else if (fcn.equals("exactMatch")) {
-	    contentMerge = new ExactMatchNodeMerge(comparator);
 	} else if (fcn.equals("sum") || fcn.equals("average") ||
 		   fcn.equals("max") || fcn.equals("min")) {
 	    if(!(comparator instanceof NumberNodeHelper)) {
@@ -126,8 +135,12 @@ class ShallowContentMerge extends MergeObject {
 	    }
 	    contentMerge = new AggNodeMerge(treeMergeType, 
 					    (NumberNodeHelper)comparator, fcn);
+	} else if (fcn.equals("noContent")) {
+	    contentMerge = new NoContentNodeMerge();
 	} else {
-	    throw new MTException(fcn + " is an invalid shallow content function (sum | average | max |  min)");
+	    throw new MTException("In element " + shallowContElt.getTagName() +
+				  " Fcn: " + fcn + 
+	     " is an invalid shallow content function (replace | sum | average | max |  min | exactMatch)");
 	}
 	return contentMerge;
     }
@@ -191,17 +204,27 @@ class ShallowContentMerge extends MergeObject {
 	 * from the "dominant" side is used.
 	 */
 
+	/* convention - accumulator is always left */
+	internal_merge(accumElt, fragElt, accumElt);	
+    }
+
+    Element accumulateEmpty(Element fragElt, String accumTagName) 
+	throws UserErrorException{
+	/* traverse through all attributes and content - if an attribute 
+	 * value (or node content) matches, no action.  If a new 
+	 * attribute/content is found in fragElt, it is inserted into 
+	 * accumElt.  If content/attribute value doesn't match, the value 
+	 * from the "dominant" side is used.
+	 */
+
 	/* Handle the case with an empty accumElt here.
 	 * This may occur when we start with a null accumulator
 	 */
-	String value = DOMHelper.getTextValue(accumElt);
-	if (value == null) {
-	    DOMHelper.setTextValue(accumElt, DOMHelper.getTextValue(fragElt));
-	    return;
-	}
+	Element accumElt = createNewAccumElt(accumTagName);
 
-	/* convention - accumulator is always left */
-	internal_merge(accumElt, fragElt, accumElt);	
+	/* convention - left is accumulator */
+	internal_merge(null, fragElt, accumElt); 
+	return accumElt;
     }
 
     /** 
@@ -253,12 +276,14 @@ class ShallowContentMerge extends MergeObject {
 	leftIsResult = (resultElt == leftElt);
 	rightIsResult = (resultElt == rightElt);
 
-	/* merge the attributes */
-	mergeAttributes();
-
 	/* now deal with the content 
 	 */
 	mergeContent();
+
+	if(leftElt == null)
+	    leftElt = resultElt;
+	/* merge the attributes */
+	mergeAttributes();
 
 	return;
     }
@@ -296,15 +321,17 @@ class ShallowContentMerge extends MergeObject {
 
 	/* left attrs which have been processed */
 	HashMap procLeftAttrs = new HashMap(); 
+	int numLAttrs = lAttrsMap.getLength();
+	int numRAttrs = rAttrsMap.getLength();
 
-	if(lAttrsMap == null && rAttrsMap == null) {
+	if(numLAttrs == 0 && numRAttrs == 0) {
 	    /* nothing to do - there are no attributes */
 	    return;
-	} else if (lAttrsMap == null) {
+	} else if (numLAttrs == 0) {
 	    /* only attributes on "right" */
 	    processAttrsAsOuter(rAttrsMap, false, rightIsResult,
 				addAttrs, delAttrs);
-	} else if (rAttrsMap == null) {
+	} else if (numRAttrs == 0) {
 	    processAttrsAsOuter(lAttrsMap, true, leftIsResult,
 				addAttrs, delAttrs);
 	} else {
@@ -349,7 +376,7 @@ class ShallowContentMerge extends MergeObject {
 			 * attribute, so merge the matching attributes 
 			 */
 			Attr tempResultAttr = 
-			    resultElt.getOwnerDocument().createAttribute("JUNK");
+			    resultElt.getOwnerDocument().createAttribute(lAttr.getName());
 			boolean new_result;
 			new_result = nodeMerge.merge(lAttr, rAttr, 
 						     tempResultAttr);
@@ -398,7 +425,9 @@ class ShallowContentMerge extends MergeObject {
 	/* add the new result attributes to the result Elemement */
 	int len = addAttrs.size();
 	for(int i=0; i < len; i++) {
-	    resultElt.setAttributeNode((Attr)(addAttrs.get(i)));
+	    Attr addedAttr = (Attr)(addAttrs.get(i));
+	    Attr toAddAttr = (Attr)(mergeTree.accumDoc.importNode(addedAttr, false));
+	    resultElt.setAttributeNode(toAddAttr);
 	}
 
 	/* delete the deleted attributes from the result Element */
@@ -415,6 +444,9 @@ class ShallowContentMerge extends MergeObject {
 	    /* a wont be null, since to change, we know we
 	     * had attr values from both sides
 	     */
+	    if(a == null)
+		System.out.println("Chgd attr name:value " + chgdAttr.getName() +":"+
+				   chgdAttr.getValue());
 	    a.setValue(chgdAttr.getValue());
 	}
 
@@ -435,8 +467,7 @@ class ShallowContentMerge extends MergeObject {
 				     ArrayList deletedAttrs) {
 	/* Process remaining attributes from the given side */
 	int numAttrs = attrsMap.getLength();
-	int i=0;
-	while(i < numAttrs) {
+	for(int i = 0; i<numAttrs; i++) {
 	    Attr attr = (Attr)(attrsMap.item(i));
 		
 	    /* Ignore all attributes without any merge information  -
@@ -455,7 +486,7 @@ class ShallowContentMerge extends MergeObject {
 		 * "1Outer" attribute */
 		processOuterAttr(attr, includeOuter, isResult,
 				 resultAttrs, deletedAttrs);
-	    }
+	    } 
 	}
     }
     

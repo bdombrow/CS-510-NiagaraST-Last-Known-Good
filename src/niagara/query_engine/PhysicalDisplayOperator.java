@@ -1,5 +1,5 @@
 /**
- * $Id: PhysicalDisplayOperator.java,v 1.6 2002/10/31 03:54:38 vpapad Exp $
+ * $Id: PhysicalDisplayOperator.java,v 1.7 2003/01/13 05:09:47 tufte Exp $
  *
  */
 
@@ -123,7 +123,7 @@ public class PhysicalDisplayOperator extends PhysicalOperator {
     }
 
     protected void serialize(Object o, StringBuffer sb) {
-        XMLUtils.flatten((Node) o, sb, false);
+        XMLUtils.flatten((Node) o, sb, false, false);
     }
 
     protected void cleanUp() {

@@ -54,6 +54,7 @@ public class MergeTree {
     public static final String DEF_ATTR_STRING = "ATTR_DEFAULT";
 
     private boolean TRACE = false;
+    protected Document accumDoc;
 
     /*
      * METHODS
@@ -67,6 +68,10 @@ public class MergeTree {
     public MergeTree() { 
 	reset();
 	tempArrayStacks = new ArrayStack();
+    }
+
+    public void setAccumulator(Document accumDoc) {
+	this.accumDoc = accumDoc;
     }
 
    /**
@@ -144,7 +149,8 @@ public class MergeTree {
 	}
 
 	mergeTreeRoot = new MergeTreeNode(mergeElt, treeMergeType,
-					  treeDomSide, checkAccumConstraints);
+					  treeDomSide, checkAccumConstraints,
+					  this);
 
 	/* make sure that was the only child */
 	mergeElt = DOMHelper.getNextSiblingElement(mergeElt);
@@ -176,7 +182,7 @@ public class MergeTree {
 	} else if (mergeType.equals("inner")) {
 	    treeMergeType = MT_INNER;
 	} else {
-	    throw new MTException("Invalid merge type");
+	    throw new MTException("Invalid merge type: " + mergeType);
 	}
 	return;
     }
@@ -222,7 +228,7 @@ public class MergeTree {
      *                       something - for now it is just a normal tree
      */
 
-    void accumulate(Document accumDoc, Element fragment)
+    void accumulate(Element fragment)
 	throws UserErrorException {
 
 	/*
@@ -237,13 +243,12 @@ public class MergeTree {
 	 * we make an empty document element for the accumulator // 
 	 * and root add it to the tree
 	 */
+	boolean newRoot = false;
 	if(accumFragRoot == null) {
 	    if(TRACE) {
 		System.out.println("KT: Empty Accumulator - creating accum root");
 	    }
-	    accumFragRoot = accumDoc.
-		createElement(mergeTreeRoot.getAccumTagName());
-	    accumDoc.appendChild(accumFragRoot);
+	    newRoot = true;
 	} else {
 	    if(TRACE) {
 		System.out.println("KT: using existing doc for accumulator");
@@ -255,16 +260,17 @@ public class MergeTree {
 	 * the accumRoot - we pass in an empty RootedKeyVal to 
 	 * createRootedKeyVal for the key of parent of accumRoot
 	 */
-	ArrayStack accumFragRootKeyVal =  getTempArrayStack();
+	ArrayStack accumFragRootKeyVal = getTempArrayStack();
 	ArrayStack localKeyVal = getTempArrayStack();
 
-	mergeTreeRoot.createLocalKeyValue(accumFragRoot, localKeyVal);
+	mergeTreeRoot.createLocalKeyValue(mergeFragRoot, localKeyVal);
 	accumFragRootKeyVal.push(localKeyVal);
 
-	do_accumulate(accumFragRoot, 
-		      accumFragRootKeyVal,
-		      mergeFragRoot, mergeTreeRoot,
-		      accumDoc);
+	accumFragRoot = do_accumulate(accumFragRoot, 
+				      accumFragRootKeyVal,
+				      mergeFragRoot, mergeTreeRoot);
+	if(newRoot)
+	    accumDoc.appendChild(accumFragRoot);
 
 	accumFragRootKeyVal.pop();
 	returnTempArrayStack(localKeyVal);
@@ -284,13 +290,13 @@ public class MergeTree {
      *
      */
 
-    private void do_accumulate(Element accumElt, ArrayStack accumEltKeyVal,
-			       Element fragElt, 
-			       MergeTreeNode mergeTreeNode,
-			       Document accumDoc)
+    private Element do_accumulate(Element accumEltArg, ArrayStack accumEltKeyVal,
+				  Element fragElt, 
+				  MergeTreeNode mergeTreeNode)
 	throws UserErrorException {
 
 	boolean isBottom = true;
+	Element accumElt = accumEltArg;
 
 	/* in all cases, I get in two elements that should
 	 * immediately be merged, we know that accumElt and
@@ -302,10 +308,21 @@ public class MergeTree {
 	 * merge these two objects - recursion is done below
 	 */
 	if(TRACE) {
-	  System.out.println("KT: do_accumulate: " +
-	 		   DOMHelper.nameAndValue(accumElt));
+	    if(accumElt != null)
+		System.out.println("KT: do_accumulate: " +
+				   DOMHelper.nameAndValue(accumElt));
+	    else
+		System.out.println("KT: do_accumulate: empty accumulate element");
 	}
-	mergeTreeNode.accumulate(accumElt, fragElt);
+	
+	boolean newAccumElt = false;
+	if(accumElt == null) {
+	    newAccumElt = true;
+	    accumElt = mergeTreeNode.accumulateEmpty(fragElt, 
+					      mergeTreeNode.getAccumTagName());
+	} else {
+	    mergeTreeNode.accumulate(accumElt, fragElt);
+	}
 
 	if(!mergeTreeNode.isDeepMerge()) {
 	    /* now call recursively - we scan the subelements of fragElt 
@@ -389,9 +406,6 @@ public class MergeTree {
 				System.out.print("   KT: Looking in RootedKeyMap for: ");
 				nextAccumEltKeyVal.print();
 			    }
-
-
-			    // && nextAccumTagName.equals("STATS")) { ???
 			    nextAccumElt = (Element)rootedKeyMap.get(nextAccumEltKeyVal);
 			} else {
 			    if(TRACE) {
@@ -410,39 +424,19 @@ public class MergeTree {
 						   DOMHelper.nameAndValue(nextAccumElt));
 			    }
 			}
-			    
-			/* have to handle the case when we start with an empty
-			 * accumulator - in this case nextAccumElt is null, so
-			 * we make an empty element as a holder and add it
-			 * to the accumulator tree 
-			 */
-			boolean addToRootedKeyMap = false;
+
+			boolean expectNew = false;
 			if(nextAccumElt == null) {
-			    nextAccumElt = accumDoc.
-				createElement(nextMergeTreeNode.
-					      getAccumTagName());
-				/* set value to value of frag elt
-				 * shouldn't need to do this - merger
-				 * should handle it
-				 */
-				/*
-				 * DOMHelper.setTextValue(nextAccumElt,
-				 *	  DOMHelper.getTextValue(nextFragElt),
-				 *			accumDoc);
-				 */
-			    accumElt.appendChild(nextAccumElt);
-			    if(TRACE) {
-				System.out.println("   KT: created new nextAccumElt "
-						   + DOMHelper.nameAndValue(nextAccumElt));
-				System.out.println("   KT: added nextAccumElt as child of " 
-						   + DOMHelper.nameAndValue(accumElt));
-			    }
-			    addToRootedKeyMap = true;
-			} 
-			
+			    expectNew = true;
+			}
 			/* the recursive call */
-			do_accumulate(nextAccumElt, nextAccumEltKeyVal, 
-				      nextFragElt, nextMergeTreeNode, accumDoc);
+			Element newNextAccumElt =
+			    do_accumulate(nextAccumElt, nextAccumEltKeyVal, 
+				      nextFragElt, nextMergeTreeNode);
+		
+			if((newNextAccumElt == nextAccumElt && expectNew) ||
+			   (newNextAccumElt != nextAccumElt && !expectNew))
+			    throw new PEException("KT - problem with empty accumulator case");
 			
 			/* have to add to the rooted key map after we do the
 			 * recursive call since we don't have the key until
@@ -456,8 +450,9 @@ public class MergeTree {
 			/* pops tempLocalKeyVal off the stack */
 			accumEltKeyVal.pop();
 			returnTempArrayStack(temp);
-			if(addToRootedKeyMap == true) {
-			    addChildToRootedKeyMap(nextAccumElt, accumEltKeyVal,
+			if(expectNew) {
+			    accumElt.appendChild(newNextAccumElt);
+			    addChildToRootedKeyMap(newNextAccumElt, accumEltKeyVal,
 						   nextMergeTreeNode, false);
 			}
 		    }
@@ -471,7 +466,7 @@ public class MergeTree {
 			       accumElt.getTagName() + "(" + 
 			       DOMHelper.getTextValue(accumElt) + ")");	
 	}
-	return;
+	return accumElt;
     }
 
     /**

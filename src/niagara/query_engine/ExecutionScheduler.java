@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.16 2002/10/24 02:25:43 vpapad Exp $
+  $Id: ExecutionScheduler.java,v 1.17 2003/01/13 05:09:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -95,6 +95,7 @@ public class ExecutionScheduler {
     public synchronized void executeOperators (SchedulablePlan optimizedTree,
 					       QueryInfo queryInfo) 
 	throws ShutdownException {
+
 	// First create a Physical Head Operator to handle this query
 	// in the system, only need to do this when top node
 	// is SourceOp and can't function as head

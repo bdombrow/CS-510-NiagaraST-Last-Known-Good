@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.15 2002/12/10 01:17:45 vpapad Exp $
+  $Id: PhysicalConstructOperator.java,v 1.16 2003/01/13 05:09:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -73,7 +73,6 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 
         // Initialize the result template 
         this.resultTemplate = constructLogicalOp.getResTemp();
-
         this.variable = constructLogicalOp.getVariable();
     }
 

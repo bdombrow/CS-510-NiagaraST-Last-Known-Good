@@ -1,4 +1,4 @@
-// $Id: LocalKey.java,v 1.6 2002/10/27 03:08:04 vpapad Exp $
+// $Id: LocalKey.java,v 1.7 2003/01/13 05:09:47 tufte Exp $
 package niagara.query_engine;
 
 import java.util.*;
@@ -203,7 +203,6 @@ public class LocalKey {
 		if(reachableNodes.size() == 0) {
 		    DOMHelper.printElt(elt);
 		    throw new UserErrorException("Document is not key-complete. Elt tagname " + tagName + " " + elt.getTagName());
-		    //" path " + atomicKey.path().toString());
 		} else  if(reachableNodes.size() != 1) {
 		throw new UserErrorException("Matches not allowed on set values when path is not singular. tagname " + tagName);
 		//+ " path " + atomicKey.path().toString());

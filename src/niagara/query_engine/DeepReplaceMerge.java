@@ -37,7 +37,7 @@ class DeepReplaceMerge extends MergeObject {
      *    be kept (replaced)
      *    
      */
-    DeepReplaceMerge(int domSide) {
+    DeepReplaceMerge(int domSide, MergeTree mergeTree) {
 	if(domSide == MergeTree.DS_RIGHT) {
 	    keepLeft = false;
 	} else if (domSide == MergeTree.DS_LEFT) {
@@ -45,6 +45,7 @@ class DeepReplaceMerge extends MergeObject {
 	} else {
 	    throw new PEException("Invalid dominant side");
 	}
+	this.mergeTree =  mergeTree;
     }
 
     /** accumulates the specified fragment element into the accumulator
@@ -58,19 +59,25 @@ class DeepReplaceMerge extends MergeObject {
 
 	/* convention - accumulator is always left */
 
-	/* Don't need to do anything special for the case when
-	 * there is an empty accumlElt (as may occur when we
-	 * start with a null accumulator)
-	 */
-
 	/* if keepLeft => accumulator is dominant =>
 	 * there is nothing to do
 	 */
 	if(!keepLeft) {
 	    replaceElement(accumElt, fragElt);
-	    // old - del when new working: accumElt.replaceYourself(fragElt); 
 	} 
 	return;
+    }
+
+    Element accumulateEmpty(Element fragElt, String accumTagName) {
+
+	/* if keepLeft => accumulator is dominant =>
+	 * there is nothing to do
+	 */
+	if(!keepLeft) {
+	    return fragElt;
+	} 
+
+	return null;
     }
 
     /** 

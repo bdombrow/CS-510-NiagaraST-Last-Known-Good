@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.7 2002/10/27 03:08:04 vpapad Exp $
+  $Id: QueryEngine.java,v 1.8 2003/01/13 05:09:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -337,14 +337,7 @@ public class QueryEngine
     public Vector getDTDList()
 		{
 			Vector ret = null;
-			//try{
-
 			ret = dataManager.getDTDList();
-
-			//}catch(Exception dmce){
-				//System.out.println("The data manager has been previously shutdown, re-start the system");
-				//return null;
-			//}
 			return ret;
 		}
 

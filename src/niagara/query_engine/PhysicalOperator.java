@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.21 2002/12/10 01:17:45 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.22 2003/01/13 05:09:47 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -86,10 +86,10 @@ implements SchemaProducer, SerializableToXML, Initializable {
         
     // for triggers
     protected static DataManager DM;
-
-    // keep track of operator names for debugging
-    protected String name = "OperatorImplemShouldSetThis"; 
-    
+   
+    // for testing
+    protected CPUTimer cpuTimer; // = new CPUTimer();
+ 
     /**
      * This class is used to store the result of a read operation from
      * a set of source streams. There are two components (a) the stream element
@@ -168,6 +168,10 @@ implements SchemaProducer, SerializableToXML, Initializable {
      *
      */
     public final void execute () {
+	if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+	    cpuTimer = new CPUTimer();
+	    cpuTimer.start();
+	}
 
 	// Set up an object for reading from source streams
 	SourceStreamsObject sourceObject = new SourceStreamsObject();
@@ -212,25 +216,26 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    } // end of while loop
 	} catch (java.lang.InterruptedException e) {
 	    shutDownOperator();
-	    internalCleanUp();
+	    internalCleanUp("interrupted");
 	    return;
 	} catch (ShutdownException see) {
 	    shutDownOperator();
-	    internalCleanUp();
+	    internalCleanUp("shutdown exception");
 	    return;
 	} catch (UserErrorException uee) {
 	    // KT - really should propagate this error back to client,
 	    // however, for now will just print error message
 	    System.err.println("USER ERROR: " + uee.getMessage());
+	    uee.printStackTrace();
 	    shutDownOperator();
-	    internalCleanUp();
+	    internalCleanUp("user error");
 	    return;	    
 	}
 
 	// shut down normally by closing sink streams and do
 	// any necessary clean up
 	closeSinkStreams();
-	internalCleanUp();
+	internalCleanUp("normal");
     }
 
     public void addSinkStream(SinkTupleStream newStream) {
@@ -540,8 +545,9 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	    // There are partial results, so write them out
 	    // Write out the (partial) current output, if this is 
 	    // a blocking operator
-	    if (isBlocking()) 
+	    if (isBlocking()) {
 		flushCurrentResults(true);
+	    }
 
 	    // Variable to check whether the partial output is partial or
 	    // just synchronized
@@ -943,7 +949,11 @@ implements SchemaProducer, SerializableToXML, Initializable {
     protected void cleanUp() {
     }
 
-    private void internalCleanUp() {
+    private void internalCleanUp(String msg) {
+	if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+	    cpuTimer.stop();
+	    cpuTimer.print(getName() + " shutdown: " + msg);
+	}
         if(isHeadOperator) {
 	    // Remove the query info object from the active query list
 	    // Hack added so client server queries are not removed

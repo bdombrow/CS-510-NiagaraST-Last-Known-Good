@@ -29,6 +29,7 @@ abstract class MergeObject {
     /* Initialization will be done differently for all merge objects
      * since they need such different information.
      */
+    MergeTree mergeTree; // accumulator - necessary for creating new accum elts
 
     /** accumulates the specified fragment element into the accumulator
      *
@@ -38,6 +39,9 @@ abstract class MergeObject {
      * @return Returns nothing 
      */
     abstract void accumulate(Element accumElt, Element fragElt)
+	throws UserErrorException;
+
+    abstract Element accumulateEmpty(Element fragElt, String accumTagName)
 	throws UserErrorException;
 
     /** 
@@ -71,6 +75,10 @@ abstract class MergeObject {
      * returns the name of the merge
      */
     abstract public String getName();
+
+    protected Element createNewAccumElt(String tagName) {
+	return mergeTree.accumDoc.createElement(tagName);
+    }
 }
 
 
