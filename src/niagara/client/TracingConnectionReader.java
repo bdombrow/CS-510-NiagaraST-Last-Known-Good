@@ -66,7 +66,7 @@ public class TracingConnectionReader extends AbstractConnectionReader {
                     writer.write(buf, 0, start);
                 }
                 writer.close();
-                return;
+                ui.notifyFinalResult(0);
             }
 
             // Otherwise, start parsing
