@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOM.java,v 1.3 2003/03/07 23:45:30 vpapad Exp $
+ * $Id: SAXDOM.java,v 1.4 2003/07/03 19:40:23 tufte Exp $
  *
  */
 
@@ -16,7 +16,8 @@ import niagara.utils.PEException;
 class SAXDOM implements DOMImplementation {
 
     public Document newDocument() {
-        throw new PEException("Can't create arbitrary documents with SAXDOM.");
+        assert false : "Can't create arbitrary documents with SAXDOM.";
+	return null;
     }
 
     public DOMParser newParser() {
@@ -31,6 +32,7 @@ class SAXDOM implements DOMImplementation {
     
     public Node importNode(Document d, Node n) {
         // SAXDOM objects are read-only.
-	throw new PEException("SAXDOM objects are read-only");
+	assert false : "SAXDOM objects are read-only";
+	return null;
     }
 }

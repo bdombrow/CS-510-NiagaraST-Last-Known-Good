@@ -1,5 +1,5 @@
 /**
- * $Id: NamedNodeMapImpl.java,v 1.4 2003/02/25 06:18:51 vpapad Exp $
+ * $Id: NamedNodeMapImpl.java,v 1.5 2003/07/03 19:40:39 tufte Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -9,6 +9,7 @@
 package niagara.ndom.saxdom;
 
 import org.w3c.dom.*;
+import org.xml.sax.Attributes;
 
 public class NamedNodeMapImpl implements NamedNodeMap {
 
@@ -68,5 +69,5 @@ public class NamedNodeMapImpl implements NamedNodeMap {
         throw new DOMException(DOMException.NOT_SUPPORTED_ERR,
                                "removeNamedItemNS not supported.");
     }
-
 }
+

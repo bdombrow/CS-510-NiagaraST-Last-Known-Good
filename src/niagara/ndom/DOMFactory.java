@@ -1,5 +1,5 @@
 /**
- * $Id: DOMFactory.java,v 1.6 2003/03/07 23:45:30 vpapad Exp $
+ * $Id: DOMFactory.java,v 1.7 2003/07/03 19:40:23 tufte Exp $
  *
  */
 
@@ -113,9 +113,9 @@ public class DOMFactory {
      * @return the (possibly cloned) <code>Node</code>
      */
     public static Node importNode(Document d, Node n) {
-        if (n.getOwnerDocument() == d)
+        if (n.getOwnerDocument() == d) 
             return n;
-        else 
+	else 
             return impl.importNode(d, n);
     }
 
