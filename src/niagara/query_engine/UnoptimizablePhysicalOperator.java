@@ -1,4 +1,4 @@
-/* $Id: UnoptimizablePhysicalOperator.java,v 1.2 2002/10/07 00:21:34 vpapad Exp $ */
+/* $Id: UnoptimizablePhysicalOperator.java,v 1.3 2002/10/24 01:02:48 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.ArrayList;
@@ -10,14 +10,6 @@ import niagara.utils.SourceTupleStream;
 import niagara.xmlql_parser.op_tree.op;
 
 public abstract class UnoptimizablePhysicalOperator extends PhysicalOperator {
-    public UnoptimizablePhysicalOperator(SourceTupleStream[] sourceStreams,
-                                         SinkTupleStream[] sinkStreams,
-                                         boolean[] blockingSourceStreams,
-                                         Integer responsiveness) {
-        super(sourceStreams, sinkStreams, blockingSourceStreams, responsiveness);
-    }
-
-    /* XXX vpapad this can't go in yet
     public UnoptimizablePhysicalOperator(
         SourceTupleStream[] sourceStreams,
         SinkTupleStream[] sinkStreams,
@@ -26,7 +18,6 @@ public abstract class UnoptimizablePhysicalOperator extends PhysicalOperator {
         setBlockingSourceStreams(blockingSourceStreams);
         plugInStreams(sourceStreams, sinkStreams, responsiveness);
     }
-    */
 
     /**
      * @see niagara.optimizer.colombia.PhysicalOp#FindPhysProp(PhysicalProperty[])
