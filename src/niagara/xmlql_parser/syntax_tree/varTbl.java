@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: varTbl.java,v 1.1 2000/05/30 21:03:30 tufte Exp $
+  $Id: varTbl.java,v 1.2 2000/07/06 02:43:12 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,7 +49,7 @@ public class varTbl {
 	 * @param variable table to make a copy of
 	 */
 
-	varTbl(varTbl vt) {
+	public varTbl(varTbl vt) {
 		varList = new Vector();
 		for(int i=0;i<vt.varList.size();i++)
 			varList.addElement(new varToAttr((varToAttr)vt.varList.elementAt(i)));
