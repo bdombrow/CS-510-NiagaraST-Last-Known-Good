@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- This query tests the timer -->
+<plan top="cons">
+<timer id="timer" period="1 minute" warp="60" delay="5 minutes" 
+		slack="5 seconds" granularity="5 seconds" relative="yes"/>
+
+<prefix id="prefix" length="50" input="timer"/>
+<construct id="cons" input="prefix">
+<time> $timer </time>
+</construct>
+</plan>

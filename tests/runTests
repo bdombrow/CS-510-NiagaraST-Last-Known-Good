@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
-# $Id: runTests,v 1.4 2002/10/31 04:40:49 vpapad Exp $
+# $Id: runTests,v 1.5 2003/02/25 06:18:13 vpapad Exp $
+
+use File::Compare;
 
 $temp = "tempresults";
-if(-e $temp) {
-   system("/bin/rm $temp");
-}
+unlink $temp if(-e $temp);
 
 @queries = <queries/*.qry>;
 for $f (@queries) {
@@ -14,14 +14,16 @@ for $f (@queries) {
     next unless (-e "expected/$f.result");
     print "$f", (' ' x (32 - length($f)));
 
-    #Ugly! But how do you redirect stderr in a way that works
-    #for both tcsh and bash? 
-    `/bin/sh -c "./runSimple -silent -qf queries/$f 2>&1 >$temp"`;
-    $diffs = system "cmp -s expected/$f.result $temp";
+    open(TEMP, "> $temp") or die "Can't open $temp for writing!\n";
+    open(CLIENT, "../demo/client/runSimple -silent -qf queries/$f 2>&1 |")
+    	or die "Can't run client!\n";
+    print TEMP while (<CLIENT>);
+    close TEMP;
+    $diffs = compare("expected/$f.result", "$temp");
     if ($diffs != 0) {
-	print " FAILED\n";
-	system "diff expected/$f.result $temp";
+        print " FAILED\n";
+        system "diff expected/$f.result $temp";
     } else {
-	print " OK\n";
+        print " OK\n";
     }
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.9 2003/02/05 23:42:32 jinli Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.10 2003/02/25 06:18:13 vpapad Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -16,6 +16,14 @@
       class="niagara.xmlql_parser.op_tree.FileScanOp">
             <physical name="StreamThread" class="niagara.data_manager.StreamThread"/>      
     </logical>      
+    <logical name="timer"
+      class="niagara.logical.Timer">
+      <physical name="TimerThread" class="niagara.data_manager.TimerThread"/>
+    </logical>
+    <logical name="prefix"
+      class="niagara.logical.Prefix">
+      <physical name="PhysicalPrefix" class="niagara.query_engine.PhysicalPrefix"/>
+    </logical>
     <logical name="constant"
       class="niagara.xmlql_parser.op_tree.ConstantOp">
       <physical name="ConstantThread" class="niagara.data_manager.ConstantOpThread"/>
@@ -238,6 +246,15 @@
   		<before><logical name="accumulate"/></before>
  		<after><op name="PhysicalAccumulate"/></after>
   	</rule>
+  	<rule type="simple" name="prefix to PhysicalPrefix">
+  		<before><logical name="prefix"/></before>
+ 		<after><op name="PhysicalPrefix"/></after>
+  	</rule>
+  	<rule type="simple" name="timer to TimerThread">
+  		<before><logical name="timer"/></before>
+ 		<after><op name="TimerThread"/></after>
+  	</rule>
+  	
   	<rule type="simple" name="noop to PhysicalNoOp">
   		<before><logical name="noop"/></before>
  		<after><op name="PhysicalNoOp"/></after>
