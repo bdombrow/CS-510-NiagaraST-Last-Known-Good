@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- This query tests having a construct operator in the middle
+of the operator tree -->
+
+<plan top="select">
+
+<dtdscan id="dtd">
+<url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/>
+</dtdscan>
+
+<scan id="scan" regexp="PLAY.NUM" type="content" input="dtd"/>
+
+<select id="select" input="scan">
+<pred op="ne"><var value="$scan"/><string value="5"/></pred>
+</select>
+
+</plan>

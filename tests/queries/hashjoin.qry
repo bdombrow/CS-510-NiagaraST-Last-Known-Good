@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<dtdscan id="acdtdscan">
+<url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"></url>
+</dtdscan>
+
+<dtdscan id="jcdtdscan">
+<url value="http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml"></url>
+</dtdscan>
+
+<scan root="" type="content" 
+        regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 
+	  id="acscan" 
+          input="acdtdscan">
+</scan>
+
+<scan root="" type="content" 
+        regexp="PLAY.PERSONAE.PGROUP.PERSONA|PLAY.PERSONAE.PERSONA" 
+          id="jcscan" 
+          input="jcdtdscan">
+</scan>
+
+<join id="join" left="$acscan" right="$jcscan" 
+          physical="niagara.query_engine.PhysicalHashJoinOperator" 
+          input="acscan jcscan">
+</join>
+
+<construct clear="no" id="cons" input="join">
+<PERSONA>$acscan</PERSONA>
+</construct>
+</plan>

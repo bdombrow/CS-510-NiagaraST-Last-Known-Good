@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+<dtdscan id="dtd">
+<url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"/>
+</dtdscan>
+<scan id="scan" regexp="PLAY.(PERSONAE.PERSONA|TITLE)" input="dtd"/>
+<expression id="expr" class="niagara.query_engine.TestExpression" input="scan"/>
+<construct id="cons" input="expr">
+<title>$expr</title>
+</construct>
+</plan>

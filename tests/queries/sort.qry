@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="sort">
+<dtdscan id="dtd">
+<url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/>
+</dtdscan>
+<scan id="scan" regexp="PLAY.NUM" input="dtd"/>
+<sort id="sort" input="scan" comparison="numeric" order="ascending" sort_by="$scan"/>
+</plan>
