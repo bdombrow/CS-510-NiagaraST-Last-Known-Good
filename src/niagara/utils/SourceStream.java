@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SourceStream.java,v 1.3 2002/04/19 20:49:54 tufte Exp $
+  $Id: SourceStream.java,v 1.4 2002/04/21 04:13:35 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -102,13 +102,16 @@ public class SourceStream {
 		case StreamControlElement.ShutDown:
 		    // A shut down - so quit
 		    return false;
-		case StreamControlElement.SynchronizePartialResult:
+		case StreamControlElement.GetPartialResult:
 		    // Bounce it right back - all SourceStream tuples are final
 		    controlElement = 
-			stream.putControlElementUpStream(controlElement);
+			stream.putControlElementUpStream(
+                            new StreamControlElement(
+                                StreamControlElement.SynchronizePartialResult));
 		    break;
 		default:
-		    throw new PEException("Unexpected control element in source stream");
+		    throw new PEException("Unexpected control element in source stream" 
+                        + controlElement);
 		}
 	    } while (controlElement != null);
 
@@ -128,41 +131,7 @@ public class SourceStream {
         //
         tuple.appendAttribute(node);
 
-        // Repeatedly try to put tuple in the stream
-        //
-        boolean done = false;
-
-        do {
-            // Try to put tuple in the stream
-            //
-            StreamControlElement controlElement = 
-                stream.putTupleElementUpStream(tuple);
-
-            // If there is a control element, process it
-            //
-            if (controlElement != null) {
-
-                if (controlElement.type() == StreamControlElement.ShutDown) {
-
-                    // A shut down - so quit
-                    //
-                    return false;
-                }
-
-                // Ignore other control messages
-                //
-            }
-            else {
-
-                // The put was successful
-                //
-                done = true;
-            }
-        } while (!done);
-
-        // Tuple was successfully put
-        //
-        return true;
+        return steput(tuple);
     }
 
 
