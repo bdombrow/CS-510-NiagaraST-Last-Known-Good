@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalPunctuateOperator.java,v 1.5 2003/07/18 00:58:50 tufte Exp $
+  $Id: PhysicalPunctuateOperator.java,v 1.6 2003/07/23 22:15:26 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -61,6 +61,8 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
     private short rgiDataType[];
     private Document doc;
     private double dblLastTimer = -1;
+    
+    private static int WARP = 10;
 
     public PhysicalPunctuateOperator() {
         setBlockingSourceStreams(new boolean[cInput]);
@@ -153,8 +155,15 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
     }
 
     private void appendTimestamp(StreamTupleElement inputTuple) {
+    	String stTS;
         Element eleTS = doc.createElement(punctuateOp.STTIMESTAMPATTR);
-        String stTS = String.valueOf(System.currentTimeMillis());
+        //String stTS = String.valueOf(System.currentTimeMillis()*WARP);
+        if (dblLastTimer == -1){
+		stTS = String.valueOf(System.currentTimeMillis());
+        }else {
+        	stTS = String.valueOf(dblLastTimer);
+        }
+        
         eleTS.appendChild(doc.createTextNode(stTS));
 	inputTuple.appendAttribute(eleTS);
     }
@@ -167,7 +176,9 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 	if (fTSWildcard)
 	    stTS = new String("*");
 	else
-	    stTS = new String("(," + System.currentTimeMillis() + ")");
+	    stTS = new String("(," + String.valueOf(dblLastTimer)  + ")");
+	    //stTS = new String("(," + System.currentTimeMillis()*WARP + ")");
+	    
         eleTS.appendChild(doc.createTextNode(stTS));
         spe.appendAttribute(eleTS);
     }
@@ -204,15 +215,32 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 
 	//Create a new punctuation element
 	int iAttrTimer = -1;
+	short nodeType;
 	
 	if (attrDataTimer != null)
 	    iAttrTimer = 
 	        inputTupleSchemas[iDataInput].getPosition(attrDataTimer.getName());
 	StreamPunctuationElement spe =
 	    new StreamPunctuationElement(false);
-	for (int iAttr=0; iAttr<tupleDataSample.size(); iAttr++) {
+	for (int iAttr=0; iAttr<tupleDataSample.size() - 1; iAttr++) { //"-1" is used to exclude the "TIMESTAMP" field
 	    Node ndSample = tupleDataSample.getAttribute(iAttr);
-	    String stName = ndSample.getNodeName();
+	    nodeType = ndSample.getNodeType();
+	    if (nodeType == Node.ATTRIBUTE_NODE) {
+	    	Attr attr = doc.createAttribute(ndSample.getNodeName());
+	    	attr.appendChild(doc.createTextNode("*"));
+	    	spe.appendAttribute(attr);
+	    } else {
+			String stName = ndSample.getNodeName();
+			if (stName.compareTo("#document") == 0)
+			stName = new String("document");
+			Element ePunct = doc.createElement(stName);
+			if (iAttr != iAttrTimer)
+				ePunct.appendChild(doc.createTextNode("*"));
+			else
+				ePunct.appendChild(doc.createTextNode("(," + values.get(0) + ")"));
+			spe.appendAttribute(ePunct);	    	
+	    }
+/*	    String stName = ndSample.getNodeName();
 	    if (stName.compareTo("#document") == 0)
 		stName = new String("document");
 	    Element ePunct = doc.createElement(stName);
@@ -220,7 +248,7 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 	    	ePunct.appendChild(doc.createTextNode("*"));
             else
 	        ePunct.appendChild(doc.createTextNode("(," + values.get(0) + ")"));
-	    spe.appendAttribute(ePunct);
+	    spe.appendAttribute(ePunct);*/
 	}
 	appendTimestamp(spe, (iAttrTimer != -1));
 
