@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.1 2000/05/30 21:03:26 tufte Exp $
+  $Id: ExecutionScheduler.java,v 1.2 2000/06/24 16:09:01 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,6 +25,12 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
+/*
+ * $RCSfile:
+ * $Revision:
+ * $Date:
+ * $Author:
+ */
 
 package niagara.query_engine;
 
@@ -83,7 +89,7 @@ public class ExecutionScheduler {
      */
 
     public ExecutionScheduler (DataManager dataManager,
-							   PhysicalOperatorQueue opQueue) {
+			       PhysicalOperatorQueue opQueue) {
 
 		// Initialize the operator queue
 		//
@@ -119,9 +125,9 @@ public class ExecutionScheduler {
 
 		PhysicalHeadOperator headOperator = 
 			new PhysicalHeadOperator(queryInfo,
-									 inputStreams,
-									 outputStreams,
-									 responsiveness);
+						 inputStreams,
+						 outputStreams,
+						 responsiveness);
 
 		// Put this operator in the execution queue
 		//
@@ -156,6 +162,8 @@ public class ExecutionScheduler {
 		if (operator instanceof dtdScanOp) {
 
 			processDTDScanOperator((dtdScanOp) operator, outputStream);
+		} else if (operator instanceof FirehoseScanOp) {
+		    processFirehoseScanOperator((FirehoseScanOp) operator, outputStream);
 		}
 		else {
 
@@ -280,4 +288,49 @@ public class ExecutionScheduler {
 			System.err.println("Data Manager Already Closed!!!");
 		}
     }
+
+    /**
+     * This function processes a Firehose Scan Logical Operator by creating
+     * a firehose thread to fetch data from the firehose, parse the
+     * documents that arrive, and put them in the appropriate stream
+     *
+     * @param firehoseScanOperator The firehose scan operator that is to be scheduled
+     *                        for execution
+     * @param outputStream The stream to which the output of the scan operator
+     *                     is to be fed
+     */
+
+    protected void processFirehoseScanOperator (FirehoseScanOp fhScanOp,
+						Stream outputStream) {
+	// For now, we have the partial operator to add - THIS WILL GO
+	//
+	Stream[] outputStreams = new Stream[1];
+	outputStreams[0] = outputStream;
+	
+	Stream[] inputStreams = new Stream[1];
+	inputStreams[0] = new Stream(streamCapacity);
+	
+	PhysicalPartialOperator partialOp = 
+	    new PhysicalPartialOperator(null,inputStreams, 
+					outputStreams, responsiveness);
+	
+	opQueue.putOperator(partialOp);
+	
+	
+	// Ask the data manager to start filling the output stream with
+	// the parsed XML documents
+	//
+	System.err.println("Attempting to start firehose ");
+
+	FirehoseThread firehose = new FirehoseThread(fhScanOp.getSpec(),
+						     new SourceStream(inputStreams[0]));
+
+	
+	// start the thread
+	Thread fhthread = new Thread(firehose);
+	fhthread.start();
+    }
+
+
 }
+
