@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.8 2003/01/13 05:09:47 tufte Exp $
+  $Id: QueryEngine.java,v 1.9 2003/03/08 02:23:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -84,8 +84,6 @@ public class QueryEngine
     // The execution scheduler that schedules operators
     private ExecutionScheduler scheduler; 
 
-    private TrigExecutionScheduler trigScheduler;
-
     // A query id counter, accessed by a synchronized method 
     private int lastQueryId;
 
@@ -155,10 +153,6 @@ public class QueryEngine
 		//
 		scheduler = new ExecutionScheduler(server, dataManager, opQueue);
 
-		// Create the trig query scheduler
-		//
-		trigScheduler = new TrigExecutionScheduler(dataManager, opQueue);
-	
 		// Create the active query list
 		activeQueries = new ActiveQueryList();	
 
@@ -270,65 +264,6 @@ public class QueryEngine
 	
 	return queryResult;
     }
-
-    /**
-     *  The function called by trigger manager  to 
-     *  run a trigger query.  A new query information object is created, entered into
-     *  the query queue and active query list, and wrapped in a query result
-     *  object which is returned to the trigger manager 
-     * 
-     *  @param optimized logicalPlan roots
-     *
-     *  @return vector of QueryResults
-     */
-
-    public synchronized Vector executeGroupQuery(Vector queryRoots)
-    throws ShutdownException {
-	
-		//this is the vector of query results
-		Vector queryResults = new Vector();
-		Vector queryInfos = new Vector();	
-
-		for (int i=0; i<queryRoots.size(); i++) {
-
-		    // Get the next qid
-		    int qid = CUtil.getNextQueryId();
-		    
-		    // Generate the output streams for each query root
-		    PageStream resultStream = new PageStream("Some trigger thing");
-		    
-		    // Create a query information object
-		    QueryInfo queryInfo;
-		    
-		    try {
-			queryInfo = new QueryInfo("",
-						  qid,
-						  resultStream,
-						  activeQueries,
-						  true);
-			queryInfos.addElement(queryInfo);
-			
-		    }
-		    catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
-			System.err.println("Error in Assigning Unique Query Ids!");
-			return null;
-		    }
-		    
-		    // Create the query result object to return to the caller
-		    QueryResult queryResult = new QueryResult(qid, resultStream);
-		    queryResults.addElement(queryResult);
-		}
-		
-		//call Trigger Execution Scheduler to generate the physical
-		//plan and execute the group plan.
-		trigScheduler.executeOperators(queryRoots,queryInfos);
-		
-		// Return the query results object to the invoker of the method
-		// System.err.println("Now cleanning up");
-		trigScheduler.cleanUpAlloc();
-		return queryResults;
-    }
-
 
     /**
      *  Get the DTD list from DM (which contacts ther YP if list is not cached)

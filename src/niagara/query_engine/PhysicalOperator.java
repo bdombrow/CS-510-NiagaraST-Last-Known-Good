@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.27 2003/03/05 19:27:05 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.28 2003/03/08 02:23:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -89,9 +89,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
     /** Schemas for incoming tuples */
     protected TupleSchema[] inputTupleSchemas;
         
-    // for triggers
-    protected static DataManager DM;
-   
     // for testing
     protected CPUTimer cpuTimer; // = new CPUTimer();
  
@@ -347,8 +344,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
      * source and sink streams
      */
     private void shutDownOperator (String msg) {	
-	shutdownTrigOp();
-
 	// try to close each sink stream, even if we get an error closing
 	// one stream, we still try to close all the rest
 	// ignore all errors since we are shutting down (this is
@@ -380,8 +375,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
      * from this operator ended
      */
     private void endOperator () {	
-	shutdownTrigOp();
-
 	// try to close each sink stream, even if we get an error closing
 	// one stream, we still try to close all the rest
 	// ignore all errors since we are shutting down (this is
@@ -587,8 +580,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
 		// because partial result creation may terminate when all 
 		// input streams are either synchronized or closed.
 		updatePartialResultCreation();
-
-		shutdownTrigOp();
 	    }
 	    return;
 
@@ -1086,14 +1077,6 @@ implements SchemaProducer, SerializableToXML, Initializable {
 	// KT FIX - code should be once ExecutionScheduler is fixed
         // The default physical operator does not create new XML nodes
 	//throw new PEException("KT shouldn't get here");
-    }
-
-    protected void shutdownTrigOp() {
-	return;
-    }
-
-    public static void setDataManager(DataManager d) {
-	DM = d;
     }
 
     /**

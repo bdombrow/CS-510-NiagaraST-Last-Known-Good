@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryThread.java,v 1.7 2003/03/03 08:20:13 tufte Exp $
+  $Id: QueryThread.java,v 1.8 2003/03/08 02:23:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -194,7 +194,7 @@ public class QueryThread implements Runnable {
 	
 	// Get the query representation from the parse tree
 	//
-	query queryRep = ((xqlExt) parseTree.value).getQuery();
+	query queryRep = (query) parseTree.value;
 	
 	// Get the logical plan from the query representation
 	// THIS HAS TO CHANGE TO REUSE LOGICAL PLAN GENERATOR

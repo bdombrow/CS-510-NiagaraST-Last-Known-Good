@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QEUtil.java,v 1.7 2002/10/27 03:08:04 vpapad Exp $
+  $Id: QEUtil.java,v 1.8 2003/03/08 02:23:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -75,7 +75,7 @@ public class QEUtil {
 	}
 	    
 	// Get the conditions
-	query q = ((xqlExt)(parse_tree.value)).getQuery();
+	query q = (query) parse_tree.value;
 	if(q == null) return null;
 	Vector v = q.getConditions();
 	
@@ -116,7 +116,7 @@ public class QEUtil {
 	    
 	// Get the conditions
 	//
-	query q = ((xqlExt)(parse_tree.value)).getQuery();
+	query q = (query) parse_tree.value;
 	if(q == null) return null;
 	Vector v = q.getConditions();
 	
