@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.8 2002/10/24 02:59:34 vpapad Exp $
+  $Id: PhysicalAverageOperator.java,v 1.9 2002/10/24 03:18:50 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,6 +30,8 @@ package niagara.query_engine;
 import java.util.ArrayList;
 
 import niagara.ndom.*;
+import niagara.optimizer.colombia.LogicalOp;
+
 import org.w3c.dom.*;
 
 import niagara.utils.*;
@@ -140,7 +142,7 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
     private ArrayList atomicValues;
 
     
-    public void initFrom(op logicalOperator) {
+    public void initFrom(LogicalOp logicalOperator) {
 	// Get the averaging attribute of the average logical operator
 	averageAttribute = ((averageOp) logicalOperator).getAveragingAttribute();
         ae = new AtomicEvaluator(averageAttribute);
@@ -179,11 +181,7 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	// First get the atomic values
 	//
         atomicValues.clear();
-        // XXX vpapad: postpone until checkin of new AtomicEvaluator
-        ae.getAtomicValues(tupleElement, atomicValues);
-        /*
         ae.getAtomicValues(tupleElement, null, atomicValues);
-        */
         
 	// If there is not exactly one atomic value, skip
 	//
