@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.31 2003/07/03 19:24:57 tufte Exp $
+<!-- $Id: queryplan.dtd,v 1.32 2003/07/08 20:51:06 ptucker Exp $
      DTD for query plans -->
 
 <!-- 
@@ -13,7 +13,7 @@
 		    slidingMax | count | slidingCount | incrmax |
 		    incravg | select | dup | union | join |
 		    dtdscan | resource | constant | timer |
-		    prefix | punct | send | display | topn |
+		    prefix | punctuate | send | display | topn |
 		    firehosescan | filescan | construct |
 		    accumulate | nest | magic_construct )+>
 		    
@@ -245,16 +245,23 @@
 <!ATTLIST prefix
           id       ID           #REQUIRED
           length   CDATA		#REQUIRED
-	  %PositionAttributes;>
+	  %StandardAttributes;>
 
-<!ELEMENT punct EMPTY>
-<!ATTLIST punct
+<!ELEMENT punctuate EMPTY>
+<!ATTLIST punctuate
           id       ID           #REQUIRED
 	  datainput CDATA       #REQUIRED
 	  dataattr CDATA        #REQUIRED
 	  dataroot CDATA        #REQUIRED
 	  timer    CDATA        #REQUIRED
 	  input    IDREFS       #REQUIRED
+	  %PositionAttributes;>
+
+<!ELEMENT describe EMPTY>
+<!ATTLIST describe
+		id       ID           #REQUIRED
+		attrsDescribe	CDATA	#REQUIRED
+		input    IDREFS       #REQUIRED
 	  %PositionAttributes;>
 
 <!ELEMENT send EMPTY>
