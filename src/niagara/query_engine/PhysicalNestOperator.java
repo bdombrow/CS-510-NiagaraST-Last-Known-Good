@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.14 2003/07/09 04:59:36 tufte Exp $
+  $Id: PhysicalNestOperator.java,v 1.15 2003/07/24 19:18:34 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -119,10 +119,6 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 			 resultTemplate).getStartTag().getSdata().getValue();
 	numGroupingAttributes = groupAttributeList.size();
 	resultList = new NodeVector();
-
-	// old code - am not using skolem anymore... KT
-	//skolem grouping = ((constructInternalNode) resultTemplate).getSkolem();
-	//numGroupingAttributes = grouping.getVarList().size();
     }
 
 
