@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.11 2002/05/02 22:02:35 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.12 2002/05/07 04:49:27 vpapad Exp $
  *
  */
 
@@ -138,7 +138,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 
         page.setParser(this);
         page.addEvent(doc, SAXEvent.START_DOCUMENT, null);
-        doc = new DocumentImpl(page, page.getLastOffset());
+        doc = new DocumentImpl(page, page.getLastIndex());
         
         depth = 0; 
         open_nodes[0] = -1;
