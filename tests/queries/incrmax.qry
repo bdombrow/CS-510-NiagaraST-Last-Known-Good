@@ -19,9 +19,9 @@
 </xxx>
 ]]>
 </constant>
-<scan id="item" regexp="xxx.item" input="const"/>
-<scan id="group" regexp="group" input="item"/>
-<scan id="value" root="$item" regexp="value" input="group"/>
+<unnest id="item" regexp="xxx.item" input="const"/>
+<unnest id="group" regexp="group" input="item"/>
+<unnest id="value" root="$item" regexp="value" input="group"/>
 <incrmax id="max" groupby="$group" emptygroupvalue="0" maxattr="$value" input="value"/>
 
 <construct id="cons" input="max">

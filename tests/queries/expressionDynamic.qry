@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- This query uses an expression generated dynamically -->
+
+<plan top="cons">
+
+<constant id="const">
+<![CDATA[
+<list>
+<item><a>100</a><b>10</b></item>
+<item><a>200</a><b>20</b></item>
+<item><a>300</a><b>30</b></item>
+<item><a>400</a><b>40</b></item>
+<item><a>500</a><b>50</b></item>
+</list>
+]]>
+</constant>
+
+<unnest id="item" regexp="list.item" input="const"/>
+<unnest id="a" regexp="a" input="item"/>
+<unnest id="b" root="item" regexp="b" input="a"/>
+<expression id="expr" variables="a b" expression="result = a + 2*b" input="b"/>
+<construct id="cons" input="expr">
+<result>
+$a $b $expr
+</result>
+</construct>
+</plan>

@@ -15,9 +15,9 @@
 </xxx>
 ]]>
 </constant>
-<scan id="item" regexp="xxx.item" input="const"/>
-<scan id="group" regexp="group" input="item"/>
-<scan id="value" root="$item" regexp="value" input="group"/>
+<unnest id="item" regexp="xxx.item" input="const"/>
+<unnest id="group" regexp="group" input="item"/>
+<unnest id="value" root="$item" regexp="value" input="group"/>
 <incravg id="avg" groupby="$group" avgattr="$value" input="value"/>
 
 <construct id="cons" input="avg">
