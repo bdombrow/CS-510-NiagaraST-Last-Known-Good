@@ -25,6 +25,7 @@ public class FirehoseSpec extends StreamSpec {
     private int numTLElts;     // num top-level elts in XMLB and AUCTION docs
     private long rate;
     private boolean prettyPrint;
+    private boolean trace;
 
     /**
      * Initialize the firehose spec
@@ -50,7 +51,8 @@ public class FirehoseSpec extends StreamSpec {
     public FirehoseSpec(int listenerPortNum, String listenerHostName,
 			int dataType, String descriptor, String descriptor2,
 			int numGenCalls,int numTLElts, int rate, 
-			boolean streaming, boolean prettyPrint) {
+			boolean streaming, boolean prettyPrint,
+			boolean trace) {
 	this.listenerPortNum = listenerPortNum;
 	this.listenerHostName = listenerHostName;
 	this.dataType = dataType;
@@ -61,6 +63,7 @@ public class FirehoseSpec extends StreamSpec {
 	this.rate = rate;
 	this.streaming = streaming;
 	this.prettyPrint = prettyPrint;
+	this.trace = trace;
 	return;
     }
 
@@ -108,6 +111,10 @@ public class FirehoseSpec extends StreamSpec {
 	return prettyPrint;
     }
 
+    public boolean getTrace() {
+	return trace;
+    }
+
     public void dump(PrintStream os) {
 	os.println("Firehose Specification: (" + id + ") ");
 	os.println("  Listener Port " + String.valueOf(listenerPortNum) +
@@ -119,7 +126,8 @@ public class FirehoseSpec extends StreamSpec {
 		   ", NumTopLevelElts " + String.valueOf(numTLElts) +
 		   ", Rate " + String.valueOf(rate) +
 		   ", Streaming " + String.valueOf(streaming) +
-		   ", PrettyPrint " + String.valueOf(prettyPrint));
+		   ", PrettyPrint " + String.valueOf(prettyPrint) +
+		   ", Trace = " + String.valueOf(trace));
     }
 
     // appends all the firehose spec info into the given string buffer
@@ -149,6 +157,8 @@ public class FirehoseSpec extends StreamSpec {
 	s.append(streaming);
 	s.append(" ");
 	s.append(prettyPrint);
+	s.append(" ");
+	s.append(trace);
 	s.append(" ");
     }
 
@@ -218,5 +228,12 @@ public class FirehoseSpec extends StreamSpec {
 	    throw new CorruptMsgException("invalid prettyPrint value");
 	}
 	prettyPrint = (Boolean.valueOf(input_stream.sval)).booleanValue();     
+
+	ttype = input_stream.nextToken();
+	if(ttype != StreamTokenizer.TT_WORD) {
+	    throw new CorruptMsgException("invalid trace value");
+	}
+	trace = (Boolean.valueOf(input_stream.sval)).booleanValue();     
     }
 }
+

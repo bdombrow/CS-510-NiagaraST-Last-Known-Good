@@ -35,6 +35,8 @@ class XMLFirehoseThread extends Thread {
 		fhSpec = msg.getSpec();
 		boolean useStreamingFormat = fhSpec.isStreaming();
 		boolean usePrettyPrint = fhSpec.isPrettyPrint();
+		boolean trace = fhSpec.getTrace();
+		System.out.println(fhSpec.getDataType());
 		switch(fhSpec.getDataType()) {
 		case FirehoseConstants.XMLB:
 		    xml_generator = new XMLBGenerator(fhSpec.getNumTLElts(), 
@@ -56,7 +58,19 @@ class XMLFirehoseThread extends Thread {
 							    fhSpec.getDescriptor2(),
 							    fhSpec.getNumTLElts(),
 							    useStreamingFormat, 
-							    usePrettyPrint);
+							    usePrettyPrint,
+							    trace);
+		    break;
+		case FirehoseConstants.PACKET:
+		    boolean fLive = false;
+		    System.out.println("Generating Packets");
+		    if (fhSpec.getDescriptor2() != null)
+			fLive = Boolean.valueOf(fhSpec.getDescriptor2()).booleanValue();
+		    xml_generator = new XMLPacketGenerator(fhSpec.getDescriptor(),
+							   fLive,
+							   fhSpec.getNumTLElts(),
+							   useStreamingFormat,
+							   usePrettyPrint);
 		    break;
 		case FirehoseConstants.DTD:
 		    // if the dtd_name contains :// assume it is a
@@ -80,7 +94,8 @@ class XMLFirehoseThread extends Thread {
 		int count = 0;
 		if(useStreamingFormat)
 		    client_out.write(FirehoseConstants.OPEN_STREAM.getBytes());
-		while(count < numGenCalls || numGenCalls == -1) {
+		while((count < numGenCalls || numGenCalls == -1) &&
+		      xml_generator.getEOF() == false) {
 		    stDoc = xml_generator.generateXMLString();
 		    client_out.write(stDoc.getBytes());
 		    count++; 

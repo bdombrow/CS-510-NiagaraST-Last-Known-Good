@@ -16,14 +16,16 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     String tab2 = "";
     String tab3 = "";
     String nl = "";
-
+    private long idTrace = 0;
+    private FileWriter fwTrace;
 
   public XMLAuctionGenerator(String stFile, String desc2,
 			     int numTLElts, boolean streaming,
-			     boolean prettyPrint) {
+			     boolean prettyPrint, boolean trace) {
       this.stFile = stFile;
       this.desc2 = desc2;
       this.numTLElts = numTLElts;
+      this.trace = trace;
       if (m_av == null)
 	  m_av = new AuctionValues();
       useStreamingFormat = streaming;
@@ -46,6 +48,15 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     GregorianCalendar cal = new GregorianCalendar();
     
     cal.set(2001,10,2,1,12,53);
+
+    if (trace) {
+	try {
+	    fwTrace = new FileWriter("auction.gen", true);
+	} catch (java.io.IOException ex) {
+	    System.out.println("Can't create auction gen trace file: " +
+			       ex.getMessage());
+	}
+    }
     
     //Get the auction values
     m_av.init(stFile, cal);
@@ -68,6 +79,15 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     stringBuf.append("</site>");
     stringBuf.append(nl);
 
+    if (trace) {
+	try {
+	    fwTrace.close();
+	} catch (java.io.IOException ex) {
+	    System.out.println("Can't close auction gen trace file: " +
+			       ex.getMessage());
+	}
+    }
+    
     return stringBuf.toString();
   }
 
@@ -84,7 +104,10 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
 
     // KT - if this is too slow - make two cases with pretty print and
     // without to reduce calls to append
-    stb.append("<open_auctions>");
+    stb.append("<open_auctions");
+    if (trace)
+	writeTrace(stb);
+    stb.append(">");
     stb.append(nl);
     for (int iDoc=0; iDoc<numBids;iDoc++) {
 	stb.append(tab);
@@ -133,7 +156,10 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     // KT - if we need more speed - remove the pluses and also - to avoid excessive
     // calls to append - remove the +s.
     
-    stb.append("<people>");
+    stb.append("<people");
+    if (trace)
+	writeTrace(stb);
+    stb.append(">");
     stb.append(nl);
     for (int iDoc=0; iDoc<numPersons;iDoc++) {
       Person p = new Person();
@@ -285,6 +311,27 @@ class XMLAuctionGenerator extends XMLFirehoseGen {
     stb.append("</people>");
     stb.append(nl);
   }
+
+    private void writeTrace(StringBuffer stb) {
+	long ts = System.currentTimeMillis();
+
+	//The trace contains a unique ID, and a timestamp, so that
+	// we can determine latency at the client
+	try {
+	    fwTrace.write(String.valueOf(idTrace));
+	    fwTrace.write(",");
+	    fwTrace.write(String.valueOf(ts));
+	    fwTrace.write("\n");
+	} catch (java.io.IOException ex) {
+	    System.out.println("Write to gen trace file failed: " +
+			       ex.getMessage());
+	}
+	stb.append(" id=\"");
+	stb.append(idTrace++);
+	stb.append("\" ts=\"");
+	stb.append(ts);
+	stb.append("\"");
+    }
 }
 
 class AuctionValues extends HandlerBase {

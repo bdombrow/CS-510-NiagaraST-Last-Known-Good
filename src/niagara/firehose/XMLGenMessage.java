@@ -23,6 +23,7 @@ class XMLGenMessage {
 	    input_stream.wordChars('/','/');
 	    input_stream.wordChars(':',':');
 	    input_stream.wordChars('~','~');
+	    input_stream.wordChars('_','_');
 
 	    int ttype;
 	    ttype = input_stream.nextToken();

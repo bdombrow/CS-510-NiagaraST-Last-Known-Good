@@ -6,11 +6,12 @@ public class FirehoseConstants {
     public static final int TEMP = 2;
     public static final int AUCTION = 3;
     public static final int DTD = 4;
+    public static final int PACKET = 5;
 
     public static final String typeNames[] = {"xmlb", "subfile", "temp",
-					      "auction", "dtd"};
+					      "auction", "dtd", "packet"};
     
-    public static final int numDataTypes = 5;
+    public static final int numDataTypes = 6;
 
     // types for messages
     public static final int OPEN = 0;
