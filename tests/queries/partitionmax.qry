@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<plan top="cons">
+<constant id="const">
+<![CDATA[
+<xxx>
+<item group="1" value="10"/>
+<item group="2" value="5"/>
+<item group="1" value="5"/>
+<item group="3" value="15"/>
+<item group="1" value="20"/>
+<item group="2" value="-10"/>
+<item group="1" value="20"/>
+<item group="1" value="20"/>
+<item group="1" value="20"/>
+<item group="1" value="30"/>
+<item group="1" value="20"/>
+<item group="4" value="20"/>
+</xxx>
+]]>
+</constant>
+<unnest id="item" regexp="xxx.item" input="const"/>
+<unnest id="group" type="content" regexp="group" input="item"/>
+<unnest id="value" root="$item" regexp="value" input="group"/>
+<partitionmax id="max" groupby="$group" emptygroupvalue="0" landmark="true" maxattr="$value" input="value"/>
+
+<construct id="cons" input="max">
+<maximum> 
+<group> $group </group>
+<prev> $oldmax </prev>
+<new> $max </new>
+</maximum>
+</construct>
+</plan>

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<plan top="cons">
+<constant id="const">
+<![CDATA[
+<xxx>
+<item group="1" value="10"/>
+<item group="2" value="5"/>
+<item group="1" value="5"/>
+<item group="3" value="15"/>
+<item group="1" value="20"/>
+<item group="2" value="-10"/>
+<item group="1" value="20"/>
+<item group="1" value="20"/>
+<item group="1" value="20"/>
+<item group="1" value="30"/>
+<item group="1" value="20"/>
+<item group="4" value="20"/>
+</xxx>
+]]>
+</constant>
+<unnest id="item" regexp="xxx.item" input="const"/>
+<unnest id="group" type="content" regexp="group" input="item"/>
+<unnest id="value" root="$item" regexp="value" input="group"/>
+<partitionavg id="avg" groupby="$group" landmark="false" range="3" avgattr="$value" input="value"/>
+
+<construct id="cons" input="avg">
+<![CDATA[
+<maximum>
+<group> $group </group>
+<prev> $oldavg </prev>
+<new> $avg </new>
+</maximum>
+]]>
+</construct>
+</plan>
