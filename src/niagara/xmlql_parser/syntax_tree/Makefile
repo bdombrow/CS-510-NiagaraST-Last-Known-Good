@@ -89,5 +89,5 @@ classpath:
 
 clean:
 	rm -f *.class *~
-	rm -f re_parser/REParser.java construct_parser/ConstructParser.java QueryParser.java sym.java Scanner.java
+	\rm -rf construct_parser re_parser
 
