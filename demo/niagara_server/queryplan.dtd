@@ -187,8 +187,10 @@
 	  datatype  (xmlb | subfile | temp | auction | dtd ) "auction"
 	  num_gen_calls  CDATA   #REQUIRED  
 	  streaming      (yes | no)  "yes"
-	  desc           CDATA   "empty"
+	  desc           CDATA   ""
+	  desc2          CDATA   "bidperson"
 	  num_tl_elts    CDATA   "1"   
+	  prettyprint   (yes | no)  "no"
 	  %StandardAttributes;>
 
 <!-- NOTE: num_gen_calls is the number of times the generator will be called 
@@ -210,7 +212,8 @@
            xmlb:    num_tl_elts   (no desc)
            subfile: desc          (no num_tl_elts)
            temp:    desc              "
-           auction: desc, num_tl_elts
+           auction: desc, num_tl_elts, desc2 
+	 	desc is startFileName, desc2 specifies type of data
            dtd:     desc          (no num_tl_elts)
 
     also note, streaming is used to indicate to query engine that
