@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<timer id="timer" period="1 second" warp="10" delay="10 seconds" 
+		slack="5 second" granularity="1 second" relative=""/>
+
+<prefix id="prefix" length="200" input="timer"/>
+
+<firehosescan id="fhscan" host="localhost" port="5000" rate="0" datatype="auction_stream" num_gen_calls="100" desc="" num_tl_elts="1" prettyprint="no"/>
+
+<!-- get category name and id -->
+<filescan id="categories" filename="../../NEXMark/data/categories.xml"/>
+<unnest id="category" regexp="Categories.category" input="categories"/>
+<unnest id="cid" regexp="id" input="category"/>
+<unnest id="cname" regexp="name" root="category" input="cid"/>
+
+<dup id="dup" branch="2" input="fhscan"/>
+
+<!-- get auction's category, expiration time, and id -->
+<unnest id="auct" regexp="site.open_auctions.open_auction" input="dup"/>
+<unnest id="acat" regexp="category" input="auct"/>
+<unnest id="aexpires" regexp="interval.end" root="auct" input="acat"/>
+<unnest id="aid" regexp="id" root="auct" input="aexpires"/>
+
+<!-- get the bid's price, generated time, and bid id -->
+<unnest id="bids" regexp="site.open_auctions.open_auction" input="dup"/>
+<unnest id="bprice" regexp="bidder.bid" input="bids"/>
+<unnest id="btime" regexp="bidder.time" input="bprice" root="bids"/>
+<unnest id="bid" regexp="id" input="btime" root="bids"/>
+					     
+<punctuate id="punct" datainput="1" dataattr="$btime" timer="$timer" input="prefix bid"/>
+						       
+<!-- Now, join on a.seller=p.id -->
+ <join id="join" left="$aid" right="$bid" input="aid punct" extensionjoin="right" >
+ <pred op="le">
+ 	<var value="$btime"></var> <var value="$aexpires"></var>
+</pred>
+</join>
+
+<!-- get the closing price of each auction -->
+<max id="max" groupby="$aid $acat" maxattr="$bprice" input="join"/>
+
+<join id="ejoin" left="$aid" right="$cid" input="max cname" extensionjoin="left"/>
+
+<!-- the incravg, get the average clsing price for each category -->
+<partitionavg id="avg" groupby="$cid $cname" landmark="true" avgattr="$max" input="ejoin"/>
+
+<construct id="cons" input="avg">
+  <![CDATA[<category name=$cname>
+<avg>$avg</avg>
+     </category>]]>     
+</construct>
+</plan>
