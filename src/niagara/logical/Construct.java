@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Construct.java,v 1.1 2003/12/24 02:08:30 vpapad Exp $
+  $Id: Construct.java,v 1.2 2004/01/30 21:43:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -191,6 +191,10 @@ public class Construct extends UnaryOperator {
             ConstructParser cep = new ConstructParser(scanner);
             resultTemplate = (constructBaseNode) cep.parse().value;
             cep.done_parsing();
+        } catch (InvalidPlanException ipe) {
+            String msg = ipe.getMessage();
+            throw new InvalidPlanException("Syntax error in construct template for node "
+                    + "'" + e.getAttribute("id") + "' " + msg);
         } catch (Exception ex) {
             throw new InvalidPlanException("Error while parsing: " + content);
         }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Count.java,v 1.1 2003/12/24 02:08:29 vpapad Exp $
+  $Id: Count.java,v 1.2 2004/01/30 21:43:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,7 +40,6 @@ import org.w3c.dom.*;
 
 import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
-import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 
 public class Count extends Aggregate {

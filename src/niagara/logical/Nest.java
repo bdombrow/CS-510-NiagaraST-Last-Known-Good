@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Nest.java,v 1.7 2003/12/24 02:08:29 vpapad Exp $
+  $Id: Nest.java,v 1.8 2004/01/30 21:43:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -139,6 +139,10 @@ public class Nest extends Group {
             ConstructParser cep = new ConstructParser(scanner);
             resultTemplate = (constructInternalNode) cep.parse().value;
             cep.done_parsing();
+           } catch (InvalidPlanException ipe) {
+               String msg = ipe.getMessage();
+               throw new InvalidPlanException("Syntax error in nest template for node "
+                       + "'" + e.getAttribute("id") + "' " + msg);
         } catch (Exception ex) {
             throw new InvalidPlanException("Error while parsing Nest construct template: "
 					   + content);

@@ -1,4 +1,4 @@
-/* $Id: Unnest.java,v 1.10 2003/12/24 02:08:30 vpapad Exp $ */
+/* $Id: Unnest.java,v 1.11 2004/01/30 21:43:00 vpapad Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -187,6 +187,10 @@ public class Unnest extends UnaryOperator {
             REParser rep = new REParser(scanner);
             path  = regExp.regExp2RE((regExp) rep.parse().value);
             rep.done_parsing();
+           } catch (InvalidPlanException ipe) {
+               String msg = ipe.getMessage();
+               throw new InvalidPlanException("Syntax error in regular expression for node "
+                       + "'" + e.getAttribute("id") + "' " + msg);
         } catch (Exception ex) { // ugh cup throws "Exception!!!"
             ex.printStackTrace();
             throw new InvalidPlanException(
