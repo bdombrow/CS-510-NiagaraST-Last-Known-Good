@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PredicateEvaluator.java,v 1.8 2002/04/19 20:49:15 tufte Exp $
+  $Id: PredicateEvaluator.java,v 1.9 2002/09/09 16:43:33 ptucker Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -371,6 +371,19 @@ class Comparison extends Predicate {
     }
     
     /**
+     *  The Contains operator. "Contains"
+     *
+     *  @param leftValue The containing string
+     *  @param rightValue The string to find in the leftValue
+     *
+     *  @return True if right is contained in the left, false otherwise
+     */
+
+    boolean stringContains (String leftValue, String rightValue) {
+	return (leftValue.indexOf(rightValue) != -1);
+    }
+    
+    /**
      *  The numeric compare function is used to attempt to compare two strings
      *  as numeric double values
      *
@@ -400,6 +413,8 @@ class Comparison extends Predicate {
 	case opType.LT:   return ( leftDouble < rightDouble );
 	case opType.LEQ: return ( leftDouble <= rightDouble );
 	case opType.GEQ: return ( leftDouble >= rightDouble );
+	    //Ugly hack for containment
+        case opType.CONTAIN: throw new java.lang.NumberFormatException();
 	    
 	default:   return false;
 	}
@@ -442,6 +457,9 @@ class Comparison extends Predicate {
 		
 	    case opType.GEQ: 
 		return stringGreaterThanEquals(leftValue, rightValue); 
+
+	    case opType.CONTAIN:
+		return stringContains(leftValue, rightValue);
 		
 	    default: 
 		throw new PEException("ERROR: invalid opType for arithOpNode");
@@ -449,3 +467,4 @@ class Comparison extends Predicate {
 	}
     }
 }
+
