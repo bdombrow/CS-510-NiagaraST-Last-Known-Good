@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CountOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
+  $Id: CountOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,23 +37,20 @@
 package niagara.xmlql_parser.op_tree;
 
 
+import java.util.ArrayList;
+
 import org.w3c.dom.*;
+
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
+import niagara.utils.PEException;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class CountOp extends groupOp {
-
-    /////////////////////////////////////////////////////////////////
-    // These are the private members of the count operator       //
-    /////////////////////////////////////////////////////////////////
-
     // This is the attribute on which counting is done
-    //
-    schemaAttribute countingAttribute;
-
-
-    /////////////////////////////////////////////////////////////////
-    // These are the methods of the class                          //
-    /////////////////////////////////////////////////////////////////
+    Attribute countingAttribute;
 
     /**
      * This function sets the skolem attributes on which grouping is
@@ -64,14 +61,10 @@ public class CountOp extends groupOp {
      */
 
     public void setCountingInfo (skolem skolemAttributes,
-				schemaAttribute countingAttribute) {
-
-	// Set the counting attribute
-	//
+				Attribute countingAttribute) {
 	this.countingAttribute = countingAttribute;
 
 	// Set the skolem attributes in the super class
-	//
 	this.setSkolemAttributes(skolemAttributes);
     }
 
@@ -81,15 +74,20 @@ public class CountOp extends groupOp {
      *
      * @return Counting attribute of the operator
      */
-
-    public schemaAttribute getCountingAttribute () {
-
-	// Return the counting attribute
-	//
+    public Attribute getCountingAttribute () {
 	return countingAttribute;
     }
 
     public void dump() {
 	System.out.println("CountOp");
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+        CountOp cop = new CountOp();
+        cop.setCountingInfo(skolemAttributes, countingAttribute);
+        return cop;
     }
 }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: splitOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
+  $Id: splitOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,7 +40,7 @@ import java.util.*;
 import org.w3c.dom.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
-public class splitOp extends unryOp {
+public class splitOp extends UnoptimizableLogicalOperator {
 
     //We have two kinds of splitOp, one is for multiple destinations(select
     // group), another is for fixed destination (join group). The name is

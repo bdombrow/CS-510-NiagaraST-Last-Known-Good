@@ -1,5 +1,5 @@
 /*
- * $Id: AccumulateOp.java,v 1.6 2002/05/23 06:32:03 vpapad Exp $
+ * $Id: AccumulateOp.java,v 1.7 2002/10/27 01:20:21 vpapad Exp $
  */
 
 package niagara.xmlql_parser.op_tree;
@@ -14,14 +14,19 @@ package niagara.xmlql_parser.op_tree;
 import java.util.*;
 import org.w3c.dom.*;
 
+import niagara.utils.PEException;
 import niagara.xmlql_parser.syntax_tree.*;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
 import niagara.query_engine.MergeTree;
 import niagara.query_engine.MTException;
 
 public class AccumulateOp extends unryOp {
 
     private MergeTree mergeTree;
-    private schemaAttribute mergeAttr;
+    private Attribute mergeAttr;
     private String accumFileName;
     private String initialAccumFile;
     boolean clear; /* clear existing accum file or not */
@@ -37,7 +42,7 @@ public class AccumulateOp extends unryOp {
      *              documents/fragments to be merged
      */
     public void setAccumulate(String _mergeTemplate, 
-			      schemaAttribute _mergeAttr,
+			      Attribute _mergeAttr,
 			      String _accumFileName, 
 			      String _initialAccumFile,
 			      boolean _clear) 
@@ -60,7 +65,7 @@ public class AccumulateOp extends unryOp {
 	return mergeTree;
     }
 
-    public schemaAttribute getMergeAttr() {
+    public Attribute getMergeAttr() {
 	return mergeAttr; 
     }
 
@@ -79,7 +84,7 @@ public class AccumulateOp extends unryOp {
     public void dump() {
 	System.out.println("Accumulate Operator: ");
 	mergeTree.dump(System.out);
-	System.out.println("MergeIndex " + mergeAttr.getAttrId());
+	System.out.println("MergeIndex " + mergeAttr.getName());
 	if(accumFileName != null) {
 	    System.out.println("AccumFileName " + accumFileName);
 	}

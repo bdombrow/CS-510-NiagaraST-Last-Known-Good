@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: joinOp.java,v 1.5 2002/05/23 06:32:03 vpapad Exp $
+  $Id: joinOp.java,v 1.6 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,70 +32,75 @@
 package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
+
+import niagara.logical.And;
+import niagara.logical.EquiJoinPredicateList;
+import niagara.logical.Predicate;
+import niagara.optimizer.colombia.Attrs;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class joinOp extends binOp {
-
-	private predicate pred;// join predicate
+	private Predicate pred;// non-equijoin part of the predicate
 
 	// for equi-join represents the attributes of the left relation
 	// that will join with those of the right relation
-	private Vector equiJoinAttr_Lrel;    // not used at present
-	private Vector equiJoinAttr_Rrel;    // in the query engine
-
+	private EquiJoinPredicateList equiJoinPredicates;
   
-   /**
-    * @return the join predicate
-    */
-   public predicate getPredicate() {
-	return pred;
+  
+    public joinOp() {}
+    
+    public joinOp(Predicate pred, EquiJoinPredicateList equiJoinPredicates) {
+        this.pred = pred;
+        this.equiJoinPredicates = equiJoinPredicates;
+    }
+    
+   public EquiJoinPredicateList getEquiJoinPredicates() {
+        return equiJoinPredicates;
    }
-
+   
+   public Predicate getNonEquiJoinPredicate() {
+        return pred;
+   }
+   
    /**
     * @return the attributes of the left relation that equi-joins with those of 
     *         right relation
     */
-   public Vector getLeftEqJoinAttr() {
-	return equiJoinAttr_Lrel;
+   public Attrs getLeftEqJoinAttr() {
+	return equiJoinPredicates.getLeft();
    }
 
    /**
     * @return the attributes of the right relation in the equi-join
     */
-   public Vector getRightEqJoinAttr() {
-	return equiJoinAttr_Rrel;
+   public Attrs getRightEqJoinAttr() {
+    return equiJoinPredicates.getRight();
    }
 
+
    /**
-    * sets the parameter for the join operator. It constructs the predicate
-    * for the equi-join part and then ANDs it to the given join predicate.
-    *
-    * @param join predicate
+    * @param p non-equijoin part of the predicate
     * @param left attributes of the equi-join
     * @param right attributes of the equi-join
     */
-   public void setJoin(predicate p, Vector lre, Vector rre) {
-	equiJoinAttr_Lrel = lre;
-	equiJoinAttr_Rrel = rre;
-
-	// creates a predicate for the equi-join
-	predicate equiJoinPred = Util.makePredicate(lre,rre);
-
-	if(equiJoinPred != null)
-		if(p!=null)
-			// AND it to the join predicate if present
-			pred = new predLogOpNode(opType.AND,p,equiJoinPred);
-  		else
-			pred = equiJoinPred;
-	else
-		pred = p;
+   public void setJoin(Predicate p, ArrayList left, ArrayList right) {
+        equiJoinPredicates = new EquiJoinPredicateList(left, right);
+        pred = p;    
    }
 
+   public void setCartesian(Predicate p) {
+       equiJoinPredicates = new EquiJoinPredicateList();
+       pred = p;
+   }
+   
    /**
     * sets the predicate for a generic join operator. 
     * @param pred predicate
     */
-   public void setJoin(predicate pred) {
+   public void setJoin(Predicate pred) {
        this.pred = pred;
    }
 
@@ -121,11 +125,67 @@ public class joinOp extends binOp {
       return strBuf.toString();
    }
 
-    public String dumpAttributesInXML() {
-        return " physical='" + getSelectedAlgo().getName() +"' ";
+    public void dumpAttributesInXML(StringBuffer sb) {
+        equiJoinPredicates.toXML(sb);
+    }
+    public void dumpChildrenInXML(StringBuffer sb) {
+        sb.append(">");
+        pred.toXML(sb);
+        sb.append("</join>");
+    }
+    
+    /**
+     * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, LogicalProperty[])
+     */
+    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+        LogicalProperty left = input[0];
+        LogicalProperty right = input[1];
+
+        // check the joined predicates(attributes) are in the schema
+        assert(left.GetAttrs().Contains(equiJoinPredicates.getLeft()));
+        assert(right.GetAttrs().Contains(equiJoinPredicates.getRight()));
+
+        LogicalProperty result = left.copy();
+
+        Predicate allPredicates = And.conjunction(equiJoinPredicates.toPredicate(), pred);
+        result.setCardinality(left.getCardinality() * right.getCardinality() 
+                              * allPredicates.selectivity());
+        
+        result.setHasLocal(left.hasLocal() || right.hasLocal());
+        result.setHasRemote(left.hasRemote() || right.hasRemote());
+
+        // Derive the schema
+        result.GetAttrs().Merge(right.GetAttrs());
+
+        return result;
+    }
+    
+    public boolean isCartesian() {
+        return equiJoinPredicates.size() == 0;
     }
 
-    public String dumpChildrenInXML() {
-        return pred.toXML();
+    public boolean isEquiJoin() {
+        return equiJoinPredicates.size() > 0;
+    }
+    
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+        return new joinOp(pred.copy(), equiJoinPredicates.copy());
+    }
+
+    /**
+     * @see java.lang.Object#equals(Object)
+     */
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof joinOp)) return false;
+        if (obj.getClass() != joinOp.class) return obj.equals(this);
+        joinOp other = (joinOp) obj;
+        return pred.equals(other.pred) && equiJoinPredicates.equals(other.equiJoinPredicates);
+    }
+    
+    public int hashCode() {
+        return equiJoinPredicates.hashCode() ^ pred.hashCode();
     }
 }

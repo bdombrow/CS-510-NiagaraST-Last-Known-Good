@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SortOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
+  $Id: SortOp.java,v 1.3 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,6 +33,11 @@
 package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
+
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class SortOp extends unryOp {
@@ -51,7 +56,7 @@ public class SortOp extends unryOp {
     /**
      * The attribute we are sorting on
      */
-    private schemaAttribute attr;
+    private Attribute attr;
 
    /**
     * @return the comparison method
@@ -71,7 +76,7 @@ public class SortOp extends unryOp {
      * 
      * @return the attribute we are sorting on
      */
-    public schemaAttribute getAttr() {
+    public Attribute getAttr() {
 	return attr;
     }
 
@@ -79,7 +84,7 @@ public class SortOp extends unryOp {
     * used to configure the comparison method, and whether the
     * sort is ascending or not
     */
-   public void setSort(schemaAttribute attr, short comparisonMethod, boolean ascending) {
+   public void setSort(Attribute attr, short comparisonMethod, boolean ascending) {
        this.attr = attr;
        this.comparisonMethod = comparisonMethod;
        this.ascending = ascending;
@@ -100,5 +105,41 @@ public class SortOp extends unryOp {
    public String toString() {
        return "Sort";
    }
+    /**
+     * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, LogicalProperty[])
+     */
+    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+        return input[0].copy();
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+       SortOp op = new SortOp();
+       op.setSort(attr, comparisonMethod, ascending);
+       return op;
+    }
+
+    /**
+     * @see java.lang.Object#equals(Object)
+     */
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof SortOp)) return false;
+        if (obj.getClass() != SortOp.class) return obj.equals(this);
+        SortOp other = (SortOp) obj;
+        return comparisonMethod == other.comparisonMethod &&
+               ascending == other.ascending &&
+               attr.equals(other.attr);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+        int result = comparisonMethod ^ attr.hashCode();
+        if (ascending) result = ~result;
+        return result;
+    }
 }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: nestOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
+  $Id: nestOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,6 +38,9 @@ package niagara.xmlql_parser.op_tree;
 
 
 import org.w3c.dom.*;
+
+import niagara.optimizer.colombia.Op;
+import niagara.utils.PEException;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class nestOp extends groupOp {
@@ -96,4 +99,24 @@ public class nestOp extends groupOp {
 	System.out.println("NestOp");
     }
 
+    /**
+     * @see niagara.optimizer.colombia.Op#copy()
+     */
+    public Op copy() {
+        throw new PEException("Optimization is not supported for this operator");        
+    }
+
+    /**
+     * @see java.lang.Object#equals(Object)
+     */
+    public boolean equals(Object obj) {
+        return this == obj;
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
 }

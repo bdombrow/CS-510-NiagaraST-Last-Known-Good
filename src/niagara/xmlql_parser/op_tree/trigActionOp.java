@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: trigActionOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
+  $Id: trigActionOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,10 +35,9 @@ package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
 
-
 import org.w3c.dom.*;
 
-public class trigActionOp extends unryOp {
+public class trigActionOp extends UnoptimizableLogicalOperator {
     private Vector action;
     
     public void setAction(Vector act) {
@@ -52,6 +51,5 @@ public class trigActionOp extends unryOp {
     public void dump() {
 	System.out.println("TrigActionOp");
     }
-
 }
 

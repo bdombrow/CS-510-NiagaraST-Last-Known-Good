@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: selectOp.java,v 1.3 2002/05/23 06:32:03 vpapad Exp $
+  $Id: selectOp.java,v 1.4 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,16 +33,27 @@
 package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
+
+import niagara.logical.Predicate;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalProperty;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class selectOp extends unryOp {
+    
+   private Predicate pred;  // predicate for the selection
 
-   private predicate pred;  // predicate for the selection
 
+    public selectOp() {}
+    
+    public selectOp(Predicate pred) {
+        this.pred = pred;
+    }
+    
    /**
     * @return the selection predicate
     */
-   public predicate getPredicate() {
+   public Predicate getPredicate() {
 	return pred;
    }
 
@@ -76,27 +87,23 @@ public class selectOp extends unryOp {
       return strBuf.toString();
    }
 
-    // XXX hack 
-    boolean[] clear;
 
-    String clearAttr;
-
-    public void setClearAttr(String clearAttr) {
-        this.clearAttr = clearAttr;
+    public void dumpAttributesInXML(StringBuffer sb) {
+        sb.append(" ");
     }
-
-    public void setClear(boolean[] clear) {
-        this.clear = clear;
+    public void dumpChildrenInXML(StringBuffer sb) {
+        sb.append(">");
+        pred.toXML(sb);
+        sb.append("</select>");
     }
-    public boolean[] getClear() {
-        return clear;
-    }
-
-    public String dumpAttributesInXML() {
-        return " clear='" + clearAttr + "'";
-    }
-    public String dumpChildrenInXML() {
-        return pred.toXML();
+    
+    
+    public LogicalProperty findLogProp(
+        ICatalog catalog,
+        LogicalProperty[] input) {
+        LogicalProperty result = input[0].copy();
+        result.setCardinality(result.getCardinality() * pred.selectivity());
+        return result;
     }
 }
 

@@ -28,9 +28,7 @@ OBJ =   op.class		\
 	binOp.class		\
 	dupOp.class		\
 	splitOp.class		\
-	dbScanOp.class		\
 	dtdScanOp.class		\
-	tupleScanOp.class	\
 	scanOp.class		\
 	selectOp.class		\
 	joinOp.class		\

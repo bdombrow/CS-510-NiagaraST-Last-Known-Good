@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: SumOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
+  $Id: SumOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,23 +37,13 @@ package niagara.xmlql_parser.op_tree;
 
 
 import org.w3c.dom.*;
+
+import niagara.optimizer.colombia.Attribute;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class SumOp extends groupOp {
-
-    /////////////////////////////////////////////////////////////////
-    // These are the private members of the summing operator       //
-    /////////////////////////////////////////////////////////////////
-
     // This is the attribute on which summing is done
-    //
-    schemaAttribute summingAttribute;
-
-
-    /////////////////////////////////////////////////////////////////
-    // These are the methods of the class                          //
-    /////////////////////////////////////////////////////////////////
-
+    Attribute summingAttribute;
     /**
      * This function sets the skolem attributes on which grouping is
      * done, and the attribute that is summed
@@ -64,31 +53,19 @@ public class SumOp extends groupOp {
      */
 
     public void setSummingInfo (skolem skolemAttributes,
-				schemaAttribute summingAttribute) {
-
-	// Set the summing attribute
-	//
+				Attribute summingAttribute) {
 	this.summingAttribute = summingAttribute;
-
-	// Set the skolem attributes in the super class
-	//
 	this.setSkolemAttributes(skolemAttributes);
     }
 
 
-    /**
-     * This function returns the averaging attributes
-     *
-     * @return Averaging attribute of the operator
-     */
-
-    public schemaAttribute getSummingAttribute () {
+    public Attribute getSummingAttribute () {
 	return summingAttribute;
     }
 
     public void dump() {
 	System.out.println("SumOp");
 	skolemAttributes.dump();
-	summingAttribute.dump();
+	System.err.println(summingAttribute.getName());
     }
 }

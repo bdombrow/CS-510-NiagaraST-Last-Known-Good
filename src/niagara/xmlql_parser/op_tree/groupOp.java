@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: groupOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
+  $Id: groupOp.java,v 1.3 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,35 +24,22 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 /**
  * This is the class for the logical group operator. This is an abstract
  * class from which various notions of grouping can be derived. The
  * core part of this class is the skolem function attributes that are
  * used for grouping and are common to all the sub-classes
  *
- * @version 1.0
- *
  */
 
 package niagara.xmlql_parser.op_tree;
 
+import niagara.optimizer.colombia.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public abstract class groupOp extends unryOp {
-
-    ///////////////////////////////////////////////////////////////////
-    // These are the private members of the class                    //
-    ///////////////////////////////////////////////////////////////////
-
     // The skolem attributes associated with the group operator
-    //
     protected skolem skolemAttributes;
-
-
-    ///////////////////////////////////////////////////////////////////
-    // These are the methods of the class                            //
-    ///////////////////////////////////////////////////////////////////
 
     /**
      * This function sets the skolem attributes of the group operator
@@ -61,14 +47,10 @@ public abstract class groupOp extends unryOp {
      * @param skolemAttributes The skolem attributes associated with the
      *                         group operator
      */
-    
-    protected void setSkolemAttributes (skolem skolemAttributes) {
 
-	// Set the skolem attributes
-	//
-	this.skolemAttributes = skolemAttributes;
+    protected void setSkolemAttributes(skolem skolemAttributes) {
+        this.skolemAttributes = skolemAttributes;
     }
-
 
     /**
      * This function returns the skolem attributes associated with the group
@@ -76,12 +58,7 @@ public abstract class groupOp extends unryOp {
      *
      * @return The skolem attributes associated with the operator
      */
-
-    public skolem getSkolemAttributes () {
-
-	// Return the skolem attributes
-	//
-	return skolemAttributes;
+    public skolem getSkolemAttributes() {
+        return skolemAttributes;
     }
 }
-

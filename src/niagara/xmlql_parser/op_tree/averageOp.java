@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: averageOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
+  $Id: averageOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,60 +38,58 @@ package niagara.xmlql_parser.op_tree;
 
 
 import org.w3c.dom.*;
+
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Op;
 import niagara.xmlql_parser.syntax_tree.*;
 
 public class averageOp extends groupOp {
+    // The attribute on which averaging is done
+    Attribute averageAttribute;
 
-    /////////////////////////////////////////////////////////////////
-    // These are the private members of the average operator       //
-    /////////////////////////////////////////////////////////////////
+    public averageOp() {}
+    
+    public averageOp(
+        Attribute averageAttribute,
+        skolem skolemAttributes) {
+        this.averageAttribute = averageAttribute;
+        this.skolemAttributes = skolemAttributes;
+    }
 
-    // This is the attribute on which averaging is done
-    //
-    schemaAttribute averageAttribute;
-
-
-    /////////////////////////////////////////////////////////////////
-    // These are the methods of the class                          //
-    /////////////////////////////////////////////////////////////////
+    public averageOp(averageOp op) {
+        this(op.averageAttribute, op.skolemAttributes);
+    }
+    
+    public Op copy() {
+        return new averageOp(this);
+    }
 
     /**
-     * This function sets the skolem attributes on which grouping is
-     * done, and the attribute that is average
+     * Set the skolem attributes on which grouping is
+     * done, and the attribute that is averaged
      *
      * @param skolemAttributes Attributes on which grouping is done
      * @param averageAttribute Attribute on which averaging is done
      */
 
     public void setAverageInfo (skolem skolemAttributes,
-				schemaAttribute averageAttribute) {
-
-	// Set the average attribute
-	//
+				Attribute averageAttribute) {
 	this.averageAttribute = averageAttribute;
-
-	// Set the skolem attributes in the super class
-	//
 	this.setSkolemAttributes(skolemAttributes);
     }
 
 
     /**
-     * This function returns the averaging attributes
+     * This function returns the averaging attribute
      *
      * @return Averaging attribute of the operator
      */
-
-    public schemaAttribute getAveragingAttribute () {
-
-	// Return the averaging attribute
-	//
+    public Attribute getAveragingAttribute () {
 	return averageAttribute;
     }
 
     public void dump() {
 	System.out.println("AverageOp");
     }
-
 }
 

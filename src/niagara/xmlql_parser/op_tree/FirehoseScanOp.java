@@ -1,9 +1,4 @@
-/*
- * $RCSfile:
- * $Revision:
- * $Date:
- * $Author:
- */
+// $Id: FirehoseScanOp.java,v 1.6 2002/10/27 01:20:21 vpapad Exp $
 
 package niagara.xmlql_parser.op_tree;
 

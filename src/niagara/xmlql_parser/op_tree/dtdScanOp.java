@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: dtdScanOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
+  $Id: dtdScanOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -26,22 +25,73 @@
 **********************************************************************/
 
 
+package niagara.xmlql_parser.op_tree;
+
+import java.util.*;
+
+import niagara.logical.*;
+import niagara.optimizer.colombia.*;
+import niagara.optimizer.rules.Initializable;
+import niagara.xmlql_parser.syntax_tree.*;
+
 /**
  * This class represent dtd Scan operator that fetches the data sources,
  * parses it and then returns the DOM tree to the operator above it.
  *
  */
-package niagara.xmlql_parser.op_tree;
-
-import java.util.*;
-import niagara.xmlql_parser.syntax_tree.*;
-
-public class dtdScanOp extends unryOp {
-
+public class dtdScanOp extends NullaryOp implements Initializable {
+   /** the attribute we create */
+   private Attribute variable;
    private Vector docs;// Vector of urls to scan.
    private String type;// dtd name (e.g book.dtd)
-   private Vector docsCpy = null; //trigger. the copy of the docs  
+   private Vector docsCpy; //trigger. the copy of the docs
 
+    public dtdScanOp() {}
+    
+    public dtdScanOp(Attribute variable, Vector docs, String type, Vector docsCpy) {
+        this.variable = variable;
+        this.docs = docs;
+        this.type = type;
+        this.docsCpy = docsCpy;
+    }
+    
+    public dtdScanOp(dtdScanOp op) {
+        this(op.variable, op.docs, op.type, op.docsCpy);
+    }
+    
+    public Op copy() {
+        return new dtdScanOp(this);
+    }
+    
+   
+    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+        LogicalProperty lp = null;
+
+        float card = 0;
+        boolean local = true;
+
+        // Cardinality is the sum of document cardinalities,
+        // locality is the conjunction of document localities
+        for (int i = 0; i < docs.size(); i++) {
+            lp = catalog.getLogProp((String) docs.get(i));
+            card += lp.getCardinality();
+            local |= lp.isLocal();
+        }
+        
+        return new LogicalProperty(
+            card,
+            new Attrs(variable),
+            local);
+    }
+
+    /** Initialize the dtdscan from a resource operator */
+    public void initFrom(LogicalOp op) {
+        ResourceOp rop = (ResourceOp) op;
+        docs = new Vector();
+        docs.addAll(rop.getCatalog().getURL(rop.getURN()));
+        variable = rop.getVariable();
+    }
+    
    /**
     * @return list of XML data sources (either URLs or local files)
     */
@@ -85,10 +135,17 @@ public class dtdScanOp extends unryOp {
      */
 
     public void setDocs (Vector docVector) {
-
 	docs = docVector;
     }
 
+    public void setVariable(Attribute variable) {
+        this.variable = variable;
+    }
+    
+    public Attribute getVariable() {
+        return variable;
+    }
+    
    /**
     * @return DTD type of the XML sources to query
     */
@@ -133,15 +190,34 @@ public class dtdScanOp extends unryOp {
       return strBuf.toString();
    }
 
-    public String dumpChildrenInXML() {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < docs.size(); i++) {
-            buf.append("<url value='" + docs.elementAt(i)  +"'/>");
-        }
-        return buf.toString();
+    public void dumpChildrenInXML(StringBuffer sb) {
+        sb.append(">");
+        for (int i = 0; i < docs.size(); i++)
+            sb.append("<url value='").append(docs.elementAt(i)).append("'/>");
+        sb.append("</dtdscan>");
     }
     
     public boolean isSourceOp() {
 	return true;
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof dtdScanOp))
+            return false;
+        if (obj.getClass() != dtdScanOp.class)
+            return obj.equals(this);
+        dtdScanOp other = (dtdScanOp) obj;
+        return variable.equals(other.variable) && docs.equals(other.docs) && type.equals(other.type);
+    }
+
+    public int hashCode() {
+        int hashCode = dtdScanOp.class.hashCode();
+        if (variable != null)
+            hashCode ^= variable.hashCode();
+        if (docs != null)
+            hashCode ^= docs.hashCode();
+        if (type != null)
+            hashCode ^= type.hashCode();
+        return hashCode;
     }
 }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: op.java,v 1.10 2002/10/24 00:11:50 vpapad Exp $
+  $Id: op.java,v 1.11 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,25 +34,24 @@
 package niagara.xmlql_parser.op_tree;
 
 import java.util.*;
+
+import niagara.utils.SerializableToXML;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.connection_server.NiagraServer;
 
 import niagara.optimizer.colombia.LogicalOp;
 
-public abstract class op extends LogicalOp {
+public abstract class op extends LogicalOp implements SerializableToXML {
     // This is the index of the selected algorithm
     int selectedAlgorithmIndex;
 
-    /**
-     * Constructor
-     */
     public op() {
         // Initially, no algorithm is selected
         selectedAlgorithmIndex = -1;
     }
 
     /**
-     * @return name of the operators
+     * @return name of the operator
      */
     public String getName() {
         return NiagraServer.getCatalog().getOperatorName(getClass());
@@ -126,59 +125,17 @@ public abstract class op extends LogicalOp {
     }
 
     /**
-     * This function is defined in the dtdScan operator to set documenet sources
-     * and dtd to which they conform
-     *
-     * @param list of data sources to query
-     * @param dtd to which these data sources conforms to
-     */
-    public void setDtdScan(Vector v, String s) {}
-
-    /**
-     * To set parameters of scan operator
-     *
-     * @param parent whose child has to be scanned
-     * @param regular expression to scan
-     */
-    public void setScan(schemaAttribute attr, regExp toScan) {}
-
-    /**
-     * to set parameter of select operator
-     *
-     * @param list of predicates
-     */
-    public void setSelect(Vector v) {}
-
-    /**
-     * to set parameter for join operator
-     *
-     * @param join predicates
-     * @param list of attributes of the left relation for equi-join
-     * @param list of attributes of the right relation for equi-join
-     */
-    public void setJoin(predicate p, Vector l, Vector r) {}
-
-    /**
      * to print the information on the screen
      */
 
     public abstract void dump();
 
-
-    /**
-     * @return number of output streams of this operator
-     */
-    public int getNumberOfOutputStreams() {
-	return 1;
-    }
-
-    public String dumpAttributesInXML() {
-        return "";
-    }
-
-
-    public String dumpChildrenInXML() {
-        return "";
+    public void dumpAttributesInXML(StringBuffer sb) {}
+    
+    /** Close the element tag, append the children of this operator 
+     * to the string buffer, append the end element tag if necessary */
+    public void dumpChildrenInXML(StringBuffer sb) {
+        sb.append("/>");
     }
 
     // source ops are those that read off an input source and
@@ -188,7 +145,7 @@ public abstract class op extends LogicalOp {
     // not be at the head of a query
     public boolean isSourceOp() {
 	return false; // default is false
-    }
+    } 
 }
 
 

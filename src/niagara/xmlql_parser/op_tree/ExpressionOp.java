@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ExpressionOp.java,v 1.3 2002/05/23 06:32:03 vpapad Exp $
+  $Id: ExpressionOp.java,v 1.4 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,17 +34,37 @@
 
 package niagara.xmlql_parser.op_tree;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+
+import niagara.logical.NodeDomain;
+import niagara.logical.Variable;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
 
 public class ExpressionOp extends unryOp {
 
+    private String variableName;
     private Class expressionClass;
 
+    public ExpressionOp() {}
+    public ExpressionOp(String variableName, Class expressionClass, String expression) {
+        assert (expressionClass == null) ^ (expression == null) 
+            : "ExpressionOp needs either an expression, or a class, but not both";
+        this.variableName = variableName;
+        if (expressionClass != null)
+            setExpressionClass(expressionClass);
+        if (expression != null)
+            setExpression(expression);
+    }
+    
     /**
      * print the operator to the standard output
      */
     public void dump() {
-       System.out.println("Expression:" + expressionClass);
+       System.out.println(this);
     }
 
     /**
@@ -97,5 +117,31 @@ public class ExpressionOp extends unryOp {
 	return expressionClass;
     }
 
+    public Op copy() {
+        return new ExpressionOp(variableName, expressionClass, expression);
+    }
+
+    public void setInterpreted(boolean interpreted) {
+        this.interpreted = interpreted;
+    }
+
+    /**
+     * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, ArrayList)
+     */
+    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+        LogicalProperty result = input[0].copy();
+        Attribute newattr = new Variable(variableName, NodeDomain.getDOMNode());
+        result.addAttr(newattr);
+        return result;
+    }
+    
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof ExpressionOp)) return false;
+        if (o.getClass() != ExpressionOp.class) return o.equals(this);
+        ExpressionOp other = (ExpressionOp) o;
+        if (expression != null && !expression.equals(other.expression)) return false;
+        if (expressionClass != null && !expressionClass.equals(other.expressionClass)) return false;
+        return variableName.equals(other.variableName);
+    }
 }
 

@@ -1,5 +1,5 @@
 /**
- * $Id: SendOp.java,v 1.2 2002/05/23 06:32:03 vpapad Exp $
+ * $Id: SendOp.java,v 1.3 2002/10/27 01:20:21 vpapad Exp $
  *
  */
 
@@ -19,6 +19,14 @@ public class SendOp extends unryOp {
     String query_id;
     CommunicationServlet cs;
 
+    String location;
+    
+    public SendOp() {}
+
+    public SendOp(String location) {
+        this.location = location;
+    }
+    
     public void setQueryId(String query_id) {
         this.query_id = query_id;
     }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: scanOp.java,v 1.4 2002/05/23 06:32:03 vpapad Exp $
+  $Id: scanOp.java,v 1.5 2002/10/27 01:20:21 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,7 +36,7 @@ package niagara.xmlql_parser.op_tree;
 import java.util.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
-public class scanOp extends unryOp {
+public class scanOp extends UnoptimizableLogicalOperator {
 
     private schemaAttribute attrId;  // represents the root of the subtree
 				     // or one can call it the ancestor of the
@@ -91,24 +91,6 @@ public class scanOp extends unryOp {
 	attrId = parent;
 	regExpToScan = toScan;
     }
-
-    public String dumpAttributesInXML() {
-        String toReturn =  " regexp='" + regExpToScan.toString() + "'";
-        if (typeAttr != null && !typeAttr.equals("")) 
-            toReturn += " type='" + typeAttr + "'";
-        if (rootAttr != null && !rootAttr.equals("")) 
-            toReturn += " root='" + rootAttr + "'";
-
-        return toReturn;
-    }
-
-    String typeAttr, rootAttr; // XXX dump attributes hack
-
-    public void setDumpAttributes(String typeAttr, String rootAttr) {
-        this.typeAttr = typeAttr;
-        this.rootAttr = rootAttr;
-    }
-
 }
 
 
