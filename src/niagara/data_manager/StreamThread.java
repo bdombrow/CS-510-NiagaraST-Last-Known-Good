@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.19 2002/10/31 03:26:48 vpapad Exp $
+ * $Id: StreamThread.java,v 1.20 2002/12/10 01:22:47 vpapad Exp $
  */
 
 package niagara.data_manager;
@@ -19,6 +19,7 @@ import org.xml.sax.helpers.*;
 import java.net.Socket;
 import java.lang.reflect.Array;
 
+import niagara.logical.StreamOp;
 import niagara.ndom.*;
 import niagara.optimizer.colombia.*;
 import niagara.query_engine.TupleSchema;
@@ -40,15 +41,9 @@ public class StreamThread extends SourceThread {
     private Attribute variable;
 
     public void initFrom(LogicalOp lop) {
-        // XXX vpapad: this is so ugh-lee
-        if (lop instanceof FirehoseScanOp) {
-            spec = ((FirehoseScanOp) lop).getSpec();
-        }
-        else if (lop instanceof FileScanOp) {
-            spec = ((FileScanOp) lop).getSpec();
-        }
-        else
-            throw new PEException("Unknown logical operator passed to StreamThread");
+        StreamOp op = (StreamOp) lop;
+        spec = op.getSpec();
+        variable = op.getVariable();
     }
 
     public void constructTupleSchema(TupleSchema[] inputSchemas) {
@@ -407,21 +402,23 @@ public class StreamThread extends SourceThread {
     public Op copy() {
         StreamThread st = new StreamThread();
         st.spec = spec;
+        st.variable = variable;
         return st;
     }
-    
+
     /**
      * @see niagara.utils.SerializableToXML#dumpAttributesInXML(StringBuffer)
      */
     public void dumpAttributesInXML(StringBuffer sb) {
-        // XXX vpapad: write this!
+        sb.append(" var='").append(variable.getName());
+        sb.append("'/>");
     }
 
     /**
      * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
      */
     public void dumpChildrenInXML(StringBuffer sb) {
-        // XXX vpapad: write this!
+        ;
     }
 }
 
