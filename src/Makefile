@@ -1,4 +1,4 @@
-########################################################################
+#######################################################################
 #
 #  Makefile to build query engine related stuff
 #
@@ -54,9 +54,12 @@ export FHOSE            = $(FIREHOSEDIR)
 export DIVA	    = $(LIBDIR)/diva.jar
 export DJAVA	    = $(LIBDIR)/djava.jar
 export HTMLLAYOUT   = $(LIBDIR)/htmllayout.jar
+export JETTY	    = $(LIBDIR)/com.mortbay.jetty.jar
+export SERVLET	    = $(LIBDIR)/javax.servlet.jar
 
-export CLASSPATH     = .:..:$(COMMONLIB):$(REGEXPLIB):$(XMLQLPARSE):$(LOGICALOPTREE):$(DMLIB):$(CUPLIB):$(PARSELIB):$(TRIGGERM):$(TRIGLIB):$(QBELIB2):$(SAX):$(DIFF):$(FHOSE):$(DIVA):$(DJAVA):$(HTMLLAYOUT)
-#export CLASSPATH     = .:..:$(REGEXPLIB):$(CUPLIB):$(PARSELIB):$(QBELIB2):$(SAX):$(DIFF)
+export XERCES	    = $(LIBDIR)/xerces.jar
+
+export CLASSPATH     = .:$(XERCES):$(COMMONLIB):$(REGEXPLIB):$(XMLQLPARSE):$(LOGICALOPTREE):$(DMLIB):$(CUPLIB):$(PARSELIB):$(TRIGGERM):$(TRIGLIB):$(QBELIB2):$(SAX):$(DIFF):$(FHOSE):$(DIVA):$(DJAVA):$(HTMLLAYOUT):$(JETTY):$(SERVLET)
 
 export DEBUG = -g
 
@@ -72,12 +75,15 @@ APPLET_DIR = /p/niagara/public/html
 #  list and it will be built using 'make all'
 #
 ##############################################################################
-all:	ql_parser client se_server dm qe trigger con_server applet nitree type_system
+all:	se_server ndom con_server ql_parser qe trigger client mqpclient dm applet nitree type_system
 
 #client: 
 #	$(JAVAC) $(JAVAFLAGS) `find niagara/client -name \*.java`
 client:
 	$(JAVAC) $(JAVAFLAGS) niagara/client/NiagaraUI.java niagara/client/SimpleClient.java niagara/client/qpclient/*.java
+
+mqpclient:
+	$(JAVAC) $(JAVAFLAGS) niagara/client/MQPClient.java niagara/client/DisplayServlet.java 
 
 con_server:
 	$(JAVAC) $(JAVAFLAGS) niagara/connection_server/*.java
@@ -95,6 +101,9 @@ dm:
 
 nitree:
 	$(JAVAC) $(JAVAFLAGS) niagara/utils/nitree/NIDocument.java
+
+ndom:
+	$(JAVAC) $(JAVAFLAGS) niagara/ndom/DOMFactory.java
 
 type_system:
 	$(JAVAC) $(JAVAFLAGS) niagara/utils/type_system/*.java
@@ -126,7 +135,7 @@ applet_clean:
 #
 ##############################################################################
 classpath:
-	echo $(CLASSPATH)
+	@echo $(CLASSPATH)
 clean:
 	rm -f */*.class */*/*.class */*/*/*.class *.class niagara.jar
 
