@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.20 2003/12/06 06:58:20 jinli Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.21 2003/12/16 02:50:29 vpapad Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -336,8 +336,17 @@
 	  		</op>
   		</after>
   	</rule>
-  	<rule type="custom" name="CommuteJoin" class="niagara.optimizer.rules.CommuteJoin" mask="CommuteJoin"/>
-  	<rule type="custom" name="AssociateJoin" class="niagara.optimizer.rules.AssociateJoinRtoL"/>
+  	
+  	<!-- The duplicate-free join reordering rules from Pellenkoft et al., VLDB '97 -->
+  	<rule type="custom" name="CommuteJoin" class="niagara.optimizer.rules.CommuteJoin" 
+  	         mask="CommuteJoin,AssociateJoinRtoL,AssociateJoinLtoR,Exchange"/>
+  	<rule type="custom" name="AssociateJoinRtoL" class="niagara.optimizer.rules.AssociateJoinRtoL"
+  	         mask="AssociateJoinRtoL,AssociateJoinLtoR,Exchange"/>
+  	<rule type="custom" name="AssociateJoinLtoR" class="niagara.optimizer.rules.AssociateJoinLtoR" 
+  	         mask="AssociateJoinRtoL,AssociateJoinLtoR,Exchange"/>
+  	<rule type="custom" name="Exchange" class="niagara.optimizer.rules.Exchange" 
+  	         mask="AssociateJoinRtoL,AssociateJoinLtoR,Exchange"/>
+
   	<rule type="custom" name="SelectIntoJoin" class="niagara.optimizer.rules.SelectIntoJoin"/>
   	<rule type="custom" name="PushJoinPredicates" class="niagara.optimizer.rules.PushJoinPredicates"/>
   	<rule type="custom" name="SelectThruUnnest" class="niagara.optimizer.rules.SelectThruUnnest"/>
@@ -365,6 +374,14 @@
   		<before><logical name="resource" condition="isLocallyResolvable"/></before>
  		<after><op name="dtdscan"/></after>
   	</rule>
+	<!-- To disable projection pushing, comment out this rule (and uncomment the next one) -->  	
+  	<rule type="custom" name="PushProjection" class="niagara.optimizer.rules.PushProjection"/>
+  	<!--
+  	<rule type="simple" name="project to noop">
+  		<before><logical name="project"/></before>
+ 		<after><op name="noop"/></after> 
+  	</rule>
+  	-->
   </ruleset>
   
   	<!-- Cost Model -->
