@@ -1,4 +1,4 @@
-/* $Id: ConstructedRule.java,v 1.2 2003/08/01 17:29:06 tufte Exp $ */
+/* $Id: ConstructedRule.java,v 1.3 2003/09/13 03:44:02 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.util.HashMap;
@@ -98,7 +98,7 @@ public class ConstructedRule extends ParsedRule {
         return constructedRule;
     }
 
-    public Expr next_substitute(
+    public Expr nextSubstitute(
         Expr before,
         MExpr mExpr,
         PhysicalProperty ReqdProp) {

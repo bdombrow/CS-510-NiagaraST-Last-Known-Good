@@ -1,4 +1,4 @@
-/* $Id: SelectIntoJoin.java,v 1.2 2003/03/07 21:00:32 tufte Exp $ */
+/* $Id: SelectIntoJoin.java,v 1.3 2003/09/13 03:44:02 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.Predicate;
@@ -24,7 +24,7 @@ public class SelectIntoJoin extends CustomRule {
     }
     
     
-    public Expr next_substitute(
+    public Expr nextSubstitute(
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {

@@ -1,3 +1,4 @@
+/* $Id$ */
 package niagara.optimizer.rules;
 
 import niagara.optimizer.AnyLogicalOp;
@@ -23,7 +24,7 @@ public class ConsolidateMeRule extends CustomRule {
     /**
      * @see niagara.optimizer.colombia.Rule#next_substitute(Expr, MExpr, PhysicalProperty)
      */
-    public Expr next_substitute(
+    public Expr nextSubstitute(
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {

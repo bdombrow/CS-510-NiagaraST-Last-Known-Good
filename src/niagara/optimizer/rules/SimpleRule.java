@@ -1,4 +1,4 @@
-/* $Id: SimpleRule.java,v 1.6 2003/08/01 17:29:06 tufte Exp $ */
+/* $Id: SimpleRule.java,v 1.7 2003/09/13 03:44:02 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.lang.reflect.Constructor;
@@ -160,7 +160,7 @@ public class SimpleRule extends ParsedRule {
     /**
      * @see niagara.optimizer.colombia.Rule#next_substitute(Expr, MExpr, PhysicalProperty)
      */
-    public Expr next_substitute(
+    public Expr nextSubstitute(
         Expr before,
         MExpr mExpr,
         PhysicalProperty ReqdProp) {

@@ -1,4 +1,4 @@
-/* $Id: SelectThruUnnest.java,v 1.2 2003/03/07 21:00:32 tufte Exp $ */
+/* $Id: SelectThruUnnest.java,v 1.3 2003/09/13 03:44:02 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.And;
@@ -24,7 +24,7 @@ public class SelectThruUnnest extends CustomRule {
                     new Expr(new Select(), new Expr(new LeafOp(0))))));
     }
 
-    public Expr next_substitute(
+    public Expr nextSubstitute(
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {

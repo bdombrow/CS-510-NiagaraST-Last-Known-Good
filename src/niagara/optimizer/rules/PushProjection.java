@@ -1,4 +1,4 @@
-/* $Id: PushProjection.java,v 1.1 2002/12/10 01:18:27 vpapad Exp $ */
+/* $Id: PushProjection.java,v 1.2 2003/09/13 03:44:02 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.Project;
@@ -20,7 +20,7 @@ public class PushProjection extends CustomRule {
         new Expr(new AnyLogicalOp()));
     }
 
-    public Expr next_substitute(
+    public Expr nextSubstitute(
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {

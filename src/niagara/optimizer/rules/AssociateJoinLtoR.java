@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: AssociateJoinLtoR.java,v 1.1 2003/09/13 03:44:02 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import java.util.HashMap;
@@ -9,56 +9,55 @@ import niagara.optimizer.colombia.*;
 import niagara.logical.*;
 import niagara.xmlql_parser.op_tree.joinOp;
 
-/** Join associativity, right to left: A x (B x C) -> (A x B) x C */
-public class AssociateJoinRtoL extends CustomRule {
-
-    public AssociateJoinRtoL(String name) {
+/** Join associativity, left to right : (A x B) x C -> A x (B x C) */
+public class AssociateJoinLtoR extends CustomRule {
+    public AssociateJoinLtoR(String name) {
         super(
             name,
             3,
-            new Expr(
-                new joinOp(),
-                new Expr(new LeafOp(0)),
-                new Expr(
-                    new joinOp(),
-                    new Expr(new LeafOp(1)),
-                    new Expr(new LeafOp(2)))),
             new Expr(
                 new joinOp(),
                 new Expr(
                     new joinOp(),
                     new Expr(new LeafOp(0)),
                     new Expr(new LeafOp(1))),
-                new Expr(new LeafOp(2))));
+                new Expr(new LeafOp(2))),
+            new Expr(
+                new joinOp(),
+                new Expr(new LeafOp(0)),
+                new Expr(
+                    new joinOp(),
+                    new Expr(new LeafOp(1)),
+                    new Expr(new LeafOp(2)))));
     }
 
     public Expr nextSubstitute(
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {
-        // Get schema for B 
-        Expr BC = before.getInput(1);
-        LeafOp B = (LeafOp) (BC.getInput(0).getOp());
+        // Get A's schema 
+        Expr AB = before.getInput(0);
+        LeafOp A = (LeafOp) (AB.getInput(0).getOp());
+        Attrs aAttrs = A.getGroup().getLogProp().getAttrs();
+
+        // Get B's schema
+        LeafOp B = (LeafOp) (AB.getInput(1).getOp());
         Attrs bAttrs = B.getGroup().getLogProp().getAttrs();
 
         // Get C's schema
-        LeafOp C = (LeafOp) (BC.getInput(1).getOp());
+        LeafOp C = (LeafOp) (before.getInput(1).getOp());
         Attrs cAttrs = C.getGroup().getLogProp().getAttrs();
 
-        // Get A's schema
-        LeafOp A = (LeafOp) (before.getInput(0).getOp());
-        Attrs aAttrs = A.getGroup().getLogProp().getAttrs();
-
-        // Join numbering convention:
-        //         2  1               1  2		
-        //       Ax(BxC) ->        (AxB)xC
+        // Join numbering convention: 
+        // before: AxB is join 1, ABxC is join 2
+        // after:   BC is join 1, AxBC is join 2
 
         // from upper (second) join
         joinOp op2 = (joinOp) before.getOp();
         EquiJoinPredicateList preds2 = op2.getEquiJoinPredicates();
 
         // from lower (first) join
-        joinOp op1 = (joinOp) before.getInput(1).getOp();
+        joinOp op1 = (joinOp) before.getInput(0).getOp();
         EquiJoinPredicateList preds1 = op1.getEquiJoinPredicates();
 
         // new equijoin predicates
@@ -73,29 +72,29 @@ public class AssociateJoinRtoL extends CustomRule {
 
         // Now distribute old predicates
         // AC predicates go to the new top join (2)
-        // AB predicates go to the new lower join (1)
-        // A BC predicate B.x = C.y goes to  (2),
-        // and if we can find an A attribute A.z equivalent 
-        // to C.y, we also add A.z = B.x to (1)
+        // BC predicates go to the new lower join (1)
+        // An AB predicate A.x = B.y goes to  (2),
+        // and if we can find a C attribute C.z equivalent 
+        // to A.x, we also add B.y = C.z to (1)
         forallpreds : for (int i = 0; i < leftAttrs.size(); i++) {
             Attribute la = leftAttrs.get(i);
             Attribute ra = rightAttrs.get(i);
-            if (aAttrs.Contains(la)) {
-                if (bAttrs.Contains(ra))
+            if (cAttrs.Contains(ra)) {
+                if (bAttrs.Contains(la))
                     newPreds1.add(la, ra);
                 else {
-                    assert cAttrs.Contains(ra);
+                    assert aAttrs.Contains(la);
                     newPreds2.add(la, ra);
                 }
             } else {
-                assert bAttrs.Contains(la) && cAttrs.Contains(ra);
+                assert aAttrs.Contains(la) && bAttrs.Contains(ra);
                 newPreds2.add(la, ra);
-                HashSet eqClass = (HashSet) attr2class.get(ra);
+                HashSet eqClass = (HashSet) attr2class.get(la);
                 Iterator it = eqClass.iterator();
                 while (it.hasNext()) {
-                    Attribute az = (Attribute) it.next();
-                    if (aAttrs.Contains(az)) { // Bingo!
-                        newPreds1.add(az, la);
+                    Attribute cz = (Attribute) it.next();
+                    if (cAttrs.Contains(cz)) { // Bingo!
+                        newPreds1.add(ra, cz);
                         continue forallpreds;
                     }
                 }
@@ -115,17 +114,17 @@ public class AssociateJoinRtoL extends CustomRule {
 
         // Now we have to deal with non-equijoin predicates
         // XXX vpapad: can we use equivalence classes to
-        // push some of these to AB???
-        Attrs ab = aAttrs.copy();
-        ab.merge(bAttrs);
-        And split2 = (And) op2.getNonEquiJoinPredicate().split(ab);
-        Predicate abPred = split2.getLeft();
+        // push some of these to BC???
+        Attrs bc = bAttrs.copy();
+        bc.merge(cAttrs);
+        And split2 = (And) op2.getNonEquiJoinPredicate().split(bc);
+        Predicate bcPred = split2.getLeft();
         // KT - we can lose extension join property during association
         // no good way to know if new joins are extension joins or not
         // extension join is only optimization issue, not correctness issue
         // anyway. In future, should examine catalogs to see if these
         // are extension joins
-        joinOp newOp1 = new joinOp(abPred, newPreds1, joinOp.NONE);
+        joinOp newOp1 = new joinOp(bcPred, newPreds1, joinOp.NONE);
         Predicate abcPred =
             And.conjunction(split2.getRight(), op1.getNonEquiJoinPredicate());
         joinOp newOp2 = new joinOp(abcPred, newPreds2, joinOp.NONE);
@@ -133,8 +132,8 @@ public class AssociateJoinRtoL extends CustomRule {
         // Phew!
         return new Expr(
             newOp2,
-            new Expr(newOp1, new Expr(A), new Expr(B)),
-            new Expr(C));
+            new Expr(A),
+            new Expr(newOp1, new Expr(B), new Expr(C)));
     }
 
     public boolean condition(

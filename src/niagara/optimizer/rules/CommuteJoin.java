@@ -24,7 +24,7 @@ public class CommuteJoin extends CustomRule {
                 new Expr(new LeafOp(0))));
     }
     
-    public Expr next_substitute(
+    public Expr nextSubstitute(
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {

@@ -1,4 +1,4 @@
-/* $Id: PushJoinPredicates.java,v 1.3 2003/03/07 21:00:32 tufte Exp $ */
+/* $Id: PushJoinPredicates.java,v 1.4 2003/09/13 03:44:02 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.And;
@@ -30,7 +30,7 @@ public class PushJoinPredicates extends CustomRule {
                     new Expr(new LeafOp(1))))));
     }
 
-    public Expr next_substitute(
+    public Expr nextSubstitute(
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {

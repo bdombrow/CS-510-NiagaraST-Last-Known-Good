@@ -1,4 +1,4 @@
-/* $Id: UnionToPhysicalUnion.java,v 1.2 2002/12/10 01:18:26 vpapad Exp $ */
+/* $Id: UnionToPhysicalUnion.java,v 1.3 2003/09/13 03:44:02 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.optimizer.colombia.*;
@@ -21,7 +21,7 @@ public class UnionToPhysicalUnion extends CustomRule {
             new Expr(new PhysicalUnionOperator()));
     }
     
-    public Expr next_substitute(
+    public Expr nextSubstitute(
         Expr before,
         MExpr mexpr,
         PhysicalProperty ReqdProp) {
