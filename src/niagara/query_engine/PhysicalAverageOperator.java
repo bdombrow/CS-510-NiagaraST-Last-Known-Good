@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.9 2002/10/24 03:18:50 vpapad Exp $
+  $Id: PhysicalAverageOperator.java,v 1.10 2002/10/24 03:20:30 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -68,13 +68,7 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	 * statistics
 	 */
 	public AverageSufficientStatistics () {
-
-	    // No values initially
-	    //
 	    this.numValues = 0;
-
-	    // Sum is initialized to 0
-	    //
 	    this.sumOfValues = 0;
 	}
 
@@ -87,12 +81,7 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	 */
 
 	public void updateStatistics (double newValue) {
-	    // Increment the number of values
-	    //
 	    ++numValues;
-
-	    // Update the sum
-	    //
 	    sumOfValues += newValue;
 	}
 
@@ -181,7 +170,7 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	// First get the atomic values
 	//
         atomicValues.clear();
-        ae.getAtomicValues(tupleElement, null, atomicValues);
+        ae.getAtomicValues(tupleElement, atomicValues);
         
 	// If there is not exactly one atomic value, skip
 	//
