@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.3 2002/03/27 23:37:03 vpapad Exp $
+ * $Id: BufferManager.java,v 1.4 2002/03/28 03:05:33 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -23,8 +23,6 @@ import org.w3c.dom.*;
 import niagara.utils.PEException;
 
 public class BufferManager {
-    private static BufferManager bm;
-    
     private static Page[] pages;
 
     private static Stack free_pages;
@@ -48,18 +46,18 @@ public class BufferManager {
         System.out.println("SAXDOM buffer manager initialized: " 
                            + size + " pages of " + page_size + " events.");
         
-        bm = new BufferManager(size, page_size);
+        new BufferManager(size, page_size);
     }
 
     public static void addFreePage(Page page) {
-        bm.free_pages.push(page);
+        free_pages.push(page);
     }
 
     public static Page getFreePage() {
-        if (bm.free_pages.empty())
+        if (free_pages.empty())
             // XXX vpapad: Run away! Run away!
             throw new InsufficientMemoryException();
-        return (Page) bm.free_pages.pop();
+        return (Page) free_pages.pop();
     }
     
 

@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.3 2002/03/27 23:37:03 vpapad Exp $
+ * $Id: Page.java,v 1.4 2002/03/28 03:05:33 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -75,15 +75,13 @@ public class Page {
 
     public void addEvent(DocumentImpl doc, byte type, String string) {
         if (current_offset < event_type.length) {
-            if (!doc.includesPage(this))
-                doc.addPage(this);
-
             event_type[current_offset] = type;
             event_string[current_offset] = string;
 
             current_offset++;
         } else if (next == null) { // last page of document
             Page page = BufferManager.getFreePage();
+            doc.addPage(page);
             page.setPrevious(this);
             setNext(page);
 

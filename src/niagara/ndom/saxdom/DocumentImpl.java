@@ -1,5 +1,5 @@
 /**
- * $Id: DocumentImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
+ * $Id: DocumentImpl.java,v 1.3 2002/03/28 03:05:33 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -38,15 +38,6 @@ public class DocumentImpl extends NodeImpl implements Document {
         page.pin();
         pages.add(page);
     }
-
-    public boolean includesPage(Page page) {
-        // XXX vpapad: seems inefficient, but will do for now
-        for (int i = 0; i < pages.size(); i++)
-            if (pages.get(i) == page) 
-                return true;
-        return false;
-    }
-
 
     public void finalize() throws Throwable {
         // Unpin all pages for this document
