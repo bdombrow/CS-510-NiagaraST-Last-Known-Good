@@ -11,6 +11,7 @@ import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.Op;
 import niagara.optimizer.colombia.PhysicalOp;
 import niagara.query_engine.PhysicalOperator;
+import niagara.query_engine.PhysicalOperatorQueue;
 import niagara.query_engine.SchedulablePlan;
 import niagara.query_engine.SchemaProducer;
 import niagara.query_engine.TupleSchema;
@@ -225,11 +226,11 @@ public class Plan implements SchedulablePlan {
         return (operator.getArity() == 0);
     }
 
-    public void processSource(SinkTupleStream stream, DataManager dm) {
+    public void processSource(SinkTupleStream stream, DataManager dm, PhysicalOperatorQueue opQueue) {
         assert isSource() : "not a source op";
         SourceThread thread = (SourceThread) operator;
         thread.plugIn(stream, dm);
-        (new Thread(thread)).start();
+        opQueue.putOperator(thread);
     }
 
     /**
