@@ -1,4 +1,4 @@
-/* $Id: Variable.java,v 1.7 2003/08/01 17:28:45 tufte Exp $ */
+/* $Id: Variable.java,v 1.8 2003/09/16 02:49:21 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.connection_server.InvalidPlanException;
@@ -15,7 +15,8 @@ public class Variable implements Atom, Attribute {
     private Domain domain;
 
     public Variable(String name, Domain domain) {
-        this.name = name;
+        // We want unique names for variables
+        this.name = name.intern();
         this.domain = domain;
         if(domain == null)
             this.domain = NodeDomain.getDomain(varType.NULL_VAR);
@@ -79,7 +80,7 @@ public class Variable implements Atom, Attribute {
         if (other.getClass() != Variable.class)
             return other.equals(this);
         return
-            name.equals(((Variable) other).getName()) && 
+            name == ((Variable) other).getName() && 
             domain.equals(((Variable) other).getDomain());
     }
 
@@ -93,5 +94,9 @@ public class Variable implements Atom, Attribute {
     
     public int hashCode() {
         return name.hashCode() ^ domain.hashCode();
+    }
+    
+    public boolean matchesName(String name) {
+        return this.name == name.intern();
     }
 }
