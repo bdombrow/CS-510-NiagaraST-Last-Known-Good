@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScanOperator.java,v 1.6 2001/08/08 21:27:57 tufte Exp $
+  $Id: PhysicalScanOperator.java,v 1.7 2002/03/26 23:52:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -107,7 +107,7 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	//
 	this.scanField = logicalScanOperator.getParent().getAttrId();
 
-	
+
 	}
 
 
@@ -143,16 +143,15 @@ public class PhysicalScanOperator extends PhysicalOperator {
             }
         }
         else if(attribute instanceof Element) {
-	      // KT: Is this OK - can we delete this else if??
+				// KT: Is this OK - can we delete this else if??
         }
 	
-	Vector elementList = PathExprEvaluator.getReachableNodes(attribute,this.rExp);
+	Vector elementList = PathExprEvaluator.getReachableNodes(attribute,this.rExp);	
 		
-		
-
 	// Append all the nodes returned to the inputTuple and add these
 	// to the result
 	//
+	// KT - why this copy???
 	int numNodes = elementList.size();	
 	for(int node = 0; node < numNodes; ++node) {
 
@@ -164,7 +163,6 @@ public class PhysicalScanOperator extends PhysicalOperator {
 	    // Append a reachable node to the output tuple
 	    //
 	    outputTuple.appendAttribute(elementList.elementAt(node));
-
 	    // Add the output tuple to the result
 	    //
 	    result.add(outputTuple, 0);

@@ -91,6 +91,7 @@ class ReplaceNodeMerge extends NodeMerge {
 	     * have to
 	     */
 	    if(!comparator.nodeEquals(dominantNode, resultNode)) { 
+		/* HERE - this won't work */
 		resultNode.setNodeValue(dominantNode.getNodeValue());
 	    }
 	    return true;

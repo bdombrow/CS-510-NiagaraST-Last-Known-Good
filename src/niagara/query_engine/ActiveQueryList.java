@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: ActiveQueryList.java,v 1.6 2000/06/24 16:09:01 tufte Exp $
+  $Id: ActiveQueryList.java,v 1.7 2002/03/26 23:52:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -154,7 +154,6 @@ public class ActiveQueryList {
 
 	    throw new NoSuchQueryException();
 	}
-	System.out.println("Query removed from an active query list");
     }
 
     public Enumeration elements() {

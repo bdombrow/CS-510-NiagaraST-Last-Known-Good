@@ -34,12 +34,12 @@ public class MergeTree {
      * DATA MEMBERS
      */
     private MergeTreeNode mergeTreeRoot;
-    private Document      resultDoc;
     private boolean       validForAccumulate;
     private int           treeMergeType;
     private int           treeDomSide;
     private HashMap       rootedKeyMap;
     private HashSet       tagList;
+    private ArrayStack    tempArrayStacks;
     
     /* values for MergeType and DominantSide */
     public static final int MT_OUTER = 1;
@@ -52,18 +52,21 @@ public class MergeTree {
     public static final int DS_EXACTMATCH = 3;
 
     public static final String DEF_ATTR_STRING = "ATTR_DEFAULT";
-    
+
+    private boolean TRACE = false;
+
     /*
      * METHODS
      */
     
    /**
-     * Constructor - does nothing now.
-     *
+     * Constructor 
+     *				
      */
     
     public MergeTree() { 
 	reset();
+	tempArrayStacks = new ArrayStack();
     }
 
    /**
@@ -96,10 +99,10 @@ public class MergeTree {
 	    }
 	    create(p.getDocument(), checkAccumConstraints);
 	} catch (java.io.IOException e) {
-	    throw new MTException("Merge String appears corrupted " + 
+	    throw new MTException("Merge String appears corrupted: " + 
 				  e.getMessage());
 	} catch (org.xml.sax.SAXException e) {
-	    throw new MTException("Error parsing merge template " +
+	    throw new MTException("Error parsing merge template: " +
 				  e.getMessage());
 	}
 	return;
@@ -125,6 +128,8 @@ public class MergeTree {
 	 * MergeTreeNodes (one for each element in the merge template) 
 	 * to creates the whole merge tree.
 	 */
+	rootedKeyMap = new HashMap();
+	tagList = new HashSet();
 	
 	Element docElement = mergeTemplate.getDocumentElement();	
 
@@ -197,10 +202,10 @@ public class MergeTree {
      */
     public void reset() {
 	mergeTreeRoot = null;
-	resultDoc = null;
 	treeMergeType = MT_OUTER;
 	treeDomSide = DS_RIGHT;
 	validForAccumulate = false;
+	rootedKeyMap = null;
 	return;
     }
 
@@ -217,8 +222,9 @@ public class MergeTree {
      *                       something - for now it is just a normal tree
      */
 
-    void accumulate(Document accumDoc, Element fragment) 
+    void accumulate(Document accumDoc, Element fragment)
 	throws OpExecException {
+
 	/*
          * make it left and right frag and make treewalking code
 	 * general enough to handle the join code?
@@ -228,17 +234,20 @@ public class MergeTree {
 
 	/* have to handle the case when we start with an empty
 	 * accumulator - in this case accumFragRoot is null, so
-	 * we make an empty document element for the accumulator
+	 * we make an empty document element for the accumulator // 
 	 * and root add it to the tree
 	 */
 	if(accumFragRoot == null) {
+	    if(TRACE) {
+		System.out.println("KT: Empty Accumulator - creating accum root");
+	    }
 	    accumFragRoot = accumDoc.
 		createElement(mergeTreeRoot.getAccumTagName());
 	    accumDoc.appendChild(accumFragRoot);
 	} else {
-	    /* MTND - don't do anything */
-	    /* this automatically updates the accumDoc, if necessary */
-	    /* accumFragRoot = accumFragRoot.makeWriteable(); */
+	    if(TRACE) {
+		System.out.println("KT: using existing doc for accumulator");
+	    }
 	}
 
 	/* 
@@ -246,13 +255,20 @@ public class MergeTree {
 	 * the accumRoot - we pass in an empty RootedKeyVal to 
 	 * createRootedKeyVal for the key of parent of accumRoot
 	 */
+	ArrayStack accumFragRootKeyVal =  getTempArrayStack();
+	ArrayStack localKeyVal = getTempArrayStack();
+
+	mergeTreeRoot.createLocalKeyValue(accumFragRoot, localKeyVal);
+	accumFragRootKeyVal.push(localKeyVal);
+
 	do_accumulate(accumFragRoot, 
-		      mergeTreeRoot.createRootedKeyValue(new RootedKeyValue(),
-							 accumFragRoot),
+		      accumFragRootKeyVal,
 		      mergeFragRoot, mergeTreeRoot,
 		      accumDoc);
 
-	resultDoc = null;
+	accumFragRootKeyVal.pop();
+	returnTempArrayStack(localKeyVal);
+	returnTempArrayStack(accumFragRootKeyVal);
     }
 
     /** Recursive function to walk the merge tree, accumulator (result),
@@ -268,10 +284,10 @@ public class MergeTree {
      *
      */
 
-    private void do_accumulate(Element accumElt, RootedKeyValue accumEltKeyVal,
+    private void do_accumulate(Element accumElt, ArrayStack accumEltKeyVal,
 			       Element fragElt, 
 			       MergeTreeNode mergeTreeNode,
-			       Document accumDoc) 
+			       Document accumDoc)
 	throws OpExecException {
 
 	boolean isBottom = true;
@@ -285,8 +301,12 @@ public class MergeTree {
 	 * to do the merge, just does locally what is needed to
 	 * merge these two objects - recursion is done below
 	 */
+	if(TRACE) {
+	  System.out.println("KT: do_accumulate: " +
+	 		   DOMHelper.nameAndValue(accumElt));
+	}
 	mergeTreeNode.accumulate(accumElt, fragElt);
-	
+
 	if(!mergeTreeNode.isDeepMerge()) {
 	    /* now call recursively - we scan the subelements of fragElt 
 	     * and look for subelements of the mergeElt with the same tag 
@@ -301,6 +321,10 @@ public class MergeTree {
 	     */
 
 	    Element nextFragElt = DOMHelper.getFirstChildElement(fragElt);
+	    if(TRACE) {
+		System.out.println("   KT: next frag elt: "
+				   + DOMHelper.nameAndValue(fragElt));
+	    }
 	    Element nextAccumElt;
 	    while(nextFragElt != null) {
 		String nextFragTagName = nextFragElt.getTagName();
@@ -316,116 +340,237 @@ public class MergeTree {
 
 		    String nextAccumTagName = nextMergeTreeNode.getAccumTagName();
 
-		    /* create a rooted key value which can be used to probe
-		     * the rootedKeyMap for an accum elt matching this fragment,
-		     * thus we use values from the fragment, but the tag name for the
-		     * accumulator side (a bit ugly)
-		     * Do this here since need the key to pass onto the recursive
-		     * call
+		    /* this function checks to make sure that kids with tag
+		     * nextAccumTagName for this accumElt haven't already
+		     * been added to the rooted key map.
 		     */
-		    RootedKeyValue nextAccumEltKeyVal = nextMergeTreeNode.
-			createRootedKeyValue(accumEltKeyVal, nextFragElt,
-					     nextAccumTagName);
-		    		
-		    /* For now, we assume that only one child of accumFrag
-		     * will match the nextFragElt - although there might
-		     * be multiple children of accumFrag that have
-		     * the tag accumName
+		    /* !!! must do this before creating the key for
+		     * nextAccumElt since that modifies accumEltKeyVal
 		     */
-		    if(nextMergeTreeNode.hasMatchTemplate()) {
-			/* matching is based on a match template  -
-			 * may be multiple elements with accumName
-			 * in accumulator, but can't be multiple
-			 * matching ones by definition of accumulate -
-			 * could be if it were merge
-			 */
-			/*
-			 * Multiple frags can match to one accum and there
-			 * might be multiple accum Children with tag name
-			 * same as nextFragTagName, but
-			 * that doesn't cause a set result from findMatch
-			 */
-			 /* BIG DEMO HACK - changed last parameter
-			 * to false - this is wrong, but will
-			 * work for the demo
-			 */
-			/*OLD nextAccumElt = nextMergeTreeNode.
-			 * findUniqueMatch(accumElt, nextFragElt, false);
-			 */
-			addToRootedKeyMap(accumElt, accumEltKeyVal,
-					  nextAccumTagName,
-					  nextMergeTreeNode);
-
-			nextAccumElt = (Element)rootedKeyMap.get(nextAccumEltKeyVal);
-
+		    if(nextMergeTreeNode.isNever()) {
+			if(TRACE) {
+			    System.out.println("    KT: cloning and appending");
+			}
+			accumElt.appendChild(nextFragElt.cloneNode(true));
 		    } else {
-			/* matching is based on tag name - by
-			 * definition of accumulate - there can only
-			 * be one element with the tag name accumName
-			 * in the accumulator - this isn't true for merge 
+			if(!nextMergeTreeNode.isTag()) {
+			    addChildrenToRootedKeyMap(accumElt, accumEltKeyVal,
+						      nextAccumTagName,
+						      nextMergeTreeNode);
+			}
+			    
+			/* create a rooted key value which can be used to probe
+			 * the rootedKeyMap for an accum elt matching this 
+			 * fragment, thus we use values from the fragment, but 
+			 * the tag name for the accumulator side (ugly)
 			 */
-			nextAccumElt = DOMHelper.
-			    getFirstChildEltByTagName(accumElt, nextAccumTagName);
+			/* NOTE: To avoid allocation - we modify accumEltKeyVal
+			 * so accumEltKeyVal is NOT valid until we do the pop
+			 * below
+			 */
+			ArrayStack nextAccumEltKeyVal = accumEltKeyVal;
+			ArrayStack temp = getTempArrayStack();
+			nextMergeTreeNode.createLocalKeyValue(nextFragElt,
+							      nextAccumTagName,
+							      temp);
+			nextAccumEltKeyVal.push(temp);
+			    
+			/* We assume that only one child of accumFrag
+			 * will match the nextFragElt - although there might
+			 * be multiple children of accumFrag that have
+			 * the tag accumName
+			 */		
+			    
+			/* get nextAccumElt. Look by key if there is a key,
+			 * otherwise just use the tag
+			 */
+			if(!nextMergeTreeNode.isTag()) {
+			    if(TRACE) {	
+				System.out.print("   KT: Looking in RootedKeyMap for: ");
+				nextAccumEltKeyVal.print();
+			    }
+
+
+			    // && nextAccumTagName.equals("STATS")) { ???
+			    nextAccumElt = (Element)rootedKeyMap.get(nextAccumEltKeyVal);
+			} else {
+			    if(TRACE) {
+				System.out.println("    KT: getting first child " + nextAccumTagName);
+			    }
+			    nextAccumElt = 
+				DOMHelper.getFirstChildEltByTagName(accumElt,
+							   nextAccumTagName);
+			}
+
+			if(TRACE) {
+			    if(nextAccumElt == null) {
+				System.out.println("   KT: Next accum elt is null");
+			    } else {
+				System.out.println("   KT: Next accum elt is " +
+						   DOMHelper.nameAndValue(nextAccumElt));
+			    }
+			}
+			    
+			/* have to handle the case when we start with an empty
+			 * accumulator - in this case nextAccumElt is null, so
+			 * we make an empty element as a holder and add it
+			 * to the accumulator tree 
+			 */
+			boolean addToRootedKeyMap = false;
+			if(nextAccumElt == null) {
+			    nextAccumElt = accumDoc.
+				createElement(nextMergeTreeNode.
+					      getAccumTagName());
+				/* set value to value of frag elt
+				 * shouldn't need to do this - merger
+				 * should handle it
+				 */
+				/*
+				 * DOMHelper.setTextValue(nextAccumElt,
+				 *	  DOMHelper.getTextValue(nextFragElt),
+				 *			accumDoc);
+				 */
+			    accumElt.appendChild(nextAccumElt);
+			    if(TRACE) {
+				System.out.println("   KT: created new nextAccumElt "
+						   + DOMHelper.nameAndValue(nextAccumElt));
+				System.out.println("   KT: added nextAccumElt as child of " 
+						   + DOMHelper.nameAndValue(accumElt));
+			    }
+			    addToRootedKeyMap = true;
+			} 
+			
+			/* the recursive call */
+			do_accumulate(nextAccumElt, nextAccumEltKeyVal, 
+				      nextFragElt, nextMergeTreeNode, accumDoc);
+			
+			/* have to add to the rooted key map after we do the
+			 * recursive call since we don't have the key until
+			 * after the recursive call. This should be fine since
+			 * no one will "merge" with this node until after this
+			 * call is completed (have to get latching correct)
+			 */
+			/* OK, done with child, so return accumEltKeyVal to
+			 * it's correct value 
+			 */
+			/* pops tempLocalKeyVal off the stack */
+			accumEltKeyVal.pop();
+			returnTempArrayStack(temp);
+			if(addToRootedKeyMap == true) {
+			    addChildToRootedKeyMap(nextAccumElt, accumEltKeyVal,
+						   nextMergeTreeNode, false);
+			}
 		    }
-		    
-		    /* have to handle the case when we start with an empty
-		     * accumulator - in this case nextAccumElt is null, so
-		     * we make an empty element as a holder and add it
-		     * to the accumulator tree 
-		     */
-		    if(nextAccumElt == null) {
-			nextAccumElt = accumDoc.
-			    createElement(nextMergeTreeNode.
-					    getAccumTagName());
-			accumElt.appendChild(nextAccumElt);
-		    } 
-
-		    /* the recursive call */
-		    do_accumulate(nextAccumElt, nextAccumEltKeyVal, nextFragElt, 
-				  nextMergeTreeNode, accumDoc);
-		} 
-
+		}
 		/* now process the next sibling element */
 		nextFragElt = DOMHelper.getNextSiblingElement(nextFragElt);
 	    }
+	}
+	if(TRACE) {
+	    System.out.println("KT: do_accumulate return: " + 
+			       accumElt.getTagName() + "(" + 
+			       DOMHelper.getTextValue(accumElt) + ")");	
 	}
 	return;
     }
 
     /**
-     * addToRootedKey adds all children of an element with a given
-     * tag name.
+     * addChildrenToRootedKeyMap adds all children of an element with a given
+     * tag name to the rootedKeyMap.
      *
      * @param parent Parent whose children are to be inserted into hash map
+     * @param parentKeyVal The rootedKey value of the parent
      * @param tagName Only children with this tag name are to be added
      *      to the hash map
+     * @param mergeTreeNode The mergeTreeNode containing key
+     *          information for the child
      */
-    private void addToRootedKeyMap(Element parent, RootedKeyValue parentKeyVal,
-				   String tagName, MergeTreeNode mergeTreeNode) 
+    private void addChildrenToRootedKeyMap(Element parent, 
+					   ArrayStack parentKeyVal,
+					   String tagName, 
+					   MergeTreeNode mergeTreeNode) 
 	throws OpExecException {
-	/* check if already done, if so, just return */
-    	
-	if(tagList.contains(getUniqueObj(parentKeyVal, tagName))) {
-	    System.out.println("Found parent " + parent.hashCode() + " in tagList tagName: " + tagName);
-	    return; 
+
+	if(mergeTreeNode.isNever()) {
+	    return;
 	}
 
-	System.out.println("Adding tag: " + tagName + "of parent: " + 
-			   parent.hashCode() + " to rootedKeyMap ");
+	if(TRACE) {
+	    System.out.println("   KT: Adding children with tag " + tagName +
+			       " of " + DOMHelper.nameAndValue(parent) +
+			       " to rooted key map");
+	}
+
+	/* check if already done, if so, just return */
+    	parentKeyVal.push(tagName);
+	if(TRACE) {
+	    System.out.print("KT: Checking in tag list for " + parentKeyVal.hashCode() + " ");
+	    parentKeyVal.print();
+	}
+	if(tagList.contains(parentKeyVal)) {
+	    parentKeyVal.pop();
+	    return; 
+	} 
+	parentKeyVal.pop();
+
 	/* get an iterator over all children of parent with tagname tagName */
 	ListIterator childrenIter = 
 	    (DOMHelper.getChildElementsByTagName(parent,tagName))
 	                  .listIterator();
 
 	while(childrenIter.hasNext()) {
-	    Element child = (Element) childrenIter.next();
+	    addChildToRootedKeyMap((Element) childrenIter.next(), 
+				   parentKeyVal, mergeTreeNode, true);
+	}
 
-	    /* create the rooted key for this child */
+	/* when done with all kids - add the tagName to the tagname list */
+    	parentKeyVal.push(tagName);
+	tagList.add(parentKeyVal.clone());
+	if(TRACE) {
+	    System.out.print("KT: Adding to tag list: " + parentKeyVal.hashCode() + " ");
+	    parentKeyVal.print();
+	}
+	parentKeyVal.pop();
+    }
 
-	    /* first get the appropriate merge tree node */
-	    RootedKeyValue rkVal = 
-		mergeTreeNode.createRootedKeyValue(parentKeyVal, child);
+    /**
+     * addChildToRootedKeyMap adds a parent's child to the
+     * rootedKeyMap
+     *
+     * @param elt The element which is to be inserted into rooted key map
+     * @param parentKeyVal The parent's key value
+     * @param mergeTreeNode The merge tree node with key information 
+     *         necessary for creating the child's rooted key
+     * @param multiKey True if this child is allowed to have
+     *         multiple key - values - this allows us to lift the
+     *         restriction that matches aren't allowed on set values
+     */
+    private void addChildToRootedKeyMap(Element child,
+					ArrayStack parentKeyVal,
+					MergeTreeNode mergeTreeNode,
+					boolean multiKey) 
+	throws OpExecException {
 
+	if(TRACE) {
+	    System.out.println("KT AddChildToRootedKeyMap " + 
+			       DOMHelper.nameAndValue(child));
+	}
+
+	if(child == null) {
+	    throw new PEException("null child in addChildToRootedKeyMap");
+	}
+
+	/* IMPORTANT - have to clone everything and create new
+	 * local key values before putting in the hash map
+	 */
+	if(!multiKey) {
+	    /* create the rooted key value for the child */
+	    /* KT - wow this looks expensive!! */
+	    ArrayStack rootedKeyVal = (ArrayStack)parentKeyVal.clone();
+	    ArrayStack lkv = new ArrayStack();
+	    mergeTreeNode.createLocalKeyValue(child, lkv);
+	    rootedKeyVal.push(lkv);
+	    
 	    /* put the child and it's "key" - the value list
 	     * in the rootedKeyMap - we trust Java to make a good
 	     * hash value out of the rkVal - which is really an
@@ -433,30 +578,29 @@ public class MergeTree {
 	     * hash code value returned by calling hashCode() on the
 	     * internal array list (inside RootedKeyValue)
 	     */
-	    rootedKeyMap.put(rkVal, child);
+	    if(TRACE) {
+		System.out.print("KT: Putting in rooted Key map: ");
+		rootedKeyVal.print();
+	    }
+	    rootedKeyMap.put(rootedKeyVal, child);
+	} else {
+	    ArrayStack lKVList = getTempArrayStack();
+
+	    mergeTreeNode.createLocalKeyValues(child, lKVList);
+	    
+	    for(int i=0; i<lKVList.size(); i++) {
+		ArrayStack rkv = (ArrayStack)parentKeyVal.clone();
+		rkv.push(lKVList.get(i));
+		if(TRACE) {
+		    System.out.print("KT: Putting in rooted Key map ");
+		    rkv.print();
+		}
+		rootedKeyMap.put(rkv, child);
+	    }
+
 	}
-
-	/* when done with all kids - add the tagName to the tagname list */
-	tagList.add(getUniqueObj(parentKeyVal, tagName));
+	return;
     }
-
-    /**
-     * Function to take a parent, parentKeyVal and tagName and
-     * create an object to uniquely identify the combination of
-     * parent and tagName - for use in identifying if this combination
-     * has been put into the tagList before
-     */
-    private Object getUniqueObj(RootedKeyValue parentKeyVal, String tagName) {
-	
-	/* oh boy, does this make me unhappy, isn't there a better way
-	 * to do this???
-	 */
-	ArrayList uugh = new ArrayList();
-	uugh.add(parentKeyVal);
-	uugh.add(tagName);
-	return uugh;
-    }
-
        
     /**
      * Merges two XML Documents together to produce a new result
@@ -470,7 +614,7 @@ public class MergeTree {
      */
 
     Document merge(Document lDoc, Document rDoc) {
-	return lDoc;  /* make the compiler happy for now ??? */
+	return lDoc;  /* make the compiler happy for now */
     }
 
     public void dump(PrintStream os) {
@@ -526,6 +670,19 @@ public class MergeTree {
 	myString += "Root Result Name: ";
 	myString += mergeTreeRoot.getResultTagName();
 	return myString;
+    }
+
+    private ArrayStack getTempArrayStack() {
+	if(tempArrayStacks.size() == 0) {
+	    return new ArrayStack();
+	} else {
+	    return (ArrayStack)tempArrayStacks.pop();
+	}
+    }
+
+    private void returnTempArrayStack(ArrayStack temp) {
+	temp.quickReset();
+	tempArrayStacks.push(temp);
     }
 }
 

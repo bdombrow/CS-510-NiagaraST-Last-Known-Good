@@ -49,7 +49,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     private boolean recdData;
 
-    private int count = 0;
     /*
      * Methods of the PhysicalMergeOperator Class
      */ 
@@ -141,11 +140,6 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     protected boolean blockingProcessSourceTupleElement (StreamTupleElement tupleElement,
 							 int streamId) {
-	count++;
-	if(count%1000 == 0) {
-	    long mem = Runtime.getRuntime().freeMemory();
-	    System.out.println(count + "tuples: free mem " + mem);
-	}
 	//System.out.println("PhysAccumOp: blkProcSTE called");
 	/* get the fragment to be merged from the tuple, convert it
 	 * to an element if necessary, then pass the work off to the merge tree
@@ -219,7 +213,12 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
 	/* finally, put the accumulated tree into the results */
 	StreamTupleElement result = new StreamTupleElement(partial);
-	result.appendAttribute(accumDoc.getDocumentElement());
+
+	/* think it is most intuitive to have the result of this
+	 * operator be a whole document - so scans on the
+	 * result work intuitively. KT was accumDoc.getDocumentElement()
+	 */
+	result.appendAttribute(accumDoc);
 	resultTuples.add(result, 0);
 
 	return true;

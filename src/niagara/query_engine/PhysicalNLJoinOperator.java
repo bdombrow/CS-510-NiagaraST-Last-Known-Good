@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.3 2002/03/26 23:52:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -256,7 +256,7 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
 			}
 			// Check whether the predicate is satisfied
 			//
-			if (PredicateEvaluator.eval(leftTuple, rightTuple, joinPredicate)) {
+			if (predEval.eval(leftTuple, rightTuple, joinPredicate)) {
 
 				// Yes, it is satisfied - so create a result. The result is
 				// potentially partial if either of the tuples is potentially

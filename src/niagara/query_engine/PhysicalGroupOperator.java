@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.6 2001/08/08 21:27:57 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.7 2002/03/26 23:52:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -78,7 +78,6 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 	// This is a representative tuple of the hash entry
 	//
 	StreamTupleElement representativeTuple;
-
 
 	/////////////////////////////////////////////////////////////////
 	// These are the methods of the class                          //
@@ -228,8 +227,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     // partial results
     //
     private int currPartialResultId;
-
-
+    
     protected Document doc;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -319,78 +317,70 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
 	// First get the hash code for the grouping attributes
 	//
-	String hashCode = PredicateEvaluator.hashCode(tupleElement,
-						      groupAttributeList);
+	String hashKey = predEval.hashKey(tupleElement, groupAttributeList);
 
 	// If this is not a valid hash code, then nothing to do
+	//	    
+	// First construct ungrouped result
 	//
-	if (hashCode == null) {
-
-	    System.err.println("Invalid hash code for tuple");
-	    return true;
+	Object ungroupedResult = this.constructUngroupedResult(tupleElement);
+	if(ungroupedResult == null) {
+	    System.out.println("ungrouped result is null here too");
+	}
+	
+	// Probe hash table to see whether result for this hashcode
+	// already exist
+	//
+	
+	HashEntry prevResult = (HashEntry) hashtable.get(hashKey);
+	
+	if (prevResult == null) {
+	    
+	    // If it does not have the result, just create new one
+	    // with the current partial result id with the tupleElement
+	    // as the representative tuple
+	    //
+	    prevResult = new HashEntry(currPartialResultId, tupleElement);
+	    
+	    // Add the entry to hash table
+	    //
+	    hashtable.put(hashKey, prevResult);
 	}
 	else {
 	    
-	    // First construct ungrouped result
+	    // It did have the result - update partial results
 	    //
-	    Object ungroupedResult = this.constructUngroupedResult(tupleElement);
-	    if(ungroupedResult == null) {
-	    	System.out.println("ungrouped result is null here too");
-	    }
-
-	    // Probe hash table to see whether result for this hashcode
-	    // already exist
-	    //
-	    HashEntry prevResult = (HashEntry) hashtable.get(hashCode);
-
-	    if (prevResult == null) {
-
-		// If it does not have the result, just create new one
-		// with the current partial result id with the tupleElement
-		// as the representative tuple
-		//
-		prevResult = new HashEntry(currPartialResultId, tupleElement);
-
-		// Add the entry to hash table
-		//
-		hashtable.put(hashCode, prevResult);
-	    }
-	    else {
-
-		// It did have the result - update partial results
-		//
-		prevResult.updatePartialResult(currPartialResultId);
-	    }
-
-	    // Based on whether the tuple represents partial or final results
-	    // merge ungrouped result with previously grouped results
-	    //
-	    if (tupleElement.isPartial()) {
-
-		// Merge the partial result so far with current ungrouped result
-		//
-		Object newPartialResult = 
-		    this.mergeResults(prevResult.getPartialResult(),
-				      ungroupedResult);
-
-		// Update the partial result
-		//
-		prevResult.setPartialResult(newPartialResult);
-	    }
-	    else {
-
-		// Merge the final result so far with current ungrouped result
-		//
-		Object newFinalResult =
-		    this.mergeResults(prevResult.getFinalResult(),
-				      ungroupedResult);
-
-		// Update the final result
-		//
-		prevResult.setFinalResult(newFinalResult);
-	    }
+	    prevResult.updatePartialResult(currPartialResultId);
 	}
-
+	
+	// Based on whether the tuple represents partial or final results
+	// merge ungrouped result with previously grouped results
+	//
+	if (tupleElement.isPartial()) {
+	    
+	    // Merge the partial result so far with current ungrouped result
+	    //
+	    Object newPartialResult = 
+		this.mergeResults(prevResult.getPartialResult(),
+				  ungroupedResult);
+	    
+	    // Update the partial result
+	    //
+	    prevResult.setPartialResult(newPartialResult);
+	}
+	else {
+	    
+	    // Merge the final result so far with current ungrouped result
+	    //
+	    Object newFinalResult =
+		this.mergeResults(prevResult.getFinalResult(),
+				  ungroupedResult);
+	    
+	    // Update the final result
+	    //
+	    prevResult.setFinalResult(newFinalResult);
+	}
+    
 	// The operator can continue
 	//
 	return true;

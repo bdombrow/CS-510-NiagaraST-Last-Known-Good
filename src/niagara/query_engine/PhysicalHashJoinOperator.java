@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.2 2001/08/08 21:27:57 tufte Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.3 2002/03/26 23:52:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -73,9 +73,7 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
     // stream from which the tuples were read.
     //
     DuplicateHashtable[] finalSourceTuples;
-
-    private int count = 0;
-
+    
     ///////////////////////////////////////////////////
     // Methods of the PhysicalHashJoinOperator Class
     ///////////////////////////////////////////////////
@@ -157,75 +155,57 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 				     StreamTupleElement tupleElement,
 						 int streamId,
 						 ResultTuples result) {
-	count++;
-	if(count%1000 == 0) {
-	    long mem = Runtime.getRuntime().freeMemory();
-	    System.out.println(count + "tuples: free mem " + mem);
-	}
-	
 	// Get the hash code corresponding to the tuple element
 	//
-	String hashCode = PredicateEvaluator.hashCode(tupleElement,
-				   equalityJoinAttributes[streamId]);
+	String hashKey = predEval.hashKey(tupleElement,
+					   equalityJoinAttributes[streamId]);
 
-	// Proceed only if this is a valid hash code
+	// First add the tuple element to the appropriate hash table
 	//
-	if (hashCode == null) {
-
-	    // Nothing to do with invalid hash code; but operator can continue
-	    //
-	    System.err.println("Tuple with Invalid Hash Code");
-	    return true;
+	if (tupleElement.isPartial()) {
+	    partialSourceTuples[streamId].put(hashKey, tupleElement);
 	}
 	else {
-
-	    // First add the tuple element to the appropriate hash table
-	    //
-	    if (tupleElement.isPartial()) {
-		partialSourceTuples[streamId].put(hashCode, tupleElement);
-	    }
-	    else {
-		finalSourceTuples[streamId].put(hashCode, tupleElement);
-	    }
-	    
-	    // Determine the id of the other stream
-	    //
-	    int otherStreamId = 1 - streamId;
-	    
-	    // Now loop over all the partial elements of the other source 
-	    // and evaluate the predicate and construct a result tuple if the predicate
-	    // is satisfied
-	    //
-	    boolean proceed = constructJoinResult(tupleElement,
-						  streamId,
-						  hashCode,
-						  partialSourceTuples[otherStreamId],
-						  result);
-	    
-	    if (!proceed) {
-		
-		// Ask operator to quit
-		//
-		return false;
-	    }
-	    
-	    // Now loop over all the final elements of the other source 
-	    // and evaluate the predicate and construct a result tuple if the predicate
-	    // is satisfied
-	    //
-	    proceed = constructJoinResult(tupleElement,
-					  streamId,
-					  hashCode,
-					  finalSourceTuples[otherStreamId],
-					  result);
-	    
-	    // Continue execution or quit based on return value
-	    //
-	    return proceed;
+	    finalSourceTuples[streamId].put(hashKey, tupleElement);
 	}
+	
+	// Determine the id of the other stream
+	//
+	int otherStreamId = 1 - streamId;
+	
+	// Now loop over all the partial elements of the other source 
+	// and evaluate the predicate and construct a result tuple if the predicate
+	// is satisfied
+	//
+	boolean proceed = constructJoinResult(tupleElement,
+					      streamId,
+					      hashKey,
+					      partialSourceTuples[otherStreamId],
+					      result);
+	
+	if (!proceed) {
+	    
+	    // Ask operator to quit
+	    //
+	    return false;
+	}
+	
+	// Now loop over all the final elements of the other source 
+	// and evaluate the predicate and construct a result tuple if the predicate
+	// is satisfied
+	//
+	proceed = constructJoinResult(tupleElement,
+				      streamId,
+				      hashKey,
+				      finalSourceTuples[otherStreamId],
+				      result);
+	
+	// Continue execution or quit based on return value
+	//
+	return proceed;
     }
 
-    
+
     /**
      * This function removes the effects of the partial results in a given
      * source stream. This function over-rides the corresponding function
@@ -266,14 +246,14 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 
     private boolean constructJoinResult (StreamTupleElement tupleElement,
 					 int streamId,
-					 String hashCode,
+					 String hashKey,
 					 DuplicateHashtable otherStreamTuples,
 					 ResultTuples result) {
 
 	// Get the list of tuple elements having the same hash code in
 	// otherStreamTuples
 	//
-	Vector sourceTuples = otherStreamTuples.get(hashCode);
+	Vector sourceTuples = otherStreamTuples.get(hashKey);
 
 	// Loop over all the elements of the other source stream and
 	// evaluate the predicate and construct a result tuple if the
@@ -308,7 +288,7 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 
 	    // Check whether the predicate is satisfied
 	    //
-	    if (PredicateEvaluator.eval(leftTuple, rightTuple, joinPredicate)) {
+	    if (predEval.eval(leftTuple, rightTuple, joinPredicate)) {
 
 		// Yes, it is satisfied - so create a result. The result is
 		// potentially partial if either of the tuples is potentially

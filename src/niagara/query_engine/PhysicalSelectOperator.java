@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PhysicalSelectOperator.java,v 1.3 2002/03/26 23:52:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -117,30 +117,30 @@ public class PhysicalSelectOperator extends PhysicalOperator {
     protected boolean nonblockingProcessSourceTupleElement (
 		StreamTupleElement tupleElement,
 		int streamId,
-		ResultTuples result)
-		{
-			
-			// Evaluate the predicate on the desired attribute of the tuple
-			//
-			if (PredicateEvaluator.eval(tupleElement, pred)) {
-				
-				// If the predicate is satisfied, add the tuple to the result
-				//
-                            // XXX hack
-                            StreamTupleElement newTuple = 
-                                new StreamTupleElement(tupleElement.isPartial());
-                            for (int i = 0; i < clear.length; i++) {
-                                if (clear[i] || i == 0) { // XXX hack on hack. doc is not variable
-                                    newTuple.appendAttribute(null);
-                                }
-                                else 
-                                    newTuple.appendAttribute(tupleElement.getAttribute(i));
-                            }
-                            result.add(newTuple, 0);
-			}
-			
-			// No problem - continue execution
-			//
-			return true;
+		ResultTuples result) {
+		    
+	// Evaluate the predicate on the desired attribute of the tuple
+	//
+	if (predEval.eval(tupleElement, pred)) {
+	    // If the predicate is satisfied, add the tuple to the result
+	    //
+	    // XXX hack
+	    StreamTupleElement newTuple = 
+		new StreamTupleElement(tupleElement.isPartial());
+	    for (int i = 0; i < clear.length; i++) {
+		if (clear[i] || i == 0) { // XXX hack on hack. doc is not variable
+		    newTuple.appendAttribute(null);
+		} else {
+		    newTuple.appendAttribute(tupleElement.getAttribute(i));
 		}
+	    }
+	    result.add(newTuple, 0);
+	}
+	// No problem - continue execution
+	//
+	return true;
+    }
 }
+
+
+

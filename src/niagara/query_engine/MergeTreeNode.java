@@ -32,7 +32,7 @@ class MergeTreeNode {
      * DATA MEMBERS
      */
     private MergeObject merger;
-    private MatchTemplate matcher;
+    private LocalKey localKey;
     private ArrayList children;
     
     private String lInputTagName; 
@@ -41,7 +41,7 @@ class MergeTreeNode {
     private String fragTagName;
     private String accumTagName;
     
-    private boolean hasMatchTemplate;
+    private boolean hasNonDefaultKey;
 
     /*
      * METHODS
@@ -66,7 +66,7 @@ class MergeTreeNode {
      *         are violated 
      */
     MergeTreeNode(Element eMElt, int treeMergeType, int treeDomSide,
-		  boolean checkAccumConstraints) 
+		  boolean checkAccumConstraints)
 	throws MTException {
 
 	children = new ArrayList();
@@ -77,20 +77,19 @@ class MergeTreeNode {
 	setTagNames(eMElt, checkAccumConstraints);
 
 	/* The first element of an ElementMerge will be either
-	 * a MatchTemplate (optional) or an element describing
+	 * a Match Template (optional) or an element describing
 	 * the merge itself (ShallowContent, DeepReplace, etc.)
 	 */
 	Element contentMerge = null;
+	localKey = new LocalKey(); 
 	if(DOMHelper.getFirstChildElement(eMElt).getNodeName().equals("MatchTemplate")) {
 	    /* we have a match template */
 	    Element matchTempl = DOMHelper.getFirstChildElement(eMElt);
-	    matcher = new MatchTemplate();
-	    matcher.readXMLTemplate(resultTagName, matchTempl);
-	    hasMatchTemplate = true;
+	    localKey.readXMLMatchTemplate(resultTagName, matchTempl);
+	    hasNonDefaultKey = true;
 	    contentMerge = DOMHelper.getNextSiblingElement(matchTempl);
 	} else {
-	    hasMatchTemplate = false;
-	    matcher = null;
+	    localKey.setTagAsKey();
 	    contentMerge = DOMHelper.getFirstChildElement(eMElt);
 	}
 
@@ -202,8 +201,8 @@ class MergeTreeNode {
     /**
      * Returns whether this merge node has a match template or not
      */
-    boolean hasMatchTemplate() {
-	return hasMatchTemplate;
+    boolean hasNonDefaultKey() {
+	return hasNonDefaultKey;
     }
 
     /**
@@ -276,32 +275,27 @@ class MergeTreeNode {
     }
 
     /**
-     * Creates a key value given a parent key value. Will search the
-     * element for key values as described by local key spec in
-     * matcher and will append that local key to parent key value
+     * Creates a local key value for an element. Will search the
+     * element for key values as described by local key spec 
+     * and will concatenate those to create a local key value string
      *
-     * @param parentKey The parent key value to use in rooted key value 
-     *           creation
-     * @param elt The element whose local key should be appended to parent
-     *          key value
+     * @param elt The element whose local key should be created
      *
      * @return 
      */
-    public RootedKeyValue createRootedKeyValue(RootedKeyValue parentKey, 
-					       Element elt) 
+    public void createLocalKeyValue(Element elt, ArrayStack localKeyVal)
 	throws OpExecException {
-	return matcher.createRootedKeyValue(parentKey, elt);
+	localKey.createLocalKeyValue(elt, elt.getTagName(), localKeyVal);
+	return;
     }
 
     /**
-     * Creates a key value given a parent key value. Will search the
-     * element for key values as described by local key spec in
-     * matcher and will append that local key to parent key value
+     * Creates a local key value for an element. Will search the
+     * element for key values as described by local key spec 
+     * and will concatenate those to create a local key value string
      *
-     * @param parentKey The parent key value to use in rooted key value 
-     *           creation
-     * @param elt The element whose local key should be appended to parent
-     *          key value
+     * @param elt The element whose local key should be created
+     *
      * @param tagName The tag name to annotate the local key value with,
      *                due to support for renaming, this sometimes
      *                is not the same as the tag name of the element
@@ -309,11 +303,44 @@ class MergeTreeNode {
      *
      * @return 
      */
-    RootedKeyValue createRootedKeyValue(RootedKeyValue parentKey, Element elt,
-					String tagName) 
+    public void createLocalKeyValue(Element elt, String tagName,
+				    ArrayStack localKeyVal)
 	throws OpExecException {
-	return matcher.createRootedKeyValue(parentKey, elt, tagName);
+	localKey.createLocalKeyValue(elt, tagName, localKeyVal);
+	return;
     }
+
+    /**
+     * Creates a local key value for an element. Will search the
+     * element for key values as described by local key spec 
+     * and will concatenate those to create a local key value string.
+     * Allows multiple matches to the local key spec (local key must
+     * contain only one path in that case) in this element and returns
+     * a stack/array of strings with those values
+     *
+     * @param elt The element whose local key should be created
+     *
+     * @param tagName The tag name to annotate the local key value with,
+     *                due to support for renaming, this sometimes
+     *                is not the same as the tag name of the element
+     *                 uugh, this is UGLY - I don't like it
+     *
+     * @return stack/array of local key values
+     */
+    public void createLocalKeyValues(Element elt, String tagName,
+				     ArrayStack localKeyValList)
+	throws OpExecException {
+	localKey.createLocalKeyValues(elt, tagName, localKeyValList);
+	return;
+    }
+
+    /* same, but no tag name */
+    public void createLocalKeyValues(Element elt, ArrayStack localKeyValList)
+	throws OpExecException {
+	localKey.createLocalKeyValues(elt, elt.getTagName(), localKeyValList);
+	return;
+    }
+
 
     public void dump(PrintStream os) {
 	os.println("Merge Tree Node: Tags: " +
@@ -321,9 +348,7 @@ class MergeTreeNode {
 		   ", l:" + lInputTagName +
 		   ", r:" + rInputTagName);
 	merger.dump(os);
-	if(hasMatchTemplate) {
-	    matcher.dump(os);
-	}
+	localKey.dump(os);
 	for(int i=0; i<children.size(); i++) {
 	    ((MergeTreeNode)children.get(i)).dump(os);
 	}
@@ -332,10 +357,18 @@ class MergeTreeNode {
     public String toString() {
 	String myString = "MergeTreeNode: " + resultTagName + " ";
 	myString += merger.getName();
-	if(hasMatchTemplate) {
-	    myString += " has match";
+	if(hasNonDefaultKey) {
+	    myString += " key is non-default";
 	}
 	return myString;
+    }
+
+    public boolean isNever() {
+	return localKey.isNever();
+    }
+
+    public boolean isTag() {
+	return localKey.isTag();
     }
 }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.3 2001/07/17 07:03:47 vpapad Exp $
+  $Id: QueryResult.java,v 1.4 2002/03/26 23:52:32 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -582,18 +582,22 @@ public class QueryResult {
 		//
 		Object lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
 	
-		// Create a Document and add add the result to the Document
-		//
-		Document resultDocument;
-
-		resultDocument = DOMFactory.newDocument();
-                Node n = DOMFactory.importNode(resultDocument, (Node) lastAttribute);
-
-                resultDocument.appendChild(n);
-
-		// Return the result document
-		//
-		return resultDocument;
+		if(lastAttribute instanceof Document) {
+		    return (Document)lastAttribute;
+		} else {
+		    // Create a Document and add add the result to the Document
+		    //
+		    Document resultDocument;
+		    
+		    resultDocument = DOMFactory.newDocument();
+		    Node n = DOMFactory.importNode(resultDocument, (Node) lastAttribute);
+		    
+		    resultDocument.appendChild(n);
+		    
+		    // Return the result document
+		    //
+		    return resultDocument;
+		}
     }
 
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSumOperator.java,v 1.3 2001/08/08 21:27:57 tufte Exp $
+  $Id: PhysicalSumOperator.java,v 1.4 2002/03/26 23:52:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -219,7 +219,7 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 	// First get the atomic values
 	//
 	Vector atomicValues = 
-	    PredicateEvaluator.getAtomicValues(tupleElement, summingAttribute);
+	    predEval.getAtomicValues(tupleElement, summingAttribute);
 
 	// If there is not exactly one atomic value, skip
 	//

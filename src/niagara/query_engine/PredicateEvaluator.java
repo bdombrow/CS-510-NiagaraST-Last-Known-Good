@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PredicateEvaluator.java,v 1.4 2001/07/17 07:03:47 vpapad Exp $
+  $Id: PredicateEvaluator.java,v 1.5 2002/03/26 23:52:32 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -104,6 +104,13 @@ import niagara.xmlql_parser.syntax_tree.*;
 
 public class PredicateEvaluator {
 
+    // KT - I changed this class to having instance variables and not having
+    // all static method, to allow the variables below which avoid lots of
+    // unnecessary allocations
+    private StreamTupleElement[] oneTuple = new StreamTupleElement[1];
+    private StreamTupleElement[] twoTuples = new StreamTupleElement[2];
+
+
     ///////////////////////////////////////////////////////////////////
     // These are the methods of the class                            //
     ///////////////////////////////////////////////////////////////////
@@ -117,12 +124,11 @@ public class PredicateEvaluator {
      *  @return true if predicate is satisfied and false otherwise
      */
 
-    public static boolean eval(StreamTupleElement tuple,
-				predicate pred) {
+    public boolean eval(StreamTupleElement tuple,
+			predicate pred) {
 
 	// Add the tuple a newly created array
 	//
-	StreamTupleElement[] oneTuple = new StreamTupleElement[1];
 	oneTuple[0] = tuple;
 
 	// Invoke the evaluation function
@@ -141,13 +147,12 @@ public class PredicateEvaluator {
      *  @return true if predicate is satisfied and false otherwise
      */
 
-    public static boolean eval(StreamTupleElement leftTuple,
-				StreamTupleElement rightTuple,
-				predicate pred) {
-
+    public boolean eval(StreamTupleElement leftTuple,
+			StreamTupleElement rightTuple,
+			predicate pred) {
+	
 	// Add the tuples to a newly created array
 	//
-	StreamTupleElement[] twoTuples = new StreamTupleElement[2];
 	twoTuples[0] = leftTuple;
 	twoTuples[1] = rightTuple;
 
@@ -166,8 +171,8 @@ public class PredicateEvaluator {
      *  @return true if predicate is satisfied and false otherwise
      */
 
-    private static boolean eval(StreamTupleElement[] tuples,
-			       predicate pred) {
+    private boolean eval(StreamTupleElement[] tuples,
+			 predicate pred) {
 
 	// Act based on the type of predicate
 	//
@@ -208,12 +213,11 @@ public class PredicateEvaluator {
      * @return A vector of atomic values corresponding to the schema attribute
      */
 
-    public static Vector getAtomicValues (StreamTupleElement tuple,
-					  schemaAttribute attribute) {
+    public Vector getAtomicValues (StreamTupleElement tuple,
+				   schemaAttribute attribute) {
 
 	// Return the atomic values
 	//
-	StreamTupleElement[] oneTuple = new StreamTupleElement[1];
 	oneTuple[0] = tuple;
 
 	return getAtomicValues(oneTuple, attribute);
@@ -229,7 +233,7 @@ public class PredicateEvaluator {
      * @return True if the predicate is satisfied and false otherwise
      */
 
-    private static boolean evaluateArithmeticPredicate (
+    private boolean evaluateArithmeticPredicate (
 						 StreamTupleElement[] tuples,
 						 predArithOpNode arithmeticPred) {
 
@@ -301,32 +305,32 @@ public class PredicateEvaluator {
      * @return True if the predicate is satisfied and false otherwise
      */
 
-    private static boolean evaluateLogicalPredicate (StreamTupleElement[] tuples,
-						     predLogOpNode logicalPred) {
+    private boolean evaluateLogicalPredicate (StreamTupleElement[] tuples,
+					      predLogOpNode logicalPred) {
 
 	// Extract the sub-predicates
 	//
 	predicate leftPredicate = logicalPred.getLeftChild();
 	predicate rightPredicate = logicalPred.getRightChild();
-
+	
 	// Get the operator from the predicate
 	//
 	int oper = logicalPred.getOperator();
-	    
+	
 	// Make appropriate recursive call 
 	//
 	switch (oper) {
-		
-	    case opType.AND: return (eval(tuples, leftPredicate) && 
-				     eval(tuples, rightPredicate)); 
-		
-	    case opType.OR: return (eval(tuples, leftPredicate) ||
-				    eval(tuples, rightPredicate));
-		
-	    case opType.NOT: return !eval(tuples, leftPredicate);
-
-	    default: System.err.println("Invalid pridicate: " + logicalPred);
-		     return false;
+	    
+	case opType.AND: return (eval(tuples, leftPredicate) && 
+				 eval(tuples, rightPredicate)); 
+	
+	case opType.OR: return (eval(tuples, leftPredicate) ||
+				eval(tuples, rightPredicate));
+	
+	case opType.NOT: return !eval(tuples, leftPredicate);
+	    
+	default: System.err.println("Invalid pridicate: " + logicalPred);
+	    return false;
 	}
     }
     
@@ -339,10 +343,11 @@ public class PredicateEvaluator {
      * @param value The value in the predicate
      *
      * @return A vector of atomic values associated with the value and tuple
+     * KT - looks to me like atomic values are always strings
      */
 
-    private static Vector getAtomicValues (StreamTupleElement[] tuples,
-					   Object value) {
+    private Vector getAtomicValues (StreamTupleElement[] tuples, 
+				    Object value) {
 
 	// First create the result vector
 	//
@@ -352,7 +357,7 @@ public class PredicateEvaluator {
 	//
 	if (value instanceof String) {
 
-	    result.addElement(value);
+	    result.addElement((String)value);
 	}
 	else if (value instanceof schemaAttribute) {
 
@@ -425,7 +430,7 @@ public class PredicateEvaluator {
      * @return True if the comparison succeeds and false otherwise
      */
 
-    private static boolean compareAtomicValues (Object leftValue,
+    private boolean compareAtomicValues (Object leftValue,
 						Object rightValue,
 						int oper) {
 
@@ -459,25 +464,26 @@ public class PredicateEvaluator {
     
 
     /**
-     * This function generates a hash code for a tuple given the list of
-     * relevant attributes. The hash code is the same for any two tuples
-     * having the same values in the relevant attributes.
+     * This function generates a hash key for a tuple given the list of
+     * relevant attributes. This is NOT a hash code - it is a key to be
+     * input into a hash table. equality of keys => equality of elements
+     * this is not true for hash codes. KT - this hashing stuff is hard
+     * to understand. This key created isn't really a key, but I don't
+     * think that matters because of the way the hash tables are
+     * structured - java's native hash table isn't used directly.
      *
      * @param tupleElement The tuple to be hashed on
      * @param attributeList The list of attributes in the tuple to hash on
      *
-     * @return The hash code. If any of the attributes in the attribute list
+     * @return The hash key. If any of the attributes in the attribute list
      *         do not have a hashable value, then returns null.
      */
-
-    public static String hashCode (StreamTupleElement tupleElement,
-				   Vector attributeList) {
+    public String hashKey (StreamTupleElement tupleElement,
+			 Vector attributeList) {
 
 	// Create storage for the result
 	//
-	String hashResult = new String();
-
-	StreamTupleElement[] oneTuple = new StreamTupleElement[1];
+	StringBuffer hashResult = new StringBuffer();
 
 	// For each attribute, get the atomic value and add that to the
 	// hash code
@@ -490,25 +496,26 @@ public class PredicateEvaluator {
 	    //
 	    oneTuple[0] = tupleElement;
 
-	    Vector atomicValue = getAtomicValues(oneTuple, attributeList.elementAt(att));
+	    Vector atomicValues = 
+		getAtomicValues(oneTuple, attributeList.elementAt(att));
 
 	    // If there is not exactly one atomic value, then it is an error
 	    //
-	    if (atomicValue.size() != 1) {
-
-		return null;
+	    if (atomicValues.size() != 1) {
+		throw new PEException("More than one atomic value in hashCode eval");
 	    }
 
 	    // Add the atomic value (a string) to the current result
 	    //
-	    hashResult += ("<" + ((String) atomicValue.elementAt(0)) + ">");
+	    hashResult.append('<');
+	    hashResult.append((String) atomicValues.elementAt(0));
+	    hashResult.append('<');
 	}
 
 	// Return the hash result
 	//
-	return hashResult;
+	return hashResult.toString();
     }
-
 
     /**
      *  The equality operator.  Compares different types of objects for equality.
@@ -519,7 +526,7 @@ public class PredicateEvaluator {
      *  @return True if the two objects are equal, false otherwise
      */
 
-    public static boolean equals (Object leftValue, Object rightValue) {
+    public boolean equals (Object leftValue, Object rightValue) {
 
 	// Only string comparisons supported currently
 	//
@@ -557,7 +564,7 @@ public class PredicateEvaluator {
      *  @return True if the two objects are equal, false otherwise
      */
 
-    public static boolean deepEquals (Object leftValue, Object rightValue) {
+    public boolean deepEquals (Object leftValue, Object rightValue) {
 
 	// Currently not implemented - just returns false
 	//
@@ -574,7 +581,7 @@ public class PredicateEvaluator {
      *  @return True if left object > right object, false otherwise
      */
 
-    public static boolean greaterThan (Object leftValue, Object rightValue) {
+    public boolean greaterThan (Object leftValue, Object rightValue) {
 
 	// Only string comparisons supported currently
 	//
@@ -615,7 +622,7 @@ public class PredicateEvaluator {
      *  @return True if left object < right object, false otherwise
      */
 
-    public static boolean lessThan (Object leftValue, Object rightValue) {
+    public boolean lessThan (Object leftValue, Object rightValue) {
 
 	// Only string comparisons supported currently
 	//
@@ -656,7 +663,7 @@ public class PredicateEvaluator {
      *  @return True if left object >= right object, false otherwise
      */
 
-    public static boolean greaterThanEquals (Object leftValue, Object rightValue) {
+    public boolean greaterThanEquals (Object leftValue, Object rightValue) {
 
 	// Either greater than or equal
 	//
@@ -674,7 +681,7 @@ public class PredicateEvaluator {
      *  @return True if left object <= right object, false otherwise
      */
 
-    public static boolean lessThanEquals (Object leftValue, Object rightValue) {
+    public boolean lessThanEquals (Object leftValue, Object rightValue) {
 
 	// Either less than or equal
 	//
@@ -692,7 +699,7 @@ public class PredicateEvaluator {
      *  @return True if left object != right object, false otherwise
      */
 
-    public static boolean notEquals (Object leftValue, Object rightValue) {
+    public boolean notEquals (Object leftValue, Object rightValue) {
 
 	// The negation of equal
 	//
@@ -711,7 +718,7 @@ public class PredicateEvaluator {
      *  @return boolean value, true if comparison succeeds
      */
 
-    private static boolean numericCompare (String leftVal, 
+    private boolean numericCompare (String leftVal, 
 					   String rightVal, 
 					   int opCode) {	
 	double rightDouble = -1;

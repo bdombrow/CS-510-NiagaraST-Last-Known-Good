@@ -38,15 +38,16 @@ class AggNodeMerge extends NodeMerge {
 	    setInnerOuter(mergeType);
 	    
 	    aggObject = _comparator;
-	    Class niNodeClass = Class.forName("niagara.utils.nitree.NINode");
-	    Class[] paramTypes = {niNodeClass, niNodeClass, niNodeClass};
+	    Class nodeClass = Class.forName("org.w3c.dom.Node");
+	    Class intClass = Class.forName("java.lang.Integer");
+	    Class[] paramTypes = {nodeClass, nodeClass, nodeClass};
 	    aggMethod = aggObject.getClass().getDeclaredMethod(fcn, 
 							       paramTypes);
 	    name = null;
 	} catch (NoSuchMethodException e) {
-	    throw new MTException("NoSuchMethod " + e.getMessage());
+	    throw new MTException("NoSuchMethod (" + fcn + ")" + e.getMessage());
 	} catch (ClassNotFoundException e) {
-	    throw new PEException("Class for NINode not found" + e.getMessage());
+	    throw new PEException("Class for Node not found" + e.getMessage());
 	}
     }
 
@@ -70,6 +71,11 @@ class AggNodeMerge extends NodeMerge {
 	    throw new 
 		OpExecException("Invalid Method Invocation - Illegal Access - on " + aggMethod.getName() + "  " + e1.getMessage());
 	} catch (InvocationTargetException e2) {
+	    if(aggObject == null) {
+		System.out.println("aggObject is null");
+	    } else {
+		System.out.println("aggObject is " + aggObject.getClass().getName());
+	    }
 	    throw new 
 		OpExecException("Invalid Method Invocation - Invocation Target - on " + aggMethod.getName() + "  " + e2.getMessage());
 	}

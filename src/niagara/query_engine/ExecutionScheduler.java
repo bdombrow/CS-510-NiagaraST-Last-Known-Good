@@ -1,6 +1,6 @@
  
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.9 2001/08/08 21:27:57 tufte Exp $
+  $Id: ExecutionScheduler.java,v 1.10 2002/03/26 23:52:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,10 +76,6 @@ public class ExecutionScheduler {
     //
     private PhysicalOperatorQueue opQueue;
 
-    // This specifies the capacity of streams
-    //
-    private static int streamCapacity = 20;
-
     // This specifies the responsiveness of operators
     //
     private static Integer responsiveness = new Integer(100);
@@ -138,7 +134,7 @@ public class ExecutionScheduler {
 		outputStreams[0] = queryInfo.getOutputStream();
 
 		Stream[] inputStreams = new Stream[1];
-		inputStreams[0] = new Stream(streamCapacity);
+		inputStreams[0] = new Stream();
 
 		PhysicalHeadOperator headOperator = 
 			new PhysicalHeadOperator(queryInfo,
@@ -195,9 +191,9 @@ public class ExecutionScheduler {
 				       Stream outputStream,
 				       Hashtable nodesScheduled,
                                        Document doc) {
-
-		// Get the operator corresponding to the logical node
-		//
+	
+	// Get the operator corresponding to the logical node
+	//
 
         // Check if this is the root of a subplan meant to run
         // on a different engine
@@ -278,7 +274,11 @@ public class ExecutionScheduler {
 		if (operator instanceof dtdScanOp) {
 		    processDTDScanOperator((dtdScanOp) operator, outputStream);
 		} else if (operator instanceof FirehoseScanOp) {
-		    processFirehoseScanOperator((FirehoseScanOp) operator, outputStream);
+		    processFirehoseScanOperator((FirehoseScanOp) operator, 
+						outputStream);
+		} else if (operator instanceof StreamScanOp) {
+		    processStreamScanOperator((StreamScanOp) operator, 
+					      outputStream);
 		} else if (operator instanceof ConstantOp) {
                     processConstantOp((ConstantOp) operator, outputStream);
 		} else if (operator instanceof ReceiveOp) {
@@ -302,7 +302,7 @@ public class ExecutionScheduler {
 
 				// Create a new input stream
 				//
-				inputStreams[child] = new Stream(streamCapacity);
+				inputStreams[child] = new Stream();
 
 				// Recurse on child
 				//
@@ -386,7 +386,7 @@ public class ExecutionScheduler {
 		outputStreams[0] = outputStream;
 
 		Stream[] inputStreams = new Stream[1];
-		inputStreams[0] = new Stream(streamCapacity);
+		inputStreams[0] = new Stream();
 
 		PhysicalPartialOperator partialOp = 
 		    new PhysicalPartialOperator(null, inputStreams,
@@ -399,8 +399,8 @@ public class ExecutionScheduler {
 		// the parsed XML documents
 		//
 		try {
-		    System.err.println("XXX Try to scan " +
-                    	       dtdScanOperator.getDocs().elementAt(0));
+		    //System.err.println("XXX Try to scan " +
+                    //	       dtdScanOperator.getDocs().elementAt(0));
 		    boolean scan = 
 			dataManager.getDocuments(dtdScanOperator.getDocs(), null,
 						 new SourceStream(inputStreams[0]));
@@ -412,7 +412,7 @@ public class ExecutionScheduler {
 		    e.printStackTrace();
 		    System.err.println("Data Manager Already Closed!!!");
 		}
-                System.out.println("XXX returning from handleDtdScan");
+                //System.out.println("XXX returning from handleDtdScan");
     }
 
     /**
@@ -432,7 +432,7 @@ public class ExecutionScheduler {
 	outputStreams[0] = outputStream;
 	
 	Stream[] inputStreams = new Stream[1];
-	inputStreams[0] = new Stream(streamCapacity);
+	inputStreams[0] = new Stream();
 	
 	PhysicalPartialOperator partialOp = 
 	    new PhysicalPartialOperator(null,inputStreams, 
@@ -456,13 +456,53 @@ public class ExecutionScheduler {
 	return;
     }
 
+    /**
+     * This function processes a Stream Scan Logical Operator by creating
+     * a stream thread to fetch data from the stream, parse the
+     * documents that arrive, and put them in the appropriate stream
+     *
+     * @param streamScanOp The stream scan operator to be scheduled
+     *                        for execution
+     * @param outputStream The stream to which the output of the scan operator
+     *                     is to be fed
+     */
+
+    protected void processStreamScanOperator (StreamScanOp sScanOp,
+					      Stream outputStream) {
+	Stream[] outputStreams = new Stream[1];
+	outputStreams[0] = outputStream;
+	
+	Stream[] inputStreams = new Stream[1];
+	inputStreams[0] = new Stream();
+	
+	PhysicalPartialOperator partialOp = 
+	    new PhysicalPartialOperator(null,inputStreams, 
+					outputStreams, responsiveness);
+	
+	opQueue.putOperator(partialOp);
+	
+	
+	/* Create a StreamThread which will connect to the appropriate
+	 * stream (file or socket) and start reading documents from that 
+	 * stream and put them into the output stream
+	 */
+
+	StreamThread stream = new StreamThread(sScanOp.getSpec(),
+				     new SourceStream(inputStreams[0]));
+	
+	// start the thread
+	Thread sthread = new Thread(stream);
+	sthread.start();
+	return;
+    }
+
     protected void processConstantOp (ConstantOp op,
 						Stream outputStream) {
 	Stream[] outputStreams = new Stream[1];
 	outputStreams[0] = outputStream;
 	
 	Stream[] inputStreams = new Stream[1];
-	inputStreams[0] = new Stream(streamCapacity);
+	inputStreams[0] = new Stream();
 	
 	PhysicalPartialOperator partialOp = 
 	    new PhysicalPartialOperator(null,inputStreams, 
@@ -487,7 +527,7 @@ public class ExecutionScheduler {
 	outputStreams[0] = outputStream;
 	
 	Stream[] inputStreams = new Stream[1];
-	inputStreams[0] = new Stream(streamCapacity);
+	inputStreams[0] = new Stream();
 	
 	PhysicalPartialOperator partialOp = 
 	    new PhysicalPartialOperator(null,inputStreams, 

@@ -195,8 +195,9 @@ class ShallowContentMerge extends MergeObject {
 	/* Handle the case with an empty accumElt here.
 	 * This may occur when we start with a null accumulator
 	 */
-	if (accumElt.getNodeValue() == null) {
-	    accumElt.setNodeValue(fragElt.getNodeValue());
+	String value = DOMHelper.getTextValue(accumElt);
+	if (value == null) {
+	    DOMHelper.setTextValue(accumElt, DOMHelper.getTextValue(fragElt));
 	    return;
 	}
 

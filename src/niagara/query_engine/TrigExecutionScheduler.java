@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TrigExecutionScheduler.java,v 1.2 2001/07/17 07:03:47 vpapad Exp $
+  $Id: TrigExecutionScheduler.java,v 1.3 2002/03/26 23:52:32 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,10 +76,6 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
     //
     private PhysicalOperatorQueue opQueue;
 
-    // This specifies the capacity of streams
-    //
-    private static int streamCapacity = 25;
-
     // This specifies the responsiveness of operators
     //
     private static Integer responsiveness = new Integer(100);
@@ -150,7 +146,7 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 	    outputStreams[0] = ((QueryInfo)queryInfos.elementAt(i)).getOutputStream();
 
 	    Stream[] inputStreams = new Stream[1];
-	    inputStreams[0] = new Stream(streamCapacity);
+	    inputStreams[0] = new Stream();
 
 	    PhysicalHeadOperator headOperator = 
 		new PhysicalHeadOperator((QueryInfo)queryInfos.elementAt(i),
@@ -258,7 +254,7 @@ public class TrigExecutionScheduler extends ExecutionScheduler {
 
 		// Create a new input stream
 		//
-		inputStreams[child] = new Stream(streamCapacity);
+		inputStreams[child] = new Stream();
 
 		// Recurse on child
 		//
