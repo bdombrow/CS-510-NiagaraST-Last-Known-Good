@@ -49,7 +49,7 @@ class ClientMain {
     int numTLElts = 1;
     boolean streaming = true;
     boolean prettyPrint = false;
-    boolean trace = false;
+    String trace; 
     boolean quiet = false;
     boolean shutdown = false;
 
@@ -165,7 +165,7 @@ class ClientMain {
 
             // get trace
 	    if(idx < args.length && args[idx].compareTo("-tr") == 0) {
-               trace = true;
+               trace = args[idx+1];
 	       idx++;
 	       ok = true;
 	    }
