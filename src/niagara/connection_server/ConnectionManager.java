@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.10 2003/12/24 02:16:38 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.11 2004/02/11 01:08:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,7 +30,6 @@ package niagara.connection_server;
 import java.net.*;
 import java.util.Date;
 import java.io.IOException;
-import java.io.*;
 
 /**
  *  The ConnectionManager listens on a well known port for 
@@ -103,10 +102,7 @@ public class ConnectionManager implements Runnable {
             try {
                 // Listen for the next client request
                 Socket clientSocket = null;
-                while (true) {
-                    clientSocket = queryEngineSocket.accept();
-                    break;
-                }
+                clientSocket = queryEngineSocket.accept();
 
                 System.err.println(
                     "Query received: "
@@ -118,10 +114,10 @@ public class ConnectionManager implements Runnable {
                 // Hand over this socket to the Request handler 
                 // which will handle all the further requests
                 new RequestHandler(clientSocket, server);
-            } catch (InterruptedIOException e) {
-                if (doStop)
+            } catch (SocketTimeoutException e) {
+                if (doStop) 
                     return;
-                else
+                else 
                     continue;
             } catch (IOException e) {
                 System.out.println(

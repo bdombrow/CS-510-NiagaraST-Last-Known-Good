@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.30 2003/12/24 02:16:38 vpapad Exp $
+  $Id: NiagraServer.java,v 1.31 2004/02/11 01:08:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -59,6 +59,8 @@ public class NiagraServer {
     // The port for server-to-server communication
     protected static int server_port = 8020;
 
+    private static boolean shuttingDown;
+
     // For executing QE queries
     QueryEngine qe;
     // for managing all the client connections
@@ -77,6 +79,12 @@ public class NiagraServer {
     public static boolean TIME_OPERATORS = false;
 
     public NiagraServer() {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                shutdown();
+            }
+        });
+
         try {
             // Read the catalog
             catalog = new Catalog(catalogFileName);
@@ -89,6 +97,7 @@ public class NiagraServer {
 
             if (startConsole) {
                 Console console = new Console(this, System.in);
+                console.setDaemon(true);
                 console.start();
             }
             if (useSAXDOM)
@@ -266,11 +275,13 @@ public class NiagraServer {
 
     // Try to shutdown
     public void shutdown() {
-        info("Server is shutting down.");
+	if (shuttingDown)
+            return;
+        shuttingDown = true;
         connectionManager.shutdown();
         qe.shutdown();
         catalog.shutdown();
-        System.exit(0);
+        info("Server has shut down.");
     }
 
     /** Simple method for info messages - just outputs to stdout now

@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.11 2003/12/24 02:16:38 vpapad Exp $
+ * $Id: Catalog.java,v 1.12 2004/02/11 01:08:42 vpapad Exp $
  *  
  */
 
@@ -7,14 +7,10 @@ package niagara.connection_server;
 import java.util.*;
 import java.io.*;
 
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
+
+import org.apache.xml.serialize.XMLSerializer;
 
 import niagara.logical.NodeDomain;
 import niagara.logical.Variable;
@@ -29,8 +25,6 @@ import niagara.optimizer.rules.CustomRule;
 import niagara.optimizer.rules.SimpleRule;
 
 public class Catalog implements ICatalog {
-
-    private static final boolean debug = true;
     // This primitive Catalog maintains a mapping from URNs to URLs,
     // or location of servers that know to resolve the URNs
     
@@ -455,68 +449,65 @@ public class Catalog implements ICatalog {
     }
 
     public void shutdown() {
-        // Save resources
-        try {
-            PrintWriter pw =
-                new PrintWriter(
-                    new BufferedOutputStream(new FileOutputStream(filename)));
-            StreamResult streamResult = new StreamResult(pw);
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer serializer = tf.newTransformer();
-            Element root = document.getDocumentElement();
-            NodeList resourcesList = root.getElementsByTagName("resources");
-            Element resources;
-            if (resourcesList.getLength() != 0) {
-                // Delete it, we will create it anew
-                resources = (Element) resourcesList.item(0);
-                root.removeChild(resources);
-            }
-            resources = document.createElement("resources");
+        Element root = document.getDocumentElement();
+        NodeList resourcesList = root.getElementsByTagName("resources");
+        Element resources;
+        if (resourcesList.getLength() != 0) {
+            // Delete it, we will create it anew
+            resources = (Element) resourcesList.item(0);
+            root.removeChild(resources);
+        }
+        resources = document.createElement("resources");
 
-            Iterator keys = resourceNames.iterator();
-            while (keys.hasNext()) {
+        Iterator keys = resourceNames.iterator();
+        while (keys.hasNext()) {
 
-                String urn = (String) keys.next();
-                Element r = document.createElement("resource");
-                r.setAttribute("name", urn);
+            String urn = (String) keys.next();
+            Element r = document.createElement("resource");
+            r.setAttribute("name", urn);
+            r.appendChild(document.createTextNode("\n"));
+            if (urn2local.containsKey(urn)) {
+                Element l = document.createElement("file");
+                l.setAttribute("location", (String) urn2local.get(urn));
+                r.appendChild(l);
                 r.appendChild(document.createTextNode("\n"));
-                if (urn2local.containsKey(urn)) {
-                    Element l = document.createElement("file");
-                    l.setAttribute("location", (String) urn2local.get(urn));
+            }
+            if (urn2urls.containsKey(urn)) {
+                Vector v = (Vector) urn2urls.get(urn);
+                for (int i = 0; i < v.size(); i++) {
+                    Element l = document.createElement("url");
+                    l.setAttribute("location", (String) v.get(i));
                     r.appendChild(l);
                     r.appendChild(document.createTextNode("\n"));
                 }
-                if (urn2urls.containsKey(urn)) {
-                    Vector v = (Vector) urn2urls.get(urn);
-                    for (int i = 0; i < v.size(); i++) {
-                        Element l = document.createElement("url");
-                        l.setAttribute("location", (String) v.get(i));
-                        r.appendChild(l);
-                        r.appendChild(document.createTextNode("\n"));
-                    }
+            }
+            if (urn2resolvers.containsKey(urn)) {
+                Vector v = (Vector) urn2resolvers.get(urn);
+                for (int i = 0; i < v.size(); i++) {
+                    Element l = document.createElement("url");
+                    l.setAttribute("location", (String) v.get(i));
+                    r.appendChild(l);
+                    r.appendChild(document.createTextNode("\n"));
                 }
-                if (urn2resolvers.containsKey(urn)) {
-                    Vector v = (Vector) urn2resolvers.get(urn);
-                    for (int i = 0; i < v.size(); i++) {
-                        Element l = document.createElement("url");
-                        l.setAttribute("location", (String) v.get(i));
-                        r.appendChild(l);
-                        r.appendChild(document.createTextNode("\n"));
-                    }
-                }
-                resources.appendChild(document.createTextNode("\n"));
-                resources.appendChild(r);
             }
             resources.appendChild(document.createTextNode("\n"));
-            root.appendChild(resources);
-            root.appendChild(document.createTextNode("\n"));
+            resources.appendChild(r);
+        }
+        resources.appendChild(document.createTextNode("\n"));
+        root.appendChild(resources);
+        root.appendChild(document.createTextNode("\n"));
 
-            serializer.transform(new DOMSource(document), streamResult);
-            pw.close();
-        } catch (FileNotFoundException fnfe) {
-            cerr("Catalog file does not seem to exist.");
-        } catch (TransformerException te) {
-            cerr("Unable to save catalog data.");
+
+       // Save resources
+        try {
+            // XXX vpapad: yeah, I know, referencing apache directly sucks
+            XMLSerializer serializer = new XMLSerializer (new FileWriter(filename), null);
+            serializer.asDOMSerializer();
+            serializer.serialize(document);
+        } catch (FileNotFoundException e) {
+            cerr("Catalog file does not exist.");
+        } catch (IOException e) {
+            cerr("Problems encountered while saving catalog file" + e.getMessage());
         }
     }
 
