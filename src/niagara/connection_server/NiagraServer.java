@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.20 2003/01/13 05:05:43 tufte Exp $
+  $Id: NiagraServer.java,v 1.21 2003/02/22 08:06:08 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -331,8 +331,8 @@ public class NiagraServer {
                     }
                     i++; // Cover for argument
                     valid_args = true;
-                } else if (args[i].equals("-saxdom")) {
-                    useSAXDOM = true;
+                } else if (args[i].equals("-no-saxdom")) {
+                    useSAXDOM = false;
                     valid_args = true;
                 } else if (args[i].equals("-saxdom-pages")) {
                     saxdom_pages = parseIntArgument(args, i);

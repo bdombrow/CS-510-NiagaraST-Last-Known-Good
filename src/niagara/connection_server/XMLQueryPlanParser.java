@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.36 2003/02/20 05:44:37 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.37 2003/02/22 08:06:08 tufte Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -952,7 +952,6 @@ public class XMLQueryPlanParser {
 
         int numGenCalls = Integer.parseInt(e.getAttribute("num_gen_calls"));
         int numTLElts = Integer.parseInt(e.getAttribute("num_tl_elts"));
-        boolean streaming = e.getAttribute("streaming").equalsIgnoreCase("yes");
         boolean prettyPrint =
             e.getAttribute("prettyprint").equalsIgnoreCase("yes");
         String trace = e.getAttribute("trace");
@@ -970,6 +969,8 @@ public class XMLQueryPlanParser {
             throw new InvalidPlanException(
                 "Invalid type - typeStr: " + dataTypeStr);
 
+	boolean useStreamFormat = NiagraServer.usingSAXDOM();
+
         FirehoseSpec fhSpec =
             new FirehoseSpec(
                 port,
@@ -980,7 +981,7 @@ public class XMLQueryPlanParser {
                 numGenCalls,
                 numTLElts,
                 rate,
-                streaming,
+		useStreamFormat,
                 prettyPrint,
                 trace);
 
@@ -995,9 +996,8 @@ public class XMLQueryPlanParser {
 
     void handleFileScan(Element e) throws InvalidPlanException {
         String id = e.getAttribute("id");
-        boolean isStreaming = e.getAttribute("streaming").equals("yes");
         FileScanSpec fsSpec =
-            new FileScanSpec(e.getAttribute("fileName"), isStreaming);
+            new FileScanSpec(e.getAttribute("fileName"));
 
         FileScanOp op = new FileScanOp();
         op.setFileScan(fsSpec, new Variable(id));
