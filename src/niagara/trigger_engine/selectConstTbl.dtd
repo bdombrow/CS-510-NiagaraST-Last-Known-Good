@@ -1,8 +1,0 @@
-<?xml encoding="US-ASCII"?>
-
-<!-- Revision: 24 1.2 docs/data/personal.dtd, xml4jdocs, xml4j-jtcsv, xml4j_1_1_14  -->
-
-<!ELEMENT pairs (pair)*>
-<!ELEMENT pair (value,cid)>
-<!ELEMENT value (#PCDATA)>
-<!ELEMENT cid (#PCDATA)>
