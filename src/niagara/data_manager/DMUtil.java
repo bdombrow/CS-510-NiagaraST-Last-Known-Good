@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DMUtil.java,v 1.3 2003/03/08 01:01:53 vpapad Exp $
+  $Id: DMUtil.java,v 1.4 2003/09/22 01:52:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,9 +27,6 @@
 
 
 package niagara.data_manager;
-
-import java.util.*;
-import org.w3c.dom.*;
 
 /**
  *  DMUtil provides utility functions for the data manager
@@ -94,7 +91,6 @@ public class DMUtil
 
     }
     
-
     /**
      *  map a URL(http:// or file:/) to local file name
      *  (the local file name might contain a directory 
@@ -134,58 +130,5 @@ public class DMUtil
         
         return tmp;
 
-    }
-    
-
-
-
-    /**
-     * an utility function to parse the DTD info passed from YPServer 
-     *
-     * @param dtdInfoDoc the xml file that contains the result from YP
-     * @return a Hashtable mapping DTDId to DTDInfo node
-     * @see DTDInfo
-     */
-
-    public static DTDInfo parseDTDInfo(Document dtdInfoDoc) {
-	if(dtdInfoDoc == null)
-	    return null;
-	
-	NodeList urls = dtdInfoDoc.getElementsByTagName(ITEM);
-	int numUrls = urls.getLength();
-
-	// Init a new DTDInfo obj
-	//
-	DTDInfo curDTDInfo = new DTDInfo();
-	    
-	    
-	// Get all urls and stats associated with this dtd
-	//
-	for(int j = 0; j < numUrls; j++){
-	    String nodevalue = urls.item(j).getFirstChild().getNodeValue();
-
-	    curDTDInfo.addURL(nodevalue);
-	}
-	    
-	return curDTDInfo;
-    }
-
-
-    public static Vector parseDTDList(Document dtdListDoc) {
-	if(dtdListDoc == null)
-	    return null;
-	
-	NodeList dtds = dtdListDoc.getElementsByTagName(ITEM);
-	int numDTDs = dtds.getLength();
-
-	Vector v = new Vector();
-	    
-	for(int j = 0; j < numDTDs; j++){
-	    String nodevalue = dtds.item(j).getFirstChild().getNodeValue();
-
-	    v.addElement(nodevalue);
-	}
-	    
-	return v;
     }
 }

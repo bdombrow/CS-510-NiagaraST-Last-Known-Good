@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DataManager.java,v 1.10 2003/07/09 19:12:05 tufte Exp $
+  $Id: DataManager.java,v 1.11 2003/09/22 01:52:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,7 +48,6 @@ public class DataManager {
     private static String dtd_persist = ".dm_dtdcache";
     private static String xml_persist = ".dm_xmlcache";
     public CacheManager cacheM;
-    private DTDDirectory dtdDir;
     private String tmpDir;
 
     /* Table storing accumulate files */
@@ -69,41 +68,12 @@ public class DataManager {
 	    System.out.println("the previous incarnation of "+
                                "dtd directory is persisted at: \n"
                                +tmpDir+dtd_persist);
-            
-            dtdDir = (DTDDirectory)CUtil.persistent2memory(tmpDir+dtd_persist);
-	    /* uugh - this is not nice error handling, but it is an
-	    * improvement
-	    */
-	    if(dtdDir == null) {
-               System.err.println("WARNING: Error importing dtdDir");
-	    }
-        }
-        else {
-            dtdDir = new DTDDirectory(path);
         }
 
         // Feng's Code all in CacheManager.
         cacheM = new CacheManager(tmpDir);
     }
     
-    /**
-     *  Get a DTD from the DTDdir and return the root of parsed DTD
-     *  since DTD is assumed to be cached, getDTD is simply get the file
-     *
-     *  @param dtdURL the URL of the dtd
-     *  @return a DTD object which is the root of parsed DTD
-     *  @exception DMClosedException this function called while 
-     *                             data manager is being closed 
-     */
-    public synchronized DocumentType getDTD(String dtdURL) 
-    throws ParseException, IOException, MalformedURLException {
-	DocumentType dtd = null;
-        dtd = dtdDir.getDTD(dtdURL);
-	return dtd;
-    }
-
-    
-
     /**
      *  Generate a SE request from a vector of predicates.
      *  Send this request to the SE using YPClient.  The 
@@ -136,23 +106,12 @@ public class DataManager {
 	if (dtdPersistFile.exists()) {
             dtdPersistFile.delete();
         }
-        CUtil.memory2persistent(dtdDir,tmpDir+dtd_persist);
         
         // Next need to shutdown XML Cache. 
         cacheM.shutdown();
         return true;        
     }
 
-    public synchronized String toString() 
-    {
-        String tmpStr = 
-            "+-------------------------------+\n"+
-            "|        Data Manager Info      |\n"+
-            "+-------------------------------+\n"+
-            dtdDir.toString() + "\n\n" ;
-        return tmpStr;
-    }   
-    
     // Backward compatibility issue
     public void enableCache() {
         return;
