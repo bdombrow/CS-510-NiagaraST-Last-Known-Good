@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: op.java,v 1.8 2002/06/28 01:28:32 vpapad Exp $
+  $Id: op.java,v 1.9 2002/09/20 23:07:10 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -37,9 +37,9 @@ import java.util.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.connection_server.NiagraServer;
 
-import niagara.optimizer.colombia.LogicalOperator;
+import niagara.optimizer.colombia.LogicalOp;
 
-public abstract class op extends LogicalOperator {
+public abstract class op extends LogicalOp {
     // This is the index of the selected algorithm
     int selectedAlgorithmIndex;
 
