@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: startTag.java,v 1.4 2002/12/10 00:53:29 vpapad Exp $
+  $Id: startTag.java,v 1.5 2003/02/21 07:03:08 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -133,8 +133,8 @@ public class startTag {
         Attrs reqAttrs = new Attrs();
         if (sdata.type == dataType.VAR)
             reqAttrs.add(new Variable((String) sdata.getValue()));
-        if (attrList.size() != 0)
-            throw new PEException("Cannot handle attributes yet");
+	for (int i = 0; i < attrList.size(); i++)
+	    ((attr) attrList.get(i)).addRequiredVariables(reqAttrs);
         if (skolemId != null)
             throw new PEException("Cannot handle skolems yet");
         return reqAttrs;

@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: attr.java,v 1.4 2003/02/20 05:43:15 vpapad Exp $
+  $Id: attr.java,v 1.5 2003/02/21 07:03:08 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,6 +31,8 @@
  */
 package niagara.xmlql_parser.syntax_tree;
 
+import niagara.optimizer.colombia.Attrs;
+import niagara.logical.Variable;
 import niagara.utils.CUtil;
 
 
@@ -106,4 +107,12 @@ public class attr {
 	value.dump(i);
     }
 
-};
+    public void addRequiredVariables(Attrs al) {
+	if(value.getType() == dataType.VAR) {
+		String var = (String) value.getValue();
+		if (var.charAt(0) == '$')
+		    var = var.substring(1);
+		al.merge(new Attrs(new Variable(var)));
+	}	
+    }
+}
