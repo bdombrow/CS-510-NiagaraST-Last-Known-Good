@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.25 2003/08/01 17:28:15 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.26 2003/09/22 00:20:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,7 +39,7 @@ import niagara.data_manager.DataManager;
  * resultTranmitting thread 
  */
 
-public class ResultTransmitter implements Runnable {
+public class ResultTransmitter implements Schedulable {
     // The queryInfo of the query to which this transmitter belongs
     private ServerQueryInfo queryInfo;
     private RequestMessage request;
@@ -49,9 +49,6 @@ public class ResultTransmitter implements Runnable {
 
     // The results that are yet to be sent
     private int totalResults;
-
-    // The thread this guy runs on 
-    private Thread transmitThread;
 
     // for suspending and resuming the thread
     private boolean suspended = false;
@@ -93,9 +90,6 @@ public class ResultTransmitter implements Runnable {
         this.queryInfo = queryInfo;
         this.request = request;
         totalResults = 0;
-        transmitThread =
-            new Thread(this, "ResultTransmitter:" + queryInfo.getQueryId());
-        transmitThread.start();
     }
 
     public void setPrettyprint(boolean prettyprint) {
@@ -111,15 +105,15 @@ public class ResultTransmitter implements Runnable {
             }
 
             if (queryInfo.isQEQuery()) {
-				handleQEQuery();
+                handleQEQuery();
             } else if (queryInfo.isDTDQuery()) {
                 handleDTDQuery();
             } else if (queryInfo.isAccumFileQuery()) {
-            	handleQEQuery();
+                handleQEQuery();
                 //handleAccumQuery();
-        	} else {
-        		assert false : "Invalid query type";
-        		return;
+            } else {
+                assert false : "Invalid query type";
+                return;
             }
 
             if (niagara.connection_server.NiagraServer.TIME_OPERATORS) {
@@ -269,13 +263,12 @@ public class ResultTransmitter implements Runnable {
      */
     private void handleAccumQuery()
         throws ShutdownException, InterruptedException, IOException {
-        
+
         assert false : "KT: should not be using this function for now";
-       
-		QueryResult queryResult = queryInfo.getQueryResult();
-		response = new ResponseMessage(request,
-									ResponseMessage.QUERY_RESULT);
-										
+
+        QueryResult queryResult = queryInfo.getQueryResult();
+        response = new ResponseMessage(request, ResponseMessage.QUERY_RESULT);
+
         QueryResult.ResultObject resultObject =
             queryResult.getNewResultObject();
 
@@ -314,13 +307,13 @@ public class ResultTransmitter implements Runnable {
                         resultObject.result);
 
                     /* send final results to client */
-                    
+
                     if (!QUIET) {
                         response.appendData(
                             getResultData(resultObject, prettyprint));
-			sendResults();
+                        sendResults();
                     }
-               }
+                }
             }
         }
     }
@@ -441,5 +434,9 @@ public class ResultTransmitter implements Runnable {
         }
         response.clearData();
         resultsSoFar = 0;
+    }
+
+    public String getName() {
+        return "ResultTransmitter:" + queryInfo.getQueryId();
     }
 }

@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.45 2003/09/16 05:05:04 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.46 2003/09/22 00:20:29 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -19,18 +19,19 @@ import niagara.optimizer.colombia.*;
 
 public class XMLQueryPlanParser {
     // Maps IDs to elements
-    Hashtable ids2els;
+    private Hashtable ids2els;
 
     // Maps IDs to logical expressions
-    Hashtable ids2plans;
+    private Hashtable ids2plans;
 
     // Maps IDs to logical properties
-    Hashtable ids2logprops;
+    private Hashtable ids2logprops;
 
     // Roots of remote plans
-    ArrayList remotePlans;
+    private ArrayList remotePlans;
 
-    Catalog catalog;
+    // The server catalog
+    private Catalog catalog;
 
     public void initialize() {
         ids2els = new Hashtable();

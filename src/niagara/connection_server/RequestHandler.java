@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.29 2003/09/16 05:05:04 vpapad Exp $
+  $Id: RequestHandler.java,v 1.30 2003/09/22 00:20:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,8 +28,6 @@ package niagara.connection_server;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Enumeration;
@@ -50,7 +48,7 @@ import niagara.utils.*;
 /**There is one request handler per client and receives all the requests from that client
    Then that request is further dispatched to the appropriate module and results sent back
 */
-		
+
 public class RequestHandler {
 
     // Hashtable of queries
@@ -65,7 +63,7 @@ public class RequestHandler {
     NiagraServer server;
 
     // Every query is given a server query id. This is the counter for giving out that service id
-   	private int lastQueryId = 0;
+    private int lastQueryId = 0;
 
     private boolean dtd_hack;
     // True if we want to add HTML entities to the result   
@@ -122,11 +120,11 @@ public class RequestHandler {
             IOException {
         Plan plan, optimizedPlan;
 
-		if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
-	    	if(cpuTimer == null)
-			cpuTimer = new CPUTimer();
-	    	cpuTimer.start();
-		}
+        if (niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+            if (cpuTimer == null)
+                cpuTimer = new CPUTimer();
+            cpuTimer.start();
+        }
 
         // Handle the request according to requestType
         switch (request.getIntRequestType()) {
@@ -141,13 +139,12 @@ public class RequestHandler {
                 } catch (Exception e) {
                     System.err.println(
                         "XXX vpapad: exception occured during optimization");
-				    e.printStackTrace();
+                    e.printStackTrace();
                     assert false;
                 }
                 xqpp.clear();
+                assignQueryId(request);
                 processQPQuery(optimizedPlan, request);
-                //send the query ID out
-                sendQueryId(request);
                 break;
 
             case RequestMessage.MQP_QUERY :
@@ -160,22 +157,21 @@ public class RequestHandler {
                 // assign a new query id to this request
                 int qid = getNextConnServerQueryId();
 
-                // now give the query to the query engine
-                QueryResult qr = server.qe.executeQuery(request.requestData);
-                request.serverID = qid;
-
                 // create and populate the query info
                 ServerQueryInfo queryInfo =
                     new ServerQueryInfo(qid, ServerQueryInfo.QueryEngine);
-                queryInfo.setQueryResult(qr);
-                queryList.put(qid, queryInfo);
 
                 // start the transmitter thread for sending results back
-                queryInfo.setTransmitter(
-                    new ResultTransmitter(this, queryInfo, request));
+                ResultTransmitter transmitter =
+                    new ResultTransmitter(this, queryInfo, request);
+                queryInfo.setTransmitter(transmitter);
 
-                //send the query ID out
+                // now give the query to the query engine
+                server.qe.executeQuery(transmitter, queryInfo, request.requestData);
+                request.serverID = qid;
                 sendQueryId(request);
+
+                queryList.put(qid, queryInfo);
                 break;
 
             case RequestMessage.EXECUTE_SE_QUERY :
@@ -193,12 +189,10 @@ public class RequestHandler {
                 break;
 
             case RequestMessage.SUSPEND_QUERY :
-                throw new InvalidPlanException(
-					"Query suspension no longer allowed");
+                throw new InvalidPlanException("Query suspension no longer allowed");
 
             case RequestMessage.RESUME_QUERY :
-                 throw new InvalidPlanException(
-					"Query suspension no longer allowed");
+                throw new InvalidPlanException("Query suspension no longer allowed");
 
                 //-------------------------------------
                 //   KILL_QUERY request
@@ -220,7 +214,7 @@ public class RequestHandler {
 
                 // Respond to invalid queryID
                 if (queryInfo == null) {
-                    if(queryList.queryWasRun(request.serverID)) {
+                    if (queryList.queryWasRun(request.serverID)) {
                         break;
                     } else {
                         assert false : "Bad query id " + request.serverID;
@@ -262,20 +256,24 @@ public class RequestHandler {
                 sendResponse(doneMesg);
                 break;
 
-            case RequestMessage.DUMPDATA:
-		if(NiagraServer.RUNNING_NIPROF) {
-		    System.out.println("Requesting profile data dump");
-		    JProf.requestDataDump();
-		    ResponseMessage doneDumpMesg =
-			new ResponseMessage(request, ResponseMessage.END_RESULT);
-		    sendResponse(doneDumpMesg);
-		} else {
-		    System.out.println("Profiler not running - unable to dump data");
-		    ResponseMessage errMesg =
-			new ResponseMessage(request, ResponseMessage.ERROR);
-		    errMesg.setData("Profiler not running - unable to dump data");
-		    sendResponse(errMesg);
-		}
+            case RequestMessage.DUMPDATA :
+                if (NiagraServer.RUNNING_NIPROF) {
+                    System.out.println("Requesting profile data dump");
+                    JProf.requestDataDump();
+                    ResponseMessage doneDumpMesg =
+                        new ResponseMessage(
+                            request,
+                            ResponseMessage.END_RESULT);
+                    sendResponse(doneDumpMesg);
+                } else {
+                    System.out.println(
+                        "Profiler not running - unable to dump data");
+                    ResponseMessage errMesg =
+                        new ResponseMessage(request, ResponseMessage.ERROR);
+                    errMesg.setData(
+                        "Profiler not running - unable to dump data");
+                    sendResponse(errMesg);
+                }
                 break;
 
             case RequestMessage.SHUTDOWN :
@@ -327,10 +325,9 @@ public class RequestHandler {
                             optimizedPlan.planToXML(),
                             new Attrs()));
 
+                assignQueryId(request);
                 processQPQuery(optimizedPlan, request);
 
-                //send the query ID out
-                sendQueryId(request);
                 break;
 
                 //-------------------------------------
@@ -342,11 +339,16 @@ public class RequestHandler {
                         + request.getIntRequestType());
         }
 
-		if(niagara.connection_server.NiagraServer.TIME_OPERATORS) {
-	    	cpuTimer.stop();
-	    	cpuTimer.print("HandleRequest (" + request.requestType +")");
-		}
+        if (niagara.connection_server.NiagraServer.TIME_OPERATORS) {
+            cpuTimer.stop();
+            cpuTimer.print("HandleRequest (" + request.requestType + ")");
+        }
 
+    }
+
+    private void assignQueryId(RequestMessage request) throws IOException {
+        request.serverID = getNextConnServerQueryId();
+        sendQueryId(request);
     }
 
     private void processQPQuery(Plan plan, RequestMessage request)
@@ -371,19 +373,17 @@ public class RequestHandler {
         //                handleDistributedPlans(xqpp.getRemotePlans());
         //            } else {
 
-        // assign a new query id to this request
-        int qid = getNextConnServerQueryId();
+        int qid = request.serverID;
 
-        request.serverID = qid;
-
-	boolean isSynchronous =
-            (request.getIntRequestType() == RequestMessage.SYNCHRONOUS_QP_QUERY);
+        boolean isSynchronous =
+            (request.getIntRequestType()
+                == RequestMessage.SYNCHRONOUS_QP_QUERY);
 
         /* create and populate the query info
          */
         ServerQueryInfo serverQueryInfo;
         Op top = plan.getOperator();
-	    
+
         if (top instanceof PhysicalAccumulateOperator) {
             PhysicalAccumulateOperator pao = (PhysicalAccumulateOperator) top;
             serverQueryInfo =
@@ -399,10 +399,10 @@ public class RequestHandler {
                     ServerQueryInfo.QueryEngine,
                     isSynchronous);
         }
-		boolean stpp = true;
+        boolean stpp = true;
 
-		if (top instanceof StreamThread) {
-	    	stpp = ((StreamThread)top).prettyprint();
+        if (top instanceof StreamThread) {
+            stpp = ((StreamThread) top).prettyprint();
         }
 
         QueryResult qr = server.qe.getNewQueryResult();
@@ -410,16 +410,16 @@ public class RequestHandler {
         queryList.put(qid, serverQueryInfo);
 
         // start the transmitter thread for sending results back
-        serverQueryInfo.setTransmitter(
-            new ResultTransmitter(this, serverQueryInfo, request));
-		if (top instanceof StreamThread && stpp) {
-	    	serverQueryInfo.getTransmitter().setPrettyprint(false);	
+        ResultTransmitter transmitter =
+            new ResultTransmitter(this, serverQueryInfo, request);
+        serverQueryInfo.setTransmitter(transmitter);
+        if (top instanceof StreamThread && stpp) {
+            transmitter.setPrettyprint(false);
         }
-       
 
         // KT - DO THIS LAST - otherwise we get unexpectedly null
         // transmitter!!!
-        server.qe.execOptimizedQuery(plan, qr);
+        server.qe.execOptimizedQuery(transmitter, plan, qr);
     }
 
     /**Method used by everyone to send responses to the client
@@ -447,17 +447,15 @@ public class RequestHandler {
         ServerQueryInfo queryInfo = queryList.get(queryID);
 
         // Respond to an invalid queryID
-        if (queryInfo == null) {
-	    assert false : "Bad query id " + queryID;
-        }
+        assert queryInfo != null : "Bad query id " + queryID;
 
         // Process Kill message
         // Remove the query from the active queries list
         queryList.remove(queryID);
 
         // destroy the transmitter thread
-	assert queryInfo.getTransmitter() != null :
-	   "KT way bad transmitter is null";
+        assert queryInfo.getTransmitter()
+            != null : "KT way bad transmitter is null";
         queryInfo.getTransmitter().destroy();
 
         // Put a KILL control message down stream
@@ -524,7 +522,7 @@ public class RequestHandler {
     /**Get a new query id
        @return new query id
     */
-    public synchronized int getNextConnServerQueryId() {
+    private synchronized int getNextConnServerQueryId() {
         return (lastQueryId++);
     }
 
@@ -549,14 +547,13 @@ public class RequestHandler {
         }
 
         public ServerQueryInfo remove(int qid) {
-           // System.out.println(
-           // 	       "KT: Query with ServerQueryId "
-           //	       + qid
-           //       + " removed from RequestHandler.QueryList "); 
+            // System.out.println(
+            // 	       "KT: Query with ServerQueryId "
+            //	       + qid
+            //       + " removed from RequestHandler.QueryList "); 
             //return (ServerQueryInfo) queryList.remove(new Integer(qid));
             Integer temp = new Integer(qid);
-            ServerQueryInfo removed = 
-                (ServerQueryInfo)queryList.remove(temp);
+            ServerQueryInfo removed = (ServerQueryInfo) queryList.remove(temp);
             removedQueryList.add(temp);
             return removed;
         }

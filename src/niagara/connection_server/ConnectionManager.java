@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.8 2003/08/01 16:56:55 tufte Exp $
+  $Id: ConnectionManager.java,v 1.9 2003/09/22 00:20:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -61,7 +61,6 @@ public class ConnectionManager implements Runnable
      * dataManager and queryQueues
      */  
     public ConnectionManager(int queryEngineWellKnownPort,NiagraServer server) {
-
 		// Init our ref to the NiagraServer
 		this.server = server;
 	
@@ -80,8 +79,6 @@ public class ConnectionManager implements Runnable
 
 		// Call the query thread run method
 		thread.start();	
-
-		return;
     }
 
     public ConnectionManager(int queryEngineWellKnownPort,

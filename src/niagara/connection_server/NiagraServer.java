@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.28 2003/07/27 02:28:05 tufte Exp $
+  $Id: NiagraServer.java,v 1.29 2003/09/22 00:20:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -52,7 +52,7 @@ public class NiagraServer {
 
     // Defaults
     private static int DEFAULT_QUERY_THREADS = 3;
-    private static int DEFAULT_OPERATOR_THREADS = 20;
+    private static int DEFAULT_OPERATOR_THREADS = 30;
 
     // The port for client communication 
     private static int client_port = 9020;
@@ -89,8 +89,7 @@ public class NiagraServer {
                     new QueryEngine(
                         this,
                         NUM_QUERY_THREADS,
-                        NUM_OP_THREADS,
-                        true); // Connection Manager
+                        NUM_OP_THREADS); 
 
             // Create and start the connection manager
             connectionManager =
