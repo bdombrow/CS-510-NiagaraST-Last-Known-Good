@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.5 2001/07/17 06:37:48 vpapad Exp $
+  $Id: SimpleConnectionReader.java,v 1.6 2002/04/12 20:57:22 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -89,7 +89,7 @@ class SimpleConnectionReader extends AbstractConnectionReader
 		}
 		else {
 		    addResult(line);
-                    ((SimpleClient) ui).notifyNew(local_id);
+                    ui.notifyNew(local_id);
 		}
 		//System.out.println("XXX " + line);
 	    } while (line != null);
