@@ -145,7 +145,7 @@ public class TracingClient extends SimpleClient {
                     return;
                 fw.write(id);
                 fw.write(",");
-                fw.write(ts);
+                fw.write(String.valueOf(System.currentTimeMillis()));
                 fw.write("\n");
             } catch (IOException ioe) {
                 throw new RuntimeException("IOException " + ioe.getMessage());
