@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.12 2002/05/07 04:49:27 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.13 2002/09/24 23:15:52 ptucker Exp $
  *
  */
 
@@ -62,6 +62,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
             SAXParserFactory factory = SAXParserFactory.newInstance();
 	    factory.setFeature("http://xml.org/sax/features/string-interning",
 			       true);
+	    factory.setFeature("http://xml.org/sax/features/namespaces", true);
             parser = factory.newSAXParser();
         } 
         catch (FactoryConfigurationError e) {
@@ -182,9 +183,9 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
             open_nodes[0] = -1;            
         }
             
-
-        // XXX vpapad: not doing anything about namespaces yet
-	page.addEvent(doc, SAXEvent.START_ELEMENT, qName);
+	page.addEvent(doc, SAXEvent.START_ELEMENT, localName);
+	if (namespaceURI != null && namespaceURI.length() != 0)
+	    page.addEvent(doc, SAXEvent.NAMESPACE_URI, namespaceURI);
 
         int current = page.getLastIndex(); 
         int previous = open_nodes[depth];
