@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.19 2003/03/05 19:25:10 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.20 2003/03/08 00:57:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,6 @@
 
 package niagara.connection_server;
 
-import org.w3c.dom.*;
 import java.io.*;
 import niagara.query_engine.*;
 import java.net.*;
@@ -103,8 +102,6 @@ public class ResultTransmitter implements Runnable {
 	try {
 	    if (queryInfo.isSEQuery()) 
 		handleSEQuery();
-	    else if(queryInfo.isTriggerQuery())
-		handleTriggerQuery();
 	    else if(queryInfo.isQEQuery())
 		handleQEQuery();
 	    else if(queryInfo.isDTDQuery()) 
@@ -281,70 +278,6 @@ public class ResultTransmitter implements Runnable {
 	}
     }
     
-    
-    /** Handles Trigger Query.
-	Hands over the query to trigger manager and listens on the 
-		query result queue for a query result for each firing
-    */
-    private void handleTriggerQuery() 
-	throws ShutdownException, IOException {
-    /* KT - BROKE THIS BIG TIME
-	QueryResult queryResult = (QueryResult) queryInfo.queryResultQueue.get();
-	QueryResult.ResultObject resultObject = queryResult.getNewResultObject();
-
-	ResponseMessage response = 
-	    new ResponseMessage(request,
-				ResponseMessage.QUERY_RESULT);
-	
-	while (true) {	    
-	    //get the next result
-	    try {
-		queryResult.getNext(resultObject);
-	    }
-	    // If something goes wrong, kill this query and move on to the next query result
-	    catch (InterruptedException e) {
-		queryResult.kill();
-		queryResult = (QueryResult) queryInfo.queryResultQueue.get();
-		continue;
-	    }
-	    catch (QueryResult.ResultsAlreadyReturnedException e) {
-		queryResult.kill();
-		queryResult = (QueryResult) queryInfo.queryResultQueue.get();
-		continue;
-	    }
-	    
-	    // If this was the last stream element this query is done
-	    switch (resultObject.status) {
-	    case QueryResult.EndOfResult:
-				// send the end result response
-		response = 
-		    new ResponseMessage(request,
-					ResponseMessage.END_RESULT);
-		handler.sendResponse(response);
-		queryResult.kill();
-		queryResult = (QueryResult) queryInfo.queryResultQueue.get();
-		break;
-		
-	    case QueryResult.FinalQueryResult:
-	    case QueryResult.PartialQueryResult:
-				// add the result to responseData
-		totalResults--;
-		response.setData(getResultData(resultObject, prettyprint));
-		handler.sendResponse(response);
-		break;
-		
-	    case QueryResult.QueryError:
-		processError();
-		queryResult.kill();
-		queryResult = (QueryResult) queryInfo.queryResultQueue.get();
-		break;		
-	    }
-
-	}
-    */
-    }
-
-
     /** 
      * Function to "handle" an Accumulate Query.  This function
      * is run in this class's thread and basically sits on top
@@ -502,9 +435,6 @@ public class ResultTransmitter implements Runnable {
     /**Check whether the transmission should be suspended for any reason
      */
     synchronized private boolean checkSuspension() {
-	// triggers are never suspended (for now)
-	if (queryInfo.isTriggerQuery())
-	    return false;
 	if (suspended)
 	    return true;
 	if (totalResults <= 0)

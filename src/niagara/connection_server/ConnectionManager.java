@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.6 2002/10/31 04:20:30 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.7 2003/03/08 00:57:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -61,7 +61,7 @@ public class ConnectionManager implements Runnable
     private ServerSocket queryEngineSocket;
     
     /**
-     *server is passed because it is used for getting access to triggerManager and
+     *server is passed because it is used for getting access to 
      * dataManager and queryQueues
      */  
     public ConnectionManager(int queryEngineWellKnownPort,NiagraServer server)

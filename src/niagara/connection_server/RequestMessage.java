@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestMessage.java,v 1.6 2003/01/13 05:05:43 tufte Exp $
+  $Id: RequestMessage.java,v 1.7 2003/03/08 00:57:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,7 +39,6 @@ public class RequestMessage {
     // for "switch"ing purposes
     static final int EXECUTE_QE_QUERY = 0;
     static final int EXECUTE_SE_QUERY = 1;
-    static final int EXECUTE_TRIGGER_QUERY = 2;
     static final int KILL_QUERY =3;
     static final int SUSPEND_QUERY = 4;
     static final int RESUME_QUERY = 5;
@@ -82,7 +81,6 @@ public class RequestMessage {
 	switch (intType) {
 	case EXECUTE_QE_QUERY: this.requestType = "execute_qe_query";break;
 	case EXECUTE_SE_QUERY: this.requestType = "execute_se_query";break;
-	case EXECUTE_TRIGGER_QUERY:this.requestType = "execute_trigger_query";break;
 	case KILL_QUERY:this.requestType = "kill_query";break;
 	case SUSPEND_QUERY:this.requestType = "suspend_query";break;
 	case RESUME_QUERY:this.requestType = "resume_query";break;
@@ -103,8 +101,6 @@ public class RequestMessage {
 	    return EXECUTE_QE_QUERY;
 	if (requestType.equals("execute_se_query"))
 	    return EXECUTE_SE_QUERY;
-	if (requestType.equals("execute_trigger_query"))
-	    return EXECUTE_TRIGGER_QUERY;
 	if (requestType.equals("kill_query"))
 	    return KILL_QUERY;
 	if (requestType.equals("suspend_query"))

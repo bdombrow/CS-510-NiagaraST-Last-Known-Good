@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.23 2003/03/07 23:41:11 vpapad Exp $
+  $Id: NiagraServer.java,v 1.24 2003/03/08 00:57:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,7 +33,6 @@ import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.net.InetAddress;
 import niagara.search_engine.server.SEClient;
-import niagara.trigger_engine.TriggerManager;
 import niagara.query_engine.QueryEngine;
 import niagara.ndom.DOMFactory;
 import niagara.utils.*;
@@ -44,7 +43,7 @@ import java.net.InetAddress;
 
 
 /**The main Niagra Server which receives all the client requests
-   It has an instance of query engine and a trigger manager and a SEClient for 
+   It has an instance of query engine and a SEClient for 
    contacting the SE Server
 */
 public class NiagraServer {
@@ -76,8 +75,6 @@ public class NiagraServer {
 
     // For executing QE queries
     QueryEngine qe;
-    // For executing trigger manager queries
-    TriggerManager triggerManager;
     // for managing all the client connections
     ConnectionManager connectionManager;
     // Client for contacting the search engine
@@ -110,10 +107,6 @@ public class NiagraServer {
                         SEPORT,
                         true, // Connection Manager
 			connectToSE); // Search Engine
-
-            // Create the trigger manager
-            triggerManager = new TriggerManager(qe);
-            new Thread(triggerManager, "TriggerManager").start();
 
             // Create and start the connection manager
             connectionManager =

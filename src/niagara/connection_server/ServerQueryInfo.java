@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ServerQueryInfo.java,v 1.3 2002/09/14 04:56:47 vpapad Exp $
+  $Id: ServerQueryInfo.java,v 1.4 2003/03/08 00:57:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,7 +38,6 @@ public class ServerQueryInfo {
     // constants for the variable queryType
     final static int SearchEngine = 0;
     final static int QueryEngine = 1;
-    final static int TriggerEngine = 2;
     final static int GetDTD = 3;
     final static int AccumFile = 4;
 
@@ -52,8 +51,6 @@ public class ServerQueryInfo {
     // (Implies no result padding, and closing of connection at the end)
     private boolean synchronous;
     
-    // trigger query related data
-    String triggerName;
     SynchronizedQueue queryResultQueue;
 
     // se query related data
@@ -72,11 +69,6 @@ public class ServerQueryInfo {
 	this.queryId = queryId;
 	this.queryType = queryType;
 	
-	// Initialize the queue of query result objects
-	// That exist between the server and Trigger Engine
-	if (isTriggerQuery())
-	    queryResultQueue = new SynchronizedQueue(100);
-
 	searchEngineQuery = "";
     }
 
@@ -85,10 +77,6 @@ public class ServerQueryInfo {
         this.synchronous = synchronous;
     }
     
-    boolean isTriggerQuery() {
-	return queryType == TriggerEngine;
-    }
-
     boolean isSEQuery() {
 	return queryType == SearchEngine;
     }

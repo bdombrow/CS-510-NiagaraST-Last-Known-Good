@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestParser.java,v 1.9 2003/03/05 19:25:10 tufte Exp $
+  $Id: RequestParser.java,v 1.10 2003/03/08 00:57:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,7 +38,6 @@ import org.xml.sax.helpers.*;
 import com.microstar.xml.SAXDriver;
 
 import niagara.utils.*;
-import niagara.trigger_engine.TRIGException;
 import niagara.query_engine.QueryResult;
 
 /** This class is responsible for creating a SAX Parser for parsing incoming
@@ -157,10 +156,6 @@ public class RequestParser extends HandlerBase implements Runnable {
 		error = true;
 		err_type = ResponseMessage.EXECUTION_ERROR;
 		message = "System was shutdown during query";
-	    } catch (TRIGException e) {
-		error = true;
-		err_type = ResponseMessage.ERROR;
-		message = e.getMessage();
 	    } catch (IOException e) {
 		error = true;
 		err_type = ResponseMessage.ERROR;

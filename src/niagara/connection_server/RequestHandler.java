@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.21 2003/03/05 19:25:10 tufte Exp $
+  $Id: RequestHandler.java,v 1.22 2003/03/08 00:57:05 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,7 +36,6 @@ import niagara.optimizer.TracingOptimizer;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Op;
 import niagara.query_engine.*;
-import niagara.trigger_engine.*;
 import niagara.xmlql_parser.op_tree.logNode;
 import niagara.data_manager.ConstantOpThread;
 import niagara.data_manager.DataManager;
@@ -133,7 +132,6 @@ public class RequestHandler {
             InvalidPlanException,
             QueryResult.AlreadyReturningPartialException,
             ShutdownException,
-            TRIGException,
             IOException {
         Plan plan, optimizedPlan;
         // Handle the request according to requestType
@@ -184,36 +182,6 @@ public class RequestHandler {
 
                 //send the query ID out
                 sendQueryId(request);
-                break;
-
-            case RequestMessage.EXECUTE_TRIGGER_QUERY :
-                // Get the next qid
-                qid = getNextConnServerQueryId();
-                request.serverID = qid;
-                queryInfo =
-                    new ServerQueryInfo(qid, ServerQueryInfo.TriggerEngine);
-
-                // now enqueue the query to the query engine
-                queryInfo.triggerName =
-                    server.triggerManager.createTrigger(
-                        request.requestData,
-                        queryInfo.queryResultQueue);
-
-                // if some error happened
-                if (queryInfo.triggerName == null) {
-                    throw new TRIGException("The trigger could not be installed");
-                }
-
-                // start the transmitter thread for sending results back		    
-                queryInfo.transmitter =
-                    new ResultTransmitter(this, queryInfo, request);
-
-                queryList.put(qid, queryInfo);
-
-                System.out.println("Trigger name is " + queryInfo.triggerName);
-                //send the query ID out
-                sendQueryId(request);
-
                 break;
 
             case RequestMessage.EXECUTE_SE_QUERY :
@@ -517,10 +485,7 @@ public class RequestHandler {
         // destroy the transmitter thread
         queryInfo.transmitter.destroy();
 
-        // if it is a trigger then contact trigger manager
-        if (queryInfo.isTriggerQuery()) {
-            server.triggerManager.deleteTrigger(queryInfo.triggerName);
-        } else if (!queryInfo.isSEQuery())
+        if (!queryInfo.isSEQuery())
             // Put a KILL control message down stream
             queryInfo.queryResult.kill();
 
@@ -544,7 +509,7 @@ public class RequestHandler {
     }
 
     /**Gracefully shutdow the cunnection to this client
-       cleans up all the outstanding queryies and triggers
+       cleans up all the outstanding queryies 
     */
     public void closeConnection() {
         // first of all,kill all the queries
