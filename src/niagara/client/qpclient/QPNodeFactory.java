@@ -25,15 +25,12 @@ public class QPNodeFactory {
 	names.put("select", Select.class);
 	names.put("join", Join.class);
 	names.put("avg", Avg.class);
-	names.put("sum", Sum.class);
 	names.put("count", Count.class);
 	names.put("dtdscan", DtdScan.class);
 	names.put("construct", Construct.class);
 	names.put("firehosescan", FirehoseScan.class);
 	names.put("expression", Expression.class);
-	names.put("sort", Sort.class);
 	names.put("dup", Dup.class);
-	names.put("union", Union.class);
 	names.put("accumulate", Accumulate.class);
     }
 
