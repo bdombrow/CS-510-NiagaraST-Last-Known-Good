@@ -11,7 +11,8 @@
           y CDATA #IMPLIED">
 
 <!ELEMENT plan     (scan | select | join | avg | construct | 
-                    dtdscan | constant | resource | firehosescan | accumulate | 
+                    dtdscan | streamscan | constant | resource | 
+		    firehosescan | accumulate | 
                     expression | send | display | topn |
 		    sort | dup | union)+>
 
@@ -187,6 +188,17 @@
 	  type	   (gen | file) "gen"
 	  desc     CDATA        #REQUIRED
 	  iters    CDATA        #REQUIRED
+	  doccount CDATA       "1"
+	  %PositionAttributes;>
+
+<!ELEMENT streamscan  EMPTY>
+<!ATTLIST streamscan 
+          id       ID           #REQUIRED
+          type     (file | firehose) "file"
+	  streaming (yes | no) "yes"
+	  host	   CDATA	#IMPLIED
+ 	  port	   CDATA	#IMPLIED
+          fileName CDATA        #IMPLIED
 	  %PositionAttributes;>
 
 
