@@ -1,4 +1,4 @@
-/* $Id: PhysicalIncrementalGroup.java,v 1.1 2002/09/21 10:14:03 vpapad Exp $ */
+/* $Id: PhysicalIncrementalGroup.java,v 1.2 2002/10/24 03:17:09 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import niagara.logical.IncrementalGroup;
+import niagara.optimizer.colombia.LogicalOp;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -36,22 +37,11 @@ public abstract class PhysicalIncrementalGroup extends PhysicalOperator {
 
     protected Document doc;
 
-// XXX vpapad: commenting out code is a horrible sin!
-//    public PhysicalIncrementalGroup() {
-//        setBlockingSourceStreams(blockingSourceStreams);
-//    }
-
-    public PhysicalIncrementalGroup(
-        op logicalOperator,
-        SourceTupleStream[] sourceStreams,
-        SinkTupleStream[] sinkStreams,
-        Integer responsiveness) {
-        // Call the constructor of the super class
-        super(sourceStreams, sinkStreams, blockingSourceStreams, responsiveness);
-	initFrom(logicalOperator);
+    public PhysicalIncrementalGroup() {
+        setBlockingSourceStreams(blockingSourceStreams);
     }
 
-    public void initFrom(op logicalOperator) {
+    public void initFrom(LogicalOp logicalOperator) {
         // Typecast to a group logical operator
         logicalGroupOperator = (IncrementalGroup) logicalOperator;
     }
