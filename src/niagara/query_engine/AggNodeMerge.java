@@ -70,7 +70,7 @@ class AggNodeMerge extends NodeMerge {
 		OpExecException("Invalid Method Invocation - Illegal Access - on " + aggMethod.getName() + "  " + e1.getMessage());
 	} catch (InvocationTargetException e2) {
 	    throw new 
-		OpExecException("Invalid Method Invocation - Invocation Target - on" + aggMethod.getName() + "  " + e2.getMessage());
+		OpExecException("Invalid Method Invocation - Invocation Target - on " + aggMethod.getName() + "  " + e2.getMessage());
 	}
     }
 

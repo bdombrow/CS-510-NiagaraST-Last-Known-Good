@@ -3,6 +3,9 @@ package niagara.query_engine;
 import java.util.Vector;
 import org.w3c.dom.*;
 import com.ibm.xml.parser.*;
+import com.ibm.xml.parsers.*;
+import org.xml.sax.*;
+import java.io.*;
 
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
@@ -22,7 +25,7 @@ import niagara.data_manager.*;
 
 public class PhysicalAccumulateOperator extends PhysicalOperator {
     
-    /*
+   /*
      * Data members of the PhysicalAccumulateOperator Class
      */
     
@@ -45,6 +48,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     private boolean recdData;
 
+    private int count;
     /*
      * Methods of the PhysicalMergeOperator Class
      */ 
@@ -82,7 +86,8 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	    (AccumulateOp) logicalOperator;
 
 	mergeTree = logicalAccumulateOperator.getMergeTree();
-	mergeIndex = logicalAccumulateOperator.getMergeIndex();
+	mergeIndex = logicalAccumulateOperator.getMergeAttr().getAttrId();
+
 	/* for now, just create a new map table for the accumulate
 	 * operator.  Ideally, we would have a MapTable per stream
 	 * which might be shared by multiple operators, but since I
@@ -94,8 +99,14 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	 */
 	mapTable = new MapTable(); 
 
+	String initialAccumFile 
+	    = logicalAccumulateOperator.getInitialAccumFile();
 	String afName = logicalAccumulateOperator.getAccumFileName();
-	if(afName != null && CacheUtil.isAccumFile(afName)) {
+
+	if(!initialAccumFile.equals("")) {
+	    createAccumulatorFromDisk(initialAccumFile);
+	    System.out.println("crfromdsk done");
+	} else if(!afName.equals("") && CacheUtil.isAccumFile(afName)) {
 	    if(logicalAccumulateOperator.getClear() == false) {
 		createAccumulatorFromDoc(afName);
 	    } else {
@@ -112,6 +123,7 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
 	recdData = false;
 
+	count = 0;
 	//System.out.println("PhysicalAccumulateOperator created");
     }
 		     
@@ -129,6 +141,10 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     protected boolean blockingProcessSourceTupleElement (StreamTupleElement tupleElement,
 							 int streamId) {
+	count++;
+	if(count%100 == 0) {
+	    System.out.print("#");
+	}
 	//System.out.println("PhysAccumOp: blkProcSTE called");
 	/* get the fragment to be merged from the tuple, convert it
 	 * to an element if necessary, then pass the work off to the merge tree
@@ -274,6 +290,56 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	 */
 	accumDoc = accumDoc.cloneDocRefDocElt(false);
 	return;
+    }
+
+    private void createAccumulatorFromDisk(String initialAF) {
+
+	try {
+	    TXDOMParser p;
+	    System.out.println("Creating parser");
+	    p = new TXDOMParser();
+	    
+	    /* Parse the initial accumulate	file */
+	    if(initialAF.startsWith("<?xml")) {
+		p.parse(new InputSource(new ByteArrayInputStream(initialAF.getBytes())));
+	    } else { 
+		System.out.println("Creating File");
+		FileInputStream f = new FileInputStream(initialAF);
+		System.out.println("Calling Parse");
+		p.parse(new InputSource(f));
+		System.out.println("parse done");
+	    } 
+	
+	    System.out.println("calling getdocument");
+	    Document accumDomDoc = p.getDocument(); 
+	    System.out.println("get document done");
+	    if(accumDomDoc.getDocumentElement() == null) {
+		System.out.println("Doc elt null");
+	    } else {
+		System.out.println("Doc elt ok");
+	    }
+
+	    accumDoc = new NIDocument();
+	    accumDoc.initialize(mapTable, accumDomDoc);
+	    
+	    /* now clone the accum doc itself so I can write to it 
+	     * code always assumes that document itself has been
+	     * cloned - this clone is not deep - just clones
+	     * the document and references the document element
+	     */
+	    System.out.println("calling clone");
+	    accumDoc = accumDoc.cloneDocRefDocElt(false);
+	    System.out.println("createAccum done");
+	    return;
+	} catch (java.io.IOException e) {
+	    System.err.println("Initial Accumulate File Corrupt - creating empty accumulator " + e.getMessage());
+	    createEmptyAccumulator();
+	    return;
+	} catch (org.xml.sax.SAXException e) {
+	    System.err.println("Initial Accumulate File Corrupt - creating empty accumulator");
+	    createEmptyAccumulator();
+	    return;
+	}
     }
 
 }

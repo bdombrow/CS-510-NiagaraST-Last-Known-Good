@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.3 2000/08/21 00:59:19 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.4 2000/08/23 03:55:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -1023,17 +1023,17 @@ public abstract class PhysicalOperator {
 	       NullElementException,
 	       StreamPreviouslyClosedException {
 
-	printMessage("PO: processing source control elt");
+	//printMessage("PO: processing source control elt");
 	switch (controlElement.type()) {
 
 	case StreamControlElement.ShutDown:
-	    printMessage("PO: received shutdown request");
+	    //printMessage("PO: received shutdown request");
 	    // Propagate the shut down element to other streams if necessary
 	    //
  	    return this.propagateSourceShutDownElement(controlElement, streamId);
 
 	case StreamControlElement.SynchronizePartialResult:
-	    printMessage("PO: received synch partial result elt");
+	    //printMessage("PO: received synch partial result elt");
 	    // Remove the stream id from the set of source streams to read from
 	    //
 	    readSourceStreams.remove(readSourceStreams.indexOf(new Integer(streamId)));
@@ -1048,7 +1048,7 @@ public abstract class PhysicalOperator {
 	    return updatePartialResultCreation ();
 
 	case StreamControlElement.EndPartialResult:
-	    printMessage("PO: received end partial result elt");
+	    //printMessage("PO: received end partial result elt");
 	    // Remove the stream id from the set of source streams to read from
 	    //
 	    readSourceStreams.remove(readSourceStreams.indexOf(new Integer(streamId)));
@@ -1239,7 +1239,7 @@ public abstract class PhysicalOperator {
 	       NullElementException,
 	       StreamPreviouslyClosedException {
 
-	printMessage("PO: processing dest control elt");
+	//printMessage("PO: processing dest control elt");
 
 	switch (controlElement.type()) {
 
@@ -1253,7 +1253,7 @@ public abstract class PhysicalOperator {
 	    return propagateDestinationShutDownElement(controlElement, streamId);
 
 	case StreamControlElement.GetPartialResult:
-	printMessage("PO: received get partial result elt");
+	//printMessage("PO: received get partial result elt");
 
 	    // Handle the get partial result request appropriately
 	    //

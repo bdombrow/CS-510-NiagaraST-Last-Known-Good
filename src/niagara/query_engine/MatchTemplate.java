@@ -216,7 +216,11 @@ public class MatchTemplate {
 	 * probe the hash table for a matching object 
 	 */
 	ArrayList mi = (ArrayList)matchInfo.get(toMatch.getTagName());
-	return (NIElement)children.get(createValueList(toMatch, mi));
+	ArrayList[] vl = createValueList(toMatch, mi);
+	if(vl.length != 1) {
+	    throw new PEException("Matches not allowed on set values");
+	}
+	return (NIElement)children.get(vl[0]);
     }
 
     /*
@@ -274,14 +278,16 @@ public class MatchTemplate {
 	     * element - then those two elements are said to match 
 	     */
 	    ArrayList mi = (ArrayList) matchInfo.get(child.getTagName());
-	    ArrayList valueList = createValueList(child, mi);
+	    ArrayList[] valueList = createValueList(child, mi);
 	    mi = null;
 
 	    /* put the child and it's "key" - the value list
 	     * in the hash set - we trust Java to make a good
 	     * hash value out of the valueList
 	     */
-	    Object oldMapping = children.put(valueList, child);
+	    for(int i=0; i<valueList.length; i++) {
+		Object oldMapping = children.put(valueList[i], child);
+	    }
 	    
 	    /* old mappings might exist if parent has been upated */
 	}
@@ -315,13 +321,14 @@ public class MatchTemplate {
 	     * element - then those two elements are said to match)
 	     */
 	    ArrayList mi =(ArrayList)matchInfo.get(newElt.getTagName());
-	    ArrayList valueList = createValueList(newElt, mi);
+	    ArrayList[] valueList = createValueList(newElt, mi);
 	    
 	    /* put the newElt and it's "key" into the hash set */
-	    Object oldMapping = children.put(valueList, newElt);
-	    
-	    if(oldMapping != oldElt) {
-	       throw new PEException("oldElt doesn't match elt being replaced");
+	    for(int i=0; i<valueList.length; i++) {
+		Object oldMapping = children.put(valueList[i], newElt);
+		if(oldMapping != oldElt) {
+		    throw new PEException("oldElt doesn't match elt being replaced");
+		}
 	    }
 	}
 	   
@@ -343,8 +350,8 @@ public class MatchTemplate {
      * @return An ArrayList of the "matching values" or "key values"
      *         for this element
      */
-    private ArrayList createValueList(NIElement elt, ArrayList miList) {
-	ArrayList valueList = new ArrayList(); /* for return */
+    private ArrayList[] createValueList(NIElement elt, ArrayList miList) {
+	ArrayList[] valueList = null;
 	Vector v;
 
 	/* mi is an array list of MatchInfo objects */
@@ -361,44 +368,51 @@ public class MatchTemplate {
 	    /* we don't allow matches on set values (yet), so throw
 	     * an error if there is more than one reachable node 
 	     */
-	    if(v.size() > 1) {
+	    /*if(v.size() > 1) {
 		throw new PEException("Matches not allowed on set values");
-	    } else if(v.size() == 0) {
-		valueList.add(null);
+		} else */
+	    if(v.size() == 0) {
+		valueList = new ArrayList[1]; /* for return */
+		valueList[0] = new ArrayList();
+		valueList[0].add(null);
 	    } else {
-		/* vector size must be one - process this node */
-		Node node = (Node)v.elementAt(0);
-		NINode ninode;
-		if(node instanceof Element) {
-		    ninode = elt.getOwnerDocument().
-			getAssocNIElement((Element)node);
-		} else {
-		    /* must be an attribute, but don't know the parent
-		     */
-		    ninode = elt.getOwnerDocument().
-			getAssocNIAttr((Attr)node, null);
+		int size = v.size();
+		valueList = new ArrayList[size];
+		for(int i=0; i<size; i++) {
+		    valueList[i] = new ArrayList();
+		    /* vector size must be one - process this node */
+		    Node node = (Node)v.elementAt(i);
+		    NINode ninode;
+		    if(node instanceof Element) {
+			ninode = elt.getOwnerDocument().
+			    getAssocNIElement((Element)node);
+		    } else {
+			/* must be an attribute, but don't know the parent
+			 */
+			ninode = elt.getOwnerDocument().
+			    getAssocNIAttr((Attr)node, null);
+		    }
+		    
+		    switch(mi.mergeType()) {
+		    case MatchTemplate.TAG_EXISTENCE:
+			valueList[i].add(node.getNodeName());
+			break;
+			
+		    case MatchTemplate.CONTENT:
+			/* create the appropriate type of object -
+			 * Double, Integer, String, Date, with
+			 * the value from the element
+			 */		    
+			/* the node helper converts the node (actually
+			 * node.getNodeValue()) into an instance
+			 * of the appropriate type
+			 */
+			valueList[i].add(mi.nodeHelper.valueOf(ninode));
+			break;
+		    default:
+			throw new PEException("Invalid merge type");
+		    }
 		}
-
-		switch(mi.mergeType()) {
-		case MatchTemplate.TAG_EXISTENCE:
-		    valueList.add(node.getNodeName());
-		    break;
-
-		case MatchTemplate.CONTENT:
-		    /* create the appropriate type of object -
-		     * Double, Integer, String, Date, with
-		     * the value from the element
-		     */		    
-		    /* the node helper converts the node (actually
-		     * node.getNodeValue()) into an instance
-		     * of the appropriate type
-		     */
-		    valueList.add(mi.nodeHelper.valueOf(ninode));
-		    break;
-		default:
-		    throw new PEException("Invalid merge type");
-		}
-
 	    }
 	}
 

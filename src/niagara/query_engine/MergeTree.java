@@ -245,8 +245,8 @@ public class MergeTree {
 	do_accumulate(accumFragRoot, mergeFragRoot, mergeTreeRoot,
 		      accumDoc);
 
-	System.out.println("End of accumulate");
-	accumDoc.printWithFormat();
+	//System.out.println("End of accumulate");
+	//accumDoc.printWithFormat();
 
 	resultDoc = null;
     }
@@ -277,9 +277,10 @@ public class MergeTree {
 	 * has been done before this function was called
 	 * what if either one is null???? can this happen??
 	 */
-	System.out.println("Before accumulating " + accumElt.getTagName() +
-			   " element");
-	accumDoc.printWithFormat();
+	/* System.out.println("Before accumulating " + accumElt.getTagName() +
+	 *	   " element");
+	 * accumDoc.printWithFormat();
+	 */
 	mergeTreeNode.accumulate(accumElt, fragElt);
 	
 	if(!mergeTreeNode.isDeepMerge()) {
@@ -338,7 +339,7 @@ public class MergeTree {
 			 * that doesn't cause a set result from findMatch
 			 */
 			nextAccumElt = nextMergeTreeNode.
-			    findUniqueMatch(accumElt, nextFragElt, true);
+			    findUniqueMatch(accumElt, nextFragElt, false);
 		    } else {
 			/* matching is based on tag name - by
 			 * definition of accumulate - there can only
@@ -366,7 +367,7 @@ public class MergeTree {
 		    do_accumulate(nextAccumElt, nextFragElt, 
 				  nextMergeTreeNode, accumDoc);
 		} else {
-		    System.out.println("Found no merge info for " + fragName);
+		    /*System.out.println("Found no merge info for " + fragName); */
 		}
 		/* now process the next sibling element */
 		nextFragElt = nextFragElt.getNextElementSibling();

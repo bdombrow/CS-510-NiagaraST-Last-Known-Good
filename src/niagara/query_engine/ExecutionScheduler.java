@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ExecutionScheduler.java,v 1.6 2000/08/21 00:59:18 vpapad Exp $
+  $Id: ExecutionScheduler.java,v 1.7 2000/08/23 03:55:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,6 +33,8 @@
  */
 
 package niagara.query_engine;
+
+import org.w3c.dom.*;
 
 import java.lang.reflect.Constructor;
 import java.util.Vector;
@@ -256,6 +258,12 @@ public class ExecutionScheduler {
 			}
 			catch (Exception e) {
 				System.err.println("Error in Instantiating Physical Operator");
+			    if(e instanceof DOMException) {
+				System.err.println("e is a DOMException");
+				System.err.println("Error code is" + ((DOMException)e).code);
+			    }
+
+				e.printStackTrace();
 				return;
 			}
 
