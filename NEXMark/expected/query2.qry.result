@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:results>
+
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>160.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>166.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>100</auctionid>
+   <price>176.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>167.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>100</auctionid>
+   <price>185.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>178.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>100</auctionid>
+   <price>203.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>179.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>100</auctionid>
+   <price>204.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>193.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>202.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>130</auctionid>
+   <price>60.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>80</auctionid>
+   <price>208.00</price>
+</selected_bid>
+<selected_bid>
+   <auctionid>100</auctionid>
+   <price>209.00</price>
+</selected_bid>
+
+</niagara:results>
