@@ -1,3 +1,4 @@
+// $Id: xmlql.cup,v 1.4 2002/04/17 03:10:46 vpapad Exp $
 ////////////////////////////////////////////////////////////////////////
 //
 //  xmlql.cup
@@ -35,7 +36,10 @@ parser code {:
          
         	 if (s.right >= 0)
           	 m.append(", column "+(s.right+1));
-		 m.append(", value "+s.value.toString());
+                 if (s.value == null)
+                   m.append(", value NULL");
+                 else 
+		   m.append(", value "+s.value.toString());
 		 m.append(", sym "+s.sym);
      	  }
      	}
@@ -305,6 +309,13 @@ Element ::= StartTag:s QueryInConstructList:ql EndTag
 			v2.addElement(new constructLeafNode(new data(dataType.VAR,v)));
 			RESULT = new constructInternalNode(s,v2);	
 		:}
+	  | StartTag:s EndTag
+		{:
+			Vector v1 = new Vector();
+			v1.addElement(new constructLeafNode(
+				new data(dataType.IDEN,"")));
+			RESULT = new constructInternalNode(s,v1);
+		:}
 	  ;
 
 QueryInConstructList ::= QueryInConstructList:ql QueryInConstruct:q
@@ -453,6 +464,8 @@ RegularExpression ::= RegularExpression:r STAR
 			  {: RESULT = r; :}
 		    | IDEN:i   
 			  {: RESULT = new regExpDataNode(new data(dataType.IDEN,i)); :}
+		    | ID   
+		          {: RESULT = new regExpDataNode(new data(dataType.IDEN,"id")); :}
 		    | DOLLAR 
 			  {: RESULT = new regExpOpNode(opType.DOLLAR); :}
 		    ;
