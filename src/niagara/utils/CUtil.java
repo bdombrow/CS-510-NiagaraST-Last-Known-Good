@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CUtil.java,v 1.6 2002/03/26 22:07:19 vpapad Exp $
+  $Id: CUtil.java,v 1.7 2002/10/06 23:57:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -519,6 +519,19 @@ public class CUtil {
 	}
 
     } // end of sendFromFile()
+
+
+    /**
+	 * prints n tabs on the standard output
+	 *
+	 * @param number of tabs to print
+	 */
+
+	public static void genTab(int depth) {
+		for(int i= 0; i<depth; i++)
+			System.out.print("\t");
+	}
+
 }
 
 
