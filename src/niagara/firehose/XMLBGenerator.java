@@ -56,7 +56,9 @@ class XMLBGenerator extends XMLFirehoseGen {
 			       + "gamedata.dtd\">\n");
 		}
 	    }
-	    stb.append("<GAMEDATA>\n");
+	    stb.append("<GAMEDATA>");
+	    if(usePrettyPrint)
+		stb.append("\n");
 	    for (int iDoc = 0; iDoc < numTLElts; iDoc++) {
 		iElement = -1;
 		while (iElement == -1) {
@@ -89,7 +91,9 @@ class XMLBGenerator extends XMLFirehoseGen {
 		if(usePrettyPrint)
 		    stb.append('\n');
 	    }
-	    stb.append("</GAMEDATA>\n");
+	    stb.append("</GAMEDATA>");
+	    if(usePrettyPrint)
+		stb.append('\n');
 
 	} catch (IOException ioe) {
 	    ioe.printStackTrace();

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.22 2003/03/08 00:57:05 vpapad Exp $
+  $Id: RequestHandler.java,v 1.23 2003/03/12 22:43:39 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -445,8 +445,10 @@ public class RequestHandler {
         // start the transmitter thread for sending results back
         serverQueryInfo.transmitter =
             new ResultTransmitter(this, serverQueryInfo, request);
-	if (top instanceof StreamThread)
-	    serverQueryInfo.transmitter.setPrettyprint(false);
+	if (top instanceof StreamThread) {
+	    if(((StreamThread)top).prettyprint())
+	      serverQueryInfo.transmitter.setPrettyprint(false);
+        }
     }
 
     /**Method used by everyone to send responses to the client

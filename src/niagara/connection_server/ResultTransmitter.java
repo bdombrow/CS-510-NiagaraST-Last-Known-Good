@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.20 2003/03/08 00:57:05 vpapad Exp $
+  $Id: ResultTransmitter.java,v 1.21 2003/03/12 22:43:39 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -208,6 +208,7 @@ public class ResultTransmitter implements Runnable {
 	catch  (RequestHandler.InvalidQueryIDException e) {
 	    // do nothing
 	    // this will never happen by the way - are you sure? KT
+	    assert false;
 	}
 	return;
     }
@@ -236,12 +237,12 @@ public class ResultTransmitter implements Runnable {
 	    // see if the transmitter is currently suspended
 	    // It could be becuase of two reasons
 	    // 1. No Pending Requests 2. Last results were suspended
-	    boolean suspend = checkSuspension();		    
-	    
 	    // if we are going to suspend, better send the results collected 
 	    // so far
-	    if (suspend && !QUIET)
+	    // KT - don't use checkSuspension, no need 
+	    if (checkSuspension() && !QUIET) {
 		sendResults();
+	    }
 	    
 	    // as long as atleast one suspension condition is true, keep waiting
 	    while (checkSuspension())
@@ -270,9 +271,11 @@ public class ResultTransmitter implements Runnable {
 		totalResults--;
 		resultsSoFar++;
 		if(!QUIET) {
-		    if (response.dataSize() > BATCHSIZE)
+		    if (response.dataSize() > BATCHSIZE) {
 			sendResults();
-		    response.appendResultData(resultObject, prettyprint);
+                    }
+		    response.appendResultData(resultObject, 
+		                              prettyprint);
 		}
 	    }
 	}
@@ -345,8 +348,9 @@ public class ResultTransmitter implements Runnable {
 	throws java.io.IOException, ShutdownException {
 	switch(ctrlFlag) {
 	case CtrlFlags.EOS:
-	    if(!QUIET)
+	    if(!QUIET) {
 		sendResults();
+             }
 	    
 	    // send the end result response		
 	    handler.sendResponse(new ResponseMessage(request,
@@ -437,8 +441,9 @@ public class ResultTransmitter implements Runnable {
     synchronized private boolean checkSuspension() {
 	if (suspended)
 	    return true;
-	if (totalResults <= 0)
+	if (totalResults <= 0) {
 	    return true;
+	}
 	return false;
     }
 
@@ -452,8 +457,9 @@ public class ResultTransmitter implements Runnable {
     
     // send the results collected so far
     private void sendResults() throws IOException {
-	if (response.dataSize() != 0)
+	if (response.dataSize() != 0) {
 	    handler.sendResponse(response);
+	}
 	response.clearData();
 	resultsSoFar = 0;
     }

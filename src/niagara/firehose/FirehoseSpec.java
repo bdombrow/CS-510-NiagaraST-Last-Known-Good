@@ -24,7 +24,6 @@ public class FirehoseSpec extends StreamSpec {
     private int numGenCalls; // number of times firehose will call generator
     private int numTLElts;     // num top-level elts in XMLB and AUCTION docs
     private int rate;
-    private boolean prettyPrint;
     private String trace;
     private boolean useStreamFormat;
 

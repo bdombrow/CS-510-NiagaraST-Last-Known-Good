@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.26 2003/03/07 23:40:12 vpapad Exp $
+ * $Id: StreamThread.java,v 1.27 2003/03/12 22:43:42 tufte Exp $
  */
 
 package niagara.data_manager;
@@ -61,7 +61,7 @@ public class StreamThread extends SourceThread {
 	if(niagara.connection_server.NiagraServer.RUNNING_NIPROF)
 	    JProf.registerThreadName(this.getName());
 
-        if (NiagraServer.usingSAXDOM() /* && spec.isStream() */)
+        if (NiagraServer.usingSAXDOM())
             parser = DOMFactory.newParser("saxdom");
         else
             parser = DOMFactory.newParser();
@@ -98,9 +98,7 @@ public class StreamThread extends SourceThread {
 		// means only one document
 		InputSource inputSource = 
 		    new InputSource(inputStream);
-		System.out.println("calling parse");
 		parser.parse(inputSource);
-		System.out.println("putting in output stream");
 		outputStream.put(parser.getDocument());
 	    } else {
 		throw new PEException("KT: Unsupported");
@@ -454,6 +452,10 @@ public class StreamThread extends SourceThread {
      */
     public void dumpChildrenInXML(StringBuffer sb) {
         ;
+    }
+
+    public boolean prettyprint() {
+        return spec.prettyprint();
     }
 }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.8 2003/03/07 20:59:07 tufte Exp $
+  $Id: ResponseMessage.java,v 1.9 2003/03/12 22:43:39 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -87,7 +87,7 @@ class ResponseMessage
     }
     
     public void appendResultData(QueryResult.ResultObject ro, 
-				 boolean prettyprint) {
+                                 boolean prettyprint) {
         // XXX vpapad: really, really ugly
         Node node = (Node) ro.result;
         if (node instanceof NodeImpl) {
@@ -159,9 +159,9 @@ class ResponseMessage
 	case SE_QUERY_RESULT: return "se_query_result";
 	case DTD: return "dtd";
 	case EXECUTION_ERROR: return "execution_error";
+	default: assert false: "Invalid type " + type;
+	    return "";
 	}
-	System.out.println("Invalid type"+type);
-	return "";
     }
 }
 
