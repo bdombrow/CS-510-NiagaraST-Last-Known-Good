@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: constructOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: constructOp.java,v 1.2 2000/07/08 05:15:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -68,6 +68,14 @@ public class constructOp extends unryOp {
 	public void setConstruct(constructBaseNode temp) {
 		resultTemplate = temp;
 	}
+
+    /**
+     * print the operator to the standard output
+     */
+    public void dump() {
+	System.out.println("Construct : ");
+	resultTemplate.dump(1);
+    }
 
 	/**
 	 * a dummy toString method

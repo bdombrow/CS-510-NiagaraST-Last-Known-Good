@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: joinOp.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: joinOp.java,v 1.2 2000/07/08 05:15:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -98,6 +98,14 @@ public class joinOp extends binOp {
 			pred = equiJoinPred;
 	else
 		pred = p;
+   }
+
+   /**
+    * sets the predicate for a generic join operator. 
+    * @param pred predicate
+    */
+   public void setJoin(predicate pred) {
+       this.pred = pred;
    }
 
    /**

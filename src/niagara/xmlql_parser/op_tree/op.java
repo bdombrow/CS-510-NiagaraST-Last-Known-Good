@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: op.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: op.java,v 1.2 2000/07/08 05:15:47 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -93,6 +93,27 @@ public abstract class op implements Cloneable{
     }
 
     /**
+     * Select the physical algorithm implemented by this class
+     *
+     * @param className name of the physical algorithm class 
+     */
+
+    public void setSelectedAlgorithm (String className) 
+	throws ClassNotFoundException, InvalidAlgorithmException
+    {
+	Class c = Class.forName(className);
+
+	for (int i=0; i < AlgoList.length; i++) {
+	    if (AlgoList[i] == c) {
+		setSelectedAlgoIndex(i);
+		return;
+	    }
+	}
+    }
+
+    public class InvalidAlgorithmException extends Exception {}
+
+    /**
      * @return the index of the selected algorithm 
      */
 
@@ -173,4 +194,6 @@ public abstract class op implements Cloneable{
 
     public void dump() {}
 }
+
+
 
