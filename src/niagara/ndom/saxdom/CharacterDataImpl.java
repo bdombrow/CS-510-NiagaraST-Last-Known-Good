@@ -1,5 +1,5 @@
 /**
- * $Id: CharacterDataImpl.java,v 1.2 2002/03/27 10:12:10 vpapad Exp $
+ * $Id: CharacterDataImpl.java,v 1.3 2002/09/27 01:26:19 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -61,6 +61,13 @@ public abstract class CharacterDataImpl extends NodeImpl {
         throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
                                "SAXDOM objects are read-only.");
+    }
+
+    /**
+     * @see org.w3c.dom.Node#getFirstChild()
+     */
+    public Node getFirstChild() {
+        return null;
     }
 
 }

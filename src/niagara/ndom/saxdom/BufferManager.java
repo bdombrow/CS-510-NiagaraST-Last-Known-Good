@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.14 2002/09/25 20:20:36 ptucker Exp $
+ * $Id: BufferManager.java,v 1.15 2002/09/27 01:26:19 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -466,6 +466,10 @@ public class BufferManager {
             return new ElementImpl(doc, index);
         case SAXEvent.ATTR_NAME:
             return new AttrImpl(doc, index);
+        case SAXEvent.ATTR_VALUE:
+            // XXX vpapad: this is a fake TextImpl node we create
+            // to comply with the DOM spec 
+            return new TextImpl(doc, index);
         case SAXEvent.TEXT:
             return new TextImpl(doc, index);
         default:
@@ -479,6 +483,20 @@ public class BufferManager {
         throw new PEException("Not Implemented Yet!");
     }
 
+    public static Node fakeAttributeChildren(DocumentImpl doc, int index) {
+        // XXX vpapad: according to the DOM spec, attribute have
+        // Text nodes as children. That's not the way we implement it
+        // so we have to fake that here.
+        Page page = getPage(index);
+        int offset = getOffset(index);
+        if (offset == page.getSize() - 1) {
+            page = page.getNext();
+            offset = 0;
+        } else
+            offset++;
+        return makeNode(doc, getIndex(page, offset));
+    }
+    
     public static Node getFirstChild(DocumentImpl doc, int index) {
         int firstChildIndex = getFirstChildIndex(index);
         if (firstChildIndex < 0)
