@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.8 2002/04/20 19:28:23 vpapad Exp $
+ * $Id: Page.java,v 1.9 2002/04/26 02:38:11 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -10,6 +10,7 @@ package niagara.ndom.saxdom;
 
 import niagara.ndom.SAXDOMParser;
 import niagara.utils.PEException;
+import java.util.Arrays;
 
 /**
  * Page data describe a sequence of SAX events, using three parallel arrays:
@@ -51,12 +52,10 @@ public class Page {
 
     /** Prepare page for reuse 
      */
-    private synchronized void clear() {
-        for (int i = 0; i < event_type.length; i++) {
-            event_type[i] = SAXEvent.EMPTY;
-            event_string[i] = null;
-            next_sibling[i] = -1;
-        }
+    private void clear() {
+        Arrays.fill(event_type, SAXEvent.EMPTY);
+        Arrays.fill(event_string, null);
+        Arrays.fill(next_sibling, -1);
 
         if (previous != null)
             previous.setNext(null);

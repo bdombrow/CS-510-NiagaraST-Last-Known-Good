@@ -1,3 +1,7 @@
+/**
+ * $Id: StreamMaterializer.java,v 1.2 2002/04/26 02:37:54 vpapad Exp $
+ */
+
 package niagara.connection_server;
 
 import org.w3c.dom.*;

@@ -1,4 +1,6 @@
-/** Generate a physical plan from an XML Description
+/**
+ * $Id: XMLQueryPlanParser.java,v 1.20 2002/04/26 02:37:54 vpapad Exp $
+ * Generate a physical plan from an XML Description
  *
  */
 package niagara.connection_server;
@@ -11,8 +13,6 @@ import gnu.regexp.*;
 
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
-import niagara.xmlql_parser.syntax_tree.re_parser.*;
-import niagara.xmlql_parser.syntax_tree.construct_parser.*;
 import niagara.query_engine.MTException;
 import niagara.utils.*;
 
@@ -114,7 +114,7 @@ public class XMLQueryPlanParser {
 	    inputs.addElement(st.nextToken());
 
 	for (int i=0; i < inputs.size(); i++) {
-	    Element el = (Element) ids2els.get(inputs.elementAt(i));
+	    Element el = (Element) ids2els.get(inputs.get(i));
 	    parseOperator(el);
 	}
 
@@ -398,7 +398,7 @@ public class XMLQueryPlanParser {
 	
 	logNode[] input_arr = new logNode[inputs.size()];
 	for (int i=0; i < input_arr.length; i++) {
-	    input_arr[i] = (logNode) ids2nodes.get(inputs.elementAt(i));
+	    input_arr[i] = (logNode) ids2nodes.get(inputs.get(i));
 	}
 
 	logNode node = new logNode(op, input_arr);
@@ -487,8 +487,8 @@ public class XMLQueryPlanParser {
 	    throw new InvalidPlanException("Invalid algorithm: " + className);
 	}
 	
-	logNode left = (logNode) ids2nodes.get(inputs.elementAt(0));
-	logNode right = (logNode) ids2nodes.get(inputs.elementAt(1));
+	logNode left = (logNode) ids2nodes.get(inputs.get(0));
+	logNode right = (logNode) ids2nodes.get(inputs.get(1));
 	
 	NodeList children = e.getChildNodes();
 	Element predElt = null;
@@ -520,7 +520,7 @@ public class XMLQueryPlanParser {
 		for (int i = 0; i < all_left.length; i++) {
 		    leftvect.addElement(leftv.lookUp(all_left[i].toString()));
 		    rightvect.addElement(rightv.lookUp(all_right[i].toString()));
-		    schemaAttribute sa = (schemaAttribute)leftvect.elementAt(0);
+		    schemaAttribute sa = (schemaAttribute)leftvect.get(0);
 		    if(sa == null) {
                        System.out.println("null sa");
 		    }
