@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.16 2002/10/26 04:34:14 vpapad Exp $
+  $Id: PhysicalGroupOperator.java,v 1.17 2002/10/27 03:08:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -239,7 +239,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
      * @return True if the operator is to continue and false otherwise
      */
 
-    protected final void opInitialize () {
+    protected void opInitialize () {
 	// Get the grouping attributes
 	skolem grouping = logicalGroupOperator.getSkolemAttributes();
 

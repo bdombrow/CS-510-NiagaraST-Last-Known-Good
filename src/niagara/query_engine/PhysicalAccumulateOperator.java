@@ -1,10 +1,11 @@
-/* $Id: PhysicalAccumulateOperator.java,v 1.12 2002/10/24 02:44:52 vpapad Exp $ */
+/* $Id: PhysicalAccumulateOperator.java,v 1.13 2002/10/27 03:08:04 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.Vector;
 import org.w3c.dom.*;
 
 import niagara.ndom.*;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.LogicalOp;
 
 import org.xml.sax.*;
@@ -41,7 +42,11 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 
     /* The merge tree  */
     private MergeTree mergeTree;
+    private Attribute mergeAttr;
     private int mergeIndex;
+    private String initialAccumFile;
+    private String afName;
+    private boolean clear;
     
     /* The object into which things are being accumulated */
     private Document accumDoc;
@@ -58,14 +63,15 @@ public class PhysicalAccumulateOperator extends PhysicalOperator {
 	    (AccumulateOp) logicalOperator;
 
 	mergeTree = logicalAccumulateOperator.getMergeTree();
-	mergeIndex = logicalAccumulateOperator.getMergeAttr().getAttrId();
+	mergeAttr = logicalAccumulateOperator.getMergeAttr();
 
-	String initialAccumFile 
-	    = logicalAccumulateOperator.getInitialAccumFile();
-	String afName = logicalAccumulateOperator.getAccumFileName();
+	initialAccumFile = logicalAccumulateOperator.getInitialAccumFile();
+	afName = logicalAccumulateOperator.getAccumFileName();
 
-	boolean clear = logicalAccumulateOperator.getClear();
+	clear = logicalAccumulateOperator.getClear();
+    }
 
+    public void opInitialize() {
 	if(clear && !initialAccumFile.equals("")) {
 	    createAccumulatorFromDisk(initialAccumFile);
 	} else if(!afName.equals("") && CacheUtil.isAccumFile(afName)) {

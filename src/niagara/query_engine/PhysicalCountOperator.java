@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.10 2002/10/26 04:34:15 vpapad Exp $
+  $Id: PhysicalCountOperator.java,v 1.11 2002/10/27 03:08:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,7 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.LogicalOp;
 
 /**
@@ -110,8 +111,7 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
     ////////////////////////////////////////////////////////////////////
 
     // This is the aggregating attribute for the Count operator
-    //
-    schemaAttribute countingAttribute;
+    Attribute countingAttribute;
 
 
     AtomicEvaluator ae;
@@ -123,7 +123,11 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
         super.initFrom(logicalOperator);
 	// Get the counting attribute of the Count logical operator
 	countingAttribute = ((CountOp) logicalOperator).getCountingAttribute();
-        ae = new AtomicEvaluator(countingAttribute);
+    }
+    
+    protected void opInitialize() {
+        ae = new AtomicEvaluator(countingAttribute.getName());
+        ae.resolveVariables(inputTupleSchemas[0], 0);
         atomicValues = new ArrayList();
     }
 

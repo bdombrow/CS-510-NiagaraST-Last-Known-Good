@@ -1,5 +1,7 @@
+/* $Id: Hasher.java,v 1.4 2002/10/27 03:08:04 vpapad Exp $ */
 package niagara.query_engine;
 
+import niagara.optimizer.colombia.Attrs;
 import niagara.utils.*;
 import niagara.xmlql_parser.syntax_tree.*;
 
@@ -14,18 +16,23 @@ public class Hasher {
     AtomicEvaluator[] evaluators;
     ArrayList[] values;
 
-    StreamTupleElement[] oneTuple;
-
+    public Hasher(Attrs attrs) {
+        evaluators = new AtomicEvaluator[attrs.size()];
+        values = new ArrayList[attrs.size()];
+        for (int i = 0; i < attrs.size(); i++) {
+            evaluators[i] = new AtomicEvaluator(attrs.get(i).getName());
+            values[i] = new ArrayList(1);
+        }
+    }
+    
     public Hasher(Vector attributeList) {
         evaluators = new AtomicEvaluator[attributeList.size()];
         values = new ArrayList[attributeList.size()];
 
         for (int i = 0; i < attributeList.size(); i++) {
-            evaluators[i] = new AtomicEvaluator(attributeList.get(i));
+            evaluators[i] = new AtomicEvaluator((schemaAttribute) attributeList.get(i));
             values[i] = new ArrayList(1);
         }
-
-        oneTuple = new StreamTupleElement[1];
     }
 
     /**
@@ -56,11 +63,7 @@ public class Hasher {
 
 	for (int att = 0; att < numAttributes; ++att) {
 
-	    // Get the atomic value of attribute
-	    //
-	    oneTuple[0] = tupleElement;
-
-	    evaluators[att].getAtomicValues(oneTuple, values[att]);
+	    evaluators[att].getAtomicValues(tupleElement, null, values[att]);
 
 	    // If there is not exactly one atomic value, then it is an error
 	    //
@@ -89,6 +92,12 @@ public class Hasher {
 	    rgstRet[i] = stok.nextToken();
 	    i++;
 	}
+    }
+    
+    public void resolveVariables(TupleSchema ts, int streamId) {
+        for (int i = 0; i < evaluators.length; i++) {
+            evaluators[i].resolveVariables(ts, streamId);           
+        }
     }
 }
 

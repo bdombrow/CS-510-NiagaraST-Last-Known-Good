@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: QEUtil.java,v 1.6 2002/05/07 03:10:55 tufte Exp $
+  $Id: QEUtil.java,v 1.7 2002/10/27 03:08:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,9 +28,10 @@
 package niagara.query_engine;
 
 import org.w3c.dom.*;
-import java.lang.*;
 import java.io.*;
 import java.util.*;
+
+import niagara.logical.Predicate;
 import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -97,11 +97,11 @@ public class QEUtil {
      *  Get a regular expression given a filename.  Used for hardcoding queries
      *  
      */
-    public static predicate getPredicate(String filename) 
+    public static Predicate getPredicate(String filename) 
 	throws java.io.FileNotFoundException, ParseException {
 	
 	condition c;
-	predicate pred = null;
+	Predicate pred = null;
 	
 	// Parse the query in file on command line
 	Scanner s = new Scanner(new EscapedUnicodeReader(new FileReader(filename)));
@@ -123,9 +123,9 @@ public class QEUtil {
 	// Find the first predicate and return itmake
 	//
 	for(int i= 0; i< v.size(); i++) {
-	    c = (condition)v.elementAt(i);
-	    if(c instanceof predicate) {
-		return (predicate)c;
+            Object oc = v.elementAt(i);
+	    if(oc instanceof Predicate) {
+		return (Predicate)oc;
 	    }
 	}
 	return pred;

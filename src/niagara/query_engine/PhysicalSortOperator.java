@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSortOperator.java,v 1.4 2002/10/26 04:34:14 vpapad Exp $
+  $Id: PhysicalSortOperator.java,v 1.5 2002/10/27 03:08:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -82,7 +82,7 @@ public class PhysicalSortOperator extends PhysicalOperator {
     public void initFrom(LogicalOp logicalOperator) {
 	// Type cast the logical operator to a Sort operator
 	SortOp logicalSortOperator = (SortOp) logicalOperator;
-	sortingField = new OldVariable(logicalSortOperator.getAttr());
+	sortingField = logicalSortOperator.getAttr();
 	comparisonMethod = logicalSortOperator.getComparisonMethod();
 	ascending = logicalSortOperator.getAscending();
     }

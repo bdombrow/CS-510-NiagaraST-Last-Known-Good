@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.6 2002/05/07 03:10:55 tufte Exp $
+  $Id: QueryEngine.java,v 1.7 2002/10/27 03:08:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -73,27 +73,21 @@ public class QueryEngine
     private PhysicalOperatorQueue opQueue;
 
     // A hashtable of active queries
-    // 
     private ActiveQueryList activeQueries;
 
     // Group of threads waiting for queries to enter the system
-    //
     private Vector queryThreads;
 
     // Group of operator threads waiting to process operators
-    //
     private Vector opThreads;
 
     // The execution scheduler that schedules operators
-    //
     private ExecutionScheduler scheduler; 
 
     private TrigExecutionScheduler trigScheduler;
 
     // A query id counter, accessed by a synchronized method 
-    //
     private int lastQueryId;
-    
 
     private NiagraServer server;
     
@@ -166,15 +160,12 @@ public class QueryEngine
 		trigScheduler = new TrigExecutionScheduler(dataManager, opQueue);
 	
 		// Create the active query list
-		//
 		activeQueries = new ActiveQueryList();	
 
 		// Create the query queue
-		//
 		queryQueue = new QueryQueue(maxQueries);
 
 		// Create query thread vector and fill it with query threads
-		//
 		queryThreads = new Vector(maxQueries);
 
 		for(int qthread = 0; qthread < maxQueries; ++qthread) {
@@ -184,7 +175,6 @@ public class QueryEngine
 		}
 
 		// Inform that Query Engine is ready for processing queries
-		//
 		System.out.println("Query Engine Ready");
     }
     
@@ -230,11 +220,9 @@ public class QueryEngine
 		queryQueue.addQuery(queryInfo);
 
 		// Create the query result object to return to the caller
-		//
 		QueryResult queryResult = new QueryResult(qid, resultStream);
 
 		// Return the query result object to the invoker of the method
-		//
 		return queryResult;
     }
 
@@ -250,7 +238,7 @@ public class QueryEngine
      *  @return QueryResult
      */
 
-    public synchronized QueryResult executeOptimizedQuery(logNode planRoot)
+    public synchronized QueryResult executeOptimizedQuery(SchedulablePlan planRoot)
     throws ShutdownException {
         
 	// Get the next qid
@@ -274,7 +262,6 @@ public class QueryEngine
 	}
 	
 	// Create the query result object to return to the caller
-	//
 	QueryResult queryResult = new QueryResult(qid, resultStream);
 	
 	//call Execution Scheduler to generate the physical
@@ -304,17 +291,13 @@ public class QueryEngine
 
 		for (int i=0; i<queryRoots.size(); i++) {
 
-		    //
 		    // Get the next qid
-		    //		
 		    int qid = CUtil.getNextQueryId();
 		    
 		    // Generate the output streams for each query root
-		    //
 		    PageStream resultStream = new PageStream("Some trigger thing");
 		    
 		    // Create a query information object
-		    //
 		    QueryInfo queryInfo;
 		    
 		    try {
@@ -332,18 +315,15 @@ public class QueryEngine
 		    }
 		    
 		    // Create the query result object to return to the caller
-		    //
 		    QueryResult queryResult = new QueryResult(qid, resultStream);
 		    queryResults.addElement(queryResult);
 		}
 		
-		//
 		//call Trigger Execution Scheduler to generate the physical
 		//plan and execute the group plan.
 		trigScheduler.executeOperators(queryRoots,queryInfos);
 		
 		// Return the query results object to the invoker of the method
-		//
 		// System.err.println("Now cleanning up");
 		trigScheduler.cleanUpAlloc();
 		return queryResults;

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNestOperator.java,v 1.8 2002/10/24 01:54:26 vpapad Exp $
+  $Id: PhysicalNestOperator.java,v 1.9 2002/10/27 03:08:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -86,7 +86,6 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
 				SourceTupleStream[] sourceStreams,
 				SinkTupleStream[] sinkStreams,
 				Integer responsiveness) {
-
         plugInStreams(sourceStreams, sinkStreams, responsiveness);
 
 	// Get the result template of the nest logical operator
@@ -480,8 +479,7 @@ public class PhysicalNestOperator extends PhysicalGroupOperator {
      * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
      */
     public final void initFrom(LogicalOp op) {
-      // Do nothing, unoptimizable operators should 
-      // get initialized in their constructors
+        super.initFrom(op);
     }
 
     /**

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSumOperator.java,v 1.11 2002/10/26 21:25:10 vpapad Exp $
+  $Id: PhysicalSumOperator.java,v 1.12 2002/10/27 03:08:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -36,6 +36,7 @@ import niagara.utils.*;
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
 import niagara.ndom.*;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.LogicalOp;
 
 
@@ -142,14 +143,8 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 	}
     }
 
-
-    ////////////////////////////////////////////////////////////////////
-    // These are the private variables of the class                   //
-    ////////////////////////////////////////////////////////////////////
-
     // This is the aggregating attribute for the sum operator
-    //
-    schemaAttribute summingAttribute;
+    Attribute summingAttribute;
 
     AtomicEvaluator ae;
 
@@ -160,7 +155,11 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 	// Get the summing attribute of the sum logical operator
 	//
 	summingAttribute = ((SumOp) logicalOperator).getSummingAttribute();
-        ae = new AtomicEvaluator(summingAttribute);
+    }
+    
+    protected void opInitialize() {
+        ae = new AtomicEvaluator(summingAttribute.getName());
+        ae.resolveVariables(inputTupleSchemas[0], 0);
         atomicValues = new ArrayList();
     }
 

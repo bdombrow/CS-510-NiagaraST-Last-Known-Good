@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryThread.java,v 1.4 2002/05/23 06:31:41 vpapad Exp $
+  $Id: QueryThread.java,v 1.5 2002/10/27 03:08:04 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -72,7 +72,6 @@ public class QueryThread implements Runnable {
     private Thread thread;
 
     // The query queue on which QueryThread is to wait, shared by all threads
-    //
     private QueryQueue queryQueue;
 
     // The query scheduler, shared by all query threads
@@ -80,15 +79,12 @@ public class QueryThread implements Runnable {
     private ExecutionScheduler scheduler;
 
     // Parser for parsing xml-ql, 1 per thread
-    //
     private QueryParser queryParser;
 
     // Logical plan generator from parse tree, 1 per thread
-    //
     private logPlanGenerator logicalPlanGenerator;
 
     // The query optimizer, 1 per thread
-    //
     private QueryOptimizer queryOptimizer;
 
 

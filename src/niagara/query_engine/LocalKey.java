@@ -1,12 +1,5 @@
-// $Id: LocalKey.java,v 1.5 2002/05/07 03:10:55 tufte Exp $
+// $Id: LocalKey.java,v 1.6 2002/10/27 03:08:04 vpapad Exp $
 package niagara.query_engine;
-
-/*
- * $RCSfile:
- * $Revision:
- * $Date:
- * $Author:
- */
 
 import java.util.*;
 import org.w3c.dom.*;
