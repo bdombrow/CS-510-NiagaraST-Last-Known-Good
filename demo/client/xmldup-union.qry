@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+<plan top="cons">
+<dtdscan id="dtd">
+<url value="http://www.cse.ogi.edu/~vpapad/xml/numbers.xml"/>
+</dtdscan>
+<scan id="scan1" regexp="PLAY.NUM" input = "dtd"/>
+<dup id="dup" branch="3" input="scan1"/>
+<union id="union" input="dup dup dup"/>
+<construct id="cons" input="union">
+<NUM>$scan1</NUM>
+</construct>
+</plan>

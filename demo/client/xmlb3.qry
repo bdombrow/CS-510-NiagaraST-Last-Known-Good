@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">  
+<plan top="top_cons">
+
+<!-- Get 100 plays, selecting hits -> batters -->
+<firehosescan id="fh" host="state.cse.ogi.edu" port="5005" rate="0" 
+	type="gen" desc="http://www.cse.ogi.edu/~vpapad/xml/play.dtd" iters="10000"/>
+<scan id="gd" regexp="GAMEDATA" input="fh"/>
+
+<dup id="dup1" branch="2" input="gd"/>
+
+<scan id="play" regexp="PLAY" input="dup1"/>
+<dup id="dup2" branch="5" input="play"/>
+
+<!-- Run scored -->
+<scan id="rs_runner" regexp="$.RUNSCORED.RUNNER" type="content" input="dup2"/>
+<construct id="cons_rs_runner" clear="yes" input="rs_runner">
+<score>
+   <player>$rs_runner</player>
+   <points>1</points>
+</score>
+</construct>
+
+<!-- Base hit --> 
+<scan id="hit" root="$play" regexp="HIT" input="dup2"/>
+<scan id="batter" regexp="BATTER" type="content" input="hit"/>
+<scan id="bases" root="$hit" regexp="BASES" type="content" input="batter"/>
+<construct id="cons_base_hit" clear="yes" input="bases">
+<score>
+   <player>$batter</player>
+   <points>$bases</points>
+</score>
+</construct>
+
+<!-- Steal -->
+<scan id="steal" regexp="STEAL.RUNNER" type="content" input="dup2"/>
+<construct id="cons_steal" clear="yes" input="steal">
+<score>
+   <player>$steal</player>
+   <points>1</points>
+</score>
+</construct>
+
+<!-- Strikeout -->
+<scan id="strikeout" regexp="STRIKEOUT.PITCHER" type="content" input="dup2"/>
+<construct id="cons_strikeout" clear="yes" input="strikeout">
+<score>
+   <player>$strikeout</player>
+   <points>1</points>
+</score>
+</construct>
+
+<!-- Run allowed --> 
+<scan id="chargedto" root="$play" regexp="$.RUNSCORED.CHARGED_TO" type="content" input="dup2"/>
+<construct id="cons_chargedto" clear="yes" input="chargedto">
+<score>
+   <player>$chargedto</player>
+   <points>-1</points>
+</score>
+</construct>
+
+
+<!-- Winning pitcher -->
+<scan id="winning_pitcher" root="$gd" regexp="GAME_END.WINNING_PITCHER" type="content" input="dup1"/>
+<construct clear="yes" id="cons_wp" input="winning_pitcher">
+<score>
+    <player>$winning_pitcher</player>
+    <points>10</points>
+</score>
+</construct>
+
+<union id="union" input="cons_rs_runner cons_base_hit cons_steal cons_strikeout cons_chargedto cons_wp"/>
+
+<scan id="player" regexp="player" root="$cons_rs_runner" input="union"/>
+<scan id="points" regexp="points" root="$cons_rs_runner" input="player"/>
+
+<sum id="sum" input="points" groupby="$player" sumattr="$points"/>
+
+
+<!-- Get the team rosters -->
+<dtdscan id="league">
+<url value="http://www.cse.ogi.edu/~vpapad/xml/PetesLeague.xml"/>
+</dtdscan>
+<scan id="team" regexp="LEAGUESYSTEM.LEAGUE.TEAM" input="league"/>
+<scan id="teamname" regexp="NAME" type="content" input="team"/> 
+<scan id="plrid" root="$team" type="content" regexp="ROSTER.PLAYER.PLRID" input="teamname"/>
+
+<join id="join" right="$plrid" left="$player" 
+	physical="niagara.query_engine.PhysicalHashJoinOperator" input="sum plrid"/>
+
+<sum id="sum2" input="join" groupby="$teamname" sumattr="$sum"/>
+
+<sort id="sort" input="sum2" sort_by="$sum2" comparison="numeric" order="descending"/>
+
+<construct id="top_cons" input="sort">
+<team>
+<name>$teamname</name>
+<points>$sum2</points>
+</team>
+</construct>
+
+</plan>
