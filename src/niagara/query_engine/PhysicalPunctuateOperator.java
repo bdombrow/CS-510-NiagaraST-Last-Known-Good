@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalPunctuateOperator.java,v 1.6 2003/07/23 22:15:26 jinli Exp $
+  $Id: PhysicalPunctuateOperator.java,v 1.7 2003/12/06 06:47:07 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,6 +28,7 @@
 package niagara.query_engine;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 import org.w3c.dom.*;
 
@@ -54,16 +55,22 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 
     //Store for input values
     private AtomicEvaluator aeTimer, aeData;
-    private ArrayList vTimer, vData;
+    private ArrayList vTimer, vData, vPrevTimer;
 
     //Data template for creating punctuation
     StreamTupleElement tupleDataSample = null;
     private short rgiDataType[];
     private Document doc;
-    private double dblLastTimer = -1;
+    //private double dblLastTimer = -1;
+    private long dblLastTimer = -1;
+    private boolean fLastTimerFirstSet = false;
+    private Vector tupleBuffer = new Vector();
     
-    private static int WARP = 10;
-
+    private static int WARP = 1;  //Hack
+    
+    private boolean dataStreamClosed = false;
+    private boolean firstTimestamp = true;
+    
     public PhysicalPunctuateOperator() {
         setBlockingSourceStreams(new boolean[cInput]);
     }
@@ -94,6 +101,7 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 	aeTimer = new AtomicEvaluator(attrTimer.getName());
         aeTimer.resolveVariables(inputTupleSchemas[1-iDataInput],1-iDataInput);
 	vTimer = new ArrayList();
+	vPrevTimer = new ArrayList();
 
 	if (attrDataTimer != null) {
 	    aeData = new AtomicEvaluator(attrDataTimer.getName());
@@ -116,8 +124,11 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
     protected void nonblockingProcessSourceTupleElement (
 						 StreamTupleElement inputTuple,
 						 int streamId)
-	throws ShutdownException, InterruptedException {
+						 
+	throws ShutdownException, InterruptedException, OperatorDoneException {
+	
 	boolean fOutput = true;
+	StreamTupleElement tmpTuple;
 
 	if (streamId == iDataInput) {
 	    //Make sure this tuple doesn't match previously output
@@ -131,35 +142,82 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 	        // occassionally, and let multiple tuples have the
 	        // same timestamp. Its not as accurate, but it will
 	        // speed this up.
-                appendTimestamp(inputTuple);
-	        putTuple(inputTuple, 0);
+	        
+	        //Buffer the data tuples for a while before the dbLastTimer is set
+	        if (dblLastTimer == -1)
+			;//Jenny  tupleBuffer.add(inputTuple);  Jenny:  currently skip all the tuples before we get the first timestamp
+	        else { 
+	        	/*if (fLastTimerFirstSet) {
+	        		for (int i = 0; i < tupleBuffer.size(); i++) {
+	        			appendTimestamp((StreamTupleElement)tupleBuffer.get(i));
+	        			putTuple((StreamTupleElement)tupleBuffer.get(i), 0);
+	        		}
+	        		fLastTimerFirstSet = false;
+	        	} 
+	        	else {
+                	appendTimestamp(inputTuple);
+	        	putTuple(inputTuple, 0);
+	        	}*/
+         	
+			appendTimestamp(inputTuple);
+			putTuple(inputTuple, 0);
+	        }
 	    }
 
 	    //If we haven't already picked up a template tuple,
 	    // copy this one.
-	    if (tupleDataSample == null)
+	    //if (tupleDataSample == null)
+	    if ((tupleDataSample == null) && (dblLastTimer != -1))
 	        tupleDataSample = inputTuple;
 	} else {
-	    if (tupleDataSample != null) {
+	    //if (tupleDataSample != null) {
+
+		vPrevTimer.clear();
+		vPrevTimer = (ArrayList) vTimer.clone();
 		vTimer.clear();
 		aeTimer.getAtomicValues(inputTuple, vTimer);
 		if (vTimer.size() != 1)
 		    throw new PEException("Punctuate requires exactly one timer value");
 
-		dblLastTimer = Double.parseDouble((String) vTimer.get(0));
+		/*if (firstTimestamp) {
+			dblLastTimer = Long.parseLong((String) vTimer.get(0), 10);
+			dblLastTimer = dblLastTimer * WARP;
+			firstTimestamp = false;
+			return;
+		}*/
+		dblLastTimer = Long.parseLong((String) vTimer.get(0), 10);
+				
 
-		//Put the punctuation in the output
-		putTuple(createPunctuation(inputTuple, vTimer), 0);
-	    }
-	}
+		if (tupleDataSample != null){
+			putTuple(createPunctuation(inputTuple, vPrevTimer), 0);
+		}
+
+		
+/*		if (dblLastTimer == -1)
+		dblLastTimer = Long.parseLong((String) vTimer.get(0), 10);
+		else if (tupleDataSample != null){
+			dblLastTimer = Long.parseLong((String) vTimer.get(0), 10);
+			putTuple(createPunctuation(inputTuple, vTimer), 0);
+		}*/
+		
+		if (dataStreamClosed) 
+		    throw new OperatorDoneException();
+		
+		//if (!fLastTimerFirstSet && (dblLastTimer == -1))
+		//	fLastTimerFirstSet = true;
+		//else
+			//Put the punctuation in the output
+			//putTuple(createPunctuation(inputTuple, vTimer), 0);
+	   //if (tupleDataSample }
+	} 
     }
-
     private void appendTimestamp(StreamTupleElement inputTuple) {
     	String stTS;
         Element eleTS = doc.createElement(punctuateOp.STTIMESTAMPATTR);
-        //String stTS = String.valueOf(System.currentTimeMillis()*WARP);
+
         if (dblLastTimer == -1){
-		stTS = String.valueOf(System.currentTimeMillis());
+		//jenny, to set the TIMESTAMP before we get first value from timer
+		stTS = String.valueOf(System.currentTimeMillis()*WARP); 
         }else {
         	stTS = String.valueOf(dblLastTimer);
         }
@@ -177,7 +235,6 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 	    stTS = new String("*");
 	else
 	    stTS = new String("(," + String.valueOf(dblLastTimer)  + ")");
-	    //stTS = new String("(," + System.currentTimeMillis()*WARP + ")");
 	    
         eleTS.appendChild(doc.createTextNode(stTS));
         spe.appendAttribute(eleTS);
@@ -193,7 +250,8 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 	        throw new PEException("Punctuate-more than one value");
 	    
 	    double dbl = Double.parseDouble((String) vData.get(0));
-	    fOutput = (dbl >= dblLastTimer);
+	    //fOutput = (dbl >= dblLastTimer);  Jenny: think "==" should not be allowed;
+	    fOutput = (dbl > dblLastTimer);
 	    if (fOutput == false)
 	        System.out.println("PT - Tuple matches punctuation that has been output -- dropping it");
 	}
@@ -324,5 +382,12 @@ public class PhysicalPunctuateOperator extends PhysicalOperator {
 
     public int hashCode() {
         return getArity();
+    }
+    
+    public void streamClosed( int streamId) 
+    throws ShutdownException {
+	if (streamId == iDataInput) 
+    		dataStreamClosed = true;
+ 
     }
 }

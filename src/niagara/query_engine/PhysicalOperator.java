@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.34 2003/09/22 00:15:42 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.35 2003/12/06 06:47:07 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -596,6 +596,9 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 	    // and remove it from the list of streams to read from
 	    sourceStreams[streamId].setStatus(SourceTupleStream.Closed);
 	    activeSourceStreams.remove(streamId);
+	    
+	    // Let the operator now that one of its source stream is closed;
+            streamClosed(streamId);
 	    
 	    // If this causes the operator to become non-blocking, then
 	    // put out the current output and clear the current output
@@ -1205,4 +1208,10 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
     }
 
     protected abstract void opInitFrom(LogicalOp op);
+    
+    public void streamClosed( int streamId) 
+        throws ShutdownException {
+	return;
+    }
+    
 }
