@@ -1,9 +1,9 @@
-/* $Id: TupleSchema.java,v 1.1 2002/10/06 23:56:42 vpapad Exp $ */
+/* $Id: TupleSchema.java,v 1.2 2002/10/24 03:53:43 vpapad Exp $ */
 package niagara.query_engine;
 
 import java.util.*;
 
-import niagara.optimizer.colombia.ATTR;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
 
 /** A tuple schema maps attribute/variable names to tuple positions. */
@@ -31,7 +31,7 @@ public class TupleSchema {
     public TupleSchema copy() {
         TupleSchema ts = new TupleSchema();
         for (int i = 0; i < length; i++) {
-            ATTR attr = getVariable(i);
+            Attribute attr = getVariable(i);
             ts.addMapping(attr);
         }
         return ts;
@@ -44,7 +44,7 @@ public class TupleSchema {
     }
     
     /** Map a name to a new field */
-    public void addMapping(ATTR var) {
+    public void addMapping(Attribute var) {
         String name = var.getName();
         assert name2pos.get(name) == null : "Duplicate variable name";
         Integer pos = new Integer(length);
@@ -66,8 +66,8 @@ public class TupleSchema {
         return ((Integer) name2pos.get(name)).intValue();
     }
 
-    public ATTR getVariable(int position) {
-        return (ATTR) name2var.get(getVariableName(position));
+    public Attribute getVariable(int position) {
+        return (Attribute) name2var.get(getVariableName(position));
     }
         
     public String getVariableName(int position) {

@@ -1,13 +1,13 @@
-/* $Id: Variable.java,v 1.2 2002/10/06 23:40:13 vpapad Exp $ */
+/* $Id: Variable.java,v 1.3 2002/10/24 03:52:35 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.ArrayList;
 
-import niagara.optimizer.colombia.ATTR;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Domain;
 import niagara.query_engine.AtomicEvaluator;
 
-public class Variable implements Atom, ATTR {
+public class Variable implements Atom, Attribute {
     private String name;
     private Domain domain;
 
@@ -70,7 +70,7 @@ public class Variable implements Atom, ATTR {
     /**
      * @see niagara.optimizer.colombia.ATTR#copy()
      */
-    public ATTR copy() {
+    public Attribute copy() {
         return new Variable(name, domain);
     }
     

@@ -26,7 +26,7 @@ public class LogicalProperty {
     }
 
     /** Initialize a logical property with a Get Operator */
-    LogicalProperty(LogicalProperty LogProp, ATTR attr) {
+    LogicalProperty(LogicalProperty LogProp, Attribute attr) {
         cardinality = LogProp.getCardinality();
         assert cardinality >= 0;
         Attrs = new Attrs(attr);// attr is the only attribute at this point
@@ -60,7 +60,7 @@ public class LogicalProperty {
         return Attrs;
     }
     
-    public void addAttr(ATTR a) {
+    public void addAttr(Attribute a) {
         Attrs.add(a);
     }
     
@@ -105,15 +105,15 @@ public class LogicalProperty {
         return Attrs.GetAttrNames();
     }
 
-    ATTR GetAttr(int i) {
+    Attribute GetAttr(int i) {
         return Attrs.get(i);
     }
 
-    public ATTR GetAttr(String attrname) {
+    public Attribute GetAttr(String attrname) {
         return Attrs.GetAttr(attrname);
     }
 
-    boolean Contains(ATTR attr) {
+    boolean Contains(Attribute attr) {
         return Attrs.Contains(attr);
     }
 

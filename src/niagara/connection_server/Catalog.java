@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.6 2002/10/23 22:33:59 vpapad Exp $
+ * $Id: Catalog.java,v 1.7 2002/10/24 03:57:02 vpapad Exp $
  *
  */
 
@@ -17,7 +17,7 @@ import niagara.logical.Variable;
 import niagara.ndom.*;
 import niagara.utils.*;
 
-import niagara.optimizer.colombia.ATTR;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;

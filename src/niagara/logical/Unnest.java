@@ -1,9 +1,9 @@
-/* $Id: Unnest.java,v 1.1 2002/10/06 23:40:13 vpapad Exp $ */
+/* $Id: Unnest.java,v 1.2 2002/10/24 03:58:59 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.ArrayList;
 
-import niagara.optimizer.colombia.ATTR;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
@@ -12,15 +12,15 @@ import niagara.xmlql_parser.syntax_tree.regExp;
 
 public class Unnest extends unryOp {
     /** Variable name of the result */
-    private ATTR variable; 
+    private Attribute variable; 
     /** atribute to unnest */
-    private ATTR  root; 
+    private Attribute  root; 
     /** path to unnest */
     private regExp path; 
     
     public Unnest() {}
 
-    public Unnest(ATTR variable, ATTR root, regExp path) {
+    public Unnest(Attribute variable, Attribute root, regExp path) {
         this.variable = variable;
         this.root = root;
         this.path = path;
@@ -96,7 +96,7 @@ public class Unnest extends unryOp {
      * Returns the root attribute.
      * @return ATTR
      */
-    public ATTR getRoot() {
+    public Attribute getRoot() {
         return root;
     }
 
@@ -104,7 +104,7 @@ public class Unnest extends unryOp {
      * Returns the variable.
      * @return ATTR
      */
-    public ATTR getVariable() {
+    public Attribute getVariable() {
         return variable;
     }
 

@@ -1,3 +1,4 @@
+/* $Id: Attrs.java,v 1.3 2002/10/24 03:58:01 vpapad Exp $ */
 package niagara.optimizer.colombia;
 import java.util.ArrayList;
 
@@ -12,8 +13,8 @@ public class Attrs {
 
     ArrayList al;
 
-    public ATTR get(int i) {
-        return (ATTR) al.get(i);
+    public Attribute get(int i) {
+        return (Attribute) al.get(i);
     }
 
     public Attrs() {
@@ -24,12 +25,12 @@ public class Attrs {
         al = new ArrayList(size);
     }
 
-    public Attrs(ATTR attr) {
+    public Attrs(Attribute attr) {
         this();
         al.add(attr);
     }
 
-    Attrs(ATTR[] array, int size) {
+    Attrs(Attribute[] array, int size) {
         al.ensureCapacity(size);
         for (int i = 0; i < size; i++)
             al.add(array[i]);
@@ -56,7 +57,7 @@ public class Attrs {
         return result;
     }
 
-    ATTR GetAttr(String name) {
+    Attribute GetAttr(String name) {
         for (int i = 0; i < size(); i++)
             if (get(i).getName().equals(name))
                 return get(i);
@@ -67,11 +68,11 @@ public class Attrs {
         return al.size();
     }
 
-    ATTR GetAt(int i) {
-        return (ATTR) al.get(i);
+    Attribute GetAt(int i) {
+        return (Attribute) al.get(i);
     }
 
-    public void add(ATTR attr) {
+    public void add(Attribute attr) {
         al.add(attr);
     }
 
@@ -105,13 +106,13 @@ public class Attrs {
 
     }
 
-    public boolean Contains(ATTR Attr) {
+    public boolean Contains(Attribute Attr) {
         return Contains(Attr.getName());
     }
 
     public boolean Contains(ArrayList variables) {
         for (int i = 0; i < variables.size(); i++) {
-            ATTR a = (ATTR) variables.get(i);
+            Attribute a = (Attribute) variables.get(i);
             if (!Contains(a)) return false;
         }
         
@@ -167,7 +168,7 @@ public class Attrs {
     //int * CopyOutOne(int i);
 
     // Remove an element from Attrs
-    boolean RemoveAttr(ATTR Attr) {
+    boolean RemoveAttr(Attribute Attr) {
         int i;
         for (i = 0; i < size() - 1; i++)
             if (get(i).getName() == Attr.getName())

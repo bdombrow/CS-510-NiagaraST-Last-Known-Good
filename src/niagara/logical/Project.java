@@ -1,7 +1,7 @@
-/* $Id: Project.java,v 1.1 2002/10/06 23:40:13 vpapad Exp $ */
+/* $Id: Project.java,v 1.2 2002/10/24 03:58:59 vpapad Exp $ */
 package niagara.logical;
 
-import niagara.optimizer.colombia.ATTR;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
@@ -49,7 +49,7 @@ public class Project extends unryOp {
         // Maintain order of input tuple for projected attributes
         Attrs newAttrs = new Attrs(attrs.size());
         for (int i = 0; i < oldAttrs.size(); i++) {
-            ATTR a = oldAttrs.get(i);
+            Attribute a = oldAttrs.get(i);
             if (attrs.Contains(a))
                 newAttrs.add(a);
         }
