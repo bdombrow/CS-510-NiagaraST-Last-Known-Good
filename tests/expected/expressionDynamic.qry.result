@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?><niagara:results>
+
+<result><a>100</a><b>10</b>120</result>
+<result><a>200</a><b>20</b>240</result>
+<result><a>300</a><b>30</b>360</result>
+<result><a>400</a><b>40</b>480</result>
+<result><a>500</a><b>50</b>600</result>
+</niagara:results>
+
