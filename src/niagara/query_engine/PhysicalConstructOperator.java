@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstructOperator.java,v 1.16 2003/01/13 05:09:47 tufte Exp $
+  $Id: PhysicalConstructOperator.java,v 1.17 2003/02/21 07:01:52 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -26,7 +26,6 @@
 
 package niagara.query_engine;
 
-import java.util.ArrayList;
 import java.util.Vector;
 
 import org.w3c.dom.*;
@@ -97,7 +96,6 @@ public class PhysicalConstructOperator extends PhysicalOperator {
 
         // Add all the results in the result list as result tuples
         int numResults = resultList.size();
-
         int outSize = outputTupleSchema.getLength();
         for (int res = 0; res < numResults; ++res) {
             // Clone the input tuple 
@@ -265,8 +263,6 @@ public class PhysicalConstructOperator extends PhysicalOperator {
                     // Add the attribute as the result
                     // This better BE an attribute!
                     Attr a = (Attr) tupleElement.getAttribute(attributeId);
-                    System.err.println(
-                        "XXX adding attribute: " + name + "=" + a.getValue());
                     resultElement.setAttribute(name, a.getValue());
                 } else if (schema.getType() == varType.CONTENT_VAR) {
                     int attributeId =
