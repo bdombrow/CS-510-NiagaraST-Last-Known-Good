@@ -1,5 +1,5 @@
 /**
- * $Id: XercesJ2.java,v 1.3 2002/03/27 23:36:59 vpapad Exp $
+ * $Id: XercesJ2.java,v 1.4 2003/01/13 05:07:41 tufte Exp $
  *
  */
 
@@ -46,7 +46,7 @@ class XercesJ2 implements DOMImplementation {
         }
         catch (DOMException e) { // XXX vpapad
             System.err.println("Caught a DOMException while importing:"
-                + niagara.utils.XMLUtils.flatten(n) + " into " + niagara.utils.XMLUtils.flatten(d));
+                + niagara.utils.XMLUtils.flatten(n, true) + " into " + niagara.utils.XMLUtils.flatten(d, true));
             System.out.println("XXX vpapad: doc: " + d.hasChildNodes());
             System.out.println("XXX vpapad: offset: " + niagara.ndom.saxdom.BufferManager.getOffset(((niagara.ndom.saxdom.NodeImpl) n).getIndex()));
             niagara.ndom.saxdom.BufferManager.getPage(((niagara.ndom.saxdom.NodeImpl) n).getIndex()).show();

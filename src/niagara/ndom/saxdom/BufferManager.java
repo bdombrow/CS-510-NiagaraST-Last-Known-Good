@@ -1,5 +1,5 @@
 /**
- * $Id: BufferManager.java,v 1.18 2002/12/10 01:20:37 vpapad Exp $
+ * $Id: BufferManager.java,v 1.19 2003/01/13 05:07:44 tufte Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -727,13 +727,13 @@ public class BufferManager {
         pages[from / page_size].setNextSibling(from % page_size, to);
     }
     
-    public static void flatten(int index, StringBuffer sb) {
+    public static void flatten(int index, StringBuffer sb, boolean prettyprint) {
         switch (getEventType(index)) {
             case SAXEvent.START_ELEMENT :
-                flattenElement(index, sb);
+                flattenElement(index, sb, prettyprint);
                 break;
             case SAXEvent.START_DOCUMENT :
-                flattenElement(getFirstChildIndex(index), sb);
+                flattenElement(getFirstChildIndex(index), sb, prettyprint);
                 break;
             case SAXEvent.ATTR_NAME :
                 // It is not clear what an attribute should serialize to.
@@ -758,13 +758,14 @@ public class BufferManager {
         return free_pages.size();
     }
 
-    private static void flattenElement(int index, StringBuffer sb) {
+    private static void flattenElement(int index, StringBuffer sb, boolean prettyprint) {
         Page page = getPage(index);
         int offset = getOffset(index);
         int pageSize = page.getSize();
 
         int depth = -1;
-        boolean[] closedStartTag = new boolean[1024];
+        boolean[] closedStartTag = new boolean[1025];
+	boolean prevWasStartEl = false;
 
         String currentTag = null;
 
@@ -775,9 +776,12 @@ public class BufferManager {
                         sb.append(">");
                         closedStartTag[depth] = true;
                     }
+		    if(prevWasStartEl && prettyprint)
+			sb.append("\n");
                     sb.append("<").append(page.getEventString(offset));
                     depth++;
                     closedStartTag[depth] = false;
+		    prevWasStartEl = true; 
                     break;
                 case SAXEvent.END_ELEMENT :
                     if (closedStartTag[depth]) {
@@ -788,8 +792,11 @@ public class BufferManager {
                         sb.append("/>");
                     closedStartTag[depth] = true;
                     depth--;
+		    if(prettyprint)
+			sb.append("\n");
                     if (depth == -1)
                         return;
+		    prevWasStartEl = false; 
                     break;
                 case SAXEvent.TEXT :
                     if (depth < 0)
@@ -799,11 +806,13 @@ public class BufferManager {
                         closedStartTag[depth] = true;
                     }
                     sb.append(page.getEventString(offset));
+		    prevWasStartEl = false; 
                     break;
                 case SAXEvent.ATTR_NAME :
                     if (depth < 0 || closedStartTag[depth])
                         throw new PEException("Attribute outside an element");
                     sb.append(" ").append(page.getEventString(offset));
+		    prevWasStartEl = false; 
                     break;
                 case SAXEvent.ATTR_VALUE :
                     if (depth < 0 || closedStartTag[depth])
@@ -811,6 +820,7 @@ public class BufferManager {
                     sb.append("=").append("\"").append(
                         page.getEventString(offset)).append(
                         "\"");
+		    prevWasStartEl = false; 
                     break;
                 default :
                     throw new PEException("Unexpected event type");
