@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.34 2003/07/23 23:14:17 jinli Exp $
+<!-- $Id: queryplan.dtd,v 1.35 2003/07/24 00:04:24 jinli Exp $
      DTD for query plans -->
 
 <!-- 
@@ -15,7 +15,7 @@
 		    dtdscan | resource | constant | timer |
 		    prefix | punctuate | send | display | topn |
 		    firehosescan | filescan | construct | 
-		    bucket | partitionavg |
+		    bucket | partitionavg | partitionmax |
 		    accumulate | nest | magic_construct )+>
 		    
 <!ATTLIST plan top IDREF        #REQUIRED
@@ -128,7 +128,16 @@
 	  maxattr  CDATA	       #REQUIRED
 	  emptygroupvalue  CDATA       #REQUIRED
 	  %StandardAttributes;>
-
+	  
+<!ELEMENT partitionmax EMPTY>
+<!ATTLIST partitionmax
+	  groupby  CDATA	       #REQUIRED
+	  maxattr  CDATA	       #REQUIRED
+	  landmark CDATA	       #REQUIRED
+	  range    CDATA	       ""
+	  emptygroupvalue  CDATA       #REQUIRED
+	  %StandardAttributes;>
+	  
 <!ELEMENT incravg     EMPTY>
 <!ATTLIST incravg 
 	  groupby  CDATA	       #REQUIRED
