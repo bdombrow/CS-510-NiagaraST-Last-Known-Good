@@ -1,4 +1,4 @@
-/* $Id: NodeVector.java,v 1.3 2003/09/22 00:11:42 vpapad Exp $ */
+/* $Id: NodeVector.java,v 1.4 2003/09/26 18:12:38 vpapad Exp $ */
 package niagara.utils;
 
 /**
@@ -9,9 +9,11 @@ package niagara.utils;
  * @author Kristin Tufte
  */
 
+import niagara.query_engine.NodeConsumer;
+
 import org.w3c.dom.Node;
 
-public class NodeVector {
+public class NodeVector implements NodeConsumer {
 
     /* Contains a list of the key value lists */
     Node[] list;
@@ -82,6 +84,10 @@ public class NodeVector {
 	listSize++;
     }
 
+    public void consume(Node n) {
+        add(n);
+    }
+    
     /** add - adds a node to the list 
      * @param str the string to be appended
      */

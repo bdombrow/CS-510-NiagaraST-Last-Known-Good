@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: StreamPunctuationElement.java,v 1.4 2003/03/15 17:58:23 ptucker Exp $
+  $Id: StreamPunctuationElement.java,v 1.5 2003/09/26 18:12:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -116,9 +116,7 @@ public final class StreamPunctuationElement extends StreamTupleElement {
 	    new StreamPunctuationElement(this.partial, tupleSize);
 
 	// Add all the attributes of the current tuple to the clone
-	//
 	returnElement.appendTuple(this);
-        returnElement.setTimeStamp(timeStamp);
 
 	// Return the clone
 	//

@@ -1,6 +1,5 @@
-
 /**********************************************************************
-  $Id: StreamTupleElement.java,v 1.12 2003/07/27 02:40:51 tufte Exp $
+  $Id: StreamTupleElement.java,v 1.13 2003/09/26 18:12:38 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -25,18 +24,14 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
-
 package niagara.utils;
 
 /**
  * This is the <code>StreamTupleElement</code> class that is the unit
  * of transfer of tuples across a stream. Tuples are arrays of Nodes.
  *
- * @version 1.0
- *
  * @see Stream
  */
-
 import niagara.magic.MagicBaseNode;
 
 import org.w3c.dom.Document;
@@ -45,17 +40,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
 public class StreamTupleElement {
-
     // Members to create an expandable array of nodes
     protected Node tuple[];
     protected int allocSize;
     protected int tupleSize;
-
     // A boolean flag that indicates whether this tuple represents
     // a (potentially) partial result
-    //
     protected boolean partial;
-    protected long timeStamp;
 
     /*
      * Constructor that initializes a tuple
@@ -63,15 +54,11 @@ public class StreamTupleElement {
      * @param partial If this is true, the tuple represents a partial result;
      *                else it represents a final result
      */
-
-    public StreamTupleElement (boolean partial) {
-
-	// Initialize the tuple vector with the capacity
-	createTuple(8);
-        timeStamp = 0;
-	this.partial = partial;
+    public StreamTupleElement(boolean partial) {
+        // Initialize the tuple vector with the capacity
+        createTuple(8);
+        this.partial = partial;
     }
-
 
     /*
      * The constructor that initializes the tuple with initial capacity
@@ -80,33 +67,30 @@ public class StreamTupleElement {
      *                else it represents a final result
      * @param capacity The initial capacity of the tuple
      */
-    public StreamTupleElement (boolean partial, int capacity) {
-	// Initialize the tuple vector with the capacity
-	if(capacity <= 0) {
-	    createTuple(8);
-	} else {
-	    createTuple(capacity);
-	}
-        timeStamp = 0;
-	this.partial = partial;
+    public StreamTupleElement(boolean partial, int capacity) {
+        // Initialize the tuple vector with the capacity
+        if (capacity <= 0) {
+            createTuple(8);
+        } else {
+            createTuple(capacity);
+        }
+        this.partial = partial;
     }
 
     private void createTuple(int capacity) {
-	allocSize = capacity;
-	tuple = new Node[allocSize];
-	tupleSize = 0;
+        allocSize = capacity;
+        tuple = new Node[allocSize];
+        tupleSize = 0;
     }
-     
+
     /**
      * This function return the number of attributes in the tuple element
      *
      * @return The number of attributes
      */
-
-    public int size () {
-	return tupleSize;
+    public int size() {
+        return tupleSize;
     }
-
 
     /**
      * This function is used to determine whether the tuple represents a
@@ -114,20 +98,12 @@ public class StreamTupleElement {
      *
      * @return True if the tuple represents a partial result; false otherwise
      */
-
-    public boolean isPartial () {
-	return partial;
+    public boolean isPartial() {
+        return partial;
     }
 
     public boolean isPunctuation() {
-	return false;
-    }
-
-    public long getTimeStamp() {
-        return timeStamp;
-    }
-    public void setTimeStamp(long ts) {
-        this.timeStamp = ts;
+        return false;
     }
 
     /**
@@ -135,15 +111,11 @@ public class StreamTupleElement {
      *
      * @param attribute The attribute to be appended
      */
-
-    public void appendAttribute (Node attribute) {
-	if(tupleSize >= allocSize) {
-	    expandTuple(tupleSize);
-	}
-	tuple[tupleSize] = attribute;
-	tupleSize++;
+    public void appendAttribute(Node attribute) {
+        if (tupleSize >= allocSize)
+            expandTuple(tupleSize);
+        tuple[tupleSize++] = attribute;
     }
-
 
     /**
      * This function appends all the attributes of the tuple element passed
@@ -152,19 +124,16 @@ public class StreamTupleElement {
      * @param tupleElement The tuple whose attributes are to be appended to
      *                     the current tuple
      */
-
     public void appendTuple(StreamTupleElement otherTuple) {
-	// Loop over all the attributes of the other tuple and append them
-	while(tupleSize+otherTuple.tupleSize > allocSize) {
-	    expandTuple(tupleSize+otherTuple.tupleSize);
-	}
+        // Loop over all the attributes of the other tuple and append them
+        if (tupleSize + otherTuple.tupleSize > allocSize)
+            expandTuple(tupleSize + otherTuple.tupleSize);
 
-	for (int i = 0; i< otherTuple.tupleSize; i++) {
-	    tuple[tupleSize+i] = otherTuple.tuple[i];
-	}
-	tupleSize+=otherTuple.tupleSize;;
+        for (int i = 0; i < otherTuple.tupleSize; i++)
+            tuple[tupleSize + i] = otherTuple.tuple[i];
+
+        tupleSize += otherTuple.tupleSize;
     }
-
 
     /**
      * This function returns an attribute given its position
@@ -173,20 +142,21 @@ public class StreamTupleElement {
      *
      * @return The desired attribute
      */
-
-    public Node getAttribute (int position) {
-	assert position < tupleSize : "Invalid position " +
-	    position + " tuple size is " + tupleSize;
-	return tuple[position];
+    public Node getAttribute(int position) {
+        assert position
+            < tupleSize : "Invalid position "
+                + position
+                + " tuple size is "
+                + tupleSize;
+        return tuple[position];
     }
 
-
     public void setAttribute(int position, Node value) {
-	while(position >= allocSize)
-	    expandTuple(position);
+        while (position >= allocSize)
+            expandTuple(position);
         if (tupleSize <= position)
-            tupleSize = position+1;
-            
+            tupleSize = position + 1;
+
         tuple[position] = value;
     }
 
@@ -202,83 +172,81 @@ public class StreamTupleElement {
     /** Copy of this tuple, with space reserved for up to `size` attributes */
     public StreamTupleElement copy(int size) {
         // XML-QL query plans will come in with size = 0
-        if (tupleSize > size) size = tupleSize;
+        if (tupleSize > size)
+            size = tupleSize;
         // Create a new stream tuple element with the same partial semantics
-        StreamTupleElement returnElement = 
+        StreamTupleElement returnElement =
             new StreamTupleElement(partial, size);
-        returnElement.setTimeStamp(timeStamp);
-        
+
         // Add all the attributes of the current tuple to the clone
         System.arraycopy(tuple, 0, returnElement.tuple, 0, tupleSize);
         returnElement.tupleSize = tupleSize;
-    
+
         // Return the clone
         return returnElement;
     }
-    
+
     /** Copy parts of this tuple to a new tuple, with space reserved for up to
-     * `size` attributes */
+     * <code>size</code> attributes */
     public StreamTupleElement copy(int size, int attributeMap[]) {
         assert size >= attributeMap.length : "Insufficient tuple capacity";
         // Create a new stream tuple element with the same partial semantics
-        StreamTupleElement returnElement = 
+        StreamTupleElement returnElement =
             new StreamTupleElement(partial, size);
-        
-        // XXX vpapad: what are we supposed to do about timestamp?
-        
-        for (int i = 0; i < attributeMap.length; i++) {
-        	if(attributeMap[i] == -1)
-        		returnElement.tuple[i] = null;
-        	else
-            	returnElement.tuple[i] = tuple[attributeMap[i]];
+
+        Node[] newTuple = returnElement.tuple;
+        for (int to = 0; to < attributeMap.length; to++) {
+            int from = attributeMap[to];
+            if (from >= 0)
+                newTuple[to] = tuple[from];
         }
         returnElement.tupleSize = attributeMap.length;
-                
+
         return returnElement;
     }
 
     /** Copy parts of this tuple into another tuple, starting at offset */
-    public void copyInto(StreamTupleElement ste, int offset, int attributeMap[]) {
+    public void copyInto(
+        StreamTupleElement ste,
+        int offset,
+        int attributeMap[]) {
         // If this tuple is partial, the result should be partial        
         if (partial)
             ste.partial = true;
-            
-        // XXX vpapad: what are we supposed to do about timestamp?
-        
+
         for (int i = 0; i < attributeMap.length; i++)
             ste.tuple[offset + i] = tuple[attributeMap[i]];
         ste.tupleSize += attributeMap.length;
     }
-    
+
     /**
      * This function returns a string representation of the stream tuple element
      *
      * @return The string representation
      */
-    public String toString () {
-	return (tuple.toString() + "; Partial = " + partial);
+    public String toString() {
+        return (tuple.toString() + "; Partial = " + partial);
     }
 
     public Element toEle(Document doc) {
         Element ret = doc.createElement("StreamTupleElement");
-        if(partial) 
-	    ret.setAttribute("PARTIAL", "TRUE");
-        else 
-	    ret.setAttribute("PARTIAL", "FALSE");
-        ret.setAttribute("TIMESTAMP", ""+timeStamp);
-        
-        for(int i=0; i<tupleSize; i++) {
+        if (partial)
+            ret.setAttribute("PARTIAL", "TRUE");
+        else
+            ret.setAttribute("PARTIAL", "FALSE");
+
+        for (int i = 0; i < tupleSize; i++) {
             Element tele = doc.createElement("Entry");
             Node tmp = tuple[i];
-	    assert tmp instanceof Element || tmp instanceof Text :
-		"KT non elem/string attr in TupleElement";
-	    
-            if(tmp instanceof Element) {
+            assert tmp instanceof Element
+                || tmp instanceof Text : "KT non elem/string attr in TupleElement";
+
+            if (tmp instanceof Element) {
                 tele.setAttribute("Type", "Element");
                 tele.appendChild(tmp);
-            } else if(tmp instanceof Text) {
+            } else if (tmp instanceof Text) {
                 tele.setAttribute("Type", "Text");
-		tele.appendChild(tmp); //KT -added this, think it is needed
+                tele.appendChild(tmp); //KT -added this, think it is needed
             }
             ret.appendChild(tele);
         }
@@ -286,52 +254,42 @@ public class StreamTupleElement {
     }
 
     public StreamTupleElement(Element ele) {
-
-        if(ele.getAttribute("PARTIAL").equals("TRUE")) 
+        if (ele.getAttribute("PARTIAL").equals("TRUE"))
             partial = true;
-        else partial = false;
+        else
+            partial = false;
 
-        String ts = ele.getAttribute("TIMESTAMP");
-        timeStamp = Long.parseLong(ts);
+        createTuple(8);
 
-	createTuple(8);
-
-        for(Node c = ele.getFirstChild(); c!=null; c=c.getNextSibling()) {
-            Element e = (Element)c;
+        for (Node c = ele.getFirstChild(); c != null; c = c.getNextSibling()) {
+            Element e = (Element) c;
             String type = e.getAttribute("Type");
-	    assert type.equals("Element") || type.equals("Text"):
-		"KT invalid type " + type;
-	    appendAttribute(e.getFirstChild());
+            assert type.equals("Element")
+                || type.equals("Text") : "KT invalid type " + type;
+            appendAttribute(e.getFirstChild());
         }
     }
 
     private void expandTuple(int newSize) {
-	if(newSize < allocSize)
-	    return;
-	int newAllocSize = allocSize*2;
-	while(newSize >= newAllocSize)
-	    newAllocSize*=2;
+        if (newSize < allocSize)
+            return;
+        int newAllocSize = allocSize * 2;
+        while (newSize >= newAllocSize)
+            newAllocSize *= 2;
 
-	Node[] newTuple = new Node[newAllocSize];
-	for(int i=0; i<tupleSize; i++) {
-	    newTuple[i] = tuple[i];
-	}
-	tuple = newTuple;
-	allocSize = newAllocSize;
+        Node[] newTuple = new Node[newAllocSize];
+        for (int i = 0; i < tupleSize; i++) {
+            newTuple[i] = tuple[i];
+        }
+        tuple = newTuple;
+        allocSize = newAllocSize;
     }
-    
+
     public void setMagicTuple() {
-	for(int i = 0; i<tupleSize; i++) {
-	    if(tuple[i] instanceof MagicBaseNode) {
-		((MagicBaseNode)tuple[i]).setTuple(this);
-	    } 
-	}
+        for (int i = 0; i < tupleSize; i++) {
+            if (tuple[i] instanceof MagicBaseNode) {
+                ((MagicBaseNode) tuple[i]).setTuple(this);
+            }
+        }
     }
-
 }
-
-
-
-
-
-
