@@ -33,7 +33,8 @@ public class NIElement extends NINode {
 
     /* reference to dom element associated with this NIElement */
     private TXElement domElement; 
-    private BooleanHolder writeable;// reference to writeable bit in NIDocument 
+    /*private BooleanHolder writeable;*/// reference to writeable bit in NIDocument 
+    private int writeableIdx;
     private boolean initialized;  // indicates if dom_element ref has been set up 
     private NIDocument ownerDoc; 
     private MatchTemplate matcher; /* changes need to be propagated here */
@@ -47,7 +48,8 @@ public class NIElement extends NINode {
     NIElement() {
 	domElement = null;
 	ownerDoc = null;
-	writeable = null;
+	/*writeable = null; */
+	writeableIdx=-1;
 	matcher = null;
 	initialized = false;
     }
@@ -64,11 +66,15 @@ public class NIElement extends NINode {
      */
 
     /* FOR CONVERSION FROM DOM */
-    void initialize(TXElement _domElement, BooleanHolder _writeable, 
-		    NIDocument _ownerDoc) {
+    /*void initialize(TXElement _domElement, BooleanHolder _writeable, 
+		    NIDocument _ownerDoc) { */
+    void initialize(TXElement _domElement, int _writeableIdx,
+		    NIDocument _ownerDoc) { 
+
 	domElement = _domElement;
 	ownerDoc = _ownerDoc;
-	writeable = _writeable;
+	/* writeable = _writeable */
+	writeableIdx = _writeableIdx;
 	initialized = true;
 	return;
     }
@@ -387,7 +393,8 @@ public class NIElement extends NINode {
      */
    public NIElement makeWriteable() 
     throws NITreeException {
-        if(writeable.getValue() == true) {
+        /*if(writeable.getValue() == true) { */
+        if(ownerDoc.isWriteable(writeableIdx) == true) { 
             /* I'm already writeable, just return, yipee!! */
 	    return this;
 	}
@@ -410,7 +417,8 @@ public class NIElement extends NINode {
      */
    public void verifyWriteable() 
     throws NITreeException {
-       if(writeable.getValue() == true) {
+       /*if(writeable.getValue() == true) { */
+        if(ownerDoc.isWriteable(writeableIdx) == true) { 
 	   /* I'm already writeable, just return, yipee!! */
 	   return;
        } else {
