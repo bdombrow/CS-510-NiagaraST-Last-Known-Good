@@ -1,5 +1,5 @@
 /**
- * $Id: Page.java,v 1.10 2002/05/02 22:04:56 vpapad Exp $
+ * $Id: Page.java,v 1.11 2002/12/10 01:20:37 vpapad Exp $
  *
  * A read-only implementation of the DOM Level 2 interface,
  * using an array of SAX events as the underlying data store.
@@ -8,9 +8,10 @@
 
 package niagara.ndom.saxdom;
 
+import java.util.Arrays;
+
 import niagara.ndom.SAXDOMParser;
 import niagara.utils.PEException;
-import java.util.Arrays;
 
 /**
  * Page data describe a sequence of SAX events, using three parallel arrays:
@@ -40,6 +41,8 @@ public class Page {
     // Parser that is currently adding events to this page
     private SAXDOMParser parser; 
 
+    public static final int NO_NEXT_SIBLING = -1;
+    
     public Page(int size, int number) {
         event_type = new byte[size];
         event_string = new String[size];
@@ -53,10 +56,10 @@ public class Page {
     /** Prepare page for reuse 
      */
     private void clear() {
-        Arrays.fill(event_type, SAXEvent.EMPTY);
         Arrays.fill(event_string, null);
-        Arrays.fill(next_sibling, -1);
-
+        Arrays.fill(event_type, SAXEvent.EMPTY);
+        Arrays.fill(next_sibling, NO_NEXT_SIBLING);
+        
         if (previous != null)
             previous.setNext(null);
 
@@ -64,8 +67,7 @@ public class Page {
             next.setPrevious(null);
 
         previous = next = null;
-        pin_count = 0;
-        current_offset = 0;
+        pin_count = current_offset = 0;
         parser = null;
     }
 
@@ -103,25 +105,17 @@ public class Page {
     }
 
     public byte getEventType(int offset) {
-        if (pin_count <= 0) { // XXX vpapad
-            System.out.println("XXX vpapad: accessing freed page" + this);
-        }
-        
+        assert (pin_count > 0 && offset <= current_offset) : "accessing freed page";
         return event_type[offset];
     }
 
     public String getEventString(int offset) {
-        if (pin_count <= 0) { // XXX vpapad
-            System.out.println("XXX vpapad: accessing freed page");
-        }
-
+        assert (pin_count > 0 && offset <= current_offset) : "accessing freed page";
         return event_string[offset];
     }
 
     public int getNextSibling(int offset) {
-        if (pin_count <= 0) { // XXX vpapad
-            System.out.println("XXX vpapad: accessing freed page");
-        }
+        assert pin_count > 0  && offset <= current_offset: "accessing freed page";
         return next_sibling[offset];
     }
 
