@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalNLJoinOperator.java,v 1.3 2002/03/26 23:52:31 tufte Exp $
+  $Id: PhysicalNLJoinOperator.java,v 1.4 2002/04/08 19:03:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -58,6 +58,8 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
     //
     private predicate joinPredicate;
 
+    private PredicateEvaluator predEval;
+
     // The array of lists of partial tuple elements that are read from the source
     // streams. The index of the array corresponds to the index of the stream
     // from which the tuples were read.
@@ -108,6 +110,8 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
 		// Set the predicate for evaluating the select
 		//
 		this.joinPredicate = logicalJoinOperator.getPredicate();
+
+                predEval = new PredicateEvaluator(joinPredicate);
 
 		// Initialize the array of lists of partial source tuples - there are two
 		// input stream, so the array is of size 2
@@ -256,7 +260,7 @@ public class PhysicalNLJoinOperator extends PhysicalOperator {
 			}
 			// Check whether the predicate is satisfied
 			//
-			if (predEval.eval(leftTuple, rightTuple, joinPredicate)) {
+			if (predEval.eval(leftTuple, rightTuple)) {
 
 				// Yes, it is satisfied - so create a result. The result is
 				// potentially partial if either of the tuples is potentially

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalGroupOperator.java,v 1.7 2002/03/26 23:52:31 tufte Exp $
+  $Id: PhysicalGroupOperator.java,v 1.8 2002/04/08 19:03:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -219,6 +219,8 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
     //
     private Vector groupAttributeList;
 
+    private Hasher hasher;
+
     // This is the hash table for performing grouping efficiently
     //
     private Hashtable hashtable;
@@ -281,6 +283,8 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
 	groupAttributeList = grouping.getVarList();
 
+        hasher = new Hasher(groupAttributeList);
+
 	// Initialize the hash table
 	//
 	hashtable = new Hashtable();
@@ -317,7 +321,7 @@ public abstract class PhysicalGroupOperator extends PhysicalOperator {
 
 	// First get the hash code for the grouping attributes
 	//
-	String hashKey = predEval.hashKey(tupleElement, groupAttributeList);
+	String hashKey = hasher.hashKey(tupleElement);
 
 	// If this is not a valid hash code, then nothing to do
 	//	    

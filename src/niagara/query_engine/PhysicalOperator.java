@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.8 2002/03/26 23:52:31 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.9 2002/04/08 19:03:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -102,10 +102,6 @@ public abstract class PhysicalOperator {
      * The reference to the data manager
      */
     static DataManager DM; //Trigger 
-
-    // KT each operator has its own instance of a predicate
-    // evaluator - PredicateEvaluator is no longer static
-    protected PredicateEvaluator predEval;
 
     ///////////////////////////////////////////////////
     // Nested classes private to Physical Operator
@@ -327,8 +323,6 @@ public abstract class PhysicalOperator {
 	//
 	//lastReadSourceStream = numSourceStreams - 1;
 	lastReadSourceStream = 0;
-
-	predEval = new PredicateEvaluator();
     }
 
 

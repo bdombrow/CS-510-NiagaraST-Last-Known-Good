@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalAverageOperator.java,v 1.4 2002/03/26 23:52:31 tufte Exp $
+  $Id: PhysicalAverageOperator.java,v 1.5 2002/04/08 19:03:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,7 @@
 
 package niagara.query_engine;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import niagara.ndom.*;
 import org.w3c.dom.*;
@@ -150,7 +150,11 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
     //
     schemaAttribute averageAttribute;
 
+    private AtomicEvaluator ae;
+
     private Document doc;
+
+    private ArrayList atomicValues;
 
     ////////////////////////////////////////////////////////////////////
     // These are the methods of the class                             //
@@ -184,6 +188,8 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	// Get the averaging attribute of the average logical operator
 	//
 	averageAttribute = ((averageOp) logicalOperator).getAveragingAttribute();
+        ae = new AtomicEvaluator(averageAttribute);
+        atomicValues = new ArrayList();
     }
 
 
@@ -217,8 +223,8 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 
 	// First get the atomic values
 	//
-	Vector atomicValues = 
-	    predEval.getAtomicValues(tupleElement, averageAttribute);
+        atomicValues.clear();
+        ae.getAtomicValues(tupleElement, atomicValues);
 
 	// If there is not exactly one atomic value, skip
 	//
@@ -226,10 +232,9 @@ public class PhysicalAverageOperator extends PhysicalGroupOperator {
 	    return null;
 	}
 	else {
-
 	    // Get the string atomic value
 	    //
-	    String atomicValue = (String) atomicValues.elementAt(0);
+	    String atomicValue = (String) atomicValues.get(0);
 
 	    // Try to convert to double - if that fails, just return null
 	    //

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSelectOperator.java,v 1.3 2002/03/26 23:52:31 tufte Exp $
+  $Id: PhysicalSelectOperator.java,v 1.4 2002/04/08 19:03:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -53,7 +53,7 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 
     // The is the predicate to apply to the tuples
     //
-    private predicate pred;
+    private PredicateEvaluator predEval;
     
 
     ///////////////////////////////////////////////////
@@ -75,9 +75,9 @@ public class PhysicalSelectOperator extends PhysicalOperator {
      */
      
     public PhysicalSelectOperator (op logicalOperator,
-								   Stream[] sourceStreams,
-								   Stream[] destinationStreams,
-								   Integer responsiveness) {
+                                   Stream[] sourceStreams,
+                                   Stream[] destinationStreams,
+                                   Integer responsiveness) {
 		
 		// Call the constructor of the super class
 		//
@@ -90,9 +90,8 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 		//
 		selectOp logicalSelectOperator = (selectOp) logicalOperator;
 		
-		// Set the predicate for evaluating the select
-		//
-		this.pred = logicalSelectOperator.getPredicate();
+		predEval =  new PredicateEvaluator(logicalSelectOperator.
+                                                   getPredicate());
 
 		// XXX hack
                 clear = ((selectOp) logicalOperator).getClear();
@@ -121,7 +120,7 @@ public class PhysicalSelectOperator extends PhysicalOperator {
 		    
 	// Evaluate the predicate on the desired attribute of the tuple
 	//
-	if (predEval.eval(tupleElement, pred)) {
+	if (predEval.eval(tupleElement)) {
 	    // If the predicate is satisfied, add the tuple to the result
 	    //
 	    // XXX hack

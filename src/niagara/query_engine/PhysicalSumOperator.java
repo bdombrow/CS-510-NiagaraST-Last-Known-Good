@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSumOperator.java,v 1.4 2002/03/26 23:52:31 tufte Exp $
+  $Id: PhysicalSumOperator.java,v 1.5 2002/04/08 19:03:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,7 @@
 
 package niagara.query_engine;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import org.w3c.dom.*;
 
@@ -150,6 +150,9 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
     //
     schemaAttribute summingAttribute;
 
+    AtomicEvaluator ae;
+
+    ArrayList atomicValues;
 
     ////////////////////////////////////////////////////////////////////
     // These are the methods of the class                             //
@@ -183,6 +186,8 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 	// Get the summing attribute of the sum logical operator
 	//
 	summingAttribute = ((SumOp) logicalOperator).getSummingAttribute();
+        ae = new AtomicEvaluator(summingAttribute);
+        atomicValues = new ArrayList();
     }
 
 
@@ -217,9 +222,8 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 	throws OpExecException {
 
 	// First get the atomic values
-	//
-	Vector atomicValues = 
-	    predEval.getAtomicValues(tupleElement, summingAttribute);
+        atomicValues.clear();
+        ae.getAtomicValues(tupleElement, atomicValues);
 
 	// If there is not exactly one atomic value, skip
 	//
@@ -231,7 +235,7 @@ public class PhysicalSumOperator extends PhysicalGroupOperator {
 
 	    // Get the string atomic value
 	    //
-	    String atomicValue = (String) atomicValues.elementAt(0);
+	    String atomicValue = (String) atomicValues.get(0);
 
 	    // Try to convert to double - if that fails, just return null
 	    //

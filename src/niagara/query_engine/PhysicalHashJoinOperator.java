@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalHashJoinOperator.java,v 1.3 2002/03/26 23:52:31 tufte Exp $
+  $Id: PhysicalHashJoinOperator.java,v 1.4 2002/04/08 19:03:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -53,14 +53,8 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
     //
     private static final boolean[] blockingSourceStreams = { false, false };
 
-    // The predicate used for joining
-    //
-    private predicate joinPredicate;
-
-    // The array of vectors of attributes in used for joining. The index of the
-    // array corresponds to index of the input stream.
-    //
-    private Vector[] equalityJoinAttributes;
+    private PredicateEvaluator predEval;
+    private Hasher[] hashers;
 
     // The array of hash tables of partial tuple elements that are read from the
     // source streams. The index of the array corresponds to the index of the
@@ -107,17 +101,11 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 	//
 	joinOp logicalJoinOperator = (joinOp) logicalOperator;
 
-	// Set the predicate for evaluating the select
-	//
-	this.joinPredicate = logicalJoinOperator.getPredicate();
+	predEval = new PredicateEvaluator(logicalJoinOperator.getPredicate());
 
-	// Initialize the array of equality join attributes - there are two
-	// input streams, so the size of the array is 2
-	//
-	equalityJoinAttributes = new Vector[2];
-
-	equalityJoinAttributes[0] = logicalJoinOperator.getLeftEqJoinAttr();
-	equalityJoinAttributes[1] = logicalJoinOperator.getRightEqJoinAttr();
+        hashers = new Hasher[2];
+        hashers[0] = new Hasher(logicalJoinOperator.getLeftEqJoinAttr());
+        hashers[1] = new Hasher(logicalJoinOperator.getRightEqJoinAttr());
 
 	// Initialize the array of hash tables of partial source tuples - there are
 	// two input stream, so the array is of size 2
@@ -157,8 +145,7 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 						 ResultTuples result) {
 	// Get the hash code corresponding to the tuple element
 	//
-	String hashKey = predEval.hashKey(tupleElement,
-					   equalityJoinAttributes[streamId]);
+	String hashKey = hashers[streamId].hashKey(tupleElement);
 
 	// First add the tuple element to the appropriate hash table
 	//
@@ -288,7 +275,7 @@ public class PhysicalHashJoinOperator extends PhysicalOperator {
 
 	    // Check whether the predicate is satisfied
 	    //
-	    if (predEval.eval(leftTuple, rightTuple, joinPredicate)) {
+	    if (predEval.eval(leftTuple, rightTuple)) {
 
 		// Yes, it is satisfied - so create a result. The result is
 		// potentially partial if either of the tuples is potentially

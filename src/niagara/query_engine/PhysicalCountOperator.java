@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalCountOperator.java,v 1.4 2002/03/26 23:52:31 tufte Exp $
+  $Id: PhysicalCountOperator.java,v 1.5 2002/04/08 19:03:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,7 +28,7 @@
 
 package niagara.query_engine;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import org.w3c.dom.*;
 
@@ -123,6 +123,10 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
     schemaAttribute countingAttribute;
 
 
+    AtomicEvaluator ae;
+
+    ArrayList atomicValues;
+
     ////////////////////////////////////////////////////////////////////
     // These are the methods of the class                             //
     ////////////////////////////////////////////////////////////////////
@@ -155,6 +159,8 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
 	// Get the counting attribute of the Count logical operator
 	//
 	countingAttribute = ((CountOp) logicalOperator).getCountingAttribute();
+        ae = new AtomicEvaluator(countingAttribute);
+        atomicValues = new ArrayList();
     }
 
 
@@ -187,8 +193,8 @@ public class PhysicalCountOperator extends PhysicalGroupOperator {
 
 	// First get the atomic values
 	//
-	Vector atomicValues = 
-	    predEval.getAtomicValues(tupleElement, countingAttribute);
+        atomicValues.clear();
+        ae.getAtomicValues(tupleElement, atomicValues);
 
 	// If there is not exactly one atomic value, skip
 	//
