@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.4 2002/09/25 20:21:24 ptucker Exp $
+  $Id: SinkTupleStream.java,v 1.5 2003/02/26 06:35:33 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -50,6 +50,10 @@ public final class SinkTupleStream {
 
     private int status;
 
+    // if sendImmediate is true, tuples are not buffered,
+    // page is sent immediately
+    private boolean sendImmediate = false;
+
     //possible statuses for sink streams
     public static final int Open = 0;
     public static final int Closed = 1; // closed indicates EOS
@@ -78,6 +82,10 @@ public final class SinkTupleStream {
     }  
     
 
+    public void setSendImmediate() {
+	sendImmediate = true;
+    }
+
     /**
      * This function closes a stream so that no further upward or downward
      * communication (other than get) is possible. This function is non-
@@ -88,7 +96,7 @@ public final class SinkTupleStream {
 	throws java.lang.InterruptedException, ShutdownException{
 	// pageStream sends an EOS up stream and sets an isClosed flag
 	status = Closed;
-        int ctrlFlag = putCtrlMsg(CtrlFlags.EOS);
+        int ctrlFlag = putCtrlMsg(CtrlFlags.EOS, "End of Stream");
 	if(ctrlFlag == CtrlFlags.GET_PARTIAL) {
 	    // ignore since we just sent eos
 	} else if (ctrlFlag != CtrlFlags.NULLFLAG) {
@@ -149,11 +157,11 @@ public final class SinkTupleStream {
 	if(status == Closed)
 	    throw new PEException("KT writing after end of stream");
 	if(pageStream.shutdownReceived()) {
-	    throw new ShutdownException();
+	    throw new ShutdownException(pageStream.getShutdownMsg());
 	}
 	   
 	buffer.put(tuple);
-	if(buffer.isFull()) {
+	if(buffer.isFull() || sendImmediate) {
 	    return flushBuffer();
 	} else {
 	    return CtrlFlags.NULLFLAG; // success
@@ -218,13 +226,14 @@ public final class SinkTupleStream {
      *
      * @return CtrlFlags.NULLFLAG on success, control flag otherwise
      */
-    public int putCtrlMsg(int controlMsgId)
+    public int putCtrlMsg(int controlMsgId, String ctrlMsg)
 	throws java.lang.InterruptedException, ShutdownException {
 	// KT control element put should cause partially full page to be 
 	// sent 
 	if(buffer.getFlag() != CtrlFlags.NULLFLAG)
 	    throw new PEException("KT buffer already has a flag!");
 	buffer.setFlag(controlMsgId);
+	buffer.setCtrlMsg(ctrlMsg);
 	int ctrlFlag = flushBuffer();
 	if(ctrlFlag != CtrlFlags.NULLFLAG) {
 	    // put failed! better reset the buffer
@@ -275,7 +284,7 @@ public final class SinkTupleStream {
 
 	// if reflectPartial is true - flushBuffer and therefore 
 	// putCtrlMsg will always return NULLFLAG
-	int ctrlFlag = putCtrlMsg(CtrlFlags.SYNCH_PARTIAL);
+	int ctrlFlag = putCtrlMsg(CtrlFlags.SYNCH_PARTIAL, null);
 	if(ctrlFlag != CtrlFlags.NULLFLAG)
 	    throw new PEException("KT unexpected control flag");
     }

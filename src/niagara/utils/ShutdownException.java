@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ShutdownException.java,v 1.1 2002/04/29 19:54:57 tufte Exp $
+  $Id: ShutdownException.java,v 1.2 2003/02/26 06:35:33 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -39,4 +39,11 @@ package niagara.utils;
 
 public class ShutdownException extends Exception {
 
+    public ShutdownException() {
+	super("Query was shut down");
+    }
+
+    public ShutdownException(String msg) {
+	super(msg);
+    }
 }

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SourceTupleStream.java,v 1.1 2002/04/29 19:54:57 tufte Exp $
+  $Id: SourceTupleStream.java,v 1.2 2003/02/26 06:35:33 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -133,7 +133,7 @@ public final class SourceTupleStream {
 	} else {
 	    // check for shutdown
 	    if(pageStream.shutdownReceived()) 
-		throw new ShutdownException();
+		throw new ShutdownException(pageStream.getShutdownMsg());
 	}
 
 	if(!buffer.isEmpty()) {
@@ -172,8 +172,9 @@ public final class SourceTupleStream {
      * @return returns CtrlFlags.NULLFLAG on success, control flag
      *      otherwise
      */
-    public int putCtrlMsg(int ctrlMsgId) throws ShutdownException{
-	return pageStream.putCtrlMsgToSource(ctrlMsgId);
+    public int putCtrlMsg(int ctrlMsgId, String ctrlMsg) 
+	throws ShutdownException{
+	return pageStream.putCtrlMsgToSource(ctrlMsgId, ctrlMsg);
     }    
 
     /**

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TuplePage.java,v 1.2 2002/04/29 20:02:53 tufte Exp $
+  $Id: TuplePage.java,v 1.3 2003/02/26 06:35:33 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -54,6 +54,7 @@ public class TuplePage {
     int bufSize;
 
     private int flag;
+    private String ctrlMsg;
 
     // the page has "getMode" for when you are reading from the page
     // and "putMode" for filling the page - this flag keeps track of
@@ -87,9 +88,11 @@ public class TuplePage {
 	flag = CtrlFlags.NULLFLAG;
     }
 
-    public static TuplePage createControlPage(int controlMsgId) {
+    public static TuplePage createControlPage(int controlMsgId,
+					      String ctrlMsgStr) {
 	TuplePage ret = new TuplePage(true);
 	ret.setFlag(controlMsgId);
+	ret.ctrlMsg = ctrlMsgStr;
 	return ret;
     }
 
@@ -98,6 +101,14 @@ public class TuplePage {
 	    throw new PEException("KT invalid control flag in createControlPage");
 	}
 	this.flag = flag;
+    }
+
+    public void setCtrlMsg(String ctrlMsg) {
+	this.ctrlMsg = ctrlMsg;
+    }
+
+    public String getCtrlMsg() {
+	return ctrlMsg;
     }
 
     /**

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.2 2002/05/07 03:11:13 tufte Exp $
+  $Id: PageStream.java,v 1.3 2003/02/26 06:35:33 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,7 +48,7 @@ package niagara.utils;
 
 import java.util.LinkedList;
 
-// Note on removal of upStreamContrlQueue and priority put
+// Note on removal of upStreamContrlQueue (now toConsumerQueue) and priority put
 // instead of priority put, we have  PageStream check
 // the incoming pages to check for any "priority flags"
 // and set a flag in PageStream to indicate that a priority
@@ -64,23 +64,23 @@ import java.util.LinkedList;
 
 public class PageStream {
 
-    // Buffer for propagating tuples and control elements upstream
-    private PageQueue upStreamQueue;
+    // Buffer for propagating tuples and control elements to Consumer
+    private PageQueue toConsumerQueue; //upStreamQueue;
     
     // Buffer for propagating control information down stream
-    // Note, think I always need to be able to put in the downstream
+    // Note, think I always need to be able to put in the toProducer
     // queue without blocking - so make this infinitely expanding (that
     // won't happen of course)
-    private PageQueue downStreamQueue; 
+    private PageQueue toProducerQueue; //downStreamQueue; 
 
-    // eos indicates end of stream received from downstream (source, 
-    // tuple producer) operator
+    // eos indicates end of stream received from producer operator
     private boolean eos;
 
-    // shutdown page is not null if a shutdown control page has been
+    // shutdown flag is true if a shutdown control page has been
     // received either from upstream or downstream, shutdown indicates
     // client shutdown request or operator error
     private boolean shutdown;
+    private String shutdownMsg;
 
     private final int STREAM_CAPACITY = 5;
 
@@ -103,9 +103,9 @@ public class PageStream {
      *  Constructor
      */
     public PageStream(String name) {
-	// downstream queue is expandable...
-	upStreamQueue = new PageQueue(STREAM_CAPACITY, false);
-	downStreamQueue = new PageQueue(STREAM_CAPACITY, true);
+	// toProducerQueue is expandable...
+	toConsumerQueue = new PageQueue(STREAM_CAPACITY, false);
+	toProducerQueue = new PageQueue(STREAM_CAPACITY, true);
 	dataPageBuffer = new TuplePage[STREAM_CAPACITY];
 	extraCtrlPage = null;
 	eos = false;
@@ -125,7 +125,7 @@ public class PageStream {
     // ----------------------------------------------------------------------
 
     /**
-     * Get a page from the source operator (upstreamQueue). This
+     * Get a page from the source operator (toConsumerQueue). This
      * function should only be called by the consumer.
      *
      * If no page is received from source within timeout milliseconds,
@@ -137,16 +137,21 @@ public class PageStream {
      *
      * @param timeout A timeout period in milliseconds
      *
-     * @return Page from the source (upstreamQueue), page may have
+     * @return Page from the source (toConsumerQueue), page may have
      *          tuples, a control flag, or both, null if timed out
      *
      */
     // to be called by SourceTupleStream ONLY
-    public synchronized TuplePage getPageFromSource (int timeout) 
+    public TuplePage getPageFromSource(int timeout) 
+	throws java.lang.InterruptedException, ShutdownException {
+	return consumerGetPage(timeout);
+    }
+
+    private synchronized TuplePage consumerGetPage (int timeout) 
 	throws java.lang.InterruptedException, ShutdownException {
 
 	if(shutdown) 
-	    throw new ShutdownException();
+	    throw new ShutdownException(shutdownMsg);
 
 	// note, get is allowed after end of stream
 
@@ -154,38 +159,44 @@ public class PageStream {
 	// wake up and the buffer is still empty, means I timed out 
 
 	// Note - only one consumer on this stream. Notifies come
-	// from two possibilites - consumer notifies on downstreamQueue
-	// or producer notifies on upstreamQueue, since consumer (which
+	// from two possibilites - consumer notifies on toProducerQueue
+	// or producer notifies on toConsumerQueue, since consumer (which
 	// is the only one to call this function) can't notify when
-	// sleeping and producer notifies only on upstreamQueue,
+	// sleeping and producer notifies only on toConsumerQueue,
 	// if we wake up from wait one of two things has happened
 	// 1) timeout
-	// 2) producer notified on upStreamQueue.
+	// 2) producer notified on toConsumerQueue.
 	// we can test which of these two situations we are in by
-	// checking if upStreamQueue is empty - notice that since
+	// checking if toConsumerQueue is empty - notice that since
 	// there are no other consumers on this queue, no one else
 	// could have taken elements out of this queue before consumer
 	// got to run
 	
-	if(upStreamQueue.isEmpty()) {
+	if(toConsumerQueue.isEmpty()) {
 	    wait(timeout);
-	    if(upStreamQueue.isEmpty()) {
+	    if(toConsumerQueue.isEmpty()) {
 		// I timed out...
 		return null;
 	    }
 	    // else must be something in queue, go on
 	} 
 
+	if(shutdown)
+	    throw new ShutdownException(shutdownMsg);
+
 	// we have something in the queue...
 	// don't check for flags because 1) if shutdown flag, will
 	// already have been checked and we shouldn't get here,
 	// 2) other flags appear logically after all tuples in page
-	boolean notifyProducer = upStreamQueue.isFull();
-	TuplePage ret = upStreamQueue.get();
+	boolean notifyProducer = toConsumerQueue.isFull();
+	TuplePage ret = toConsumerQueue.get();
 
 	// KT - DEL after functions - just for checking
 	if(ret.getFlag() == CtrlFlags.SHUTDOWN) {
-	    throw new PEException("KT shouldn't get here");
+	    throw new PEException("KT shouldn't get here. Thread: " +
+				  Thread.currentThread().getName() + 
+				  " Stream name: " +
+				  name);
 	}
 
 	if(notifyProducer) {
@@ -197,8 +208,8 @@ public class PageStream {
     }
 
     /**
-     * Put a controlPage to the source (downstream queue). This
-     * function is non-blocking because the downstream queue is
+     * Put a controlPage to the source (toProducer queue). This
+     * function is non-blocking because the toProducer queue is
      * "infinitely" expandable, although it should never grow big
      * at all. 
      *
@@ -206,27 +217,38 @@ public class PageStream {
      *
      */
     // To be called by SourceTupleStream ONLY
-    public synchronized int putCtrlMsgToSource(int ctrlMsgId) 
+    // just a wrapper with a better name for calling program
+    public int putCtrlMsgToSource(int ctrlMsgId,
+				  String ctrlMsgStr) 
+	throws ShutdownException {
+	return consumerPutCtrlMsg(ctrlMsgId, ctrlMsgStr);
+    }
+
+    private synchronized int consumerPutCtrlMsg(int ctrlMsgId,
+						String ctrlMsgStr) 
 	throws ShutdownException {
 
 	if(eos)
 	    return CtrlFlags.EOS;
 	if(shutdown) 
-	    throw new ShutdownException();
+	    throw new ShutdownException(shutdownMsg);
 
 	// do SHUTDOWN check on put to make propagation of SHUTDOWN
 	// as fast as possible
 	if(ctrlMsgId == CtrlFlags.SHUTDOWN) {
 	    shutdown = true;
+	    shutdownMsg = ctrlMsgStr;
 	}
 
-	boolean notify = downStreamQueue.isEmpty();
+	boolean notify = toProducerQueue.isEmpty();
 
 	// Add the control element to the end of the down stream control 
 	// buffer
-	//System.out.println("KT: Putting to downstream queue " + name + "  " + 
+	//System.out.println("KT: Thread" +
+	//		   Thread.currentThread().getName() +
+	//		   " Putting to producer queue " + name + "  " + 
 	//		   CtrlFlags.name[ctrlMsgId]);
-	downStreamQueue.put(getCtrlPage(ctrlMsgId));
+	toProducerQueue.put(getCtrlPage(ctrlMsgId, ctrlMsgStr));
 	if(notify) {
 	    //notifiedOnCtrl++;
 	    notify();
@@ -237,6 +259,10 @@ public class PageStream {
     // to be called by SourceTupleStream ONLY
     public synchronized boolean shutdownReceived() {
 	return shutdown;
+    }
+
+    public synchronized String getShutdownMsg() {
+	return shutdownMsg;
     }
 
     // to be called by SourceTupleStream ONLY
@@ -257,7 +283,7 @@ public class PageStream {
     /**
      * This function returns a control flag sent from the sink
      * operator (the operator "above" this operator in the query tree)
-     * a.k.a. a page from the downStreamQueue, if any exists.
+     * a.k.a. a page from the toProducerQueue, if any exists.
      * Otherwise, it returns NULLFLAG. This function is non-blocking.
      *
      * @return The control flag received from the sink message, NULLFLAG
@@ -265,10 +291,15 @@ public class PageStream {
      *
      */
     // To be called by SinkTupleStream ONLY
-    public synchronized int getCtrlMsgFromSink() throws ShutdownException {
+    // just a wrapper with a better name...
+    public int getCtrlMsgFromSink() throws ShutdownException {
+	return producerGetCtrlMsg();
+    }
+
+    private synchronized int producerGetCtrlMsg() throws ShutdownException{
 	// shutdown takes priority over all other messages
 	if(shutdown)
-	    throw new ShutdownException();
+	    throw new ShutdownException(shutdownMsg);
 
 	// Check for end of stream and raise exception if necessary
 	if (eos) {
@@ -276,11 +307,11 @@ public class PageStream {
 	}
 	
 	// Get first element, if any, in the down stream buffer
-	if (downStreamQueue.isEmpty()) {
+	if (toProducerQueue.isEmpty()) {
 	    return CtrlFlags.NULLFLAG;
 	} else {
-	    // no notification, no one ever blocks on downStreamQueue
-	    TuplePage ctrlPage = downStreamQueue.get();
+	    // no notification, no one ever blocks on toProducerQueue
+	    TuplePage ctrlPage = toProducerQueue.get();
 	    int retVal = ctrlPage.getFlag();
 	    returnCtrlPage(ctrlPage); // make page avail for reuse
 	    return retVal;
@@ -289,14 +320,14 @@ public class PageStream {
 
     /**
      * Put a page to the Sink operator - a.k.a. put a page in the
-     * upstreamQueue.
+     * toConsumerQueue.
      *
      * This function checks for control pages from the sink. If there
      * is a control page(message) from the sink, the tuplePage is not
      * put in the stream and the control page is returned.
      * This function blocks until either the output element can be put in
-     * the upStreamQueue (to Sink) or a control page is read from the
-     * downStreamQueue (from Sink) (this is our flow control mechanism)
+     * the toConsumerQueue (to Sink) or a control page is read from the
+     * toProducerQueue (from Sink) (this is our flow control mechanism)
      * 
      * @param page The page to be sent to the Sink
      *
@@ -304,12 +335,17 @@ public class PageStream {
      *
      */
     // to be called by SinkTupleStream ONLY
-    public synchronized int putPageToSink(TuplePage page)
+    public int putPageToSink(TuplePage page) 
+	throws java.lang.InterruptedException, ShutdownException {
+	return producerPutPage(page);
+    }
+
+    private synchronized int producerPutPage(TuplePage page) 
 	throws java.lang.InterruptedException, ShutdownException {
 
 	// shutdown takes priority over everything
 	if(shutdown)
-	    throw new ShutdownException();
+	    throw new ShutdownException(shutdownMsg);
 
 	if (eos) 
 	    throw new PEException("KT Writing after end of stream");
@@ -318,15 +354,15 @@ public class PageStream {
 	// (so that the outputElement can be put) or the down stream 
 	// control buffer is not empty (so that a control element can 
 	// be returned).
-	while (upStreamQueue.isFull() &&
-	       downStreamQueue.isEmpty()) {
+	while (toConsumerQueue.isFull() &&
+	       toProducerQueue.isEmpty()) {
 		wait();
 	}
 
 	// If there is a control element in the down stream buffer, 
 	// then return that
-	if (!downStreamQueue.isEmpty()) {
-	    TuplePage ctrlPage = downStreamQueue.get();
+	if (!toProducerQueue.isEmpty()) {
+	    TuplePage ctrlPage = toProducerQueue.get();
 	    int ctrlFlag = ctrlPage.getFlag();
 	    returnCtrlPage(ctrlPage);
 	    return ctrlFlag;
@@ -337,13 +373,20 @@ public class PageStream {
 	    // the producer, but for the consumer - note that this shutdown
 	    // message is just arriving into the consumers
 	    // input stream
-	    if(page.getFlag() == CtrlFlags.SHUTDOWN) 
+	    if(page.getFlag() == CtrlFlags.SHUTDOWN) {
 		shutdown = true; 
+		shutdownMsg = page.getCtrlMsg();
+		//System.out.println("KT: Thread " + 
+		//		   Thread.currentThread().getName() + 
+		//		   " Putting to consumer queue " 
+		//		   + name + "  " + 
+		//		   CtrlFlags.name[page.getFlag()]);
+	    }
 
-	    // There must be an open spot in the upstream Queue, so put
+	    // There must be an open spot in the toConsumerQueue, so put
 	    // the page there.
-	    boolean notifyConsumer = upStreamQueue.isEmpty();
-	    upStreamQueue.put(page);
+	    boolean notifyConsumer = toConsumerQueue.isEmpty();
+	    toConsumerQueue.put(page);
 
 	    if(notifyConsumer) {
 		//notifiedConsumer++;
@@ -356,7 +399,7 @@ public class PageStream {
     /**
      * This function closes a stream so that no further upward or downward
      * communication (other than get) is possible. This function blocks
-     * until there is space available in the upstreamQueue.
+     * until there is space available in the toConsumerQueue.
      *
      */
     // To be called by SinkTupleStream ONLY
@@ -391,16 +434,17 @@ public class PageStream {
 	return new TuplePage();
     }
 
-    private TuplePage getCtrlPage(int ctrlMsgId) {
+    private TuplePage getCtrlPage(int ctrlMsgId, String ctrlMsgStr) {
 	if(extraCtrlPage != null) {
 	    TuplePage ret = extraCtrlPage;
 	    extraCtrlPage = null;
 	    ret.setFlag(ctrlMsgId);
+	    ret.setCtrlMsg(ctrlMsgStr);
 	    //existingCtrlPagesUsed++;
 	    return ret;
 	} else {
 	    //ctrlPagesAllocd++;
-	    return TuplePage.createControlPage(ctrlMsgId);
+	    return TuplePage.createControlPage(ctrlMsgId, ctrlMsgStr);
 	}
     }
 
@@ -417,11 +461,12 @@ public class PageStream {
      */
     public synchronized String toString()
     {
-	String retStr = new String ("\nUp Stream Tuple Queue\n");
-	retStr += upStreamQueue.toString();
-	retStr += "\nDown Stream Control Queue\n";
-	retStr += downStreamQueue.toString();
-	retStr += "\n eos: " + eos + " shutdown: " + shutdown + "\n";
+	String retStr = new String ("\nTo Consumer Tuple/Control Queue\n");
+	retStr += toConsumerQueue.toString();
+	retStr += "\n To Producer Control Queue\n";
+	retStr += toProducerQueue.toString();
+	retStr += "\n eos: " + eos + " shutdown: " + shutdown + " " +
+	    shutdownMsg + "\n";
 	return retStr;
     }
 }
