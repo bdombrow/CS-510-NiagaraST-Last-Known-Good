@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.25 2003/03/03 08:23:39 tufte Exp $
+ * $Id: StreamThread.java,v 1.26 2003/03/07 23:40:12 vpapad Exp $
  */
 
 package niagara.data_manager;
@@ -61,7 +61,7 @@ public class StreamThread extends SourceThread {
 	if(niagara.connection_server.NiagraServer.RUNNING_NIPROF)
 	    JProf.registerThreadName(this.getName());
 
-        if (NiagraServer.usingSAXDOM() && spec.isStream())
+        if (NiagraServer.usingSAXDOM() /* && spec.isStream() */)
             parser = DOMFactory.newParser("saxdom");
         else
             parser = DOMFactory.newParser();
