@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.16 2003/07/03 19:27:18 tufte Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.17 2003/07/23 23:18:09 jinli Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
@@ -46,10 +46,6 @@
     <logical name="construct"
       class="niagara.xmlql_parser.op_tree.constructOp">
       <physical name="PhysicalConstruct" class="niagara.query_engine.PhysicalConstructOperator"/>
-    </logical>
-    <logical name="magic_construct"
-      class="niagara.logical.MagicConstruct">
-      <physical name="PhysicalMagicConstruct" class="niagara.query_engine.PhysicalMagicConstruct"/>
     </logical>
     <logical name="avg"
       class="niagara.xmlql_parser.op_tree.averageOp">
@@ -121,6 +117,14 @@
       class="niagara.logical.IncrementalAverage">
       <physical name="PhysicalIncrementalAverage" class="niagara.query_engine.PhysicalIncrementalAverage"/>
     </logical>
+    <logical name="partitionavg"
+      class="niagara.logical.PartitionAvg">
+      <physical name="PhysicalPartitionAvg" class="niagara.query_engine.PhysicalPartitionAvg"/>
+    </logical>
+    <logical name="partitionmax"
+      class="niagara.logical.PartitionMax">
+      <physical name="PhysicalPartitionMax" class="niagara.query_engine.PhysicalPartitionMax"/>
+    </logical>
     <logical name="project" class="niagara.logical.Project"/>
     <logical name="noop"
       class="niagara.optimizer.NoOp">
@@ -130,6 +134,11 @@
        class="niagara.xmlql_parser.op_tree.punctuateOp">
        <physical name="PhysicalPunctuate"
                 class="niagara.query_engine.PhysicalPunctuateOperator"/>
+    </logical>
+    <logical name="bucket"
+       class="niagara.xmlql_parser.op_tree.BucketOp">
+       <physical name="PhysicalBucket"
+       		class="niagara.query_engine.PhysicalBucketOperator"/>
     </logical>
     <logical name="nest"
       class="niagara.logical.Nest">
@@ -154,10 +163,6 @@
   		<before><logical name="construct"/></before>
  		<after><op name="PhysicalConstruct"/></after>
   	</rule>
-	<rule type="simple" name="magicCons to PhysicalMagicConst">
-	         <before><logical name="magic_construct"/></before>
-		 <after><op name="PhysicalMagicConstruct"/></after>
-        </rule>
   	<rule type="simple" name="display to PhysicalDisplay">
   		<before><logical name="display"/></before>
  		<after><op name="PhysicalDisplay"/></after>
@@ -230,10 +235,18 @@
   		<before><logical name="incravg"/></before>
  		<after><op name="PhysicalIncrementalAverage"/></after>
   	</rule>
+	<rule type="simple" name="partitionavg to PhysicalPartitionAvg">
+		<before><logical name="partitionavg"/></before>
+		<after><op name="PhysicalPartitionAvg"/></after>
+	</rule>
   	<rule type="simple" name="incrmax to PhysicalIncrementalMax">
   		<before><logical name="incrmax"/></before>
  		<after><op name="PhysicalIncrementalMax"/></after>
   	</rule>
+	<rule type="simple" name="partitionmax to PhysicalPartitionMax">
+		<before><logical name="partitionmax"/></before>
+		<after><op name="PhysicalPartitionMax"/></after>
+	</rule>
   	<rule type="simple" name="sort to PhysicalSort">
   		<before><logical name="sort"/></before>
  		<after><op name="PhysicalSort"/></after>
@@ -266,6 +279,10 @@
 	<rule type="simple" name="punctuate to PhysicalPunctuate">
 		<before><logical name="punctuate"/></before>
 		<after><op name="PhysicalPunctuate"/></after>
+	</rule>
+	<rule type="simple" name="bucket to PhysicalBucket">
+		<before><logical name="bucket"/></before>
+		<after><op name="PhysicalBucket"/></after>
 	</rule>
 	<rule type="simple" name="nest to PhysicalNest">
 	        <before><logical name="nest"/></before>
