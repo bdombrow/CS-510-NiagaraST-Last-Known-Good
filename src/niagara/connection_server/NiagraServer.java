@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.16 2002/08/16 17:55:53 tufte Exp $
+  $Id: NiagraServer.java,v 1.17 2002/10/24 00:11:24 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -529,6 +529,12 @@ public class NiagraServer
     // Try to shutdown
     public void shutdown() {
         connectionManager.shutdown();
+    }
+
+    /** Simple method for info messages - just outputs to stdout now
+     * we can extend it later to do something fancier */
+    public static void info(String msg) {
+	cout(msg);
     }
 }
 

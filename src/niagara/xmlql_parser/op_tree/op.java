@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: op.java,v 1.9 2002/09/20 23:07:10 vpapad Exp $
+  $Id: op.java,v 1.10 2002/10/24 00:11:50 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,7 +55,7 @@ public abstract class op extends LogicalOp {
      * @return name of the operators
      */
     public String getName() {
-        return NiagraServer.getCatalog().getOperatorName(getClass().getName());
+        return NiagraServer.getCatalog().getOperatorName(getClass());
     }
 
     /**
