@@ -12,8 +12,9 @@ public class TestSAXParser extends DefaultHandler {
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser parser = factory.newSAXParser();
+	    TestSAXParser tsp = new TestSAXParser();
             for (int i = 0; i < times; i++) {
-                parser.parse(xmlFile, new TestSAXParser());
+                parser.parse(xmlFile, tsp);
             }
         } 
         catch (FactoryConfigurationError e) {

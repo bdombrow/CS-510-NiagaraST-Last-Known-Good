@@ -1,58 +1,27 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
+# $Id: runTests,v 1.3 2002/10/30 10:45:31 vpapad Exp $
 
 $temp = "tempresults";
 if(-e $temp) {
    system("/bin/rm $temp");
 }
 
-print "Running tests...\n";
+@queries = <queries/*.qry>;
+for $f (@queries) {
+    #Remove "queries/" prefix 
+    $f =~ s@[^/]*/@@;
+    # Don't run the test if we don't know the expected results!
+    next unless (-e "results/$f.result");
+    print "$f\t";
 
-#system("./runSimple < queries/accumulate.qry > $temp");
-
-print "Average query\n";
-system("./runSimple < queries/average.qry > $temp");
-
-print "Construct query\n";
-system("./runSimple < queries/construct.qry >> $temp");
-
-print "Construct Middle query\n";
-system("./runSimple < queries/consmiddle.qry >> $temp");
-
-print "Count query\n";
-system("./runSimple < queries/count.qry >> $temp");
-
-print "Dup-union query\n";
-system("./runSimple < queries/dup-union.qry >> $temp");
-
-print "Expression query\n";
-system("./runSimple < queries/expression.qry >> $temp");
-
-print "Hash Join query\n";
-system("./runSimple < queries/hashjoin.qry >> $temp");
-
-print "Nested Loops query\n"; 
-system("./runSimple < queries/nljoin.qry >> $temp");
-
-print "Scan query\n";
-system("./runSimple < queries/scan.qry" >> $temp);
-
-print "Select query\n";
-system("./runSimple < queries/select.qry >> $temp");
-
-print "Sort query\n";
-system("./runSimple < queries/sort.qry >> $temp");
-
-print "Sum query\n";
-system("./runSimple < queries/sum.qry >> $temp");
-
-print "XMLB firehose scan \n";
-system("./runSimple < queries/fhXMLB.qry >> $temp");
-
-#print "Auction firehose scan \n";
-#system("./runSimple < queries/fhAuction.qry >> $temp");
-
-print "Test have been run - differences below.\n";
-
-system("diff $temp results");
-
-print "End of differences.\n"
+    #Ugly! But how do you redirect stderr in a way that works
+    #for both tcsh and bash? 
+    `/bin/sh -c "./runSimple -silent -qf queries/$f 2>&1 >$temp"`;
+    $diffs = system "cmp -s results/$f.result $temp";
+    if ($diffs != 0) {
+	print "FAILED\n";
+	system "diff results/$f.result $temp";
+    } else {
+	print "OK\n";
+    }
+}

@@ -1,11 +1,12 @@
 <?xml version="1.0" ?>
+<!-- $Id: sample_catalog.xml,v 1.5 2002/10/30 10:45:31 vpapad Exp $ -->
 <catalog>
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
   	     logical-to-physical mappings for unoptimized query plans. -->
     <logical name="dtdscan" 
       class="niagara.xmlql_parser.op_tree.dtdScanOp">
-<!-- XXX vpapad: not ready yet <physical name="DTDThread" class="niagara.data_manager.DTDThread"/> -->
+            <physical name="DTDThread" class="niagara.data_manager.DTDThread"/>
     </logical>
     <logical name="firehosescan" 
       class="niagara.xmlql_parser.op_tree.FirehoseScanOp">
@@ -23,7 +24,7 @@
       class="niagara.xmlql_parser.op_tree.ResourceOp"/>
     <logical name="unnest"
       class="niagara.logical.Unnest">
-      <!-- <physical name="PhysicalUnnest" class="niagara.query_engine.PhysicalUnnest"/> -->
+      <physical name="PhysicalUnnest" class="niagara.query_engine.PhysicalUnnest"/>
     </logical>
     <logical name="select"
       class="niagara.xmlql_parser.op_tree.selectOp">
@@ -118,7 +119,6 @@
   </ruleset>
   
   <ruleset name="normal ruleset">
-	<!-- XXX vpapad: not yet
   	<rule type="simple" name="unnest to PhysicalUnnest">
   		<before><logical name="unnest"/></before>
  		<after><op name="PhysicalUnnest"/></after>
@@ -131,6 +131,10 @@
   		<before><logical name="display"/></before>
  		<after><op name="PhysicalDisplay"/></after>
   	</rule>
+  	<rule type="simple" name="select to PhysicalSelect">
+  		<before><logical name="select"/></before>
+ 		<after><op name="PhysicalSelect"/></after>
+  	</rule> 
   	<rule type="simple" name="join to HashJoin">
   		<before><logical name="join" condition="isEquiJoin"/></before>
  		<after><op name="HashJoin"/></after>
@@ -143,7 +147,7 @@
   		<before><logical name="constant"/></before>
  		<after><op name="ConstantThread"/></after>
   	</rule>
-  	<rule type="simple" name="fhcan to StreamThread">
+  	<rule type="simple" name="fhscan to StreamThread">
   		<before><logical name="firehosescan"/></before>
  		<after><op name="StreamThread"/></after>
   	</rule>
@@ -151,14 +155,42 @@
   		<before><logical name="filescan"/></before>
  		<after><op name="StreamThread"/></after>
   	</rule>
+  	<rule type="simple" name="firehosescan to StreamThread">
+  		<before><logical name="firehosescan"/></before>
+ 		<after><op name="StreamThread"/></after>
+  	</rule>
   	<rule type="simple" name="dtdscan to DTDThread">
   		<before><logical name="dtdscan"/></before>
  		<after><op name="DTDThread"/></after>
   	</rule>
-	-->
+  	<rule type="simple" name="avg to PhysicalAverage">
+  		<before><logical name="avg"/></before>
+ 		<after><op name="PhysicalAverage"/></after>
+  	</rule>
+  	<rule type="simple" name="count to PhysicalCount">
+  		<before><logical name="count"/></before>
+ 		<after><op name="PhysicalCount"/></after>
+  	</rule>
+  	<rule type="simple" name="sum to PhysicalSum">
+  		<before><logical name="sum"/></before>
+ 		<after><op name="PhysicalSum"/></after>
+  	</rule>
+  	<rule type="simple" name="sort to PhysicalSort">
+  		<before><logical name="sort"/></before>
+ 		<after><op name="PhysicalSort"/></after>
+  	</rule>
+  	<rule type="simple" name="expression to PhysicalExpression">
+  		<before><logical name="expression"/></before>
+ 		<after><op name="PhysicalExpression"/></after>
+  	</rule>
+  	<rule type="simple" name="dup to PhysicalDup">
+  		<before><logical name="dup"/></before>
+ 		<after><op name="PhysicalDup"/></after>
+  	</rule>
   	<!-- Custom rules -->
   	<rule type="custom" name="commuteJoin" class="niagara.optimizer.rules.CommuteJoin"/>
   	<rule type="custom" name="associateJoin" class="niagara.optimizer.rules.AssociateJoinRtoL"/>
+  	<rule type="custom" name="unionToPhysicalUnion" class="niagara.optimizer.rules.UnionToPhysicalUnion"/>
   </ruleset>
   
   	<!-- Cost Model -->
@@ -175,6 +207,10 @@
       <predicate_cost value="0.05"/>
       <!-- Cost of hashing one tuple -->
       <tuple_hashing_cost value="0.1"/>
+      <!-- Cost of accumulating one tuple -->
+      <tuple_accumulation_cost value="0.1"/>
+      <!-- Cost of evaluating a used-defined expression over one tuple -->
+      <expression_cost value="0.2"/>
       <!-- Cost of "constructing" one output tuple -->
       <tuple_construction_cost value="0.5"/>
       <!-- Cost of opening an HTTP connection -->
@@ -187,6 +223,8 @@
     <config>
       <!-- Default fanout for unnest operations -->
       <unnest_fanout value="10"/>
+      <!-- Cardinality restriction factor for groupby -->
+      <restrictivity value="10"/>
     </config>
   
   	<!-- Resources: urn to url, or urn to server mappings -->
