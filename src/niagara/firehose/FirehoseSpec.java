@@ -158,7 +158,10 @@ public class FirehoseSpec extends StreamSpec {
 	s.append(" ");
 	s.append(prettyPrint);
 	s.append(" ");
-	s.append(trace);
+	if (trace.length() == 0)
+	    s.append("NULL");
+	else
+	    s.append(trace);
 	s.append(" ");
     }
 
