@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.10 2002/04/21 04:11:40 vpapad Exp $
+  $Id: RequestHandler.java,v 1.11 2002/04/29 19:47:51 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +34,7 @@ import niagara.query_engine.*;
 import niagara.trigger_engine.*;
 import niagara.xmlql_parser.op_tree.logNode;
 import niagara.data_manager.DataManager;
+import niagara.utils.PEException;
 
 /**There is one request handler per client and receives all the requests from that client
    Then that request is further dispatched to the appropriate module and results sent back
@@ -340,6 +341,7 @@ public class RequestHandler {
                     break;
 
             case RequestMessage.SHUTDOWN:
+		System.out.println("Shutdown message received");
 	            ResponseMessage shutMesg = 
 		         new ResponseMessage(request,
 			               ResponseMessage.END_RESULT);
@@ -393,17 +395,12 @@ public class RequestHandler {
     public void killQuery(int queryID) throws InvalidQueryIDException
     {
 	// Get the queryInfo object for this request
-	//
 	ServerQueryInfo queryInfo = queryList.get(queryID);
 	
 	// Respond to an invalid queryID
-	//
 	if (queryInfo == null) {
-            System.err.println("Trying to remove a nonexisting query!");
-            return;
-	    // throw new InvalidQueryIDException(); // XXX vpapad commented out
+            throw new PEException("Trying to remove a nonexisting query!");
 	}
-	   	
 
 	// Process Kill message
 	// Remove the query from the active queries list
@@ -446,7 +443,7 @@ public class RequestHandler {
 	Enumeration e = queryList.elements();
 	while (e.hasMoreElements()) {
 	    try {
-		System.out.println("Killing query...");
+		//System.out.println("Killing query...");
 		ServerQueryInfo info = (ServerQueryInfo) e.nextElement();
 		killQuery(info.getQueryId());
 	    }

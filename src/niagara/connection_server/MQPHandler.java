@@ -1,5 +1,5 @@
 /**
- * $Id: MQPHandler.java,v 1.1 2001/07/17 07:06:06 vpapad Exp $
+ * $Id: MQPHandler.java,v 1.2 2002/04/29 19:47:51 tufte Exp $
  *
  */
 
@@ -103,8 +103,10 @@ public class MQPHandler extends Thread {
         results = new String[schedulableRoots.size()];
 
         for (int i = 0; i < subplans.length; i++) {
-            Stream is = es.scheduleSubPlan((logNode) schedulableRoots.get(i));
-            subplans[i] = new StreamMaterializer(i, this, is);
+            PageStream is = 
+		es.scheduleSubPlan((logNode) schedulableRoots.get(i));
+            subplans[i] = new StreamMaterializer(i, this, 
+						 new SourceTupleStream(is));
             subplans[i].start();
         }
 

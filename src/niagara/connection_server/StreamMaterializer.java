@@ -1,5 +1,5 @@
 /**
- * $Id: StreamMaterializer.java,v 1.2 2002/04/26 02:37:54 vpapad Exp $
+ * $Id: StreamMaterializer.java,v 1.3 2002/04/29 19:47:51 tufte Exp $
  */
 
 package niagara.connection_server;
@@ -13,23 +13,35 @@ import java.util.*;
 public class StreamMaterializer extends Thread {
     int number;
     MQPHandler handler;
-    Stream inputStream;
+    SourceTupleStream inputStream;
     StringBuffer output;
     Hashtable elements;
 
     public void run() {
-        output.append("<stream>");
-        while (true) {
-            StreamElement e = inputStream.getUpStreamElement(500);
-            if (e == null) 
-                continue;
-            if (e instanceof StreamEosElement)
-                break;
-            StreamTupleElement ste = (StreamTupleElement) e;
-            process(ste);
-        }
-        output.append("</stream>");
-        handler.subPlanDone(number, output.toString());
+	try {
+	    output.append("<stream>");
+	    while (true) {
+		StreamTupleElement ste = inputStream.getTuple(500);
+		if (ste == null) {
+		    if(!inputStream.timedOut() &&
+		       inputStream.getCtrlFlag() == CtrlFlags.EOS) {
+			break;
+		    } else {
+			// if we time out or get a control flag other than
+			// eos, we continue...
+			continue;
+		    }
+		}
+		process(ste);
+	    }
+	    output.append("</stream>");
+	    handler.subPlanDone(number, output.toString());
+	} catch (java.lang.InterruptedException e) {
+	    System.err.println("KT thread interruped in StreamMaterializer");
+	    return; // just quit
+	} catch (ShutdownException se) {
+	    return; // just quit
+	}
     }
 
     public void process(StreamTupleElement ste) {
@@ -40,7 +52,8 @@ public class StreamMaterializer extends Thread {
             if (o instanceof Document) {
                 o = ((Document) o).getDocumentElement();
             }
-            // Now it must be an Element
+            // Now it must be an Element, are you sure? - couldn't
+	    // it be an attribute?? KT
             Element e = (Element) o;
             
             output.append("<elt>");
@@ -96,7 +109,7 @@ public class StreamMaterializer extends Thread {
     }
 
     public StreamMaterializer(int number, MQPHandler handler, 
-                              Stream inputStream) {
+                              SourceTupleStream inputStream) {
         this();
         this.number = number;
         this.handler = handler;

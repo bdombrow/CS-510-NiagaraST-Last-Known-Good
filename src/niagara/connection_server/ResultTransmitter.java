@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.9 2002/03/31 15:53:57 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.10 2002/04/29 19:47:51 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -93,18 +93,24 @@ public class ResultTransmitter implements Runnable {
     }
     
     public void run() {
-	if (queryInfo.isSEQuery()) 
-	    handleSEQuery();
-	else if(queryInfo.isTriggerQuery())
-	    handleTriggerQuery();
-	else if(queryInfo.isQEQuery())
-	    handleQEQuery();
-	else if(queryInfo.isDTDQuery()) 
-	    handleDTDQuery();
-	else if(queryInfo.isAccumFileQuery()) 
-	    handleAccumQuery();
-	else 
-	    throw new PEException("Invalid query type");
+	try {
+	    if (queryInfo.isSEQuery()) 
+		handleSEQuery();
+	    else if(queryInfo.isTriggerQuery())
+		handleTriggerQuery();
+	    else if(queryInfo.isQEQuery())
+		handleQEQuery();
+	    else if(queryInfo.isDTDQuery()) 
+		handleDTDQuery();
+	    else if(queryInfo.isAccumFileQuery()) 
+		handleAccumQuery();
+	    else 
+		throw new PEException("Invalid query type");
+	} catch (ShutdownException se) {
+	    // don't think there is anything to do
+	} catch (InterruptedException ie) {
+	    // ditto...
+	}
     }
     
     private void handleDTDQuery() {
@@ -188,7 +194,7 @@ public class ResultTransmitter implements Runnable {
     /** Handles QE Query.
      */
     private void handleQEQuery() 
-    {
+	throws ShutdownException, InterruptedException {
 	QueryResult queryResult = queryInfo.queryResult;
 	
 	while (true) {
@@ -229,26 +235,20 @@ public class ResultTransmitter implements Runnable {
 	    switch (resultObject.status) {
 		// If this was the last stream element this query is done
 	    case QueryResult.EndOfResult:
-		try{
-		    if(!NiagraServer.QUIET)
-			sendResults();
-
-		    // send the end result response
-		    response = 
-			new ResponseMessage(request,
-					    ResponseMessage.END_RESULT);
-		    handler.sendResponse(response);
-		    
-		    //everything done! kill the query
-		    handler.killQuery(request.serverID);
-		    
-		    return;
-		}
-		catch(RequestHandler.InvalidQueryIDException nsqe){ 
-		    // Should never get here
-		    nsqe.printStackTrace();
-		}
-		break;
+		if(!NiagraServer.QUIET)
+		    sendResults();
+		
+		// send the end result response
+		response = 
+		    new ResponseMessage(request,
+					ResponseMessage.END_RESULT);
+		handler.sendResponse(response);
+		
+		//everything done! kill the query		
+		/* KT this gives a "trying to remove nonexisting query
+		 * message if called */
+		//handler.killQuery(request.serverID);		
+		return;
 		
 		// If it is just a regular query result save it
 	    case QueryResult.FinalQueryResult:
@@ -285,7 +285,8 @@ public class ResultTransmitter implements Runnable {
 	Hands over the query to trigger manager and listens on the 
 		query result queue for a query result for each firing
     */
-    private void handleTriggerQuery() {
+    private void handleTriggerQuery() 
+	throws ShutdownException {
 		// first get the query result
 	QueryResult queryResult = (QueryResult) queryInfo.queryResultQueue.get();
 	while (true) {
@@ -353,7 +354,8 @@ public class ResultTransmitter implements Runnable {
      * is to pull results from the accumulate operator and update
      * the Accumulate File Directory.
      */
-    private void handleAccumQuery() {
+    private void handleAccumQuery() 
+	throws ShutdownException, InterruptedException{
 	QueryResult queryResult = queryInfo.queryResult;
 	QueryResult.ResultObject resultObject;
 	boolean alreadyReturningPartial = false;
@@ -362,15 +364,10 @@ public class ResultTransmitter implements Runnable {
 	/* 	transmitThread.sleep(5000); */
         int count = 0;
 	while (true) {
-
 	    /* If a kill query message has been sent, killThread will
 	     * be set to true. So, return to end this thread's execution
 	     */
 	    if (killThread) {
-		/* don't think I want to do this - client has to remove
-		 * accum file when ready
-		 */
-		/* DataManager.AccumFileDir.remove(queryInfo.accumFileName); */
 		return;
 	    }
 	    
@@ -380,30 +377,19 @@ public class ResultTransmitter implements Runnable {
 	     * seem necessary for AccumFile stuff
 	     */
 	    try {
-		/*if(!alreadyReturningPartial) { */
-		/* sleep for some amount of time */
-		/* there are two thread sleep functions 
-		 * sleep(long millis), sleep(long millis, int nanos)
-		 */
-		/*transmitThread.sleep(100);
-		  count += 100; */
-		
 		/* request the generation of partial results - 
 		 * who knows if this will work or not
 		 */
 		if(count >= 2000 && !alreadyReturningPartial) {
 		    System.out.println("Accum Mgr requesting partial result");
 		    try {
-		    queryInfo.queryResult.returnPartialResults();
+			queryInfo.queryResult.returnPartialResults();
 		    }
 		    catch (QueryResult.AlreadyReturningPartialException arpe) {
 			//
 		    }
 		    count = 0;
 		} 
-		/*}*/
-
-		/*alreadyReturningPartial = false; */
 		
 		/* get the result and update the accum file dir */
 	        /* OK, now wait for the result to come popping up */
@@ -412,7 +398,6 @@ public class ResultTransmitter implements Runnable {
 		if(resultObject.status == QueryResult.TimedOut) {
                     count += 100;
 		} else {
-		    //System.out.println("Accum Mgr received result");
 		    alreadyReturningPartial = false; 
 		    switch (resultObject.status) {
 		    case QueryResult.PartialQueryResult:
@@ -453,37 +438,30 @@ public class ResultTransmitter implements Runnable {
 		    handler.sendResponse(response);
 		
 		    /* everything done! kill the query */
-		    handler.killQuery(request.serverID);
+		    /* KT this gives a "trying to remove nonexisting query
+		     * message if called */
+		    //handler.killQuery(request.serverID);
 		    return;
 
 		case QueryResult.EndOfPartialResult:
 		    /* think I can ignore this */
-		    //		    System.out.println("ResultTransmitter.handleAccumQuery ignoring EndOfPartialResult");
 		    break;
 
 		    case QueryResult.NonBlockingResult:
 		    case QueryResult.TimedOut:
 			/* should only get partial results, something
-		     * is wrong if I get one of the other statuses, I think
-		     */
+			 * is wrong if I get one of the other statuses, I think
+			 */
 			throw new PEException("Unexpected QueryResult status" +
 					  String.valueOf(resultObject.status));
 		    
 		default:
 		    throw new PEException("Unexpected QueryResult status");
-		}
+		    }
 		}
 	    } catch (QueryResult.ResultsAlreadyReturnedException e) {
 		throw new PEException("HELP - What happened??");
-		/*	    } catch (InterruptedException e) {
-		System.out.println("WARNING: Accumulate File Result Transmitter Thread interrupted!!");
-		*do nothing, just continue??? */
-	    /*} catch (QueryResult.AlreadyReturningPartialException e) {
-		alreadyReturningPartial = true;
-*/
-	    } catch (RequestHandler.InvalidQueryIDException e) {
-		throw new PEException("Invalid query id found in ResultTrans");
-	    }
+	    } 
 	}
     }
     

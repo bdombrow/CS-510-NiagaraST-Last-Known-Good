@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: RequestParser.java,v 1.3 2001/08/08 21:25:05 tufte Exp $
+  $Id: RequestParser.java,v 1.4 2002/04/29 19:47:51 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -65,7 +65,6 @@ public class RequestParser extends HandlerBase implements Runnable {
     RequestMessage currentMesg;
     // The source from which the messages in XML are to be read
     InputSource source;
-    //XMLParser parser;
     SAXDriver parser;
 
 
@@ -75,7 +74,6 @@ public class RequestParser extends HandlerBase implements Runnable {
     */
     public RequestParser(InputStream istream,RequestHandler reqHandler) {
 	this.reqHandler = reqHandler;
-	//source = new InputSource(new BufferedReader(new InputStreamReader(istream)));
 	source = new InputSource(istream);
 	parser = new com.microstar.xml.SAXDriver();
     }
@@ -87,19 +85,18 @@ public class RequestParser extends HandlerBase implements Runnable {
 
     public void run() {
 	try {
-	    //System.out.println("request parser started...");
 	    parser.setDocumentHandler(this);
 	    parser.parse(source);
 	}
-	catch (Exception e) {
-	    //System.out.println("Parser closed. Shutting down service to this client");
+	catch (SAXException e) {
+	    // UUUUGLY
+	    //Parser closed. Shutting down service to this client
 	    reqHandler.closeConnection();
 	}
 	return;
     }
 
      public  void startElement(String  name, AttributeList atts) {
-	 //	 super.startElement(name,atts);
 	 // record which element is currently being processed
 	 currentElement = name;
 	 // if it is the beginning of requestMessage, get all the attributes outta there
@@ -119,7 +116,6 @@ public class RequestParser extends HandlerBase implements Runnable {
 
     //If an element ends
     public void endElement(String name) {
-	//	super.endElement(name);
 	// if the request ended then it means that we have successfully parsed the request
 	if (name.equals(REQUEST_MESSAGE)) {
 	    //lets handle the request
