@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.1 2002/04/29 19:54:57 tufte Exp $
+  $Id: SinkTupleStream.java,v 1.2 2002/05/07 03:11:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -148,7 +148,7 @@ public final class SinkTupleStream {
 	if(status == Closed)
 	    throw new PEException("KT writing after end of stream");
 	if(pageStream.shutdownReceived()) {
-	    return CtrlFlags.SHUTDOWN;
+	    throw new ShutdownException();
 	}
 	   
 	buffer.put(tuple);

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SynchronizedQueue.java,v 1.1 2000/05/30 21:03:29 tufte Exp $
+  $Id: SynchronizedQueue.java,v 1.2 2002/05/07 03:11:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -74,23 +74,19 @@ public class SynchronizedQueue extends Queue
     /**
      * @return the object at the front of the queue; return null if the queue is empty
      **/
-    public synchronized Object get( )
-    {
-	while(isEmpty( ))
-	    {
-		try{
-		    wait( );
-		}
-		catch (Exception e)
-		    {
-			System.out.println("error in calling wait( ) in get( )");
-			System.exit(-1);			
-		    }		
+    public synchronized Object get( ) {
+	try {
+	    while(isEmpty( )) {
+		wait( );
 	    }
-
-	Object o = super.get( );	
-	notifyAll( );	
-	return o;
+	    
+	    Object o = super.get( );	
+	    notifyAll( );	
+	    return o;
+	} catch (InterruptedException ie) {
+	    // think really this method should  throw interrupted exception
+	    throw new PEException("Interrupted during synchqueue.get");
+	}
     }
     
 

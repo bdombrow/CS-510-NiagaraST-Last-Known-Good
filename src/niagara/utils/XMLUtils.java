@@ -5,14 +5,14 @@ import org.w3c.dom.*;
 public class XMLUtils {
 
     public static int getInt(StreamTupleElement ste, int attrpos) {
-	try {
+	//try {
 	    String sval = ((Node) ste.getAttribute(attrpos)).
 		getChildNodes().item(0).getNodeValue();
 	    return Integer.parseInt(sval);
-	}
-	catch (Exception e) {
-	    return 0;
-	}
+	    //}
+	    //catch (Exception e) {
+	    //return 0;
+	    //}
     }
 
     public static String flatten(Node n) {

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.1 2002/04/29 19:54:57 tufte Exp $
+  $Id: PageStream.java,v 1.2 2002/05/07 03:11:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -216,13 +216,16 @@ public class PageStream {
 
 	// do SHUTDOWN check on put to make propagation of SHUTDOWN
 	// as fast as possible
-	if(ctrlMsgId == CtrlFlags.SHUTDOWN) 
+	if(ctrlMsgId == CtrlFlags.SHUTDOWN) {
 	    shutdown = true;
+	}
 
 	boolean notify = downStreamQueue.isEmpty();
 
 	// Add the control element to the end of the down stream control 
 	// buffer
+	//System.out.println("KT: Putting to downstream queue " + name + "  " + 
+	//		   CtrlFlags.name[ctrlMsgId]);
 	downStreamQueue.put(getCtrlPage(ctrlMsgId));
 	if(notify) {
 	    //notifiedOnCtrl++;
