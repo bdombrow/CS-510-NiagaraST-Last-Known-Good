@@ -3,7 +3,7 @@ package niagara.firehose;
 // broken off from BigValueGen to avoid the "too many constants" error from the compiler
 
 class WordValueGen {
-
+/*
     public static final int NUM_WORDS = 17000; 
     public static final String words[] = {
     "the","and","you","that","not","with","for","his","this","your","but",
@@ -2613,5 +2613,5 @@ class WordValueGen {
     "brambles","laundry","wondered","swans","pearly","difficult",
     "fehemently","flushing","wotting","ensnareth","solicitation",
     "sugared","recoverable","purged","adjoining","preventions"
-    };
+    }; */
 }
