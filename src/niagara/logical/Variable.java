@@ -1,4 +1,4 @@
-/* $Id: Variable.java,v 1.3 2002/10/24 03:52:35 vpapad Exp $ */
+/* $Id: Variable.java,v 1.4 2002/12/10 01:21:22 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.ArrayList;
@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Domain;
 import niagara.query_engine.AtomicEvaluator;
+import niagara.query_engine.SimpleAtomicEvaluator;
+import niagara.xmlql_parser.syntax_tree.regExp;
 
 public class Variable implements Atom, Attribute {
     private String name;
@@ -28,10 +30,18 @@ public class Variable implements Atom, Attribute {
         return name;
     }
 
+    public SimpleAtomicEvaluator getSimpleEvaluator() {
+        return new SimpleAtomicEvaluator(name);
+    }
+    
     public AtomicEvaluator getEvaluator() {
         return new AtomicEvaluator(name);
     }
 
+    public AtomicEvaluator getEvaluator(regExp path) {
+        return new AtomicEvaluator(name, path);
+    }
+    
     public void toXML(StringBuffer sb) {
         sb.append("<var value='$").append(name).append("'/>");
     }
@@ -48,10 +58,6 @@ public class Variable implements Atom, Attribute {
         return domain;
     }
 
-    Variable Copy() {
-        return new Variable(name, domain);
-    }
-
     public boolean equals(Object other) {
         if (other == null || !(other instanceof Variable))
             return false;
@@ -66,18 +72,11 @@ public class Variable implements Atom, Attribute {
         return " Name:" + name + " Domain:" + domain.getName();
     }
 
-
-    /**
-     * @see niagara.optimizer.colombia.ATTR#copy()
-     */
     public Attribute copy() {
         return new Variable(name, domain);
     }
     
-    /**
-     * @see java.lang.Object#hashCode()
-     */
     public int hashCode() {
-        return name.hashCode()^ domain.hashCode();
+        return name.hashCode() ^ domain.hashCode();
     }
 }

@@ -1,4 +1,4 @@
-/* ConstToVarComparison.java,v 1.3 2002/10/31 03:33:19 vpapad Exp */
+/* ConstToVarComparison.java,v 1.4 2002/12/10 01:21:22 vpapad Exp */
 package niagara.logical;
 import java.util.ArrayList;
 
@@ -51,7 +51,7 @@ public class ConstToVarComparison extends Comparison {
     /**
      * @see niagara.logical.Predicate#split(Attrs)
      */
-    public Predicate split(Attrs variables) {
+    public And split(Attrs variables) {
         if (variables.Contains(right))
             return new And(this, True.getTrue());
         else

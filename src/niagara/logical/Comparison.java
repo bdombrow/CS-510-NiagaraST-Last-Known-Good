@@ -44,7 +44,7 @@ abstract public class Comparison extends Predicate {
     }
 
     // Subclasses can and should implement split!
-    public abstract Predicate split(Attrs variables);
+    public abstract And split(Attrs variables);
     
     public void beginXML(StringBuffer sb) {
         sb.append("<pred op='");
@@ -79,6 +79,7 @@ abstract public class Comparison extends Predicate {
         }
     }
     
+   
     /**
      * @see niagara.logical.Predicate#selectivity()
      */

@@ -1,4 +1,4 @@
-/* $Id: Predicate.java,v 1.2 2002/10/31 03:32:21 vpapad Exp $ */
+/* $Id: Predicate.java,v 1.3 2002/12/10 01:21:22 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.*;
@@ -6,6 +6,7 @@ import java.util.*;
 import niagara.optimizer.colombia.Attrs;
 import niagara.query_engine.PredicateImpl;
 import niagara.utils.CUtil;
+import niagara.utils.PEException;
 import niagara.xmlql_parser.syntax_tree.condition;
 import niagara.xmlql_parser.syntax_tree.schemaAttribute;
 import niagara.xmlql_parser.syntax_tree.varTbl;
@@ -14,7 +15,7 @@ abstract public class Predicate implements condition {
     /** Get an implementation for this predicate */
     public abstract PredicateImpl getImplementation();
 
-    /** Gather all the variables referenced in this predicate */
+    /** Append all the variables referenced in this predicate to al*/
     public abstract void getReferencedVariables(ArrayList al);
 
     public abstract Predicate copy();
@@ -22,11 +23,26 @@ abstract public class Predicate implements condition {
     /** Split this predicate into a conjunction of two 
      * predicates: one that only references the specified
      * variables, and another with no such restrictions */
-    public Predicate split(Attrs variables) {
+    public And split(Attrs variables) {
         // In the default case, we do not know how to split
         return new And(True.getTrue(), this);
     }
-    
+
+    /** Split this predicate into a conjunction of two 
+     * predicates: a conjunction of equality comparisons 
+     * between attributes from leftAttrs and rightAttrs (that can be used 
+     * in a hash-based join), and another with no such restrictions */
+    public Predicate splitEquiJoin(Attrs leftAttrs, Attrs rightAttrs) {
+        // In the default case, we do not know how to split
+        return new And(True.getTrue(), this);
+    }
+
+    public EquiJoinPredicateList toEquiJoinPredicateList(
+        Attrs leftAttrs,
+        Attrs rightAttrs) {
+        throw new PEException("Cannot convert an arbitrary predicate to an equijoin predicate list");
+    }
+
     abstract Predicate negation();
 
     public void toXML(StringBuffer sb) {
@@ -95,11 +111,11 @@ abstract public class Predicate implements condition {
                 sa = new schemaAttribute(sa);
             } else {
                 sa = right.lookUp(varName);
-                assert (sa != null) : "Could not find variable: " + varName;
+                assert(sa != null) : "Could not find variable: " + varName;
                 sa = new schemaAttribute(sa);
                 sa.setStreamId(1);
             }
-            
+
             var.setSA(sa);
         }
     }

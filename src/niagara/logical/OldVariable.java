@@ -1,7 +1,10 @@
-/* $Id: OldVariable.java,v 1.2 2002/10/31 03:32:21 vpapad Exp $ */
+/* $Id: OldVariable.java,v 1.3 2002/12/10 01:21:22 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.query_engine.AtomicEvaluator;
+import niagara.query_engine.SimpleAtomicEvaluator;
+import niagara.utils.PEException;
+import niagara.xmlql_parser.syntax_tree.regExp;
 import niagara.xmlql_parser.syntax_tree.schemaAttribute;
 
 public class OldVariable extends Variable {
@@ -34,5 +37,18 @@ public class OldVariable extends Variable {
      */
     public AtomicEvaluator getEvaluator() {
         return new AtomicEvaluator(sa);
+    }
+    /**
+     * @see niagara.logical.Variable#getEvaluator(regExp)
+     */
+    public AtomicEvaluator getEvaluator(regExp path) {
+        throw new PEException("Old style schema attributes already have a path attribute");
+    }
+
+    /**
+     * @see niagara.logical.Variable#getSimpleEvaluator()
+     */
+    public SimpleAtomicEvaluator getSimpleEvaluator() {
+        return new SimpleAtomicEvaluator(sa);
     }
 }

@@ -1,4 +1,4 @@
-/* $Id: And.java,v 1.1 2002/10/06 23:40:12 vpapad Exp $ */
+/* $Id: And.java,v 1.2 2002/12/10 01:21:22 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.ArrayList;
@@ -43,18 +43,32 @@ public class And extends BinaryPredicate {
         return right;
     }
 
-    public Predicate split(Attrs variables) {
-        Predicate leftSplit = left.split(variables);
-        Predicate l1 = ((And) leftSplit).getLeft();
-        Predicate l2 = ((And) leftSplit).getRight();
+    public And split(Attrs variables) {
+        And leftSplit = left.split(variables);
+        Predicate l1 = leftSplit.getLeft();
+        Predicate l2 = leftSplit.getRight();
 
-        Predicate rightSplit = right.split(variables);
-        Predicate r1 = ((And) rightSplit).getLeft();
-        Predicate r2 = ((And) rightSplit).getRight();
+        And rightSplit = right.split(variables);
+        Predicate r1 = rightSplit.getLeft();
+        Predicate r2 = rightSplit.getRight();
 
         Predicate lower = conjunction(l1, r1);
         Predicate upper = conjunction(l2, r2);
         return new And(lower, upper);
+    }
+
+    public Predicate splitEquiJoin(Attrs leftAttrs, Attrs rightAttrs) {
+        Predicate leftSplit = left.splitEquiJoin(leftAttrs, rightAttrs);
+        Predicate l1 = ((And) leftSplit).getLeft();
+        Predicate l2 = ((And) leftSplit).getRight();
+
+        Predicate rightSplit = right.splitEquiJoin(leftAttrs, rightAttrs);
+        Predicate r1 = ((And) rightSplit).getLeft();
+        Predicate r2 = ((And) rightSplit).getRight();
+
+        Predicate equiPred = conjunction(l1, r1);
+        Predicate nonEquiPred = conjunction(l2, r2);
+        return new And(equiPred, nonEquiPred);
     }
     
     public static Predicate conjunction(Predicate left, Predicate right) {
@@ -77,29 +91,18 @@ public class And extends BinaryPredicate {
 
     }
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
     public int hashCode() {
         return left.hashCode() ^ right.hashCode();
     }
 
-    /**
-     * @see niagara.logical.Predicate#negation()
-     */
     Predicate negation() {
         return new Or(left.negation(), right.negation());
     }
-    /**
-     * @see niagara.logical.Predicate#copy()
-     */
+
     public Predicate copy() {
         return new And(left, right);
     }
     
-    /**
-     * @see niagara.logical.Predicate#selectivity()
-     */
     public float selectivity() {
         // Independence assumption
         return left.selectivity() * right.selectivity();
@@ -116,5 +119,13 @@ public class And extends BinaryPredicate {
 
     public void endXML(StringBuffer sb) {
         sb.append("</and>");
+    }
+
+    public EquiJoinPredicateList toEquiJoinPredicateList(
+        Attrs leftAttrs,
+        Attrs rightAttrs) {
+            EquiJoinPredicateList result = left.toEquiJoinPredicateList(leftAttrs, rightAttrs);
+            result.addAll(right.toEquiJoinPredicateList(leftAttrs, rightAttrs));
+            return result;
     }
 }

@@ -3,14 +3,17 @@ package niagara.logical;
 import java.util.ArrayList;
 
 import niagara.optimizer.colombia.Attrs;
+import niagara.query_engine.PathToConstComparisonImpl;
 import niagara.query_engine.VarToConstComparisonImpl;
 import niagara.query_engine.VarToVarComparisonImpl;
 import niagara.query_engine.PredicateImpl;
+import niagara.xmlql_parser.syntax_tree.regExp;
 
 
 public class VarToConstComparison extends Comparison {
     private Variable left;
     private Constant right;
+    private regExp path;
 
     protected VarToConstComparison(int operator, Variable left, Constant right) {
         super(operator);
@@ -19,7 +22,11 @@ public class VarToConstComparison extends Comparison {
     }
 
     public PredicateImpl getImplementation() {
-        return new VarToConstComparisonImpl(this);
+        // XXX vpapad: unnesting code not used yet
+        if (path == null)
+            return new VarToConstComparisonImpl(this);
+        else
+            return new PathToConstComparisonImpl(this);
     }
 
     public void getReferencedVariables(ArrayList al) {
@@ -29,6 +36,8 @@ public class VarToConstComparison extends Comparison {
     public Atom getLeft() { return left; }
     
     public Atom getRight() { return right; }
+    
+    public regExp getPath() { return path; }
     
     public int hashCode() { return operator ^ left.hashCode() ^ right.hashCode(); }
     
@@ -51,7 +60,7 @@ public class VarToConstComparison extends Comparison {
     /**
      * @see niagara.logical.Predicate#split(Attrs)
      */
-    public Predicate split(Attrs variables) {
+    public And split(Attrs variables) {
         if (variables.Contains(left))
             return new And(this, True.getTrue());
         else

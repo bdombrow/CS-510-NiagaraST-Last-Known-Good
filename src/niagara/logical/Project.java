@@ -1,4 +1,4 @@
-/* $Id: Project.java,v 1.3 2002/10/31 03:32:21 vpapad Exp $ */
+/* $Id: Project.java,v 1.4 2002/12/10 01:21:22 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.optimizer.colombia.Attribute;
@@ -53,14 +53,15 @@ public class Project extends unryOp {
             if (attrs.Contains(a))
                 newAttrs.add(a);
         }
-        result.SetAttrs(newAttrs);
+        result.setAttrs(newAttrs);
         return result;
     }
     
-    /**
-     * @see java.lang.Object#hashCode()
-     */
     public int hashCode() {
         return attrs.hashCode();
+    }
+
+    public Attrs getAttrs() {
+        return attrs;
     }
 }

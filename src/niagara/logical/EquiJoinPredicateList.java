@@ -1,4 +1,4 @@
-/* $Id: EquiJoinPredicateList.java,v 1.1 2002/10/27 00:50:34 vpapad Exp $ */
+/* $Id: EquiJoinPredicateList.java,v 1.2 2002/12/10 01:21:22 vpapad Exp $ */
 package niagara.logical;
 
 import java.util.*;
@@ -37,6 +37,11 @@ public class EquiJoinPredicateList {
         return p;
     }
 
+    public void getReferencedVariables(ArrayList al) {
+        al.addAll(left);
+        al.addAll(right);
+    }
+    
     public EquiJoinPredicateList copy() {
         return new EquiJoinPredicateList(left, right);
     }
@@ -46,6 +51,7 @@ public class EquiJoinPredicateList {
         right.add(rightAttr);
     }
 
+    
     /** Remove the predicate at position pos*/
     public void remove(int pos) {
         left.remove(pos);
