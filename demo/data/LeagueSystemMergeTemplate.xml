@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE DocumentMerge SYSTEM "/disk/hopper/projects/disc/niagara/dtds/MergeTemplate.dtd">
+<!DOCTYPE DocumentMerge SYSTEM "MergeTemplate.dtd">
 
 <DocumentMerge>
 

@@ -1,30 +1,30 @@
 <?xml version="1.0"?>
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
-<plan top="result" x="318" y="115">
-<dtdscan id="accum" x="247" y="645">
+<plan top="result" x="335" y="53">
+<dtdscan id="accum" x="344" y="465">
 <url value="LeagueStats.xml"></url>
 </dtdscan>
-<scan root="" regexp="LEAGUESYSTEM.LEAGUE.TEAM" id="team" type="element" input="accum" x="94" y="552">
+<scan root="" type="element" regexp="LEAGUESYSTEM.LEAGUE.TEAM" id="team" input="accum" x="141" y="395">
 </scan>
-<scan root="" regexp="NAME" id="teamname" type="element" input="team" x="240" y="550">
+<scan root="" type="content" regexp="NAME" id="teamname" input="team" x="295" y="395">
 </scan>
-<scan root="$team" regexp="STATS.RUNSCORED" id="runsscored" type="content" input="teamname" x="361" y="549">
+<scan root="$team" type="content" regexp="STATS.RUNSCORED" id="runsscored" input="teamname" x="446" y="396">
 </scan>
-<scan root="$team" regexp="STATS.BASES" id="bases" type="content" input="runsscored" x="478" y="551">
+<scan root="$team" type="content" regexp="STATS.BASES" id="bases" input="runsscored" x="573" y="396">
 </scan>
-<scan root="$team" regexp="STATS.STRIKEOUT" id="strikeouts" type="content" input="bases" x="608" y="550">
+<scan root="$team" type="content" regexp="STATS.STRIKEOUT" id="strikeouts" input="bases" x="573" y="319">
 </scan>
-<scan root="$team" regexp="STATS.RUNALLOWED" id="runsallowed" type="content" input="strikeouts" x="441" y="481">
+<scan root="$team" type="content" regexp="STATS.RUNALLOWED" id="runsallowed" input="strikeouts" x="431" y="318">
 </scan>
-<scan root="$team" regexp="STATS.WIN" id="wins" type="content" input="runsallowed" x="300" y="481">
+<scan root="$team" type="content" regexp="STATS.WIN" id="wins" input="runsallowed" x="294" y="319">
 </scan>
-<scan root="$team" regexp="STATS.STEAL" id="steals" type="content" input="wins" x="169" y="484">
+<scan root="$team" type="content" regexp="STATS.STEAL" id="steals" input="wins" x="145" y="320">
 </scan>
-<expression class="" expression="result = runsscored + bases + strikeouts + wins * 10 + steals - runsallowed;" id="final_score" input="steals" x="325" y="377">
+<expression class="" expression="result = runsscored + bases + strikeouts + wins * 10 + steals - runsallowed;" id="final_score" input="steals" x="336" y="249">
 </expression>
-<sort order="descending" sort_by="$final_score" id="sort" comparison="numeric" input="final_score" x="321" y="300">
+<sort order="descending" sort_by="$final_score" comparison="numeric" id="sort" input="final_score" x="336" y="184">
 </sort>
-<construct id="result" clear="no" input="sort" x="320" y="217">
+<construct clear="no" id="result" input="sort" x="336" y="113">
 <team>
 	$teamname
 	$final_score

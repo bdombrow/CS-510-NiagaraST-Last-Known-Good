@@ -1,9 +1,9 @@
 <?xml version = "1.0"?>
-<!DOCTYPE LEAGUESYSTEM SYSTEM "league.dtd">
+<!DOCTYPE LEAGUESYSTEM SYSTEM "../data/league.dtd">
 <LEAGUESYSTEM>
 <LEAGUE>
 	<TEAM>
-		<NAME> Chen's Chiefs </NAME>
+		<NAME> Chen's Chiefs              </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Lou Thornton" </PNAME>
@@ -589,7 +589,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> DeWitt's Demolition Crew </NAME>
+		<NAME> DeWitt's Demolition Crew   </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Tim Belcher" </PNAME>
@@ -1175,7 +1175,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> Galanis' Gladiators </NAME>
+		<NAME> Galanis' Gladiators        </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Joe Magrane" </PNAME>
@@ -1754,7 +1754,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> Kang's Crusaders </NAME>
+		<NAME> Kang's Crusaders           </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Rick Reuschel" </PNAME>
@@ -2333,7 +2333,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> Krishnamurthy's Crushers </NAME>
+		<NAME> Krishnamurthy's Crushers   </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Roger Clemens" </PNAME>
@@ -2912,7 +2912,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> Maier's Movers </NAME>
+		<NAME> Maier's Movers             </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Don August" </PNAME>
@@ -3491,7 +3491,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> Naughton's Notorious Nine </NAME>
+		<NAME> Naughton's Notorious Nine  </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Bobby Ojeda" </PNAME>
@@ -4070,7 +4070,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> Papadimos' Padres </NAME>
+		<NAME> Papadimos' Padres          </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Jimmy Key" </PNAME>
@@ -4649,7 +4649,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> Ramamurthy's Rams </NAME>
+		<NAME> Ramamurthy's Rams          </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Mark Langston" </PNAME>
@@ -5228,7 +5228,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> Tian's Titans </NAME>
+		<NAME> Tian's Titans              </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Mark McGwire" </PNAME>
@@ -5807,7 +5807,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> Tucker's Truckers </NAME>
+		<NAME> Tucker's Truckers          </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Danny Jackson" </PNAME>
@@ -6386,7 +6386,7 @@
 		</ROSTER>
 	</TEAM>
 	<TEAM>
-		<NAME> Tufte's Tough Guys </NAME>
+		<NAME> Tufte's Tough Guys         </NAME>
 		<ROSTER>
 			<PLAYER>
 				<PNAME> "Dwight Gooden" </PNAME>
