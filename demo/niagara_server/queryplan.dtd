@@ -1,9 +1,29 @@
 <!-- DTD for query plans -->
+
 <!ENTITY % NLJoin '"niagara.query_engine.PhysicalNLJoinOperator"'>
 <!ENTITY % HashJoin '"niagara.query_engine.PhysicalHashJoinOperator"'>
 
-<!ELEMENT plan     (scan | select | join | avg | construct | dtdscan | firehosescan)+>
+<!-- 
+     Plan is a dummy node, representing the output of a query plan.
+     top is a ref to the topmost operator, usually a construct.
+-->
+
+<!ELEMENT plan     (scan | select | join | avg | construct | 
+                    dtdscan | firehosescan)+>
 <!ATTLIST plan top IDREF        #REQUIRED>
+
+<!-- 
+     For all operators, an "id" attribute is required, so that other 
+     operators may reference them. Also for logical operators with 
+     multiple physical implementations available, a "physical" attribute
+     may be attached, specifying the class name of the physical operator.
+-->
+
+<!-- 
+     type : Whether we want the element itself, its content, or its tag name
+     root:  Where is the regular expression rooted. Default: scan's input
+     regexp: The XML-QL regular expression
+-->
 
 <!ELEMENT scan     EMPTY>
 <!ATTLIST scan 
@@ -11,14 +31,14 @@
 
 	  type	   (tag|element|content) "element"
 	  root	   CDATA                 ""
-	  regexp   CDATA                 #REQUIRED
+	  regexp   CDATA               #REQUIRED
 
           physical CDATA               #IMPLIED
           input   IDREF                #REQUIRED>
 
 <!ELEMENT avg     EMPTY>
 <!ATTLIST avg 
-          id       ID                    #REQUIRED
+          id       ID                  #REQUIRED
 	  groupby  CDATA	       #REQUIRED
 	  avgattr  CDATA	       #REQUIRED
           physical CDATA               #IMPLIED
@@ -26,7 +46,7 @@
 
 <!ELEMENT sum     EMPTY>
 <!ATTLIST sum 
-          id       ID                    #REQUIRED
+          id       ID                  #REQUIRED
 	  groupby  CDATA	       #REQUIRED
 	  sumattr  CDATA	       #REQUIRED
           physical CDATA               #IMPLIED
@@ -34,7 +54,7 @@
 
 <!ELEMENT count     EMPTY>
 <!ATTLIST count 
-          id       ID                    #REQUIRED
+          id       ID                  #REQUIRED
 	  groupby  CDATA	       #REQUIRED
 	  countattr  CDATA	       #REQUIRED
           physical CDATA               #IMPLIED
@@ -42,14 +62,20 @@
 
 <!ELEMENT select  (and | or | not | pred)>
 <!ATTLIST select 
-          id       ID                    #REQUIRED
+          id       ID                  #REQUIRED
 
-          physical CDATA                #IMPLIED
-          input    IDREF                #REQUIRED>
-
+          physical CDATA               #IMPLIED
+          input    IDREF               #REQUIRED>
+<!--
+        "left" and "right" are lists of variables used in an equijoin.
+	It's necessary to specify them when using a hash join 
+	implementation.
+-->
 <!ELEMENT join     (pred)? >
 <!ATTLIST join
           id       ID                   #REQUIRED
+	  left	   CDATA		#IMPLIED
+	  right	   CDATA		#IMPLIED
 	  physical CDATA		""
           input    IDREFS               #REQUIRED>
 

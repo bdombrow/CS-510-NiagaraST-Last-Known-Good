@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">  
+<plan top="cons">
+
+<!-- Get 100 plays, selecting hits -> batters -->
+<firehosescan id="fh" host="state.cse.ogi.edu" port="5000" rate="0" 
+	type="gen" desc="http://www.cse.ogi.edu/~vpapad/xml/play.dtd" iters="10000"/>
+<scan id="hit" regexp="PLAY.HIT" input="fh"/>
+<scan id="batter" regexp="BATTER" input="hit"/>
+
+<!-- Get the league data, with player names/ids -->
+<dtdscan id="league">
+<url value="http://www.cse.ogi.edu/~vpapad/xml/PetesLeague.xml"/>
+</dtdscan>
+<scan id="team" regexp="LEAGUESYSTEM.LEAGUE.TEAM" input="league"/>
+<scan id="teamname" regexp="NAME" input="team"/> 
+<scan id="playerdata" root="$team" regexp="ROSTER.PLAYER" input="teamname"/>
+<scan id="pname" regexp="PNAME" input="playerdata"/>
+<scan id="plrid" regexp="PLRID" root="$playerdata" input="pname"/>
+
+<!-- And now join them -->
+<join id="join" left="$plrid" right="$batter" input="plrid batter" physical="niagara.query_engine.PhysicalHashJoinOperator">
+</join>
+
+<count id="cnt" input="join" groupby="$teamname" countattr="$pname"/>
+
+<construct id="cons" input="cnt">
+<score>$teamname $cnt</score>
+</construct>
+</plan>

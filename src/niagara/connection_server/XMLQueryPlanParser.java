@@ -8,7 +8,7 @@ import org.w3c.dom.*;
 import org.xml.sax.*;
 import java.io.*;
 import java.util.*;
-
+import gnu.regexp.*;
 
 import niagara.xmlql_parser.op_tree.*;
 import niagara.xmlql_parser.syntax_tree.*;
@@ -76,7 +76,6 @@ public class XMLQueryPlanParser {
 	// If we already visited this node, just return 
 	if (ids2nodes.containsKey(id))
 	    return;
-		
 	String nodeName = e.getNodeName();
 
 	// visit all the node's inputs
@@ -272,7 +271,32 @@ public class XMLQueryPlanParser {
 	varTbl rightv = right.getVarTbl();
 	
 	predicate pred = parsePreds(predElt, leftv, rightv);
-	op.setJoin(pred);
+
+	// In case of an equijoin we may have to parse "left" 
+	// and "right" to get additional equality predicates
+	String leftattrs = e.getAttribute("left");
+	String rightattrs = e.getAttribute("right");
+
+	if (!leftattrs.equals("")) {
+	    Vector leftvect = new Vector();
+	    Vector rightvect = new Vector();
+	    try {
+		RE re = new RE("\\$[a-z0-9]*");
+		REMatch[] all_left = re.getAllMatches(leftattrs);
+		REMatch[] all_right = re.getAllMatches(rightattrs);
+		for (int i = 0; i < all_left.length; i++) {
+		    leftvect.addElement(leftv.lookUp(all_left[i].toString()));
+		    rightvect.addElement(rightv.lookUp(all_right[i].toString()));
+		}
+		op.setJoin(pred, leftvect, rightvect);
+	    }
+	    catch (REException rx) {
+		System.out.println("Syntax error in regular expression.");
+		rx.printStackTrace();
+	    }
+	}
+	else 
+	    op.setJoin(pred);
 	
 	logNode joinNode = new logNode(op, left, right);
 	ids2nodes.put(id, joinNode);
