@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.10 2002/04/29 19:49:33 tufte Exp $
+ * $Id: SAXDOMParser.java,v 1.11 2002/05/02 22:02:35 vpapad Exp $
  *
  */
 
@@ -87,6 +87,8 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
     public void parse(InputSource is) throws SAXException, IOException {
         reset();
         parser.parse(is, this);
+
+        setPage(null);
     }
 
     public void reset() {
@@ -112,21 +114,29 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
     }
 
     public void setPage(Page page) {
+        // Unpin previous page, if any
+        if (this.page != null)
+            this.page.unpin(1);
+
 	this.page = page;
+
+        // Pin current page, so that it doesn't go away
+        // under our feet
+        if (page != null)
+            page.pin();
     }
 
 
     // Event handling
     
     public void startDocument() throws SAXException {
-        if (page == null || page.isFull()) {
-            page = BufferManager.getFreePage();
-            page.setParser(this);
-        }
+        if (page == null || page.isFull())
+            setPage(BufferManager.getFreePage());
 
         // If we're streaming, ignore the enclosing document 
         if (streaming) return;
 
+        page.setParser(this);
         page.addEvent(doc, SAXEvent.START_DOCUMENT, null);
         doc = new DocumentImpl(page, page.getLastOffset());
         
@@ -160,8 +170,13 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
         // If we're streaming, and this is a top-level element
         // pretend we just received a start document event
 	if(streaming && depth == -1) {
+            if (page.isFull())
+                setPage(BufferManager.getFreePage());
+
+            page.setParser(this);
+
             page.addEvent(doc, SAXEvent.START_DOCUMENT, null);
-            doc = new DocumentImpl(page, page.getLastOffset());
+            doc = new DocumentImpl(page, page.getLastIndex());
 
             depth = 0; 
             open_nodes[0] = -1;            
