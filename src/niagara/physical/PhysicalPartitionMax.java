@@ -1,4 +1,4 @@
-/* $Id: PhysicalPartitionMax.java,v 1.1 2003/12/24 01:49:02 vpapad Exp $ */
+/* $Id: PhysicalPartitionMax.java,v 1.2 2005/07/05 21:34:53 tufte Exp $ */
 package niagara.physical;
 
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public class PhysicalPartitionMax extends PhysicalPartitionGroup {
 	private Double findMax (Vector group) {
 		Double newMax = emptyGroupValue;
 		for (int i = 1; i <= range; i++) {
-			if (newMax.compareTo(group.elementAt(i)) < 0)
+			if (newMax.compareTo((Double)group.elementAt(i)) < 0)
 				newMax = (Double)group.elementAt(i);
 		}
 		return newMax;
