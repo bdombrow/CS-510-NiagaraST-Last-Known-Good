@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.31 2004/02/11 01:08:43 vpapad Exp $
+  $Id: NiagraServer.java,v 1.32 2005/07/06 16:58:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -134,6 +134,9 @@ public class NiagraServer {
                 ResultTransmitter.QUIET = true;
             } else if (args[i].equals("-full-tuple")) {
                 ResultTransmitter.OUTPUT_FULL_TUPLE = true;
+            } else if (args[i].equals("-disable-buf-flush")){
+            	System.out.println("Buffer flush false");
+            	ResultTransmitter.BUF_FLUSH = false;
             } else if (args[i].equals("-console")) {
                 startConsole = true;
             } else if (args[i].equals("-client-port")) {

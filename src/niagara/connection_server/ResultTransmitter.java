@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.27 2003/12/24 02:16:38 vpapad Exp $
+  $Id: ResultTransmitter.java,v 1.28 2005/07/06 16:58:57 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,7 +76,8 @@ public class ResultTransmitter implements Schedulable {
 
     public static boolean QUIET = false;
     public static boolean OUTPUT_FULL_TUPLE = false;
-
+    public static boolean BUF_FLUSH = true;
+    
     /** Constructor
     @param handler The request handler that created this transmitter
     @param queryInfo The info about the query to be executed
@@ -345,11 +346,18 @@ public class ResultTransmitter implements Schedulable {
                     // If we timed out two times in a row, then
                     // send the results
                     sendResults();
+                    
+                    // wait until we have another result
+                    // to send data
+                    timedOut = false;
                 }
-                // returns a ctrl flag
-                int newCtrlFlag = queryInfo.getQueryResult().requestBufFlush();
-                if (newCtrlFlag != CtrlFlags.NULLFLAG) {
-                    processCtrlMsg(newCtrlFlag);
+                
+                if(BUF_FLUSH) {
+                	// 	returns a ctrl flag
+                	int newCtrlFlag = queryInfo.getQueryResult().requestBufFlush();
+                	if (newCtrlFlag != CtrlFlags.NULLFLAG) {
+                		processCtrlMsg(newCtrlFlag);
+                	}
                 }
                 timedOut = true;
                 break;
