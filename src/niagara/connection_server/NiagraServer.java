@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.32 2005/07/06 16:58:57 tufte Exp $
+  $Id: NiagraServer.java,v 1.33 2005/07/06 19:28:52 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -139,7 +139,7 @@ public class NiagraServer {
             	ResultTransmitter.BUF_FLUSH = false;
             } else if (args[i].equals("-console")) {
                 startConsole = true;
-            } else if (args[i].equals("-client-port")) {
+            } else if (args[i].equals("-port")) {
                 if ((i + 1) >= args.length) {
                     cerr("Please supply a parameter to -client-port");
                     usage();
