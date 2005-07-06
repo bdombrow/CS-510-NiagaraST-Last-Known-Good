@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.1 2003/12/24 01:49:01 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.2 2005/07/06 16:59:37 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,6 +48,7 @@ import niagara.query_engine.Schedulable;
 import niagara.utils.*;
 
 import org.w3c.dom.Document;
+import niagara.connection_server.ResultTransmitter;
 
 public abstract class PhysicalOperator extends PhysicalOp 
 implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
@@ -279,7 +280,8 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 			     ctrlFlag == CtrlFlags.NULLFLAG; sourceId++) {
 			// best we can do is send a message downstream
 			// only send message to active source streams
-			if(activeSourceStreams.contains(sourceId)) {
+			if(activeSourceStreams.contains(sourceId) &&
+			   ResultTransmitter.BUF_FLUSH) {
 			    if(PageStream.VERBOSE)
 				System.out.println(getName() + 
 					   "Requesting buffer flush on stream " 
