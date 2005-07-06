@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.19 2004/02/10 03:54:39 vpapad Exp $ -->
+<!-- $Id: build.xml,v 1.20 2005/07/06 16:36:29 tufte Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -60,7 +60,7 @@
 
   <!-- Compile everything -->
   <target name="compile" depends="init,create.cups">
-    <javac srcdir="${src}" destdir="${build}" source="1.4" debug="true"
+    <javac srcdir="${src}" destdir="${build}" debug="true"
     	excludes="niagara/client/qbe/**,niagara/client/qpclient/**,NEXMarkGenerator">
       <compilerarg line=" -Xbootclasspath/p:${lib}/xercesImpl.xerces-2_6_1.jar:${lib}/xmlParserAPIs.xerces-2_6_1.jar"/>
       <classpath refid="compilation.classpath"/>
@@ -90,7 +90,7 @@
   <target name="javadoc">
     <javadoc packagenames="niagara.*,niagara.*.*,niagara.*.*.*" 
            sourcepath="${basedir}/src"
-           destdir="${basedir}/docs/api" access="private" source="1.4">
+           destdir="${basedir}/docs/api" access="private">
       <classpath refid="compilation.classpath"/>
       <tag name="execution" scope="all" description="Execution time variable."/>
     </javadoc>
