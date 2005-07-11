@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.22 2003/12/24 02:30:15 vpapad Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.23 2005/07/11 20:51:36 tufte Exp $ -->
 <catalog>
   <configuration>
     <!-- General configuration parameters -->
@@ -63,10 +63,6 @@
       class="niagara.logical.Average">
       <physical name="PhysicalAverage" class="niagara.physical.PhysicalAverage"/>
     </logical>
-    <logical name="slidingAvg"
-      class="niagara.logical.SlidingAverage">
-      <physical name="PhysicalSlidingAverage" class="niagara.physical.PhysicalSlidingAverage"/>
-    </logical>
     <logical name="accumulate"
       class="niagara.logical.Accumulate">
       <physical name="PhysicalAccumulate" class="niagara.physical.PhysicalAccumulate"/>
@@ -97,10 +93,6 @@
       class="niagara.logical.Sum">
       <physical name="PhysicalSum" class="niagara.physical.PhysicalSum"/>
     </logical>
-    <logical name="slidingSum"
-      class="niagara.logical.SlidingSum">
-      <physical name="PhysicalSlidingSum" class="niagara.physical.PhysicalSlidingSum"/>
-    </logical>
     <logical name="min"
       class="niagara.logical.Min">
       <physical name="PhysicalMin" class="niagara.physical.PhysicalMin"/>
@@ -108,10 +100,6 @@
      <logical name="max"
       class="niagara.logical.Max">
       <physical name="PhysicalMax" class="niagara.physical.PhysicalMax"/>
-    </logical>
-    <logical name="slidingMax"
-      class="niagara.logical.SlidingMax">
-      <physical name="PhysicalSlidingMax" class="niagara.physical.PhysicalSlidingMax"/>
     </logical>
     <logical name="count"
       class="niagara.logical.Count">
@@ -128,10 +116,6 @@
     <logical name="windowAverage"
       class="niagara.logical.WindowAverage">
       <physical name="PhysicalWindowAverage" class="niagara.physical.PhysicalWindowAverage"/>
-    </logical>
-    <logical name="slidingCount"
-      class="niagara.logical.SlidingCount">
-      <physical name="PhysicalSlidingCount" class="niagara.physical.PhysicalSlidingCount"/>
     </logical>
     <logical name="dup"
       class="niagara.logical.Duplicate">
@@ -235,10 +219,6 @@
   		<before><logical name="avg"/></before>
  		<after><op name="PhysicalAverage"/></after>
   	</rule>
-  	<rule type="simple" name="slidingAvg to PhysicalSlidingAverage">
-  		<before><logical name="slidingAvg"/></before>
- 		<after><op name="PhysicalSlidingAverage"/></after>
-  	</rule>
   	<rule type="simple" name="count to PhysicalCount">
   		<before><logical name="count"/></before>
  		<after><op name="PhysicalCount"/></after>
@@ -255,18 +235,9 @@
 		<before><logical name="windowAverage"/></before>
 		<after><op name="PhysicalWindowAverage"/></after>
 	</rule>
-
-  	<rule type="simple" name="slidingCount to PhysicalSlidingCount">
-  		<before><logical name="slidingCount"/></before>
- 		<after><op name="PhysicalSlidingCount"/></after>
-  	</rule>
   	<rule type="simple" name="sum to PhysicalSum">
   		<before><logical name="sum"/></before>
  		<after><op name="PhysicalSum"/></after>
-  	</rule>
-  	<rule type="simple" name="slidingSum to PhysicalSlidingSum">
-  		<before><logical name="slidingSum"/></before>
- 		<after><op name="PhysicalSlidingSum"/></after>
   	</rule>
 	<rule type="simple" name="min to PhysicalMin">
 		<before><logical name="min"/></before>
@@ -275,10 +246,6 @@
   	<rule type="simple" name="max to PhysicalMax">
   		<before><logical name="max"/></before>
  		<after><op name="PhysicalMax"/></after>
-  	</rule>
-  	<rule type="simple" name="slidingMax to PhysicalSlidingMax">
-  		<before><logical name="slidingMax"/></before>
- 		<after><op name="PhysicalSlidingMax"/></after>
   	</rule>
   	<rule type="simple" name="incravg to PhysicalIncrementalAverage">
   		<before><logical name="incravg"/></before>
