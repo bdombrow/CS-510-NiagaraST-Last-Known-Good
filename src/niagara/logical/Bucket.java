@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Bucket.java,v 1.1 2003/12/24 02:08:28 vpapad Exp $
+  $Id: Bucket.java,v 1.2 2005/07/12 02:21:12 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -44,11 +44,6 @@ import niagara.xmlql_parser.*;
 import java.util.StringTokenizer;
 
 public class Bucket extends UnaryOperator {
-	private final static int SEC_AS_MILLISECS = 1000;
-	private final static int MIN_AS_MILLISECS = 60 * SEC_AS_MILLISECS;
-	private final static int HOUR_AS_MILLISECS = 60 * MIN_AS_MILLISECS;
-	private final static int DAY_AS_MILLISECS = 24 * HOUR_AS_MILLISECS;	
-
 	protected Attribute windowAttr;
 	protected int windowType;
 	protected int range;
@@ -110,8 +105,8 @@ public class Bucket extends UnaryOperator {
 			range = (Integer.valueOf(windowRange)).intValue();
 			slide = (Integer.valueOf(windowSlide)).intValue();
 		} else {
-			range = parseTimeInterval(windowRange);
-			slide = parseTimeInterval(windowSlide);
+			range = Timer.parseTimeInterval(windowRange);
+			slide = Timer.parseTimeInterval(windowSlide);
 		}
 		
 		if(windowAttribute.length() != 0)
@@ -169,47 +164,5 @@ public class Bucket extends UnaryOperator {
         
 		return  new LogicalProperty(card, attrs, inpLogProp.isLocal());
 	}
-	public int parseTimeInterval(String intervalStr)
-		throws InvalidPlanException {
-		StringTokenizer strtok = new StringTokenizer(intervalStr);
-		boolean expectNumber = true;
-		int currentNumber = 0;
-		int total = 0;
-		while (strtok.hasMoreTokens()) {
-			String tok = strtok.nextToken();
-			if (expectNumber) {
-				try {
-					currentNumber = Integer.parseInt(tok);
-					expectNumber = false;
-				} catch (NumberFormatException nfe) {
-					throw new InvalidPlanException(
-						"Expected integer, found "
-							+ tok
-							+ "while parsing "
-							+ name);
-				}
-			} else {
-				tok = tok.toLowerCase();
-				if (tok.indexOf("day") >= 0)
-					total += currentNumber * DAY_AS_MILLISECS;
-				else if (tok.indexOf("hour") >= 0)
-					total += currentNumber * HOUR_AS_MILLISECS;
-				else if (tok.indexOf("minute") >= 0)
-					total += currentNumber * MIN_AS_MILLISECS;
-				else if (tok.indexOf("second") >= 0)
-					total += currentNumber * SEC_AS_MILLISECS;
-				else if (tok.indexOf("millisecond") >= 0)
-					total += currentNumber;
-				else
-					throw new InvalidPlanException(
-						"Expected time term, found "
-							+ tok
-							+ " while parsing "
-							+ name);
-			}
-		}
-		return total;
-	}
-	
 }
 

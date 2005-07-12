@@ -1,4 +1,4 @@
-/* $Id: Timer.java,v 1.4 2003/12/24 02:08:27 vpapad Exp $ */
+/* $Id: Timer.java,v 1.5 2005/07/12 02:21:12 vpapad Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -134,7 +134,9 @@ public class Timer extends NullaryOperator {
         sb.append(warp).append("'");
     }
 
-    public int parseTimeInterval(String intervalStr)
+    /** @return the number of milliseconds in the specified time interval
+     * (if no unit is provided, assume milliseconds) */
+    public static int parseTimeInterval(String intervalStr)
         throws InvalidPlanException {
         StringTokenizer strtok = new StringTokenizer(intervalStr);
         boolean expectNumber = true;
@@ -145,13 +147,12 @@ public class Timer extends NullaryOperator {
             if (expectNumber) {
                 try {
                     currentNumber = Integer.parseInt(tok);
-                    expectNumber = false;
                 } catch (NumberFormatException nfe) {
                     throw new InvalidPlanException(
                         "Expected integer, found "
                             + tok
                             + "while parsing "
-                            + name);
+                            + intervalStr);
                 }
             } else {
                 tok = tok.toLowerCase();
@@ -170,9 +171,12 @@ public class Timer extends NullaryOperator {
                         "Expected time term, found "
                             + tok
                             + " while parsing "
-                            + name);
+                            + intervalStr);
             }
+            expectNumber = !expectNumber;
         }
+        if (!expectNumber)
+            total += currentNumber;
         return total;
     }
 
