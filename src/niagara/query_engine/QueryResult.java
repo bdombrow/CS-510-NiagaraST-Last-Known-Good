@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.19 2003/12/24 01:31:48 vpapad Exp $
+  $Id: QueryResult.java,v 1.20 2005/07/13 20:31:48 acd Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -246,15 +246,29 @@ public class QueryResult {
         // First get the last attribute of the tuple
 
         if (ResultTransmitter.OUTPUT_FULL_TUPLE) {
-            Document resultDoc = DOMFactory.newDocument();
-            Element root = resultDoc.createElement("niagara:tuple");
-            resultDoc.appendChild(root);
-            for (int i = 0; i < tupleElement.size(); i++) {
-                Node tupAttr = tupleElement.getAttribute(i);
-                Element elt = tupleAttrToElt(tupAttr, resultDoc);
-                root.appendChild(elt);
-            }
-            return resultDoc;
+
+            int tupleSize = tupleElement.size(); 
+
+			if(tupleSize == 1 && 
+				       tupleElement.getAttribute(0).getNodeType() ==
+					           Node.DOCUMENT_NODE) {
+                return (Document)tupleElement.getAttribute(0);
+			} else {
+				int startIdx = 0;
+				if(tupleElement.getAttribute(0).getNodeType() ==
+					           Node.DOCUMENT_NODE) {
+                      startIdx = 1;
+				}
+                Document resultDoc = DOMFactory.newDocument();
+                Element root = resultDoc.createElement("niagara:tuple");
+                resultDoc.appendChild(root);
+                for (int i = startIdx; i < tupleSize; i++) {
+                    Node tupAttr = tupleElement.getAttribute(i);
+                    Element elt = tupleAttrToElt(tupAttr, resultDoc);
+                    root.appendChild(elt);
+                }
+                return resultDoc;
+			}
         }
 
         Node lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
