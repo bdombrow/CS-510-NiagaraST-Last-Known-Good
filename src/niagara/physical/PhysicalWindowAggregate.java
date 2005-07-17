@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowAggregate.java,v 1.1 2003/12/24 01:49:04 vpapad Exp $
+  $Id: PhysicalWindowAggregate.java,v 1.2 2005/07/17 03:35:51 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -61,6 +61,8 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 
 	protected void localInitFrom(LogicalOp logicalOperator) {
 		aggrAttr = ((WindowAggregate)logicalOperator).getAggrAttr();
+		inputName = ((WindowAggregate)logicalOperator).getInputName();
+
 	}
 
 	protected void initializeForExecution() {
@@ -118,9 +120,10 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 				   (AggrResult)finalResult);
 	}
 
-	protected PhysicalGroup localCopy() {
+	protected PhysicalWindowGroup localCopy() {
 		PhysicalWindowAggregate op = getInstance();
 		op.aggrAttr = this.aggrAttr;
+		op.inputName = inputName;
 		return op;
 	}
 

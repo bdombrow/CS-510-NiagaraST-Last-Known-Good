@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalBucket.java,v 1.1 2003/12/24 01:49:01 vpapad Exp $
+  $Id: PhysicalBucket.java,v 1.2 2005/07/17 03:35:51 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -50,6 +50,7 @@ public class PhysicalBucket extends PhysicalOperator {
     private long range;
     private long slide;
     private int count = 0;
+    private String name;
     private long windowId_from = 0;
     private long windowId_to = 0;    
     private int windowCount = 0;
@@ -74,6 +75,7 @@ public class PhysicalBucket extends PhysicalOperator {
 	windowType = ((Bucket) logicalOperator).getWindowType();		
 	range = ((Bucket) logicalOperator).getWindowRange();
 	slide = ((Bucket) logicalOperator).getWindowSlide();
+	name = ((Bucket) logicalOperator).getId();
     }
 
     public Op opCopy() {
@@ -82,6 +84,7 @@ public class PhysicalBucket extends PhysicalOperator {
 	p.windowType = windowType;
 	p.range = range;
 	p.slide = slide;
+	p.name = name;
 
 	return p;
     }
@@ -203,9 +206,9 @@ public class PhysicalBucket extends PhysicalOperator {
 	
 	Tuple result = inputTuple.copy(numNodes);
 
-	Element from = doc.createElement("wid_from");
+	Element from = doc.createElement("wid_from_"+name);
 	from.appendChild(doc.createTextNode(String.valueOf(windowId_from)));    	
-	Element to = doc.createElement("wid_to");
+	Element to = doc.createElement("wid_to_"+name);
 	to.appendChild(doc.createTextNode(String.valueOf(windowId_to)));    	
 
 	result.appendAttribute(from);
@@ -289,10 +292,11 @@ public class PhysicalBucket extends PhysicalOperator {
 		ts.appendChild(doc.createTextNode("*"));
 		inputTuple.setAttribute(pos, ts);
 	    	    
-		Element from = doc.createElement("wid_from");
-		from.appendChild(doc.createTextNode("(," + String.valueOf(wid-1) + ")"));   //windowId_from? 	
-		//from.appendChild(doc.createTextNode( String.valueOf(wid-1)));   //windowId_from?
-		Element to = doc.createElement("wid_to");
+		Element from = doc.createElement("wid_from_"+name);
+		//from.appendChild(doc.createTextNode("(," + String.valueOf(wid-1) + ")"));   //windowId_from?
+		//hack
+		from.appendChild(doc.createTextNode( String.valueOf(wid-1)));   //windowId_from?
+		Element to = doc.createElement("wid_to_"+name);
 		to.appendChild(doc.createTextNode(String.valueOf("*")));    
 	    
 		inputTuple.appendAttribute(from);	   	    
@@ -337,13 +341,15 @@ public class PhysicalBucket extends PhysicalOperator {
 			spe.appendAttribute(ePunct);
 		}
 	}
-	tPattern = doc.createTextNode("(," +Long.toString(value) + ")");
-	eChild = doc.createElement("wid_from");
+	//tPattern = doc.createTextNode("(," +Long.toString(value) + ")");
+	//hack
+	tPattern = doc.createTextNode(Long.toString(value));
+	eChild = doc.createElement("wid_from_"+name);
 	eChild.appendChild(tPattern);
 	spe.appendAttribute(eChild);
 	
 	tPattern = doc.createTextNode("*");
-	eChild = doc.createElement("wid_to");
+	eChild = doc.createElement("wid_to_"+name);
 	eChild.appendChild(tPattern);
 	spe.appendAttribute(eChild);	
 		
@@ -397,12 +403,11 @@ public class PhysicalBucket extends PhysicalOperator {
 	 public void constructTupleSchema(TupleSchema[] inputSchemas) {
 		 inputTupleSchemas = inputSchemas;
 	 	outputTupleSchema = inputSchemas[0].copy();
-	 	Attribute attrFrom = logProp.getAttr("wid_from");
-	 	Attribute attrTo = logProp.getAttr("wid_to");
+	 	Attribute attrFrom = logProp.getAttr("wid_from_"+name);
+	 	Attribute attrTo = logProp.getAttr("wid_to_"+name);
 	 	outputTupleSchema.addMapping(attrFrom);
 	 	outputTupleSchema.addMapping(attrTo);
-	 }    
-    
+	 }        
 }
 
 
