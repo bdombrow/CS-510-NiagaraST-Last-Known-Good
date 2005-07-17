@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowAggregate.java,v 1.1 2003/12/24 02:08:29 vpapad Exp $
+  $Id: WindowAggregate.java,v 1.2 2005/07/17 03:36:42 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -72,6 +72,8 @@ public abstract class WindowAggregate extends WindowGroup {
 	op = getInstance();
 	op.groupingAttrs = this.groupingAttrs;
 	op.aggrAttr = this.aggrAttr;
+	op.inputName = inputName;
+
 	return op;
 	}
 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Bucket.java,v 1.2 2005/07/12 02:21:12 vpapad Exp $
+  $Id: Bucket.java,v 1.3 2005/07/17 03:36:42 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,6 +63,7 @@ public class Bucket extends UnaryOperator {
 	op.slide = slide;
 	//op.attrInput = attrInput;
 	op.stInput = stInput;
+	op.name = name;
 	return op;
     }
     
@@ -159,8 +160,8 @@ public class Bucket extends UnaryOperator {
 			attrs.add(a);
 		}
 		
-		attrs.add(new Variable("wid_from", varType.ELEMENT_VAR));
-		attrs.add(new Variable("wid_to", varType.ELEMENT_VAR));
+		attrs.add(new Variable("wid_from_"+name, varType.ELEMENT_VAR));
+		attrs.add(new Variable("wid_to_"+name, varType.ELEMENT_VAR));
         
 		return  new LogicalProperty(card, attrs, inpLogProp.isLocal());
 	}
