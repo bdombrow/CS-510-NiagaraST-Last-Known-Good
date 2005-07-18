@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalBucket.java,v 1.2 2005/07/17 03:35:51 jinli Exp $
+  $Id: PhysicalBucket.java,v 1.3 2005/07/18 21:46:44 acd Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -202,17 +202,17 @@ public class PhysicalBucket extends PhysicalOperator {
 			} 
 		}	
     		
-	int numNodes = inputTuple.size();
+	int outSize = outputTupleSchema.getLength();
 	
-	Tuple result = inputTuple.copy(numNodes);
+	Tuple result = inputTuple.copy(outSize);
 
 	Element from = doc.createElement("wid_from_"+name);
 	from.appendChild(doc.createTextNode(String.valueOf(windowId_from)));    	
 	Element to = doc.createElement("wid_to_"+name);
 	to.appendChild(doc.createTextNode(String.valueOf(windowId_to)));    	
 
-	result.appendAttribute(from);
-	result.appendAttribute(to);
+	result.setAttribute(outSize - 2, from);
+	result.setAttribute(outSize -1, to);
 	
 	return result;
 
