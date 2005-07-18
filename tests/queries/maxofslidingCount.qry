@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<!DOCTYPE plan SYSTEM "http://www.cse.ogi.edu/~jinli/xml/bids.dtd">
+<!DOCTYPE plan SYSTEM "http://www.cs.pdx.edu/~tufte/xml/bids.dtd">
 
 <plan top="cons">
 <dtdscan id="dtd">
-<url value="http://www.cse.ogi.edu/~jinli/xml/bids.xml"/>
+<url value="http://www.cs.pdx.edu/~tufte/xml/bids.xml"/>
 </dtdscan>
 <unnest id="scan" regexp="BIDS.BID" input="dtd"/>
 <unnest id="auction" regexp="auction" input="scan"/>

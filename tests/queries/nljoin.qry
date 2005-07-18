@@ -4,11 +4,11 @@
 <plan top="cons">
 
 <dtdscan id="acdtdscan">
-<url value="http://www.cse.ogi.edu/~tufte/xml/a_and_c.xml"></url>
+<url value="http://www.cs.pdx.edu/~tufte/xml/a_and_c.xml"></url>
 </dtdscan>
 
 <dtdscan id="jcdtdscan">
-<url value="http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml"></url>
+<url value="http://www.cs.pdx.edu/~tufte/xml/j_caesar.xml"></url>
 </dtdscan>
 
 <unnest root="" type="content" 

@@ -2,7 +2,7 @@
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 <plan top="cons">
 <dtdscan id="dtd">
-<url value="http://www.cse.ogi.edu/~tufte/xml/numbers.xml"/>
+<url value="http://www.cs.pdx.edu/~tufte/xml/numbers.xml"/>
 </dtdscan>
 <unnest id="scan1" regexp="PLAY.NUM" input = "dtd" type="content"/>
 <dup id="dup" branch="3" input="scan1"/>

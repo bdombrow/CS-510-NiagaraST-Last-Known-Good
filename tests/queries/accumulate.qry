@@ -5,8 +5,8 @@
 
 <dtdscan id="docroot">
 
-<url value="http://www.cse.ogi.edu/~tufte/xml/data/classes1.xml"/>
-<url value="http://www.cse.ogi.edu/~tufte/xml/data/classes2.xml"/>
+<url value="http://www.cs.pdx.edu/~tufte/xml/data/classes1.xml"/>
+<url value="http://www.cs.pdx.edu/~tufte/xml/data/classes2.xml"/>
 
 </dtdscan>
 

@@ -3,7 +3,7 @@
 
 <plan top="cons">
 <dtdscan id="dtd">
-<url value="http://www.cse.ogi.edu/~jinli/xml/numbers_1.xml"/>
+<url value="http://www.cs.pdx.edu/~tufte/xml/numbers_1.xml"/>
 </dtdscan>
 
 <unnest id="scan" regexp="PLAY.NUM" input="dtd"/>

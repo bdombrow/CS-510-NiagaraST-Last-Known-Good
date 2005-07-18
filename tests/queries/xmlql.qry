@@ -1,8 +1,8 @@
 WHERE 
 <PLAY><NUM> $n </></> 
-    IN "http://www.cse.ogi.edu/~tufte/xml/numbers.xml" ,
+    IN "http://www.cs.pdx.edu/~tufte/xml/numbers.xml" ,
 <PLAY><TITLE> $t </></> 
-    IN "http://www.cse.ogi.edu/~tufte/xml/j_caesar.xml" ,
+    IN "http://www.cs.pdx.edu/~tufte/xml/j_caesar.xml" ,
 $n >3
 CONSTRUCT 
 <result>
