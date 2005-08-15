@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowGroup.java,v 1.3 2005/07/17 03:36:42 jinli Exp $
+  $Id: WindowGroup.java,v 1.4 2005/08/15 01:47:56 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,7 +49,7 @@ public abstract class WindowGroup extends Group {
 	protected int windowType;
 	protected int range;
 	protected int slide;
-	protected String inputName;
+	protected String widName;
     
 
 	/**
@@ -108,7 +108,11 @@ public abstract class WindowGroup extends Group {
 	throws InvalidPlanException {
 		String id = e.getAttribute("id");
 		String groupbyStr = e.getAttribute(gpAttrName);
-		inputName = e.getAttribute("input");
+		String inputName = e.getAttribute("input");
+		widName = e.getAttribute("wid");
+		
+		if (widName.equals(""))
+			widName = inputName; 
 
 		// Parse the groupby attribute to see what to group on
 		Vector groupbyAttrs = new Vector();
@@ -119,7 +123,7 @@ public abstract class WindowGroup extends Group {
 			groupbyAttrs.addElement(attr);
 		}
 		//add the window_from (window_id) to the grouping attributes
-		Attribute attr = Variable.findVariable(inputLogProp, "wid_from_"+inputName);
+		Attribute attr = Variable.findVariable(inputLogProp, "wid_from_"+widName);
 		groupbyAttrs.addElement(attr);
 		groupingAttrs = new skolem(id, groupbyAttrs);
 	
@@ -210,8 +214,8 @@ public abstract class WindowGroup extends Group {
 	public int getWindowSlide() {
 		return slide;
 	}
-	public String getInputName() {
-		return inputName;
+	public String getWid () {
+			return widName;
 	}
 
     

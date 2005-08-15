@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowAggregate.java,v 1.2 2005/07/17 03:36:42 jinli Exp $
+  $Id: WindowAggregate.java,v 1.3 2005/08/15 01:47:56 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -72,13 +72,13 @@ public abstract class WindowAggregate extends WindowGroup {
 	op = getInstance();
 	op.groupingAttrs = this.groupingAttrs;
 	op.aggrAttr = this.aggrAttr;
-	op.inputName = inputName;
+	op.widName = widName;
 
 	return op;
 	}
 
 	public int hashCode() {
-		return groupingAttrs.hashCode() ^ aggrAttr.hashCode();
+		return groupingAttrs.hashCode() ^ aggrAttr.hashCode() ^ widName.hashCode();
 	}
 
 	public boolean equals(Object obj) {
@@ -90,6 +90,6 @@ public abstract class WindowAggregate extends WindowGroup {
 		return obj.equals(this);
 		WindowAggregate other = (WindowAggregate) obj;
 	return groupingAttrs.equals(other.groupingAttrs) &&
-		aggrAttr.equals(other.aggrAttr);
+		aggrAttr.equals(other.aggrAttr) && widName.equals(other.widName);
 	}    
 }
