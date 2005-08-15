@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowGroup.java,v 1.2 2005/07/17 03:35:51 jinli Exp $
+  $Id: PhysicalWindowGroup.java,v 1.3 2005/08/15 01:36:53 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -47,6 +47,7 @@ import java.util.Vector;
 
 import niagara.logical.*;
 import niagara.optimizer.colombia.*;
+import niagara.query_engine.TupleSchema;
 import niagara.utils.ShutdownException;
 import niagara.utils.Tuple;
 import niagara.utils.Punctuation;
@@ -216,7 +217,8 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 	//    
 	protected ArrayList streamIds;
 	protected Attribute windowAttr;
-	protected String inputName;
+	protected String widName;
+	private int widFromPos, widToPos;
     
 	///////////////////////////////////////////////////////////////////////////
 	// These are the methods of the PhysicalWindowGroupOperator class          //
@@ -250,6 +252,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     public final Op opCopy() {
     	PhysicalWindowGroup op = localCopy();
     	op.groupAttributeList = groupAttributeList;
+    	op.widName = widName;
     	return op;
         }
 
@@ -263,6 +266,8 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     	if(!groupAttributeList.equals(
     			((PhysicalWindowGroup)o).groupAttributeList))
     	    return false;
+    	if(!widName.equals(((PhysicalWindowGroup)o).widName))
+    		return false;
     	return localEquals(o);
         }
 
@@ -304,6 +309,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
 	protected void localInitFrom(LogicalOp logicalOperator) {
 		windowAttr = ((WindowGroup)logicalOperator).getWindowAttr();
+		widName = ((WindowGroup)logicalOperator).getWid();
 	}
 
 	protected void processPunctuation(
@@ -389,13 +395,14 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		
 		int tupleSize = tupleElement.size();
 
-		Node wid_from = tupleElement.getAttribute(tupleSize-2);
-		Node wid_to = tupleElement.getAttribute(tupleSize-1);
+		Node wid_from = tupleElement.getAttribute(widFromPos);
+		Node wid_to = tupleElement.getAttribute(widToPos);		
+		
 			
 		int from = Long.valueOf(wid_from.getFirstChild().getNodeValue()).intValue();
 		int to = Long.valueOf(wid_to.getFirstChild().getNodeValue()).intValue();
 
-    	HashEntry prevResult;
+		HashEntry prevResult;
     		    
     	Tuple tmpTuple;
     	tmpTuple = (Tuple) tupleElement.clone();
@@ -422,7 +429,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     		//prevResult = (HashEntry)hashtable.get(key);
     		if (prevResult == null) {
     			
-    			wid = doc.createElement("wid_from_"+inputName);
+    			wid = doc.createElement("wid_from_"+widName);
     			text = doc.createTextNode(String.valueOf(i));
     			wid.appendChild(text);
     			
@@ -467,44 +474,6 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     		    
     } 
     	    	    
-	
-
-
-/*	protected final void blockingProcessTuple (
-					 Tuple tupleElement,
-					 int streamId) 
-	throws ShutdownException {
-
-		// First get the hash code for the grouping attributes
-		
-		int tupleSize = tupleElement.size();
-
-		Node wid_from = tupleElement.getAttribute(tupleSize-2);
-		Node wid_to = tupleElement.getAttribute(tupleSize-1);
-		
-		long from = Long.valueOf(wid_from.getFirstChild().getNodeValue()).intValue();
-		long to = Long.valueOf(wid_to.getFirstChild().getNodeValue()).intValue();
-		
-		Tuple tmpTuple;
-		tmpTuple = (Tuple) tupleElement.clone();
-		//tmpTuple.deleteAttribute(1);
-		Node wid;
-		Node text;
-		for (long i = from; i <= to; i++ ) {
-			super.blockingProcessTuple(tmpTuple, streamId);			
-			//wid = tmpTuple.getAttribute(tupleSize-2);
-			//wid.setNodeValue(String.valueOf(i+1));
-			wid = doc.createElement("wid_from");
-			text = doc.createTextNode(String.valueOf(i+1));
-			wid.appendChild(text);
-			
-			tupleElement.setAttribute(tupleSize-2, wid);					
-		}
-	
-	}
-}*/
-
-//Copied from PhysicalGroup.java
 	/**
 	 * This function returns the current output of the operator. This
 	 * function is invoked only when the operator is blocking. This
@@ -704,5 +673,12 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
         cost += outputCard * catalog.getDouble("tuple_construction_cost");
         return new Cost(cost);
     }
+    
+    public void constructTupleSchema(TupleSchema[] inputSchemas) {
+        super.constructTupleSchema(inputSchemas);
+        
+        widFromPos = inputSchemas[0].getPosition("wid_from_"+widName);
+        widToPos = inputSchemas[0].getPosition("wid_to_"+widName);
+    }    
 }
 
