@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.39 2003/12/24 02:33:08 vpapad Exp $
+<!-- $Id: queryplan.dtd,v 1.40 2005/08/15 01:38:49 jinli Exp $
      DTD for query plans -->
 
 <!-- 
@@ -17,7 +17,7 @@
 		    firehosescan | filescan | construct | 
 		    bucket | partitionavg | partitionmax |
 		    accumulate | nest | magic_construct | 
-		    windowCount | windowMax | windowAverage  |
+		    windowCount | windowMax | windowAverage  | windowJoin |
 		    store | load )+>
 		    
 <!ATTLIST plan top IDREF        #REQUIRED
@@ -81,6 +81,7 @@
 <!ATTLIST windowAverage
 	  groupby  CDATA		#REQUIRED
 	  avgattr  CDATA		#REQUIRED
+	  wid	   CDATA		""
 	  %StandardAttributes;>
 
 <!ELEMENT slidingAvg     EMPTY>
@@ -115,6 +116,7 @@
 <!ATTLIST windowMax
 	  groupby  CDATA		#REQUIRED
 	  maxattr  CDATA		#REQUIRED
+	  wid	   CDATA		""
 	  %StandardAttributes;>
 	  
 <!ELEMENT slidingMax     EMPTY>
@@ -133,8 +135,9 @@
 
 <!ELEMENT windowCount	EMPTY>
 <!ATTLIST windowCount
-	  groupby  CDATA		#REQUIRED
+	  groupby    CDATA		#REQUIRED
 	  countattr  CDATA		#REQUIRED
+	  wid	     CDATA		""
 	  %StandardAttributes;>
 
 <!ELEMENT slidingCount     EMPTY>
@@ -215,6 +218,15 @@
           input    IDREFS               #REQUIRED
           extensionjoin (left | right | both | none)  "none"
 	  %PositionAttributes;>
+
+<!ELEMENT windowJoin EMPTY>
+<!ATTLIST windowJoin
+          id	ID		#REQUIRED
+	  left	CDATA		#REQUIRED
+	  right CDATA		#REQUIRED
+	  input	IDREFS		#REQUIRED
+	  %PositionAttributes;>
+	  
 
 <!ELEMENT and     (and | or | not | pred)+>
 <!ELEMENT or      (and | or | not | pred)+>
@@ -297,13 +309,17 @@
 	  input    IDREFS       #REQUIRED
 	  %PositionAttributes;>
 
+<!-- winattr is required for time-based windows, but not for tuple-based windows;
+     wid is needed  when the window aggregate is not the next to bucket-->
+
 <!ELEMENT bucket EMPTY>
 <!ATTLIST bucket 
 	  id	   ID		#REQUIRED
 	  range	   CDATA	#REQUIRED
 	  slide	   CDATA	#REQUIRED
 	  wintype  CDATA	#REQUIRED
-	  winattr  CDATA	#REQUIRED
+	  winattr  CDATA	""
+	  wid	   CDATA	""
 	  %StandardAttributes;>
 
 <!ELEMENT describe EMPTY>
