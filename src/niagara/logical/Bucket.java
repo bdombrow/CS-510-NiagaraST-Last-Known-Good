@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Bucket.java,v 1.3 2005/07/17 03:36:42 jinli Exp $
+  $Id: Bucket.java,v 1.4 2005/08/15 01:35:03 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,6 +46,7 @@ import java.util.StringTokenizer;
 public class Bucket extends UnaryOperator {
 	protected Attribute windowAttr;
 	protected int windowType;
+	protected String widName;
 	protected int range;
 	protected int slide;	
 	protected String stInput;
@@ -64,6 +65,7 @@ public class Bucket extends UnaryOperator {
 	//op.attrInput = attrInput;
 	op.stInput = stInput;
 	op.name = name;
+	op.widName = widName;
 	return op;
     }
     
@@ -81,7 +83,10 @@ public class Bucket extends UnaryOperator {
 
 	if (stInput != null)
 		if(!stInput.equals(other.stInput))
-			return false;			
+			return false;		
+	if (widName != null)
+		if(!widName.equals(other.widName))
+			return false;
 	return (windowType == other.windowType) &&
 		(range == other.range) &&
 		(slide == other.slide);
@@ -94,6 +99,10 @@ public class Bucket extends UnaryOperator {
 	String type = e.getAttribute("wintype");
 	String windowRange = e.getAttribute("range");
 	String windowSlide = e.getAttribute("slide");
+	widName = e.getAttribute("wid");
+	
+	if (widName.length() == 0)
+		widName = name;
 	
 	if (type.length() == 0) {
 		range = 0;
@@ -118,8 +127,8 @@ public class Bucket extends UnaryOperator {
     public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)    
 	throws InvalidPlanException {
 		name = e.getAttribute("id");
-		loadWindowAttrsFromXML(e, inputProperties[0]);
 		stInput = e.getAttribute("input");
+		loadWindowAttrsFromXML(e, inputProperties[0]);
     }
     
     public Attribute getWindowAttr() {
@@ -137,6 +146,9 @@ public class Bucket extends UnaryOperator {
     public String getInput() {
     	return stInput;
     }
+    public String getWid () {
+    	return widName;
+    }
     /**
      * 
      * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, LogicalProperty[])
@@ -150,20 +162,36 @@ public class Bucket extends UnaryOperator {
 		// XXX vpapad: Really crude, fixed restriction factor for groupbys
 		float card =
 			inpLogProp.getCardinality() / catalog.getInt("restrictivity");
+
+		LogicalProperty result = inpLogProp.copy();
+		if (!widName.equals("")) {
+			result.addAttr(new Variable("wid_from_"+widName, varType.ELEMENT_VAR));
+			result.addAttr(new Variable("wid_to_"+widName, varType.ELEMENT_VAR));
+		} else {
+			result.addAttr(new Variable("wid_from_"+name, varType.ELEMENT_VAR));
+			result.addAttr(new Variable("wid_to_"+name, varType.ELEMENT_VAR));
+		}
+		return result;
+
 		//Vector groupbyAttrs = groupingAttrs.getVarList();
 		// We keep the group-by attributes (possibly rearranged)
 		// and we add an attribute for the aggregated result
-		Attrs data = inpLogProp.getAttrs();
+		/*Attrs data = inpLogProp.getAttrs();
 		Attrs attrs = new Attrs(data.size() + 1);
 		for (int i = 0; i < data.size(); i++) {			
 			Attribute a = (Attribute) data.get(i);
 			attrs.add(a);
 		}
 		
-		attrs.add(new Variable("wid_from_"+name, varType.ELEMENT_VAR));
-		attrs.add(new Variable("wid_to_"+name, varType.ELEMENT_VAR));
+		if (!widName.equals("")) {
+			attrs.add(new Variable("wid_from_"+widName, varType.ELEMENT_VAR));
+			attrs.add(new Variable("wid_to_"+widName, varType.ELEMENT_VAR));			
+		} else {
+			attrs.add(new Variable("wid_from_"+name, varType.ELEMENT_VAR));
+			attrs.add(new Variable("wid_to_"+name, varType.ELEMENT_VAR));
+		}
         
-		return  new LogicalProperty(card, attrs, inpLogProp.isLocal());
+		return  new LogicalProperty(card, attrs, inpLogProp.isLocal());*/
 	}
 }
 
