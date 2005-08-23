@@ -19,10 +19,9 @@ javac -source 1.4 *.java
 
 
 To Run:
-java NEXMarkGenerator [-gen-calls gencalls] [-prettyprint true|false]
+java NEXMarkGenerator [-result-size MB] [-prettyprint true|false]
 
--gen-calls sets the number of times the generator is called (see
-            additional info below)
+-result-size specifies the size of result that should be produced
 
 -prettyprint indicates if the streams should include newlines
              and formatting or not (we find streams without

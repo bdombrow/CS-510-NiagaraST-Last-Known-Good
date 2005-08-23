@@ -35,18 +35,24 @@
 import java.util.*;
 
 class OpenAuction {
-    public static int MAXAUCTIONLEN_SEC = 24*60*60; // 24 hours
-    public static int MINAUCTIONLEN_SEC = 2*60*60; // 2 hours
+    //public static int MAXAUCTIONLEN_SEC = 24*60*60; // 24 hours
+    //public static int MINAUCTIONLEN_SEC = 2*60*60; // 2 hours
 
+    public static int MAXAUCTIONLEN_TICKS = 2000;
+    public static int MINAUCTIONLEN_TICKS = 100; 
+    
     private int currPrice; // price in dollars
     private boolean closed = false;
+    private long startTime;
     private long endTime;
     int numBids = 0; // for debugging purposes
     private Random rnd;
     
     public OpenAuction(SimpleCalendar cal, int virtualId, Random rnd) {
         currPrice = rnd.nextInt(200)+1; // initial price must be at least $1
-        endTime = cal.getTimeInSecs() + rnd.nextInt(MAXAUCTIONLEN_SEC) + MINAUCTIONLEN_SEC;
+	startTime = cal.getTime();
+        endTime = startTime + rnd.nextInt(MAXAUCTIONLEN_TICKS) 
+	        + MINAUCTIONLEN_TICKS;
         this.rnd = rnd;
     }
     
@@ -61,7 +67,11 @@ class OpenAuction {
     public int getCurrPrice() {
         return currPrice;
     }
-    
+   
+    public long getStartTime() {
+        return startTime;
+    }
+
     public long getEndTime() {
         return endTime;
     }
@@ -76,7 +86,7 @@ class OpenAuction {
     }
 
     private void checkClosed(SimpleCalendar cal) {
-        if(!closed && (cal.getTimeInSecs())
+        if(!closed && (cal.getTime())
            > endTime) {
             //System.err.println("KT closing auction. Number of Bids: " + numBids);
             closed = true;

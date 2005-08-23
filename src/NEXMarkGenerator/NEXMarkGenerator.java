@@ -44,44 +44,50 @@ public class NEXMarkGenerator {
 
     // DEFAULT SETTINGS - modify as desired.
     // number of times the generator is called
-    public static int DEFAULT_GEN_CALLS = 1000;
+    public static int DEFAULT_RESULT_MB = 1; // in bytes
 
     // print nicely or print without newlines and indentation
     // (In our experience newlines and indentation significantly
     // slow down parsing.)  
     public static boolean DEFAULT_PRETTYPRINT = true;
+    public static boolean DEFAULT_PUNCT = false;
 
     public static void main(String[] args) {
         try {
             // set defaults then process args
-            // num times to run generator
-            int gencalls = DEFAULT_GEN_CALLS;
-            // print with formatting or not 
+            float resultMB = DEFAULT_RESULT_MB;
             boolean prettyprint = DEFAULT_PRETTYPRINT;
+            boolean punct = DEFAULT_PUNCT;
 
             // process args
             for (int i = 0; i < args.length; i++) {
                 if (args[i].equals("-help")) {
                     usage();
-                } else if (args[i].equals("-gen-calls")) {
-                    gencalls = Integer.parseInt(args[i + 1]);
-                    i++; // increment past argument   
+                } else if(args[i].equals("-result-size")) {
+                    resultMB = Float.parseFloat(args[i+1]);
+                    i++;
                 } else if (args[i].equals("-prettyprint")) {
                     prettyprint = Boolean.valueOf(args[i + 1]).booleanValue();
                     i++;
-                } else {
+                } else if (args[i].equals("-punct")) {
+                    punct = Boolean.valueOf(args[i + 1]).booleanValue();
+                    i++;
+                }  else {
                     usage();
                 }
             }
 
             // create generator
-            XMLAuctionStreamGenerator generator =
-                new XMLAuctionStreamGenerator(gencalls, prettyprint);
+            // first argument is number of chars in result -
             BufferedWriter writer =
                 new BufferedWriter(new OutputStreamWriter(System.out));
-
+            
+            XMLAuctionStreamGenerator generator =
+                new XMLAuctionStreamGenerator(
+                                              (int)(resultMB*1024*1024), 
+                                              prettyprint, punct);
             generator.generateStream(writer);
-
+            generator.printStats();
         } catch (java.io.IOException ioe) {
             System.err.println(ioe.getMessage());
         }
@@ -89,8 +95,10 @@ public class NEXMarkGenerator {
 
     private static void usage() {
         System.out.println(
-            "Usage: NexMarkGenerator [-gen-calls gencalls]"
-                + " [-prettyprint true|false]");
+            "Usage: NexMarkGenerator [-result-size MB]" +
+                " [-prettyprint true|false]" +
+		  " [-punct true|false]");
         System.exit(-1);
     }
 }
+

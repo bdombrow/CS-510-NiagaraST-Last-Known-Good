@@ -61,13 +61,18 @@ class OpenAuctions {
     private int highChunk = 1; // virtual
     private int allocSize; // allocated size of openAuctions array
     private OpenAuction[] openAuctions;
-    private Random rnd = new Random(18394);
+    private Random rnd;
     private SimpleCalendar cal;
 
     public OpenAuctions(SimpleCalendar cal) {
         allocSize = 3000;
         openAuctions = new OpenAuction[allocSize];
         this.cal = cal;
+	if(XMLAuctionStreamGenerator.USE_SEED) {
+	   rnd = new Random(XMLAuctionStreamGenerator.SEED);
+	} else {
+           rnd = new Random(18394);
+        }
     }
 
     // creates the open auction instance as well as returning the new id
@@ -111,6 +116,10 @@ class OpenAuctions {
         return openAuctions[id-offset].increasePrice();
     }   
 
+    public long getStartTime(int id) {
+        return openAuctions[id-offset].getStartTime();
+    }
+    
     public long getEndTime(int id) {
         return openAuctions[id-offset].getEndTime();
     }

@@ -31,6 +31,8 @@
 */
 
 import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
@@ -42,36 +44,76 @@ class XMLAuctionStreamGenerator {
     String tab3 = "";
     String nl = "";
 
-    public static int ITEMS_PER_PERSON = 10;
-    public static int BIDS_PER_ITEM = 10;
     public static final String yesno[] = { "yes", "no"};
     public static final String auction_type[] = {"Regular", "Featured"};
     public static final String XML_DECL = "\n<?xml version=\"1.0\"?>\n";
+    public static final String STREAM_OPEN = 
+        "<niagara:stream xmlns:niagara =\"http://www.cse.ogi.edu/dot/niagara\">";
+    public static final String STREAM_CLOSE =
+        "</niagara:stream>";
+
+    // OPTIONS
+    public static int ITEMS_PER_PERSON = 10;
+    public static int BIDS_PER_ITEM = 10;
+    
+    public static final boolean USE_SEED = false;
+    public static final int SEED = 1837640;
+    
+    private static int MAXINCREMENT_MILLISEC = 1000;
+    private static int WARP = 10;
+    private static int DELAY = 24000;    
+   
+    // BIGDOCS AND BIDSONLY OPTIONS
+    // setting NUM_WRITERS > 1 creates that number of files and
+    // the generated data is split among those files
+    private static final int NUM_WRITERS = 1;
+    // setting ONEDOC = true creates one large file as opposed
+    // to several small files
+    public static final boolean ONEDOC = false;
+    public static final boolean WRITE_PERSONS = true;
+    public static final boolean WRITE_ITEMS = true;
+    
+    public boolean LIMIT_ATTRIBUTES = false;
     
     // will generate bids, items and persons in a ratio of 10 bids/item 5 items/person
-    private Random  rnd = new Random(103984);
-    private SimpleCalendar cal = new SimpleCalendar(rnd);
+    private Random rnd;
+    private SimpleCalendar cal = new SimpleCalendar();
 
     private Persons persons = new Persons(); // for managing person ids
     private OpenAuctions openAuctions; // for managing open auctions
     private PersonGen p = new PersonGen();  // used for generating values for person    
 
     private MyBuffer myBuf;
-    private BufferedWriter writer;
-    private int numGenCalls;
+    private BufferedWriter[] writers;
     private boolean usePrettyPrint;
+    private boolean usePunct;
+    // used for counting number of times generator is called, num persons, etc
+    private int cntGenCalls; 
+    private int cntPersons;
+    private int cntItems;
+    private int cntBids;
+    private int cntPunct;
+    private int resultSize; // in bytes
+    private int charsWritten;
     
-    private static int MAXINCREMENT_MILLISEC = 1000;
-    private static int WARP = 10;
-    private static int DELAY = 24000;    
 
-    public boolean LIMIT_ATTRIBUTES = false;
 
-    public XMLAuctionStreamGenerator(int genCalls, boolean prettyprint){
+    /**
+     * @param resultSize Size in chars for the result
+     */
+    public XMLAuctionStreamGenerator(int resultChars,
+                                     boolean prettyprint,
+				     boolean punct) {
 	 
-        numGenCalls = genCalls;
+        resultSize = resultChars;
         usePrettyPrint = prettyprint;
+	usePunct = punct;
         openAuctions = new OpenAuctions(cal);
+	if(USE_SEED) {
+	   rnd = new Random(SEED);
+	} else {
+           rnd = new Random(103984);
+	}
 
         if(usePrettyPrint) {
             tab = "\t";
@@ -79,79 +121,176 @@ class XMLAuctionStreamGenerator {
             tab3 = "\t\t\t";
             nl = "\n";
         }
+
+        cntGenCalls = 0;
+        cntPersons = 0;
+        cntItems = 0;
+        cntBids = 0;
+	cntPunct = 0;
     }
 
-    public void generateStream(BufferedWriter writer) throws IOException {
+    public void generateStream(BufferedWriter _dontuse) 
+     throws IOException {
         myBuf = new MyBuffer();
-        this.writer = writer;
+        //this.writer = _dontuse;
+	//_dontuse.close();
+
+	String sizeStr;
+	if(resultSize >= 1048576) {
+	   sizeStr = resultSize/1048576 + "MB";
+        } else {
+	   sizeStr = resultSize/1024 + "KB";
+        }
+
+	String[] fn = new String[NUM_WRITERS];
+	for(int i = 0; i<NUM_WRITERS; i++) {
+           fn[i] = "fh" + sizeStr + "-" + i + ".xml";
+	}
+
+        writers = new BufferedWriter[NUM_WRITERS];
+	for(int i = 0; i<NUM_WRITERS; i++) {
+           writers[i]= new BufferedWriter(new OutputStreamWriter(
+	              new FileOutputStream(fn[i])));
+        }
+        charsWritten = 0;
 
         if(LIMIT_ATTRIBUTES)
             System.out.println("WARNING: LIMITING ATTRIBUTES");
-	
-        // first do startup - generate some people and open auctions that
-        // can be bid on
+        if(!WRITE_PERSONS)
+            System.out.println("WARNING: NOT WRITING PERSONS");
+        if(!WRITE_ITEMS)
+            System.out.println("WARNING: NOT WRITING ITEMS");
 
-        // put 10 persons in a document
-        for(int i = 0;i<5; i++) {
-            initMyBuf();
-            for(int j = 0; j<10; j++) {
-                generatePerson(myBuf, 1);
-            }
-            writeMyBuf();
+        // stream declaration
+	if(!ONEDOC) {
+           myBuf.append(STREAM_OPEN);
+           myBuf.append(nl);
+        } else {
+           myBuf.append("<site>");
+           myBuf.append(nl);
         }
-
-        for(int i = 0; i<5; i++) {
-            initMyBuf();
-            for(int j = 0; j<10; j++) {
-                generateOpenAuction(myBuf, 1);
+        charsWritten += myBuf.length();
+	for(int i = 0; i<NUM_WRITERS; i++) {
+           writers[i].write(myBuf.array(), 0, myBuf.length());
+        }
+        
+	// first do startup - generate 50 people and 50 open 
+	// auctions that can be bid on
+	int wIdx=0; 
+        if(resultSize > 1000000) {
+            // put 50 persons in a document
+            for(int i = 0;i<5; i++) {
+	        wIdx = i%NUM_WRITERS;
+                initMyBuf();
+                generatePerson(myBuf, 10);
+                if(WRITE_PERSONS)
+		   writeMyBuf(writers[wIdx]);
+            } 
+        
+            for(int i = 0; i<5; i++) {
+	        wIdx = (wIdx+1)%NUM_WRITERS;
+                initMyBuf();
+                generateOpenAuction(myBuf, 10);
+		if(WRITE_ITEMS)
+                   writeMyBuf(writers[wIdx]);
             }
-            writeMyBuf();
+        } else {
+            initMyBuf();
+            generatePerson(myBuf, 3);
+       	    if(WRITE_PERSONS)
+               writeMyBuf(writers[0]);
+
+            initMyBuf();
+            generateOpenAuction(myBuf, 3);
+       	    if(WRITE_ITEMS)
+               writeMyBuf(writers[0]); 
         }
 
         // now go into a loop generating bids and persons and so on
-        // want on average 10 items/person and 10 bids/item
-        int count = 0;
-        while(count < numGenCalls) {
-            initMyBuf();
+        // want on average 11 items/person and 10 bids/item
+        while(charsWritten < resultSize) {
+        //while(cntGenCalls < 37089) {
+	    wIdx = cntGenCalls%NUM_WRITERS; // writer index
+            cntGenCalls++;
 
             // generating a person approximately 10th time will
             // give is 10 items/person since we generate on average
             // one bid per loop
-            if(rnd.nextInt(10) == 0) {
+            initMyBuf();
+            if(rnd.nextInt(10) == 0) { 
                 generatePerson(myBuf, 1);
             } 
-	    
+       	    if(WRITE_PERSONS)
+	       writeMyBuf(writers[wIdx]);
+
             // want on average 1 item and 10 bids
             int numItems = rnd.nextInt(3); // should average 1
+            initMyBuf();
             generateOpenAuction(myBuf, numItems);
+       	    if(WRITE_ITEMS)
+               writeMyBuf(writers[wIdx]);
 	    
             int numBids = rnd.nextInt(21); // should average 10
+            initMyBuf();
             generateBid(myBuf, numBids);
+            writeMyBuf(writers[wIdx]);
 
-            writeMyBuf();
-            count++;
+            // insert a punctuation here, if desired
+	    if(usePunct) {
+	        if(cntGenCalls%3 == 0) {
+		    cntPunct++;
+                    myBuf.clear();
+                    myBuf.append("<PUNCT_timestamp>");
+                    myBuf.append(cal.getTime());
+                    myBuf.append("</PUNCT_timestamp>\n");
+		    for(int i = 0; i<NUM_WRITERS; i++) {
+		       assert NUM_WRITERS == 1;
+                       writers[i].write(myBuf.array(), 0,
+		                             myBuf.length());
+                    }
+                }
+            }
         }
-        writer.close();
+
+        myBuf.clear();
+	if(!ONEDOC) {
+	   myBuf.append(STREAM_CLOSE);
+           myBuf.append(nl);
+	 } else {   
+           myBuf.append("</site>");
+           myBuf.append(nl);
+         }
+	
+	for(int i = 0; i<NUM_WRITERS; i++) {
+           writers[i].write(myBuf.array(), 0, myBuf.length());
+	   writers[i].close();
+	}
     }
 
     private void initMyBuf() throws IOException {
         myBuf.clear();
-        myBuf.append(XML_DECL);
-        myBuf.append("<site>");
-        myBuf.append(nl);
+	if(!ONEDOC) {
+           myBuf.append("<site>");
+           myBuf.append(nl);
+        }
     }
     
-    private void writeMyBuf() throws IOException {
-        myBuf.append("</site>");
-        myBuf.append(nl);
-        writer.write(myBuf.array(), 0, myBuf.length());
+    private void writeMyBuf(BufferedWriter bw) throws IOException {
+        if(!ONEDOC) {
+           myBuf.append("</site>");
+           myBuf.append(nl);
+        }
+        bw.write(myBuf.array(), 0, myBuf.length());
+        charsWritten += myBuf.length();
+        return;
     } 
     
     private void generateBid(MyBuffer myb, int numBids) throws IOException { 
+        cntBids += numBids;
+
     	long ts=0, temp;
     	boolean start=true;
     	
-        cal.incrementTime();
         myb.append("<open_auctions>");
 	
         myb.append(nl);
@@ -170,7 +309,8 @@ class XMLAuctionStreamGenerator {
 	    
             myb.append(tab3);
             myb.append("<time>");
-            myb.append(cal.getTimeInSecs());//here, datetime is in second;
+            myb.append(cal.getTime());
+	    cal.incrementTime();
             // Alternate time stamps
             //myb.append(System.currentTimeMillis() - rnd.nextInt(MAXINCREMENT_MILLISEC));     
             //ts = System.currentTimeMillis() * WARP + DELAY;
@@ -205,8 +345,9 @@ class XMLAuctionStreamGenerator {
     // uugh, a bad thing here is that a person can be selling items that are in
     // different regions, ugly, but to keep it consistent requires maintaining
     // too much data and also I don't think this will affect results
-    private void generateOpenAuction(MyBuffer myb, int numItems) throws IOException {
-        cal.incrementTime();
+    private void generateOpenAuction(MyBuffer myb, int numItems) 
+        throws IOException {
+        cntItems += numItems;
 
         myb.append("<open_auctions>");
         myb.append(nl);
@@ -222,6 +363,7 @@ class XMLAuctionStreamGenerator {
 	    
             myb.append(tab);
             myb.append("<open_auction id=\"");
+	    // gets id and creates new open_auction instance
             int auctionId = openAuctions.getNewId();
             myb.append(auctionId);
             myb.append("\">");
@@ -300,7 +442,7 @@ class XMLAuctionStreamGenerator {
                 myb.append(tab2);
                 myb.append("<interval>");
                 myb.append("<start>");
-                myb.append(cal.getTimeInSecs());
+                myb.append(openAuctions.getStartTime(auctionId));
                 myb.append("</start>");
                 myb.append("<end>");
                 myb.append(openAuctions.getEndTime(auctionId));
@@ -319,13 +461,17 @@ class XMLAuctionStreamGenerator {
     
     // append region AFRICA, ASIA, AUSTRALIA, EUROPE, NAMERICA, SAMERICA
     //Item contains:
-    // location, quantity, name, payment, description, shipping, incategory+, mailbox)>
-    // weird, item doesn't contain a reference to the seller, open_auction contains
-    // a reference to the item and a reference to the seller
+    // location, quantity, name, payment, description, shipping, 
+    //      incategory+, mailbox)>
+    // weird, item doesn't contain a reference to the seller, 
+    // open_auction contains a reference to the item and a 
+    // reference to the seller
     
   
-    private void generatePerson(MyBuffer myb, int numPersons) throws IOException {
-        cal.incrementTime();
+    private void generatePerson(MyBuffer myb, int numPersons) 
+        throws IOException {
+        
+        cntPersons += numPersons;
 
         myb.append("<people>");      
         myb.append(nl);
@@ -482,6 +628,15 @@ class XMLAuctionStreamGenerator {
         }
         myb.append("</people>");
         myb.append(nl);
+    }
+
+    public void printStats() {
+        System.err.println("Gen Calls " + cntGenCalls);
+        System.err.println("Persons: " + cntPersons);
+        System.err.println("Items: " + cntItems);
+        System.err.println("Bids: " + cntBids);    
+        System.err.println("Puncts: " + cntPunct);
+	System.err.println("Bytes: " + charsWritten);
     }
 }
 

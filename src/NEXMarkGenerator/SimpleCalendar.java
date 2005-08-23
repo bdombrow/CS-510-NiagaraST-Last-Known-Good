@@ -33,24 +33,25 @@
 import java.util.*;
 
 class SimpleCalendar {
-    private static int MAXINCREMENT_SEC = 60;
-    private int time_sec = 0; // time in seconds
-    private Random rnd;
+    //private static int MAXINCREMENT_SEC = 60;
+    //private int time_sec = 0; // time in seconds
+    //private Random rnd;
+    private int time_cnt; // cnt number of auctions
 
-    SimpleCalendar(Random rnd) {	
+    /*SimpleCalendar(Random rnd) {	
 	this.rnd = rnd;
+    } */
+   
+   SimpleCalendar() { 
+    	time_cnt = 0;
     }
 
-    int getTimeInSecs() {
-	return time_sec;
+    int getTime() {
+	return time_cnt;
     }
 
-    int getTimeInMS() {
-        return time_sec*1000;
-    }
-    
     void incrementTime() {
-	time_sec += rnd.nextInt(MAXINCREMENT_SEC); // 1000 millesecons per second
-	assert time_sec >= 0 : "time overflowed";
+	time_cnt++;
+	assert time_cnt >= 0 : "time overflowed";
     }
 }

@@ -47,6 +47,7 @@ class MyBuffer {
             cb.put(String.valueOf(i));	    
     }
     public void append(long l) {
+        assert l >= 0;
         if(l<IntToString.NUM_VALS) {
             cb.put(IntToString.strings[(int)l]);
         } else {

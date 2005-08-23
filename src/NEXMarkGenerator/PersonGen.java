@@ -71,11 +71,19 @@ class PersonGen {
     public CharBuffer m_stCreditcard = CharBuffer.allocate(20);
     public Profile m_profile = new Profile();
     public Vector m_vctWatches = new Vector();
-    
-    private Random m_rnd = new Random(20934);
+   
+    Random m_rnd; 
     public static int NUM_CATEGORIES = 1000;
 
-    
+    public PersonGen() {
+        if(XMLAuctionStreamGenerator.USE_SEED) {
+           m_rnd = new Random(XMLAuctionStreamGenerator.SEED);
+	} else {
+           m_rnd = new Random(20934);
+        }
+    }
+
+
     public void generateValues(OpenAuctions auctions) {
         int ifn = m_rnd.nextInt(FirstnamesGen.NUM_FIRSTNAMES);
         int iln = m_rnd.nextInt(LastnamesGen.NUM_LASTNAMES);

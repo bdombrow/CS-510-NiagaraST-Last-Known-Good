@@ -33,37 +33,43 @@
 import java.util.*;
 
 class Persons {
-
-    public static int PERSON_DISTR_SIZE = 100;
+    // since persons don't go away, don't need the distr
+    //public static int PERSON_DISTR_SIZE = 100;
 
     // persons dont go away so lowChunk is always 0
     private int highChunk = 1;
     private int currId = 0;
-    private Random rnd =  new Random(283494);
+    private Random rnd; 
 
     public Persons() {
+       if(XMLAuctionStreamGenerator.USE_SEED) {
+          rnd =  new Random(XMLAuctionStreamGenerator.SEED);
+       } else {
+          rnd =  new Random(283494);
+       }
     }
 
     // creates the open auction instance as well as returning the new id
     public int getNewId() {
         int newId = currId;
         currId++;
-        if(newId == highChunk*PERSON_DISTR_SIZE) {
-            highChunk++;
-        }
+        //if(newId == highChunk*PERSON_DISTR_SIZE) {
+        //    highChunk++;
+        //}
         return newId;
     }
 
     public int getExistingId() {  // used by generateBid 
-        int id = rnd.nextInt(PERSON_DISTR_SIZE);
-        id += getRandomChunkOffset();
-        return id%currId;
+        //int id = rnd.nextInt(PERSON_DISTR_SIZE);
+        //id += getRandomChunkOffset();
+        //return id%currId;
+	return rnd.nextInt(currId);
     }
-
+/*
     private int getRandomChunkOffset() {
         int chunkId = rnd.nextInt(highChunk);
         return chunkId*PERSON_DISTR_SIZE;
     }
-
+*/
 }
 
