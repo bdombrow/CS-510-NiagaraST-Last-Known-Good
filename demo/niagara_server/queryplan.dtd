@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.40 2005/08/15 01:38:49 jinli Exp $
+<!-- $Id: queryplan.dtd,v 1.41 2005/08/25 02:35:08 vpapad Exp $
      DTD for query plans -->
 
 <!-- 
@@ -18,7 +18,7 @@
 		    bucket | partitionavg | partitionmax |
 		    accumulate | nest | magic_construct | 
 		    windowCount | windowMax | windowAverage  | windowJoin |
-		    store | load )+>
+		    store | load | xmlscan)+>
 		    
 <!ATTLIST plan top IDREF        #REQUIRED
           %PositionAttributes;>
@@ -232,7 +232,7 @@
 <!ELEMENT or      (and | or | not | pred)+>
 <!ELEMENT not     (and | or | not | pred)>
 
-<!ELEMENT pred    (number | string | var)+>
+<!ELEMENT pred    (number | string | var | path)+>
 <!ATTLIST pred
           op      (lt | gt | le | ge | ne | eq)  #REQUIRED>
 <!ELEMENT number  EMPTY>
@@ -246,6 +246,11 @@
 <!ELEMENT var  EMPTY>
 <!ATTLIST var
           value   CDATA                #REQUIRED>
+
+<!ELEMENT path  EMPTY>
+<!ATTLIST path
+          var   CDATA                #REQUIRED
+          path  CDATA                #REQUIRED>
 
 <!ELEMENT dtdscan  (url)+>
 <!ATTLIST dtdscan 
@@ -402,6 +407,17 @@
 <!ATTLIST filescan 
           id       ID           #REQUIRED
           filename CDATA        #REQUIRED
+	  isstream (yes | no) "no"
+	  %PositionAttributes;>
+<!-- isStream should be yes if file is a stream in niagara:stream
+     format, no otherwise. If isStream is no, then file must
+     contain only one document -->
+
+<!ELEMENT xmlscan EMPTY>
+<!ATTLIST xmlscan 
+          id       ID           #REQUIRED
+          filename CDATA        #REQUIRED
+          attrs    CDATA		#REQUIRED
 	  isstream (yes | no) "no"
 	  %PositionAttributes;>
 <!-- isStream should be yes if file is a stream in niagara:stream
