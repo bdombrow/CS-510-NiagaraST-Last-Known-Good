@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:results>
+
+<result>
+   <A> 1 </A>
+   <B> 2 </B>
+</result>
+<result>
+   <A> 1 </A>
+   <B> 4 </B>
+</result>
+<result>
+   <A> 2 </A>
+   <B> 2 </B>
+</result>
+
+</niagara:results>

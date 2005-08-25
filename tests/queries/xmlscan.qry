@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<xmlscan id="stream" filename = "../../tests/data/A.xml" attrs="B,A"/>
+
+<construct id="cons" input="stream">
+<![CDATA[
+<result>
+   $A 
+   $B 
+</result>
+]]>
+</construct>
+</plan>
