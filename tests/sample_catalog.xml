@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- $Id: sample_catalog.xml,v 1.23 2005/07/11 20:51:36 tufte Exp $ -->
+<!-- $Id: sample_catalog.xml,v 1.24 2005/08/25 02:22:56 vpapad Exp $ -->
 <catalog>
   <configuration>
     <!-- General configuration parameters -->
@@ -24,6 +24,7 @@
       class="niagara.logical.FileScan">
             <physical name="StreamThread" class="niagara.data_manager.StreamThread"/>      
     </logical>      
+    <logical name="xmlscan" class="niagara.logical.XMLScan"/>
     <logical name="timer"
       class="niagara.logical.Timer">
       <physical name="TimerThread" class="niagara.data_manager.TimerThread"/>
@@ -355,6 +356,8 @@
  		<after><op name="noop"/></after> 
   	</rule>
   	-->
+  	
+  	<rule type="custom" name="UnfoldXMLScan" class="niagara.optimizer.rules.UnfoldXMLScan"/>
   </ruleset>
 
   <ruleset name="consolidation ruleset">
