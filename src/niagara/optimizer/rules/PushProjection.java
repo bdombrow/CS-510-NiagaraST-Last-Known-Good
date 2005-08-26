@@ -1,4 +1,4 @@
-/* $Id: PushProjection.java,v 1.3 2003/12/24 01:51:55 vpapad Exp $ */
+/* $Id: PushProjection.java,v 1.4 2005/08/26 16:43:51 vpapad Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.Project;
@@ -50,7 +50,7 @@ public class PushProjection extends CustomRule {
         
         // If there are any attributes in (allAttrs - projectAttrs)
         // then the implementation of xop can project them away
-        if (allAttrs.minus(projectAttrs).size() != 0)
+        if (arity == 0 || allAttrs.minus(projectAttrs).size() != 0)
             xop.projectedOutputAttributes(projectAttrs);
 
         // Have we changed anything?

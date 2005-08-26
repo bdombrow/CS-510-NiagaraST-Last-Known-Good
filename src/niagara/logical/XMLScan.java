@@ -1,4 +1,4 @@
-// $Id: XMLScan.java,v 1.1 2005/08/25 02:24:01 vpapad Exp $
+// $Id: XMLScan.java,v 1.2 2005/08/26 16:43:50 vpapad Exp $
 
 package niagara.logical;
 
@@ -14,14 +14,17 @@ import niagara.optimizer.colombia.*;
 
 public class XMLScan extends Stream {
     Attrs attrs;
-    
+    /** The attributes we're projecting on (null means keep all attributes) */
+    Attrs projectedAttrs;
+
     // Required zero-argument constructor
     public XMLScan() {}
     
-    public XMLScan(FileScanSpec fileScanSpec, Attribute variable, Attrs attrs) {
+    public XMLScan(FileScanSpec fileScanSpec, Attribute variable, Attrs attrs, Attrs projectedAttrs) {
         this.streamSpec = fileScanSpec;
         this.variable = variable;
         this.attrs = attrs;
+	this.projectedAttrs = projectedAttrs;
     }
 
     public void dump() {
@@ -31,29 +34,42 @@ public class XMLScan extends Stream {
     }
 
     public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
-        Attrs allAttrs = new Attrs();
-        allAttrs.add(variable);
-        allAttrs.add(new Variable ("_" + variable.getName() + "_unnest_top"));
-        allAttrs.merge(attrs);
+	Attrs allAttrs;
+        if (projectedAttrs == null) {
+	    allAttrs = new Attrs();
+	    allAttrs.add(variable);
+	    allAttrs.add(new Variable ("_" + variable.getName() + "_unnest_top"));
+	    allAttrs.merge(attrs);
+	} else
+	    allAttrs = projectedAttrs;
+
         return new LogicalProperty(
             1,
             allAttrs,
             true);
     }
     
+    public void projectedOutputAttributes(Attrs outputAttrs) {
+        projectedAttrs = outputAttrs.copy();
+    }
+
+    public Attrs getProjectedAttrs() {
+	return projectedAttrs;
+    }
+
     public Op opCopy() {
-        return new XMLScan((FileScanSpec) streamSpec, variable, attrs);
+        return new XMLScan((FileScanSpec) streamSpec, variable, attrs, projectedAttrs);
     }
 
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof XMLScan)) return false;
         if (obj.getClass() != XMLScan.class) return obj.equals(this);
         XMLScan other = (XMLScan) obj;
-        return streamSpec.equals(other.streamSpec) && variable.equals(other.variable) && attrs.equals(other.attrs);
+        return streamSpec.equals(other.streamSpec) && variable.equals(other.variable) && attrs.equals(other.attrs) && equalsNullsAllowed(projectedAttrs, other.projectedAttrs);
     }
 
     public int hashCode() {
-        return streamSpec.hashCode() ^ variable.hashCode() ^ attrs.hashCode();
+        return streamSpec.hashCode() ^ variable.hashCode() ^ attrs.hashCode() ^ hashCodeNullsAllowed(projectedAttrs);
     }
 
     public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
