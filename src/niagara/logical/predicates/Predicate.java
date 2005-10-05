@@ -1,4 +1,4 @@
-/* $Id: Predicate.java,v 1.2 2004/05/20 22:10:15 vpapad Exp $ */
+/* $Id: Predicate.java,v 1.3 2005/10/05 17:36:38 vpapad Exp $ */
 package niagara.logical.predicates;
 
 //import java.util.*;
@@ -135,8 +135,6 @@ abstract public class Predicate implements condition {
         }
     }
 
-    // XXX This code should be rewritten to take advantage of 
-    // XXX getName and getCode in opType KT - done
     public static Predicate loadFromXML(Element e,
 					LogicalProperty[] inputProperties)
         throws InvalidPlanException {
@@ -199,8 +197,14 @@ abstract public class Predicate implements condition {
 	    right = inputProperties[1];
 
         String name = e.getNodeName();
-        if (name.equals("number"))
-            return new NumericConstant(e.getAttribute("value"));
+        if (name.equals("number")) {
+            String val = e.getAttribute("value");
+            try {
+                return new NumericConstant(val);
+            } catch (NumberFormatException nfe) {
+                throw new InvalidPlanException("Could not parse '" + val + "' as a number.");
+            }
+        }
         else if (name.equals("string"))
             return new StringConstant(e.getAttribute("value"));
         else if (name.equals("path")) {
