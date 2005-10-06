@@ -1,4 +1,4 @@
-// $Id: XMLScan.java,v 1.2 2005/08/26 16:43:50 vpapad Exp $
+// $Id: XMLScan.java,v 1.3 2005/10/06 03:26:58 vpapad Exp $
 
 package niagara.logical;
 
@@ -79,7 +79,7 @@ public class XMLScan extends Stream {
             new FileScanSpec(e.getAttribute("filename"), isStream);
         variable = new Variable(e.getAttribute("id"));
         
-        String[] sattrs = e.getAttribute("attrs").split(",");
+        String[] sattrs = e.getAttribute("attrs").split("\\W+");
         if (sattrs.length == 0 || sattrs[sattrs.length-1].length() == 0)
             throw new InvalidPlanException("XMLScan must unnest at least one attribute");
         attrs = new Attrs();

@@ -3,7 +3,7 @@
 
 <plan top="cons">
 
-<xmlscan id="stream" filename = "../../tests/data/A.xml" attrs="B,A"/>
+<xmlscan id="stream" filename = "../../tests/data/A.xml" attrs="B, A"/>
 
 <construct id="cons" input="stream">
 <![CDATA[
