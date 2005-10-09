@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class SimpleClient implements UIDriverIF {
+	  protected boolean ecode = false;
     protected ConnectionManager cm;
     static final int MAX_QUERY_LEN = 10000;
     static String queryFilePath =
@@ -43,15 +44,17 @@ public class SimpleClient implements UIDriverIF {
     }
 
     public void notifyNew(int id) {
-        String results = ((SimpleConnectionReader) acr).getResults();
-        if (resultListeners.size() == 0) {
-            System.out.println(results);
-        } else {
-            for (int i = 0; i < resultListeners.size(); i++) {
-                ((ResultsListener) resultListeners.get(i)).notifyNewResults(
-                    results);
-            }
-        }
+				if(!ecode) {
+          String results = ((SimpleConnectionReader) acr).getResults();
+          if (resultListeners.size() == 0) {
+              System.out.println(results);
+          } else {
+              for (int i = 0; i < resultListeners.size(); i++) {
+                  ((ResultsListener) resultListeners.get(i)).notifyNewResults(
+                      results);
+              }
+          }
+       }
     }
 
     public void setConnectionReader(AbstractConnectionReader acr) {
@@ -103,10 +106,10 @@ public class SimpleClient implements UIDriverIF {
 
     protected static void usage() {
         System.err.println(
-            "Usage: SimpleClient -qf QueryFileName(s) [-h host] [-t timeout]"
-	    + "[-p port] \n"
-            + "[-x repetitions] [-d delay] [-w wait] [-o outputFileName]\n"
-            + "[-quiet] [-explain] [-ch client host] [-cp client port] [-silent]");
+            "Usage: SimpleClient -qf QueryFileName(s) [-port port] \n");
+					//	 "[-h host] [-t timeout]" +
+          //  + "[-x repetitions] [-d delay] [-w wait] [-o outputFileName]\n"
+          //  + "[-quiet] [-explain] [-ch client host] [-cp client port] [-silent]");
         System.exit(-1);
     }
 
@@ -138,7 +141,7 @@ public class SimpleClient implements UIDriverIF {
             if (args[i].equals("-h")) {
                 host = args[i + 1];
                 i += 2;
-            } else if (args[i].equals("-p")) {
+            } else if (args[i].equals("-port")) {
                 port = Integer.parseInt(args[i + 1]);
                 i += 2;
             } else if (args[i].equals("-t")) {
@@ -212,12 +215,8 @@ public class SimpleClient implements UIDriverIF {
 		    // I removed it - hope this doesn't cause trouble!
 		    // if it is synchronized, causes deadlock on error
 		    synchronized (this) {
-			try {
-			    processQuery(query);
-			} catch (ClientException ce) {
-			    // do nothing - error reported elsewhere
-			}
-			wait();
+		      processQuery(query);
+		      wait();
 		    }
 		}
 		if (i < nQueries - 1 && wait > 0)
@@ -225,12 +224,18 @@ public class SimpleClient implements UIDriverIF {
 	    }
 	    System.exit(0);
         } catch (IOException e) {
+			      ecode = true;
             System.err.println(
                 "SimpleClient: IO error while reading query or query file");
             e.printStackTrace();
             System.exit(-1);
         } catch (InterruptedException e) {
+			ecode = true;
 	    System.err.println("Unexpected Thread Interruption: " + e.getMessage());
+	} catch (ClientException ce) {
+			ecode = true;
+	    System.err.println("Error processing query: " + ce.getMessage());
+	    System.exit(-1);
 	}
     }
     
@@ -262,41 +267,41 @@ public class SimpleClient implements UIDriverIF {
 
     public void processQuery(String fullQueryText) throws ClientException {
 	// remove any leading or trailing whitespace
-	String queryText = fullQueryText.trim(); 
+			String queryText = fullQueryText.trim(); 
         if (!silent) {
-            System.err.println("Executing query: " + queryText);
-	    System.err.flush(); // make query print before results
+	  System.err.println("Executing query: " + queryText);
+	  System.err.flush(); // make query print before results
         }
         if (queryText.equalsIgnoreCase(ConnectionManager.RUN_GC)) {
-	    System.out.println("Requesting garbage collection");
-            cm.runSpecialFunc(ConnectionManager.RUN_GC);
-            return;
+	  System.out.println("Requesting garbage collection");
+	  cm.runSpecialFunc(ConnectionManager.RUN_GC);
+	  return;
         } else if (queryText.equalsIgnoreCase(ConnectionManager.SHUTDOWN)) {
-	    System.out.println("Shutting down server");
-            cm.runSpecialFunc(ConnectionManager.SHUTDOWN);
-            return;
+	  System.out.println("Shutting down server");
+	  cm.runSpecialFunc(ConnectionManager.SHUTDOWN);
+	  return;
         } else if (queryText.equalsIgnoreCase(ConnectionManager.DUMPDATA)) {
-	    System.out.println("Requesting profile data dump");
-            cm.runSpecialFunc(ConnectionManager.DUMPDATA);
-	    return;
+	  System.out.println("Requesting profile data dump");
+	  cm.runSpecialFunc(ConnectionManager.DUMPDATA);
+	  return;
 	}
 
         Query q = null;
         if (explain) 
-            q = new ExplainQPQuery(queryText);
+	  q = new ExplainQPQuery(queryText);
         else
-            q = QueryFactory.makeQuery(queryText);
+	  q = QueryFactory.makeQuery(queryText);
         m_start = System.currentTimeMillis();
         final int id =
-            cm.executeQuery(q, Integer.MAX_VALUE);
+	  cm.executeQuery(q, Integer.MAX_VALUE);
         if (timeout > 0) {
-            // Create a new timer thread as a daemon thread
-            timer = new Timer(true);
-            // Request partial results after timeout milliseconds
-            timer.schedule(new TimerTask() {
-                public void run() {
-                    cm.requestPartial(id);
-                }
+	  // Create a new timer thread as a daemon thread
+	  timer = new Timer(true);
+	  // Request partial results after timeout milliseconds
+	  timer.schedule(new TimerTask() {
+	      public void run() {
+		cm.requestPartial(id);
+	      }
             }, timeout);
         }
     }
