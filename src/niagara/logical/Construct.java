@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Construct.java,v 1.2 2004/01/30 21:43:00 vpapad Exp $
+  $Id: Construct.java,v 1.3 2005/10/10 08:38:35 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -191,6 +191,9 @@ public class Construct extends UnaryOperator {
             ConstructParser cep = new ConstructParser(scanner);
             resultTemplate = (constructBaseNode) cep.parse().value;
             cep.done_parsing();
+            Attrs missing_vars = resultTemplate.requiredInputAttributes(new Attrs()).minus(inputProperties[0].getAttrs());
+	    if (missing_vars.size() > 0)
+		    throw new InvalidPlanException("Undeclared variable(s): " + missing_vars.toString());
         } catch (InvalidPlanException ipe) {
             String msg = ipe.getMessage();
             throw new InvalidPlanException("Syntax error in construct template for node "
