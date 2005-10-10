@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.2 2004/05/20 22:10:22 vpapad Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.3 2005/10/10 20:33:10 vpapad Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -24,10 +24,8 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
     private boolean projecting;
     /** Maps shared attribute positions between incoming and outgoing tuples */
     private int[] attributeMap;
-    /** indicates if tuples should be dropped or kept if they do not
-     * match path expression
-     */
-    private boolean outer;
+    
+    private Unnest.OuterBehavior outer;
 
     // Runtime attributes
     protected PathExprEvaluator pev;
@@ -55,7 +53,7 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         this.path = logicalUnnest.getPath();
         this.root = logicalUnnest.getRoot();
         this.variable = logicalUnnest.getVariable();
-        this.outer = logicalUnnest.outer();
+        this.outer = logicalUnnest.getOuter();
     }
 
     /**
@@ -78,8 +76,12 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         // Get the nodes reachable from the path expression 
         pev.produceMatches(inputTuple.getAttribute(scanField), this);
 
-        if (outer && !matchFound)
-            consume(null);
+        if (!matchFound) {
+            if (outer == Unnest.OuterBehavior.OUTER)
+                consume(null);
+            else if (outer == Unnest.OuterBehavior.STRICT)
+                throw new ShutdownException("Input does not contain '" + variable +"'");
+        }
 
         this.inputTuple = null;
     }
@@ -121,7 +123,7 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         return path.hashCode()
             ^ variable.hashCode()
             ^ root.hashCode() 
-            ^ (outer ? 0 : 1);
+            ^ outer.hashCode();
     }
 
     /**

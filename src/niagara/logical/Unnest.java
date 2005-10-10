@@ -1,4 +1,4 @@
-/* $Id: Unnest.java,v 1.11 2004/01/30 21:43:00 vpapad Exp $ */
+/* $Id: Unnest.java,v 1.12 2005/10/10 20:32:47 vpapad Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -24,7 +24,13 @@ public class Unnest extends UnaryOperator {
     /** The attributes we're projecting on (null means keep all attributes) */
     private Attrs projectedAttrs;
     /** keep or not tuples that do not have a match to the path expression */
-    private boolean outer;
+
+    public enum OuterBehavior {
+        NORMAL, /** Zero or more output tuples per input tuple, one per match */ 
+        OUTER,  /** Produce a null-padded output tuple even if there is no match */
+        STRICT  /** Check that there is at least one match per input tuple*/
+    };
+    private OuterBehavior outer;
 
     public Unnest() {
     }
@@ -34,7 +40,7 @@ public class Unnest extends UnaryOperator {
         Attribute root,
         RE path,
         Attrs projectedAttrs,
-        boolean outer) {
+        OuterBehavior outer) {
         this.variable = variable;
         this.root = root;
         this.path = path;
@@ -129,7 +135,7 @@ public class Unnest extends UnaryOperator {
 
     public int hashCode() {
         return variable.hashCode() ^ root.hashCode() ^ path.hashCode() 
-        ^ hashCodeNullsAllowed(projectedAttrs);
+        ^ hashCodeNullsAllowed(projectedAttrs) ^ outer.hashCode();
     }
 
     /**
@@ -157,7 +163,7 @@ public class Unnest extends UnaryOperator {
         return projectedAttrs;
     }
     
-    public boolean outer() {
+    public OuterBehavior getOuter() {
     	return outer;
     }
 
@@ -167,8 +173,14 @@ public class Unnest extends UnaryOperator {
         String typeAttr = e.getAttribute("type");
         String rootAttr = e.getAttribute("root");
         String regexpAttr = e.getAttribute("regexp");
-        outer = e.getAttribute("outer")
-        	.equalsIgnoreCase("yes");
+        String outerAttr = e.getAttribute("outer");
+        if (outerAttr.equalsIgnoreCase("yes"))
+            outer = OuterBehavior.OUTER;
+        else if (outerAttr.equalsIgnoreCase("strict"))
+            outer = OuterBehavior.STRICT;
+        else
+            outer = OuterBehavior.NORMAL;
+            
 
         int type;
         if (typeAttr.equals("tag")) {

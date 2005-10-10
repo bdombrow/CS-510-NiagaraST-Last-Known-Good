@@ -1,4 +1,4 @@
-/* $Id: Variable.java,v 1.11 2004/05/20 22:10:07 vpapad Exp $ */
+/* $Id: Variable.java,v 1.12 2005/10/10 20:32:47 vpapad Exp $ */
 package niagara.logical;
 
 import niagara.connection_server.InvalidPlanException;
@@ -78,6 +78,10 @@ public class Variable implements Atom, Attribute {
         sb.append("<var value='$").append(name).append("'/>");
     }
 
+    public String toString() {
+        return getName();
+    }
+    
     public boolean isConstant() {
         return false;
     }
@@ -117,5 +121,9 @@ public class Variable implements Atom, Attribute {
 
     public boolean matchesName(String name) {
         return this.name.equals(name);
+    }
+
+    public Attribute copy(String newName) {
+        return new Variable(newName, domain);
     }
 }
