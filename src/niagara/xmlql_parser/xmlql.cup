@@ -235,12 +235,6 @@ Element ::= StartTag:s QueryInConstructList:ql EndTag
 			v1.addElement(new constructLeafNode(new data(dataType.STRING,i)));
 			RESULT = new constructInternalNode(s,v1);
 		:}
-	  | StartTag:s VAR:v EndTag
-		{: 
-			Vector v2 = new Vector();	
-			v2.addElement(new constructLeafNode(new data(dataType.VAR,v)));
-			RESULT = new constructInternalNode(s,v2);	
-		:}
 	  | StartTag:s EndTag
 		{:
 			Vector v1 = new Vector();
