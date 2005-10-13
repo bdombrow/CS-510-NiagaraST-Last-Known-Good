@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstruct.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $
+  $Id: PhysicalConstruct.java,v 1.2 2005/10/13 01:32:55 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -92,13 +92,11 @@ public class PhysicalConstruct extends PhysicalOperator {
      * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected void processTuple(
-        Tuple tupleElement,
-        int streamId)
+    protected void processTuple(Tuple tuple, int streamId)
         throws InterruptedException, ShutdownException {
         // Recurse down the result template to construct result
         resultList.quickReset(); // just for safety
-        constructResult(tupleElement, resultTemplate, resultList, doc);
+        constructResult(tuple, resultTemplate, resultList, doc);
 
         // Add all the results in the result list as result tuples
         int numResults = resultList.size();
@@ -108,9 +106,9 @@ public class PhysicalConstruct extends PhysicalOperator {
             Tuple outputTuple;
 
             if (projecting) // We can project some attributes away
-                outputTuple = tupleElement.copy(outSize, attributeMap);
+                outputTuple = tuple.copy(outSize, attributeMap);
             else // Just clone
-                outputTuple = tupleElement.copy(outSize);
+                outputTuple = tuple.copy(outSize);
             
             // Append the constructed result to end of newly created tuple
             outputTuple.appendAttribute(resultList.get(res));
@@ -132,7 +130,7 @@ public class PhysicalConstruct extends PhysicalOperator {
      */
 
     public static void constructResult(
-        Tuple tupleElement,
+        Tuple tuple,
         constructBaseNode templateRoot,
         NodeVector localResult,
 	Document localDoc) 
@@ -142,12 +140,12 @@ public class PhysicalConstruct extends PhysicalOperator {
        
         if (templateRoot instanceof constructLeafNode) {
             processLeafNode(
-                tupleElement,
+                tuple,
                 (constructLeafNode) templateRoot,
                 localResult, localDoc);
         } else if (templateRoot instanceof constructInternalNode) {
             processInternalNode(
-                tupleElement,
+                tuple,
                 (constructInternalNode) templateRoot,
                 localResult, localDoc);
         } else {
@@ -275,7 +273,13 @@ public class PhysicalConstruct extends PhysicalOperator {
 	    Node res;
             for (int i = 0; i < numResults; i++) {
 		res = localResult.get(prevSize + i);
+        
 		Node n = DOMFactory.importNode(localDoc, res);
+        // If the node is already in the document and connected
+        // to the tree, we must clone it first
+        if (n == res && n.getParentNode() != null) 
+            n = res.cloneNode(true);
+        
 		resultElement.appendChild(n);
             }
             localResult.setSize(prevSize);
