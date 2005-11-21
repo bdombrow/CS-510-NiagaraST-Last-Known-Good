@@ -1,4 +1,4 @@
-/* $Id: UnfoldXMLScan.java,v 1.3 2005/10/10 20:35:11 vpapad Exp $ */
+/* $Id: UnfoldXMLScan.java,v 1.4 2005/11/21 20:01:10 tufte Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.FileScan;
@@ -33,14 +33,17 @@ public class UnfoldXMLScan extends CustomRule {
         FileScan fs = new FileScan(fss, a);
         Expr expr = new Expr(fs);
         Attribute tupAttr = new Variable("_" + a.getName() + "_unnest_top");
-        Unnest firstu = new Unnest(tupAttr, a, new Dot(
-                new Wildcard(), new Wildcard()), null, Unnest.OuterBehavior.STRICT);
+        Unnest firstu = new Unnest(tupAttr, a, 
+				           new Wildcard(), 
+									 null, Unnest.OuterBehavior.STRICT);
         expr = new Expr(firstu, expr);
         
         Attrs as = x.getAttrs();
         for (int i = 0; i < as.size(); i++) {
             a = as.get(i);
-            Unnest u = new Unnest(a, tupAttr, new Constant(a.getName()), null, Unnest.OuterBehavior.STRICT);
+            Unnest u = new Unnest(a, tupAttr, 
+					                       	new Constant(a.getName()), null, 
+																	Unnest.OuterBehavior.STRICT);
             expr = new Expr(u, expr);
         }
 
