@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.10 2003/12/24 01:05:34 vpapad Exp $
+  $Id: SinkTupleStream.java,v 1.11 2005/11/21 20:24:39 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -190,9 +190,15 @@ public final class SinkTupleStream {
 	if (child != null) {
 	    //It will be a punctuation if it prefixed with "PUNCT"
 	    String name = child.getNodeName();
-	    if (name != null &&
-		name.startsWith(Punctuation.STPUNCTNS))
-		tuple = new Punctuation(false, 1);
+				System.out.println("Hi MOM " +  name);
+			String namespace = child.getNamespaceURI();
+      if (namespace != null &&
+				  namespace.equals("http://www.cse.ogi.edu/dot/punct")){
+	//    if (name != null &&
+	//			name.startsWith(Punctuation.STPUNCTNS)) {
+				tuple = new Punctuation(false, 1);
+				System.out.println("Punct created");
+      }
 	}
 
 	if (tuple == null)
