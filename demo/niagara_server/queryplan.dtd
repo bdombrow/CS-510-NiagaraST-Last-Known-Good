@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.42 2005/10/10 20:32:23 vpapad Exp $
+<!-- $Id: queryplan.dtd,v 1.43 2005/12/04 06:37:33 tufte Exp $
      DTD for query plans -->
 
 <!-- 
@@ -212,7 +212,7 @@
 	It's necessary to specify them when using a hash join 
 	implementation.
 -->
-<!ELEMENT join     (pred)? >
+<!ELEMENT join (and | or | not | pred)?>
 <!ATTLIST join
           id       ID                   #REQUIRED
 	  left	   CDATA		#IMPLIED
@@ -327,6 +327,7 @@
 	  wintype  CDATA	#REQUIRED
 	  winattr  CDATA	""
 	  wid	   CDATA	""
+	  order    (yes|no)     "yes"
 	  %StandardAttributes;>
 
 <!ELEMENT describe EMPTY>
@@ -409,7 +410,7 @@
 <!ATTLIST filescan 
           id       ID           #REQUIRED
           filename CDATA        #REQUIRED
-	  isstream (yes | no) "no"
+	  isstream (yes | no) "yes"
 	  %PositionAttributes;>
 <!-- isStream should be yes if file is a stream in niagara:stream
      format, no otherwise. If isStream is no, then file must
@@ -420,7 +421,7 @@
           id       ID           #REQUIRED
           filename CDATA        #REQUIRED
           attrs    CDATA		#REQUIRED
-	  isstream (yes | no) "no"
+	  isstream (yes | no) "yes"
 	  %PositionAttributes;>
 <!-- isStream should be yes if file is a stream in niagara:stream
      format, no otherwise. If isStream is no, then file must
