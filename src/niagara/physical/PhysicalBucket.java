@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalBucket.java,v 1.4 2005/08/15 01:36:53 jinli Exp $
+  $Id: PhysicalBucket.java,v 1.5 2006/10/24 22:08:33 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,7 @@ import niagara.query_engine.*;
 
 import org.w3c.dom.*;
 import java.lang.Object;
+import java.util.ArrayList;
 
 /**
  * Implementation of the Select operator.
@@ -62,7 +63,9 @@ public class PhysicalBucket extends PhysicalOperator {
    private String stDataRoot;
    // Data template for creating punctuation
    Tuple tupleDataSample = null;  
-   private long startSecond; 
+   private long startSecond;
+   
+   AtomicEvaluator ae;
    
    
     public PhysicalBucket() {
@@ -76,6 +79,8 @@ public class PhysicalBucket extends PhysicalOperator {
 	range = ((Bucket) logicalOperator).getWindowRange();
 	slide = ((Bucket) logicalOperator).getWindowSlide();
 	widName = ((Bucket) logicalOperator).getWid();
+	ae = new AtomicEvaluator (windowAttribute.getName());
+	ae.resolveVariables(inputTupleSchemas[0], 0);
 	
     }
 
@@ -115,8 +120,8 @@ public class PhysicalBucket extends PhysicalOperator {
 		tupleDataSample = inputTuple;
 			
 	count++;
-        result = appendWindowId(inputTuple, streamId);
-        putTuple(result, 0);	    
+    result = appendWindowId(inputTuple, streamId);
+    putTuple(result, 0);	    
 	if ((count % slide == 0) && (windowType == 0)) {
 		//output a punctuation to say windowId_from is completed			
 		putTuple (createPunctuation (inputTuple, windowId_from), 0);
@@ -166,13 +171,9 @@ public class PhysicalBucket extends PhysicalOperator {
 				
 		long timestamp;
 		try {
-//			int pos = inputTupleSchemas[0].getPosition("TIMESTAMP");
-			String windowAttrName = windowAttribute.getName();
-			int pos = inputTupleSchemas[0].getPosition(windowAttrName);
-			
-			String tmp = inputTuple.getAttribute(pos).getFirstChild().getNodeValue();
-			timestamp = Long.parseLong(tmp);
-			
+			ArrayList values = new ArrayList (); 
+			ae.getAtomicValues(inputTuple, values);
+			timestamp = Long.parseLong(((BaseAttr)values.get(0)).toASCII());
 		} catch (NumberFormatException nfe) {
 			timestamp = 0;
 		}
@@ -257,60 +258,59 @@ public class PhysicalBucket extends PhysicalOperator {
 	protected void processPunctuation(Punctuation inputTuple,
 					  int streamId)
 	throws ShutdownException, InterruptedException {
-	if (inputTuple.isPunctuation()) {  // for time-based bucket  
-	   
+ 
 	   long wid=0, mod;
 	   //long timestamp;
 	   double timestamp;
 	   int length;
-	   String transform;
-
-	   String windowAttrName = windowAttribute.getName();
-	   int pos = inputTupleSchemas[0].getPosition(windowAttrName);
-
-	   String tmp = inputTuple.getAttribute(pos).getFirstChild().getNodeValue();
-	   //assume that the punctuation on winattr should have the format of (, *****)
-	   transform = tmp.trim();
-	   length = transform.length();
-	   tmp = transform.substring(1, length - 1);
-	   transform = tmp.trim();
-	   length = transform.length();
-	   tmp = transform.substring(1, length);
+	   String punctVal;
 	   
-	  // timestamp = Long.parseLong(tmp);	   
-	  timestamp = Double.parseDouble(tmp);
+	   ArrayList values = new ArrayList();
+	   ae.getAtomicValues(inputTuple, values);
+
+	   //assume that the punctuation on winattr should have the format of (, *****)
+	   punctVal = ((BaseAttr)values.get(0)).toASCII().trim();
+	   length = punctVal.length();
+	   String tmp = punctVal.substring(1, length - 1).trim();
+	   length = tmp.length();
+	   punctVal = tmp.substring(1, length);
+	    
+	   timestamp = Double.parseDouble(tmp);
 	   
 	   if ((range % slide) == 0) {
-		wid = (long)(timestamp - startSecond + 1) / slide;
-		mod = (long)(timestamp - startSecond + 1) % slide;
-		if (mod != 0)
-			wid += 1;
-		}
-		else {
+		   wid = (long)(timestamp - startSecond + 1) / slide;
+		   mod = (long)(timestamp - startSecond + 1) % slide;
+		   if (mod != 0)
+			   wid += 1;
+	   }
+	   else {
 			wid =(long) (timestamp - startSecond + 1) / slide;
 			mod = (long) (timestamp - startSecond + 1) % slide;
-		   } 
-		Punctuation punct = null;
+	   } 
+	   Punctuation punct = null;
 	    	    
-		Element ts = doc.createElement(windowAttrName);
-		ts.appendChild(doc.createTextNode("*"));
-		inputTuple.setAttribute(pos, ts);
+	   //Element ts = doc.createElement(windowAttrName);
+	   //ts.appendChild(doc.createTextNode("*"));
+	   
+	   StringAttr ts = new StringAttr("*");
+	   inputTuple.setAttribute(ae.attributeId, ts);
 		
-		Element from, to;
+	   /*Element from, to;
 
+	   from = doc.createElement("wid_from_"+widName);
+	   to = doc.createElement("wid_to_"+widName);
 
-		from = doc.createElement("wid_from_"+widName);
-		to = doc.createElement("wid_to_"+widName);
-
-		from.appendChild(doc.createTextNode( String.valueOf(wid-1)));   //windowId_from?
-		to.appendChild(doc.createTextNode(String.valueOf("*")));    
+	   from.appendChild(doc.createTextNode( String.valueOf(wid-1)));   //windowId_from?
+	   to.appendChild(doc.createTextNode(String.valueOf("*")));*/
+	   StringAttr from, to;
+	   
+	   from = new StringAttr(String.valueOf(wid-1));
+	   to = new StringAttr("*");
 	    
-		inputTuple.appendAttribute(from);	   	    
-		inputTuple.appendAttribute(to);
+	   inputTuple.appendAttribute(from);	   	    
+	   inputTuple.appendAttribute(to);
 
-		putTuple(inputTuple, streamId);
-
-	}
+	   putTuple(inputTuple, streamId);
 	}
 	    
 	/**
@@ -332,24 +332,30 @@ public class PhysicalBucket extends PhysicalOperator {
 	Punctuation spe =
 		new Punctuation(false);
 	for (int iAttr=0; iAttr<tupleDataSample.size(); iAttr++) {
-		Node ndSample = tupleDataSample.getAttribute(iAttr);
-		nodeType = ndSample.getNodeType();
-		if (nodeType == Node.ATTRIBUTE_NODE) {
-			Attr attr = doc.createAttribute(ndSample.getNodeName());
-			attr.appendChild(doc.createTextNode("*"));
-			spe.appendAttribute(attr);
-		} else {
-			String stName = ndSample.getNodeName();
-			if (stName.compareTo("#document") == 0)
-			stName = new String("document");
-			Element ePunct = doc.createElement(stName);
-			ePunct.appendChild(doc.createTextNode("*"));
-			spe.appendAttribute(ePunct);
+		//Node ndSample = tupleDataSample.getAttribute(iAttr);
+		Object ndSample = tupleDataSample.getAttribute(iAttr);
+		
+		if (ndSample instanceof BaseAttr) {
+			spe.appendAttribute(((BaseAttr)ndSample).copy());		
+		} else if (ndSample instanceof Node) {
+			nodeType = ((Node)ndSample).getNodeType();
+			if (nodeType == Node.ATTRIBUTE_NODE) {
+				Attr attr = doc.createAttribute(((Node)ndSample).getNodeName());
+				attr.appendChild(doc.createTextNode("*"));
+				spe.appendAttribute(attr);
+			} else {
+				String stName = ((Node)ndSample).getNodeName();
+				if (stName.compareTo("#document") == 0)
+				stName = new String("document");
+				Element ePunct = doc.createElement(stName);
+				ePunct.appendChild(doc.createTextNode("*"));
+				spe.appendAttribute(ePunct);
+			}			
 		}
 	}
 	//tPattern = doc.createTextNode("(," +Long.toString(value) + ")");
 	//hack
-	tPattern = doc.createTextNode(Long.toString(value));
+	/*tPattern = doc.createTextNode(Long.toString(value));
 
 	eChild = doc.createElement("wid_from_"+widName);
 	eChild.appendChild(tPattern);
@@ -359,7 +365,9 @@ public class PhysicalBucket extends PhysicalOperator {
 
 	eChild = doc.createElement("wid_to_"+widName);
 	eChild.appendChild(tPattern);
-	spe.appendAttribute(eChild);	
+	spe.appendAttribute(eChild);*/
+	spe.appendAttribute(new StringAttr(value));
+	spe.appendAttribute(new StringAttr("*"));
 		
 	return spe;
 	}	

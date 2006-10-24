@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalCount.java,v 1.1 2003/12/24 01:49:02 vpapad Exp $
+  $Id: PhysicalCount.java,v 1.2 2006/10/24 22:08:35 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,6 +28,8 @@
 package niagara.physical;
 
 import niagara.utils.Tuple;
+import niagara.utils.BaseAttr;
+import niagara.utils.IntegerAttr;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -52,13 +54,14 @@ public class PhysicalCount extends PhysicalAggregate {
      *                 updated
      */
     public void updateAggrResult (PhysicalAggregate.AggrResult result, 
-				  Object ungroupedResult) {
+				  BaseAttr ungroupedResult) {
 	// Increment the number of values
 	// KT - is this correct??
 	// code from old mrege results:
 	//finalResult.updateStatistics(((Integer) ungroupedResult).intValue());
 	    
-	assert ((Integer)ungroupedResult).intValue() == 1 :
+	//assert ((Integer)ungroupedResult).intValue() == 1 :
+    assert ungroupedResult.eq(new IntegerAttr(1)):
 	    "KT BAD BAD BAD";
 	result.count++;
     }
@@ -88,7 +91,8 @@ public class PhysicalCount extends PhysicalAggregate {
      *         null
      */
 
-    protected final Object constructUngroupedResult (Tuple 
+    //protected final Object constructUngroupedResult (Tuple 
+    protected final BaseAttr constructUngroupedResult (Tuple
 						     tupleElement) {
 
 	// First get the atomic values
@@ -99,7 +103,7 @@ public class PhysicalCount extends PhysicalAggregate {
 			return null;
 
 		assert atomicValues.size() == 1 : "Must have exactly one atomic value";
-		return new Integer(1);
+		return new IntegerAttr(1);
     }
 
     /**
@@ -132,7 +136,8 @@ public class PhysicalCount extends PhysicalAggregate {
      *         returns null
      */
 
-    protected final Node constructAggrResult (
+    //protected final Node constructAggrResult (
+    protected final BaseAttr constructAggrResult (
                    PhysicalAggregate.AggrResult partialResult,
 		   PhysicalAggregate.AggrResult finalResult) {
 	int numValues = 0;
@@ -146,10 +151,11 @@ public class PhysicalCount extends PhysicalAggregate {
 	}
 
 	// Create an Count result element
-	Element resultElement = doc.createElement("Count");
+	return new IntegerAttr(numValues);
+	/*Element resultElement = doc.createElement("Count");
 	Text childElement = doc.createTextNode(Integer.toString(numValues));
 	resultElement.appendChild(childElement);
-	return resultElement;
+	return resultElement;*/
     }
 
     protected PhysicalAggregate getInstance() {

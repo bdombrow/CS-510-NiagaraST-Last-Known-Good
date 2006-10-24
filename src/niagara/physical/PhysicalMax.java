@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalMax.java,v 1.1 2003/12/24 01:49:02 vpapad Exp $
+  $Id: PhysicalMax.java,v 1.2 2006/10/24 22:08:35 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,6 +30,7 @@ package niagara.physical;
 
 import niagara.utils.ShutdownException;
 import niagara.utils.Tuple;
+import niagara.utils.BaseAttr;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -53,13 +54,21 @@ public class PhysicalMax extends PhysicalAggregate {
      * @param newValue The value by which the statistics are to be
      *                 updated
      */
-    public void updateAggrResult (PhysicalAggregate.AggrResult result, 
-				  Object ungroupedResult) {
+    public void updateAggrResult (PhysicalAggregate.AggrResult result,
+    				BaseAttr ungroupedResult) {
+				  //Object ungroupedResult) {
 	// increm num values and update the max
-	double newValue = ((Double) ungroupedResult).doubleValue();
-	result.count++;
-	if (newValue > result.doubleVal)  // doubleVal holds max
-	    result.doubleVal = newValue;
+	//double newValue = ((Double) ungroupedResult).doubleValue();
+	
+    	result.count++;
+    	if (result.value != null) {
+    		if (ungroupedResult.gt(result.value))
+    			result.value = ungroupedResult;
+    	} else
+    		result.value = ungroupedResult;
+    	
+	/*if (newValue > result.doubleVal)  // doubleVal holds max
+	    result.doubleVal = newValue;*/
     }
 
 
@@ -78,10 +87,11 @@ public class PhysicalMax extends PhysicalAggregate {
      *         null
      */
 
-    protected final Object constructUngroupedResult (Tuple 
+    protected final BaseAttr constructUngroupedResult (Tuple 
 						     tupleElement) 
 	throws ShutdownException {
-	return getDoubleValue(tupleElement);
+    	return getValue(tupleElement);
+	//return getDoubleValue(tupleElement);
     }
 
     /**
@@ -105,35 +115,44 @@ public class PhysicalMax extends PhysicalAggregate {
      *         returns null
      */
 
-    protected final Node constructAggrResult (
+    //protected final Node constructAggrResult (
+    protected final BaseAttr constructAggrResult (
 			   PhysicalAggregate.AggrResult partialResult,
 			   PhysicalAggregate.AggrResult finalResult) {
 
 	// Create number of values and sum of values variables
 	int numValues = 0;
-	double max = 0;
+	BaseAttr max = null;
+	//double max = 0;
 
 	if (partialResult != null) {
 	    numValues += partialResult.count;
-	    if (partialResult.doubleVal > max)
-		max = partialResult.doubleVal;
+	    max = partialResult.value;
+	    /*if (partialResult.doubleVal > max)
+		max = partialResult.doubleVal;*/
 	}
 	if (finalResult != null) {
 	    numValues += finalResult.count;
-	    if (finalResult.doubleVal > max) 
-		max = finalResult.doubleVal;
+	    if (max != null) {
+	    	if (finalResult.value.gt(max))
+	    		max = finalResult.value;
+	    } else
+	    	max = finalResult.value;
+	    
+	   /* if (finalResult.doubleVal > max) 
+		max = finalResult.doubleVal;*/
 	}
 
 	// If the number of values is 0, sum does not make sense
 	if (numValues == 0) {
 	    assert false : "KT don't think returning null is ok";
-	    //return null;
 	}
 
-	Element resultElement = doc.createElement("niagara:max");
+	/*Element resultElement = doc.createElement("niagara:max");
 	Text childElement = doc.createTextNode(Double.toString(max));
 	resultElement.appendChild(childElement);
-	return resultElement;
+	return resultElement;*/
+	return max;
     }
 
     protected PhysicalAggregate getInstance() {

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalSum.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $
+  $Id: PhysicalSum.java,v 1.2 2006/10/24 22:08:34 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,6 +30,9 @@ package niagara.physical;
 
 import niagara.utils.ShutdownException;
 import niagara.utils.Tuple;
+import niagara.utils.BaseAttr;
+import niagara.utils.Arithmetics;
+
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -54,10 +57,11 @@ public class PhysicalSum extends PhysicalAggregate {
      *                 updated
      */
     public void updateAggrResult (PhysicalAggregate.AggrResult result,
-				  Object ungroupedResult) {
+				  BaseAttr ungroupedResult) {
 	result.count++;
 	// result.doubleVal holds the sum...
-	result.doubleVal += ((Double) ungroupedResult).doubleValue();
+	//result.doubleVal += ((Double) ungroupedResult).doubleValue();
+	result.value = ((Arithmetics)result.value).plus(ungroupedResult);
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -74,10 +78,11 @@ public class PhysicalSum extends PhysicalAggregate {
      *         null
      */
 
-    protected final Object constructUngroupedResult (Tuple 
+    protected final BaseAttr constructUngroupedResult (Tuple 
 						     tupleElement) 
 	throws ShutdownException {
-	return getDoubleValue(tupleElement);
+	//return getDoubleValue(tupleElement);
+    	return getValue(tupleElement);
     }
 
     /**
@@ -101,21 +106,26 @@ public class PhysicalSum extends PhysicalAggregate {
      *         returns null
      */
 
-    protected final Node constructAggrResult (
+    protected final BaseAttr constructAggrResult (
 		       PhysicalAggregate.AggrResult partialResult,
 		       PhysicalAggregate.AggrResult finalResult) {
 
 	// Create number of values and sum of values variables
 	int numValues = 0;
-	double sum = 0;
+	BaseAttr sum = null;
+	//double sum = 0;
 
 	if (partialResult != null) {
 	    numValues += partialResult.count;
-	    sum += partialResult.doubleVal;
+	    sum = partialResult.value;
+	    //sum += partialResult.doubleVal;
 	}
 	if (finalResult != null) {
 	    numValues += finalResult.count;
-	    sum += finalResult.doubleVal;
+	    if (sum != null)
+	    	sum = ((Arithmetics)sum).plus(finalResult.value);
+	    else
+	    	sum = partialResult.value;
 	}
 
 	// If the number of values is 0, average does not make sense
@@ -125,10 +135,11 @@ public class PhysicalSum extends PhysicalAggregate {
 	}
 
 	// Create a sum result element
-	Element resultElement = doc.createElement("Sum");
+	return sum;
+	/*Element resultElement = doc.createElement("Sum");
 	Text childElement = doc.createTextNode(Double.toString(sum));
 	resultElement.appendChild(childElement);
-	return resultElement;
+	return resultElement;*/
     }
 
     protected PhysicalAggregate getInstance() {

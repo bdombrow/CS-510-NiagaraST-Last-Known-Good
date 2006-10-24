@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowGroup.java,v 1.3 2005/08/15 01:36:53 jinli Exp $
+  $Id: PhysicalWindowGroup.java,v 1.4 2006/10/24 22:08:33 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -218,7 +218,8 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 	protected ArrayList streamIds;
 	protected Attribute windowAttr;
 	protected String widName;
-	private int widFromPos, widToPos;
+	SimpleAtomicEvaluator eaFrom, eaTo;
+	//private int widFromPos, widToPos;
     
 	///////////////////////////////////////////////////////////////////////////
 	// These are the methods of the PhysicalWindowGroupOperator class          //
@@ -243,9 +244,20 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 	public final void opInitFrom(LogicalOp logicalOperator) {
         skolem grouping = ((niagara.logical.Group)logicalOperator).getSkolemAttributes();
         groupAttributeList = grouping.getVarList();
+        
+		windowAttr = ((WindowGroup)logicalOperator).getWindowAttr();
+		widName = ((WindowGroup)logicalOperator).getWid();
+        
+        eaFrom = new SimpleAtomicEvaluator ("wid_from_"+widName);
+        eaFrom.resolveVariables(inputTupleSchemas[0], 0);
+        eaTo = new SimpleAtomicEvaluator ("wid_to_"+widName);
+        eaTo.resolveVariables(inputTupleSchemas[0], 0);
+        
         // have subclass do initialization
         localInitFrom(logicalOperator);
     }
+	
+	abstract protected void localInitFrom(LogicalOp logicalOperator);
 
 	//Copied from PhysicalGroup
 	
@@ -306,11 +318,6 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
             this.initializeForExecution();
         }
    // END
-
-	protected void localInitFrom(LogicalOp logicalOperator) {
-		windowAttr = ((WindowGroup)logicalOperator).getWindowAttr();
-		widName = ((WindowGroup)logicalOperator).getWid();
-	}
 
 	protected void processPunctuation(
 			  Punctuation inputTuple,
@@ -395,12 +402,14 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		
 		int tupleSize = tupleElement.size();
 
-		Node wid_from = tupleElement.getAttribute(widFromPos);
-		Node wid_to = tupleElement.getAttribute(widToPos);		
-		
+		//Node wid_from = tupleElement.getAttribute(widFromPos);
+		//Node wid_to = tupleElement.getAttribute(widToPos);
 			
-		int from = Long.valueOf(wid_from.getFirstChild().getNodeValue()).intValue();
-		int to = Long.valueOf(wid_to.getFirstChild().getNodeValue()).intValue();
+		//int from = Long.valueOf(wid_from.getFirstChild().getNodeValue()).intValue();
+		//int to = Long.valueOf(wid_to.getFirstChild().getNodeValue()).intValue();
+		
+		int from = Integer.valueOf(eaFrom.getAtomicValue(tupleElement, null));
+		int to = Integer.valueOf(eaTo.getAtomicValue(tupleElement, null));
 
 		HashEntry prevResult;
     		    
@@ -674,11 +683,5 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
         return new Cost(cost);
     }
     
-    public void constructTupleSchema(TupleSchema[] inputSchemas) {
-        super.constructTupleSchema(inputSchemas);
-        
-        widFromPos = inputSchemas[0].getPosition("wid_from_"+widName);
-        widToPos = inputSchemas[0].getPosition("wid_to_"+widName);
-    }    
 }
 

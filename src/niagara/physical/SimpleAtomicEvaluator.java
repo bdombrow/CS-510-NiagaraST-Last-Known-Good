@@ -1,10 +1,11 @@
-/* $Id: SimpleAtomicEvaluator.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $ */
+/* $Id: SimpleAtomicEvaluator.java,v 1.2 2006/10/24 22:08:34 jinli Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.Node;
 
 import niagara.query_engine.*;
 import niagara.utils.Tuple;
+import niagara.utils.BaseAttr;
 import niagara.xmlql_parser.schemaAttribute;
 
 /** A simplified version of AtomicEvaluator, for cases where we just
@@ -48,14 +49,39 @@ public class SimpleAtomicEvaluator {
             tuple = t1;
         else
             tuple = t2;
-		Node n = tuple.getAttribute(attributeId);
+		//Node n = tuple.getAttribute(attributeId);
+        Object n = tuple.getAttribute(attributeId);
 		if(n == null)
 			return null;
         else
-        	return getAtomicValue(n);
+       		return getAtomicValue(n);
+        		
     }
-    
-    public static final String getAtomicValue(Node node) {
+
+    public static final String getAtomicValue(Object node) {
+    	if (node instanceof BaseAttr)
+    		return ((BaseAttr)node).toASCII();
+    	
+        // XXX vpapad: We must get the semantics of atomic values straight!!!
+        switch (((Node)node).getNodeType()) {
+            case Node.ATTRIBUTE_NODE :
+                return ((Node)node).getNodeValue();
+                // XXX vpapad: What the original code did,
+                // text nodes don't have children
+            case Node.TEXT_NODE :
+                return null;
+                // XXX vpapad: this is what the original code ended up doing,
+                // assumes that first child is a text node, otherwise
+                // weird things will happen
+            default :
+                if (((Node)node).hasChildNodes())
+                    return ((Node)node).getFirstChild().getNodeValue();
+                else
+                    return null;
+        }
+    }
+
+    /*public static final String getAtomicValue(Node node) {
         // XXX vpapad: We must get the semantics of atomic values straight!!!
         switch (node.getNodeType()) {
             case Node.ATTRIBUTE_NODE :
@@ -73,5 +99,5 @@ public class SimpleAtomicEvaluator {
                 else
                     return null;
         }
-    }
+    }*/
 }

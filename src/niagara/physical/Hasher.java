@@ -1,4 +1,4 @@
-/* $Id: Hasher.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $ */
+/* $Id: Hasher.java,v 1.2 2006/10/24 22:08:35 jinli Exp $ */
 package niagara.physical;
 
 import niagara.optimizer.colombia.Attribute;
@@ -68,7 +68,7 @@ public class Hasher {
 
 	    // Add the atomic value (a string) to the current result
 	    hashResult.append('<');
-	    hashResult.append((String) values[att].get(0));
+	    hashResult.append(((BaseAttr)values[att].get(0)).toASCII());
 	    hashResult.append('<');
 
             values[att].clear();

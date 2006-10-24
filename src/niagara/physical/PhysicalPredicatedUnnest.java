@@ -1,4 +1,4 @@
-/* $Id: PhysicalPredicatedUnnest.java,v 1.2 2004/05/20 22:10:22 vpapad Exp $ */
+/* $Id: PhysicalPredicatedUnnest.java,v 1.3 2006/10/24 22:08:34 jinli Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -89,10 +89,14 @@ public class PhysicalPredicatedUnnest extends PhysicalOperator {
         throws ShutdownException, InterruptedException {
 
         // Get the attribute to scan on
-        Node attribute = inputTuple.getAttribute(scanField);
+        //Node attribute = inputTuple.getAttribute(scanField);
+    	Object attribute = inputTuple.getAttribute(scanField);
 
         // Get the nodes reachable using the path expression scanned
-        pev.getMatches(attribute, elementList);
+    	//pev.getMatches(attribute, elementList);
+    	
+    	// The input of an unnest must be of XMLAttr type
+        pev.getMatches(((XMLAttr)attribute).getNodeValue(), elementList);
 
         int numNodes = elementList.size();
 
@@ -208,10 +212,12 @@ public class PhysicalPredicatedUnnest extends PhysicalOperator {
         // to handle the extra predicate and projections - HELP!!!
         try {
             // Get the attribute to scan on
-            Node attribute = inputTuple.getAttribute(scanField);
+            //Node attribute = inputTuple.getAttribute(scanField);
+        	Object attribute = inputTuple.getAttribute(scanField);
 
             // Get the nodes reachable using the path expression scanned
-            pev.getMatches(attribute, elementList);
+            //pev.getMatches(attribute, elementList);
+        	pev.getMatches(((XMLAttr)attribute).getNodeValue(), elementList);
 
             // Append all the nodes returned to the inputTuple and add these
             // to the result

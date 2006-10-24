@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalGroup.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $
+  $Id: PhysicalGroup.java,v 1.2 2006/10/24 22:08:32 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -268,7 +268,8 @@ public abstract class PhysicalGroup extends PhysicalOperator {
         int streamId)
         throws ShutdownException {
 
-	Object ungroupedResult = 
+	//Object ungroupedResult = 
+    BaseAttr ungroupedResult =
 	    this.constructUngroupedResult(tupleElement);
 	if(ungroupedResult == null)
 		return;
@@ -342,6 +343,9 @@ public abstract class PhysicalGroup extends PhysicalOperator {
      */
     protected final void flushCurrentResults(boolean partial)
         throws InterruptedException, ShutdownException {
+    	
+    	//MemProf.runGC();
+    	//System.out.println("Before flushing: "+MemProf.usedMemory());
 
 	if(numGroupingAttributes == 0) {
 	    if(singleGroupResult == null) {
@@ -367,6 +371,9 @@ public abstract class PhysicalGroup extends PhysicalOperator {
 				putResult(hashEntry, partial);
 	    	}
 		}
+        
+    	//MemProf.runGC();
+    	//System.out.println("After flushing: "+MemProf.usedMemory());        
     }
 
     private void putEmptyResult(boolean partial) 
@@ -398,7 +405,8 @@ public abstract class PhysicalGroup extends PhysicalOperator {
 	Object partialResult = hashEntry.getPartialResult();
 	Object finalResult = hashEntry.getFinalResult();
 	
-	Node resultNode = null;
+	//Node resultNode = null;
+	BaseAttr resultNode = null;
 	
 	if (partialResult != null || finalResult != null) {
 	    resultNode = this.constructResult(partialResult, finalResult);
@@ -473,7 +481,8 @@ public abstract class PhysicalGroup extends PhysicalOperator {
                 // Get the result object if at least partial or final
                 HashEntry hashEntry = (HashEntry) hashtable.get(key);
                 Object finalResult = hashEntry.getFinalResult();
-                Node resultNode = null;
+                //Node resultNode = null;
+                BaseAttr resultNode = null;
                 if (finalResult != null)
                     resultNode = this.constructResult(null, finalResult);
 
@@ -549,6 +558,35 @@ public abstract class PhysicalGroup extends PhysicalOperator {
         return tupleElement;
     }
 
+    protected Tuple createTuple(
+		     BaseAttr groupedResult,
+		     Tuple representativeTuple,
+		     boolean partial) {
+
+    	// Create a result tuple element tagged appropriately as
+    	// partial or final
+    	Tuple tupleElement = new Tuple(partial);
+
+    	// For each grouping attribute, add the corresponding element
+    	// to the result tuple from the representative tuple
+
+    	for (int grp = 0; grp < numGroupingAttributes; ++grp) {
+    		// Append the relevant attribute from the representative tuple
+    		// to the result
+    		if (representativeTuple != null)
+    			tupleElement.appendAttribute(
+    					representativeTuple.getAttribute(attributeIds[grp]));
+    		else
+    			tupleElement.appendAttribute(null);
+    	}
+
+    	// Add the grouped result as the attribute
+    	tupleElement.appendAttribute(groupedResult);
+
+    	// Return the result tuple
+    	return tupleElement;
+    }
+
     public void setResultDocument(Document doc) {
         this.doc = doc;
     }
@@ -578,9 +616,12 @@ public abstract class PhysicalGroup extends PhysicalOperator {
      *         null
      */
 
-    protected abstract Object constructUngroupedResult(
+    /*protected abstract Object constructUngroupedResult(
 				   Tuple tupleElement) 
-	throws ShutdownException;
+	throws ShutdownException;*/
+    protected abstract BaseAttr constructUngroupedResult(
+			   Tuple tupleElement) 
+    throws ShutdownException;
 
     /**
      * This function merges a grouped result with an ungrouped result
@@ -593,9 +634,13 @@ public abstract class PhysicalGroup extends PhysicalOperator {
      * @return The new grouped result
      */
 
-    protected abstract Object mergeResults(
+    /*protected abstract Object mergeResults(
         Object groupedResult,
-        Object ungroupedResult);
+        Object ungroupedResult);*/
+    protected abstract Object mergeResults(
+            Object groupedResult,
+            BaseAttr ungroupedResult);
+
 
     /**
      * This function returns an empty result in case there are no groups
@@ -617,9 +662,13 @@ public abstract class PhysicalGroup extends PhysicalOperator {
      *         returns null
      */
 
-    protected abstract Node constructResult(
+    /*protected abstract Node constructResult(
         Object partialResult,
-        Object finalResult);
+        Object finalResult);*/
+    protected abstract BaseAttr constructResult(
+            Object partialResult,
+            Object finalResult);
+
 
     public boolean isStateful() {
         return true;

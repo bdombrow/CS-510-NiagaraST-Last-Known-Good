@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalAggregate.java,v 1.1 2003/12/24 01:49:01 vpapad Exp $
+  $Id: PhysicalAggregate.java,v 1.2 2006/10/24 22:08:34 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -54,10 +54,14 @@ public abstract class PhysicalAggregate extends PhysicalGroup {
     ArrayList atomicValues;
 
     protected abstract PhysicalAggregate getInstance();
-    protected abstract Node constructAggrResult(AggrResult partialResult,
-						AggrResult finalResult);
+    /*protected abstract Node constructAggrResult(AggrResult partialResult,
+						AggrResult finalResult);*/
+    protected abstract BaseAttr constructAggrResult(AggrResult partialResult,
+			AggrResult finalResult);
+    /*protected abstract void updateAggrResult(AggrResult result, 
+					     Object ungroupedResult);*/
     protected abstract void updateAggrResult(AggrResult result, 
-					     Object ungroupedResult);
+		     BaseAttr ungroupedResult);
 
     protected void localInitFrom(LogicalOp logicalOperator) {
 	aggrAttr = ((Aggregate)logicalOperator).getAggrAttr();
@@ -67,6 +71,18 @@ public abstract class PhysicalAggregate extends PhysicalGroup {
         ae = new AtomicEvaluator(aggrAttr.getName());
         ae.resolveVariables(inputTupleSchemas[0], 0);
         atomicValues = new ArrayList();
+    }
+    
+    protected final BaseAttr getValue (Tuple tupleElement) {
+    	// First get the atomic values
+    	atomicValues.clear();
+    	ae.getAtomicValues(tupleElement, atomicValues);
+    	    
+    	assert atomicValues.size() <= 1 : "Need exactly one atomic value";
+    	if(atomicValues.size() == 0)
+    	  	return null;
+    	    
+    	return (BaseAttr) atomicValues.get(0);
     }
 
     protected final Double getDoubleValue (Tuple tupleElement) 
@@ -98,8 +114,10 @@ public abstract class PhysicalAggregate extends PhysicalGroup {
      * @return The new grouped result
      */
 
+    /*protected final Object mergeResults (Object groupedResult,
+					 Object ungroupedResult) {*/
     protected final Object mergeResults (Object groupedResult,
-					 Object ungroupedResult) {
+			 BaseAttr ungroupedResult) {
 
 	// Set up the final result - if the groupedResult is null, then
 	// create holder for final result, else just use groupedResult
@@ -115,8 +133,10 @@ public abstract class PhysicalAggregate extends PhysicalGroup {
 	return finalResult;
     }
 
-    public Node constructResult (Object partialResult,
-				 Object finalResult) {
+    /*public Node constructResult (Object partialResult,
+				 Object finalResult) {*/
+    public BaseAttr constructResult (Object partialResult,
+			 Object finalResult) {
 	return constructAggrResult((AggrResult)partialResult,
 				   (AggrResult)finalResult);
     }
@@ -143,6 +163,7 @@ public abstract class PhysicalAggregate extends PhysicalGroup {
 
     protected class AggrResult {
 	int count;
-	double doubleVal;
+	BaseAttr value;
+	//double doubleVal;
     }
 }

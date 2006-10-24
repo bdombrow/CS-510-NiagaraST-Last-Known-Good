@@ -1,4 +1,4 @@
-/* $Id: AtomicEvaluator.java,v 1.2 2004/05/20 22:10:22 vpapad Exp $ */
+/* $Id: AtomicEvaluator.java,v 1.3 2006/10/24 22:08:33 jinli Exp $ */
 package niagara.physical;
 
 import java.util.ArrayList;
@@ -80,10 +80,15 @@ public class AtomicEvaluator {
         else
             tuple = t2;
 
-		Node n = tuple.getAttribute(attributeId);
+		//Node n = tuple.getAttribute(attributeId);
+        Object n = tuple.getAttribute(attributeId);
 		if(n == null)
 			return ;
         getAtomicValues(tuple.getAttribute(attributeId), values);
+    }
+    
+    public final void getAtomicValues(Object n, ArrayList values) {
+    	values.add(n);
     }
     
     public final void getAtomicValues(Node n, ArrayList values) {

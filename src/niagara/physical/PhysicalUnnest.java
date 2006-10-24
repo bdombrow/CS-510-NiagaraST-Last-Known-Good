@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.3 2005/10/10 20:33:10 vpapad Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.4 2006/10/24 22:08:33 jinli Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -74,7 +74,12 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         matchFound = false;
 
         // Get the nodes reachable from the path expression 
-        pev.produceMatches(inputTuple.getAttribute(scanField), this);
+        if (inputTuple.getAttribute(scanField) instanceof Node)
+        	pev.produceMatches((Node)inputTuple.getAttribute(scanField), this);
+        else if (inputTuple.getAttribute(scanField) instanceof XMLAttr)
+        	pev.produceMatches(((XMLAttr)inputTuple.getAttribute(scanField)).getNodeValue(), this);
+        else
+        	throw new PEException ("JL: We only unnest xml node or xmlattr");
 
         if (!matchFound) {
             if (outer == Unnest.OuterBehavior.OUTER)
@@ -98,8 +103,31 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
 
         // Append a reachable node to the output tuple
         // and put the tuple in the output stream
-        if (reallyUnnesting)
-            inputTuple.setAttribute(outputPos, n);
+        if (reallyUnnesting) {
+        	BaseAttr attr;
+        	DataType type = variable.getDataType(); 
+        	
+        	switch (type) {
+        	case String: 
+        		attr = new StringAttr();
+        		break;
+        	case Integer: 
+        		attr = new IntegerAttr();
+        		break;
+        	case TS: 
+        		attr = new TSAttr();
+        		break;
+        	case XML: 
+        		attr = new XMLAttr();
+        		break;
+        	default: 
+        		throw new PEException ("JL: Unsupported data type");
+        	}
+        	attr.loadFromXMLNode(n);
+        	inputTuple.setAttribute(outputPos, attr);
+            //inputTuple.setAttribute(outputPos, n);
+        }
+        
         putTuple(inputTuple, 0);
         matchFound = true;
     }
@@ -181,7 +209,7 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         // to handle projections - HELP
         try {
             // Get the attribute to scan on
-            Node attribute = inputTuple.getAttribute(scanField);
+            Node attribute = (Node)inputTuple.getAttribute(scanField);
 
             // Get the nodes reachable using the path expression scanned
             pev.getMatches(attribute, elementList);
@@ -197,7 +225,8 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
                     // and put the tuple in the output stream
                     Punctuation outputTuple =
                         (Punctuation) inputTuple.clone();
-                    outputTuple.appendAttribute(elementList.get(node));
+                    outputTuple.appendAttribute(new StringAttr(elementList.get(node)));
+                    //outputTuple.appendAttribute(elementList.get(node));
                     putTuple(outputTuple, 0);
                 }
             } else {

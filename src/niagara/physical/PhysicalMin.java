@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalMin.java,v 1.1 2003/12/24 01:49:01 vpapad Exp $
+  $Id: PhysicalMin.java,v 1.2 2006/10/24 22:08:34 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,15 +49,23 @@ public class PhysicalMin extends PhysicalAggregate {
 	 * @param newValue The value by which the statistics are to be
 	 *                 updated
 	 */
-	public void updateAggrResult (PhysicalAggregate.AggrResult result, 
-				  Object ungroupedResult) {
+	public void updateAggrResult (PhysicalAggregate.AggrResult result,
+					BaseAttr ungroupedResult) {
+				  //Object ungroupedResult) {
 	// increm num values and update the max
-	double newValue = ((Double) ungroupedResult).doubleValue();
+	/*double newValue = ((Double) ungroupedResult).doubleValue();
 	result.count++;
 	if (result.doubleVal == 0)
 		result.doubleVal = newValue;
 	if (newValue < result.doubleVal)  // doubleVal holds max
-		result.doubleVal = newValue; 
+		result.doubleVal = newValue;*/
+    	result.count++;
+    	if (result.value != null) {
+    		if (ungroupedResult.lt(result.value))
+    			result.value = ungroupedResult;
+    	} else
+    		result.value = ungroupedResult;
+
 	}
 
 
@@ -76,10 +84,12 @@ public class PhysicalMin extends PhysicalAggregate {
 	 *         null
 	 */
 
-	protected final Object constructUngroupedResult (Tuple 
+	//protected final Object constructUngroupedResult (Tuple 
+	protected final BaseAttr constructUngroupedResult (Tuple
 							 tupleElement) 
 	throws ShutdownException {
-	return getDoubleValue(tupleElement);
+	//return getDoubleValue(tupleElement);
+		return getValue(tupleElement);
 	}
 
 	/**
@@ -103,37 +113,43 @@ public class PhysicalMin extends PhysicalAggregate {
 	 *         returns null
 	 */
 
-	protected final Node constructAggrResult (
+	//protected final Node constructAggrResult (
+	protected final BaseAttr constructAggrResult (
 			   PhysicalAggregate.AggrResult partialResult,
 			   PhysicalAggregate.AggrResult finalResult) {
 
 	// Create number of values and sum of values variables
 	int numValues = 0;
-	//double max = 0; //Jenny: Hack
-	long min = Long.MAX_VALUE;
+	//long min = Long.MAX_VALUE;
+	BaseAttr min = null;
 
 	if (partialResult != null) {
 		numValues += partialResult.count;
-		if (partialResult.doubleVal < min)
-		min = (long) partialResult.doubleVal; //Jenny:  Hack
+		min = partialResult.value;
+		/*if (partialResult.doubleVal < min)
+		min = (long) partialResult.doubleVal;*/ 
 	}
 	if (finalResult != null) {
 		numValues += finalResult.count;
-		if (finalResult.doubleVal < min) 
-		min = (long)finalResult.doubleVal; //Jenny: Hack
+		if (min != null) {
+			if (finalResult.value.lt(min))
+				min = finalResult.value;
+		} else
+			min = finalResult.value;
+		/*if (finalResult.doubleVal < min) 
+		min = (long)finalResult.doubleVal;*/ 
 	}
 
 	// If the number of values is 0, sum does not make sense
 	if (numValues == 0) {
 		assert false : "KT don't think returning null is ok";
-		//return null;
 	}
 
-	Element resultElement = doc.createElement("niagara:min");
-	//Text childElement = doc.createTextNode(Double.toString(max));
-	Text childElement = doc.createTextNode(Long.toString(min)); //Jenny:  Hack
+	return min;
+	/*Element resultElement = doc.createElement("niagara:min");
+	Text childElement = doc.createTextNode(Long.toString(min)); 
 	resultElement.appendChild(childElement);
-	return resultElement;
+	return resultElement;*/
 	}
 
 	protected PhysicalAggregate getInstance() {

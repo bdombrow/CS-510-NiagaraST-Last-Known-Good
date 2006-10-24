@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalAverage.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $
+  $Id: PhysicalAverage.java,v 1.2 2006/10/24 22:08:35 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,6 +29,8 @@ package niagara.physical;
 
 import niagara.utils.ShutdownException;
 import niagara.utils.Tuple;
+import niagara.utils.BaseAttr;
+import niagara.utils.Arithmetics;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -52,10 +54,12 @@ public class PhysicalAverage extends PhysicalAggregate {
      * @param newValue The value by which the statistics are to be
      *                 updated
      */
-    public void updateAggrResult (PhysicalAggregate.AggrResult result, 
-				  Object ungroupedResult) {
+    public void updateAggrResult (PhysicalAggregate.AggrResult result,
+    				BaseAttr ungroupedResult) {
+				  //Object ungroupedResult) {
 	result.count++;
-	result.doubleVal += ((Double) ungroupedResult).doubleValue(); // sum
+	result.value = ((Arithmetics)result.value).plus(ungroupedResult);
+	//result.doubleVal += ((Double) ungroupedResult).doubleValue(); // sum
     }
    
 
@@ -74,10 +78,10 @@ public class PhysicalAverage extends PhysicalAggregate {
      *         null
      */
 
-    protected final Object constructUngroupedResult (Tuple 
+    protected final BaseAttr constructUngroupedResult (Tuple 
 						     tupleElement) 
 	throws ShutdownException {
-	return getDoubleValue(tupleElement);
+	return getValue(tupleElement);
     }
 
     /**
@@ -100,21 +104,27 @@ public class PhysicalAverage extends PhysicalAggregate {
      * @return A results merging partial and final results; If no such result,
      *         returns null
      */
-    protected final Node constructAggrResult (
+    protected final BaseAttr constructAggrResult (
 		  PhysicalAggregate.AggrResult partialResult,
 		  PhysicalAggregate.AggrResult finalResult) {
 
 	// Create number of values and sum of values variables
 	int numValues = 0;
-	double sum = 0;
+	//double sum = 0;
+	BaseAttr sum = null;
 
 	if (partialResult != null) {
 	    numValues += partialResult.count;
-	    sum += partialResult.doubleVal;
+	    sum = partialResult.value;
+	    //sum += partialResult.doubleVal;
 	}
 	if (finalResult != null) {
 	    numValues += finalResult.count;
-	    sum += finalResult.doubleVal;
+	    //sum += finalResult.doubleVal;
+	    if (sum != null)
+	    	sum = ((Arithmetics)sum).plus(finalResult.value);
+	    else
+	    	sum = partialResult.value;
 	}
 
 	// If the number of values is 0, average does not make sense
@@ -124,10 +134,11 @@ public class PhysicalAverage extends PhysicalAggregate {
 	}
 
 	// Create an average result element and return it
-	Element resultElement = doc.createElement("Average");
+	return sum;
+	/*Element resultElement = doc.createElement("Average");
 	Text childElement = doc.createTextNode(Double.toString(sum/numValues));
 	resultElement.appendChild(childElement);
-	return resultElement;
+	return resultElement;*/
     }
 
     protected PhysicalAggregate getInstance() {
