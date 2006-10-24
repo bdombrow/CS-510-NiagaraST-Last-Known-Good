@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Tuple.java,v 1.1 2003/12/24 01:05:34 vpapad Exp $
+  $Id: Tuple.java,v 1.2 2006/10/24 22:09:39 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,8 +40,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
 public class Tuple {
-    // Members to create an expandable array of nodes
-    protected Node tuple[];
+    // Members to create an expandable array of attributes
+	protected Object tuple[];
     protected int allocSize;
     protected int tupleSize;
     // A boolean flag that indicates whether this tuple represents
@@ -79,7 +79,7 @@ public class Tuple {
 
     private void createTuple(int capacity) {
         allocSize = capacity;
-        tuple = new Node[allocSize];
+        tuple = new Object[allocSize];
         tupleSize = 0;
     }
 
@@ -111,7 +111,7 @@ public class Tuple {
      *
      * @param attribute The attribute to be appended
      */
-    public void appendAttribute(Node attribute) {
+    public void appendAttribute(Object attribute) {
         if (tupleSize >= allocSize)
             expandTuple(tupleSize);
         tuple[tupleSize++] = attribute;
@@ -142,7 +142,7 @@ public class Tuple {
      *
      * @return The desired attribute
      */
-    public Node getAttribute(int position) {
+    public Object getAttribute(int position) {
         assert position
             < tupleSize : "Invalid position "
                 + position
@@ -151,7 +151,7 @@ public class Tuple {
         return tuple[position];
     }
 
-    public void setAttribute(int position, Node value) {
+    public void setAttribute(int position, Object value) {
         while (position >= allocSize)
             expandTuple(position);
         if (tupleSize <= position)
@@ -194,7 +194,7 @@ public class Tuple {
         Tuple returnElement =
             new Tuple(partial, size);
 
-        Node[] newTuple = returnElement.tuple;
+        Object[] newTuple = returnElement.tuple;
         for (int to = 0; to < attributeMap.length; to++) {
             int from = attributeMap[to];
             if (from >= 0)
@@ -277,7 +277,7 @@ public class Tuple {
         while (newSize >= newAllocSize)
             newAllocSize *= 2;
 
-        Node[] newTuple = new Node[newAllocSize];
+        Object[] newTuple = new Object[newAllocSize];
         for (int i = 0; i < tupleSize; i++) {
             newTuple[i] = tuple[i];
         }

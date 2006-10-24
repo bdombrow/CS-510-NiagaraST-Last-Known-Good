@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.11 2005/11/21 20:24:39 tufte Exp $
+  $Id: SinkTupleStream.java,v 1.12 2006/10/24 22:09:38 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -190,14 +190,11 @@ public final class SinkTupleStream {
 	if (child != null) {
 	    //It will be a punctuation if it prefixed with "PUNCT"
 	    String name = child.getNodeName();
-				System.out.println("Hi MOM " +  name);
-			String namespace = child.getNamespaceURI();
-      if (namespace != null &&
+		//System.out.println("Hi MOM " +  name);
+		String namespace = child.getNamespaceURI();
+        if (namespace != null &&
 				  namespace.equals("http://www.cse.ogi.edu/dot/punct")){
-	//    if (name != null &&
-	//			name.startsWith(Punctuation.STPUNCTNS)) {
 				tuple = new Punctuation(false, 1);
-				System.out.println("Punct created");
       }
 	}
 
@@ -205,9 +202,9 @@ public final class SinkTupleStream {
 	    // create a tuple that is not a partial result
 	    tuple = new Tuple(false, 1);
 
-        // Add the object as an attribute of the tuple
-        tuple.appendAttribute(node);
-        int ctrlFlag = putTuple(tuple);
+    // Add the object as an attribute of the tuple
+    tuple.appendAttribute(node);
+    int ctrlFlag = putTuple(tuple);
 
 	// stream above an operator using this put should
 	// always reflect partials

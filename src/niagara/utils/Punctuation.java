@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Punctuation.java,v 1.1 2003/12/24 01:05:34 vpapad Exp $
+  $Id: Punctuation.java,v 1.2 2006/10/24 22:09:38 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -70,7 +70,16 @@ public final class Punctuation extends Tuple {
     public boolean equals(Punctuation punct) {
 	//Only compare the 'document' nodes
 
-	return nodeEquals(this.getAttribute(0), punct.getAttribute(0));
+	//return nodeEquals(this.getAttribute(0), punct.getAttribute(0));
+    	boolean eq = true;
+    	int pos = 0;
+    	for (Object attr:tuple) {
+    		if (attr instanceof Node)
+    			eq = eq && nodeEquals((Node)attr, (Node)punct.getAttribute(pos++));
+    		else if (attr instanceof BaseAttr)
+    			eq = eq && ((BaseAttr)attr).eq((BaseAttr) punct.getAttribute(pos++));
+    	}
+    	return eq;
     }
 
     private boolean nodeEquals(Node nd1, Node nd2) {
@@ -131,6 +140,8 @@ public final class Punctuation extends Tuple {
 	//This punctuation should be verified against the first
 	// node in the tuple (the "document" node)
 	return matchNode(this.getAttribute(0), ste.getAttribute(0));
+	
+	
     }
 
     private boolean matchNode(Node ndPunct, Node ndTuple) {
