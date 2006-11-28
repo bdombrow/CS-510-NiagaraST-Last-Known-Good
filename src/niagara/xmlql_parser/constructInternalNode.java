@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: constructInternalNode.java,v 1.1 2003/12/24 01:19:54 vpapad Exp $
+  $Id: constructInternalNode.java,v 1.2 2006/11/28 05:26:29 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -123,7 +123,7 @@ public class constructInternalNode extends constructBaseNode {
 
 	public void truncate() {
 		children = new Vector();
-		children.addElement(new constructLeafNode(new data(dataType.ATTR,new schemaAttribute(0,varType.ELEMENT_VAR))));
+		children.addElement(new constructLeafNode(new data(dataType.ATTR,new schemaAttribute(0,varType.ELEMENT_VAR, null))));
 	}
 //-----------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: schemaAttribute.java,v 1.1 2003/12/24 01:19:54 vpapad Exp $
+  $Id: schemaAttribute.java,v 1.2 2006/11/28 05:26:30 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -58,7 +58,9 @@ public class schemaAttribute {
         regExp path;        // regular expression for this attribute from the
 			    //   the root
 
-	int type;           // CONTENT_VAR,ELEMENT_VAR,TAG_VAR 
+	int type;           // CONTENT_VAR,ELEMENT_VAR,TAG_VAR
+	
+	String name;
 
 	/**
 	 * Constructor
@@ -66,11 +68,12 @@ public class schemaAttribute {
 	 * @param the position of the SchemaUnit
 	 */
 
-	public schemaAttribute (int num) {
+	public schemaAttribute (int num, String tagName) {
 		attrNumber = num;
 		path = null;
 		type = varType.CONTENT_VAR;
 		streamid = 0;
+		name = tagName;
 	}
 
 	/**
@@ -93,13 +96,14 @@ public class schemaAttribute {
 	 * @param type of the variable which represents this schemaAttribute
 	 */
 
-	public schemaAttribute (int num, int _type) {
+	public schemaAttribute (int num, int _type, String tagName) {
 		attrNumber = num;
 		path = null;
 		type = _type;
 		streamid = 0;
+		name = tagName;
 	}
-
+	
 	/**
 	 * Constructor
 	 *
@@ -108,10 +112,11 @@ public class schemaAttribute {
 	 *        element from the root
 	 */
 
-	public schemaAttribute (int num, regExp re) {
+	public schemaAttribute (int num, regExp re, String tagName) {
 		attrNumber = num;
 		path = re;
 		streamid = 0;
+		name = tagName;
 	}
 
 	/**
@@ -183,6 +188,12 @@ public class schemaAttribute {
 		return type;
 	}
 
+	/**
+	 * @return the name of the variable that represents this schemaAttribute
+	 */
+	public String getName () {
+		return name;
+	}
 	/**
 	 * prints to the standard output
 	 *

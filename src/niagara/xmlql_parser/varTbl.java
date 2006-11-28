@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: varTbl.java,v 1.1 2003/12/24 01:19:54 vpapad Exp $
+  $Id: varTbl.java,v 1.2 2006/11/28 05:26:30 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,7 @@ import java.util.*;
 
 import niagara.logical.NodeDomain;
 import niagara.query_engine.TupleSchema;
+import niagara.utils.DataType;
 
 public class varTbl {
 	private Vector varList;   // of varToAttr
@@ -47,8 +48,8 @@ public class varTbl {
             varList = new Vector();
             for (int i = 0; i < ts.getLength(); i++) {
                 int varType = ((NodeDomain) ts.getVariable(i).getDomain()).getType();
+            	//DataType varType = ts.getVariable(i).getDataType();
                 String varName = ts.getVariableName(i);
-                varList.add(new varToAttr(varName, new schemaAttribute(i, varType)));
             }
         }
         
