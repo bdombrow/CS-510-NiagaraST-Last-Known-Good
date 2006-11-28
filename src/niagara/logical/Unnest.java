@@ -1,4 +1,4 @@
-/* $Id: Unnest.java,v 1.12 2005/10/10 20:32:47 vpapad Exp $ */
+/* $Id: Unnest.java,v 1.13 2006/11/28 05:12:29 jinli Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -13,6 +13,8 @@ import niagara.xmlql_parser.Scanner;
 import niagara.xmlql_parser.regExp;
 import niagara.xmlql_parser.varType;
 import niagara.logical.path.RE;
+import niagara.utils.DataType;
+import niagara.utils.PEException;
 
 public class Unnest extends UnaryOperator {
     /** Variable name of the result */
@@ -174,6 +176,8 @@ public class Unnest extends UnaryOperator {
         String rootAttr = e.getAttribute("root");
         String regexpAttr = e.getAttribute("regexp");
         String outerAttr = e.getAttribute("outer");
+        String dataTypeAttr = e.getAttribute("datatype");
+        
         if (outerAttr.equalsIgnoreCase("yes"))
             outer = OuterBehavior.OUTER;
         else if (outerAttr.equalsIgnoreCase("strict"))
@@ -190,8 +194,24 @@ public class Unnest extends UnaryOperator {
         } else { // (typeAttr.equals("content"))
             type = varType.CONTENT_VAR;
         }
+        
+        DataType dataType;
+        if (dataTypeAttr.equals("String"))
+        	dataType = DataType.String;
+        else if (dataTypeAttr.equals("XML"))
+        	dataType = DataType.XML;
+        else if (dataTypeAttr.equals("Integer"))
+        	dataType = DataType.Integer;
+        else if (dataTypeAttr.equals("TS"))
+        	dataType = DataType.TS;
+        else
+        	throw new PEException ("JL: Unsupported data type");
 
-        variable = new Variable(id, type);
+        //variable = new Variable(id, type);
+        if (dataType == DataType.XML) {
+        	variable = new Variable(id, dataType, type);
+        } else
+        	variable = new Variable(id, dataType);
 
         Scanner scanner;
         try {

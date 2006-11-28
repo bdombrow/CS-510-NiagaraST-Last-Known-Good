@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: LogPlanGenerator.java,v 1.2 2004/02/10 03:20:16 vpapad Exp $
+  $Id: LogPlanGenerator.java,v 1.3 2006/11/28 05:12:30 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -208,7 +208,7 @@ public class LogPlanGenerator {
         			if(type == dataType.VAR) {
         				var = (String)expData.getValue();
         				curregExp = valueOfTagVar(var);
-        				schattr = new schemaAttribute(i+1,varType.TAG_VAR);
+        				schattr = new schemaAttribute(i+1,varType.TAG_VAR, var);
         				varList.addVar(var,schattr);
         			}
         		}
@@ -222,9 +222,9 @@ public class LogPlanGenerator {
         			type = curbd.getType();
         			var = (String)curbd.getValue();
         			if(type == dataType.ELEMENT_AS)
-        				schattr = new schemaAttribute(i+1,varType.ELEMENT_VAR);
+        				schattr = new schemaAttribute(i+1,varType.ELEMENT_VAR, var);
         			else
-        				schattr = new schemaAttribute(i+1);
+        				schattr = new schemaAttribute(i+1, var);
         			varList.addVar(var,schattr);
         		}
         		
@@ -259,8 +259,8 @@ public class LogPlanGenerator {
         				var = getTmpVar();
         				listOfPredicates.addElement(Comparison.newComparison(opType.EQ,new Variable(var),sc));
         			}
-                                schattr = new schemaAttribute(i+1);
-                                varList.addVar(var,schattr);
+                    schattr = new schemaAttribute(i+1, var);
+                    varList.addVar(var,schattr);
         		}
         		
         		tupleDes.addSchemaUnit(new SchemaUnit(curregExp,backPtr));
@@ -272,9 +272,9 @@ public class LogPlanGenerator {
         		scan = new ScanOp();
         		su = tupleDes.getSchemaUnit(i);
         		if(i==1)
-        			scan.setScan(new schemaAttribute(su.getBackPtr(),varType.ELEMENT_VAR),su.getRegExp());
+        			scan.setScan(new schemaAttribute(su.getBackPtr(),varType.ELEMENT_VAR, null),su.getRegExp());
         		else
-        			scan.setScan(new schemaAttribute(su.getBackPtr()),su.getRegExp());
+        			scan.setScan(new schemaAttribute(su.getBackPtr(), null),su.getRegExp());
         		curLogNode = new LogNode(scan,childLogNode);
         		curLogNode.setSchema(tupleDes);
         		curLogNode.setVarTbl(varList);
@@ -700,7 +700,7 @@ public class LogPlanGenerator {
 			if(baseNode instanceof constructLeafNode)
 				new_children.addElement(baseNode);
 			else {
-				newLeafNode = new constructLeafNode(new data(dataType.ATTR,new schemaAttribute(childPtrs[i],varType.ELEMENT_VAR)));
+				newLeafNode = new constructLeafNode(new data(dataType.ATTR,new schemaAttribute(childPtrs[i],varType.ELEMENT_VAR, null)));
 				new_children.addElement(newLeafNode);
 			}
 		}

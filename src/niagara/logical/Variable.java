@@ -1,4 +1,4 @@
-/* $Id: Variable.java,v 1.12 2005/10/10 20:32:47 vpapad Exp $ */
+/* $Id: Variable.java,v 1.13 2006/11/28 05:12:29 jinli Exp $ */
 package niagara.logical;
 
 import niagara.connection_server.InvalidPlanException;
@@ -11,15 +11,18 @@ import niagara.physical.AtomicEvaluator;
 import niagara.physical.SimpleAtomicEvaluator;
 import niagara.xmlql_parser.regExp;
 import niagara.xmlql_parser.varType;
+import niagara.utils.DataType;
 
 public class Variable implements Atom, Attribute {
     private String name;
     private Domain domain;
+    private DataType dataType;
 
     public Variable(String name, Domain domain) {
         // We want unique names for variables
         this.name = name.intern();
         this.domain = domain;
+        this.dataType = DataType.XML;
         if (domain == null)
             this.domain = NodeDomain.getDomain(varType.NULL_VAR);
     }
@@ -30,6 +33,24 @@ public class Variable implements Atom, Attribute {
 
     public Variable(String name, int type) {
         this(name, NodeDomain.getDOMNode(type));
+    }
+    
+    public Variable (String name, DataType dataType) {
+    	this.name = name;
+    	this.dataType = dataType;
+    	this.domain = NodeDomain.getDOMNode();
+    }
+    
+    public Variable (String name, DataType dataType, int type) {
+    	this.name = name;
+    	this.dataType = dataType;
+    	this.domain = NodeDomain.getDOMNode(type);
+    }
+
+    public Variable (String name, DataType dataType, Domain domain) {
+    	this.name = name;
+    	this.dataType = dataType;
+    	this.domain = domain;
     }
 
     public static Attribute findVariable(LogicalProperty lp, String varName)
@@ -97,6 +118,10 @@ public class Variable implements Atom, Attribute {
     public Domain getDomain() {
         return domain;
     }
+    
+    public DataType getDataType() {
+    	return dataType;
+    }
 
     public boolean equals(Object other) {
         if (other == null || !(other instanceof Variable))
@@ -107,16 +132,23 @@ public class Variable implements Atom, Attribute {
     }
 
     public boolean equals(Attribute other) {
-        return name == other.getName()
-            && domain.equals(other.getDomain());
+    	return name.equals(other.getName());
+
+    	/*return name == other.getName() 
+    		&& dataType == other.getDataType();*/ 
+        /*return name == other.getName()
+            && domain.equals(other.getDomain());*/
     }
     
     public Attribute copy() {
-        return new Variable(name, domain);
+    	// return new Variable (name, dataType);
+        //return new Variable(name, domain);
+    	return new Variable(name, dataType, domain);
     }
 
     public int hashCode() {
-        return name.hashCode() ^ domain.hashCode();
+        //return name.hashCode() ^ domain.hashCode();
+    	return name.hashCode() ^ dataType.hashCode();
     }
 
     public boolean matchesName(String name) {
@@ -124,6 +156,8 @@ public class Variable implements Atom, Attribute {
     }
 
     public Attribute copy(String newName) {
-        return new Variable(newName, domain);
+        //return new Variable(newName, domain);
+    	//return new Variable(newName, dataType);
+    	return new Variable(newName, dataType, domain);
     }
 }
