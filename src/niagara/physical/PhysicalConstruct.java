@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstruct.java,v 1.2 2005/10/13 01:32:55 vpapad Exp $
+  $Id: PhysicalConstruct.java,v 1.3 2006/11/28 05:16:11 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -100,7 +100,7 @@ public class PhysicalConstruct extends PhysicalOperator {
 
         // Add all the results in the result list as result tuples
         int numResults = resultList.size();
-	assert numResults == 1 : "HELP numResults is " + numResults;
+        assert numResults == 1 : "HELP numResults is " + numResults;
         for (int res = 0; res < numResults; ++res) {
             // Clone the input tuple 
             Tuple outputTuple;
@@ -185,30 +185,37 @@ public class PhysicalConstruct extends PhysicalOperator {
 		//		The value of the leafData is a schema attribute - from it
 		// get the attribute id in the tuple to construct from
 	    int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
-	    Node n = tupleElement.getAttribute(attributeId);
+	    //Node n = tupleElement.getAttribute(attributeId);
+	    BaseAttr n = (BaseAttr)tupleElement.getAttribute(attributeId);
 	    if(n == null) {
 	    	return;
 	    }
 	    
 	    switch(schema.getType()) {
 	    case varType.ELEMENT_VAR:
-        	localResult.add(n);
+        	//localResult.add(n);
+	    	
+	    	Element elt = localDoc.createElement(schema.getName());
+	    	elt.appendChild(localDoc.createTextNode(n.toASCII()));
+	    	localResult.add(elt);
 		break;
         
         case varType.CONTENT_VAR:
         	// The value of the leafData is a schema attribute - from it
             // get the attribute id in the tuple to construct from
-            
-                // Get the children of the attribute
-                NodeList nodeList =
-                    tupleElement.getAttribute(attributeId).getChildNodes();
+            if (n instanceof XMLAttr) { 
+            	// Get the children of the attribute
+            	NodeList nodeList =
+            		((XMLAttr)n).getNodeValue().getChildNodes();
 
-                // Add all the children to the result
-                int numChildren = nodeList.getLength();
-
-                for (int child = 0; child < numChildren; ++child) {
-                    localResult.add(nodeList.item(child));
-                }
+            	// Add all the children to the result
+            	int numChildren = nodeList.getLength();
+            	for (int child = 0; child < numChildren; ++child) {
+            		localResult.add(nodeList.item(child));
+            	}
+            } else {
+            	localResult.add(localDoc.createTextNode(n.toASCII()));
+            }
 		break;
 	    default:
 		assert false: "Unknown schema attribute type in construct leaf node";
@@ -245,7 +252,8 @@ public class PhysicalConstruct extends PhysicalOperator {
             schemaAttribute sattr = (schemaAttribute) tagData.getValue();
             int attrId = sattr.getAttrId();
             // TODO HERE what to do if we get null attribute??
-            tagName = tupleElement.getAttribute(attrId).getNodeName();
+            //tagName = tupleElement.getAttribute(attrId).getNodeName();
+            tagName = sattr.getName();
         } else
             tagName = (String) tagData.getValue();
 
@@ -300,78 +308,86 @@ public class PhysicalConstruct extends PhysicalOperator {
             attr attribute = (attr) attrs.get(i);
             String name = attribute.getName();
             data attrData = attribute.getValue();
-	    int attributeId;
+		    int attributeId;
+	
+		    switch(attrData.getType()) {
+		    case dataType.STRING:
+	                // Add the string value to the result
+	                resultElement.setAttribute(name, (String) attrData.getValue());
+			break;
+	
+		    case dataType.ATTR:
+	                // First get the schema attribute
+	                schemaAttribute schema = (schemaAttribute) attrData.getValue();
+			assert schema != null : "Schema null for attribute " + name;
+	
+	                // Now construct result based on whether it is to be 
+			// interpreted as an element or a parent
+	                switch(schema.getType()) {
+			case varType.ELEMENT_VAR:
+	            // The value of the leafData is a schema attribute
+			    // - from it get the attribute id in the tuple 
+			    // to construct from
+				
+			    attributeId =
+	                        ((schemaAttribute) attrData.getValue()).getAttrId();
+	
+	                    // Add the attribute as the result
+	                    // This better BE an attribute!
+	                 
+			    assert tupleElement.getAttribute(attributeId) instanceof XMLAttr:
+			    	"??? - Jenny";
+			    //Node na = tupleElement.getAttribute(attributeId);
+			    Node na = ((XMLAttr)tupleElement.getAttribute(attributeId)).getNodeValue();
+			    if(na == null)
+			    	break;
+			    if(!(na instanceof Attr)) {
+				throw new ShutdownException("Can not use element type variable to create attribute");
+			    }
+	            Attr a = (Attr) na;
+	            resultElement.setAttribute(name, a.getValue());
+			    break;
+	
+			case varType.CONTENT_VAR:
+			    attributeId =
+	                        ((schemaAttribute) attrData.getValue()).getAttrId();
 
-	    switch(attrData.getType()) {
-	    case dataType.STRING:
-                // Add the string value to the result
-                resultElement.setAttribute(name, (String) attrData.getValue());
-		break;
-
-	    case dataType.ATTR:
-                // First get the schema attribute
-                schemaAttribute schema = (schemaAttribute) attrData.getValue();
-		assert schema != null : "Schema null for attribute " + name;
-
-                // Now construct result based on whether it is to be 
-		// interpreted as an element or a parent
-                switch(schema.getType()) {
-		case varType.ELEMENT_VAR:
-                    // The value of the leafData is a schema attribute
-		    // - from it get the attribute id in the tuple 
-		    // to construct from
-		    attributeId =
-                        ((schemaAttribute) attrData.getValue()).getAttrId();
-
-                    // Add the attribute as the result
-                    // This better BE an attribute!
-                 
-		    Node na = tupleElement.getAttribute(attributeId);
-		    if(na == null)
-		    	break;
-		    if(!(na instanceof Attr)) {
-			throw new ShutdownException("Can not use element type variable to create attribute");
-		    }
-                    Attr a = (Attr) na;
-                    resultElement.setAttribute(name, a.getValue());
-		    break;
-
-		case varType.CONTENT_VAR:
-		    attributeId =
-                        ((schemaAttribute) attrData.getValue()).getAttrId();
-			
-		    Node attr = tupleElement.getAttribute(attributeId);
-		    if(attr == null)
-		    	break;
-		    if(attr instanceof Element) {
-			Element elt = (Element)attr;
-			
-			// Concatenate the node values of 
-			// the element's children
-			StringBuffer attrValue = new StringBuffer("");
-			Node n = elt.getFirstChild();
-			while (n != null) {
-			    attrValue.append(n.getNodeValue());
-			    n = n.getNextSibling();
+			    assert tupleElement.getAttribute(attributeId) instanceof XMLAttr:
+			    	"??? - Jenny";
+				
+			    //Node attr = tupleElement.getAttribute(attributeId);
+			    Node attr = ((XMLAttr)tupleElement.getAttribute(attributeId)).getNodeValue();
+			    if(attr == null)
+			    	break;
+			    if(attr instanceof Element) {
+				Element elt = (Element)attr;
+				
+				// Concatenate the node values of 
+				// the element's children
+				StringBuffer attrValue = new StringBuffer("");
+				Node n = elt.getFirstChild();
+				while (n != null) {
+				    attrValue.append(n.getNodeValue());
+				    n = n.getNextSibling();
+				}
+				resultElement.setAttribute(name, attrValue.toString());
+			    } else if (attr instanceof Attr) {
+				// KT used to require that this be an element,
+				// but I think attribute is valid also
+				resultElement.setAttribute(name, 
+							   ((Attr)attr).getValue());
+			    } else {
+				assert false : "KT: what did I get here??";
+			    }
+			    break;
+	
+			default:
+			    assert false: "Unknown var type in attribute constructor";
 			}
-			resultElement.setAttribute(name, attrValue.toString());
-		    } else if (attr instanceof Attr) {
-			// KT used to require that this be an element,
-			// but I think attribute is valid also
-			resultElement.setAttribute(name, 
-						   ((Attr)attr).getValue());
-		    } else {
-			assert false : "KT: what did I get here??";
-		    }
-		    break;
-
-		default:
-		    assert false: "Unknown var type in attribute constructor";
-		}
-		break;
-
-	    default:
-		assert false: "Unknown data type";
+			break;
+	
+		    default:
+			assert false: "Unknown data type";
             }
         }
     }

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalPunctuate.java,v 1.1 2003/12/24 01:49:00 vpapad Exp $
+  $Id: PhysicalPunctuate.java,v 1.2 2006/11/28 05:16:09 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -282,7 +282,14 @@ public class PhysicalPunctuate extends PhysicalOperator {
 	Punctuation spe =
 	    new Punctuation(false);
 	for (int iAttr=0; iAttr<tupleDataSample.size() - 1; iAttr++) { //"-1" is used to exclude the "TIMESTAMP" field
-	    Node ndSample = tupleDataSample.getAttribute(iAttr);
+		if (iAttr != iAttrTimer)
+			spe.appendAttribute(new StringAttr("*"));
+		else
+			spe.appendAttribute(new StringAttr("(," + values.get(0) + ")"));			
+	}
+
+	/*for (int iAttr=0; iAttr<tupleDataSample.size() - 1; iAttr++) { //"-1" is used to exclude the "TIMESTAMP" field
+		Node ndSample = tupleDataSample.getAttribute(iAttr);
 	    nodeType = ndSample.getNodeType();
 	    if (nodeType == Node.ATTRIBUTE_NODE) {
 	    	Attr attr = doc.createAttribute(ndSample.getNodeName());
@@ -299,16 +306,7 @@ public class PhysicalPunctuate extends PhysicalOperator {
 				ePunct.appendChild(doc.createTextNode("(," + values.get(0) + ")"));
 			spe.appendAttribute(ePunct);	    	
 	    }
-/*	    String stName = ndSample.getNodeName();
-	    if (stName.compareTo("#document") == 0)
-		stName = new String("document");
-	    Element ePunct = doc.createElement(stName);
-	    if (iAttr != iAttrTimer)
-	    	ePunct.appendChild(doc.createTextNode("*"));
-            else
-	        ePunct.appendChild(doc.createTextNode("(," + values.get(0) + ")"));
-	    spe.appendAttribute(ePunct);*/
-	}
+	}*/
 	appendTimestamp(spe, (iAttrTimer != -1));
 
 	return spe;

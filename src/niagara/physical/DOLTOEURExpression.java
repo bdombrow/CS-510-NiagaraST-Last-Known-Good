@@ -1,4 +1,4 @@
-/* $Id: DOLTOEURExpression.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $ */
+/* $Id: DOLTOEURExpression.java,v 1.2 2006/11/28 05:16:10 jinli Exp $ */
 package niagara.physical;
 
 import niagara.utils.*;
@@ -18,12 +18,14 @@ public class DOLTOEURExpression implements ExpressionIF {
 	private Document doc = DOMFactory.newDocument();
 
     public Node processTuple(Tuple ste) {
-        Node priceNode = ste.getAttribute(pricePos);
+        //Node priceNode = ste.getAttribute(pricePos);
+    	BaseAttr priceNode = (BaseAttr)ste.getAttribute(pricePos);
         if(priceNode == null)
         	return null;
 		float priceNum;
         try {
-            priceNum = Float.parseFloat(priceNode.getFirstChild().getNodeValue());
+            //priceNum = Float.parseFloat(priceNode.getFirstChild().getNodeValue());
+        	priceNum = Float.parseFloat(priceNode.toASCII());
         } catch (NumberFormatException nfe) {
 	    priceNum = 0;
         }

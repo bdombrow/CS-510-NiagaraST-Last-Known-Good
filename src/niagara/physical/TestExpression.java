@@ -1,4 +1,4 @@
-/* $Id: TestExpression.java,v 1.1 2003/12/24 01:49:00 vpapad Exp $ */
+/* $Id: TestExpression.java,v 1.2 2006/11/28 05:16:09 jinli Exp $ */
 package niagara.physical;
 
 import niagara.utils.*;
@@ -12,7 +12,7 @@ import org.w3c.dom.*;
 public class TestExpression implements ExpressionIF {
     private int aPos;
     private int bPos;
-    public Node processTuple(Tuple ste) {
+    /*public Node processTuple(Tuple ste) {
         Document doc = DOMFactory.newDocument();
         Node aNode = ste.getAttribute(aPos);
         Node bNode = ste.getAttribute(bPos);
@@ -28,7 +28,25 @@ public class TestExpression implements ExpressionIF {
 	Element res = doc.createElement("AminusB");
 	res.appendChild(doc.createTextNode(String.valueOf(aNum - bNum)));
 	return res;
+    }*/
+    public Node processTuple(Tuple ste) {
+        Document doc = DOMFactory.newDocument();
+        BaseAttr aNode = (BaseAttr)ste.getAttribute(aPos);
+        BaseAttr bNode = (BaseAttr)ste.getAttribute(bPos);
+        if(aNode == null || bNode == null)
+        	return null;
+        int aNum, bNum;
+        try {
+            aNum = Integer.parseInt(aNode.toASCII());
+            bNum = Integer.parseInt(bNode.toASCII());
+        } catch (NumberFormatException nfe) {
+            aNum = bNum = 0;
+        }
+	Element res = doc.createElement("AminusB");
+	res.appendChild(doc.createTextNode(String.valueOf(aNum - bNum)));
+	return res;
     }
+
     public void setupSchema(TupleSchema ts) {
         aPos = ts.getPosition("a");
         bPos = ts.getPosition("b");

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalScan.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $
+  $Id: PhysicalScan.java,v 1.2 2006/11/28 05:16:10 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -93,7 +93,9 @@ public class PhysicalScan extends UnoptimizablePhysicalOperator {
 	throws ShutdownException, InterruptedException {
 
 	// Get the attribute to scan on
-	Node attribute = inputTuple.getAttribute(scanField);
+    assert inputTuple.getAttribute(scanField) instanceof XMLAttr:
+    	"What?! It's not an XMLAttr? - Jenny";
+	Node attribute = ((XMLAttr)inputTuple.getAttribute(scanField)).getNodeValue();
 	
 	// Get the nodes reachable using the path expression scanned
 	pev.getMatches(attribute, elementList);	
@@ -132,7 +134,7 @@ public class PhysicalScan extends UnoptimizablePhysicalOperator {
 
 	try {
 	    // Get the attribute to scan on
-	    Node attribute = inputTuple.getAttribute(scanField);
+	    Node attribute = ((XMLAttr)inputTuple.getAttribute(scanField)).getNodeValue();
 	
 	    // Get the nodes reachable using the path expression scanned
 	    pev.getMatches(attribute, elementList);	

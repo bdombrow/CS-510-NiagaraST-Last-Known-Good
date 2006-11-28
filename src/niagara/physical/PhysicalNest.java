@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalNest.java,v 1.1 2003/12/24 01:49:01 vpapad Exp $
+  $Id: PhysicalNest.java,v 1.2 2006/11/28 05:16:10 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -127,7 +127,7 @@ public class PhysicalNest extends PhysicalGroup {
      * @return The constructed object; If no object is constructed, returns
      *         null
      */
-    protected final Object constructUngroupedResult (Tuple 
+    protected final BaseAttr constructUngroupedResult (Tuple 
 						     tupleElement) 
     throws ShutdownException {	
 
@@ -142,7 +142,7 @@ public class PhysicalNest extends PhysicalGroup {
 		if(resultList.size() == 0)  // this means we got a null
 			return null;
 	assert resultList.size() == 1;
-	return resultList.get(0);
+	return new XMLAttr(resultList.get(0));
     }
 
 
@@ -158,7 +158,7 @@ public class PhysicalNest extends PhysicalGroup {
      */
 
     protected final Object mergeResults (Object groupedResult,
-					 Object ungroupedResult) {
+					 BaseAttr ungroupedResult) {
 	// Set up the final result - if the groupedResult is null, then
 	// create holder for final result, else just use groupedResult
 	// ungrouped nodes was a node list, now it is the whole node
@@ -168,17 +168,22 @@ public class PhysicalNest extends PhysicalGroup {
 	// if grouped result is null, we first add stripped down root element
 
 	NodeVector resultVec;
+	
+	assert ungroupedResult instanceof XMLAttr:
+		"How to nest non-XML data? - Jenny";
 
 	if (groupedResult == null) {
 	    resultVec = new NodeVector();
 	    // add root element to the result
 	    // KT don't think we need this clone...
-	    resultVec.add((Node)ungroupedResult);
+	    //resultVec.add((Node)ungroupedResult);
+	    resultVec.add(((XMLAttr)ungroupedResult).getNodeValue());
 	} else {
 	    resultVec = (NodeVector) groupedResult;
 
 		// The ungrouped result is a node list
-		NodeList ungroupedNodes = ((Node)ungroupedResult).getChildNodes();
+		//NodeList ungroupedNodes = ((Node)ungroupedResult).getChildNodes();
+	    NodeList ungroupedNodes = (((XMLAttr)ungroupedResult).getNodeValue().getChildNodes());
 
 		// Add all items in ungrouped result
 		int numNodes = ungroupedNodes.getLength();
@@ -226,7 +231,7 @@ public class PhysicalNest extends PhysicalGroup {
      *         returns null
      */
 
-    protected final Node constructResult (Object partialResult,
+    protected final BaseAttr constructResult (Object partialResult,
 					  Object finalResult) {
 	// first element in finalResult and partial result 
 	// should be the same
@@ -250,7 +255,7 @@ public class PhysicalNest extends PhysicalGroup {
 	    // Add nodes in vector to result
 	    addNodesToResult(resultElement, (NodeVector) finalResult);
 	}
-	return resultElement;
+	return new XMLAttr(resultElement);
     }
 
 
