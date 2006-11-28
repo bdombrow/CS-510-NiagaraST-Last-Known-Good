@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.20 2005/07/13 20:31:48 acd Exp $
+  $Id: QueryResult.java,v 1.21 2006/11/28 05:20:44 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -249,6 +249,55 @@ public class QueryResult {
 
             int tupleSize = tupleElement.size(); 
 
+			if(tupleSize == 1) {
+				if (tupleElement.getAttribute(0) instanceof Node) {
+					if (((Node)tupleElement.getAttribute(0)).getNodeType() ==
+					    Node.DOCUMENT_NODE) 
+					    return (Document)tupleElement.getAttribute(0);
+				} else if (tupleElement.getAttribute(0) instanceof BaseAttr) {
+					return tupleAttrToDoc((BaseAttr)tupleElement.getAttribute(0));
+				} else 
+					throw new PEException ("JL: Unsupported tuple attribute type");
+						
+			} else {
+				int startIdx = 0;
+				if (tupleElement.getAttribute(0) instanceof Node)
+					if (((Node)tupleElement.getAttribute(0)).getNodeType() ==
+					           Node.DOCUMENT_NODE) 
+						startIdx = 1;
+					
+                Document resultDoc = DOMFactory.newDocument();
+                Element root = resultDoc.createElement("niagara:tuple");
+                resultDoc.appendChild(root);
+                for (int i = startIdx; i < tupleSize; i++) {
+                    Object tupAttr = tupleElement.getAttribute(i);
+                    if (tupAttr instanceof Node) {
+                    	Element elt = tupleAttrToElt((Node)tupAttr, resultDoc);
+                    	root.appendChild(elt);
+                    } else if (tupAttr instanceof BaseAttr) {
+                    	Element elt = tupleAttrToElt((BaseAttr)tupAttr, resultDoc);
+                    	root.appendChild(elt);
+                    } else 
+                    	throw new PEException ("JL: Unsupported tuple attribute type");
+                }
+                return resultDoc;
+			}
+        }
+
+        Object lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
+        if (lastAttribute instanceof Node)
+        	return tupleAttrToDoc((Node)lastAttribute);
+        else
+        	return tupleAttrToDoc((BaseAttr)lastAttribute);
+    }
+
+    /*private Document extractXMLDocument(Tuple tupleElement) {
+        // First get the last attribute of the tuple
+
+        if (ResultTransmitter.OUTPUT_FULL_TUPLE) {
+
+            int tupleSize = tupleElement.size(); 
+
 			if(tupleSize == 1 && 
 				       tupleElement.getAttribute(0).getNodeType() ==
 					           Node.DOCUMENT_NODE) {
@@ -273,7 +322,7 @@ public class QueryResult {
 
         Node lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
         return tupleAttrToDoc(lastAttribute);
-    }
+    }*/
 
     private Document tupleAttrToDoc(Node tupAttr) {
 
@@ -285,6 +334,13 @@ public class QueryResult {
             resultDoc.appendChild(elt);
             return resultDoc;
         }
+    }
+    
+    private Document tupleAttrToDoc(BaseAttr tupAttr) {
+        Document resultDoc = DOMFactory.newDocument();
+        Element elt = tupleAttrToElt(tupAttr, resultDoc);
+        resultDoc.appendChild(elt);
+        return resultDoc;    	
     }
 
     private Element tupleAttrToElt(Node tupAttr, Document resultDoc) {
@@ -309,6 +365,13 @@ public class QueryResult {
                 + tupAttr.getClass().getName();
             return null;
         }
+    }
+    
+    private Element tupleAttrToElt(BaseAttr tupAttr, Document resultDoc) {
+    	Element elt = resultDoc.createElement("BaseAttr");
+    	Text txt = resultDoc.createTextNode(tupAttr.toASCII());
+    	elt.appendChild(txt);
+    	return elt;
     }
 
     public String toString() {
