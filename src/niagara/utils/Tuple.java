@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Tuple.java,v 1.2 2006/10/24 22:09:39 jinli Exp $
+  $Id: Tuple.java,v 1.3 2006/11/28 05:23:34 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -237,7 +237,9 @@ public class Tuple {
 
         for (int i = 0; i < tupleSize; i++) {
             Element tele = doc.createElement("Entry");
-            Node tmp = tuple[i];
+            assert tuple[i] instanceof XMLAttr:
+            	"Don't know how to deal with a non-XML attribute - Jenny";
+            Node tmp = ((XMLAttr) tuple[i]).getNodeValue();
             assert tmp instanceof Element
                 || tmp instanceof Text : "KT non elem/string attr in TupleElement";
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Punctuation.java,v 1.2 2006/10/24 22:09:38 jinli Exp $
+  $Id: Punctuation.java,v 1.3 2006/11/28 05:23:35 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -42,7 +42,6 @@ import org.w3c.dom.*;
 import java.util.StringTokenizer;
 
 public final class Punctuation extends Tuple {
-    public static final String STPUNCTNS = "PUNCT";
 
     public Punctuation (boolean partial) {
 		super(partial);
@@ -133,15 +132,8 @@ public final class Punctuation extends Tuple {
     }
 
     public boolean match(Tuple ste) {
-	//Punctuations do not match each other
-	if (ste.isPunctuation())
-	    return false;
-
-	//This punctuation should be verified against the first
-	// node in the tuple (the "document" node)
-	return matchNode(this.getAttribute(0), ste.getAttribute(0));
-	
-	
+    	assert false : "Unsupported function! - Jenny";
+    	return false;
     }
 
     private boolean matchNode(Node ndPunct, Node ndTuple) {
