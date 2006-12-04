@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.43 2005/12/04 06:37:33 tufte Exp $
+<!-- $Id: queryplan.dtd,v 1.44 2006/12/04 21:56:18 tufte Exp $
      DTD for query plans -->
 
 <!-- 
@@ -18,7 +18,7 @@
 		    bucket | partitionavg | partitionmax |
 		    accumulate | nest | magic_construct | 
 		    windowCount | windowMax | windowAverage  | windowJoin |
-		    store | load | xmlscan)+>
+		    store | load | xmlscan | dbscan)+>
 		    
 <!ATTLIST plan top IDREF        #REQUIRED
           %PositionAttributes;>
@@ -46,6 +46,7 @@
 <!ATTLIST unnest 
 
 	  type	   (tag|element|content) "element"
+	  datatype	(String|XML|Integer|TS) "XML"
 	  root	   CDATA                 ""
 	  regexp   CDATA               #REQUIRED
 	  outer    (yes|no|strict)     "no"
@@ -427,6 +428,13 @@
      format, no otherwise. If isStream is no, then file must
      contain only one document -->
 
+<!ELEMENT dbscan  EMPTY>
+<!ATTLIST dbscan 
+          id       ID           #REQUIRED
+					attr_types   CDATA		#REQUIRED
+					attr_names   CDATA    #REQUIRED
+          query_string CDATA    #REQUIRED
+	  %PositionAttributes;>
 
 <!ELEMENT url        EMPTY >
 <!ATTLIST url
