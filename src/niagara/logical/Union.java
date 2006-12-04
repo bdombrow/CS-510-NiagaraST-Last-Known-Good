@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Union.java,v 1.1 2003/12/24 02:08:29 vpapad Exp $
+  $Id: Union.java,v 1.2 2006/12/04 21:21:05 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -225,14 +225,4 @@ public class Union extends LogicalOperator {
 	}
     }
 
-    private String[] parseInputAttrs(String inputAttrString) {
-	StringTokenizer tokenizer = new StringTokenizer(inputAttrString, ", ");
-	String[] parsedAttrs = new String[tokenizer.countTokens()];
-	int i = 0;
-	while(tokenizer.hasMoreTokens()) {
-	    parsedAttrs[i] = tokenizer.nextToken();
-	    i++;
-	}
-	return parsedAttrs;
-    }
 }

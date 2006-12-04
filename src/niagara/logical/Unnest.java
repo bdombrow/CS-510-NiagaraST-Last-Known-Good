@@ -1,8 +1,7 @@
-/* $Id: Unnest.java,v 1.13 2006/11/28 05:12:29 jinli Exp $ */
+/* $Id: Unnest.java,v 1.14 2006/12/04 21:21:04 tufte Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
-
 import java.io.StringReader;
 
 import niagara.connection_server.Catalog;
@@ -14,6 +13,7 @@ import niagara.xmlql_parser.regExp;
 import niagara.xmlql_parser.varType;
 import niagara.logical.path.RE;
 import niagara.utils.DataType;
+import niagara.utils.BaseAttr;
 import niagara.utils.PEException;
 
 public class Unnest extends UnaryOperator {
@@ -195,17 +195,7 @@ public class Unnest extends UnaryOperator {
             type = varType.CONTENT_VAR;
         }
         
-        DataType dataType;
-        if (dataTypeAttr.equals("String"))
-        	dataType = DataType.String;
-        else if (dataTypeAttr.equals("XML"))
-        	dataType = DataType.XML;
-        else if (dataTypeAttr.equals("Integer"))
-        	dataType = DataType.Integer;
-        else if (dataTypeAttr.equals("TS"))
-        	dataType = DataType.TS;
-        else
-        	throw new PEException ("JL: Unsupported data type");
+        DataType dataType = BaseAttr.getDataTypeFromString(dataTypeAttr);
 
         //variable = new Variable(id, type);
         if (dataType == DataType.XML) {
