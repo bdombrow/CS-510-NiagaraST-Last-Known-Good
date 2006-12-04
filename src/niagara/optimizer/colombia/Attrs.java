@@ -1,4 +1,4 @@
-/* $Id: Attrs.java,v 1.10 2003/09/16 04:45:29 vpapad Exp $    
+/* $Id: Attrs.java,v 1.11 2006/12/04 21:49:15 tufte Exp $    
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -54,7 +54,9 @@ public class Attrs {
         al.add(attr);
     }
 
-    Attrs(Attribute[] array, int size) {
+    public Attrs(Attribute[] array, int size) {
+    	if(al == null)
+    		al = new ArrayList(size);
         al.ensureCapacity(size);
         for (int i = 0; i < size; i++)
             al.add(array[i]);
