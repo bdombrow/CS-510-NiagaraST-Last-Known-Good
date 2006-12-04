@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Punctuation.java,v 1.3 2006/11/28 05:23:35 jinli Exp $
+  $Id: Punctuation.java,v 1.4 2006/12/04 21:50:22 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -136,7 +136,12 @@ public final class Punctuation extends Tuple {
     	return false;
     }
 
-    private boolean matchNode(Node ndPunct, Node ndTuple) {
+    private boolean matchNode(Object ndPunctO, Object ndTupleO) {
+    	if(!(ndPunctO instanceof Node) || !(ndTupleO instanceof Node)) {
+    		throw new PEException("KT This code does not support object attrs");
+    	}
+    	Node ndPunct = (Node) ndPunctO;
+    	Node ndTuple = (Node) ndTupleO;
 	String stPunct = ndPunct.getNodeValue();
 	boolean fMatch = true;
 

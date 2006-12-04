@@ -3,6 +3,8 @@ package niagara.utils;
 import org.w3c.dom.Node;
 
 public class IntegerAttr extends BaseAttr implements Arithmetics{
+	 
+	public static String name = "integer";
 	
 	public IntegerAttr () {};
 	
@@ -40,6 +42,10 @@ public class IntegerAttr extends BaseAttr implements Arithmetics{
 			attrVal = Integer.valueOf((String)value);
 		else 
 			throw new PEException("JL: Unsupported Attribute Data Type");
+	}
+	
+	public void loadFromValue(int value) {
+		attrVal = new Integer(value);
 	}
 	
 	public String toASCII() {

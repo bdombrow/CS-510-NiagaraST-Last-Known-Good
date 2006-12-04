@@ -15,5 +15,24 @@ public abstract class BaseAttr {
 	public abstract BaseAttr copy();
 	public abstract boolean gt(BaseAttr other);
 	public abstract boolean lt(BaseAttr other);
+
+	public static DataType getDataTypeFromString(String typeName) {
+		DataType dataType;
+        if (typeName.equalsIgnoreCase("string"))
+        	dataType = DataType.String;
+        else if (typeName.equalsIgnoreCase("xml"))
+        	dataType = DataType.XML;
+        else if (typeName.equalsIgnoreCase("integer") ||
+        		 typeName.equalsIgnoreCase("int"))
+        	dataType = DataType.Integer;
+        else if (typeName.equalsIgnoreCase("timestamp") ||
+        		 typeName.equalsIgnoreCase("ts"))
+        	dataType = DataType.TS;
+        else
+        	throw new PEException ("JL: Unsupported data type: " + typeName + " :");
+        return dataType;
+
+	}
 	
+	public static enum Type {Int, String, XML, Timestamp};
 }
