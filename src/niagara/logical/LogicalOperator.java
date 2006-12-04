@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: LogicalOperator.java,v 1.1 2003/12/24 02:08:30 vpapad Exp $
+  $Id: LogicalOperator.java,v 1.2 2006/12/04 21:17:02 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,6 +31,8 @@
  */
 
 package niagara.logical;
+
+import java.util.StringTokenizer;
 
 import org.w3c.dom.Element;
 
@@ -176,4 +178,15 @@ public abstract class LogicalOperator extends LogicalOp implements SerializableT
     public void projectedOutputAttributes(Attrs outputAttrs) {
         // Default: do nothing   
     }
+    
+    protected String[] parseInputAttrs(String inputAttrString) {
+    	StringTokenizer tokenizer = new StringTokenizer(inputAttrString, ", ");
+    	String[] parsedAttrs = new String[tokenizer.countTokens()];
+    	int i = 0;
+    	while(tokenizer.hasMoreTokens()) {
+    	    parsedAttrs[i] = tokenizer.nextToken();
+    	    i++;
+    	}
+    	return parsedAttrs;
+   }
 }
