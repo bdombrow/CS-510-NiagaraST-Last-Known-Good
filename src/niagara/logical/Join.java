@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Join.java,v 1.1 2003/12/24 02:08:27 vpapad Exp $
+  $Id: Join.java,v 1.2 2006/12/06 23:58:50 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,16 +55,16 @@ public class Join extends BinaryOperator {
     public static final int RIGHT = 2;
     public static final int BOTH = 3;
 
-    private Predicate pred; // non-equijoin part of the predicate
+    protected Predicate pred; // non-equijoin part of the predicate
 
     // for equi-join represents the attributes of the left relation
     // that will join with those of the right relation
-    private EquiJoinPredicateList equiJoinPredicates;
+    protected EquiJoinPredicateList equiJoinPredicates;
 
     /** The attributes we're projecting on (null means keep all attributes) */
-    private Attrs projectedAttrs;
+    protected Attrs projectedAttrs;
 
-    private int extensionJoin;
+    protected int extensionJoin;
 
     public Join() {
 	extensionJoin = NONE; // default
