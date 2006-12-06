@@ -10,9 +10,10 @@ package niagara.logical;
 
 import niagara.query_engine.TupleSchema;
 import niagara.utils.Tuple;
+import niagara.utils.BaseAttr;
 import org.w3c.dom.*;
 
 public interface ExpressionIF {
-    Node processTuple(Tuple ste);
+    BaseAttr processTuple(Tuple ste);
     void setupSchema(TupleSchema ts);
 }
