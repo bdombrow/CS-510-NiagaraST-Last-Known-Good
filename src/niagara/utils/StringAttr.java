@@ -47,14 +47,10 @@ public class StringAttr extends BaseAttr {
 	}
 	
 	public boolean eq(BaseAttr other) {
-		if (other instanceof StringAttr)
-			if (attrVal == other.attrVal)
-				return true;
-			else
-				return false;
-		else 
+		if (!(other instanceof StringAttr))
 			return false;
-			
+		
+		return attrVal.equals(other.attrVal);
 	}
 	
 	public boolean gt(BaseAttr other) {

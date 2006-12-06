@@ -41,11 +41,10 @@ public class XMLAttr extends BaseAttr {
 	}
 	
 	public boolean eq(BaseAttr other) {
-		if (other instanceof XMLAttr)
-			return nodeEquals((Node)attrVal, (Node)other.attrVal);
-		else 
+		if (!(other instanceof XMLAttr))
 			return false;
-			
+		
+		return nodeEquals((Node)attrVal, (Node)other.attrVal);
 	}
 	
     private boolean nodeEquals(Node nd1, Node nd2) {

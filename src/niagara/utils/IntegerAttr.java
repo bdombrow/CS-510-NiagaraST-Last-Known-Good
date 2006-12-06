@@ -53,14 +53,10 @@ public class IntegerAttr extends BaseAttr implements Arithmetics{
 	}
 	
 	public boolean eq(BaseAttr other) {
-		if (other instanceof IntegerAttr)
-			if (attrVal == other.attrVal)
-				return true;
-			else
-				return false;
-		else 
+		if (!(other instanceof IntegerAttr))
 			return false;
-			
+		
+		return attrVal.equals(other.attrVal);
 	}
 	
 	public boolean gt(BaseAttr other) {
