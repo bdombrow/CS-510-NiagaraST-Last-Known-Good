@@ -1,4 +1,4 @@
-/* $Id: PhysicalJoin.java,v 1.1 2003/12/24 01:49:01 vpapad Exp $ */
+/* $Id: PhysicalJoin.java,v 1.2 2006/12/07 00:06:32 jinli Exp $ */
 package niagara.physical;
 
 import niagara.logical.Join;
@@ -12,10 +12,10 @@ import niagara.utils.PEException;
 /** Common functionality for join implementations */
 abstract public class PhysicalJoin extends PhysicalOperator {
     /** Are we projecting attributes away? */
-    private boolean projecting;
+    protected boolean projecting;
     /** Maps shared attribute positions between incoming and outgoing tuples */
-    private int[] leftAttributeMap;
-    private int[] rightAttributeMap;
+    protected int[] leftAttributeMap;
+    protected int[] rightAttributeMap;
 
     /** All predicates */
     protected Predicate joinPredicate;
