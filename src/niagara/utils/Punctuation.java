@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: Punctuation.java,v 1.4 2006/12/04 21:50:22 tufte Exp $
+  $Id: Punctuation.java,v 1.5 2006/12/07 00:42:36 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -242,6 +242,43 @@ public final class Punctuation extends Tuple {
 
 	return fMatch;
     }
+    
+    /** Copy of this punctuation, with space reserved for up to `size` attributes */
+    public Punctuation copy(int size) {
+        // XML-QL query plans will come in with size = 0
+        if (tupleSize > size)
+            size = tupleSize;
+        // Create a new stream tuple element with the same partial semantics
+        Punctuation returnElement =
+            new Punctuation(partial, size);
+    
+        // Add all the attributes of the current tuple to the clone
+        System.arraycopy(tuple, 0, returnElement.tuple, 0, tupleSize);
+        returnElement.tupleSize = tupleSize;
+
+        // Return the clone 
+        return returnElement;
+    }
+
+    /** Copy parts of this punctuation to a new tuple, with space reserved for up to
+     * <code>size</code> attributes */
+    public Punctuation copy(int size, int attributeMap[]) {
+        assert size >= attributeMap.length : "Insufficient tuple capacity";
+        // Create a new stream tuple element with the same partial semantics
+        Punctuation returnElement =
+            new Punctuation (partial, size);
+
+        Object[] newTuple = returnElement.tuple;
+        for (int to = 0; to < attributeMap.length; to++) {
+            int from = attributeMap[to];
+            if (from >= 0)
+                newTuple[to] = tuple[from];
+        }
+        returnElement.tupleSize = attributeMap.length;
+
+        return returnElement;
+    }
+
 }
 
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DuplicateHashtable.java,v 1.3 2002/09/24 23:19:37 ptucker Exp $
+  $Id: DuplicateHashtable.java,v 1.4 2006/12/07 00:42:35 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -31,6 +31,7 @@ package niagara.utils;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.Enumeration;
+import java.util.Set;
 
 /**
  * This class provides a hash table implementation in which many objects can be
@@ -325,6 +326,9 @@ public class DuplicateHashtable {
 	return hashtable.keys();
     }
 
+    public Set keySet() {
+    	return hashtable.keySet();
+    }
 
     /**
      * Clears this hash table so that it contains no keys
