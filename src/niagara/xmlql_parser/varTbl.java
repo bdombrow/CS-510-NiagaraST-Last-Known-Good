@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: varTbl.java,v 1.2 2006/11/28 05:26:30 jinli Exp $
+  $Id: varTbl.java,v 1.3 2006/12/07 00:50:22 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -50,6 +50,7 @@ public class varTbl {
                 int varType = ((NodeDomain) ts.getVariable(i).getDomain()).getType();
             	//DataType varType = ts.getVariable(i).getDataType();
                 String varName = ts.getVariableName(i);
+                varList.add(new varToAttr(varName, new schemaAttribute(i, varType, varName)));
             }
         }
         
