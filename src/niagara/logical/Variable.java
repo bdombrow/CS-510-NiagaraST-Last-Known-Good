@@ -1,4 +1,4 @@
-/* $Id: Variable.java,v 1.13 2006/11/28 05:12:29 jinli Exp $ */
+/* $Id: Variable.java,v 1.14 2006/12/07 00:03:31 jinli Exp $ */
 package niagara.logical;
 
 import niagara.connection_server.InvalidPlanException;
@@ -51,6 +51,9 @@ public class Variable implements Atom, Attribute {
     	this.name = name;
     	this.dataType = dataType;
     	this.domain = domain;
+        if (domain == null)
+            this.domain = NodeDomain.getDomain(varType.NULL_VAR);
+
     }
 
     public static Attribute findVariable(LogicalProperty lp, String varName)
@@ -132,10 +135,14 @@ public class Variable implements Atom, Attribute {
     }
 
     public boolean equals(Attribute other) {
+    	//return name.equals(other.getName());
+    	
+    	if (dataType == DataType.XML)
+    		if (!domain.equals(other.getDomain()))
+    			return false;
     	return name.equals(other.getName());
+    	//return name.equals(other.getName()) && dataType == other.getDataType();
 
-    	/*return name == other.getName() 
-    		&& dataType == other.getDataType();*/ 
         /*return name == other.getName()
             && domain.equals(other.getDomain());*/
     }
