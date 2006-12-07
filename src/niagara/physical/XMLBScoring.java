@@ -1,4 +1,4 @@
-/* $Id: XMLBScoring.java,v 1.1 2003/12/24 01:49:02 vpapad Exp $ */
+/* $Id: XMLBScoring.java,v 1.2 2006/12/07 00:08:25 jinli Exp $ */
 package niagara.physical;
 
 import niagara.utils.*;
@@ -46,7 +46,7 @@ public class XMLBScoring implements ExpressionIF {
 	    }
     }
 
-    public Node processTuple(Tuple ste) {
+    public BaseAttr processTuple(Tuple ste) {
 	// This is a complete and utter hack
 	int final_score = getInt(ste, runscored)
 	    + getInt(ste, bases)
@@ -54,8 +54,9 @@ public class XMLBScoring implements ExpressionIF {
 	    + getInt(ste, win) * 10 
 	    + getInt(ste, strikeout) 
 	    + getInt(ste, runallowed) * (-1);
-	Element txe = doc.createElement("score");
-	txe.appendChild(doc.createTextNode(Integer.toString(final_score)));
+	//Element txe = doc.createElement("score");
+	//txe.appendChild(doc.createTextNode(Integer.toString(final_score)));
+	BaseAttr txe = new StringAttr(final_score);
 	return txe;
     }
 }

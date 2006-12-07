@@ -1,4 +1,4 @@
-/* $Id: DOLTOEURExpression.java,v 1.2 2006/11/28 05:16:10 jinli Exp $ */
+/* $Id: DOLTOEURExpression.java,v 1.3 2006/12/07 00:08:26 jinli Exp $ */
 package niagara.physical;
 
 import niagara.utils.*;
@@ -17,7 +17,7 @@ public class DOLTOEURExpression implements ExpressionIF {
     private static NumberFormat nf = NumberFormat.getCurrencyInstance(loc);
 	private Document doc = DOMFactory.newDocument();
 
-    public Node processTuple(Tuple ste) {
+    public BaseAttr processTuple(Tuple ste) {
         //Node priceNode = ste.getAttribute(pricePos);
     	BaseAttr priceNode = (BaseAttr)ste.getAttribute(pricePos);
         if(priceNode == null)
@@ -29,8 +29,9 @@ public class DOLTOEURExpression implements ExpressionIF {
         } catch (NumberFormatException nfe) {
 	    priceNum = 0;
         }
-		Element res = doc.createElement("bid");
-		res.appendChild(doc.createTextNode(nf.format(priceNum*1.08380)));
+        BaseAttr res = new StringAttr(nf.format(priceNum*1.08380));
+		//Element res = doc.createElement("bid");
+		//res.appendChild(doc.createTextNode(nf.format(priceNum*1.08380)));
 		return res;
     }
     public void setupSchema(TupleSchema ts) {

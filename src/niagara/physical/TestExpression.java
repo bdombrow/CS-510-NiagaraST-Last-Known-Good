@@ -1,4 +1,4 @@
-/* $Id: TestExpression.java,v 1.2 2006/11/28 05:16:09 jinli Exp $ */
+/* $Id: TestExpression.java,v 1.3 2006/12/07 00:08:25 jinli Exp $ */
 package niagara.physical;
 
 import niagara.utils.*;
@@ -29,7 +29,7 @@ public class TestExpression implements ExpressionIF {
 	res.appendChild(doc.createTextNode(String.valueOf(aNum - bNum)));
 	return res;
     }*/
-    public Node processTuple(Tuple ste) {
+    public BaseAttr processTuple(Tuple ste) {
         Document doc = DOMFactory.newDocument();
         BaseAttr aNode = (BaseAttr)ste.getAttribute(aPos);
         BaseAttr bNode = (BaseAttr)ste.getAttribute(bPos);
@@ -42,8 +42,9 @@ public class TestExpression implements ExpressionIF {
         } catch (NumberFormatException nfe) {
             aNum = bNum = 0;
         }
-	Element res = doc.createElement("AminusB");
-	res.appendChild(doc.createTextNode(String.valueOf(aNum - bNum)));
+	//Element res = doc.createElement("AminusB");
+	//res.appendChild(doc.createTextNode(String.valueOf(aNum - bNum)));
+        BaseAttr res = new StringAttr(aNum - bNum);
 	return res;
     }
 

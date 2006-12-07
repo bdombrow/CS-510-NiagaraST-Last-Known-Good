@@ -1,5 +1,5 @@
 /**********************************************************************
- $Id: PhysicalExpression.java,v 1.3 2005/07/18 22:22:20 acd Exp $
+ $Id: PhysicalExpression.java,v 1.4 2006/12/07 00:08:25 jinli Exp $
 
 
  NIAGARA -- Net Data Management System                                 
@@ -74,28 +74,38 @@ public void opInitialize()
             try {
 
                 String source =
-                    "package; import niagara.query_engine.TupleSchema; import niagara.utils.XMLUtils; import java.util.*; import niagara.ndom.*; import org.w3c.dom.*;  public class UserExpression extends XMLUtils implements "
+                    "package; import niagara.query_engine.TupleSchema; import niagara.utils.XMLUtils; import niagara.utils.BaseAttr; import niagara.utils.StringAttr; import java.util.*; import niagara.ndom.*; import org.w3c.dom.*;  public class UserExpression extends XMLUtils implements "
                         + " niagara.logical.ExpressionIF {\n"
                         + "org.w3c.dom.Document doc = niagara.ndom.DOMFactory.newDocument();"
                          + " public void setupSchema(TupleSchema ts) {};\n"
-                        + " public org.w3c.dom.Node processTuple(niagara.utils.Tuple ste) throws Exception {\n";
+                         + " public niagara.utils.BaseAttr processTuple(niagara.utils.Tuple ste) throws Exception {\n";
+                        //+ " public org.w3c.dom.Node processTuple(niagara.utils.Tuple ste) throws Exception {\n";
                 Attrs attrs = expressionOp.getVariablesUsed();
 
                 for (int i = 0; i < attrs.size(); i++) {
                     String varname = attrs.get(i).getName();
                     int attrpos = inputTupleSchemas[0].getPosition(varname);
-                    source += " int "
+                    //source += " int "
+                    source += " double "
                         + varname
-                        + " = XMLUtils.getInt(ste, "
+                        //+ " = XMLUtils.getInt(ste, "
+                        + " = Double.parseDouble( ((BaseAttr)ste.getAttribute(" 
                         + attrpos
-                        + ");\n";
+                        + ")).toASCII());\n";
                 }
-                source += "int result; " + expression;
+                //source += "int result; " + expression;
+                source += "double result; " + expression;
+                
                 source
+                += "; BaseAttr newNode =  new StringAttr(String.valueOf(result)); \n" 
+                +  "return newNode; \n"
+                + "}} new UserExpression();";
+
+                /*source
                     += "; Element newNode =  doc.createElement(\"expr\"); \n" 
                     +  "newNode.appendChild(doc.createTextNode(String.valueOf(result)));\n"
                     +  "return newNode; \n"
-                    + "}} new UserExpression();";
+                    + "}} new UserExpression();";*/
 
                 Interpreter interpreter =
                     new TreeInterpreter(new JavaCCParserFactory());
@@ -143,7 +153,8 @@ public void opInitialize()
 
 	protected void processTuple(Tuple inputTuple, int streamId)
 			throws ShutdownException, InterruptedException {
-		Node exprElt = expressionObject.processTuple(inputTuple);
+		//Node exprElt = expressionObject.processTuple(inputTuple);
+		BaseAttr exprElt = expressionObject.processTuple(inputTuple);
 		if (exprElt != null) {
 			int outSize = outputTupleSchema.getLength();
 			Tuple outputTuple = inputTuple.copy(outSize);
