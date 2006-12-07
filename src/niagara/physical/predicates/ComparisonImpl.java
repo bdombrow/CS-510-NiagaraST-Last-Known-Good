@@ -1,7 +1,11 @@
-/* $Id: ComparisonImpl.java,v 1.1 2003/12/24 01:44:23 vpapad Exp $ */
+/* $Id: ComparisonImpl.java,v 1.2 2006/12/07 00:20:45 jinli Exp $ */
 package niagara.physical.predicates;
 
 import niagara.utils.PEException;
+import niagara.utils.BaseAttr;
+import niagara.utils.StringAttr;
+import niagara.utils.TSAttr;
+import niagara.utils.IntegerAttr;
 import niagara.xmlql_parser.opType;
 
 abstract public class ComparisonImpl implements PredicateImpl {
@@ -185,6 +189,45 @@ abstract public class ComparisonImpl implements PredicateImpl {
                 throw new PEException("ERROR: invalid opType for arithOpNode");
         }
     }
+    
+    /**
+     *  The numeric compare function is used to attempt to compare two strings
+     *  as numeric double values
+     *
+     *  @param leftVal The left string for the comparison
+     *  @param rightVal The right string for the comparison
+     *  @param opCode The comparison operator to use
+     *
+     *  @return boolean value, true if comparison succeeds
+     */
+
+    private boolean compare(BaseAttr leftVal, BaseAttr rightVal)
+        throws java.lang.NumberFormatException {
+
+        double rightDouble = -1;
+        double leftDouble = -1;
+
+        switch (operator) {
+            case opType.EQ :
+                return leftVal.eq(rightVal);
+            case opType.NEQ :
+            	return !leftVal.eq(rightVal);
+            case opType.GT :
+                return leftVal.gt(rightVal);
+            case opType.LT :
+            	return leftVal.lt(rightVal);
+            case opType.LEQ :
+                return leftVal.eq(rightVal) || leftVal.lt(rightVal);
+            case opType.GEQ :
+                return leftVal.eq(rightVal) || leftVal.gt(rightVal);
+                //Ugly hack for containment
+            case opType.CONTAIN :
+                throw new PEException("BaseAttrs don't know what to do for the CONTAIN operator - Jenny");
+            default :
+                throw new PEException("Unknown operator for numeric comparison");
+        }
+    }
+
 
     //This is a simple test to determine if the string can be converted
     // into a numeric value. It only handles negative numbers and decimal
@@ -233,4 +276,13 @@ abstract public class ComparisonImpl implements PredicateImpl {
         } else
             return stringCompare(leftValue, rightValue);
     }
+    
+    protected boolean compareAtomicValues(BaseAttr leftValue, BaseAttr rightValue) {
+        // Check to see whether values exist
+        if (leftValue == null || rightValue == null)
+            throw new PEException("A null value passed for Comparison");
+
+        return compare(leftValue, rightValue);
+    }
+
 }

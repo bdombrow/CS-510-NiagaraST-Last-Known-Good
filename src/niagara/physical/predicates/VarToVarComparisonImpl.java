@@ -1,4 +1,4 @@
-/* $Id: VarToVarComparisonImpl.java,v 1.1 2003/12/24 01:44:23 vpapad Exp $ */
+/* $Id: VarToVarComparisonImpl.java,v 1.2 2006/12/07 00:20:46 jinli Exp $ */
 package niagara.physical.predicates;
 
 import java.util.ArrayList;
@@ -13,6 +13,7 @@ import niagara.physical.AtomicEvaluator;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.PEException;
 import niagara.utils.Tuple;
+import niagara.utils.BaseAttr;
 
 /** A comparison between two variables */
 public class VarToVarComparisonImpl extends ComparisonImpl {
@@ -61,8 +62,10 @@ public class VarToVarComparisonImpl extends ComparisonImpl {
 
         for (int left = 0; left < numLeft; ++left) {
             for (int right = 0; right < numRight; ++right) {
-                if (compareAtomicValues((String) leftValues.get(left),
-                    (String) rightValues.get(right))) {
+                //if (compareAtomicValues((String) leftValues.get(left),
+                //    (String) rightValues.get(right))) {
+            	if (compareAtomicValues((BaseAttr) leftValues.get(left),
+                      (BaseAttr) rightValues.get(right))) {
                     // The comparison succeeds - return true
                     return true;
                 }
