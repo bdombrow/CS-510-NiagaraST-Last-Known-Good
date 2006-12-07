@@ -1,4 +1,4 @@
-/* $Id: AtomicEvaluator.java,v 1.3 2006/10/24 22:08:33 jinli Exp $ */
+/* $Id: AtomicEvaluator.java,v 1.4 2006/12/07 00:10:47 jinli Exp $ */
 package niagara.physical;
 
 import java.util.ArrayList;
@@ -67,6 +67,7 @@ public class AtomicEvaluator {
      *
      * KT - looks to me like atomic values are always strings
      * XXX vpapad: They are!
+     * XXX Jenny: Now they are BaseAttrs ...
      */
 
     public void getAtomicValues(

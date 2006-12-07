@@ -1,4 +1,4 @@
-/* $Id: SimpleAtomicEvaluator.java,v 1.2 2006/10/24 22:08:34 jinli Exp $ */
+/* $Id: SimpleAtomicEvaluator.java,v 1.3 2006/12/07 00:10:47 jinli Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.Node;
@@ -81,6 +81,9 @@ public class SimpleAtomicEvaluator {
         }
     }
 
+    public String getName () {
+    	return name;
+    }
     /*public static final String getAtomicValue(Node node) {
         // XXX vpapad: We must get the semantics of atomic values straight!!!
         switch (node.getNodeType()) {
