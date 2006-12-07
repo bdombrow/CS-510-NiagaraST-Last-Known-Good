@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.21 2006/11/28 05:20:44 jinli Exp $
+  $Id: QueryResult.java,v 1.22 2006/12/07 00:25:25 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -272,6 +272,9 @@ public class QueryResult {
                 for (int i = startIdx; i < tupleSize; i++) {
                     Object tupAttr = tupleElement.getAttribute(i);
                     if (tupAttr instanceof Node) {
+                    	if (((Node)tupleElement.getAttribute(0)).getNodeType() ==
+					           Node.DOCUMENT_NODE)
+                    		continue;
                     	Element elt = tupleAttrToElt((Node)tupAttr, resultDoc);
                     	root.appendChild(elt);
                     } else if (tupAttr instanceof BaseAttr) {
