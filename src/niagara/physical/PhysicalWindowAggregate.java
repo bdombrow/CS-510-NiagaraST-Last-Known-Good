@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowAggregate.java,v 1.3 2005/08/15 01:36:53 jinli Exp $
+  $Id: PhysicalWindowAggregate.java,v 1.4 2006/12/18 21:50:02 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -54,7 +54,7 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 	ArrayList atomicValues;
 
 	protected abstract PhysicalWindowAggregate getInstance();
-	protected abstract Node constructAggrResult(AggrResult partialResult,
+	protected abstract BaseAttr constructAggrResult(AggrResult partialResult,
 						AggrResult finalResult);
 	protected abstract void updateAggrResult(AggrResult result, 
 						 Object ungroupedResult);
@@ -113,7 +113,7 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 	return finalResult;
 	}
 
-	public Node constructResult (Object partialResult,
+	public BaseAttr constructResult (Object partialResult,
 				 Object finalResult) {
 	return constructAggrResult((AggrResult)partialResult,
 				   (AggrResult)finalResult);

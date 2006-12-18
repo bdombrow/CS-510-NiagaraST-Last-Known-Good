@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalWindowAverage.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $
+  $Id: PhysicalWindowAverage.java,v 1.2 2006/12/18 21:50:03 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,6 +28,8 @@
 package niagara.physical;
 
 import niagara.utils.Tuple;
+import niagara.utils.BaseAttr;
+import niagara.utils.StringAttr;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -97,7 +99,7 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 
 	assert atomicValues.size() == 1 : "Must have exactly one atomic value";
 	
-	return new Double((String)atomicValues.get(0));
+	return new Double(((BaseAttr)atomicValues.get(0)).toASCII());
 	}
 
 	/**
@@ -107,7 +109,7 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 	 *         result is to be constructed
 	 */
 
-	protected final Node constructEmptyResult () {
+	protected final BaseAttr constructEmptyResult () {
 		return null;
 	}
 
@@ -123,9 +125,9 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 	 *         returns null
 	 */
 
-	protected final Node constructAggrResult (
-				   PhysicalWindowAggregate.AggrResult partialResult,
-		   PhysicalWindowAggregate.AggrResult finalResult) {
+	protected final BaseAttr constructAggrResult (
+		PhysicalWindowAggregate.AggrResult partialResult,
+		PhysicalWindowAggregate.AggrResult finalResult) {
 			// Create number of values and sum of values variables
 			int numValues = 0;
 			double sum = 0;
@@ -148,10 +150,7 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 
 			// Create an average result element and return it
 			totalCost += timestamp;
-			Element resultElement = doc.createElement("niagara:windowAverage");
-			//Text childElement = doc.createTextNode(Double.toString(sum/numValues));
-			Text childElement = doc.createTextNode(Double.toString(sum/numValues));
-			resultElement.appendChild(childElement);
+			StringAttr resultElement = new StringAttr(sum/numValues);
 			return resultElement;	
 	
 	}

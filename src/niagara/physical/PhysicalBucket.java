@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalBucket.java,v 1.5 2006/10/24 22:08:33 jinli Exp $
+  $Id: PhysicalBucket.java,v 1.6 2006/12/18 21:50:03 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -80,7 +80,6 @@ public class PhysicalBucket extends PhysicalOperator {
 	slide = ((Bucket) logicalOperator).getWindowSlide();
 	widName = ((Bucket) logicalOperator).getWid();
 	ae = new AtomicEvaluator (windowAttribute.getName());
-	ae.resolveVariables(inputTupleSchemas[0], 0);
 	
     }
 
@@ -91,12 +90,14 @@ public class PhysicalBucket extends PhysicalOperator {
 	p.range = range;
 	p.slide = slide;
 	p.widName = widName;
+	p.ae = ae;
 
 	return p;
     }
     
     public void opInitialize() {
-	setBlockingSourceStreams(blockingSourceStreams);	
+	setBlockingSourceStreams(blockingSourceStreams);
+	ae.resolveVariables(inputTupleSchemas[0], 0);
 	}   
     
     /**
@@ -206,21 +207,14 @@ public class PhysicalBucket extends PhysicalOperator {
     		
 	int outSize = outputTupleSchema.getLength();
 	
-	Tuple result = inputTuple.copy(outSize);
-	Element from, to;
-
-	from = doc.createElement("wid_from_"+widName);
-	to = doc.createElement("wid_to_"+widName);
+	LongAttr from, to; 
 	
-	from.appendChild(doc.createTextNode(String.valueOf(windowId_from)));    	
-
-	to.appendChild(doc.createTextNode(String.valueOf(windowId_to)));    	
-
-	result.setAttribute(outSize - 2, from);
-	result.setAttribute(outSize -1, to);
+	from = new LongAttr(windowId_from);
+	to = new LongAttr(windowId_to);
+	inputTuple.appendAttribute(from);
+	inputTuple.appendAttribute(to);
+	return inputTuple;
 	
-	return result;
-
     }
     
     /**

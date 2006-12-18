@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowGroup.java,v 1.4 2006/10/24 22:08:33 jinli Exp $
+  $Id: PhysicalWindowGroup.java,v 1.5 2006/12/18 21:50:04 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -248,11 +248,6 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		windowAttr = ((WindowGroup)logicalOperator).getWindowAttr();
 		widName = ((WindowGroup)logicalOperator).getWid();
         
-        eaFrom = new SimpleAtomicEvaluator ("wid_from_"+widName);
-        eaFrom.resolveVariables(inputTupleSchemas[0], 0);
-        eaTo = new SimpleAtomicEvaluator ("wid_to_"+widName);
-        eaTo.resolveVariables(inputTupleSchemas[0], 0);
-        
         // have subclass do initialization
         localInitFrom(logicalOperator);
     }
@@ -290,7 +285,13 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
          * @return True if the operator is to continue and false otherwise
          */
         protected final void opInitialize() {
-            numGroupingAttributes = groupAttributeList.size();
+        
+        eaFrom = new SimpleAtomicEvaluator ("wid_from_"+widName);
+        eaFrom.resolveVariables(inputTupleSchemas[0], 0);
+        eaTo = new SimpleAtomicEvaluator ("wid_to_"+widName);
+        eaTo.resolveVariables(inputTupleSchemas[0], 0);
+            
+        numGroupingAttributes = groupAttributeList.size();
 
     	if(numGroupingAttributes > 0) {
     	    hasher = new Hasher(groupAttributeList);
@@ -334,8 +335,6 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 			//Not a punctuation for the group attribute. Ignore it.
 			return;
 		}
-
-
 		groupResult = (HashEntry) hashtable.get(stPunctKey);
 
 		if(groupResult != null)
@@ -357,10 +356,10 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 	Object partialResult = hashEntry.getPartialResult();
 	Object finalResult = hashEntry.getFinalResult();
 
-	Node resultNode = null;
+	BaseAttr resultNode = null;
 
 	if (partialResult != null || finalResult != null) {
-    		resultNode = this.constructResult(partialResult, finalResult);
+    	resultNode = this.constructResult(partialResult, finalResult);
 	}
 
 	// If there is a non- empty result, then create tuple and add to
@@ -396,7 +395,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     	        int streamId)
     throws ShutdownException {
     	Object ungroupedResult = 
-    		this.constructUngroupedResult(tupleElement);
+    	this.constructUngroupedResult(tupleElement);
     	if(ungroupedResult == null)
     		return;
 		
@@ -408,16 +407,15 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		//int from = Long.valueOf(wid_from.getFirstChild().getNodeValue()).intValue();
 		//int to = Long.valueOf(wid_to.getFirstChild().getNodeValue()).intValue();
 		
-		int from = Integer.valueOf(eaFrom.getAtomicValue(tupleElement, null));
-		int to = Integer.valueOf(eaTo.getAtomicValue(tupleElement, null));
+		int from = Integer.parseInt(eaFrom.getAtomicValue(tupleElement, null));
+		int to = Integer.parseInt(eaTo.getAtomicValue(tupleElement, null));
 
 		HashEntry prevResult;
     		    
     	Tuple tmpTuple;
     	tmpTuple = (Tuple) tupleElement.clone();
 
-    	Node wid;
-    	Node text;
+    	IntegerAttr wid;
     	
     	Vector hashKeys = null;
     	//hashKeys = hasher.rangeHash(tupleElement);
@@ -426,31 +424,23 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     	// Probe hash table to see whether result for this hashcode
     	// already exist
     	for  (int i = from; i <= to; i++) {
-    		//****need to put this part into rangeHash function *****
     		StringBuffer hashKey = new StringBuffer();	
     		hashKey.append('<');
     		hashKey.append(String.valueOf(i));
     		hashKey.append('<');
     		prevResult = (HashEntry) hashtable.get(hashKey.toString());
-    		//****need to put this part into rangeHash function *****
     		
-    		//key = (String)hashKeys.get(i-from);
-    		//prevResult = (HashEntry)hashtable.get(key);
     		if (prevResult == null) {
-    			
-    			wid = doc.createElement("wid_from_"+widName);
-    			text = doc.createTextNode(String.valueOf(i));
-    			wid.appendChild(text);
+    			wid = new IntegerAttr(i);
     			
     			tmpTuple.setAttribute(tupleSize-2, wid);	
     			// If it does not have the result, just create new one
     			// with the current partial result id with the tupleElement
     			// as the representative tuple
-    			//******Note: the HashEntry will clone the tmpTuple - Jenny
     			prevResult = new HashEntry(currPartialResultId, tmpTuple);
     	    
     			// Add the entry to hash table
-    			//hashtable.put(key, prevResult);
+    			// hashtable.put(key, prevResult);
     			hashtable.put(hashKey.toString(), prevResult);
     	    
     		} else {
@@ -523,7 +513,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
 	private void putEmptyResult(boolean partial) 
 	throws InterruptedException, ShutdownException {
-		Node emptyResult = constructEmptyResult();
+		BaseAttr emptyResult = constructEmptyResult();
 
 		// If there is a non- empty result, then create tuple and add to
 		// result
@@ -566,8 +556,8 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
      */
     // HERE
     protected Tuple createTuple(
-					     Node groupedResult,
-				      Tuple representativeTuple,
+					     BaseAttr groupedResult,
+					     Tuple representativeTuple,
 					     boolean partial) {
 
         // Create a result tuple element tagged appropriately as
@@ -649,7 +639,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
      *         result is to be constructed
      */
 
-    protected abstract Node constructEmptyResult();
+    protected abstract BaseAttr constructEmptyResult();
 
     /**
      * This function constructs a result from the grouped partial and final
@@ -662,7 +652,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
      *         returns null
      */
 
-    protected abstract Node constructResult(
+    protected abstract BaseAttr constructResult(
         Object partialResult,
         Object finalResult);
 

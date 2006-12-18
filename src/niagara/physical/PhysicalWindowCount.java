@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalWindowCount.java,v 1.1 2003/12/24 01:49:03 vpapad Exp $
+  $Id: PhysicalWindowCount.java,v 1.2 2006/12/18 21:50:02 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,6 +28,8 @@
 package niagara.physical;
 
 import niagara.utils.Tuple;
+import niagara.utils.BaseAttr;
+import niagara.utils.IntegerAttr;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -104,12 +106,9 @@ public class PhysicalWindowCount extends PhysicalWindowAggregate {
 	 *         result is to be constructed
 	 */
 
-	protected final Node constructEmptyResult () {
+	protected final BaseAttr constructEmptyResult () {
 	// Create an Count result element
-	Element resultElement = doc.createElement("Count");
-
-	// Add the text node as a child of the element node
-	resultElement.appendChild(doc.createTextNode("0"));
+	IntegerAttr resultElement = new IntegerAttr(0);
 	
 	// Return the result element
 	return resultElement;
@@ -127,24 +126,19 @@ public class PhysicalWindowCount extends PhysicalWindowAggregate {
 	 *         returns null
 	 */
 
-	protected final Node constructAggrResult (
-				   PhysicalWindowAggregate.AggrResult partialResult,
-		   PhysicalWindowAggregate.AggrResult finalResult) {
+	protected final BaseAttr constructAggrResult (
+		PhysicalWindowAggregate.AggrResult partialResult,
+		PhysicalWindowAggregate.AggrResult finalResult) {
 	int numValues = 0;
 	double timestamp = 0;
 
 	if (partialResult != null) 
 		numValues += partialResult.count;
-
 	
 	if (finalResult != null) 
 		numValues += finalResult.count;
-	
 
-	Element resultElement = doc.createElement("niagara:windowCount");
-	Text childElement = doc.createTextNode(Integer.toString(numValues));
-	resultElement.appendChild(childElement);
-	
+	IntegerAttr resultElement = new IntegerAttr(numValues);	
 	return resultElement;
 	}
 

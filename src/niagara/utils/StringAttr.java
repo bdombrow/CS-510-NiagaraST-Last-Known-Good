@@ -36,10 +36,8 @@ public class StringAttr extends BaseAttr {
 	
 		if (value instanceof String)
 			attrVal = value;
-		else if (value instanceof Integer)
-			attrVal = String.valueOf(value);
 		else 
-			throw new PEException("JL: Unsupported Attribute Data Type");
+			attrVal = String.valueOf(value);
 	}
 	
 	public String toASCII() {

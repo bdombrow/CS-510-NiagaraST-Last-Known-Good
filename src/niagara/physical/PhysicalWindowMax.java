@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalWindowMax.java,v 1.1 2003/12/24 01:49:01 vpapad Exp $
+  $Id: PhysicalWindowMax.java,v 1.2 2006/12/18 21:50:05 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,6 +28,8 @@
 package niagara.physical;
 
 import niagara.utils.Tuple;
+import niagara.utils.BaseAttr;
+import niagara.utils.LongAttr;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -88,7 +90,7 @@ public class PhysicalWindowMax extends PhysicalWindowAggregate {
 	ae.getAtomicValues(tupleElement, atomicValues);
 
 	assert atomicValues.size() == 1 : "Must have exactly one atomic value";
-	return new Double((String)atomicValues.get(0));
+	return new Double(((BaseAttr)atomicValues.get(0)).toASCII());
 	}
 
 	/**
@@ -98,7 +100,7 @@ public class PhysicalWindowMax extends PhysicalWindowAggregate {
 	 *         result is to be constructed
 	 */
 
-	protected final Node constructEmptyResult () {
+	protected final BaseAttr constructEmptyResult () {
 	return null;
 	}
 
@@ -114,16 +116,14 @@ public class PhysicalWindowMax extends PhysicalWindowAggregate {
 	 *         returns null
 	 */
 
-	protected final Node constructAggrResult (
+	protected final BaseAttr constructAggrResult (
 				   PhysicalWindowAggregate.AggrResult partialResult,
-		   PhysicalWindowAggregate.AggrResult finalResult) {
+				   PhysicalWindowAggregate.AggrResult finalResult) {
 		   	
 			// Create number of values and sum of values variables
 			int numValues = 0;
-			//double max = 0; //Jenny: Hack
 			long max = 0;
 			
-
 			if (partialResult != null) {
 				numValues += partialResult.count;
 				if (partialResult.doubleVal > max)
@@ -138,14 +138,11 @@ public class PhysicalWindowMax extends PhysicalWindowAggregate {
 			// If the number of values is 0, sum does not make sense
 			if (numValues == 0) {
 				assert false : "KT don't think returning null is ok";
-				//return null;
+				return null;
 			}
-			Element resultElement = doc.createElement("niagara:windowMax");
-			//Text childElement = doc.createTextNode(Double.toString(max));
-			Text childElement = doc.createTextNode(Long.toString(max)); 
-			resultElement.appendChild(childElement);
-			return resultElement;
 			
+			LongAttr resultElement = new LongAttr(max);
+			return resultElement;
 	}
 
 	protected PhysicalWindowAggregate getInstance() {
