@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.13 2006/12/04 21:50:22 tufte Exp $
+  $Id: SinkTupleStream.java,v 1.14 2007/02/14 03:30:11 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -188,11 +188,10 @@ public final class SinkTupleStream {
 	//Let's see if this is a punctuation or not
 	Node child = node.getFirstChild();
 	if (child != null) {
-	    //It will be a punctuation if it prefixed with "PUNCT"
 	    String name = child.getNodeName();
 		String namespace = child.getNamespaceURI();
         if (namespace != null &&
-				  namespace.equals("http://www.cse.ogi.edu/dot/punct")){
+				  namespace.equals("http://www.cse.ogi.edu/dot/niagara/punct")){
 				tuple = new Punctuation(false, 1);
       }
 	}

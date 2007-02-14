@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoin.java,v 1.1 2003/12/24 01:49:00 vpapad Exp $
+  $Id: PhysicalHashJoin.java,v 1.2 2007/02/14 03:30:09 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -28,6 +28,7 @@
 package niagara.physical;
 
 import java.util.Vector;
+import java.util.Iterator;
 
 import niagara.logical.*;
 import niagara.logical.predicates.*;
@@ -37,6 +38,8 @@ import niagara.physical.predicates.PredicateImpl;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import niagara.utils.*;
+
+import org.w3c.dom.*;
 
 /**
  * This is the <code>PhysicalHashJoinOperator</code> that extends
@@ -72,6 +75,11 @@ public class PhysicalHashJoin extends PhysicalJoin {
     // stream from which the tuples were read.
     DuplicateHashtable[] finalSourceTuples;
     
+    SimpleAtomicEvaluator[] ts = null;
+    String[] punctAttrs = null; 
+    int INTERVAL = 0;
+    Document doc;
+    
     public PhysicalHashJoin() {
         setBlockingSourceStreams(blockingSourceStreams);
     }
@@ -83,7 +91,9 @@ public class PhysicalHashJoin extends PhysicalJoin {
         joinPredicate = And.conjunction(join.getNonEquiJoinPredicate(), 
                                         eqjoinPreds.toPredicate());
         pred = joinPredicate.getImplementation();
-	initExtensionJoin(join);
+        punctAttrs = join.getPunctAttrs();
+        initExtensionJoin(join);
+        
     }
 		     
 
@@ -103,17 +113,17 @@ public class PhysicalHashJoin extends PhysicalJoin {
 				     int streamId) 
 	throws ShutdownException, InterruptedException {
 		
-		// Get the hash code corresponding to the tuple element
-		String hashKey = hashers[streamId].hashKey(tupleElement);
-		
-		// ignore null attributes...
-		if(hashKey == null)
-			return;
+	// Get the hash code corresponding to the tuple element
+	String hashKey = hashers[streamId].hashKey(tupleElement);
 			
-		String stPunctJoinKey = null;
+	// ignore null attributes...
+	if(hashKey == null)
+		return;
+			
+	String stPunctJoinKey = null;
 
-		// Determine the id of the other stream
-		int otherStreamId = 1 - streamId;
+	// Determine the id of the other stream
+	int otherStreamId = 1 - streamId;
 
 	// Now loop over all the partial elements of the other source 
 	// and evaluate the predicate and construct a result tuple if 
@@ -284,7 +294,97 @@ public class PhysicalHashJoin extends PhysicalJoin {
      *
      */
 
-    protected void processPunctuation(Punctuation tuple,
+    protected void processPunctuation(Punctuation tuple, int streamId)
+    	throws ShutdownException, InterruptedException {
+    	
+    	if (ts == null) {
+    		System.err.println("Don't know what to do with this punctuation - no punctation attr is specified");
+    		return;
+    	}
+    		
+		Tuple left, right;
+		if (streamId == 0) {
+			left = tuple;
+			right = null;
+		} else {
+			left = null;
+			right = tuple;
+		}
+		
+		String punctVal = ts[streamId].getAtomicValue(left, right).trim();
+		if (punctVal.startsWith("(")) 
+		   punctVal = punctVal.substring(2, punctVal.length() - 1);  
+		   
+		int punctTS = Integer.valueOf(punctVal) ;
+
+		// see if there are tuples to remove from the other hash table.
+		// check both the partial list and the final list
+		int otherStreamId = 1-streamId;
+		
+		Iterator keys = finalSourceTuples[otherStreamId].keySet().iterator();
+		Vector hashEntry;
+		Iterator list;
+		
+		while (keys.hasNext()) {
+			hashEntry = finalSourceTuples[otherStreamId].get(keys.next());
+			list = hashEntry.iterator();
+	    	while (list.hasNext()) {
+	    		if (otherStreamId == 0) {
+	    			left = (Tuple)list.next();
+	    			right = null;
+	    		} else {
+	    			left = null;
+	    			right = (Tuple)list.next();
+	    		}
+	    		
+	    		if (Double.valueOf(ts[otherStreamId].getAtomicValue(left, right)) < (punctTS - INTERVAL))
+	    			list.remove();
+	    	}
+	    	if (hashEntry.size() == 0)
+	    		keys.remove();
+		}
+		
+		// then, produce punctuation and add this punctuation
+		// to the appropriate list of punctuations if necessary
+		Iterator it = rgPunct[otherStreamId].iterator();
+		int otherTs;
+		boolean fMatch = false;
+
+		while (it.hasNext() && !fMatch) {
+		// We assume linear punctuation of equal granularity on both input streams, 
+		//	e.g., punctuation every minute on both input streams.
+			if (otherStreamId == 0) {
+				left = (Punctuation)it.next();
+				right = null;
+			} else {
+				left = null;
+				right = (Punctuation)it.next();
+			}
+			punctVal = ts[otherStreamId].getAtomicValue(left, right).trim();
+			if (punctVal.startsWith("(")) 
+			   punctVal = punctVal.substring(2, punctVal.length() - 1);  
+			   
+			otherTs = Integer.valueOf(punctVal);
+
+			if ((punctTS - INTERVAL) == otherTs) {
+				if (streamId == 0)
+					producePunctuation(tuple, (Punctuation)right, 1);
+				else
+					producePunctuation((Punctuation)left, tuple, 0);
+				it.remove();
+			} else if ((otherTs - INTERVAL) == punctTS) {
+	    		if (streamId == 0)
+	    			producePunctuation (tuple, (Punctuation)right, 0);
+	    		else
+	    			producePunctuation ((Punctuation)left, tuple, 1);
+
+				fMatch = true;
+			}
+		}
+		if (!fMatch)
+			rgPunct[streamId].add(tuple); 
+    }
+    /*protected void processPunctuation(Punctuation tuple,
 				      int streamId)
 	throws ShutdownException, InterruptedException {
 
@@ -308,7 +408,39 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	}
 
 	return;
+    }*/
+
+	protected void producePunctuation(
+        Punctuation left,
+        Punctuation right,
+        int streamId)
+        throws ShutdownException, InterruptedException {
+        Punctuation result;
+        
+        if (projecting) {
+            result = left.copy(outputTupleSchema.getLength(), leftAttributeMap);
+            right.copyInto(result, leftAttributeMap.length, rightAttributeMap);
+        } else {
+            result = left.copy(outputTupleSchema.getLength());
+            result.appendTuple(right);
+        }
+        
+        if (streamId == 0) { // left side punctuation;
+    		int pos = outputTupleSchema.getPosition(ts[1].getName());
+    		Element n = doc.createElement(ts[1].getName());
+    		n.appendChild(doc.createTextNode("*"));
+    		result.setAttribute(pos, n);
+        } else { // right side punctuation;
+    		int pos = outputTupleSchema.getPosition(ts[0].getName());
+    		Element n = doc.createElement(ts[0].getName());
+    		n.appendChild(doc.createTextNode("*"));
+    		result.setAttribute(pos, n);        	
+        }	
+
+        // Add the result to the output
+        putTuple(result, 0);
     }
+
 
     private void purgeHashTable(DuplicateHashtable ht, int streamId,
 				String[] rgstPunct) {
@@ -397,6 +529,17 @@ public Cost findLocalCost(
         //Initialize the punctuation lists
         rgPunct[0] = new ArrayList();
         rgPunct[1] = new ArrayList();
+        
+        if (punctAttrs!=null) {
+        	ts = new SimpleAtomicEvaluator[2];
+        
+        	ts[0] = new SimpleAtomicEvaluator(punctAttrs[0]);
+        	ts[1] = new SimpleAtomicEvaluator(punctAttrs[1]);
+        	
+            ts[0].resolveVariables(inputTupleSchemas[0], 0);
+            ts[1].resolveVariables(inputTupleSchemas[1], 1);
+
+        }
     }
 
     /**
@@ -407,8 +550,13 @@ public Cost findLocalCost(
         op.pred = pred;
         op.joinPredicate = joinPredicate;
         op.eqjoinPreds = eqjoinPreds;
-	op.extensionJoin = extensionJoin;
+        op.extensionJoin = extensionJoin;
+        op.punctAttrs = punctAttrs;
         return op;
     }
+    
+    public void setResultDocument(Document doc) {
+    	this.doc = doc;
+        }   
 }
 

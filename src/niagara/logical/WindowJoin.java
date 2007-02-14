@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowJoin.java,v 1.1 2006/12/06 23:58:50 jinli Exp $
+  $Id: WindowJoin.java,v 1.2 2007/02/14 03:30:10 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -79,7 +79,7 @@ public class WindowJoin extends Join {
         Attribute[] wid,
         Attribute[] wa,
         int Interval, int delta) {
-        super (pred, equiJoinPredicates, projectedAttrs, extensionJoin); 
+        super (pred, equiJoinPredicates, projectedAttrs, extensionJoin, null); 
         this.isOOP = isOOP;
         this.wa = wa;
         this.interval = Interval;

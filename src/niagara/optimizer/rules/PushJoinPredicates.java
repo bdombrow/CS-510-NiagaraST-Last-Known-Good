@@ -1,4 +1,4 @@
-/* $Id: PushJoinPredicates.java,v 1.5 2003/12/24 01:51:56 vpapad Exp $ */
+/* $Id: PushJoinPredicates.java,v 1.6 2007/02/14 03:30:15 jinli Exp $ */
 package niagara.optimizer.rules;
 
 import niagara.logical.EquiJoinPredicateList;
@@ -61,7 +61,7 @@ public class PushJoinPredicates extends CustomRule {
 
         EquiJoinPredicateList eq = j.getEquiJoinPredicates();
         Join newJ = new Join(remJoin, eq, j.getProjectedAttrs(),
-				 j.getExtensionJoin());
+				 j.getExtensionJoin(), j.getPunctAttrs());
         return new Expr(newJ, left, right);
     }
     

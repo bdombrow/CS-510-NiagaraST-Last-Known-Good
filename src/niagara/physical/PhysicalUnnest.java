@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.4 2006/10/24 22:08:33 jinli Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.5 2007/02/14 03:30:09 jinli Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -38,6 +38,7 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
     private boolean reallyUnnesting;
     /** Position of new attribute in the output schema */
     private int outputPos;
+    private Punctuation inputPunct; 
 
     public PhysicalUnnest() {
         setBlockingSourceStreams(blockingSourceStreams);
@@ -97,9 +98,19 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
 
         if (!matchFound && projecting)
             // We can project some attributes away
-            inputTuple = inputTuple.copy(outSize, attributeMap);
+            //inputTuple = inputTuple.copy(outSize, attributeMap);
+        	if (inputTuple != null)
+        		inputTuple = inputTuple.copy(outSize, attributeMap);
+        	else 
+        		inputPunct = inputPunct.copy(outSize, attributeMap);
+
         else // Just clone
-            inputTuple = inputTuple.copy(outSize);
+            //inputTuple = inputTuple.copy(outSize);
+        	if (inputTuple != null)
+        		inputTuple = inputTuple.copy(outSize);
+        	else 
+        		inputPunct = inputPunct.copy(outSize);
+
 
         // Append a reachable node to the output tuple
         // and put the tuple in the output stream
@@ -124,13 +135,25 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         		throw new PEException ("JL: Unsupported data type");
         	}
         	attr.loadFromXMLNode(n);
-        	inputTuple.setAttribute(outputPos, attr);
+        	//inputTuple.setAttribute(outputPos, attr);
+        	if (inputTuple != null) {
+        		inputTuple.setAttribute(outputPos, attr);
+        	} else {
+        		inputPunct.setAttribute(outputPos, attr);
+        	}
             //inputTuple.setAttribute(outputPos, n);
         }
         
-        putTuple(inputTuple, 0);
+        //putTuple(inputTuple, 0);
+    	if (inputTuple != null) {
+    		putTuple(inputTuple, 0);
+    	} else {
+    		putTuple(inputPunct, 0);
+    	}
+
         matchFound = true;
     }
+    
 
     public boolean isStateful() {
         return false;
@@ -201,7 +224,32 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    protected void processPunctuation(
+     protected void processPunctuation(
+            Punctuation punct,
+            int streamId)
+            throws ShutdownException, InterruptedException {
+            this.inputPunct = punct;
+            matchFound = false;
+
+            // Get the nodes reachable from the path expression
+            if (inputPunct.getAttribute(scanField) instanceof Node)
+            	pev.produceMatches((Node)inputPunct.getAttribute(scanField), this);
+            else if (inputPunct.getAttribute(scanField) instanceof XMLAttr)
+            	pev.produceMatches(((XMLAttr)inputPunct.getAttribute(scanField)).getNodeValue(), this);
+            else
+            	throw new PEException ("JL: We only unnest xml node or xmlattr");
+            
+            if (!matchFound) {
+                if (outer == Unnest.OuterBehavior.OUTER)
+                    consume(null);
+                else if (outer == Unnest.OuterBehavior.STRICT)
+                    throw new ShutdownException("Input does not contain '" + variable +"'");
+            }
+
+            this.inputPunct = null;
+     }
+
+    /*protected void processPunctuation(
         Punctuation inputTuple,
         int streamId)
         throws ShutdownException, InterruptedException {
@@ -240,7 +288,7 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
             // still want the tuple to live on.
             putTuple(inputTuple, streamId);
         }
-    }
+    }*/
 
     public void constructTupleSchema(TupleSchema[] inputSchemas) {
         super.constructTupleSchema(inputSchemas);
@@ -253,6 +301,8 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         if (reallyUnnesting)
             outputPos = outputTupleSchema.getPosition(variable.getName());
     }
+    
+
 
     public void dumpAttributesInXML(StringBuffer sb) {
         sb.append(" variable='").append(variable.getName()).append("'");

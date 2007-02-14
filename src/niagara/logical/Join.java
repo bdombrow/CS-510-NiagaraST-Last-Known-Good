@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Join.java,v 1.2 2006/12/06 23:58:50 jinli Exp $
+  $Id: Join.java,v 1.3 2007/02/14 03:30:11 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -65,6 +65,8 @@ public class Join extends BinaryOperator {
     protected Attrs projectedAttrs;
 
     protected int extensionJoin;
+    
+    private String[] punctAttrs = null;
 
     public Join() {
 	extensionJoin = NONE; // default
@@ -74,16 +76,17 @@ public class Join extends BinaryOperator {
         Predicate pred,
         EquiJoinPredicateList equiJoinPredicates,
         Attrs projectedAttrs,
-	int extensionJoin) {
+	int extensionJoin, String[] punctAttrs) {
         this.pred = pred;
         this.equiJoinPredicates = equiJoinPredicates;
         this.projectedAttrs = projectedAttrs;
-	this.extensionJoin = extensionJoin;
+        this.extensionJoin = extensionJoin;
+        this.punctAttrs = punctAttrs;
     }
 
     public Join(Predicate pred, EquiJoinPredicateList equiJoinPredicates,
 		  int extensionJoin) {
-        this(pred, equiJoinPredicates, null, extensionJoin);
+        this(pred, equiJoinPredicates, null, extensionJoin, null);
     }
 
     public EquiJoinPredicateList getEquiJoinPredicates() {
@@ -207,7 +210,7 @@ public class Join extends BinaryOperator {
             pred,
             equiJoinPredicates,
             (projectedAttrs == null)?null:projectedAttrs.copy(),
-	    extensionJoin);
+	    extensionJoin, punctAttrs);
     }
 
     public boolean equals(Object obj) {
@@ -216,6 +219,18 @@ public class Join extends BinaryOperator {
         if (obj.getClass() != Join.class)
             return obj.equals(this);
         Join other = (Join) obj;
+        if (punctAttrs != null) {
+        	if (other.punctAttrs == null)
+        		return false;
+        	else {
+        		if (!(punctAttrs[0].equals(other.punctAttrs[0]) && 
+        				punctAttrs[1].equals(other.punctAttrs[1])))
+        			return false;
+        	}
+        } else 
+        	if (punctAttrs != null)
+        		return false;
+        
         return pred.equals(other.pred)
             && equiJoinPredicates.equals(other.equiJoinPredicates)
             && equalsNullsAllowed(projectedAttrs, other.projectedAttrs)
@@ -327,5 +342,17 @@ public class Join extends BinaryOperator {
         }
 
         setJoin(pred, leftVars, rightVars, extJoin);
+        
+        String punctattr = e.getAttribute("punctattr");
+        if (punctattr=="")
+        	return;
+        punctAttrs = punctattr.split("[\t| ]+");
+                
+        Variable.findVariable(inputProperties[0], punctAttrs[0]);
+        Variable.findVariable(inputProperties[1], punctAttrs[1]);
     }
+    public String[] getPunctAttrs() {
+    	return punctAttrs;
+    }
+    
 }
