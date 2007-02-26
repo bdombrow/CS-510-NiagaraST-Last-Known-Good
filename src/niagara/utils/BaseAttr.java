@@ -5,9 +5,15 @@ import org.w3c.dom.Node;
 public abstract class BaseAttr {
 	
 	protected Object attrVal;
+	/*
+	 * punct indicates that the BaseAttr object contains a special value, a punctuation pattern;
+	 * when punct is true, the attrVal is a String object, no matter what data type of the object is;   
+	 */
+	protected boolean punct = false;
 	
 	public abstract void loadFromXMLNode(Node XMLNode);
 	public abstract void loadFromObject(Object value);
+	public abstract void loadPunctFromXMLNode(Node XMLNode);
 	
 	public abstract String toASCII();
 	

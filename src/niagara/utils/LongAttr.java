@@ -33,7 +33,38 @@ public class LongAttr extends BaseAttr implements Arithmetics{
 			throw new PEException("JL: Unsupported XML Node Type");
 		}
 	}
-	
+
+	public void loadPunctFromXMLNode(Node xmlNode) {
+		short type = xmlNode.getNodeType();
+		String nodeVal;
+		
+		switch (type) {
+		case Node.ELEMENT_NODE:
+			nodeVal = xmlNode.getFirstChild().getNodeValue();
+			break;
+		case Node.ATTRIBUTE_NODE:
+			nodeVal = xmlNode.getNodeValue();
+			break;
+		case Node.TEXT_NODE:
+			nodeVal = xmlNode.getNodeValue();
+			break;
+		default:
+			nodeVal = null;
+			throw new PEException("JL: Unsupported XML Node Type");
+		}
+		/*
+		 * Right now, we only handle "*" for punctuation pattern
+		 */
+		if (nodeVal != null) {
+			if (nodeVal.startsWith("*")) 
+				attrVal = nodeVal;
+			else
+				attrVal = Integer.valueOf(nodeVal);
+		}
+		punct = true;
+
+	}
+
 	public void loadFromObject(Object value) {
 	
 		if (value instanceof Long)

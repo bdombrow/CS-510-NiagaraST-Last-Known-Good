@@ -19,6 +19,11 @@ public class XMLAttr extends BaseAttr {
 		attrVal = xmlNode;
 	}
 	
+	public void loadPunctFromXMLNode (Node xmlNode) {
+		loadFromXMLNode (xmlNode);
+		punct = true;
+	}
+	
 	public void loadFromObject(Object value) {
 		throw new PEException("JL: Unsupported yet");
 	}
@@ -87,7 +92,6 @@ public class XMLAttr extends BaseAttr {
 		if (!(other instanceof XMLAttr))
 			throw new PEException("JL: Comparing to a different data type");
 		return (this.toASCII().compareTo(other.toASCII()) < 0);
-
 	}
 	
 	public BaseAttr copy() {

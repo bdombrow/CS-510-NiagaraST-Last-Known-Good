@@ -32,6 +32,11 @@ public class StringAttr extends BaseAttr {
 		}
 	}
 	
+	public void loadPunctFromXMLNode(Node xmlNode) {
+		loadFromXMLNode(xmlNode);
+		punct = true;
+	}
+	
 	public void loadFromObject(Object value) {
 	
 		if (value instanceof String)
