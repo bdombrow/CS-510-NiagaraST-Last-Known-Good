@@ -218,6 +218,9 @@ public class XMLUtils {
    	 * @return true if the string consists of all whitespace chars
    	 */
     public static boolean isWhite(String s) {
+    	if (s == null)
+    		return true;
+    	
     	int len = s.length(); 
     	for(int i =0; i<len; i++){
     		if(!Character.isWhitespace(s.charAt(i)))
