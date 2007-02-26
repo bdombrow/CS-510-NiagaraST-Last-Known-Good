@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.5 2007/02/14 03:30:09 jinli Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.6 2007/02/26 23:52:45 jinli Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -134,7 +134,10 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         	default: 
         		throw new PEException ("JL: Unsupported data type");
         	}
-        	attr.loadFromXMLNode(n);
+        	if (inputTuple != null)
+        		attr.loadFromXMLNode(n);
+        	else
+        		attr.loadPunctFromXMLNode(n);
         	//inputTuple.setAttribute(outputPos, attr);
         	if (inputTuple != null) {
         		inputTuple.setAttribute(outputPos, attr);
