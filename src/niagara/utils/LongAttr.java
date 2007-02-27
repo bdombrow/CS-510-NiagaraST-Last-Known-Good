@@ -88,29 +88,25 @@ public class LongAttr extends BaseAttr implements Arithmetics{
 	public boolean eq(BaseAttr other) {
 		if (!(other instanceof LongAttr))
 			return false;
-		
-		return attrVal.equals(other.attrVal);
+		if (other.punct) {
+			throw new PEException("JL: Don't know how to compare an int to a punctuation value");
+		}
+			
+		return (((Long)attrVal).compareTo((Long)other.attrVal) == 0);
 	}
 	
 	public boolean gt(BaseAttr other) {
 		if (!(other instanceof LongAttr))
 			throw new PEException ("JL: Comparing to a different data type");
 		
-		if (((Long)attrVal) > (Long)other.attrVal) 
-			return true;
-		else 
-			return false;
+		return (((Long)attrVal).compareTo((Long)other.attrVal) > 0);
 	}
 
 	public boolean lt(BaseAttr other) {
 		if (!(other instanceof LongAttr))
 			throw new PEException ("JL: Comparing to a different data type");
 
-		if (((Long)attrVal) < (Long)other.attrVal)
-			return true;
-		else 
-			return false;
-
+		return (((Long)attrVal).compareTo((Long)other.attrVal) < 0);
 	}
 	
 	public BaseAttr copy() {

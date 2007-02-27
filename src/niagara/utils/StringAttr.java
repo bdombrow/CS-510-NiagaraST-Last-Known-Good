@@ -53,15 +53,12 @@ public class StringAttr extends BaseAttr {
 		if (!(other instanceof StringAttr))
 			return false;
 		
-		return attrVal.equals(other.attrVal);
+		return (((String)attrVal).compareTo((String)other.attrVal) == 0);
 	}
 	
 	public boolean gt(BaseAttr other) {
 		if (other instanceof StringAttr)
-			if (((String)attrVal).compareTo((String)other.attrVal) > 0)
-				return true;
-			else 
-				return false;
+			return (((String)attrVal).compareTo((String)other.attrVal) > 0);
 		else 
 			throw new PEException("JL: Comparing Different Attribute Types");
 
@@ -69,10 +66,7 @@ public class StringAttr extends BaseAttr {
 
 	public boolean lt(BaseAttr other) {
 		if (other instanceof StringAttr)
-			if (((String)attrVal).compareTo((String)other.attrVal) < 0)
-				return true;
-			else 
-				return false;
+			return (((String)attrVal).compareTo((String)other.attrVal) < 0);
 		else 
 			throw new PEException("JL: Comparing Different Attribute Types");
 
