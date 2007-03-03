@@ -64,7 +64,7 @@ public class IntegerAttr extends BaseAttr implements Arithmetics{
 		}
 		punct = true;
 	}
-	
+		
 	public void loadFromObject(Object value) {
 	
 		if (value instanceof Integer)
@@ -84,16 +84,21 @@ public class IntegerAttr extends BaseAttr implements Arithmetics{
 	}
 	
 	public boolean eq(BaseAttr other) {
+		if (other.punct || punct) {
+			throw new PEException("JL: Don't know how to do comparison with punctuation");
+		}
+
 		if (!(other instanceof IntegerAttr))
 			return false;
-		if (other.punct) {
-			throw new PEException("JL: Don't know how to compare an int to a punctuation value");
-		}
 			
 		return (((Integer)attrVal).compareTo((Integer)other.attrVal) == 0);
 	}
 	
 	public boolean gt(BaseAttr other) {
+		if (other.punct || punct) {
+			throw new PEException("JL: Don't know how to do comparison with punctuation");
+		}
+
 		if (!(other instanceof IntegerAttr))
 			throw new PEException ("JL: Comparing to a different data type");
 		
@@ -101,6 +106,10 @@ public class IntegerAttr extends BaseAttr implements Arithmetics{
 	}
 
 	public boolean lt(BaseAttr other) {
+		if (other.punct || punct) {
+			throw new PEException("JL: Don't know how to do comparison with punctuation");
+		}
+
 		if (!(other instanceof IntegerAttr))
 			throw new PEException ("JL: Comparing to a different data type");
 

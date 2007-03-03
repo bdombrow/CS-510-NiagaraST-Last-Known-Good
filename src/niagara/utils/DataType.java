@@ -1,3 +1,3 @@
 package niagara.utils;
 
-public enum DataType {String, Integer, XML, TS}
+public enum DataType {String, Long, Integer, XML, TS}

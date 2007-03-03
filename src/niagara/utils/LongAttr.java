@@ -64,7 +64,7 @@ public class LongAttr extends BaseAttr implements Arithmetics{
 		punct = true;
 
 	}
-
+	
 	public void loadFromObject(Object value) {
 	
 		if (value instanceof Long)
@@ -86,6 +86,10 @@ public class LongAttr extends BaseAttr implements Arithmetics{
 	}
 	
 	public boolean eq(BaseAttr other) {
+		if (other.punct || punct) {
+			throw new PEException("JL: Don't know how to do comparison with punctuation");
+		}
+
 		if (!(other instanceof LongAttr))
 			return false;
 		if (other.punct) {
@@ -96,6 +100,10 @@ public class LongAttr extends BaseAttr implements Arithmetics{
 	}
 	
 	public boolean gt(BaseAttr other) {
+		if (other.punct || punct) {
+			throw new PEException("JL: Don't know how to do comparison with punctuation");
+		}
+
 		if (!(other instanceof LongAttr))
 			throw new PEException ("JL: Comparing to a different data type");
 		
@@ -103,6 +111,10 @@ public class LongAttr extends BaseAttr implements Arithmetics{
 	}
 
 	public boolean lt(BaseAttr other) {
+		if (other.punct || punct) {
+			throw new PEException("JL: Don't know how to do comparison with punctuation");
+		}
+
 		if (!(other instanceof LongAttr))
 			throw new PEException ("JL: Comparing to a different data type");
 

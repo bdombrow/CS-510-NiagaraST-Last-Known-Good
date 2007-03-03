@@ -40,5 +40,30 @@ public abstract class BaseAttr {
 
 	}
 	
-	public static enum Type {Int, String, XML, Timestamp};
+	public static enum Type {Int, Long, String, XML, TS};
+	
+	public static BaseAttr createWildStar(Type attrType) {
+		BaseAttr attr = null; 
+		if (Type.Int.compareTo(attrType) == 0) 
+			attr = new IntegerAttr();
+		else if (Type.Long.compareTo(attrType) == 0)
+			attr = new LongAttr();
+		else if (Type.XML.compareTo(attrType) == 0)
+			attr = new XMLAttr();
+		else if (Type.String.compareTo(attrType) == 0)
+			attr = new StringAttr();
+		else if (Type.TS.compareTo(attrType) == 0)
+			attr = new TSAttr();
+        else
+        	throw new PEException ("JL: Unsupported data type: " + attrType.toString() + " :");
+
+		attr.wildStar();
+		return attr;
+	}
+	
+	private void wildStar() {
+		attrVal = new String("*");
+		punct = true;
+	}
+
 }
