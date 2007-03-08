@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="join">
+
+<filescan id="bids" isstream="yes" filename="/stash/datalab/datastreams-student/streamdata/bids_small.xml"/>
+<filescan id="auctions" isstream="yes" filename="/stash/datalab/datastreams-student/streamdata/auctions_small.xml"/>
+
+<unnest id="auction" regexp="auctions.auction"  datatype="XML" input="auctions"/>
+<unnest id="id" regexp="id" datatype="Integer" input="auction"/>
+<unnest id="expires" regexp="expires" datatype="Integer" input="id" root="auction"/>
+
+<unnest id="bid" regexp="bid" datatype="XML"  input="bids"/>
+<unnest id="auctionid" regexp="auctionid" datatype="Integer" input="bid"/>
+<unnest id="time" regexp="time" datatype="Integer" input="auctionid" root="bid"/>
+
+<join id="join" left="id" right="auctionid" input="expires time">
+
+<pred op="le">
+       <var value="$time"></var><var value ="$expires"></var>
+</pred>
+
+</join>
+
+</plan>

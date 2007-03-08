@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="join">
+
+<filescan id="ld" isstream="yes" delay="20"
+filename="/stash/datalab/latte/data/2007-02-06-12:30.punct.xml"/>
+
+<unnest id="dts" regexp="dts" datatype="XML" input="ld"/>
+<unnest id="time_t" regexp="time_t" datatype="Integer"
+                    input="dts"/>
+<unnest id="time_s" regexp="time_s" root="$dts" datatype="String"
+                    input="time_t"/>
+<unnest id="d" regexp="d" root = "$dts" datatype="XML"
+input="time_s"/>
+<unnest id="stdetectorid" regexp="i" root="$d"
+datatype="Integer" input="d"/>
+<unnest id="stspeed" regexp="s" root="$d" datatype="Integer"
+input="stdetectorid"/>
+
+<dbscan id="dbscan" 
+
+query_string= "select extract('epoch' from starttime) as starttime, detectorid, speed
+from loopdata_20sec where detectorid = 1001 and
+starttime >= '2007-02-06 12:30:00' and starttime &lt;= '2007-02-06 12:30:40'"
+
+attr_names="dbstarttime dbdetectorid dbspeed"
+attr_types="TS int int"/>
+
+<join id="join" 
+left="dbdetectorid dbstarttime" 
+right="stdetectorid time_t" 
+punctattr="dbstarttime time_t"
+input="dbscan stspeed">
+
+</join>
+
+<construct id="result" input="join">
+<![CDATA[
+<speeddata>
+  $time_t
+	$dbstarttime
+  $dbdetectorid
+  $dbspeed
+  $stspeed
+</speeddata>
+]]>
+</construct>
+
+</plan>

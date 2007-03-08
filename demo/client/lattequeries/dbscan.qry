@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- very simple query to scan over the database -->
+
+<plan top="dbscan">
+
+<dbscan id="dbscan" query_string= "select detectorid,
+	stationid from detectors
+where detectorid = 1002"
+attr_names="dd ss" attr_types="int int"/>
+
+<construct id="cons" input="dbscan">
+<![CDATA[
+<result>
+  <a> $dd </a>
+  <b> $ss </b>
+</result>
+]]>
+</construct>
+</plan>

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- scan/unnest over the faked 'live' file which contains
+punctuation -->
+
+<plan top="result">
+
+<filescan id="ld" isstream="yes"
+filename="/stash/datalab/latte/data/2007-02-06-12:30.punct.xml"/>
+
+<unnest id="dts" regexp="dts" datatype="XML" input="ld"/>
+<unnest id="time_t" regexp="time_t" datatype="Integer" input="dts"/>
+<unnest id="d" regexp="d" root = "$dts" datatype="XML" input="time_t"/>
+<unnest id="detectorid" regexp="i" root="$d" datatype="Integer" input="d"/>
+<unnest id="speed" regexp="s" root="$d" datatype="Integer" input="detectorid"/>
+
+
+<construct id="result" input="speed">
+<![CDATA[
+<speeddata>
+  $detectorid 
+  $speed 
+	</speeddata>
+	]]>
+	</construct>
+
+</plan>
