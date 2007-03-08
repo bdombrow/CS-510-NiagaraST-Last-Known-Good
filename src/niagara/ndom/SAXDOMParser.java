@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.18 2004/02/11 01:11:10 vpapad Exp $
+ * $Id: SAXDOMParser.java,v 1.19 2007/03/08 22:33:08 tufte Exp $
  *
  */
 
@@ -36,6 +36,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
     private Page page;
 
     private boolean streaming;
+		private int delay; // in seconds
     private boolean seenHeader;
 
     // XXX vpapad: To test SAXDOM table building performance
@@ -108,8 +109,10 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
     }
 
     // for streaming, a place to put top-level elements
-    public void setOutputStream(SinkTupleStream outputStream) {
+    public void setOutputStream(SinkTupleStream outputStream, int delay) {
 	this.outputStream = outputStream;
+	System.out.println("Saxdom stream is send immediate " + outputStream.isSendImmediate());
+	this.delay = delay;
 	streaming = true;
     }
 
@@ -146,7 +149,9 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
 
     public void endDocument() throws SAXException {
         // if we're streaming, ignore the enclosing document
-        if (streaming) return;
+        if (streaming) {
+					return;
+				}
 
         handleText();
         page.addEvent(SAXEvent.END_DOCUMENT, null);
@@ -222,22 +227,37 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
         if(streaming && depth == 0) {
             page.addEvent(SAXEvent.END_DOCUMENT, null);
 
-	    // for now throw fatal errors on these exceptions, if
-	    // they happen, I'll have to figure out what the right
-	    // thing is to do - KT
-	    // I don't want to do a lot of work until I know this
-	    // actually works
-	    try {
-		if (producingOutput)
-		    outputStream.put(doc);
-	    } catch (java.lang.InterruptedException ie) {
+						// for now throw fatal errors on these exceptions, if
+						// they happen, I'll have to figure out what the right
+						// thing is to do - KT
+						// I don't want to do a lot of work until I know this
+						// actually works
+						try {
+							if (producingOutput) {
+								System.out.println("saxdom put doc in output stream");
+								outputStream.put(doc);
+              }
+						if(delay>0) {
+							try {
+								String namespace = doc.getDocumentElement().getNamespaceURI();
+                if (namespace != null &&
+						          namespace.equals("http://www.cse.ogi.edu/dot/niagara/punct")){
+									System.out.println("delaying 20 seconds");
+									Thread.sleep(delay*1000); // sleep is in milliseconds
+                }
+							} catch(java.lang.InterruptedException ie) {
+								// do nothing...
+							}
+					}
+
+						} catch (java.lang.InterruptedException ie) {
                 throw new PEException("KT - InterruptedException in SAXDOMParser");
-	    } catch (ShutdownException se) {
-		throw new SAXException("Query shutdown " + se.getMessage());
-	    }
-	    if (--depth != -1) 
-		throw new PEException("Unbalanced open nodes list.");
-	}
+						} catch (ShutdownException se) {
+							throw new SAXException("Query shutdown " + se.getMessage());
+						}
+						if (--depth != -1) 
+							throw new PEException("Unbalanced open nodes list.");
+				}
     }
 
     public void characters(char[] ch, int start, int length) 
