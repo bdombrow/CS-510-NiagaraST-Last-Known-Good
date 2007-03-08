@@ -1,4 +1,4 @@
-/* $Id: PhysicalJoin.java,v 1.2 2006/12/07 00:06:32 jinli Exp $ */
+/* $Id: PhysicalJoin.java,v 1.3 2007/03/08 22:34:28 tufte Exp $ */
 package niagara.physical;
 
 import niagara.logical.Join;
@@ -42,6 +42,7 @@ abstract public class PhysicalJoin extends PhysicalOperator {
         }
 
         // Add the result to the output
+				System.out.println("Physical Join producing result...KT");
         putTuple(result, 0);
     }
 

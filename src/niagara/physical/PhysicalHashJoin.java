@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoin.java,v 1.2 2007/02/14 03:30:09 jinli Exp $
+  $Id: PhysicalHashJoin.java,v 1.3 2007/03/08 22:34:28 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -81,6 +81,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
     Document doc;
     
     public PhysicalHashJoin() {
+			  isSendImmediate = true;
         setBlockingSourceStreams(blockingSourceStreams);
     }
     
@@ -112,6 +113,8 @@ public class PhysicalHashJoin extends PhysicalJoin {
 				     Tuple tupleElement,
 				     int streamId) 
 	throws ShutdownException, InterruptedException {
+		if(streamId == 0)
+		  System.out.println("Physical Hash Processing tuple from stream " + getStreamName(streamId));
 		
 	// Get the hash code corresponding to the tuple element
 	String hashKey = hashers[streamId].hashKey(tupleElement);
@@ -132,6 +135,9 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	producedResult = constructJoinResult(tupleElement, streamId, hashKey,
 					     partialSourceTuples[otherStreamId]);
 
+	if(producedResult) {
+		System.out.println("Physical Hash Join Produced Results");
+	}
 	// Extension join note: Extension join indicates that we
 	// expect an extension join with referential integrity 
 	// meaning that tuples on the denoted extension join side
@@ -296,6 +302,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 
     protected void processPunctuation(Punctuation tuple, int streamId)
     	throws ShutdownException, InterruptedException {
+   	System.err.println("Physical hash join - processing punct from stream " + getStreamName(streamId));
     	
     	if (ts == null) {
     		System.err.println("Don't know what to do with this punctuation - no punctation attr is specified");

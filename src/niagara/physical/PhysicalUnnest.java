@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.6 2007/02/26 23:52:45 jinli Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.7 2007/03/08 22:34:29 tufte Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -116,14 +116,17 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         // and put the tuple in the output stream
         if (reallyUnnesting) {
         	BaseAttr attr;
-        	DataType type = variable.getDataType(); 
+        	BaseAttr.Type type = variable.getDataType(); 
         	
         	switch (type) {
         	case String: 
         		attr = new StringAttr();
         		break;
-        	case Integer: 
+        	case Int: 
         		attr = new IntegerAttr();
+        		break;
+        	case Long: 
+        		attr = new LongAttr();
         		break;
         	case TS: 
         		attr = new TSAttr();

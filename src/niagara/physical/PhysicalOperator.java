@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.2 2005/07/06 16:59:37 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.3 2007/03/08 22:34:28 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -208,6 +208,11 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 	}
 	return true;
     }
+
+
+	  public String getStreamName(int streamId) {
+			return sourceStreams[streamId].getName();
+		}
 
     /**
      * This function sets up the flow of control for the operator by
