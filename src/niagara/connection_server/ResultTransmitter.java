@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.28 2005/07/06 16:58:57 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.29 2007/03/08 22:29:32 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -61,6 +61,7 @@ public class ResultTransmitter implements Schedulable {
 
     // The size (in bytes) of a batch in a batched query
     private static final int BATCHSIZE = 1024;
+    //private static final int BATCHSIZE = 1;
 
     // Tags for element and attribute list
     private static final String ELEMENT = "<!ELEMENT";
@@ -230,7 +231,6 @@ public class ResultTransmitter implements Schedulable {
             // KT HERE IS WHERE SERVER RESULTS ARE PRODUCED  
             int ctrlFlag =
                 queryResult.getNextResult(PageStream.MAX_DELAY, resultObject);
-            timedOut = false;
 
             if (ctrlFlag != CtrlFlags.NULLFLAG) {
                 assert resultObject.result
@@ -243,6 +243,7 @@ public class ResultTransmitter implements Schedulable {
                 // add the result to responseData
                 totalResults--;
                 resultsSoFar++;
+								timedOut = false;
                 if (!QUIET) {
                     if (response.dataSize() > BATCHSIZE) {
                         sendResults();
@@ -343,13 +344,14 @@ public class ResultTransmitter implements Schedulable {
                 // if no more new results have come in a while
                 // send the results and request more..
                 if (!QUIET && timedOut && !queryInfo.isAccumFileQuery()) {
+										if (response.dataSize() != 0) 
+												System.out.println("Timed out twice & have results - sending them");
                     // If we timed out two times in a row, then
                     // send the results
                     sendResults();
                     
                     // wait until we have another result
                     // to send data
-                    timedOut = false;
                 }
                 
                 if(BUF_FLUSH) {
