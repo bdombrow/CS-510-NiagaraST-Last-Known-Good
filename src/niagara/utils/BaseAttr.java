@@ -22,18 +22,20 @@ public abstract class BaseAttr {
 	public abstract boolean gt(BaseAttr other);
 	public abstract boolean lt(BaseAttr other);
 
-	public static DataType getDataTypeFromString(String typeName) {
-		DataType dataType;
+	public static BaseAttr.Type getDataTypeFromString(String typeName) {
+		BaseAttr.Type dataType;
         if (typeName.equalsIgnoreCase("string"))
-        	dataType = DataType.String;
+        	dataType = BaseAttr.Type.String;
         else if (typeName.equalsIgnoreCase("xml"))
-        	dataType = DataType.XML;
+        	dataType = BaseAttr.Type.XML;
         else if (typeName.equalsIgnoreCase("integer") ||
         		 typeName.equalsIgnoreCase("int"))
-        	dataType = DataType.Integer;
+        	dataType = BaseAttr.Type.Int;
+        else if (typeName.equalsIgnoreCase("long")) 
+        	dataType = BaseAttr.Type.Long;
         else if (typeName.equalsIgnoreCase("timestamp") ||
         		 typeName.equalsIgnoreCase("ts"))
-        	dataType = DataType.TS;
+        	dataType = BaseAttr.Type.TS;
         else
         	throw new PEException ("JL: Unsupported data type: " + typeName + " :");
         return dataType;

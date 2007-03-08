@@ -97,6 +97,10 @@ public class TSAttr extends BaseAttr {
 		return calender.get(Calendar.DAY_OF_WEEK);		
 	}
 
+  public long extractEpoch() {
+    return ((Long)attrVal).longValue();
+  }
+
 	public Long map(int factor) {
 		return (Long)attrVal/factor;
 	} 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.14 2007/02/14 03:30:11 jinli Exp $
+  $Id: SinkTupleStream.java,v 1.15 2007/03/08 22:30:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -85,6 +85,10 @@ public final class SinkTupleStream {
     public void setSendImmediate() {
 	sendImmediate = true;
     }
+    
+		public boolean isSendImmediate() {
+			return sendImmediate;
+		}
 
     /**
      * This function closes a stream so that no further upward or downward
@@ -157,7 +161,7 @@ public final class SinkTupleStream {
 	}
 	   
 	buffer.put(tuple);
-	if(buffer.isFull() || sendImmediate) {
+	if(buffer.isFull() || sendImmediate || tuple.isPunctuation()) {
 	    return flushBuffer(); // flushBuffer returns GET_PARTIAL or NULLFLAG
 	} else {
 	    return CtrlFlags.NULLFLAG; // success

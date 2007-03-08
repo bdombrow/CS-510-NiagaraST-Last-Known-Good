@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SourceTupleStream.java,v 1.5 2003/12/24 01:05:34 vpapad Exp $
+  $Id: SourceTupleStream.java,v 1.6 2007/03/08 22:30:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -83,6 +83,10 @@ public final class SourceTupleStream {
 		buffer = null;
 		status = Open;
     }  
+
+		public String getName() {
+			return pageStream.getName();
+		}
 
     /**
      * Get a tuple from the stream. If there is a tuple in the buffer,

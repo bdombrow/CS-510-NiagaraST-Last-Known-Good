@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.8 2003/07/09 04:59:40 tufte Exp $
+  $Id: PageStream.java,v 1.9 2007/03/08 22:30:31 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -169,16 +169,16 @@ public class PageStream {
 	
 	if(toConsumerQueue.isEmpty()) {
 	    if(timeout > 0) {
-		wait(timeout);
-		if(toConsumerQueue.isEmpty()) {
-		    // I timed out...
-		    if(VERBOSE)
-			timeouts++;
-		    return null;
-		}
+				wait(timeout);
+				if(toConsumerQueue.isEmpty()) {
+					// I timed out...
+					if(VERBOSE)
+					timeouts++;
+					return null;
+				}
 	    } else {
-		// caller does not want to wait on this stream
-		return null;
+				// caller does not want to wait on this stream
+				return null;
 	    }
 	    // else must be something in queue, go on
 	} 
