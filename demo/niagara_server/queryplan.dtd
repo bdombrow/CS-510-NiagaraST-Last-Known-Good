@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.46 2007/03/03 00:49:07 jinli Exp $
+<!-- $Id: queryplan.dtd,v 1.47 2007/03/08 22:28:21 tufte Exp $
      DTD for query plans -->
 
 <!-- 
@@ -18,7 +18,7 @@
 		    bucket | partitionavg | partitionmax |
 		    accumulate | nest | magic_construct | 
 		    windowCount | windowMax | windowAverage  | windowJoin |
-		    store | load | xmlscan | dbscan)+>
+		    store | load | xmlscan | dbscan | punctqc )+>
 		    
 <!ATTLIST plan top IDREF        #REQUIRED
           %PositionAttributes;>
@@ -323,6 +323,32 @@
 	  input    IDREFS       #REQUIRED
 	  %PositionAttributes;>
 
+<!-- punctuate/query control - does both functions of
+punctuating a stream from the database and also taking input
+from the punctuation on the stream 
+specify the db input first and the stream punct input second --> 
+<!ELEMENT punctqc EMPTY>
+<!ATTLIST punctqc
+          id       ID           #REQUIRED
+	        punctattr CDATA       #REQUIRED
+	        puncttype CDATA       #REQUIRED
+	        similarity CDATA       #REQUIRED
+	        prefetch CDATA       #REQUIRED
+	        input    IDREFS       #REQUIRED
+	  %PositionAttributes;>
+
+<!-- Punctuate on specification
+     punctattr is the attribute to be punctuated
+		 puncttype is the type of punctuation/specification -
+		 simple for now... -->
+<!ELEMENT punctuateonspec EMPTY>
+<!ATTLIST punctuateonspec
+          id       ID           #REQUIRED
+	  punctattr CDATA       #REQUIRED
+	  puncttype (onchange) "onchange" 
+	  input    IDREFS       #REQUIRED
+	  %PositionAttributes;>
+
 <!-- winattr is required for time-based windows, but not for tuple-based windows;
      wid is needed  when the window aggregate is not the next to bucket-->
 
@@ -417,6 +443,7 @@
 <!ATTLIST filescan 
           id       ID           #REQUIRED
           filename CDATA        #REQUIRED
+					delay    CDATA        "-1"
 	  isstream (yes | no) "yes"
 	  %PositionAttributes;>
 <!-- isStream should be yes if file is a stream in niagara:stream
@@ -428,6 +455,7 @@
           id       ID           #REQUIRED
           filename CDATA        #REQUIRED
           attrs    CDATA		#REQUIRED
+					delay    CDATA        "-1"
 	  isstream (yes | no) "yes"
 	  %PositionAttributes;>
 <!-- isStream should be yes if file is a stream in niagara:stream
