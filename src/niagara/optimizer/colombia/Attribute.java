@@ -1,4 +1,4 @@
-/* $Id: Attribute.java,v 1.6 2006/11/28 05:14:10 jinli Exp $ 
+/* $Id: Attribute.java,v 1.7 2007/03/08 22:35:48 tufte Exp $ 
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State
@@ -23,7 +23,7 @@
    and DARPA (ARPA order #8230, CECOM contract DAAB07-91-C-Q518).
  */
 package niagara.optimizer.colombia;
-import niagara.utils.DataType;
+import niagara.utils.BaseAttr;
 
 /** Tuple attributes */
 public interface Attribute {
@@ -33,7 +33,7 @@ public interface Attribute {
     
     Attribute copy();
     
-    DataType getDataType();
+    BaseAttr.Type getDataType();
     
     boolean matchesName(String name);
 } 
