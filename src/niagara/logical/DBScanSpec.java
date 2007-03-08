@@ -8,19 +8,18 @@ package niagara.logical;
 import java.io.*;
 import java.lang.reflect.Array;
 import niagara.utils.BaseAttr;
-import niagara.utils.DataType;
 
 public class DBScanSpec {
     private String query_string;
     private String[] attr_names;
-    private DataType[] attr_types;
+    private BaseAttr.Type[] attr_types;
 
     /**
      * Initialize the stream spec
      */
     public DBScanSpec(String _query_string, String[] _attr_names,
     				String[] _attr_type_names) {
-    	attr_types = new DataType[_attr_type_names.length];
+    	attr_types = new BaseAttr.Type[_attr_type_names.length];
     	this.query_string = _query_string;
     	this.attr_names = _attr_names;
     	for(int i = 0; i< _attr_type_names.length; i++) {
@@ -32,7 +31,7 @@ public class DBScanSpec {
     	return query_string;
     }
     
-    public DataType getAttrType(int i) {
+    public BaseAttr.Type getAttrType(int i) {
     	return attr_types[i];
     }
     

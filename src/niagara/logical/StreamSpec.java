@@ -8,6 +8,7 @@ package niagara.logical;
 public class StreamSpec {
     protected boolean isStream;
     protected boolean prettyPrint = false;
+		protected int delay;
 
     public boolean isStream() {
 	return isStream;
@@ -20,4 +21,7 @@ public class StreamSpec {
     public void dump(java.io.PrintStream ps) {
 	
     }
+		public int delay() {
+			return delay;
+		}
 }

@@ -1,4 +1,4 @@
-// $Id: FileScan.java,v 1.1 2003/12/24 02:08:29 vpapad Exp $
+// $Id: FileScan.java,v 1.2 2007/03/08 22:34:00 tufte Exp $
 
 package niagara.logical;
 
@@ -61,8 +61,12 @@ public class FileScan extends Stream {
     public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
         throws InvalidPlanException {
         boolean isStream = e.getAttribute("isstream").equalsIgnoreCase("yes");
+				int delay = Integer.parseInt(e.getAttribute("delay"));
+				if(!isStream && delay > 0) {
+				  throw new InvalidPlanException("delay > 0 allowed only if isstream is yes");
+				}
         streamSpec =
-            new FileScanSpec(e.getAttribute("filename"), isStream);
+            new FileScanSpec(e.getAttribute("filename"), isStream, delay);
         variable = new Variable(e.getAttribute("id"));
     }
 }

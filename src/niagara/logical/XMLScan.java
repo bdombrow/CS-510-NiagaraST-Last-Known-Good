@@ -1,4 +1,4 @@
-// $Id: XMLScan.java,v 1.3 2005/10/06 03:26:58 vpapad Exp $
+// $Id: XMLScan.java,v 1.4 2007/03/08 22:34:03 tufte Exp $
 
 package niagara.logical;
 
@@ -75,10 +75,15 @@ public class XMLScan extends Stream {
     public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
         throws InvalidPlanException {
         boolean isStream = e.getAttribute("isstream").equalsIgnoreCase("yes");
+				int delay = Integer.getInteger(e.getAttribute("delay")).intValue();
+        if(!isStream && delay > 0) {
+            throw new InvalidPlanException("delay > 0 allowed only if isstream is yes");
+				}
+				
         streamSpec =
-            new FileScanSpec(e.getAttribute("filename"), isStream);
+            new FileScanSpec(e.getAttribute("filename"), isStream, delay);
         variable = new Variable(e.getAttribute("id"));
-        
+       
         String[] sattrs = e.getAttribute("attrs").split("\\W+");
         if (sattrs.length == 0 || sattrs[sattrs.length-1].length() == 0)
             throw new InvalidPlanException("XMLScan must unnest at least one attribute");

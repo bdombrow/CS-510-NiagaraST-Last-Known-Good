@@ -1,4 +1,4 @@
-/* $Id: Unnest.java,v 1.14 2006/12/04 21:21:04 tufte Exp $ */
+/* $Id: Unnest.java,v 1.15 2007/03/08 22:34:03 tufte Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -12,7 +12,6 @@ import niagara.xmlql_parser.Scanner;
 import niagara.xmlql_parser.regExp;
 import niagara.xmlql_parser.varType;
 import niagara.logical.path.RE;
-import niagara.utils.DataType;
 import niagara.utils.BaseAttr;
 import niagara.utils.PEException;
 
@@ -195,10 +194,10 @@ public class Unnest extends UnaryOperator {
             type = varType.CONTENT_VAR;
         }
         
-        DataType dataType = BaseAttr.getDataTypeFromString(dataTypeAttr);
+        BaseAttr.Type dataType = BaseAttr.getDataTypeFromString(dataTypeAttr);
 
         //variable = new Variable(id, type);
-        if (dataType == DataType.XML) {
+        if (dataType == BaseAttr.Type.XML) {
         	variable = new Variable(id, dataType, type);
         } else
         	variable = new Variable(id, dataType);

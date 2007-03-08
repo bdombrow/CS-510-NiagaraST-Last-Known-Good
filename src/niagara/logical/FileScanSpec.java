@@ -13,9 +13,10 @@ public class FileScanSpec extends StreamSpec{
     /**
      * Initialize the stream spec
      */
-    public FileScanSpec(String file_name, boolean isStream) {
+    public FileScanSpec(String file_name, boolean isStream, int delay) {
 	this.file_name = file_name;
 	this.isStream = isStream;
+	this.delay = delay;
     }
 
     public String getFileName() {
@@ -25,5 +26,6 @@ public class FileScanSpec extends StreamSpec{
     public void dump(PrintStream os) {
 	os.println("Stream Specification: ");
 	os.println("File Stream: fileName: " + file_name);
+	os.println("Delay: " + delay);
     }
 }

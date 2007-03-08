@@ -1,4 +1,4 @@
-/* $Id: Variable.java,v 1.14 2006/12/07 00:03:31 jinli Exp $ */
+/* $Id: Variable.java,v 1.15 2007/03/08 22:34:03 tufte Exp $ */
 package niagara.logical;
 
 import niagara.connection_server.InvalidPlanException;
@@ -11,18 +11,18 @@ import niagara.physical.AtomicEvaluator;
 import niagara.physical.SimpleAtomicEvaluator;
 import niagara.xmlql_parser.regExp;
 import niagara.xmlql_parser.varType;
-import niagara.utils.DataType;
+import niagara.utils.BaseAttr;
 
 public class Variable implements Atom, Attribute {
     private String name;
     private Domain domain;
-    private DataType dataType;
+    private BaseAttr.Type dataType;
 
     public Variable(String name, Domain domain) {
         // We want unique names for variables
         this.name = name.intern();
         this.domain = domain;
-        this.dataType = DataType.XML;
+        this.dataType = BaseAttr.Type.XML;
         if (domain == null)
             this.domain = NodeDomain.getDomain(varType.NULL_VAR);
     }
@@ -35,19 +35,19 @@ public class Variable implements Atom, Attribute {
         this(name, NodeDomain.getDOMNode(type));
     }
     
-    public Variable (String name, DataType dataType) {
+    public Variable (String name, BaseAttr.Type dataType) {
     	this.name = name;
     	this.dataType = dataType;
     	this.domain = NodeDomain.getDOMNode();
     }
     
-    public Variable (String name, DataType dataType, int type) {
+    public Variable (String name, BaseAttr.Type dataType, int type) {
     	this.name = name;
     	this.dataType = dataType;
     	this.domain = NodeDomain.getDOMNode(type);
     }
 
-    public Variable (String name, DataType dataType, Domain domain) {
+    public Variable (String name, BaseAttr.Type dataType, Domain domain) {
     	this.name = name;
     	this.dataType = dataType;
     	this.domain = domain;
@@ -122,7 +122,7 @@ public class Variable implements Atom, Attribute {
         return domain;
     }
     
-    public DataType getDataType() {
+    public BaseAttr.Type getDataType() {
     	return dataType;
     }
 
@@ -137,7 +137,7 @@ public class Variable implements Atom, Attribute {
     public boolean equals(Attribute other) {
     	//return name.equals(other.getName());
     	
-    	if (dataType == DataType.XML)
+    	if (dataType == BaseAttr.Type.XML)
     		if (!domain.equals(other.getDomain()))
     			return false;
     	return name.equals(other.getName());
