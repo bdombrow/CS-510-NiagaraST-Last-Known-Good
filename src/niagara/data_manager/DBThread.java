@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.1 2006/12/04 21:13:30 tufte Exp $ */
+/* $Id: DBThread.java,v 1.2 2007/03/08 22:32:29 tufte Exp $ */
 
 package niagara.data_manager;
 
@@ -116,7 +116,7 @@ public class DBThread extends SourceThread {
 	public void run() {
 
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName("org.postgresql.Driver");
 
 		} catch (ClassNotFoundException e) {
 			System.out.println("Class not found " + e.getMessage());
@@ -139,11 +139,10 @@ public class DBThread extends SourceThread {
 		ResultSet rs = null;
 		try {
 			String qs = dbScanSpec.getQueryString();
-			System.out.println("got to the thread query is:" + qs);
+			System.out.println("DB Query is:" + qs);
 
 			System.out.println("Attempting to connect to server.");
-			conn = DriverManager.getConnection(
-					"jdbc:mysql://db.cecs.pdx.edu/tufte", "tufte", "loopdata");
+			conn = DriverManager.getConnection("jdbc:postgresql://barista.cs.pdx.edu/latte", "tufte", "loopdata");
 			System.out.println("Connected.");
 
 			stmt = conn.createStatement();
@@ -156,9 +155,6 @@ public class DBThread extends SourceThread {
 			System.out.println("Num Attrs: " + numAttrs);
 			
 			while (rs.next()) {
-				//int a = rs.getInt("a");
-				//int b = rs.getInt("b");
-				//System.out.println(a + "   " + b);
 				Tuple newtuple = new Tuple(false, numAttrs);
 				for(int i = 1; i<= numAttrs; i++) {
 					// get attribut type
@@ -166,21 +162,28 @@ public class DBThread extends SourceThread {
 					// finally, load attribute into the tuple
 					BaseAttr attr;
 					switch(dbScanSpec.getAttrType(i-1)) {
-					case Integer:
-						System.out.println("Loaded integer");
+					case Int:
 						attr = new IntegerAttr();
 						Integer iObj = new Integer(rs.getInt(i));
 						attr.loadFromObject(iObj);
 						break;
+					case Long:
+						attr = new LongAttr();
+						Long lObj = new Long(rs.getLong(i));
+						attr.loadFromObject(lObj);
+						break;
+					case TS:
+						attr = new TSAttr();
+						Long tObj = new Long(rs.getLong(i));
+						attr.loadFromObject(tObj);
+						break;
 					case String:
 						attr = new StringAttr();
 						attr.loadFromObject(rs.getString(i));
-						System.out.println("Loaded string");
 						break;
 					case XML:
 						attr = new XMLAttr();
 						attr.loadFromObject(rs.getString(i));
-						System.out.println("Loaded xmlattr");
 						break;
 					default:
 						throw new PEException("Invalid type " + dbScanSpec.getAttrType(i));
@@ -190,11 +193,6 @@ public class DBThread extends SourceThread {
 				}  // end for
 				outputStream.putTuple(newtuple);
 			} // end while
-			// or alternatively, if you don't know ahead of time that
-			// the query will be a SELECT...
-			// if (stmt.execute("SELECT foo FROM bar")) {
-			// rs = stmt.getResultSet();
-			// }
 			
 			outputStream.endOfStream();
 			
