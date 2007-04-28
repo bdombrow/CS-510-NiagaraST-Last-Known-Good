@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoin.java,v 1.3 2007/03/08 22:34:28 tufte Exp $
+  $Id: PhysicalHashJoin.java,v 1.4 2007/04/28 21:42:17 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -80,6 +80,9 @@ public class PhysicalHashJoin extends PhysicalJoin {
     int INTERVAL = 0;
     Document doc;
     
+    private boolean[] streamClose;
+    private ArrayList punctBuffer = null;
+    
     public PhysicalHashJoin() {
 			  isSendImmediate = true;
         setBlockingSourceStreams(blockingSourceStreams);
@@ -113,8 +116,8 @@ public class PhysicalHashJoin extends PhysicalJoin {
 				     Tuple tupleElement,
 				     int streamId) 
 	throws ShutdownException, InterruptedException {
-		if(streamId == 0)
-		  System.out.println("Physical Hash Processing tuple from stream " + getStreamName(streamId));
+		//if(streamId == 0)
+		 // System.out.println("Physical Hash Processing tuple from stream " + getStreamName(streamId));
 		
 	// Get the hash code corresponding to the tuple element
 	String hashKey = hashers[streamId].hashKey(tupleElement);
@@ -135,9 +138,9 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	producedResult = constructJoinResult(tupleElement, streamId, hashKey,
 					     partialSourceTuples[otherStreamId]);
 
-	if(producedResult) {
+	/*if(producedResult) {
 		System.out.println("Physical Hash Join Produced Results");
-	}
+	}*/
 	// Extension join note: Extension join indicates that we
 	// expect an extension join with referential integrity 
 	// meaning that tuples on the denoted extension join side
@@ -154,7 +157,17 @@ public class PhysicalHashJoin extends PhysicalJoin {
 						 hashKey,
 					   finalSourceTuples[otherStreamId]);
 	}
+	
+	Tuple left, right;
 
+	if (streamId == 0) {
+		left = tupleElement;
+		right = null;
+	} else {
+		left = null;
+		right = tupleElement;
+	}
+	
 	if(!extensionJoin[streamId] || !producedResult) {
 	    //System.out.println("KT inserting in hash table streamID " + streamId);
 	    // we don't add to hash table if this is extension join
@@ -165,37 +178,48 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	    // other input that matches it
 	    boolean fMatch=false;
 
-	    for (int i=0; 
-		 i<rgPunct[otherStreamId].size() && fMatch==false; i++) {
-		stPunctJoinKey =
-		    hashers[otherStreamId].hashKey
-		    ((Punctuation) rgPunct[otherStreamId].get(i));
-		
-		if (stPunctJoinKey != null) {
-		    hashers[otherStreamId].getValuesFromKey(stPunctJoinKey,
-							    rgstPValues);
-		    hashers[streamId].getValuesFromKey(hashKey,
-						       rgstTValues);
-		    boolean fMatchValue=true;
-		    
-		    for (int j=0; j<rgstPValues.length && fMatchValue; j++) {
-			fMatchValue =
-			    Punctuation.matchValue(rgstPValues[j],
-								rgstTValues[j]);
-		    }
-		}
+	    if (streamClose[otherStreamId]) {
+	    	fMatch = true;
 	    }
 	    
-	    if (fMatch == false) {
-		if (tupleElement.isPartial()) {
-		    partialSourceTuples[streamId].put(hashKey, tupleElement);
-		} else {
-		    finalSourceTuples[streamId].put(hashKey, tupleElement);
+		long punctTS;
+		Punctuation punct;
+		if (ts != null) { 
+			long timestamp = Long.valueOf(ts[streamId].getAtomicValue(left, right).trim());
+			for (int i=0; i<rgPunct[otherStreamId].size() && fMatch==false; i++) {
+				punct = (Punctuation) rgPunct[otherStreamId].get(i);
+				if (otherStreamId == 0) {
+					left = punct;
+					right = null;
+				} else {
+					left = null;
+					right = punct;
+				}
+			
+				String punctVal = ts[otherStreamId].getAtomicValue(left, right).trim();
+				if (punctVal.startsWith("(")) 
+					punctVal = punctVal.substring(2, punctVal.length() - 1);  
+			   
+				punctTS = Integer.valueOf(punctVal);
+			
+			
+			
+				if (punctTS >= timestamp) 
+					fMatch = true;			
+			}
 		}
-	    }
-	} else {
-	    //System.out.println("KT: not inserting in hash table " + streamId);
-	}
+	    
+	    
+	    if (fMatch == false) 
+	    	if (tupleElement.isPartial()) 
+	    		partialSourceTuples[streamId].put(hashKey, tupleElement);
+	    	else {
+	    		//if(streamId == 0)
+	    		//	  System.out.println("Physical Hash storing tuple from stream " + getStreamName(streamId) + " hashkey: "+hashKey);
+
+	    		finalSourceTuples[streamId].put(hashKey, tupleElement);
+	    	}
+	} 
     }
 
 
@@ -238,6 +262,8 @@ public class PhysicalHashJoin extends PhysicalJoin {
 
 	boolean producedResult = false;
 
+	//System.err.println("searching in stream "+getStreamName(1-streamId) + "for: "+hashKey);
+	
 	// Get the list of tuple elements having the same hash code in
 	// otherStreamTuples
 	//
@@ -272,16 +298,16 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	    // Check whether the predicate is satisfied
 	    if (pred.evaluate(leftTuple, rightTuple)) {
                 produceTuple(leftTuple, rightTuple);
-		producedResult = true;
-		if(extensionJoin[1-streamId]) {
-		    boolean success =
-			otherStreamTuples.remove(hashKey, otherTupleElement);
-		    if(!success)
-			throw new PEException("KT: removal from hash table failed");
-		    removed = true;
-		} 
-		if(extensionJoin[streamId])
-		    return producedResult;
+                producedResult = true;
+                if(extensionJoin[1-streamId]) {
+                	boolean success =
+                		otherStreamTuples.remove(hashKey, otherTupleElement);
+                	if(!success)
+                		throw new PEException("KT: removal from hash table failed");
+                	removed = true;
+                } 
+                if(extensionJoin[streamId])
+                	return producedResult;
 	    }
 	    if(!removed)
 		tup++;
@@ -302,10 +328,16 @@ public class PhysicalHashJoin extends PhysicalJoin {
 
     protected void processPunctuation(Punctuation tuple, int streamId)
     	throws ShutdownException, InterruptedException {
-   	System.err.println("Physical hash join - processing punct from stream " + getStreamName(streamId));
+   	//System.err.println("Physical hash join - processing punct from stream " + getStreamName(streamId));
     	
     	if (ts == null) {
-    		System.err.println("Don't know what to do with this punctuation - no punctation attr is specified");
+    		//System.err.println("Don't know what to do with this punctuation - no punctation attr is specified");
+    		
+    		/**
+    		 * no punctuating attribute is specified, but we want to pass the punctuations on
+    		 */
+    		passOnPunct(tuple, streamId);
+    				
     		return;
     	}
     		
@@ -322,7 +354,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 		if (punctVal.startsWith("(")) 
 		   punctVal = punctVal.substring(2, punctVal.length() - 1);  
 		   
-		int punctTS = Integer.valueOf(punctVal) ;
+		long punctTS = Integer.valueOf(punctVal) ;
 
 		// see if there are tuples to remove from the other hash table.
 		// check both the partial list and the final list
@@ -344,8 +376,12 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	    			right = (Tuple)list.next();
 	    		}
 	    		
-	    		if (Double.valueOf(ts[otherStreamId].getAtomicValue(left, right)) < (punctTS - INTERVAL))
+	    		if (Double.valueOf(ts[otherStreamId].getAtomicValue(left, right)) < (punctTS - INTERVAL)) {
+	    			
+	    			//System.out.println("Physical Hash purging tuple from stream " + getStreamName(otherStreamId));
+
 	    			list.remove();
+	    		}
 	    	}
 	    	if (hashEntry.size() == 0)
 	    		keys.remove();
@@ -417,6 +453,25 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	return;
     }*/
 
+	/**
+	 * @param tuple
+	 * @param streamId
+	 * 
+	 * No punctuating attribute is specified. We pass on punctuation tuples directly to the output.
+	 * 
+	 */
+	private void passOnPunct(Punctuation tuple, int streamId) 
+	throws InterruptedException, ShutdownException {
+		
+		if (streamClose[1-streamId])
+			putPunctuation(tuple, streamId);
+		else {
+			if (punctBuffer == null)
+				punctBuffer = new ArrayList();
+			punctBuffer.add(tuple);
+		}
+	}
+
 	protected void producePunctuation(
         Punctuation left,
         Punctuation right,
@@ -462,8 +517,10 @@ public class PhysicalHashJoin extends PhysicalJoin {
 							     rgstTValues[i]);
 	    }
 
-	    if (fMatch)
-		ht.remove(hashKey);
+	    if (fMatch){
+	    	//System.out.println("purging in stream " + getStreamName(streamId) +" for "+hashKey);
+	    	ht.remove(hashKey);
+	    }
 	}
     }
 
@@ -547,6 +604,10 @@ public Cost findLocalCost(
             ts[1].resolveVariables(inputTupleSchemas[1], 1);
 
         }
+        
+        streamClose = new boolean[2];
+        streamClose[0] = false;
+        streamClose[1] = false;
     }
 
     /**
@@ -565,5 +626,70 @@ public Cost findLocalCost(
     public void setResultDocument(Document doc) {
     	this.doc = doc;
         }   
+    
+    public void streamClosed( int streamId) 
+    throws ShutdownException { 
+    	streamClose[streamId] = true;
+    	finalSourceTuples[1-streamId].clear();
+    	if (punctBuffer != null) {
+    		Iterator punctuations = punctBuffer.iterator();
+    		try {
+    			while (punctuations.hasNext()) {
+    				
+    				putPunctuation((Punctuation) punctuations.next(), 1-streamId);
+    				punctuations.remove();
+    			}
+    		} catch (InterruptedException e) {
+    			return;
+    		}
+    	}
+    }
+    
+    private void putPunctuation (Punctuation tuple, int streamId) 
+    throws InterruptedException, ShutdownException {
+    	Punctuation result;
+    	Punctuation left, right;
+    	
+    	if (streamId == 0) {
+    		left = tuple;
+    		right = null;
+    	} else {
+    		right = tuple; 
+    		left = null;
+    	}
+
+    	
+        if (projecting) {
+        	if (left == null) {
+        		result = new Punctuation(false);
+        		for (int i = 0; i< leftAttributeMap.length; i++) 
+        			result.appendAttribute(new StringAttr("*"));
+        	} else
+        		result = left.copy(outputTupleSchema.getLength(), leftAttributeMap);
+        	
+        	if (right == null) {
+        		for (int i = 0; i< rightAttributeMap.length; i++)
+        			result.appendAttribute(new StringAttr("*"));
+        	} else
+        		right.copyInto(result, leftAttributeMap.length, rightAttributeMap);
+        } else {
+        	int length;
+        	if (left == null) {
+        		result = new Punctuation(false);
+        		length = inputTupleSchemas[0].getLength();
+        		for (int i = 0; i<length;  i++)
+        			result.appendAttribute(new StringAttr("*"));
+        	} else
+        		result = left.copy(outputTupleSchema.getLength());
+        	
+        	if (right == null) {        		
+        		length = inputTupleSchemas[1].getLength();
+    			for (int i = 0; i<length;  i++)
+    				result.appendAttribute(new StringAttr("*"));
+        	} else
+        		result.appendTuple(right);
+        }
+    	putTuple(result, 0);
+    }
 }
 
