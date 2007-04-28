@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Bucket.java,v 1.4 2005/08/15 01:35:03 jinli Exp $
+  $Id: Bucket.java,v 1.5 2007/04/28 21:26:13 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -51,6 +51,7 @@ public class Bucket extends UnaryOperator {
 	protected int slide;	
 	protected String stInput;
 	private String name;
+	private long starttime;
 
     public void dump() {
 	System.out.println("BucketOp");
@@ -62,6 +63,7 @@ public class Bucket extends UnaryOperator {
 	op.windowType = windowType;
 	op.range = range;
 	op.slide = slide;
+	op.starttime = starttime;
 	//op.attrInput = attrInput;
 	op.stInput = stInput;
 	op.name = name;
@@ -89,7 +91,7 @@ public class Bucket extends UnaryOperator {
 			return false;
 	return (windowType == other.windowType) &&
 		(range == other.range) &&
-		(slide == other.slide);
+		(slide == other.slide) && (starttime == other.starttime);
     }
 
     protected void loadWindowAttrsFromXML(Element e, 
@@ -128,6 +130,10 @@ public class Bucket extends UnaryOperator {
 	throws InvalidPlanException {
 		name = e.getAttribute("id");
 		stInput = e.getAttribute("input");
+		if (e.getAttribute("start") != "")
+			starttime = Long.valueOf(e.getAttribute("start"));
+		else
+			starttime = Long.MIN_VALUE;
 		loadWindowAttrsFromXML(e, inputProperties[0]);
     }
     
@@ -148,6 +154,9 @@ public class Bucket extends UnaryOperator {
     }
     public String getWid () {
     	return widName;
+    }
+    public long getStarttime () {
+    	return starttime;
     }
     /**
      * 
