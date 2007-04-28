@@ -65,6 +65,7 @@ public abstract class BaseAttr {
 	
 	private void wildStar() {
 		attrVal = new String("*");
+		// punct is true when the attrVal of a BaseAttr contrains a "*"
 		punct = true;
 	}
 

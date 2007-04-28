@@ -1,7 +1,10 @@
 package niagara.utils;
 
+import niagara.utils.BaseAttr.Type;
+
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
 
 public class XMLAttr extends BaseAttr {
 	
@@ -20,8 +23,7 @@ public class XMLAttr extends BaseAttr {
 	}
 	
 	public void loadPunctFromXMLNode (Node xmlNode) {
-		loadFromXMLNode (xmlNode);
-		punct = true;
+		loadFromXMLNode(xmlNode);
 	}
 	
 	public void loadFromObject(Object value) {
@@ -29,14 +31,28 @@ public class XMLAttr extends BaseAttr {
 	}
 	
 	public String toASCII() {
+		if (punct)
+			//System.err.println("XML attribute cannot contain a punctuation value");
+			return (String) attrVal;
+		
 		short type = ((Node)attrVal).getNodeType();
 		
 		switch (type) {
 		case Node.ATTRIBUTE_NODE:
 			return ((Node)attrVal).getNodeValue();
 		case Node.ELEMENT_NODE:
-			return ((Node)attrVal).getFirstChild().getNodeValue();
-			
+			StringBuffer result = new StringBuffer();
+			Element elt = (Element)attrVal;
+			Node item;
+			int size = elt.getChildNodes().getLength();
+			for (int i = 0; i < size; i++) {
+				item = elt.getChildNodes().item(i);
+				if (item.getNodeType() == Node.ELEMENT_NODE)
+					result.append(item.getFirstChild().getNodeValue()+"\t");
+				else 
+					result.append(item.getNodeValue()+"\t");
+			}
+			return result.toString();
 		case Node.TEXT_NODE:
 			return ((Node)attrVal).getNodeValue();
 		default:
@@ -99,6 +115,8 @@ public class XMLAttr extends BaseAttr {
 	}
 	
 	public Node getNodeValue() {
+		if (punct)
+			return null;
 		return (Node)attrVal;
 	}
 

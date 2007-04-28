@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: CtrlFlags.java,v 1.2 2003/03/05 19:28:55 tufte Exp $
+  $Id: CtrlFlags.java,v 1.3 2007/04/28 21:51:26 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -54,6 +54,8 @@ public class CtrlFlags {
     public final static int REQUEST_BUF_FLUSH = 6; // upstream only
 
     public final static int TIMED_OUT = 7; // for returning status only
+    public final static int CHANGE_QUERY = 8;
+    public final static int READY_TO_FINISH = 9;
 
     // flag names - order MUST match order of values -
     // value (from above) is used as an index into the name
@@ -66,7 +68,9 @@ public class CtrlFlags {
 	  "EndPartial",
 	  "EndOfStream",
 	  "RequestBufferFlush",
-	  "TimedOut" };
+	  "TimedOut",
+	  "ChangeQuery",
+	  "ReadyToFinish"};
     
 }
 

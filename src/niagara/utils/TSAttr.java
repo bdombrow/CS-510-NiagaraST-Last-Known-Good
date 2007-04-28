@@ -37,7 +37,7 @@ public class TSAttr extends BaseAttr {
 	
 	public void loadPunctFromXMLNode (Node xmlNode) {
 		loadFromXMLNode(xmlNode);
-		punct = true;
+		//punct = true;
 	}
 	
 	public void loadFromObject(Object value) {
@@ -51,6 +51,8 @@ public class TSAttr extends BaseAttr {
 	}
 	
 	public String toASCII() {
+		if (punct)
+			return (String) attrVal;
 		return ((Long)attrVal).toString();
 	}
 	
@@ -60,21 +62,23 @@ public class TSAttr extends BaseAttr {
 	 * 
 	 */
 	public boolean eq(BaseAttr other) {
-		if (!(other instanceof TSAttr))
+		if (!((other instanceof TSAttr) || (other instanceof LongAttr)))
 			return false;
-		return (((Long)attrVal).compareTo((Long)other.attrVal) == 0);
+		
+		return ((Long)attrVal).compareTo((Long)other.attrVal) == 0;
 	}
 	
 	public boolean gt(BaseAttr other) {
-		if (other instanceof TSAttr)
-			return (((Long)attrVal).compareTo((Long)other.attrVal) > 0);
+		if (!((other instanceof TSAttr) || (other instanceof LongAttr)))
+			return ((Long)attrVal).compareTo((Long)other.attrVal) > 0;
+		
 		else 
 			throw new PEException("JL: Comparing Different Attribute Types");
 	}
 
 	public boolean lt(BaseAttr other) {
-		if (other instanceof TSAttr)
-			return (((Long)attrVal).compareTo((Long)other.attrVal) < 0);
+		if (!((other instanceof TSAttr) || (other instanceof LongAttr)))
+			return ((Long)attrVal).compareTo((Long)other.attrVal) < 0;
 		else 
 			throw new PEException("JL: Comparing Different Attribute Types");
 	}
@@ -97,6 +101,9 @@ public class TSAttr extends BaseAttr {
 		return calender.get(Calendar.DAY_OF_WEEK);		
 	}
 
+	/*
+	 * the factor should be specified in the same granularity of the timestamp, e.g., second
+	 */
   public long extractEpoch() {
     return ((Long)attrVal).longValue();
   }
