@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Join.java,v 1.3 2007/02/14 03:30:11 jinli Exp $
+  $Id: Join.java,v 1.4 2007/04/28 21:27:20 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -76,7 +76,7 @@ public class Join extends BinaryOperator {
         Predicate pred,
         EquiJoinPredicateList equiJoinPredicates,
         Attrs projectedAttrs,
-	int extensionJoin, String[] punctAttrs) {
+        int extensionJoin, String[] punctAttrs) {
         this.pred = pred;
         this.equiJoinPredicates = equiJoinPredicates;
         this.projectedAttrs = projectedAttrs;
@@ -219,22 +219,14 @@ public class Join extends BinaryOperator {
         if (obj.getClass() != Join.class)
             return obj.equals(this);
         Join other = (Join) obj;
-        if (punctAttrs != null) {
-        	if (other.punctAttrs == null)
-        		return false;
-        	else {
-        		if (!(punctAttrs[0].equals(other.punctAttrs[0]) && 
-        				punctAttrs[1].equals(other.punctAttrs[1])))
-        			return false;
-        	}
-        } else 
-        	if (punctAttrs != null)
-        		return false;
         
-        return pred.equals(other.pred)
-            && equiJoinPredicates.equals(other.equiJoinPredicates)
-            && equalsNullsAllowed(projectedAttrs, other.projectedAttrs)
-	    && (extensionJoin == other.extensionJoin);
+        if ((punctAttrs==null) ^ (other.punctAttrs==null))
+        	return false;
+        
+        return pred.equals(other.pred) &&
+			   equiJoinPredicates.equals(other.equiJoinPredicates) &&
+			   equalsNullsAllowed(projectedAttrs, other.projectedAttrs) &&
+			   (extensionJoin == other.extensionJoin);
     }
 
     public int hashCode() {
