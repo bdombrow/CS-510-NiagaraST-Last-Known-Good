@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.2 2007/03/08 22:32:29 tufte Exp $ */
+/* $Id: DBThread.java,v 1.3 2007/04/28 21:23:00 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -15,13 +15,16 @@ import niagara.logical.DBScanSpec;
 import niagara.optimizer.colombia.*;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.*;
+import niagara.utils.BaseAttr.Type;
 
 // for jdbc
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Properties;
 
 /**
  * DBThread provides a SourceThread compatible interface to fetch data from a
@@ -30,13 +33,22 @@ import java.sql.ResultSet;
 public class DBThread extends SourceThread {
 
 	// think these are optimization time??
-	private DBScanSpec dbScanSpec;
+	public DBScanSpec dbScanSpec;
 	private Attribute[] variables;
 
 	// these are run-time??
-	private SinkTupleStream outputStream;
-	private CPUTimer cpuTimer;
+	public SinkTupleStream outputStream;
+	public CPUTimer cpuTimer;
+	private ArrayList newQueries;
+	private boolean finish = false;
+	private boolean shutdown = false; 
+	
+	private boolean  test = false;
 
+	public DBThread() {
+		newQueries = new ArrayList();
+	}
+	
 	/**
 	 * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
 	 */
@@ -82,6 +94,8 @@ public class DBThread extends SourceThread {
 		if (o.getClass() != getClass())
 			return o.equals(this);
 		// XXX vpapad: Spec.equals is Object.equals
+		if (dbScanSpec.equals(((DBThread) o).dbScanSpec))
+			System.err.println("DBSCAN equals true");
 		return dbScanSpec.equals(((DBThread) o).dbScanSpec);
 	}
 
@@ -115,21 +129,22 @@ public class DBThread extends SourceThread {
 	 */
 	public void run() {
 
+		
 		try {
 			Class.forName("org.postgresql.Driver");
-
+	
 		} catch (ClassNotFoundException e) {
 			System.out.println("Class not found " + e.getMessage());
 			return;
 		}
 		if (niagara.connection_server.NiagraServer.RUNNING_NIPROF)
 			JProf.registerThreadName(this.getName());
-
+	
 		if (niagara.connection_server.NiagraServer.TIME_OPERATORS) {
-			cpuTimer = new CPUTimer();
-			cpuTimer.start();
+			this.cpuTimer = new CPUTimer();
+			this.cpuTimer.start();
 		}
-
+	
 		// steps
 		// connect to the database
 		// execute the query
@@ -137,64 +152,108 @@ public class DBThread extends SourceThread {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
+		String timeConstraint;
 		try {
-			String qs = dbScanSpec.getQueryString();
-			System.out.println("DB Query is:" + qs);
-
 			System.out.println("Attempting to connect to server.");
-			conn = DriverManager.getConnection("jdbc:postgresql://barista.cs.pdx.edu/latte", "tufte", "loopdata");
-			System.out.println("Connected.");
+			//conn = DriverManager.getConnection("jdbc:postgresql://barista.cs.pdx.edu/latte", "tufte", "loopdata");
+			Properties properties = new Properties();
+			properties.setProperty("user", "tufte");
+			properties.setProperty("password", "loopdata");
 
+			conn = DriverManager.getConnection("jdbc:postgresql://barista.cs.pdx.edu/latte", properties);
+
+			System.out.println("Connected.");
+			
+			stmt = conn.createStatement();
+
+			stmt.execute("SET work_mem=100000");
+			
+			String qs = dbScanSpec.getQueryString();
+			System.out.println("main query string: "+qs);
+	
+		do {
+			if (dbScanSpec.oneTime()) {
+				System.out.println("DB Query is:" + qs);
+				//stmt = conn.createStatement();
+				System.out.println("Attempting to execute query.");
+
+				rs = stmt.executeQuery(qs);
+				//System.out.println("Executed.");				
+		
+				// Now do something with the ResultSet ....
+				int numAttrs = dbScanSpec.getNumAttrs();
+				//System.out.println("Num Attrs: " + numAttrs);
+				
+				putResults(rs, numAttrs);
+
+				outputStream.endOfStream();
+				break;
+			}
+			
+			/*
+			 * response to query shutdown;
+			 */
+			if (shutdown) {
+				outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "bouncing back SHUTDOWN msg");
+				
+				break;
+			}
+				
+			/*
+			 * if this is a continuous db scan
+			 */	
+			if (newQueries.size()==0) {
+				if (finish){
+					outputStream.endOfStream();
+					break;
+				} else {
+					//blocking call to get ctrl msg;
+					checkForSinkCtrlMsg();
+					
+					if (newQueries.size()==0)
+						continue;
+				}
+			}
+				
+			//timeConstraint = changeQuery((String) (newQueries.remove(0)));
+			//System.out.println("DB Query is:" + qs+timeConstraint);
+	
 			stmt = conn.createStatement();
 			System.out.println("Attempting to execute query.");
-			rs = stmt.executeQuery(qs);
-			System.out.println("Executed.");
+			
+			if (!test) {
+				/*timeConstraint = changeQuery((String) (newQueries.remove(0)));
+				System.out.println("DB Query is:" + qs+timeConstraint);
 
-			// Now do something with the ResultSet ....
-			int numAttrs = dbScanSpec.getNumAttrs();
-			System.out.println("Num Attrs: " + numAttrs);
+				rs = stmt.executeQuery(qs+timeConstraint);*/
+				String queryString = (String) newQueries.remove(0);
+				System.err.println(queryString);
+				rs = stmt.executeQuery(queryString);
+		
+				// Now do something with the ResultSet ....
+				int numAttrs = dbScanSpec.getNumAttrs();
+								
+				putResults(rs, numAttrs);
+				
+			} else {
+				timeConstraint = (String) (newQueries.remove(0));
+				System.out.println("DB Query is:" + qs+timeConstraint);
+
+				for (int j = 1000; j<=2000; j++) {
+					String sensor = " and detectorid= "+j;
 			
-			while (rs.next()) {
-				Tuple newtuple = new Tuple(false, numAttrs);
-				for(int i = 1; i<= numAttrs; i++) {
-					// get attribut type
-					// then create the appropriate object
-					// finally, load attribute into the tuple
-					BaseAttr attr;
-					switch(dbScanSpec.getAttrType(i-1)) {
-					case Int:
-						attr = new IntegerAttr();
-						Integer iObj = new Integer(rs.getInt(i));
-						attr.loadFromObject(iObj);
-						break;
-					case Long:
-						attr = new LongAttr();
-						Long lObj = new Long(rs.getLong(i));
-						attr.loadFromObject(lObj);
-						break;
-					case TS:
-						attr = new TSAttr();
-						Long tObj = new Long(rs.getLong(i));
-						attr.loadFromObject(tObj);
-						break;
-					case String:
-						attr = new StringAttr();
-						attr.loadFromObject(rs.getString(i));
-						break;
-					case XML:
-						attr = new XMLAttr();
-						attr.loadFromObject(rs.getString(i));
-						break;
-					default:
-						throw new PEException("Invalid type " + dbScanSpec.getAttrType(i));
-					}
+					rs = stmt.executeQuery(qs+timeConstraint+sensor);
+					//System.out.println("Executed.");				
+
+					// Now do something with the ResultSet ....
+					int numAttrs = dbScanSpec.getNumAttrs();
+					//System.out.println("Num Attrs: " + numAttrs);
 					
-					newtuple.appendAttribute(attr);
-				}  // end for
-				outputStream.putTuple(newtuple);
-			} // end while
+					putResults(rs, numAttrs);
+				} // end for
+			}
 			
-			outputStream.endOfStream();
+		} while (true);
 			
 		} catch (SQLException ex) {
 			// handle any errors
@@ -207,6 +266,11 @@ public class DBThread extends SourceThread {
 				// just ignore it
 			}
 		} catch(ShutdownException se) {
+			try {
+			//outputStream.endOfStream();
+			} catch (Exception e) {
+				//ignore it
+			}
 			// no need to send shutdown, we must have got it from the output stream
 		} catch(InterruptedException ie) {
 			try {
@@ -219,7 +283,7 @@ public class DBThread extends SourceThread {
 		 // resources in a finally{} block
 		 // in reverse-order of their creation
 		 // if they are no-longer needed
-
+	
 		 if (rs != null) {
 		 try {
 			 rs.close();
@@ -227,7 +291,7 @@ public class DBThread extends SourceThread {
 			 rs = null;
 		 }
 		 }
-
+	
 		 if (stmt != null) {
 		 try {
 			 stmt.close();
@@ -235,7 +299,7 @@ public class DBThread extends SourceThread {
 			 stmt = null;
 		 }
 		 }
-
+	
 		 if (conn != null) {
 		 try {
 			 conn.close();
@@ -244,8 +308,124 @@ public class DBThread extends SourceThread {
 		 }
 		 }
 	   }// end of finally
+	
 
 	}	// end of run method
+	
+	private void putResults (ResultSet rs, int numAttrs) 
+		throws SQLException, ShutdownException, InterruptedException {
+
+		//rs.beforeFirst();
+		System.err.println("fetch direction: "+rs.getFetchDirection());
+		if (rs.isBeforeFirst())
+			System.err.println("yes, we are at the start of rows ********************");
+		else
+			System.err.println("no, we aren't at the start ********************");
+		while (rs.next()) {
+			Tuple newtuple = new Tuple(false, numAttrs);
+			for(int i = 1; i<= numAttrs; i++) {
+				// get attribut type
+				// then create the appropriate object
+				// finally, load attribute into the tuple
+				BaseAttr attr;
+				switch(dbScanSpec.getAttrType(i-1)) {
+				case Int:
+					attr = new IntegerAttr();
+					Integer iObj = new Integer(rs.getInt(i));
+					attr.loadFromObject(iObj);
+					break;
+				case Long:
+					attr = new LongAttr();
+					Long lObj = new Long(rs.getLong(i));
+					attr.loadFromObject(lObj);
+					break;
+				case TS:
+					attr = new TSAttr();
+					Long tObj = new Long(rs.getLong(i));
+					attr.loadFromObject(tObj);
+					break;
+				case String:
+					attr = new StringAttr();
+					attr.loadFromObject(rs.getString(i));
+					break;
+				case XML:
+					attr = new XMLAttr();
+					attr.loadFromObject(rs.getString(i));
+					break;
+				default:
+					throw new PEException("Invalid type " + dbScanSpec.getAttrType(i));
+				}
+				
+				newtuple.appendAttribute(attr);
+			}  // end for
+			ArrayList ctrl = outputStream.putTuple(newtuple);
+			while(ctrl != null) {
+				processCtrlMsgFromSink(ctrl);
+				ctrl = outputStream.flushBuffer();
+				//assert ctrlFlag == CtrlFlags.NULLFLAG: "bad ctrl flag ";
+			}
+			
+		} // end while				
+
+	}
+	
+    public void checkForSinkCtrlMsg()
+	throws java.lang.InterruptedException, ShutdownException {
+	// Loop over all sink streams, checking for control elements
+    ArrayList ctrl;
+
+    // Make sure the stream is not closed before checking is done
+    if (!outputStream.isClosed()) {
+    	ctrl = outputStream.getCtrlMsg(1*1000);
+	    
+    	// If got a ctrl message, process it
+    	if (ctrl != null) {
+    		processCtrlMsgFromSink(ctrl);
+    	} else {
+    		
+    	}
+    	}
+    }
+    
+    public void processCtrlMsgFromSink(ArrayList ctrl) 
+    	throws ShutdownException {
+    	if (ctrl == null)
+    		return;
+    	
+    	int ctrlFlag = (Integer)ctrl.get(0); 
+    	String ctrlMsg = (String)ctrl.get(1);
+    	switch (ctrlFlag) {
+    	case CtrlFlags.CHANGE_QUERY:
+    		newQueries.add(ctrlMsg);
+    		break;
+    	case CtrlFlags.READY_TO_FINISH:
+    		System.err.println("live stream ends...");
+    		finish = true;
+    		break;
+    	case CtrlFlags.SHUTDOWN: //handle query shutdown;
+    		System.err.println("ready to shutdown at DBThread");
+    		shutdown = true;
+    		break;
+    	default:
+    		assert false : "KT unexpected control message from source " + 
+		    CtrlFlags.name[ctrlFlag];
+    	}
+    }
+    
+    public String changeQuery (String queryPara) {
+    	
+    	String[] queryRange = queryPara.split("\t");
+    	assert queryRange.length == 2: "Jenny - range is more than a pair?!";
+    	String timeattr = dbScanSpec.getTimeAttr();
+    	String timeFunct = timeattr; 
+    	//StringBuffer query = new StringBuffer(" " + timeFunct  + ">= '" + queryRange[0] + "' and "+ timeFunct + "<= '" +queryRange[1]+"' ");
+    	//query.append(" and dbdetectorid= "+queryRange[2]);
+    	test = (queryRange[0].compareTo(queryRange[1]) == 0);
+    	String query = " " + timeFunct  + ">= '" + queryRange[0] + "' and "+ timeFunct + "<= '" +queryRange[1]+"' ";
+    	System.out.println("new query predicate: "+query);
+    	return query;
+    }
+
 
 	/**
 	 * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
