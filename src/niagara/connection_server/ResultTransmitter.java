@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.29 2007/03/08 22:29:32 tufte Exp $
+  $Id: ResultTransmitter.java,v 1.30 2007/04/28 21:21:30 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -220,7 +220,7 @@ public class ResultTransmitter implements Schedulable {
         // do the allocation here instead of inside getNext, so 
         // we only allocate one resultObject
         QueryResult.ResultObject resultObject =
-            queryResult.getNewResultObject();
+            queryResult.getNewResultObject(true);
 
         while (true) {
             if (killThread) {
@@ -270,7 +270,7 @@ public class ResultTransmitter implements Schedulable {
         response = new ResponseMessage(request, ResponseMessage.QUERY_RESULT);
 
         QueryResult.ResultObject resultObject =
-            queryResult.getNewResultObject();
+            queryResult.getNewResultObject(false);
 
         while (true) {
             if (killThread) {
