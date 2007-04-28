@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<filescan id="ld" isstream="yes" delay="1000"
+filename="/stash/datalab/latte/data/2007-02-06_midday.xml"/>
+
+<unnest id="dts" regexp="dts" datatype="XML" input="ld"/>
+<unnest id="time_t" regexp="time_t" datatype="TS" input="dts"/>
+<unnest id="d" regexp="d" root = "$dts" datatype="XML" input="time_t"/>
+<unnest id="stdetectorid" regexp="i" root="$d" datatype="Integer" input="d"/>
+<unnest id="stspeed" regexp="s" root="$d" datatype="Integer" input="stdetectorid"/>
+
+<dup id="dup" branch="2" input="stspeed"/>
+
+<dbscan id="svgid_relation" 
+query_string="select DISTINCT detectorid, stationid from detectors"
+timeattr="" 
+type="one_time"
+attr_names="detectorid, stationid"
+attr_types="int int"/>
+
+<join id="addStationId" left="stdetectorid" right="detectorid" punctattr="" input="dup svgid_relation">
+</join>
+
+<bucket id="bucket" wintype="1" winattr="time_t" range="180" slide="60" input="addStationId"/>
+
+<windowAverage id="avg" groupby="stationid" avgattr="stspeed" input="bucket"/>
+
+<dbscan id="archive"
+query_string= " "
+timeattr="starttime"
+attr_names="panetime dbstationid dbspeed"
+attr_types="TS int int"/>
+
+<punctqc id = "pqc"
+
+query_string= "select floor(extract('epoch' from (starttime - (TIMESTAMP '2007-02-06 08:03:00' - interval NUMOFDAYS)))/60) as
+panetime, stationid, avg(speed)
+from loopdata_20sec, detectors  where detectors.detectorid = loopdata_20sec.detectorid and TIMEPREDICATE group by panetime, stationid"
+
+timeattr="starttime"
+
+punctattr="panetime time_t"
+puncttype = "onchange"
+similarity = "alldays  5  3"
+prefetch = "4  10"
+input="archive dup"/>
+
+<bucket id="bucket_archive" wintype="1" winattr="panetime" range="6" slide="1" start="0" input="pqc" />
+
+<windowAverage id ="avg_archive" groupby="dbstationid" avgattr="dbspeed" input="bucket_archive" />
+
+<join id="stream_archive" left="wid_from_bucket stationid" right="wid_from_bucket_archive dbstationid" input="avg avg_archive">
+</join>
+
+<construct id="cons" input="stream_archive">
+<![CDATA[
+<result>
+  $stationid
+  $avg
+  $avg_archive
+  $wid_from_bucket
+</result>
+]]>
+</construct>
+</plan>
