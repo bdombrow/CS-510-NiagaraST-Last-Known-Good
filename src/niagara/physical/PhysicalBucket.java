@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalBucket.java,v 1.6 2006/12/18 21:50:03 jinli Exp $
+  $Id: PhysicalBucket.java,v 1.7 2007/04/28 21:38:58 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -55,6 +55,7 @@ public class PhysicalBucket extends PhysicalOperator {
     private long windowId_from = 0;
     private long windowId_to = 0;    
     private int windowCount = 0;
+
     private Document doc;
     
    //Data template for creating punctuation
@@ -64,6 +65,7 @@ public class PhysicalBucket extends PhysicalOperator {
    // Data template for creating punctuation
    Tuple tupleDataSample = null;  
    private long startSecond;
+   private long start;
    
    AtomicEvaluator ae;
    
@@ -79,6 +81,7 @@ public class PhysicalBucket extends PhysicalOperator {
 	range = ((Bucket) logicalOperator).getWindowRange();
 	slide = ((Bucket) logicalOperator).getWindowSlide();
 	widName = ((Bucket) logicalOperator).getWid();
+	start = ((Bucket) logicalOperator).getStarttime();
 	ae = new AtomicEvaluator (windowAttribute.getName());
 	
     }
@@ -90,6 +93,7 @@ public class PhysicalBucket extends PhysicalOperator {
 	p.range = range;
 	p.slide = slide;
 	p.widName = widName;
+	p.start = start;
 	p.ae = ae;
 
 	return p;
@@ -129,8 +133,46 @@ public class PhysicalBucket extends PhysicalOperator {
 	}    		
         
     }
-       
+   
     protected Tuple appendWindowId (Tuple inputTuple, int steamId) 
+    throws ShutdownException, InterruptedException {
+   	
+    	// tuple-based window
+    	if (windowType == 0) {
+    		windowId_from = count / slide;
+    		windowId_to = (count + range) / slide - 1;
+    	} else if (windowType == 1) { //value-based window
+    		long timestamp;
+    		try {
+    			ArrayList values = new ArrayList (); 
+    			ae.getAtomicValues(inputTuple, values);
+    			timestamp = Long.parseLong(((BaseAttr)values.get(0)).toASCII());
+    		} catch (NumberFormatException nfe) {
+    			timestamp = 0;
+    		}
+    		
+    		if ( count==1 ) {
+    			startSecond = timestamp;
+    			if (start == Long.MIN_VALUE)
+    				start = startSecond;
+    		}
+        		
+    		windowId_from = (timestamp - start) / slide;
+    		windowId_to = ((timestamp - start) + range) / slide - 1;
+    		
+    	}
+    	int outSize = outputTupleSchema.getLength();
+    	
+    	LongAttr from, to; 
+    	
+    	from = new LongAttr(windowId_from);
+    	to = new LongAttr(windowId_to);
+    	inputTuple.appendAttribute(from);
+    	inputTuple.appendAttribute(to);
+    	return inputTuple;
+    }
+    
+    /*protected Tuple appendWindowId (Tuple inputTuple, int steamId) 
     throws ShutdownException, InterruptedException {
 	
 	long mod;
@@ -163,10 +205,6 @@ public class PhysicalBucket extends PhysicalOperator {
 				windowId_to -= 1;			
 		}
 		
-/*		if (count % slide == 0) {
-			//output a punctuation to say windowId_from is completed			
-			putTuple (createPunctuation (inputTuple, windowId_from), 0);
-		}*/
     	}
 	else if (windowType == 1) { // value-based window
 				
@@ -215,7 +253,7 @@ public class PhysicalBucket extends PhysicalOperator {
 	inputTuple.appendAttribute(to);
 	return inputTuple;
 	
-    }
+    }*/
     
     /**
      * This function processes a punctuation element read from a source stream
@@ -254,24 +292,35 @@ public class PhysicalBucket extends PhysicalOperator {
 	throws ShutdownException, InterruptedException {
  
 	   long wid=0, mod;
-	   //long timestamp;
-	   double timestamp;
+	   long timestamp;
 	   int length;
 	   String punctVal;
 	   
 	   ArrayList values = new ArrayList();
 	   ae.getAtomicValues(inputTuple, values);
 
-	   //assume that the punctuation on winattr should have the format of (, *****)
+	   //assume that the punctuation on winattr should have the format of xxx, which means the end of xxx
 	   punctVal = ((BaseAttr)values.get(0)).toASCII().trim();
-	   length = punctVal.length();
-	   String tmp = punctVal.substring(1, length - 1).trim();
-	   length = tmp.length();
-	   punctVal = tmp.substring(1, length);
+	   //length = punctVal.length();
+	   //String tmp = punctVal.substring(1, length - 1).trim();
+	   //length = tmp.length();
+	   //punctVal = tmp.substring(1, length);
 	    
-	   timestamp = Double.parseDouble(tmp);
+	   timestamp = Long.parseLong(punctVal);
 	   
-	   if ((range % slide) == 0) {
+	   // punctuation may come in a finer granularity; e.g., 20 seconds rather than 1 minute;
+	   if (slide != 1)
+		   if ((timestamp - startSecond) == 0 || (timestamp - startSecond) % slide != 0)
+			   return;
+	      
+	   wid = (long)((timestamp+1) - start) / slide - 1;
+	   
+	   System.err.println("window_id: "+wid + "   timestamp: "+timestamp);
+	   if (timestamp < -1000) 
+		   System.err.println("sth is wrong ...");
+
+	   
+	 /*  if ((range % slide) == 0) {
 		   wid = (long)(timestamp - startSecond + 1) / slide;
 		   mod = (long)(timestamp - startSecond + 1) % slide;
 		   if (mod != 0)
@@ -280,7 +329,8 @@ public class PhysicalBucket extends PhysicalOperator {
 	   else {
 			wid =(long) (timestamp - startSecond + 1) / slide;
 			mod = (long) (timestamp - startSecond + 1) % slide;
-	   } 
+	   }*/ 
+	   
 	   Punctuation punct = null;
 	    	    
 	   //Element ts = doc.createElement(windowAttrName);
@@ -289,16 +339,9 @@ public class PhysicalBucket extends PhysicalOperator {
 	   StringAttr ts = new StringAttr("*");
 	   inputTuple.setAttribute(ae.attributeId, ts);
 		
-	   /*Element from, to;
-
-	   from = doc.createElement("wid_from_"+widName);
-	   to = doc.createElement("wid_to_"+widName);
-
-	   from.appendChild(doc.createTextNode( String.valueOf(wid-1)));   //windowId_from?
-	   to.appendChild(doc.createTextNode(String.valueOf("*")));*/
 	   StringAttr from, to;
 	   
-	   from = new StringAttr(String.valueOf(wid-1));
+	   from = new StringAttr(String.valueOf(wid));
 	   to = new StringAttr("*");
 	    
 	   inputTuple.appendAttribute(from);	   	    
@@ -385,8 +428,18 @@ public class PhysicalBucket extends PhysicalOperator {
 	 if (o == null || !(o instanceof PhysicalBucket))
 	     return false;
 	 if (o.getClass() != PhysicalBucket.class)
-	     return o.equals(this);
-	return getArity() == ((PhysicalBucket) o).getArity();
+	     return false;
+	 
+	 PhysicalBucket another = (PhysicalBucket) o;
+	 
+	 boolean match = another.windowAttribute.equals(this.windowAttribute) && 
+	 another.range == this.range && another.slide  == this.slide &&
+	 another.windowType == this.windowType && 
+	 another.start == this.start;
+	 if (match)
+		 System.err.println("PhysicalBucket equal true");
+	 return match;
+	 //return getArity() == ((PhysicalBucket) o).getArity();
      }
 
 
