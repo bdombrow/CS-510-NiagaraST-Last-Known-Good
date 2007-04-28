@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TuplePage.java,v 1.7 2003/12/24 01:05:35 vpapad Exp $
+  $Id: TuplePage.java,v 1.8 2007/04/28 22:34:04 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -97,7 +97,7 @@ public class TuplePage {
     }
 
     public void setFlag(int flag) {
-	assert flag >= CtrlFlags.NULLFLAG && flag <= CtrlFlags.TIMED_OUT:
+	assert flag >= CtrlFlags.NULLFLAG && flag <= CtrlFlags.READY_TO_FINISH:
 	    "KT invalid control flag in createControlPage " + flag;
 	this.flag = flag;
     }
