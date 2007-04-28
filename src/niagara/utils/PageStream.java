@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.9 2007/03/08 22:30:31 tufte Exp $
+  $Id: PageStream.java,v 1.10 2007/04/28 22:31:33 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,6 +27,8 @@
 
 
 package niagara.utils;
+
+import java.util.ArrayList;
 
 // Note on removal of upStreamContrlQueue (now toConsumerQueue) and priority put
 // instead of priority put, we have  PageStream check
@@ -228,7 +230,7 @@ public class PageStream {
     private synchronized int consumerPutCtrlMsg(int ctrlMsgId,
 						String ctrlMsgStr) 
 	throws ShutdownException {
-
+    
 	if(eos)
 	    return CtrlFlags.EOS;
 	if(shutdown) 
@@ -250,6 +252,7 @@ public class PageStream {
 	//		   " Putting to producer queue " + name + "  " + 
 	//		   CtrlFlags.name[ctrlMsgId]);
 	toProducerQueue.put(getCtrlPage(ctrlMsgId, ctrlMsgStr));
+	
 	if(notify) {
 	    if(VERBOSE)
 		notifiedOnCtrl++;
@@ -294,11 +297,16 @@ public class PageStream {
      */
     // To be called by SinkTupleStream ONLY
     // just a wrapper with a better name...
-    public int getCtrlMsgFromSink() throws ShutdownException {
-	return producerGetCtrlMsg();
+    //public int getCtrlMsgFromSink() throws ShutdownException {
+	//return producerGetCtrlMsg();
+    //}
+    
+    public ArrayList getCtrlMsgFromSink(int timeout) 
+    throws java.lang.InterruptedException, ShutdownException {
+    	return producerGetCtrlMsg(timeout);
     }
-
-    private synchronized int producerGetCtrlMsg() throws ShutdownException{
+    
+    /*private synchronized ArrayList producerGetCtrlMsg() throws ShutdownException{
 	// shutdown takes priority over all other messages
 	if(shutdown)
 	    throw new ShutdownException(shutdownMsg);
@@ -308,14 +316,59 @@ public class PageStream {
 	
 	// Get first element, if any, in the down stream buffer
 	if (toProducerQueue.isEmpty()) {
-	    return CtrlFlags.NULLFLAG;
+		return null;
+	    //return CtrlFlags.NULLFLAG;
 	} else {
+		
 	    // no notification, no one ever blocks on toProducerQueue
 	    TuplePage ctrlPage = toProducerQueue.get();
-	    int retVal = ctrlPage.getFlag();
+	    ArrayList ctrl = null;
+	    int ctrlFlag = ctrlPage.getFlag();
+	    if (ctrlFlag != CtrlFlags.NULLFLAG) {
+	    	ctrl = new ArrayList(2);	
+	    	ctrl.add(ctrlFlag);
+	    	ctrl.add(ctrlPage.getCtrlMsg());
+	    }
+	    //int retVal = ctrlPage.getFlag();
 	    returnCtrlPage(ctrlPage); // make page avail for reuse
-	    return retVal;
+	    //return retVal;
+	    return ctrl;
 	}
+    }*/
+    
+    private synchronized ArrayList producerGetCtrlMsg(int timeout) 
+	throws java.lang.InterruptedException, ShutdownException {
+    	// shutdown takes priority over all other messages
+    	if(shutdown)
+    	    throw new ShutdownException(shutdownMsg);
+
+    	// Check for end of stream and raise exception if necessary
+    	assert !eos : "KT Reading after end of stream";
+    	
+    	// Get first element, if any, in the down stream buffer
+    	if (timeout >= 0)
+    		while (toProducerQueue.isEmpty()) {
+    			wait(timeout);
+    		}
+    	else {
+    		if (toProducerQueue.isEmpty())
+    			return null;
+    	}
+    	
+    	// !toProducerQueue.isEmpty() must be false;	
+   	    // no notification, no one ever blocks on toProducerQueue
+   	    TuplePage ctrlPage = toProducerQueue.get();
+   	    ArrayList ctrl = null;
+   	    int ctrlFlag = ctrlPage.getFlag();
+   	    if (ctrlFlag != CtrlFlags.NULLFLAG) {
+   	    	ctrl = new ArrayList(2);	
+   	    	ctrl.add(ctrlFlag);
+   	    	ctrl.add(ctrlPage.getCtrlMsg());
+   	    }
+   	    //int retVal = ctrlPage.getFlag();
+   	    returnCtrlPage(ctrlPage); // make page avail for reuse
+   	    //return retVal;
+   	    return ctrl;
     }
 
     /**
@@ -335,12 +388,12 @@ public class PageStream {
      *
      */
     // to be called by SinkTupleStream ONLY
-    public int putPageToSink(TuplePage page) 
+    public ArrayList putPageToSink(TuplePage page) 
 	throws java.lang.InterruptedException, ShutdownException {
 	return producerPutPage(page);
     }
 
-    private synchronized int producerPutPage(TuplePage page) 
+    private synchronized ArrayList producerPutPage(TuplePage page) 
 	throws java.lang.InterruptedException, ShutdownException {
 
 	// shutdown takes priority over everything
@@ -364,17 +417,22 @@ public class PageStream {
 
 	// If there is a control element in the down stream buffer, 
 	// then return that
+	
 	if (!toProducerQueue.isEmpty()) {
 	    TuplePage ctrlPage = toProducerQueue.get();
+
+	    String ctrlMsg = ctrlPage.getCtrlMsg();
 	    int ctrlFlag = ctrlPage.getFlag();
 	    if(ctrlFlag == CtrlFlags.SHUTDOWN) {
-		assert shutdown : "@*#$!#*$";
-		String msg = ctrlPage.getCtrlMsg();
-		returnCtrlPage(ctrlPage);
-		throw new ShutdownException(msg);
+	    	assert shutdown : "@*#$!#*$";
+			returnCtrlPage(ctrlPage);
+			throw new ShutdownException(ctrlMsg);
 	    } else {
-		returnCtrlPage(ctrlPage);
-		return ctrlFlag;
+	    	returnCtrlPage(ctrlPage);
+	    	ArrayList ret = new ArrayList(2);
+	    	ret.add(ctrlFlag);
+	    	ret.add(ctrlMsg);
+	    	return ret;
 	    }
 	} else {
 	    // do SHUTDOWN check on put to make propagation of SHUTDOWN
@@ -403,7 +461,7 @@ public class PageStream {
 		    notifiedConsumer++;
 		notify();
 	    }
-	    return CtrlFlags.NULLFLAG; // indicates successful put
+	    return null; // indicates successful put
 	}	
     }
 

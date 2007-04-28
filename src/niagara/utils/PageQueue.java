@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PageQueue.java,v 1.5 2003/09/26 18:12:38 vpapad Exp $
+  $Id: PageQueue.java,v 1.6 2007/04/28 22:31:34 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -100,6 +100,11 @@ public class PageQueue
 	    head = (head + 1) % length;
 	    TuplePage p = queue[head];
 	    queue[head] = null;
+	    /*if (p == null) {
+	    	System.err.println("between head and tail, there is null in page queue");
+	    	System.err.println("head ="+head + " tail ="+tail);
+	    	System.err.println("the size of page queue :"+length);
+	    }*/
 	    return p;
 	} else
 	    return null;
@@ -110,32 +115,53 @@ public class PageQueue
      *
      **/
     public void put(TuplePage page) {
+    	
+    if (page == null)
+    	System.err.println("put a null value to page queue");
+    
 	assert !isFull() || expandable : 
 	    "KT putting into full un-expandable PageQueue not allowed";
 	if(!isFull()) {
 	    tail = (tail + 1) % length;
 	    queue[tail] = page;
 	} else if (expandable) {
+		System.out.println("is full tail is " + tail + "head is " + head);
 	    if(expandQueue()) {
 	       put(page);
             } else {
+            	System.err.println("Dropping control flag " +
+                        CtrlFlags.name[page.getFlag()] + 
+			   " on stream " + name);
+            	System.err.println("length of the queue: "+length);
 	       // queue to big, refused to expand
 	       assert !page.hasTuples() : "KT - help dropping tuples";
-	       System.err.println("Dropping control flag " +
-	                           CtrlFlags.name[page.getFlag()] + 
-				   " on stream " + name);
+	       
 	    }
 	} 
     }
     
     private boolean expandQueue() {
-        if(length>=20)
+    	//System.err.println("Expanding queue: current len " + length);
+    if(length>=100)
 	    return false; // refuse to expand
 
+    //System.err.println("expanding queue");
+    //System.err.println("before expanding - head ="+head+" tail= "+tail);
 	TuplePage[] newQueue = new TuplePage[length*2];
-	for(int i=0; i<length; i++) {
-	    newQueue[i] = queue[i];
+	
+	for (int i = 0; i < length; i++) {
+		newQueue[i] = queue[(head+i)%length];
 	}
+	
+	/*for(int i=head; i<length; i++) {
+	    newQueue[i-head] = queue[i];
+	}
+	for(int i = 0; i<=tail; i++) {
+		newQueue[i+length] = queue[i];
+	}*/
+	
+	head = 0;
+	tail = length-1;
 	queue = newQueue;
 	length = length*2;
 	return true;
@@ -168,6 +194,13 @@ public class PageQueue
 	}
 	retString += "-----------------------------------------------\n";
 	return retString;
+    }
+    
+    public int getHead() {
+    	return head;
+    }
+    public int getTail() {
+    	return tail;
     }
 }
 
