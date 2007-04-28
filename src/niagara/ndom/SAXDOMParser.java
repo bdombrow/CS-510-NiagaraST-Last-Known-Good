@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.19 2007/03/08 22:33:08 tufte Exp $
+ * $Id: SAXDOMParser.java,v 1.20 2007/04/28 21:34:45 jinli Exp $
  *
  */
 
@@ -36,7 +36,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
     private Page page;
 
     private boolean streaming;
-		private int delay; // in seconds
+		private int delay; // in milliseconds
     private boolean seenHeader;
 
     // XXX vpapad: To test SAXDOM table building performance
@@ -234,16 +234,16 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
 						// actually works
 						try {
 							if (producingOutput) {
-								System.out.println("saxdom put doc in output stream");
+								//System.out.println("saxdom put doc in output stream");
 								outputStream.put(doc);
               }
 						if(delay>0) {
 							try {
 								String namespace = doc.getDocumentElement().getNamespaceURI();
-                if (namespace != null &&
+								if (namespace != null &&
 						          namespace.equals("http://www.cse.ogi.edu/dot/niagara/punct")){
-									System.out.println("delaying 20 seconds");
-									Thread.sleep(delay*1000); // sleep is in milliseconds
+									System.out.println("delaying " + delay + " seconds");
+									Thread.sleep(delay); // sleep is in milliseconds
                 }
 							} catch(java.lang.InterruptedException ie) {
 								// do nothing...
