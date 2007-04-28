@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.3 2007/03/08 22:34:28 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.4 2007/04/28 21:44:07 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,6 +49,8 @@ import niagara.utils.*;
 
 import org.w3c.dom.Document;
 import niagara.connection_server.ResultTransmitter;
+
+import java.util.ArrayList;
 
 public abstract class PhysicalOperator extends PhysicalOp 
 implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
@@ -539,14 +541,17 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
     private void checkForSinkCtrlMsg()
 	throws java.lang.InterruptedException, ShutdownException {
 	// Loop over all sink streams, checking for control elements
+    ArrayList ctrl;
 	for (int sinkId = 0; sinkId < numSinkStreams; sinkId++) {
 	    // Make sure the stream is not closed before checking is done
 	    if (!sinkStreams[sinkId].isClosed()) {
-		int ctrlFlag = sinkStreams[sinkId].getCtrlMsg();
-
+	    // -1 means a non-blocking call on getCtrlMsg 	
+	    ctrl = sinkStreams[sinkId].getCtrlMsg(-1);
+	    
 		// If got a ctrl message, process it
-		if (ctrlFlag !=  CtrlFlags.NULLFLAG) 
-		    processCtrlMsgFromSink(ctrlFlag, sinkId);
+		//if (ctrlFlag !=  CtrlFlags.NULLFLAG)
+	    if (ctrl != null)
+		    processCtrlMsgFromSink(ctrl, sinkId);
 	    }
 	}
     }
@@ -607,14 +612,14 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 	    updatePartialResultCreation ();
 	    return;
 
-	case CtrlFlags.EOS:		    
+	case CtrlFlags.EOS:		
 	    // This is the end of stream, so mark the stream as closed
 	    // and remove it from the list of streams to read from
 	    sourceStreams[streamId].setStatus(SourceTupleStream.Closed);
 	    activeSourceStreams.remove(streamId);
 	    
 	    // Let the operator now that one of its source stream is closed;
-            streamClosed(streamId);
+        streamClosed(streamId);
 	    
 	    // If this causes the operator to become non-blocking, then
 	    // put out the current output and clear the current output
@@ -636,7 +641,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 		    CtrlFlags.name[ctrlFlag];
 	}
     }
-
+    
     /**
      * This function handles the creation of partial results
      *
@@ -732,12 +737,17 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
      *            during execution
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void processCtrlMsgFromSink(int ctrlFlag, int streamId)
+    private void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
 	throws java.lang.InterruptedException, ShutdownException {
 	// downstream control message is GET_PARTIAL
 	// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG 
 	// REQ_BUF_FLUSH is handled inside SinkTupleStream
 	// here (SHUTDOWN is handled with exceptions)
+
+    if (ctrl == null)
+    	return;
+    
+    int ctrlFlag =(Integer) ctrl.get(0);
 
 	switch (ctrlFlag) {
 	case CtrlFlags.GET_PARTIAL:
@@ -748,7 +758,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 		+ CtrlFlags.name[ctrlFlag];
 	}
     }
-
+        
     /**
      * This function processes a GetPartialResult control element received
      * from a sink stream. If the control element is not a duplicate
@@ -816,14 +826,14 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 	// Loop until the required element is sent 
 	while (!sent) {
 	    // Try to send to the required sink stream
-	    int ctrlFlag = sinkStreams[streamId].putTuple(tuple);
+	    ArrayList ctrl = sinkStreams[streamId].putTuple(tuple);
 
 	    // Check if it was successfull
-	    if (ctrlFlag == CtrlFlags.NULLFLAG) {
+	    if (ctrl == null) {
 		sent = true;
 	    } else {
 		// process the control message
-		processCtrlMsgFromSink(ctrlFlag, streamId);
+		processCtrlMsgFromSink(ctrl, streamId);
 	    }
 	}
     }
@@ -882,6 +892,32 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 	}
     }
 
+    /**
+     * This function is used by physical operators to send a message to a down-stream operator
+     * Currently, it is only used by PhysicalPunctQC to send msg (query parameters, EOS)
+     * to DBThread;
+     * 
+     * 
+     */
+    protected void sendCtrlMsgUpStream(int ctrlFlag, String ctrlMsg, int streamId) 
+    	throws ShutdownException, InterruptedException{
+    	    System.err.println("sendCtrlMsgUpStream "+ CtrlFlags.name[ctrlFlag]);
+    		if (sourceStreams[streamId].isClosed()){
+    			return;
+    		}
+    		int retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag, 
+    								     ctrlMsg);
+    		
+    		if(retCtrlFlag == CtrlFlags.EOS) {
+    		    processCtrlMsgFromSource(retCtrlFlag, streamId);
+    		    return;
+    		} 
+    		
+    		assert retCtrlFlag == CtrlFlags.NULLFLAG :
+    		    "Unexpected ctrl flag in sendCtrlMsgUpStream " +
+    		    CtrlFlags.name[retCtrlFlag];
+    		return;
+    }
 
     /**
      * This function puts a control element to a sink stream
@@ -894,15 +930,16 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
      */
     private void sendCtrlMsgToSink(int ctrlFlag, String ctrlMsg, int streamId)
 	throws java.lang.InterruptedException, ShutdownException {
-	int newCtrlFlag;
+	ArrayList newCtrl;
 	do {
-	     newCtrlFlag = sinkStreams[streamId].putCtrlMsg(ctrlFlag,
+	     newCtrl = sinkStreams[streamId].putCtrlMsg(ctrlFlag,
 							    ctrlMsg);
-	     if (newCtrlFlag != CtrlFlags.NULLFLAG) {
-		 processCtrlMsgFromSink(newCtrlFlag, streamId);
+	     if (newCtrl != null) {
+	    	 
+		 processCtrlMsgFromSink(newCtrl, streamId);
 	    }
 	}
-	while (newCtrlFlag != CtrlFlags.NULLFLAG); // *NEVER* give up!
+	while (newCtrl != null); // *NEVER* give up!
     }
 
 
