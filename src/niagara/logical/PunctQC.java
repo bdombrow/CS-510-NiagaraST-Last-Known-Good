@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PunctQC.java,v 1.1 2007/03/08 22:34:01 tufte Exp $
+  $Id: PunctQC.java,v 1.2 2007/04/28 21:29:55 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,13 +43,21 @@ import niagara.optimizer.colombia.Op;
 
 public class PunctQC extends BinaryOperator {
   
-    //The attribute we are punctuating on
-    private Attribute pAttr;
-		private PunctSpec pSpec;
+	private PunctSpec pSpec;
     private SimilaritySpec sSpec;
     private PrefetchSpec pfSpec;
+    private String queryString;
     
-		//The data value corresponding to the timer value
+    //The attribute we are punctuating on
+    private Attribute pAttr;
+    
+    // The attribute of the input stream that we rely on to 
+    // retrieve data from db - stream punctuating attr
+    private Attribute spAttr;
+    
+	//The data value corresponding to the timer value     
+    private String timeAttr;
+
     //private Attribute attrDataTimer;
 
     public PunctQC() {
@@ -57,14 +65,19 @@ public class PunctQC extends BinaryOperator {
 
     // attribute we are punctuating on, a punctuation
     // specification, and a query control specification
-    public PunctQC(Attribute pAttr, PunctSpec pSpec, 
-        SimilaritySpec sSpec, PrefetchSpec pfSpec) {
+    public PunctQC(Attribute pAttr, String timeAttr, PunctSpec pSpec, 
+        SimilaritySpec sSpec, PrefetchSpec pfSpec, String queryString) {
 			this.pAttr = pAttr;
 			this.pSpec = pSpec;
 			this.sSpec = sSpec;
 			this.pfSpec = pfSpec;
+			this.timeAttr = timeAttr;
+			this.queryString = queryString;
     }
 
+    public void setSPAttr (Attribute spAttr) {
+    	this.spAttr = spAttr;
+    }
     /**
      * print the operator to the standard output
      */
@@ -82,7 +95,8 @@ public class PunctQC extends BinaryOperator {
         strBuf.append("PunctQC: Punct: " + pSpec.toString() +
 						          " Attr: " + pAttr.getName());
         strBuf.append("Similarity: " + sSpec.toString()); 
-        strBuf.append("Prefetching: " + pfSpec.toString()); 
+        strBuf.append("Prefetching: " + pfSpec.toString());
+        strBuf.append("Stream Punctuating Attr: "+spAttr.getName());
         return strBuf.toString();
     }
 
@@ -101,11 +115,23 @@ public class PunctQC extends BinaryOperator {
     public PrefetchSpec getPrefetchSpec() {
 			return pfSpec;
     }
+    
+    public Attribute getStreamPunctAttr() {
+    	return spAttr;
+    }
 
     public void dumpAttributesInXML(StringBuffer sb) {
 			assert false : "Not implemented";
     }
 
+    public String getQueryString() {
+    	return queryString;
+    }
+    
+    public String getTimeAttr() {
+    	return timeAttr;
+    }
+    
     public void dumpChildrenInXML(StringBuffer sb) {
 				assert false : "Not implemented";
         sb.append(">");
@@ -126,7 +152,9 @@ public class PunctQC extends BinaryOperator {
     }
 
     public Op opCopy() {
-        return new PunctQC(this.pAttr, this.pSpec, this.sSpec, this.pfSpec);
+        PunctQC other =  new PunctQC(this.pAttr, this.timeAttr, this.pSpec, this.sSpec, this.pfSpec, this.queryString);
+        other.setSPAttr(this.spAttr);
+        return other;
     }
 
     public boolean equals(Object obj) {
@@ -138,11 +166,12 @@ public class PunctQC extends BinaryOperator {
         return pAttr.equals(op.pAttr) &&
                    pSpec.equals(op.pSpec) &&
                    sSpec.equals(op.sSpec) && 
-                   pfSpec.equals(op.pfSpec);
+                   pfSpec.equals(op.pfSpec) &&
+                   spAttr.equals(op.spAttr);
     }
 
     public int hashCode() {
-        return pAttr.hashCode() ^ pSpec.hashCode() ^ sSpec.hashCode() ^ pfSpec.hashCode();
+        return pAttr.hashCode() ^ pSpec.hashCode() ^ sSpec.hashCode() ^ pfSpec.hashCode() ^ spAttr.hashCode();
     }
 
     public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
@@ -152,10 +181,22 @@ public class PunctQC extends BinaryOperator {
 				String punctAttrStr = e.getAttribute("punctattr");
 				if (punctAttrStr.length() == 0)
 					throw new InvalidPlanException("Bad value for 'punctattr' for : " + id);
-				pAttr = Variable.findVariable(inputProperties[0], punctAttrStr);
+				
+				String[] punctAttrs = punctAttrStr.split("[\t| ]+");
+				if (punctAttrs.length != 2)
+					throw new InvalidPlanException ("Bad value for 'punctattr' for : "+id);
+				
+					
+				pAttr = Variable.findVariable(inputProperties[0], punctAttrs[0]);
+				spAttr = Variable.findVariable(inputProperties[1], punctAttrs[1]);
 
 				pSpec = new PunctSpec(e.getAttribute("puncttype"));
-				sSpec = new SimilaritySpec(e.getAttribute("similarity"));
+				String [] similarityMetric = e.getAttribute("similarity").split("[\t | ]+");
+				sSpec = new SimilaritySpec(similarityMetric[0], 
+						Integer.valueOf(similarityMetric[1]), Integer.valueOf(similarityMetric[2]));
 				pfSpec = new PrefetchSpec(e.getAttribute("prefetch"));
+				
+				queryString = e.getAttribute("query_string").trim();
+				timeAttr =  e.getAttribute("timeattr").trim();
     }
 }
