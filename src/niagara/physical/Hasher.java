@@ -1,4 +1,4 @@
-/* $Id: Hasher.java,v 1.2 2006/10/24 22:08:35 jinli Exp $ */
+/* $Id: Hasher.java,v 1.3 2007/04/28 21:37:20 jinli Exp $ */
 package niagara.physical;
 
 import niagara.optimizer.colombia.Attribute;
@@ -73,9 +73,25 @@ public class Hasher {
 
             values[att].clear();
 	}
+	
 
 	// Return the hash result
 	return hashResult.toString();
+    }
+    
+    public String hashKey (String[] values) {
+    	int numAttributes = values.length;
+    	StringBuffer hashResult = new StringBuffer();
+
+    	for (int att = 0; att < numAttributes; ++att) {    	    
+    	    // Add the atomic value (a string) to the current result
+    	    hashResult.append('<');
+    	    hashResult.append(values[att]);
+    	    hashResult.append('<');
+    	}
+    	
+    	// Return the hash result
+    	return hashResult.toString();
     }
 
     public void getValuesFromKey(String hashKey, String[] rgstRet) {
