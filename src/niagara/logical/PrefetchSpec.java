@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PrefetchSpec.java,v 1.1 2007/03/08 22:34:01 tufte Exp $
+  $Id: PrefetchSpec.java,v 1.2 2007/04/28 21:24:47 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,17 +33,38 @@
 package niagara.logical;
 
 public class PrefetchSpec {
-  
+  // prefetch and coverage are specified in minutes;
+	
+  private int prefetchVal;
+  private int coverage;
 
+  public void setCoverage(int _coverage) {
+	  coverage = _coverage;
+  }
+  
+  public int getCoverage() {
+	  return coverage; 
+  }
+  
+  public void setPrefetchVal(int val) {
+	  prefetchVal = val;
+  }
+  
+  public int getPrefetchVal() {
+	  return prefetchVal;
+  }
+  
   public enum PrefetchType {
 			 SOMETHING, SOMETHINGELSE
       };
 	  
-	private PrefetchType pfType;
+  private PrefetchType pfType = PrefetchType.SOMETHING;
 
-	public PrefetchSpec(String pfSpecStr) {
-    // do something...
-	}
+  public PrefetchSpec(String pfSpecStr) {
+	  String[] parameters = pfSpecStr.split("[\t| ]+" );
+	  prefetchVal = Integer.valueOf(parameters[0]) * 60;
+	  coverage = Integer.valueOf(parameters[1]) * 60;
+  }
 
   public PrefetchType getPrefetchType() {
 		return pfType;

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimilaritySpec.java,v 1.1 2007/03/08 22:34:02 tufte Exp $
+  $Id: SimilaritySpec.java,v 1.2 2007/04/28 21:24:47 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,24 +35,48 @@ public class SimilaritySpec {
   
 
   public enum SimilarityType {
-			  SOMETHING, SOMETHINGELSE
+			  AllDays, WeekDays, SameDayOfWeek
       };
 	  
 	private SimilarityType sType;
+	private int numOfDays;
+	private int numOfMins;
 
-	public SimilaritySpec(String sSpecStr) {
+	public SimilaritySpec(String type, int _numOfDays, int _numOfMins) {
     // do something smart
-    sType = SimilarityType.SOMETHING;
+	if (type.compareToIgnoreCase("AllDays") == 0)
+		sType = SimilarityType.AllDays;
+	else if (type.compareToIgnoreCase("WeekDays") == 0)
+		sType = SimilarityType.WeekDays;
+	else if (type.compareToIgnoreCase("SameDayOfWeek")==0)
+		sType = SimilarityType.SameDayOfWeek;
+	else
+		System.err.println("unsupported similarity type - "+type);
+	
+    numOfDays = _numOfDays;
+    numOfMins = _numOfMins;
 	}
 
   public SimilarityType getSimilarityType() {
 		return sType;
 	}
+  
+  public int getNumOfDays () {
+	  return numOfDays;
+  }
 
+  public int getNumOfMins () {
+	  return numOfMins;
+  }
+  
   public String toString() {
 		switch(sType) {
-			case SOMETHING:
-				return "something";
+			case AllDays:
+				return "All days";
+			case WeekDays:
+				return "Week days";
+			case SameDayOfWeek:
+				return "Same day of week";
 			default:
 				assert false : "Invalid similarity type";
         return null;

@@ -1,4 +1,4 @@
-// $Id: DBScan.java,v 1.1 2006/12/04 21:15:40 tufte Exp $
+// $Id: DBScan.java,v 1.2 2007/04/28 21:24:48 jinli Exp $
 
 package niagara.logical;
 
@@ -70,8 +70,10 @@ public class DBScan extends NullaryOperator  {
     	String qstring = e.getAttribute("query_string");
     	String[] attrNames = parseInputAttrs(e.getAttribute("attr_names"));
     	String[] attrTypes = parseInputAttrs(e.getAttribute("attr_types"));
+    	String timeattr = e.getAttribute("timeattr");
+    	String type = e.getAttribute("type");
         dbScanSpec =
-            new DBScanSpec(qstring, attrNames, attrTypes);
+            new DBScanSpec(qstring, attrNames, attrTypes, timeattr, type);
         int numAttrs = Array.getLength(attrNames);
         variables = new Attribute[numAttrs];
         for(int i = 0; i< numAttrs; i++) {
