@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowGroup.java,v 1.5 2006/12/18 21:50:04 jinli Exp $
+  $Id: PhysicalWindowGroup.java,v 1.6 2007/04/28 21:48:44 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -335,15 +335,55 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 			//Not a punctuation for the group attribute. Ignore it.
 			return;
 		}
-		groupResult = (HashEntry) hashtable.get(stPunctKey);
+	
+		String [] punctValues = new String[numGroupingAttributes];
+		hasher.getValuesFromKey(stPunctKey, punctValues);
+	
+		//Does the punctuation punctuates on every grouping attribiute?
+		boolean idealPunct = true;
+		for (int i = 0; i < numGroupingAttributes; i++)
+			if (punctValues[i].trim().compareTo("*") == 0) {
+				idealPunct = false;
+				break;
+			}
+		
+		// Yes. The punctuation punctuates on every grouping attributes 
+		if (idealPunct) {
+			groupResult = (HashEntry) hashtable.get(stPunctKey);
 
-		if(groupResult != null)
-			putResult(groupResult, false);
-		/*else {
-			int pos = inputTupleSchemas[0].getPosition("wid_from_"+inputName);
-			String tmpPos = inputTuple.getAttribute(pos).getFirstChild().getNodeValue();
-		}*/ // for debugging
-		hashtable.remove(stPunctKey);
+			if(groupResult != null)
+				putResult(groupResult, false);
+			/*else {
+				int pos = inputTupleSchemas[0].getPosition("wid_from_"+inputName);
+				String tmpPos = inputTuple.getAttribute(pos).getFirstChild().getNodeValue();
+			}*/ // for debugging
+			hashtable.remove(stPunctKey);
+		} 
+		// No. Need to walk through the hashtable
+		else {
+			Iterator keys = hashtable.keySet().iterator();
+			String groupKey;
+			String[] groupKeyValues = new String[numGroupingAttributes];
+			boolean match;
+			while (keys.hasNext()) {
+				groupKey = (String)keys.next();
+				hasher.getValuesFromKey(groupKey, groupKeyValues);
+				match = true;
+				for (int i=0; i<numGroupingAttributes; i++) {
+					// if groupKeyValues match punctVals, output the result
+					if (groupKeyValues[i].compareTo(punctValues[i]) != 0 && 
+							punctValues[i].trim().compareTo("*") != 0) {
+						match = false;
+						break;
+					}
+				}
+				if (match) {
+					putResult((HashEntry)hashtable.get(groupKey), false);
+					keys.remove();
+				}
+			}
+		}
+		
 	}
 	
     private void putResult(HashEntry hashEntry, boolean partial) 
@@ -400,39 +440,32 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     		return;
 		
 		int tupleSize = tupleElement.size();
-
-		//Node wid_from = tupleElement.getAttribute(widFromPos);
-		//Node wid_to = tupleElement.getAttribute(widToPos);
-			
-		//int from = Long.valueOf(wid_from.getFirstChild().getNodeValue()).intValue();
-		//int to = Long.valueOf(wid_to.getFirstChild().getNodeValue()).intValue();
-		
+	
 		int from = Integer.parseInt(eaFrom.getAtomicValue(tupleElement, null));
 		int to = Integer.parseInt(eaTo.getAtomicValue(tupleElement, null));
 
 		HashEntry prevResult;
     		    
-    	Tuple tmpTuple;
-    	tmpTuple = (Tuple) tupleElement.clone();
-
-    	IntegerAttr wid;
     	
-    	Vector hashKeys = null;
-    	//hashKeys = hasher.rangeHash(tupleElement);
-    
-    	String key = null;
+    	
+    	String key = hasher.hashKey(tupleElement);
+    	String [] values = new String[numGroupingAttributes];
+    	hasher.getValuesFromKey(key, values);
+    	
+    	IntegerAttr wid;
+    	String hashKey;
     	// Probe hash table to see whether result for this hashcode
     	// already exist
     	for  (int i = from; i <= to; i++) {
-    		StringBuffer hashKey = new StringBuffer();	
-    		hashKey.append('<');
-    		hashKey.append(String.valueOf(i));
-    		hashKey.append('<');
-    		prevResult = (HashEntry) hashtable.get(hashKey.toString());
+    		values[numGroupingAttributes-1] = String.valueOf(i);
+    		hashKey = hasher.hashKey(values);
+    		prevResult = (HashEntry) hashtable.get(hashKey);
     		
     		if (prevResult == null) {
     			wid = new IntegerAttr(i);
     			
+    	    	Tuple tmpTuple = (Tuple) tupleElement.clone();
+
     			tmpTuple.setAttribute(tupleSize-2, wid);	
     			// If it does not have the result, just create new one
     			// with the current partial result id with the tupleElement
@@ -441,7 +474,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     	    
     			// Add the entry to hash table
     			// hashtable.put(key, prevResult);
-    			hashtable.put(hashKey.toString(), prevResult);
+    			hashtable.put(hashKey, prevResult);
     	    
     		} else {
     			// It did have the result - update partial results
@@ -449,7 +482,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     		}
     		// Based on whether the tuple represents partial or final results
     		// merge ungrouped result with previously grouped results
-    		if (tmpTuple.isPartial()) {
+    		if (tupleElement.isPartial()) {
     		    // Merge the partial result so far with current ungrouped result
     		    Object newPartialResult =
     			this.mergeResults(
