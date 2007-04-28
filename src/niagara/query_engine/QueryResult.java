@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.22 2006/12/07 00:25:25 jinli Exp $
+  $Id: QueryResult.java,v 1.23 2007/04/28 21:49:18 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -59,6 +59,17 @@ public class QueryResult {
     public class ResultObject {
         public Document result; // the value read from stream
         public boolean isPartial; // is result partial or final
+        public String stringResult;
+        public boolean sendStr;
+        
+        public ResultObject() {
+        	;
+        }
+        
+        public ResultObject(boolean sendStr) {
+        	this.sendStr = sendStr;
+        }
+        
     }
 
     /////////////////////////////////////////////////////////////
@@ -108,8 +119,8 @@ public class QueryResult {
     // KT - hack so I don't have to put ResultObject in it's own class,
     // as it is I'm removing about 10,000 extra allocations, so I get
     // one teeny weeny hack
-    public ResultObject getNewResultObject() {
-        return new ResultObject();
+    public ResultObject getNewResultObject(boolean sendStr) {
+        return new ResultObject(sendStr);
     }
 
     /**
@@ -237,14 +248,71 @@ public class QueryResult {
                 == CtrlFlags.NULLFLAG : "Unexpected control flag "
                     + CtrlFlags.name[ctrlFlag];
             resultObject.isPartial = tuple.isPartial();
-            resultObject.result = extractXMLDocument(tuple);
+            if (!resultObject.sendStr)
+            	resultObject.result = extractXMLDocument(tuple);
+            else
+            	resultObject.stringResult = extractResult(tuple);
         }
         return ctrlFlag;
     }
 
+    private String extractResult (Tuple tupleElement) {
+        if (ResultTransmitter.OUTPUT_FULL_TUPLE) {
+
+            int tupleSize = tupleElement.size(); 
+
+			if(tupleSize == 1) {
+				if (tupleElement.getAttribute(0) instanceof Node) {
+					if (((Node)tupleElement.getAttribute(0)).getNodeType() ==
+					    Node.DOCUMENT_NODE) 
+					    return null; //(Document)tupleElement.getAttribute(0);
+				} else if (tupleElement.getAttribute(0) instanceof BaseAttr) {
+					return ((BaseAttr)tupleElement.getAttribute(0)).toASCII(); //tupleAttrToDoc((BaseAttr)tupleElement.getAttribute(0));
+				} else 
+					throw new PEException ("JL: Unsupported tuple attribute type");
+						
+			} else {
+				int startIdx = 0;
+				if (tupleElement.getAttribute(0) instanceof Node)
+					if (((Node)tupleElement.getAttribute(0)).getNodeType() ==
+					           Node.DOCUMENT_NODE) 
+						startIdx = 1;
+					
+                //Document resultDoc = DOMFactory.newDocument();
+                //Element root = resultDoc.createElement("niagara:tuple");
+                //resultDoc.appendChild(root);
+				StringBuffer resultTuple = new StringBuffer();
+                for (int i = startIdx; i < tupleSize; i++) {
+                    Object tupAttr = tupleElement.getAttribute(i);
+                    if (tupAttr instanceof Node) {
+                    	if (((Node)tupleElement.getAttribute(i)).getNodeType() ==
+					           Node.DOCUMENT_NODE)
+                    		continue;
+                    	resultTuple.append(tupleAttrToStr((Node)tupAttr)+"\t");
+                    	
+                    } else if (tupAttr instanceof BaseAttr) {
+                    	resultTuple.append(((BaseAttr)tupAttr).toASCII()+"\t");
+                    } else if (tupAttr == null) {
+                    	resultTuple.append("null");
+                    } else
+                    	throw new PEException ("JL: Unsupported tuple attribute type");
+                }
+                return resultTuple.append("\n").toString();
+			}
+        }
+        
+        Object lastAttribute = tupleElement.getAttribute(tupleElement.size() - 1);
+
+        if (lastAttribute instanceof Node)
+        	return tupleAttrToStr(((Node)lastAttribute))+"\n";
+        else
+        	return ((BaseAttr)lastAttribute).toASCII()+"\n";
+
+    }
+    
     private Document extractXMLDocument(Tuple tupleElement) {
         // First get the last attribute of the tuple
-
+    	
         if (ResultTransmitter.OUTPUT_FULL_TUPLE) {
 
             int tupleSize = tupleElement.size(); 
@@ -272,7 +340,7 @@ public class QueryResult {
                 for (int i = startIdx; i < tupleSize; i++) {
                     Object tupAttr = tupleElement.getAttribute(i);
                     if (tupAttr instanceof Node) {
-                    	if (((Node)tupleElement.getAttribute(0)).getNodeType() ==
+                    	if (((Node)tupleElement.getAttribute(i)).getNodeType() ==
 					           Node.DOCUMENT_NODE)
                     		continue;
                     	Element elt = tupleAttrToElt((Node)tupAttr, resultDoc);
@@ -280,7 +348,10 @@ public class QueryResult {
                     } else if (tupAttr instanceof BaseAttr) {
                     	Element elt = tupleAttrToElt((BaseAttr)tupAttr, resultDoc);
                     	root.appendChild(elt);
-                    } else 
+                    } else if (tupAttr == null) {
+                    	Element elt = resultDoc.createElement("null");
+                    	root.appendChild(elt);
+                    } else
                     	throw new PEException ("JL: Unsupported tuple attribute type");
                 }
                 return resultDoc;
@@ -370,8 +441,37 @@ public class QueryResult {
         }
     }
     
+    private String tupleAttrToStr (Node tupAttr) {
+        if (tupAttr instanceof Element) {
+        	StringBuffer result = new StringBuffer ();
+			Element elt = (Element)tupAttr;
+			Node item;
+			int size = elt.getChildNodes().getLength();
+			for (int i = 0; i < size; i++) {
+				item = elt.getChildNodes().item(i);
+				if (item.getNodeType() == Node.ELEMENT_NODE)
+					result.append(item.getFirstChild().getNodeValue()+"\t");
+				else 
+					result.append(item.getNodeValue()+"\t");
+			}
+			return result.toString();
+            //return ((Element)tupAttr).getFirstChild().getNodeValue(); 
+        } else if (tupAttr instanceof Attr) {
+        	return ((Attr) tupAttr).getValue();
+        } else if (tupAttr instanceof Text) {
+        	return tupAttr.getNodeValue(); 
+        } else if (tupAttr == null) {
+            return null;
+        } else {
+            assert false : "KT What did I get?? "
+                + tupAttr.getClass().getName();
+            return null;
+        }    	
+    }
+    
     private Element tupleAttrToElt(BaseAttr tupAttr, Document resultDoc) {
     	Element elt = resultDoc.createElement("BaseAttr");
+    	
     	Text txt = resultDoc.createTextNode(tupAttr.toASCII());
     	elt.appendChild(txt);
     	return elt;
