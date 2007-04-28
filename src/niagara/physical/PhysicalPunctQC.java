@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalPunctQC.java,v 1.1 2007/03/08 22:34:29 tufte Exp $
+  $Id: PhysicalPunctQC.java,v 1.2 2007/04/28 21:47:13 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,6 +29,9 @@ package niagara.physical;
 
 import java.util.ArrayList;
 import java.util.Vector;
+import java.sql.Timestamp;
+import java.util.GregorianCalendar;
+import java.util.Calendar;
 
 import org.w3c.dom.*;
 
@@ -36,6 +39,7 @@ import niagara.logical.PunctQC;
 import niagara.logical.PunctSpec;
 import niagara.logical.PrefetchSpec;
 import niagara.logical.SimilaritySpec;
+import niagara.logical.SimilaritySpec.SimilarityType;
 import niagara.optimizer.colombia.*;
 import niagara.query_engine.*;
 import niagara.utils.*;
@@ -56,21 +60,37 @@ public class PhysicalPunctQC extends PhysicalOperator {
     // assume index of dbdata is 0
     // index of punct is 1
     
-		// attribute to punctuate on
+	// attribute to punctuate on
     private Attribute pAttr;
-		private PunctSpec pSpec;
-    private int pIdx; // index of punctuation attr
+	private PunctSpec pSpec;
     private SimilaritySpec sSpec;
     private PrefetchSpec pfSpec;
-
-		// last timestamp - for on change punctuation
-		private long lastts;
+    
+    // punctuating attribute of the input stream, which we rely 
+    // on to retrieve data from db
+    private Attribute spAttr;
+    
+    private int [] pIdx; // index of punctuation attr
+    
+	// last timestamp - for on change punctuation
+	private long lastts;
 
     // keep track of data types to be used to create
     // punctuation
     BaseAttr.Type dataType[];      
     
-    private boolean dataStreamClosed = false;
+    // queryInterval should specify the coverage of each database query; 
+    //private int queryGranularity = 1*20; //each database query covers 100 second data;
+    
+    // high watermark on db data;
+    private long highWatermark;
+    
+    // the time attribute of db data  
+    private String timeAttr;
+    
+    private String queryString;
+    
+    private int count = 0;
     
     public PhysicalPunctQC() {
         setBlockingSourceStreams(blockingSourceStreams);
@@ -81,7 +101,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
     // can't get index there
     // probably take attr here, and convert to idx in
     // opInitialize
-    public PhysicalPunctQC(Attribute pAttr,
+    public PhysicalPunctQC(Attribute pAttr, String timeAttr, String queryString,
 				PunctSpec pSpec, SimilaritySpec sSpec,
         PrefetchSpec pfSpec) {
         setBlockingSourceStreams(blockingSourceStreams);
@@ -90,6 +110,12 @@ public class PhysicalPunctQC extends PhysicalOperator {
 				this.pSpec = pSpec;
 				this.sSpec = sSpec;
 				this.pfSpec = pfSpec;
+				this.timeAttr = timeAttr;
+				this.queryString = queryString;
+    }
+    
+    public void setSPAttr(Attribute spAttr) {
+    	this.spAttr = spAttr;
     }
     
     public void opInitFrom(LogicalOp logicalOperator) {
@@ -98,15 +124,23 @@ public class PhysicalPunctQC extends PhysicalOperator {
 				pSpec = pop.getPunctSpec();
 				sSpec = pop.getSimilaritySpec();
 				pfSpec = pop.getPrefetchSpec();
+				spAttr = pop.getStreamPunctAttr();
+				timeAttr = pop.getTimeAttr();
+				queryString = pop.getQueryString();
+				
     }
 
     public void opInitialize() {
         // initialize ts to -1 so we can detect the first
         // tuple 
-				lastts= -1;
+		lastts= Long.MIN_VALUE;
+		highWatermark = Long.MIN_VALUE;
 
+		pIdx = new int[2];
+		
         // get index of attribute we are punctuating on
-        pIdx = inputTupleSchemas[0].getPosition(pAttr.getName());
+        pIdx[0] = inputTupleSchemas[0].getPosition(pAttr.getName());
+        pIdx[1] = inputTupleSchemas[1].getPosition(spAttr.getName());
 
         // get the data types of all attributes
         int numAttrs = inputTupleSchemas[0].getLength();
@@ -116,7 +150,8 @@ public class PhysicalPunctQC extends PhysicalOperator {
         }
        
         // print to verify i've got the inputs set up right
-        System.out.println("PunctQC - pidx: " + pIdx);
+        System.out.println("PunctQC - pidx[0]: " + pIdx[0]);
+        System.out.println("PunctQC - pidx[1]: " + pIdx[1]);
         System.out.println("PunctQC - len input 0 (db): " + inputTupleSchemas[0].getLength());
         System.out.println("PunctQC - first attr input 0: " + inputTupleSchemas[0].getVariable(0).getName());
         System.out.println("PunctQC - len input 1 (stream punct): " + inputTupleSchemas[1].getLength());
@@ -140,21 +175,46 @@ public class PhysicalPunctQC extends PhysicalOperator {
 			throws ShutdownException, InterruptedException, OperatorDoneException {
 
       if(streamId == 1) {
-        System.out.println("PunctQC dropping data from stream side");
-        return;
+        //System.out.println("PunctQC dropping data from stream side");
+          return;
+    	
+    	/**
+    	 * JUST FOR TEST PURPOSE. EVERY TUPLE IS USED AS A PUNCTUATION; 
+    	 */
+    	  
+          /*long start, end;
+          long ts = getTupleTimestamp(inputTuple, 1);
+
+          	start = ts;
+          	end = start + queryGranularity;
+      
+          	String startTS = new Timestamp(start*1000).toString();
+          	startTS = startTS.substring(0, startTS.length()-2);
+      
+          	String endTS = new Timestamp(end*1000).toString();
+          	endTS = endTS.substring(0, endTS.length()-2);
+          	
+          	IntegerAttr sensorid = (IntegerAttr)inputTuple.getAttribute(5);
+          	//String ctrlMsg = String.valueOf(start)+"\t"+String.valueOf(end);
+          	String ctrlMsg = startTS + "\t" + endTS +"\t"+sensorid.toASCII();
+          	System.err.println(ctrlMsg);
+
+          	int ctrlFlag = CtrlFlags.CHANGE_QUERY;
+          	System.err.println("putting a CHANGE_QUERY control msg");
+          	sendCtrlMsgUpStream(ctrlFlag, ctrlMsg, 0);*/
       }
 			
 			// could enforce punctuation here - for now assume
 			// input is ordered - jenny is going to hate me when
 			// she sees this!!
 
-			if(lastts == -1) {
+			if(lastts == Long.MIN_VALUE) {
 				// this is the first tuple
 				// record the tuple's timestamp 
 				// grab a copy of the tuple for a punctuation
 				// template
 				// put the tuple in the output stream and continue
-				lastts = getTupleTimestamp(inputTuple);
+				lastts = getTupleTimestamp(inputTuple, 0);
 	      //tupleDataSample = inputTuple.copy();
 				putTuple(inputTuple, 0);
 				
@@ -162,8 +222,11 @@ public class PhysicalPunctQC extends PhysicalOperator {
 				// compare tuple timestamp to see if it has changed
 				// if changed put punct, then tuple
 				// else just put tuple
-				long newts = getTupleTimestamp(inputTuple);
+				long newts = getTupleTimestamp(inputTuple, 0);
 				if(newts != lastts) {
+					if (newts < lastts)
+						System.err.println("data from db is not ordered *******************");
+
 					putTuple(createPunctuation(), 0);
 					lastts = newts;
 				} 
@@ -171,9 +234,12 @@ public class PhysicalPunctQC extends PhysicalOperator {
 			}
 		}
 
-	  private long getTupleTimestamp(Tuple inputTuple){
-      assert (inputTuple.getAttribute(pIdx)).getClass() == TSAttr.class : "bad punct attr type";
-      TSAttr tsAttr = (TSAttr)inputTuple.getAttribute(pIdx);
+    /*
+     * Assume timestamp is in seconds;
+     */ 
+    private long getTupleTimestamp(Tuple inputTuple, int streamId){
+      assert (inputTuple.getAttribute(pIdx[streamId])).getClass() == TSAttr.class : "bad punct attr type";
+      TSAttr tsAttr = (TSAttr)inputTuple.getAttribute(pIdx[streamId]);
       return tsAttr.extractEpoch();
     }
 
@@ -191,7 +257,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
       // HERE - FIX - DON'T KNOW HOW TO CREATE NEW * ATTRS
       Punctuation punct = new Punctuation(false); // what does false mean?
       for (int i=0; i<dataType.length; i++) { 
-        if (i != pIdx) {
+        if (i != pIdx[0]) {
           punct.appendAttribute(BaseAttr.createWildStar(dataType[i])); 
         } else {
           punct.appendAttribute(new TSAttr(lastts));	// ???
@@ -214,10 +280,115 @@ public class PhysicalPunctQC extends PhysicalOperator {
     protected void processPunctuation(Punctuation tuple,
 				      int streamId)
       throws ShutdownException, InterruptedException {
+    	
         // FIX - process punct from stream
         assert streamId == 1 : "Shouldn't get punct from db side";
-        System.out.println("DO SOMETHING HERE - PROCESS PUNCT FROM DB SIDE");
+        if (streamId == 0) {
+        	System.err.println("DO SOMETHING HERE - PROCESS PUNCT FROM DB SIDE");
+        	return;
+        }
+        
+        long start, end;
+        long ts = getTupleTimestamp(tuple, 1);
+        int prefetch = pfSpec.getPrefetchVal();
+        
+        if (highWatermark < ts+prefetch) {
+            int queryCoverage = pfSpec.getCoverage();
+
+            /*start = ts + prefetch;
+        	end = start + queryCoverage;
+        	
+        	String startTS = new Timestamp(start*1000).toString();       	
+        	startTS = startTS.substring(0, startTS.length()-2);
+    
+        	String endTS = new Timestamp(end*1000).toString();
+        	endTS = endTS.substring(0, endTS.length()-2);*/
+            if (count == 0) {
+            	start = ts - sSpec.getNumOfMins()*60;
+            	count++;
+            } else
+            	start = highWatermark;
+        	end = (start + queryCoverage);
+        	
+        	String ctrlMsg = newQuery(start, end);
+    
+        	System.err.println(ctrlMsg);
+        	highWatermark = end;
+        	int ctrlFlag = CtrlFlags.CHANGE_QUERY;
+
+        	sendCtrlMsgUpStream(ctrlFlag, ctrlMsg, 0);
+        }        
     }
+
+	/**
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	private String newQuery(long start, long end) {
+		Calendar calendar = GregorianCalendar.getInstance();
+		
+		//calendar.setTimeInMillis(start*1000);
+		//String startTS = calendar.getTime().toString();
+		//calendar.setTimeInMillis(end*1000);
+		//String endTS = calendar.getTime().toString();
+
+		System.err.println("start at: "+start+"   end at: "+end);
+		StringBuffer query = new StringBuffer("(");
+		
+		int numDays = sSpec.getNumOfDays();
+		int numMins = sSpec.getNumOfMins();
+		
+		//queryString.replace ("NUMOFDAYS", "interval '1 day'");
+		//query.append(queryString);
+		String upper, lower;
+		switch (sSpec.getSimilarityType()) {
+		case AllDays:
+			for (int i = 1; i <= numDays; i++) {
+				if (i > 1)
+					query.append(" union all ");
+				
+				//query.append(queryString.replace("NUMOFDAYS", " '" +i+" days'"));
+				
+				calendar.setTimeInMillis(start*1000);											
+				calendar.roll(Calendar.DAY_OF_YEAR, -i);				
+				//calendar.add(Calendar.MINUTE, -numMins);				
+				lower = calendar.getTime().toString();
+				
+				calendar.setTimeInMillis(end*1000);			
+				calendar.roll(Calendar.DAY_OF_YEAR, -i);				
+				//calendar.add(Calendar.MINUTE, numMins);				
+				upper = calendar.getTime().toString();
+				
+				query.append(queryString.replace("NUMOFDAYS", " '" +i+" days'").replace("TIMEPREDICATE", timePredicate(upper, lower)));
+				
+			}
+			query.append(") order by panetime");
+			
+			break;
+			
+		case WeekDays:						
+			break;
+		case SameDayOfWeek:
+			break;
+		default:
+			System.err.println("unsupported similarity type: "+sSpec.getSimilarityType().toString());
+		}
+		return query.toString();
+	}
+    
+    public void streamClosed( int streamId) 
+    throws ShutdownException {
+    try {
+    if (streamId == 1) // the stream ends;
+    	//send a READY_TO_FINISH msg to its left input source, which is the dbthread;
+    	System.err.println("the stream is going to end. Sending out the Shutdown msg ..");
+    	sendCtrlMsgUpStream(CtrlFlags.READY_TO_FINISH, null, 0);
+    } catch (InterruptedException e) {
+    	;
+    }
+    }
+
 
     public boolean isStateful() {
       return false;
@@ -238,7 +409,9 @@ public class PhysicalPunctQC extends PhysicalOperator {
      * @see niagara.optimizer.colombia.Op#copy()
      */
     public Op opCopy() {
-        return new  PhysicalPunctQC(pAttr, pSpec, sSpec, pfSpec);
+        PhysicalPunctQC another = new  PhysicalPunctQC(pAttr, timeAttr, queryString, pSpec, sSpec, pfSpec);
+        another.setSPAttr(spAttr);
+        return another;
     }
 
     // HERE
@@ -266,6 +439,16 @@ public class PhysicalPunctQC extends PhysicalOperator {
       // FIX - this is garbage
         return getArity(); // what is this ?? 
     }
+    
+    public String timePredicate (String upper, String lower) {
+    	
+    	//StringBuffer query = new StringBuffer(" " + timeFunct  + ">= '" + queryRange[0] + "' and "+ timeFunct + "<= '" +queryRange[1]+"' ");
+    	//query.append(" and dbdetectorid= "+queryRange[2]);
+    	String pred = " "+timeAttr  + ">= " + "TIMESTAMP '"+lower + "' and "+ timeAttr + "< " + "TIMESTAMP '"+upper+ "'";
+
+    	return pred;
+    }
+
     
 }
     
