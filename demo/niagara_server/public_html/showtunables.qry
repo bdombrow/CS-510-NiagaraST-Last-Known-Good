@@ -3,7 +3,7 @@
 
 <plan top="cons">
 
-<showTunables id="show" planID="forever"/>
+<showTunables id="show" plan="forever"/>
 
 <select id="select" input="show">
 <pred op="eq"><var value="$operator"/><string value="PhysicalConstruct1"/>
