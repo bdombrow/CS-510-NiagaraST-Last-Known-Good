@@ -1,14 +1,9 @@
 /**
- * $Id: TimerThread.java,v 1.6 2003/12/24 02:12:09 vpapad Exp $
+ * $Id: TimerThread.java,v 1.7 2007/04/30 19:19:06 vpapad Exp $
  *
  */
 
 package niagara.data_manager;
-
-/** Niagara DataManager
-  * ConstantOpThread - retrieve data from an embedded document and
-  * put it into the stream; based on FirehoseThread
-  */
 
 import org.w3c.dom.*;
 
@@ -48,8 +43,6 @@ public class TimerThread extends SourceThread {
     private String name;
 
     protected SinkTupleStream outputStream;
-
-    protected int cnt;
 
     public TimerThread() {
 	isSendImmediate = true;
@@ -228,21 +221,16 @@ public class TimerThread extends SourceThread {
             long currentTime =
                 (System.currentTimeMillis() - offset) * tt.warp - tt.slack;
             currentTime = currentTime - (currentTime % granularity);
-            System.err.println("XXX vpapad: producing value");
-            Node node = doc.createTextNode(String.valueOf(currentTime));
-	    Element elt = doc.createElement("Time");
-	    elt.appendChild(node);
-	    
+	    LongAttr la = new LongAttr(new Long(currentTime));
+	    Tuple t = new Tuple(false, 1);
+	    t.appendAttribute(la);
             do {
                 try {
-                    tt.outputStream.put(elt);
-                    cnt++;
-                    System.err.println("XXX vpapad: timer tuple sent " + cnt);
+                    tt.outputStream.putTuple(t);
                     return;
                 } catch (InterruptedException ie) {
                     // Do nothing
                 } catch (ShutdownException se) {
-                    System.err.println("XXX vpapad: cancelling");
                     cancel();
                     return;
                 }

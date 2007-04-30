@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.31 2007/03/08 22:32:29 tufte Exp $
+ * $Id: StreamThread.java,v 1.32 2007/04/30 19:19:05 vpapad Exp $
  */
 
 package niagara.data_manager;
@@ -85,7 +85,8 @@ public class StreamThread extends SourceThread {
 
 	    if(parser instanceof SAXDOMParser && spec.isStream()) {
 		// Use SAXDOMParser - assumes niagara:stream format
-		((SAXDOMParser)(parser)).setOutputStream(outputStream, spec.delay());
+		((SAXDOMParser)(parser)).setOutputStream(outputStream, 
+							 spec.delay());
 		InputSource inputSource = new InputSource(inputStream);
 		parser.parse(inputSource);
 		/* }else if(parser.supportsStreaming()) {
@@ -436,7 +437,7 @@ public class StreamThread extends SourceThread {
      */
     public int hashCode() {
         // XXX vpapad: spec's hashCode is Object.hashCode()
-        return spec.hashCode();
+        return hashCodeNullsAllowed(spec);
     }
     
     /**
