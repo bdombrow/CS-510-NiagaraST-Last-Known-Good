@@ -1,5 +1,9 @@
 /**********************************************************************
-  $Id: RequestParser.java,v 1.15 2007/04/30 19:17:13 vpapad Exp $
+<<<<<<< RequestParser.java
+  $Id: RequestParser.java,v 1.16 2007/04/30 23:17:08 jinli Exp $
+=======
+  $Id: RequestParser.java,v 1.16 2007/04/30 23:17:08 jinli Exp $
+>>>>>>> 1.15
 
   NIAGARA -- Net Data Management System                                 
                                                                         
@@ -32,10 +36,12 @@ import java.io.InputStream;
 
 import niagara.connection_server.RequestMessage.InvalidRequestTypeException;
 
-import org.xml.sax.AttributeList;
-import org.xml.sax.HandlerBase;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+//import org.xml.sax.AttributeList;
+//import org.xml.sax.HandlerBase;
+//import org.xml.sax.InputSource;
+//import org.xml.sax.SAXException;
+
+import org.xml.sax.*;
 
 import com.microstar.xml.SAXDriver;
 
@@ -52,6 +58,7 @@ public class RequestParser extends HandlerBase implements Runnable {
     static final String REQUEST_TYPE =  "requestType";
     static final String REQUEST_DATA = "requestData";
     static final String REQUEST = "request";
+    static final String RESULT_TYPE = "resultType";
 
     //local variables
 
@@ -110,12 +117,19 @@ public class RequestParser extends HandlerBase implements Runnable {
 	     currentMesg = new RequestMessage();
 	     currentMesg.localID = Integer.parseInt(atts.getValue(LOCAL_ID));
 	     currentMesg.serverID = Integer.parseInt(atts.getValue(SERVER_ID));
+	     
+	     String outputType = atts.getValue(RESULT_TYPE); 
+	     if (outputType != null) {
+	    	if (outputType.compareToIgnoreCase("text") == 0)
+	    		currentMesg.asii = true;  
+	     }
          String reqType = atts.getValue(REQUEST_TYPE);
          try {
              currentMesg.setRequestType(reqType);
          } catch (InvalidRequestTypeException irte) {
              reqHandler.sendErrMessage(currentMesg, ResponseMessage.PARSE_ERROR, "Invalid request type: " + reqType);
          }
+
 	     currentMesg.requestData = "";
 	 } else if (name.equals(REQUEST)) { 
 	     // do nothing, this is the first tag

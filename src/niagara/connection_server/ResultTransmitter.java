@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.31 2007/04/30 19:17:13 vpapad Exp $
+  $Id: ResultTransmitter.java,v 1.32 2007/04/30 23:17:08 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -62,7 +62,6 @@ public class ResultTransmitter implements Schedulable {
     // The size (in bytes) of a batch in a batched query
     private static final int BATCHSIZE = 1024; 
 
-    private final boolean sendStr;
     private final boolean sendImmediate;
     
     // Tags for element and attribute list
@@ -97,7 +96,6 @@ public class ResultTransmitter implements Schedulable {
         this.request = request;
         totalResults = 0;
         this.sendImmediate = request.isSendImmediate();
-	this.sendStr = NiagraServer.getCatalog().getBooleanConfigParam("sendStr");
     }
 
     public void setPrettyprint(boolean prettyprint) {
@@ -236,7 +234,7 @@ public class ResultTransmitter implements Schedulable {
         // do the allocation here instead of inside getNext, so 
         // we only allocate one resultObject
         QueryResult.ResultObject resultObject =
-            queryResult.getNewResultObject(sendStr);
+        	queryResult.getNewResultObject(request.asii);
 
         while (true) {
             if (killThread) {
@@ -292,7 +290,7 @@ public class ResultTransmitter implements Schedulable {
         response = new ResponseMessage(request, ResponseMessage.QUERY_RESULT);
 
         QueryResult.ResultObject resultObject =
-            queryResult.getNewResultObject(sendStr);
+            queryResult.getNewResultObject(request.asii);
 
         while (true) {
             if (killThread) {

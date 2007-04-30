@@ -1,5 +1,5 @@
 /**********************************************************************
- $Id: RequestMessage.java,v 1.10 2007/04/30 19:17:12 vpapad Exp $
+ $Id: RequestMessage.java,v 1.11 2007/04/30 23:17:09 jinli Exp $
  
  
  NIAGARA -- Net Data Management System                                 
@@ -88,16 +88,19 @@ public class RequestMessage {
     int localID;
     private boolean sendImmediate;
     String requestData;
+    boolean asii;
 
     public RequestMessage() {
         serverID = -1;
         localID = -1;
+        asii = false;
     }
 
     public RequestMessage(RequestType qt) throws InvalidRequestTypeException {
         this.requestType = qt;
         serverID = -1;
         localID = -1;
+        asii = false;
     }
 
     public void setRequestType(RequestType requestType) {
