@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.47 2007/03/08 22:28:21 tufte Exp $
+<!-- $Id: queryplan.dtd,v 1.48 2007/04/30 19:10:13 vpapad Exp $
      DTD for query plans -->
 
 <!-- 
@@ -18,9 +18,11 @@
 		    bucket | partitionavg | partitionmax |
 		    accumulate | nest | magic_construct | 
 		    windowCount | windowMax | windowAverage  | windowJoin |
-		    store | load | xmlscan | dbscan | punctqc )+>
+        showTunables | collectInstrumentation |
+		    store | load | xmlscan | dbscan | punctqc | present)+>
 		    
 <!ATTLIST plan top IDREF        #REQUIRED
+               planID CDATA     ""
           %PositionAttributes;>
 
 <!-- 
@@ -46,7 +48,7 @@
 <!ATTLIST unnest 
 
 	  type	   (tag|element|content) "element"
-	  datatype	(String|XML|Integer|TS) "String"
+	  datatype	(String|XML|Integer|Long|TS) "String"
 	  root	   CDATA                 ""
 	  regexp   CDATA               #REQUIRED
 	  outer    (yes|no|strict)     "no"
@@ -334,6 +336,8 @@ specify the db input first and the stream punct input second -->
 	        puncttype CDATA       #REQUIRED
 	        similarity CDATA       #REQUIRED
 	        prefetch CDATA       #REQUIRED
+		query_string CDATA   #REQUIRED
+		timeattr CDATA		#REQUIRED
 	        input    IDREFS       #REQUIRED
 	  %PositionAttributes;>
 
@@ -361,6 +365,7 @@ specify the db input first and the stream punct input second -->
 	  winattr  CDATA	""
 	  wid	   CDATA	""
 	  order    (yes|no)     "yes"
+	  start    CDATA        ""
 	  %StandardAttributes;>
 
 <!ELEMENT describe EMPTY>
@@ -443,7 +448,7 @@ specify the db input first and the stream punct input second -->
 <!ATTLIST filescan 
           id       ID           #REQUIRED
           filename CDATA        #REQUIRED
-					delay    CDATA        "-1"
+          delay    CDATA        "-1"
 	  isstream (yes | no) "yes"
 	  %PositionAttributes;>
 <!-- isStream should be yes if file is a stream in niagara:stream
@@ -453,14 +458,17 @@ specify the db input first and the stream punct input second -->
 <!ELEMENT xmlscan EMPTY>
 <!ATTLIST xmlscan 
           id       ID           #REQUIRED
-          filename CDATA        #REQUIRED
+	  spec	   CDATA	""
+          filename CDATA        ""
           attrs    CDATA		#REQUIRED
-					delay    CDATA        "-1"
+          delay    CDATA        "-1"
 	  isstream (yes | no) "yes"
 	  %PositionAttributes;>
 <!-- isStream should be yes if file is a stream in niagara:stream
      format, no otherwise. If isStream is no, then file must
-     contain only one document -->
+     contain only one document. You can either use "spec" to
+     load the info from the catalog, or specify isStream and
+     filename explicitly, but not both. -->
 
 <!ELEMENT dbscan  EMPTY>
 <!ATTLIST dbscan 
@@ -468,6 +476,8 @@ specify the db input first and the stream punct input second -->
 					attr_types   CDATA		#REQUIRED
 					attr_names   CDATA    #REQUIRED
           query_string CDATA    #REQUIRED
+	  timeattr CDATA	""
+	  type		CDATA	"continuous"
 	  %PositionAttributes;>
 
 <!ELEMENT url        EMPTY >
@@ -508,4 +518,24 @@ specify the db input first and the stream punct input second -->
 	  variable CDATA  #REQUIRED
 	  resource CDATA  #REQUIRED
           %PositionAttributes;>
-          
+
+<!ELEMENT present EMPTY>
+<!ATTLIST present
+          id       ID                   #REQUIRED
+	  input    IDREFS		#REQUIRED
+	  punctattr	CDATA		#REQUIRED
+	  %PositionAttributes;>
+         
+<!ELEMENT showTunables EMPTY>
+<!ATTLIST showTunables
+       id       ID           #REQUIRED
+         plan   CDATA        #REQUIRED
+          %PositionAttributes;>
+
+<!ELEMENT collectInstrumentation EMPTY>
+<!ATTLIST collectInstrumentation
+       id       ID          #REQUIRED
+         plan          CDATA           #REQUIRED
+         operators     CDATA           #REQUIRED
+         period        CDATA           #REQUIRED
+          %PositionAttributes;>

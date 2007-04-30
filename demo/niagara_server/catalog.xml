@@ -1,11 +1,48 @@
 <?xml version="1.0"?>
-<!-- $Id: catalog.xml,v 1.4 2007/03/08 22:28:03 tufte Exp $ --><catalog>
+<!-- $Id: catalog.xml,v 1.5 2007/04/30 19:10:13 vpapad Exp $ --><catalog>
+  <streams>
+    <stream delay="-1" filename="/stash/datalab/datastreams-student/streamdata/auctions10k.xml" isStream="yes" name="auctions">
+      <var name="id" type="int"/>
+      <var name="reserve" type="int"/>
+      <var name="sellerid" type="int"/>
+      <var name="category" type="int"/>
+      <var name="expires" type="int"/>
+    </stream>
+    <stream delay="-1" filename="auctions1MB.xml" isStream="yes" name="auctionslarge">
+      <var name="id" type="int"/>
+      <var name="reserve" type="int"/>
+      <var name="sellerid" type="int"/>
+      <var name="category" type="int"/>
+      <var name="expires" type="int"/>
+    </stream>
+    <stream delay="-1" filename="/stash/datalab/datastreams-student/streamdata/bids10k.xml" isStream="yes" name="bids">
+      <var name="auctionid" type="int"/>
+      <var name="time" type="int"/>
+      <var name="bidderid" type="int"/>
+      <var name="amt" type="double"/>
+    </stream>
+    <stream delay="-1" filename="bids1MB.xml" isStream="yes" name="bidslarge">
+      <var name="auctionid" type="int"/>
+      <var name="time" type="int"/>
+      <var name="bidderid" type="int"/>
+      <var name="amt" type="double"/>
+    </stream>
+  </streams>
+
   <configuration>
     <!-- General configuration parameters -->
     <!-- Directory name where locally available data will be stored.
             Name is relative to the directory where the server starts up,
             the data manager will attempt to create it if it doesn't already exist. -->
     <param name="local data directory" value="data"/>
+    <!-- Directory name whose static files will be made available PUBLICLY
+         through the HTTP server. Name is relative to the directory where
+         the server starts up. -->
+    <param name="web directory" value="public_html"/>
+
+    <param name="query threads" value="5"/>
+    <param name="operator threads" value="30"/>
+    <param name="sendStr" value="false"/>
   </configuration>
   
   <operators>
@@ -35,6 +72,12 @@
     </logical>
     <logical class="niagara.logical.ConstantScan" name="constant">
       <physical class="niagara.data_manager.ConstantOpThread" name="ConstantThread"/>
+    </logical>
+    <logical class="niagara.logical.ShowTunables" name="showTunables">
+      <physical class="niagara.data_manager.ShowTunablesThread" name="ShowTunablesThread"/>
+    </logical>
+    <logical class="niagara.logical.CollectInstrumentation" name="collectInstrumentation">
+      <physical class="niagara.data_manager.CollectInstrumentationThread" name="CollectInstrumentationThread"/>
     </logical>
     <logical class="niagara.logical.Resource" name="resource"/>
     <logical class="niagara.logical.Unnest" name="unnest">
@@ -135,6 +178,10 @@
     </logical>
     <physical class="niagara.physical.PhysicalPredicatedUnnest" name="PhysicalPredicatedUnnest"/>
     <physical class="niagara.physical.PhysicalHead" name="PhysicalHead"/>
+    <logical class="niagara.logical.Present" name="present">
+      <physical class="niagara.physical.PhysicalPresent" name="PhysicalPresent"/>
+    </logical>
+
   </operators>
 
   <ruleset name="normal ruleset">
@@ -174,6 +221,14 @@
   		<before><logical name="dbscan"/></before>
  		<after><op name="DBThread"/></after>
   	</rule>  	
+       <rule name="showTunables to ShowTunablesThread" type="simple">
+               <before><logical name="showTunables"/></before>
+               <after><op name="ShowTunablesThread"/></after>
+       </rule>
+       <rule name="collectInstrumentation to CollectInstrumentationThread" type="simple">
+               <before><logical name="collectInstrumentation"/></before>
+               <after><op name="CollectInstrumentationThread"/></after>
+       </rule>
   	<rule name="fhscan to StreamThread" type="simple">
   		<before><logical name="firehosescan"/></before>
  		<after><op name="StreamThread"/></after>
@@ -287,6 +342,14 @@
         <before><logical name="load"/></before>
 		<after><op name="LoadThread"/></after>
     </rule>
+  <rule name="present to PhysicalPresent" type="simple">
+  		<before><logical name="present"/></before>
+ 		<after><op name="PhysicalPresent"/></after>
+  	</rule> 
+	<rule name="punctqc to PhysicalPunctQC" type="simple">
+		<before><logical name="punctqc"/></before>
+		<after><op name="PhysicalPunctQC"/></after>
+	</rule>
   	<rule argument="unn" condition="isPushableInto" name="select-unnest to PhysicalPredicatedUnnest" type="constructed">
   		<before>
   			<op name="sel" op="select">
@@ -389,7 +452,17 @@
         local files, URLs, or resolver addresses (servers that can resolve
         the URN). This element is reconstructed on every server shutdown,
         manual edits while the server is running will be lost! -->
+
+
+
+
+
+
+
+
+
+
+
 <resources>
 </resources>
 </catalog>
-
