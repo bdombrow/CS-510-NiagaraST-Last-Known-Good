@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.18 2003/09/22 01:16:00 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.19 2007/04/30 19:15:27 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -179,7 +179,9 @@ public class ConnectionManager implements QueryExecutionIF {
 	    
         if (queryType == QueryType.XMLQL
             || queryType == QueryType.QP
-            || queryType == QueryType.EXPLAIN_QP) {
+            || queryType == QueryType.EXPLAIN_QP
+            || queryType == QueryType.PREPARE_QP
+            || queryType == QueryType.EXECUTE_PREPARED) {
             getNext(id, nResults);
         }
 

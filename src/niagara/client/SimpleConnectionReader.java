@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.16 2003/09/22 01:16:01 vpapad Exp $
+  $Id: SimpleConnectionReader.java,v 1.17 2007/04/30 19:15:30 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -70,8 +70,8 @@ class SimpleConnectionReader
             BufferedReader br = new BufferedReader(cReader);
             String line;
             RE re =
-                new RE("<responseMessage localID\\s*=\\s*\"([0-9]*)\"\\s*serverID\\s*=\\s*\"([0-9]*)\"\\s*responseType\\s*=\\s*\"server_query_id\"");
-            RE reLid = new RE("<responseMessage localID\\s*=\\s*\"([0-9]*)\"");
+                new RE("<responseMessage .*localID\\s*=\\s*\"([0-9]*)\"\\s*serverID\\s*=\\s*\"([0-9]*)\"\\s*responseType\\s*=\\s*\"server_query_id\"");
+            RE reLid = new RE("<responseMessage .*localID\\s*=\\s*\"([0-9]*)\"");
             RE reLidNoPad =
                 new RE("SERVER ERROR - localID\\s*=\\s*\"([0-9]*)\"");
             boolean registered = false;

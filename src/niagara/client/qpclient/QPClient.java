@@ -1,5 +1,5 @@
 /**
- * $Id: QPClient.java,v 1.7 2003/09/22 01:16:03 vpapad Exp $
+ * $Id: QPClient.java,v 1.8 2007/04/30 19:15:35 vpapad Exp $
  */
 
 package niagara.client.qpclient;
@@ -295,7 +295,7 @@ public class QPClient
 
         SimpleClient sc = new SimpleClient(server_host);
         sc.addResultsListener(this);
-        sc.processQuery(sw.toString());
+        sc.processQuery(SimpleClient.RequestType.RUN, sw.toString());
         results.pack();
         results.setVisible(true);
 	} catch (ClientException ce) {

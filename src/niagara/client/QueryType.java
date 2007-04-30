@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryType.java,v 1.6 2003/09/22 01:16:01 vpapad Exp $
+  $Id: QueryType.java,v 1.7 2007/04/30 19:15:29 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -40,4 +40,7 @@ class QueryType
         public static final int SYNCHRONOUS_QP = 5;
         public static final int EXPLAIN_QP = 6;
         public static final int MQP = 7;
+        public static final int PREPARE_QP = 8;
+        public static final int EXECUTE_PREPARED = 9;
+        public static final int SET_TUNABLE = 10;
 }

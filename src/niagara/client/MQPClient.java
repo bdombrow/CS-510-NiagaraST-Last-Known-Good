@@ -1,5 +1,5 @@
 /**
- * $Id: MQPClient.java,v 1.8 2003/09/22 01:16:01 vpapad Exp $
+ * $Id: MQPClient.java,v 1.9 2007/04/30 19:15:28 vpapad Exp $
  */
 
 package niagara.client;
@@ -13,9 +13,10 @@ import org.xml.sax.*;
 import java.io.StringReader;
 
 // For Jetty Servlet engine
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import com.mortbay.HTTP.Handler.Servlet.*;
+import org.mortbay.http.*;
+import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.util.*;
 
 public class MQPClient extends SimpleClient {
     // ??? still requires xerces parser - do we want
@@ -119,7 +120,7 @@ public class MQPClient extends SimpleClient {
             // Start HTTP server for interserver communication
             HttpServer hs = new HttpServer();
             hs.addListener(new InetAddrPort(clientPort));
-            HandlerContext hc = hs.addContext(null, "/servlet/*");
+            HttpContext hc = hs.addContext(null, "/servlet/*");
 
             ServletHandler sh = new ServletHandler();
             ServletHolder sholder =

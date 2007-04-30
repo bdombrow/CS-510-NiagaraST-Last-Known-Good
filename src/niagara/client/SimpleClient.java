@@ -107,21 +107,38 @@ public class SimpleClient implements UIDriverIF {
     protected static void usage() {
         System.err.println(
             "Usage: SimpleClient -qf QueryFileName(s) [-port port] \n");
-					//	 "[-h host] [-t timeout]" +
+                                        //       "[-h host] [-t timeout]" +
           //  + "[-x repetitions] [-d delay] [-w wait] [-o outputFileName]\n"
-          //  + "[-quiet] [-explain] [-ch client host] [-cp client port] [-silent]");
+          //  + "[-quiet] [-prepare | -explain] [-execute-prepared queryId] [-set \"tunable=value\"] [-ch client host] [-cp client port] [-silent]");
         System.exit(-1);
     }
 
-    protected static ArrayList queryFiles = new ArrayList();
-    protected static ArrayList repetitions = new ArrayList();
-    protected static ArrayList delays = new ArrayList();
-    protected static ArrayList waits = new ArrayList();
+    protected static ArrayList<Request> requests = new ArrayList<Request>();
     protected static boolean queryfile = false;
     protected static String host;
     protected static int port;
-    /** Just show the output of the optimizer for the query */
-    protected static boolean explain;
+    
+    public enum RequestType {
+        /** Run this query */
+        RUN,
+        /** Just show the output of the optimizer for the query */
+        EXPLAIN,
+        /** Prepare a query for later execution */
+        PREPARE,
+        /** Execute a prepared query */
+        EXECUTE_PREPARED,
+        /** Set a tunable parameter */
+        SET_TUNABLE
+    }
+    
+    private static class Request {
+        RequestType type;
+        String value;
+        int repetitions;
+        int delay;
+        int wait;
+    };
+    
     protected static boolean silent;
     // XXX vpapad: ugly... SimpleClient can't do this yet
     protected static String outputFileName;
@@ -150,22 +167,25 @@ public class SimpleClient implements UIDriverIF {
             } else if (args[i].equals("--help")) {
                 usage();
             } else if (args[i].equals("-qf")) {
-                queryfile = true;
-                queryFiles.add(args[i + 1]);
-                repetitions.add(new Integer(1));
-                delays.add(new Integer(0));
-                waits.add(new Integer(0));
+                Request req = new Request();
+                requests.add(req);
+                req.type = RequestType.RUN;
+                req.value = args[i + 1];
+                req.repetitions = 1;
+                req.delay = 0;
+                req.wait = 0;
                 i += 2;
             } else if (args[i].equals("-x")) {
-                repetitions.set(
-                    repetitions.size() - 1,
-                    new Integer(args[i + 1]));
+                requests.get(requests.size() - 1).repetitions = 
+                    Integer.parseInt(args[i + 1]);
                 i += 2;
             } else if (args[i].equals("-d")) {
-                delays.set(delays.size() - 1, new Integer(args[i + 1]));
+                requests.get(requests.size() - 1).delay = 
+                    Integer.parseInt(args[i + 1]);
                 i += 2;
             } else if (args[i].equals("-w")) {
-                waits.set(waits.size() - 1, new Integer(args[i + 1]));
+                requests.get(requests.size() - 1).wait = 
+                    Integer.parseInt(args[i + 1]);
                 i += 2;
             } else if (args[i].equals("-o")) {
                 outputFileName = args[i + 1];
@@ -174,8 +194,35 @@ public class SimpleClient implements UIDriverIF {
                 quiet = true;
                 i++;
             } else if (args[i].equals("-explain")) {
-                explain= true;
-                i++;
+                if (requests.size() == 0)
+                        usage();
+                Request req = requests.get(requests.size() - 1);
+                req.type = RequestType.EXPLAIN;
+                i += 1;
+            } else if (args[i].equals("-prepare")) {
+                if (requests.size() == 0)
+                        usage();
+                Request req = requests.get(requests.size() - 1);
+                req.type = RequestType.PREPARE;
+                i += 1;
+            } else if (args[i].equals("-execute-prepared")) {
+                Request req = new Request();
+                requests.add(req);
+                req.type = RequestType.EXECUTE_PREPARED;
+                req.value = args[i + 1];
+                req.repetitions = 1;
+                req.delay = 0;
+                req.wait = 0;
+                i += 2;
+            } else if (args[i].equals("-set")) {
+                Request req = new Request();
+                requests.add(req);
+                req.type = RequestType.SET_TUNABLE;
+                req.value = args[i + 1];
+                req.repetitions = 1;
+                req.delay = 0;
+                req.wait = 0;
+                i += 2;
             } else if (args[i].equals("-ch")) {
                 clientHost = args[i + 1];
                 i += 2;
@@ -193,34 +240,48 @@ public class SimpleClient implements UIDriverIF {
                 usage();
             }
         }
-	if(!queryfile)
+	if(requests.size() == 0)
 	    usage();
     }
     
     protected void processQueries() {
-        String query;
+        String query = null;
 
         try {
-	    int nQueries = queryFiles.size();
+	    int nQueries = requests.size();
 	    for (int i = 0; i < nQueries; i++) {
-		char cbuf[] = new char[MAX_QUERY_LEN];
-		query = getQueryFromFile((String) queryFiles.get(i), cbuf);
-		int reps = ((Integer) repetitions.get(i)).intValue();
-		int delay = ((Integer) delays.get(i)).intValue();
-		int wait = ((Integer) waits.get(i)).intValue();
-		for (int j = 0; j < reps; j++) {
-		    if (j > 0 && delay > 0)
-			Thread.sleep(delay);
-		    // kt - don't think this needs to be synch
-		    // I removed it - hope this doesn't cause trouble!
-		    // if it is synchronized, causes deadlock on error
-		    synchronized (this) {
-		      processQuery(query);
-		      wait();
-		    }
-		}
-		if (i < nQueries - 1 && wait > 0)
-		    Thread.sleep(wait);
+	        Request req = requests.get(i);
+	        switch (req.type) {
+	            case RUN:
+	            case EXPLAIN:
+	            case PREPARE:
+	                char cbuf[] = new char[MAX_QUERY_LEN];
+	                query = getQueryFromFile((String) req.value, cbuf);
+                        break;
+	            case EXECUTE_PREPARED:
+	            case SET_TUNABLE:
+	                query = req.value;
+                        break;
+                    // XXX vpapad: Can we throw PEException on the client?!
+	        }
+	        
+	        int reps = req.repetitions;
+	        int delay = req.delay;
+	        int wait = req.wait;
+	        for (int j = 0; j < reps; j++) {
+	            if (j > 0 && delay > 0)
+	                Thread.sleep(delay);
+	            // kt - don't think this needs to be synch
+	            // I removed it - hope this doesn't cause trouble!
+	            // if it is synchronized, causes deadlock on error
+	            synchronized (this) {
+	                processQuery(req.type, query);
+	                wait();
+	            }
+	        }
+	        if (i < nQueries - 1 && wait > 0)
+	            Thread.sleep(wait);
+	        
 	    }
 	    System.exit(0);
         } catch (IOException e) {
@@ -265,43 +326,49 @@ public class SimpleClient implements UIDriverIF {
 
     }
 
-    public void processQuery(String fullQueryText) throws ClientException {
-	// remove any leading or trailing whitespace
-			String queryText = fullQueryText.trim(); 
+    public void processQuery(RequestType type, String fullQueryText) 
+        throws ClientException {
+        // remove any leading or trailing whitespace
+        String queryText = fullQueryText.trim();
         if (!silent) {
-	  System.err.println("Executing query: " + queryText);
-	  System.err.flush(); // make query print before results
+            System.err.println("Executing query: " + queryText);
+            System.err.flush(); // make query print before results
         }
         if (queryText.equalsIgnoreCase(ConnectionManager.RUN_GC)) {
-	  System.out.println("Requesting garbage collection");
-	  cm.runSpecialFunc(ConnectionManager.RUN_GC);
-	  return;
+            System.out.println("Requesting garbage collection");
+            cm.runSpecialFunc(ConnectionManager.RUN_GC);
+            return;
         } else if (queryText.equalsIgnoreCase(ConnectionManager.SHUTDOWN)) {
-	  System.out.println("Shutting down server");
-	  cm.runSpecialFunc(ConnectionManager.SHUTDOWN);
-	  return;
+            System.out.println("Shutting down server");
+            cm.runSpecialFunc(ConnectionManager.SHUTDOWN);
+            return;
         } else if (queryText.equalsIgnoreCase(ConnectionManager.DUMPDATA)) {
-	  System.out.println("Requesting profile data dump");
-	  cm.runSpecialFunc(ConnectionManager.DUMPDATA);
-	  return;
-	}
+            System.out.println("Requesting profile data dump");
+            cm.runSpecialFunc(ConnectionManager.DUMPDATA);
+            return;
+        }
 
         Query q = null;
-        if (explain) 
-	  q = new ExplainQPQuery(queryText);
+        if (type == RequestType.EXPLAIN)
+            q = new ExplainQPQuery(queryText);
+        else if (type == RequestType.PREPARE)
+            q = new PrepareQPQuery(queryText);
+        else if (type == RequestType.EXECUTE_PREPARED)
+            q = new ExecutePreparedQPQuery(queryText);
+        else if (type == RequestType.SET_TUNABLE)
+            q = new SetTunable(queryText);
         else
-	  q = QueryFactory.makeQuery(queryText);
+            q = QueryFactory.makeQuery(queryText);
         m_start = System.currentTimeMillis();
-        final int id =
-	  cm.executeQuery(q, Integer.MAX_VALUE);
+        final int id = cm.executeQuery(q, Integer.MAX_VALUE);
         if (timeout > 0) {
-	  // Create a new timer thread as a daemon thread
-	  timer = new Timer(true);
-	  // Request partial results after timeout milliseconds
-	  timer.schedule(new TimerTask() {
-	      public void run() {
-		cm.requestPartial(id);
-	      }
+            // Create a new timer thread as a daemon thread
+            timer = new Timer(true);
+            // Request partial results after timeout milliseconds
+            timer.schedule(new TimerTask() {
+                public void run() {
+                    cm.requestPartial(id);
+                }
             }, timeout);
         }
     }
