@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<!-- $Id: build.xml,v 1.20 2005/07/06 16:36:29 tufte Exp $ -->
+<!-- $Id: build.xml,v 1.21 2007/04/30 19:26:39 vpapad Exp $ -->
 
 <project name="Niagara" default="compile" basedir="..">
   <property name="src" value="${basedir}/src"/>
@@ -69,7 +69,8 @@
   <path id="compilation.classpath">
         <!-- In alpha order -->
         <pathelement location="${lib}/aelfred.jar"/>
-        <pathelement location="${lib}/com.mortbay.jetty.jar"/>
+        <pathelement location="${lib}/org.mortbay.jetty.jar"/>
+        <pathelement location="${lib}/commons-logging-api.jar"/>
         <pathelement location="${lib}/cup_all.jar"/>
         <pathelement location="${lib}/diva.jar"/>
         <pathelement location="${lib}/djava.jar"/>
