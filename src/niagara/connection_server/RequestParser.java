@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestParser.java,v 1.14 2003/12/24 02:16:38 vpapad Exp $
+  $Id: RequestParser.java,v 1.15 2007/04/30 19:17:13 vpapad Exp $
 
   NIAGARA -- Net Data Management System                                 
                                                                         
@@ -28,11 +28,9 @@ package niagara.connection_server;
 
 import gnu.regexp.RE;
 
-import java.io.IOException;
 import java.io.InputStream;
 
-import niagara.query_engine.QueryResult;
-import niagara.utils.ShutdownException;
+import niagara.connection_server.RequestMessage.InvalidRequestTypeException;
 
 import org.xml.sax.AttributeList;
 import org.xml.sax.HandlerBase;
@@ -59,13 +57,13 @@ public class RequestParser extends HandlerBase implements Runnable {
 
     // The request Handler that created this object and should be called
     // whenever a RequestMessage is received
-    private RequestHandler reqHandler;   
+    RequestHandler reqHandler;   
     private Thread parserThread;
     
     // contains the current element being processed by the parser
     private String currentElement;
     //The current request message that is being built
-    private RequestMessage currentMesg;
+    RequestMessage currentMesg;
     // The source from which the messages in XML are to be read
     private InputSource source;
     private SAXDriver parser;
@@ -112,7 +110,12 @@ public class RequestParser extends HandlerBase implements Runnable {
 	     currentMesg = new RequestMessage();
 	     currentMesg.localID = Integer.parseInt(atts.getValue(LOCAL_ID));
 	     currentMesg.serverID = Integer.parseInt(atts.getValue(SERVER_ID));
-	     currentMesg.requestType = atts.getValue(REQUEST_TYPE);
+         String reqType = atts.getValue(REQUEST_TYPE);
+         try {
+             currentMesg.setRequestType(reqType);
+         } catch (InvalidRequestTypeException irte) {
+             reqHandler.sendErrMessage(currentMesg, ResponseMessage.PARSE_ERROR, "Invalid request type: " + reqType);
+         }
 	     currentMesg.requestData = "";
 	 } else if (name.equals(REQUEST)) { 
 	     // do nothing, this is the first tag
@@ -122,64 +125,18 @@ public class RequestParser extends HandlerBase implements Runnable {
 	 }
      }
 
-    //If an element ends
+    // If an element ends
     public void endElement(String name) {
-	// if the request ended then it means that we have successfully parsed the request
-	if (name.equals(REQUEST_MESSAGE)) {
-	    // lets handle the request - this has to happen here - parser handles
-	    // multiple messages from client
-	    int err_type;
-	    boolean error;
-	    String message;
+        // if the request ended then it means that we have successfully parsed
+        // the request
+        if (name.equals(REQUEST_MESSAGE)) {
+            // lets handle the request - this has to happen here - parser
+            // handles
+            // multiple messages from client
+            reqHandler.handleRequest(currentMesg);
+        }
 
-	    // handle errors in this function
-	    // so we can return better messages than if
-	    // we just send up a sax exception	    
-	    try {
-		reqHandler.handleRequest(currentMesg);
-		// keep compiler happy and catch pgming errors below
-		err_type = 0;
-		error = false;
-		message = null;
-	    } catch (InvalidPlanException e) {
-		error = true;
-		err_type = ResponseMessage.PARSE_ERROR;
-		message = e.getMessage();
-	    } catch (QueryResult.AlreadyReturningPartialException e) {
-		error = true;
-		err_type = ResponseMessage.EXECUTION_ERROR;
-		message = e.getMessage();
-	    } catch (ShutdownException e) {
-		error = true;
-		err_type = ResponseMessage.EXECUTION_ERROR;
-		message = "System was shutdown during query";
-	    } catch (IOException e) {
-		error = true;
-		err_type = ResponseMessage.ERROR;
-		message = "IOException during query: " + e.getMessage();
-	    } catch (RuntimeException e) {
-		// deal with runtime exceptions here - if not these are
-		// turned into SAX exceptions by the parser
-		sendErrMessage(ResponseMessage.ERROR, 
-			    "Programming or Runtime Error (see server for message)");
-		System.err.println("WARNING: PROGRAMMING or RUNTIME ERROR " + e.getMessage());
-		e.printStackTrace();
-		// keep compiler happy
-		error = false;
-		err_type = -1;
-		message = null;
-		// kill system as would be expected on a runtime exception
-		reqHandler.server.shutdown();
-	    } 
-
-	    if(error) {
-		System.err.println("\nERROR occured during query parsing or execution. Error Message: " + message);
-		System.err.println();
-		sendErrMessage(err_type, message);
-	    }
-	}
-
-	currentElement = "";
+        currentElement = "";
     }
 	
 
@@ -198,31 +155,6 @@ public class RequestParser extends HandlerBase implements Runnable {
 	    ex.printStackTrace();
 	}
 	
-    }
-
-    private void sendErrMessage(int err_type, String message) {
-	try {
-	    if(currentMesg == null) {
-		// just do something stupid, anything, to get message back to client
-		// if currentMesg is null, means error occured so early in parsing
-		// of the request message that localID and serverID could not be read
-		currentMesg = new RequestMessage();
-		currentMesg.localID = -1;
-		currentMesg.serverID = -1;
-	    }
-	    ResponseMessage rm = 
-		new ResponseMessage(currentMesg, err_type);
-	    // add local id here in case padding is turned off !*#$*@$*
-	    rm.setData("SERVER ERROR - localID=\"" + currentMesg.localID 
-	               + "\" - Error Message: " + message);
-	    reqHandler.sendResponse(rm);
-	    reqHandler.closeConnection();
-	} catch (IOException ioe) {
-	    System.err.println("\nERROR sending message \"" + message + "\" to client " +
-			       "Error message: " + ioe.getMessage());
-	    ioe.printStackTrace();
-	}
-	return;
     }
 }
 				  

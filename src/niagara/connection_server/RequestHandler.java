@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.32 2003/12/24 02:16:38 vpapad Exp $
+  $Id: RequestHandler.java,v 1.33 2007/04/30 19:17:12 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -24,16 +24,23 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
+
 package niagara.connection_server;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.ArrayList;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import niagara.connection_server.RequestMessage.InvalidRequestTypeException;
 import niagara.data_manager.ConstantOpThread;
 import niagara.data_manager.StreamThread;
 import niagara.optimizer.Optimizer;
@@ -42,15 +49,17 @@ import niagara.optimizer.TracingOptimizer;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Op;
 import niagara.physical.PhysicalAccumulate;
+import niagara.physical.Tunable;
+import niagara.query_engine.Instrumentable;
+import niagara.query_engine.QueryInfo;
 import niagara.query_engine.QueryResult;
+import niagara.query_engine.QueryResult.AlreadyReturningPartialException;
 import niagara.utils.*;
 
 /**There is one request handler per client and receives all the requests from that client
    Then that request is further dispatched to the appropriate module and results sent back
 */
-
 public class RequestHandler {
-
     // Hashtable of queries
     private QueryList queryList;
 
@@ -68,6 +77,17 @@ public class RequestHandler {
     private XMLQueryPlanParser xqpp;
     private Optimizer optimizer;
     private CPUTimer cpuTimer;
+    
+    private Catalog catalog;
+    
+    /** Do we need to send each response message as a separate XML document,
+     *  with its own header? */
+    private boolean sendHeader;
+    private static String xmlHeader = "Content-type: application/xml\n\n<?xml version='1.0'?>\n";
+    /** The delimiter between response messages */
+    private static String delimiter = "\n--<][>\n";
+    /** The footer sent after the last response */
+    private static String footer = "\n--<][>--\n";
 
     /**Constructor
        @param sock The socket to read from 
@@ -75,23 +95,80 @@ public class RequestHandler {
     */
     public RequestHandler(Socket sock, NiagraServer server)
         throws IOException {
-
-        // A hashtable of queries with qid as key
-        this.queryList = new QueryList();
         this.outputWriter =
             new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
         this.server = server;
+
+        initialize();
+
         sendBeginDocument();
+
+        // Request parser will take care of the rest through callbacks
+        this.requestParser = new RequestParser(sock.getInputStream(), this);
+        this.requestParser.startParsing();
+    }
+
+    private void initialize() throws IOException {
+        this.catalog = NiagraServer.getCatalog();
+
+        // A hashtable of queries with qid as key
+        this.queryList = new QueryList();
 
         this.xqpp = new XMLQueryPlanParser();
         this.optimizer = new Optimizer();
         // XXX vpapad: uncomment next line to get the tracing optimizer
         //this.optimizer = new TracingOptimizer();
-
-        this.requestParser = new RequestParser(sock.getInputStream(), this);
-        this.requestParser.startParsing();
     }
+    
+    public RequestHandler(String queryString,
+            String requestType,
+            HttpServletResponse res, 
+            NiagraServer server) throws IOException {
+        this.outputWriter =
+            new BufferedWriter(new OutputStreamWriter(res.getOutputStream()));
+        this.server = server;
+        this.sendHeader = true;
+        
+        initialize();
 
+        this.xqpp = new XMLQueryPlanParser();
+        this.optimizer = new Optimizer();
+        
+        // Send initial delimiter
+        outputWriter.write(delimiter);
+        
+        RequestMessage request = new RequestMessage();
+        try {
+            request.setRequestType(requestType);
+            // XXX vpapad: Do we ever need sendImmediate=false 
+            // on the HTTP interface?
+            request.setSendImmediate(true);
+        } catch (InvalidRequestTypeException e) {
+            sendErrMessage(request, ResponseMessage.ERROR, "Invalid request type" + requestType);
+            return;
+        }
+        request.requestData = queryString;
+        handleRequest(request);
+        waitForCompletion(request);
+    }
+    
+    private void waitForCompletion(RequestMessage request) {
+        ServerQueryInfo qi = queryList.get(request.serverID); 
+        if (qi == null)
+            return;
+        Object queryDone = qi.getTransmitter().getQueryDone();
+        while (true) {
+            synchronized(queryDone) {
+                try {
+                    queryDone.wait();
+                    return;
+                } catch (InterruptedException ie) {
+                    ;
+                }
+            }
+        }
+    }
+    
     // Send the initial string to the client
     private void sendBeginDocument() throws IOException {
         String header = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n<response>\n";
@@ -99,15 +176,7 @@ public class RequestHandler {
         outputWriter.flush();
     }
 
-    /**Handle the request that just came in from the client
-       @param request The request that needs to be handled
-     */
-    public void handleRequest(RequestMessage request)
-        throws
-            InvalidPlanException,
-            QueryResult.AlreadyReturningPartialException,
-            ShutdownException,
-            IOException {
+    public void handleRequest(RequestMessage request) {
         Plan plan, optimizedPlan;
 
         if (niagara.connection_server.NiagraServer.TIME_OPERATORS) {
@@ -116,203 +185,366 @@ public class RequestHandler {
             cpuTimer.start();
         }
 
-        // Handle the request according to requestType
-        switch (request.getIntRequestType()) {
-            //   EXECUTE_QUERY request
-            //-------------------------------------
-            case RequestMessage.EXECUTE_QP_QUERY :
-                plan = xqpp.parse(request.requestData);
-                // Optimize the plan
-                optimizedPlan = null;
-                try {
-                    optimizedPlan = optimizer.optimize(plan.toExpr());
-                } catch (Exception e) {
-                    System.err.println(
-                        "XXX vpapad: exception occured during optimization");
-                    e.printStackTrace();
-                    assert false;
-                }
-                xqpp.clear();
-                assignQueryId(request);
-                processQPQuery(optimizedPlan, request);
-                break;
-
-            case RequestMessage.MQP_QUERY :
-                plan = xqpp.parse(request.requestData);
-                new MQPHandler(server.qe.getScheduler(), optimizer, plan);
-                xqpp.clear();
-                break;
-
-            case RequestMessage.EXECUTE_QE_QUERY :
-                // assign a new query id to this request
-                int qid = getNextConnServerQueryId();
-
-                // create and populate the query info
-                ServerQueryInfo queryInfo =
-                    new ServerQueryInfo(qid, ServerQueryInfo.QueryEngine);
-
-                // start the transmitter thread for sending results back
-                ResultTransmitter transmitter =
-                    new ResultTransmitter(this, queryInfo, request);
-                queryInfo.setTransmitter(transmitter);
-
-                // now give the query to the query engine
-                server.qe.executeQuery(transmitter, queryInfo, request.requestData);
-                request.serverID = qid;
-                sendQueryId(request);
-
-                queryList.put(qid, queryInfo);
-                break;
-
-            case RequestMessage.SUSPEND_QUERY :
-                throw new InvalidPlanException("Query suspension no longer allowed");
-
-            case RequestMessage.RESUME_QUERY :
-                throw new InvalidPlanException("Query suspension no longer allowed");
-
-                //-------------------------------------
-                //   KILL_QUERY request
-                //-------------------------------------
-            case RequestMessage.KILL_QUERY :
-                killQuery(request.serverID);
-                break;
-
-                //-------------------------------------
-                //   GET_NEXT request
-                //-------------------------------------
-            case RequestMessage.GET_NEXT :
-                // get the queryInfo of this query
-                queryInfo = queryList.get(request.serverID);
-
-                // Respond to invalid queryID
-                if (queryInfo == null) {
-                    if (queryList.queryWasRun(request.serverID)) {
-                        break;
-                    } else {
-                        assert false : "Bad query id " + request.serverID;
+        boolean error = false;
+        int err_type = 0;
+        String message = "";
+        try {
+            // Handle the request according to requestType
+            switch (request.getRequestType()) {
+                case EXECUTE_QP_QUERY:
+                    plan = xqpp.parse(request.requestData);
+                    // Optimize the plan
+                    optimizedPlan = null;
+                    try {
+                        optimizedPlan = optimizer.optimize(plan.toExpr());
+                    } catch (Exception e) {
+                        System.err
+                                .println("XXX vpapad: exception occured during optimization");
+                        e.printStackTrace();
+                        assert false;
                     }
-                }
+                    xqpp.clear();
+                    assignQueryId(request);
+                    processQPQuery(optimizedPlan, request);
+                    break;
 
-                queryInfo.getTransmitter().handleRequest(request);
+                case EXECUTE_PREPARED_QUERY:
+                    String pID = request.requestData.trim();
+                    optimizedPlan = catalog.getPreparedPlan(pID);
+                    if (optimizedPlan == null) {
+                        sendErrMessage(request, ResponseMessage.ERROR, "Non-existent prepared query id: " + pID);                        
+                    } else {
+                        optimizedPlan.setPlanID(pID);
+                        assignQueryId(request);
+                        processQPQuery(optimizedPlan, request);
+                    }
+                    break;
 
-                break;
+                case MQP_QUERY:
+                    plan = xqpp.parse(request.requestData);
+                    new MQPHandler(server.qe.getScheduler(), optimizer, plan);
+                    xqpp.clear();
+                    break;
 
-                //-------------------------------------
-                //   GET_PARTIAL request
-                //-------------------------------------
-            case RequestMessage.GET_PARTIAL :
-                // Get the queryInfo object for this request
-                queryInfo = queryList.get(request.serverID);
+                case EXECUTE_QE_QUERY:
+                    // assign a new query id to this request
+                    int qid = getNextConnServerQueryId();
 
-                // Respond to invalid queryID
-                if (queryInfo == null)
-                    assert false : "Bad query id " + request.serverID;
+                    // create and populate the query info
+                    ServerQueryInfo queryInfo = new ServerQueryInfo(qid,
+                            ServerQueryInfo.QueryEngine);
 
-                // Put a get partial message upstream
-                queryInfo.getQueryResult().requestPartialResult();
-                break;
+                    // start the transmitter thread for sending results back
+                    ResultTransmitter transmitter = new ResultTransmitter(this,
+                            queryInfo, request);
+                    queryInfo.setTransmitter(transmitter);
 
-            case RequestMessage.RUN_GC :
-                System.out.println("Starting Garbage Collection");
-                long startime = System.currentTimeMillis();
-                System.gc();
-                long stoptime = System.currentTimeMillis();
-                double executetime = (stoptime - startime) / 1000.0;
-                System.out.println(
-                    "Garbage Collection Completed."
-                        + " Time: "
-                        + executetime
-                        + " seconds.");
-                ResponseMessage doneMesg =
-                    new ResponseMessage(request, ResponseMessage.END_RESULT);
-                sendResponse(doneMesg);
-                break;
+                    // now give the query to the query engine
+                    server.qe.executeQuery(transmitter, queryInfo,
+                            request.requestData);
+                    request.serverID = qid;
+                    sendQueryId(request);
 
-            case RequestMessage.DUMPDATA :
-                if (NiagraServer.RUNNING_NIPROF) {
-                    System.out.println("Requesting profile data dump");
-                    JProf.requestDataDump();
-                    ResponseMessage doneDumpMesg =
-                        new ResponseMessage(
-                            request,
+                    queryList.put(qid, queryInfo);
+                    break;
+
+                case SUSPEND_QUERY:
+                    throw new InvalidPlanException(
+                            "Query suspension no longer allowed");
+
+                case RESUME_QUERY:
+                    throw new InvalidPlanException(
+                            "Query suspension no longer allowed");
+
+                case KILL_QUERY:
+                    killQuery(request.serverID);
+                    break;
+
+                case GET_NEXT:
+                    // get the queryInfo of this query
+                    queryInfo = queryList.get(request.serverID);
+
+                    // Respond to invalid queryID
+                    if (queryInfo == null) {
+                        if (queryList.queryWasRun(request.serverID)) {
+                            break;
+                        } else {
+                            assert false : "Bad query id " + request.serverID;
+                        }
+                    }
+
+                    queryInfo.getTransmitter().handleRequest(request);
+
+                    break;
+
+                case GET_PARTIAL:
+                    // Get the queryInfo object for this request
+                    queryInfo = queryList.get(request.serverID);
+
+                    // Respond to invalid queryID
+                    if (queryInfo == null)
+                        assert false : "Bad query id " + request.serverID;
+
+                    // Put a get partial message upstream
+                    queryInfo.getQueryResult().requestPartialResult();
+                    break;
+
+                case RUN_GC:
+                    System.out.println("Starting Garbage Collection");
+                    long startime = System.currentTimeMillis();
+                    System.gc();
+                    long stoptime = System.currentTimeMillis();
+                    double executetime = (stoptime - startime) / 1000.0;
+                    System.out.println("Garbage Collection Completed."
+                            + " Time: " + executetime + " seconds.");
+                    ResponseMessage doneMesg = new ResponseMessage(request,
                             ResponseMessage.END_RESULT);
-                    sendResponse(doneDumpMesg);
-                } else {
-                    System.out.println(
-                        "Profiler not running - unable to dump data");
-                    ResponseMessage errMesg =
-                        new ResponseMessage(request, ResponseMessage.ERROR);
-                    errMesg.setData(
-                        "Profiler not running - unable to dump data");
-                    sendResponse(errMesg);
-                }
-                break;
+                    sendResponse(doneMesg);
+                    break;
 
-            case RequestMessage.SHUTDOWN :
-                System.out.println("Shutdown message received");
-                ResponseMessage shutMesg =
-                    new ResponseMessage(request, ResponseMessage.END_RESULT);
-                sendResponse(shutMesg);
-                server.shutdown();
-                break;
-            case RequestMessage.SYNCHRONOUS_QP_QUERY :
-                plan = xqpp.parse(request.requestData);
+                case DUMPDATA:
+                    if (NiagraServer.RUNNING_NIPROF) {
+                        System.out.println("Requesting profile data dump");
+                        JProf.requestDataDump();
+                        ResponseMessage doneDumpMesg = new ResponseMessage(
+                                request, ResponseMessage.END_RESULT);
+                        sendResponse(doneDumpMesg);
+                    } else {
+                        System.out
+                                .println("Profiler not running - unable to dump data");
+                        ResponseMessage errMesg = new ResponseMessage(request,
+                                ResponseMessage.ERROR);
+                        errMesg
+                                .setData("Profiler not running - unable to dump data");
+                        sendResponse(errMesg);
+                    }
+                    break;
+                case SHUTDOWN:
+                    System.out.println("Shutdown message received");
+                    ResponseMessage shutMesg = new ResponseMessage(request,
+                            ResponseMessage.END_RESULT);
+                    sendResponse(shutMesg);
+                    server.shutdown();
+                    break;
+                case SYNCHRONOUS_QP_QUERY:
+                    plan = xqpp.parse(request.requestData);
 
-                // Optimize the plan
-                optimizedPlan = null;
-                try {
-                    optimizedPlan = optimizer.optimize(plan.toExpr());
-                } catch (Exception e) {
-                    System.err.println("exception occured during optimization");
-                    e.printStackTrace();
-                }
-                xqpp.clear();
+                    // Optimize the plan
+                    optimizedPlan = null;
+                    try {
+                        optimizedPlan = optimizer.optimize(plan.toExpr());
+                    } catch (Exception e) {
+                        System.err
+                                .println("exception occured during optimization");
+                        e.printStackTrace();
+                    }
+                    xqpp.clear();
 
-                processQPQuery(optimizedPlan, request);
-                // get the queryInfo of this query
-                queryInfo = queryList.get(request.serverID);
-                queryInfo.getTransmitter().handleSynchronousRequest();
-                break;
-            case RequestMessage.EXPLAIN_QP_QUERY :
-                plan = xqpp.parse(request.requestData);
+                    processQPQuery(optimizedPlan, request);
+                    // get the queryInfo of this query
+                    queryInfo = queryList.get(request.serverID);
+                    queryInfo.getTransmitter().handleSynchronousRequest();
+                    break;
+                case EXPLAIN_QP_QUERY:
+                    plan = xqpp.parse(request.requestData);
 
-                // Optimize the plan
-                optimizedPlan = null;
-                try {
-                    optimizedPlan = optimizer.optimize(plan.toExpr());
-                } catch (Exception e) {
-                    System.err.println("exception occured during optimization");
-                    e.printStackTrace();
-                }
+                    // Optimize the plan
+                    optimizedPlan = null;
+                    try {
+                        optimizedPlan = optimizer.optimize(plan.toExpr());
+                    } catch (Exception e) {
+                        System.err
+                                .println("exception occured during optimization");
+                        e.printStackTrace();
+                    }
 
-                xqpp.clear();
+                    xqpp.clear();
 
-                // We don't want to actually *run* the plan!
-                // Replace the plan with a constant operator 
-                // having the optimized plan as its content
-                optimizedPlan =
-                    new Plan(
-                        new ConstantOpThread(
-                            optimizedPlan.planToXML(),
-                            new Attrs()));
+                    // We don't want to actually *run* the plan!
+                    // Replace the plan with a constant operator
+                    // having the optimized plan as its content
+                    optimizedPlan = new Plan(new ConstantOpThread(optimizedPlan
+                            .planToXML(), new Attrs()));
 
-                assignQueryId(request);
-                processQPQuery(optimizedPlan, request);
+                    assignQueryId(request);
+                    processQPQuery(optimizedPlan, request);
+                    break;
+                case PREPARE_QUERY:
+                    plan = xqpp.parse(request.requestData);
 
-                break;
+                    // Optimize the plan
+                    optimizedPlan = null;
+                    try {
+                        optimizedPlan = optimizer.optimize(plan.toExpr());
+                    } catch (Exception e) {
+                        System.err.println("Exception occured during optimization");
+                        server.shutdown();
+                    }
 
-                //-------------------------------------
-                //   Ooops 
-                //-------------------------------------
-            default :
-                throw new PEException(
-                    "ConnectionThread: INVALID_REQUEST "
-                        + request.getIntRequestType());
+                    xqpp.clear();
+
+                    // Store the prepared plan and register its operators
+                    // for instrumentation queries
+		    optimizedPlan.setPlanID(plan.getPlanID());
+                    String planID = catalog.storePreparedPlan(optimizedPlan);
+                    String instrumentedPlanAsXML = 
+                        catalog.instrumentPlan(planID);
+                    
+                    // We don't want to actually *run* the plan!
+                    // Replace the plan with a constant operator
+                    // having the prepared plan as its content
+                    optimizedPlan = new Plan(new ConstantOpThread(
+                            instrumentedPlanAsXML, new Attrs()));
+
+                    assignQueryId(request);
+                    processQPQuery(optimizedPlan, request);
+                    break;
+                    
+                case SET_TUNABLE:
+                    // requestData must have the form:
+                    // planID.operator.tunable=value
+                    String str = request.requestData.trim();
+                    String[] parts = str.split("\\.");
+                    if (parts.length != 3) {
+                        sendErrMessage(request, ResponseMessage.ERROR, "Invalid syntax in SET_TUNABLE request");
+                        break;
+                    } 
+                    // Get planID
+                    planID = parts[0];
+                    plan = catalog.getPreparedPlan(planID);
+                    if (plan == null) {
+                        sendErrMessage(request, ResponseMessage.ERROR, "Non-existent prepared query id: " + planID);
+                        break;
+                    } 
+                    // Get operator
+                    String opID = parts[1];
+                    Instrumentable operator = catalog.getOperator(planID, opID);
+                    if (operator == null) {
+                        sendErrMessage(request, ResponseMessage.ERROR, "Non-existent operator id: " + opID);
+                        break;
+                    }
+                    // Get tunable
+                    String rest = parts[2];
+                    parts = rest.split("=", 2);
+                    if (parts.length != 2) {
+                        sendErrMessage(request, ResponseMessage.ERROR, "Invalid syntax in SET_TUNABLE request");
+                        break;
+                    }
+                    String tunable = parts[0];
+                    String newValue = parts[1];
+                    String setterName = null;
+                    Tunable.TunableType type = null;
+                    for (Method m : operator.getClass().getMethods()) {
+                        if (!m.isAnnotationPresent(Tunable.class))
+                            continue;
+                        Tunable t = m.getAnnotation(Tunable.class);
+                        if (!t.name().equals(tunable))
+                            continue;
+                        setterName = t.setter();
+                        type = t.type();
+                    }                
+                    if (setterName == null) {
+                        sendErrMessage(request, ResponseMessage.ERROR, 
+                                "Unknown tunable: " + opID + "." + tunable);
+                        break;
+                    }
+                    // Get setter method & invoke it
+                    Method setter = null;
+                    try {
+                        switch (type) {
+                            case BOOLEAN:
+                                setter = operator.getClass().getMethod(setterName,
+                                        boolean.class);
+                                boolean b;
+                                if (newValue.equals("true"))
+                                    b = true;
+                                else if (newValue.equals("false"))
+                                    b = false;
+                                else
+                                    throw new IllegalArgumentException("Could not convert " + newValue + " to a boolean");
+                                setter.invoke(operator, b);
+                                break;
+                            case INTEGER:
+                                setter = operator.getClass().getMethod(setterName,
+                                        int.class);
+                                int i = Integer.parseInt(newValue);
+                                setter.invoke(operator, i);
+                                break;
+                            default:
+                                throw new PEException("Unexpected tunable type: "
+                                        + type);
+                        }
+                    } catch (NoSuchMethodException e) {
+                        sendErrMessage(request, ResponseMessage.ERROR, 
+                                "Could not find setter method for " + opID + "." + tunable);
+                    } catch (SecurityException e) {
+                        sendErrMessage(request, ResponseMessage.ERROR, 
+                                "Could not access setter method for " + opID + "." + tunable);
+                    } catch (IllegalArgumentException e) {
+                        sendErrMessage(request, ResponseMessage.ERROR, 
+                                "Problem invoking setter method for " 
+                                + opID + "." + tunable + ": " + e.getMessage());
+                    } catch (IllegalAccessException e) {
+                        sendErrMessage(request, ResponseMessage.ERROR, 
+                                "Problem invoking setter method for " 
+                                + opID + "." + tunable + ": " + e.getMessage());
+                    } catch (InvocationTargetException e) {
+                        sendErrMessage(request, ResponseMessage.ERROR, 
+                                "Problem invoking setter method for " 
+                                + opID + "." + tunable + ": " + e.getMessage());
+                    }
+                    assignQueryId(request);
+                    sendResponse(new ResponseMessage(request,
+                            ResponseMessage.END_RESULT));
+                    break;
+                // -------------------------------------
+                // Ooops
+                // -------------------------------------
+                default:
+                    throw new PEException("ConnectionThread: INVALID_REQUEST "
+                            + request.getRequestType());
+            }
+        } catch (InvalidPlanException e) {
+            error = true;
+            err_type = ResponseMessage.PARSE_ERROR;
+            message = e.getMessage();
+        } catch (QueryResult.AlreadyReturningPartialException e) {
+            error = true;
+            err_type = ResponseMessage.EXECUTION_ERROR;
+            message = e.getMessage();
+        } catch (ShutdownException e) {
+            error = true;
+            err_type = ResponseMessage.EXECUTION_ERROR;
+            message = "System was shutdown during query";
+        } catch (IOException e) {
+            error = true;
+            err_type = ResponseMessage.ERROR;
+            message = "IOException during query: " + e.getMessage();
+        } catch (RuntimeException e) {
+            // deal with runtime exceptions here - if not these are
+            // turned into SAX exceptions by the parser
+            sendErrMessage(request, ResponseMessage.ERROR,
+                    "Programming or Runtime Error (see server for message)");
+            System.err.println("WARNING: PROGRAMMING or RUNTIME ERROR "
+                    + e.getMessage());
+            e.printStackTrace();
+            // keep compiler happy
+            error = false;
+            err_type = -1;
+            message = null;
+            // kill system as would be expected on a runtime exception
+            server.shutdown();
+        }
+
+        if (error) {
+            System.err.println("\nAn error occured during query parsing or execution." +
+                    "Error Message: " + message + "\n");
+            sendErrMessage(request, err_type, message);
         }
 
         if (niagara.connection_server.NiagraServer.TIME_OPERATORS) {
             cpuTimer.stop();
-            cpuTimer.print("HandleRequest (" + request.requestType + ")");
+            cpuTimer.print("HandleRequest (" + request.getRequestType() + ")");
         }
 
     }
@@ -325,10 +557,10 @@ public class RequestHandler {
     private void processQPQuery(Plan plan, RequestMessage request)
         throws InvalidPlanException, ShutdownException, IOException {
         // XXX vpapad: commenting out code is a horrible sin
-        //            if (type.equals("submit_subplan")) {
-        //                //                // The top operator better be a send...
-        //                //                // XXX vpapad: Argh... Plan or logNode?
-        //                //                SendOp send = (SendOp) ((logNode) top).getOperator();
+        // if (type.equals("submit_subplan")) {
+        // // // The top operator better be a send...
+        // // // XXX vpapad: Argh... Plan or logNode?
+        // // SendOp send = (SendOp) ((logNode) top).getOperator();
         //                //
         //                //                String query_id = nextId();
         //                //                send.setQueryId(query_id);
@@ -347,8 +579,7 @@ public class RequestHandler {
         int qid = request.serverID;
 
         boolean isSynchronous =
-            (request.getIntRequestType()
-                == RequestMessage.SYNCHRONOUS_QP_QUERY);
+            (request.getRequestType() == RequestMessage.RequestType.SYNCHRONOUS_QP_QUERY);
 
         /* create and populate the query info
          */
@@ -398,13 +629,27 @@ public class RequestHandler {
     */
     public synchronized void sendResponse(ResponseMessage mesg)
         throws IOException {
+        if (sendHeader)
+            outputWriter.write(xmlHeader);
+        
         ServerQueryInfo sqi = queryList.get(mesg.getServerID());
         boolean padding = true; // is this the correct default?
         if (sqi != null) {
             padding = !sqi.isSynchronous();
         }
         mesg.toXML(outputWriter, padding);
+        
+        if (!sendHeader && mesg.type == ResponseMessage.END_RESULT)
+            outputWriter.write("</response>\n");
+        
         mesg.clearData();
+        
+        if (sendHeader)
+            if (mesg.isFinal())
+                outputWriter.write(footer);
+            else
+                outputWriter.write(delimiter);
+        
         outputWriter.flush();
     }
 
@@ -471,6 +716,31 @@ public class RequestHandler {
         return (lastQueryId++);
     }
 
+    public void sendErrMessage(RequestMessage reqMsg, int err_type,
+            String message) {
+        try {
+            if (reqMsg == null) {
+                // just do something stupid, anything, to get message back to
+                // client if currentMesg is null, means error occured so early 
+                // in parsing of the request message that localID and serverID 
+                // could not be read
+                reqMsg = new RequestMessage();
+                reqMsg.localID = -1;
+                reqMsg.serverID = -1;
+            }
+            ResponseMessage rm = new ResponseMessage(reqMsg, err_type);
+            // add local id here in case padding is turned off !*#$*@$*
+            rm.setData("SERVER ERROR - localID=\"" + reqMsg.localID
+                    + "\" - Error Message: " + message);
+            sendResponse(rm);
+            closeConnection();
+        } catch (IOException ioe) {
+            System.err.println("\nERROR sending message \"" + message
+                    + "\" to client " + "Error message: " + ioe.getMessage());
+            ioe.printStackTrace();
+        }
+    }
+
     /**Class for storing the ServerQueryInfo objects into a hashtable and accessing it
        Essentially a wrapper around Hashtable class with similar functionality
     */
@@ -493,8 +763,8 @@ public class RequestHandler {
 
         public ServerQueryInfo remove(int qid) {
             // System.out.println(
-            // 	       "KT: Query with ServerQueryId "
-            //	       + qid
+            //         "KT: Query with ServerQueryId "
+            //         + qid
             //       + " removed from RequestHandler.QueryList "); 
             //return (ServerQueryInfo) queryList.remove(new Integer(qid));
             Integer temp = new Integer(qid);

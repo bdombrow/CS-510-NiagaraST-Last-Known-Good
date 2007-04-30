@@ -1,5 +1,5 @@
 /**
- * $Id: XMLQueryPlanParser.java,v 1.48 2003/12/24 02:16:38 vpapad Exp $
+ * $Id: XMLQueryPlanParser.java,v 1.49 2007/04/30 19:17:14 vpapad Exp $
  * Generate a physical plan from an XML Description
  *
  */
@@ -102,7 +102,11 @@ public class XMLQueryPlanParser {
             ((LogicalProperty) ids2logprops.get(top)).getAttrs();
         if (outputSchema.size() != 0)
             outputSchema = new Attrs(outputSchema.get(outputSchema.size() - 1));
-        return new Plan(new Project(outputSchema), p);
+
+	String planID = root.getAttribute("planID");
+        p = new Plan(new Project(outputSchema), p);
+	p.setPlanID(planID);
+	return p;
     }
 
     /**

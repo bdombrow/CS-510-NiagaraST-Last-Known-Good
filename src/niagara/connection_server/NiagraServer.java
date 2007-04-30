@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.33 2005/07/06 19:28:52 tufte Exp $
+  $Id: NiagraServer.java,v 1.34 2007/04/30 19:17:11 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -23,24 +23,30 @@
   This software was developed with support by DARPA through             
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
-
 package niagara.connection_server;
 
+import java.io.IOException;
 import java.net.InetAddress;
 
 import niagara.ndom.DOMFactory;
 import niagara.ndom.saxdom.BufferManager;
 import niagara.query_engine.QueryEngine;
 
+import org.mortbay.http.HttpContext;
+import org.mortbay.http.HttpListener;
+import org.mortbay.http.HttpServer;
+import org.mortbay.http.SocketListener;
+import org.mortbay.http.handler.ResourceHandler;
+import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.util.InetAddrPort;
+
+import javax.servlet.*;
+
 /**The main Niagra Server which receives all the client requests
    It has an instance of query engine and a SEClient for 
    contacting the SE Server
 */
 public class NiagraServer {
-
-    // All constants defined here
-    private static int NUM_QUERY_THREADS;
-    private static int NUM_OP_THREADS;
 
     // SAXDOM
     private static final int SAXDOM_DEFAULT_NUMBER_OF_PAGES = 1024;
@@ -49,15 +55,14 @@ public class NiagraServer {
     private static int saxdom_pages = SAXDOM_DEFAULT_NUMBER_OF_PAGES;
     private static int saxdom_page_size = SAXDOM_DEFAULT_PAGE_SIZE;
 
-    // Defaults
-    private static int DEFAULT_QUERY_THREADS = 3;
-    private static int DEFAULT_OPERATOR_THREADS = 30;
-
+    private static boolean acceptHTTP = false;
+    
     // The port for client communication 
     private static int client_port = 9020;
 
     // The port for server-to-server communication
     protected static int server_port = 8020;
+    private HttpServer httpServer;
 
     private static boolean shuttingDown;
 
@@ -75,6 +80,9 @@ public class NiagraServer {
     private static Catalog catalog = null;
 
     public static boolean KT_PERFORMANCE = true;
+    // Set this to false if you want to completely #ifdef away 
+    // the instrumentation code
+    public static boolean ALLOW_INSTRUMENTATION = true;
     public static boolean RUNNING_NIPROF = false;
     public static boolean TIME_OPERATORS = false;
 
@@ -90,7 +98,9 @@ public class NiagraServer {
             catalog = new Catalog(catalogFileName);
 
             // Create the query engine
-            qe = new QueryEngine(this, NUM_QUERY_THREADS, NUM_OP_THREADS);
+            qe = new QueryEngine(this, 
+                    catalog.getIntConfigParam("query threads"), 
+                    catalog.getIntConfigParam("operator threads"));
 
             // Create and start the connection manager
             connectionManager = new ConnectionManager(client_port, this);
@@ -104,6 +114,41 @@ public class NiagraServer {
                 BufferManager.createBufferManager(
                     saxdom_pages,
                     saxdom_page_size);
+
+            if (acceptHTTP) {
+                // Start HTTP server for interserver communication
+                httpServer = new HttpServer();
+                SocketListener listener = new SocketListener();
+                listener.setPort(server_port);
+                listener.setAcceptorThreads(10); // XXX vpapad
+                
+                httpServer.addListener(listener);
+                
+                // Niagara queries and other services
+                HttpContext hc = httpServer.addContext(null, "/servlet/*");
+                ServletHandler sh = new ServletHandler();
+                sh.addServlet("/communication",
+                "niagara.connection_server.CommunicationServlet");
+                sh.addServlet("/httpclient",
+                "niagara.connection_server.HTTPClientServlet"); 
+                sh.addServlet("/rivulet/*",
+                "niagara.connection_server.HTTPRivuletServlet");
+                
+                hc.addHandler(sh);                
+                
+                // Serve static content
+                HttpContext static_context = httpServer.addContext(null, "/static/*");
+                static_context.setMimeMapping("xml", "text/xml");
+                static_context.setResourceBase(catalog.getConfigParam("web directory"));
+                static_context.addHandler(new ResourceHandler());                
+                
+                try {
+                    httpServer.start();
+                } catch (Exception e) {
+                    cerr("Could not start HTTP server: " + e.getMessage());
+                }
+                sh.getServletContext().setAttribute("server", this);
+            }
         } catch (ConfigurationError ce) {
             System.err.println(ce.getMessage());
             System.exit(-1);
@@ -126,17 +171,14 @@ public class NiagraServer {
             return;
         }
 
-        NUM_QUERY_THREADS = DEFAULT_QUERY_THREADS;
-        NUM_OP_THREADS = DEFAULT_OPERATOR_THREADS;
-
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-quiet")) {
                 ResultTransmitter.QUIET = true;
             } else if (args[i].equals("-full-tuple")) {
                 ResultTransmitter.OUTPUT_FULL_TUPLE = true;
             } else if (args[i].equals("-disable-buf-flush")){
-            	System.out.println("Buffer flush false");
-            	ResultTransmitter.BUF_FLUSH = false;
+                System.out.println("Buffer flush false");
+                ResultTransmitter.BUF_FLUSH = false;
             } else if (args[i].equals("-console")) {
                 startConsole = true;
             } else if (args[i].equals("-port")) {
@@ -193,6 +235,8 @@ public class NiagraServer {
                 RUNNING_NIPROF = true;
             } else if (args[i].equals("-time-operators")) {
                 TIME_OPERATORS = true;
+            } else if (args[i].equals("-accept-http")) {
+                acceptHTTP = true;
             } else {
                 cerr("Unknown option: " + args[i]);
                 usage();
@@ -234,6 +278,7 @@ public class NiagraServer {
         cout("\t-saxdom  Use SAXDOM for input documents.");
         cout("\t-saxdom-pages <number> Number of SAXDOM pages.");
         cout("\t-saxdom-page-size <number> Size of each SAXDOM page.");
+        cout("\t-accept-http Accept queries over HTTP.");
         cout("\t-help   print this help screen");
         System.exit(-1);
     }
@@ -278,12 +323,20 @@ public class NiagraServer {
 
     // Try to shutdown
     public void shutdown() {
-	if (shuttingDown)
+    if (shuttingDown)
             return;
         shuttingDown = true;
         connectionManager.shutdown();
         qe.shutdown();
         catalog.shutdown();
+        if (httpServer != null) {
+            try {
+                httpServer.stop(false);
+                httpServer.destroy();
+            } catch (InterruptedException e) {
+                ; 
+            }
+        }
         info("Server has shut down.");
     }
 

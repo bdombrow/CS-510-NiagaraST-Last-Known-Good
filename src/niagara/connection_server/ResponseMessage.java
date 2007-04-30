@@ -1,7 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.13 2007/04/28 21:21:31 jinli Exp $
-
+  $Id: ResponseMessage.java,v 1.14 2007/04/30 19:17:13 vpapad Exp $
 
   NIAGARA -- Net Data Management System                                 
                                                                         
@@ -71,7 +70,8 @@ class ResponseMessage
     /**
      * Object corresponding to responsedata
      */
-    private StringBuffer responseData;
+    // XXX public for debugging
+    public StringBuffer responseData;
     
     public void clearData() {
         responseData.setLength(0);
@@ -124,7 +124,7 @@ class ResponseMessage
     */
     public void toXML(Writer writer, boolean padding) throws IOException {
         if (padding) {
-            writer.write("<responseMessage localID =\"");
+            writer.write("<responseMessage xmlns:niagara='http://datalab.cs.pdx.edu/niagara' localID =\"");
             writer.write(String.valueOf(localID));
 	    	writer.write("\" serverID = \"");
             writer.write(String.valueOf(serverID));
@@ -145,9 +145,6 @@ class ResponseMessage
 	    }
     	    writer.write("</responseData></responseMessage>\n");
         }
-        if (type == END_RESULT) {
-            writer.write("</response>\n");
-	}
     }
 
     /** Get the responseType of the message in this object
@@ -163,6 +160,10 @@ class ResponseMessage
 	default: assert false: "Invalid type " + type;
 	    return "";
 	}
+    }
+    
+    public boolean isFinal() {
+        return type != QUERY_RESULT && type != SERVER_QUERY_ID;
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.12 2004/02/11 01:08:42 vpapad Exp $
+ * $Id: Catalog.java,v 1.13 2007/04/30 19:17:09 vpapad Exp $
  *  
  */
 
@@ -12,17 +12,22 @@ import org.xml.sax.InputSource;
 
 import org.apache.xml.serialize.XMLSerializer;
 
+import niagara.logical.DoubleDomain;
+import niagara.logical.FileScanSpec;
+import niagara.logical.IntDomain;
 import niagara.logical.NodeDomain;
 import niagara.logical.Variable;
 import niagara.ndom.*;
 import niagara.utils.*;
 
+import niagara.optimizer.Plan;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.rules.ConstructedRule;
 import niagara.optimizer.rules.CustomRule;
 import niagara.optimizer.rules.SimpleRule;
+import niagara.query_engine.Instrumentable;
 
 public class Catalog implements ICatalog {
     // This primitive Catalog maintains a mapping from URNs to URLs,
@@ -48,6 +53,12 @@ public class Catalog implements ICatalog {
     /** Cache for int parameters lookups */
     private HashMap intParams;
 
+    /** Prepared plans */
+    private int preparedPlanID = 0;
+    private HashMap<String, Plan> preparedPlans = new HashMap<String, Plan>();
+    /** Registry for instrumented operators */
+    private HashMap<String, HashMap<String, Instrumentable>> planIDs2operators = new HashMap<String, HashMap<String, Instrumentable>>();
+    
     // Operator name <-> class mapping
     private HashMap name2class;
     private HashMap class2name;
@@ -66,8 +77,20 @@ public class Catalog implements ICatalog {
     // Resource name -> its logical properties
     private HashMap logicalProperties;
 
+    /** Registered streams */
+    private HashMap<String, FileScanSpec> registeredStreams;
+    private HashMap<String, HashMap<String, Variable>> streamSchemas;
+    
     public String getConfigParam(String name) {
         return (String) configParams.get(name);
+    }
+
+    public int getIntConfigParam(String name) {
+        return Integer.parseInt((String) configParams.get(name));
+    }
+
+    public boolean getBooleanConfigParam(String name) {
+	return Boolean.parseBoolean((String) configParams.get(name));
     }
 
     public void addResolver(String urn, String resolver) {
@@ -149,6 +172,10 @@ public class Catalog implements ICatalog {
         rulesets = new HashMap();
         logical2physical = new HashMap();
         logicalProperties = new HashMap();
+        registeredStreams = new HashMap<String, FileScanSpec>();
+        streamSchemas = new HashMap<String, HashMap<String, Variable>>();
+        
+        
         this.filename = filename;
 
         // parse the catalog file
@@ -172,6 +199,7 @@ public class Catalog implements ICatalog {
             loadParameters(root, "costmodel");
             loadParameters(root, "config");
             loadRules(root);
+            loadRegisteredStreams(root);
         } catch (FileNotFoundException e) {
             throw new ConfigurationError(
                 "Catalog file not found: " + e.getMessage());
@@ -340,6 +368,50 @@ public class Catalog implements ICatalog {
         }
     }
 
+    public void loadRegisteredStreams(Element root) {
+        NodeList nl = root.getElementsByTagName("streams");
+        if (nl.getLength() == 0)
+            return;
+        if (nl.getLength() > 1)
+            confError("The catalog must contain at most one <streams> element");
+        Node cm = nl.item(0);
+        nl = cm.getChildNodes();
+        
+        for (int i = 0; i < nl.getLength(); i++) {
+            Node n = nl.item(i);
+            if (n.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            Element e = (Element) n;
+            String streamName = mustHaveAttribute(e, "name");
+            String filename = mustHaveAttribute(e, "filename");
+            boolean isStream = 
+                mustHaveAttribute(e, "isStream").equalsIgnoreCase("yes");
+	    int delay = Integer.parseInt(mustHaveAttribute(e, "delay"));
+            registeredStreams.put(streamName, 
+                    new FileScanSpec(filename, isStream, delay));
+            NodeList vars = e.getChildNodes();
+            streamSchemas.put(streamName, new HashMap<String, Variable>());
+            for (int j = 0; j < vars.getLength(); j++) {
+                Node v = vars.item(j);
+                if (v.getNodeType() != Node.ELEMENT_NODE)
+                    continue;
+                Element ev = (Element) v;
+                Variable var = null;
+                String name = ev.getAttribute("name");
+                String type = ev.getAttribute("type");
+                if (type.equals("int"))
+                    var = new Variable(name, IntDomain.getDomain());
+                else if (type.equals("double"))
+                    var = new Variable(name, DoubleDomain.getDomain());
+                else
+                    confError("Unknown attribute type: '" + type + "'");
+                streamSchemas.get(streamName).put(name, var);
+            }
+        }
+        NiagraServer.info(
+                "Registered " + registeredStreams.size() + " streams");
+    }
+    
     public static void confError(String msg) {
         throw new ConfigurationError(msg);
     }
@@ -551,5 +623,65 @@ public class Catalog implements ICatalog {
             String k = (String) keys.next();
             cerr(k + " = " + parameters.get(k));
         }
+    }
+
+    public String storePreparedPlan(Plan plan) {
+        synchronized (preparedPlans) {
+            preparedPlanID++;
+	    String planID = plan.getPlanID();
+	    if (planID == null || planID.length() == 0 || preparedPlans.containsKey(planID))
+		planID = String.valueOf(preparedPlanID);
+            preparedPlans.put(planID, plan);
+            return planID;
+        }
+    }
+    
+    public Instrumentable getOperator(String planID, String operatorName) {
+        synchronized (preparedPlans) {
+            HashMap<String, Instrumentable> hm = planIDs2operators.get(planID);
+            if (hm == null)
+                return null;
+            return hm.get(operatorName);
+        }
+    }
+    
+    public String instrumentPlan(String planID) {
+        synchronized (preparedPlans) {
+            assert preparedPlans.containsKey(planID);
+            Plan plan = preparedPlans.get(planID);
+            HashMap<String, Instrumentable> operatorRegistry = new HashMap<String, Instrumentable>();
+            String planAsXML = plan.planToXML(planID, operatorRegistry);
+            planIDs2operators.put(planID, operatorRegistry);
+            return planAsXML;
+        }
+    }
+    
+    public Plan getPreparedPlan(String planID) {
+        // XXX vpapad: Remember that prepared plans cannot 
+        // currently be executed more than once
+        synchronized (preparedPlans) {
+            return preparedPlans.get(planID);
+        }
+    }
+    
+    public void removePreparedPlan(String planID) {
+        synchronized (preparedPlans) {
+            preparedPlans.remove(planID);
+            planIDs2operators.remove(planID);
+        }
+    }
+    
+    public boolean isActive(String planID) {
+        synchronized(preparedPlans) {
+            return planIDs2operators.containsKey(planID);
+        }
+    }
+    
+    public FileScanSpec getRegisteredStream(String streamName) {
+        return registeredStreams.get(streamName);
+    }
+    
+    public Variable getStreamAttribute(String streamName, String attrName) {
+        return streamSchemas.get(streamName).get(attrName);
     }
 }

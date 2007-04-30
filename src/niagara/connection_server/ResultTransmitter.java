@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.30 2007/04/28 21:21:30 jinli Exp $
+  $Id: ResultTransmitter.java,v 1.31 2007/04/30 19:17:13 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -24,12 +24,12 @@
   This software was developed with support by DARPA through             
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
-
 package niagara.connection_server;
 
 import java.io.*;
 import niagara.query_engine.*;
 import java.net.*;
+import java.util.HashMap;
 
 import niagara.utils.*;
 import niagara.data_manager.DataManager;
@@ -60,9 +60,11 @@ public class ResultTransmitter implements Schedulable {
     private int resultsSoFar = 0;
 
     // The size (in bytes) of a batch in a batched query
-    private static final int BATCHSIZE = 1024;
-    //private static final int BATCHSIZE = 1;
+    private static final int BATCHSIZE = 1024; 
 
+    private final boolean sendStr;
+    private final boolean sendImmediate;
+    
     // Tags for element and attribute list
     private static final String ELEMENT = "<!ELEMENT";
     private static final String ATTLIST = "<!ATTLIST";
@@ -78,6 +80,8 @@ public class ResultTransmitter implements Schedulable {
     public static boolean QUIET = false;
     public static boolean OUTPUT_FULL_TUPLE = false;
     public static boolean BUF_FLUSH = true;
+
+    private Object queryDone = new Object();
     
     /** Constructor
     @param handler The request handler that created this transmitter
@@ -92,6 +96,8 @@ public class ResultTransmitter implements Schedulable {
         this.queryInfo = queryInfo;
         this.request = request;
         totalResults = 0;
+        this.sendImmediate = request.isSendImmediate();
+	this.sendStr = NiagraServer.getCatalog().getBooleanConfigParam("sendStr");
     }
 
     public void setPrettyprint(boolean prettyprint) {
@@ -146,11 +152,21 @@ public class ResultTransmitter implements Schedulable {
             // probably means there was a problem sending message
             // to client
             System.err.println(
-                "KT ResultTransmitter - IO exception - likely problem sending message to client");
+                "KT ResultTransmitter - IO exception - likely problem sending message to client ["
+                + ioe.toString() + "]");
             queryInfo.getQueryResult().kill();
+        }
+        
+        synchronized(queryDone) {
+            queryDone.notifyAll();
         }
     }
 
+    public Object getQueryDone() {
+        return queryDone;
+    }
+    
+    
     // for use by RequestHandler when client requests that this
     // query be killed
     public void destroy() {
@@ -220,7 +236,7 @@ public class ResultTransmitter implements Schedulable {
         // do the allocation here instead of inside getNext, so 
         // we only allocate one resultObject
         QueryResult.ResultObject resultObject =
-            queryResult.getNewResultObject(true);
+            queryResult.getNewResultObject(sendStr);
 
         while (true) {
             if (killThread) {
@@ -243,12 +259,18 @@ public class ResultTransmitter implements Schedulable {
                 // add the result to responseData
                 totalResults--;
                 resultsSoFar++;
-								timedOut = false;
+		timedOut = false;
+
                 if (!QUIET) {
-                    if (response.dataSize() > BATCHSIZE) {
+                    if (!sendImmediate) {
+                        if (response.dataSize() > BATCHSIZE) {
+                            sendResults();
+                        }
+                        response.appendResultData(resultObject, prettyprint);
+                    } else {  // Send results now, no buffering
+                        response.appendResultData(resultObject, prettyprint);
                         sendResults();
                     }
-                    response.appendResultData(resultObject, prettyprint);
                 }
             }
         }
@@ -270,7 +292,7 @@ public class ResultTransmitter implements Schedulable {
         response = new ResponseMessage(request, ResponseMessage.QUERY_RESULT);
 
         QueryResult.ResultObject resultObject =
-            queryResult.getNewResultObject(false);
+            queryResult.getNewResultObject(sendStr);
 
         while (true) {
             if (killThread) {
@@ -332,11 +354,11 @@ public class ResultTransmitter implements Schedulable {
                     sendResults();
                 }
 
-                // send the end result response		
+                // send the end result response     
                 handler.sendResponse(
                     new ResponseMessage(request, ResponseMessage.END_RESULT));
 
-                //everything done! kill the query		
+                //everything done! kill the query       
                 handler.killQuery(request.serverID);
                 return;
 
@@ -344,8 +366,8 @@ public class ResultTransmitter implements Schedulable {
                 // if no more new results have come in a while
                 // send the results and request more..
                 if (!QUIET && timedOut && !queryInfo.isAccumFileQuery()) {
-										if (response.dataSize() != 0) 
-												System.out.println("Timed out twice & have results - sending them");
+		    if (response.dataSize() != 0) 
+			System.out.println("Timed out twice & have results - sending them");
                     // If we timed out two times in a row, then
                     // send the results
                     sendResults();
@@ -355,11 +377,11 @@ public class ResultTransmitter implements Schedulable {
                 }
                 
                 if(BUF_FLUSH) {
-                	// 	returns a ctrl flag
-                	int newCtrlFlag = queryInfo.getQueryResult().requestBufFlush();
-                	if (newCtrlFlag != CtrlFlags.NULLFLAG) {
-                		processCtrlMsg(newCtrlFlag);
-                	}
+                    //  returns a ctrl flag
+                    int newCtrlFlag = queryInfo.getQueryResult().requestBufFlush();
+                    if (newCtrlFlag != CtrlFlags.NULLFLAG) {
+                        processCtrlMsg(newCtrlFlag);
+                    }
                 }
                 timedOut = true;
                 break;
@@ -389,15 +411,6 @@ public class ResultTransmitter implements Schedulable {
         totalResults = Integer.MAX_VALUE;
         suspended = false;
         notify();
-    }
-
-    // Just a synchronized wrapper around wait()
-    synchronized private void doWait() {
-        try {
-            wait();
-        } catch (InterruptedException e) {
-            System.out.println("Waiting Thread Interrupted");
-        }
     }
 
     /**Suspend this transmitter
@@ -446,5 +459,17 @@ public class ResultTransmitter implements Schedulable {
 
     public String getName() {
         return "ResultTransmitter:" + queryInfo.getQueryId();
+    }
+
+    public void getInstrumentationValues(HashMap<String, Object> hm) {
+        ; // No instrumentation for now
+    }
+
+    public void getInstrumentationDescriptions(HashMap<String, String> hm) {
+        ; // No instrumentation for now
+    }
+
+    public void setInstrumented(boolean instrumented) {
+        ; // No instrumentation for now
     }
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: CommunicationServlet.java,v 1.7 2003/12/24 02:16:38 vpapad Exp $
+ * $Id: CommunicationServlet.java,v 1.8 2007/04/30 19:17:10 vpapad Exp $
  */
 
 package niagara.connection_server;
@@ -47,7 +47,6 @@ public class CommunicationServlet extends HttpServlet {
 	throws IOException {
         try {
             String type = req.getParameter("type");
-            debug("handling GET request");
             if (type.equals("get_tuples")) {
                 String query_id = req.getParameter("id");
                 if (!queries.containsKey(query_id))

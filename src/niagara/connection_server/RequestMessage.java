@@ -1,127 +1,130 @@
-
 /**********************************************************************
-  $Id: RequestMessage.java,v 1.9 2003/09/26 21:25:13 vpapad Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
-**********************************************************************/
-
+ $Id: RequestMessage.java,v 1.10 2007/04/30 19:17:12 vpapad Exp $
+ 
+ 
+ NIAGARA -- Net Data Management System                                 
+ 
+ Copyright (c)    Computer Sciences Department, University of          
+ Wisconsin -- Madison                             
+ All Rights Reserved.                                                  
+ 
+ Permission to use, copy, modify and distribute this software and      
+ its documentation is hereby granted, provided that both the           
+ copyright notice and this permission notice appear in all copies      
+ of the software, derivative works or modified versions, and any       
+ portions thereof, and that both notices appear in supporting          
+ documentation.                                                        
+ 
+ THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
+ OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
+ AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
+ FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
+ 
+ This software was developed with support by DARPA through             
+ Rome Research Laboratory Contract No. F30602-97-2-0247.  
+ **********************************************************************/
 
 package niagara.connection_server;
 
-/** Contains the request message in an object form and implements some utility methods
-*/
+/**
+ * Contains the request message in an object form and implements some utility
+ * methods
+ */
 
-import niagara.utils.*;
+import java.util.HashMap;
 
 public class RequestMessage {
-    
-    //Assigning numbers to request types
-    // for "switch"ing purposes
-    static final int EXECUTE_QE_QUERY = 0;
-    static final int KILL_QUERY =3;
-    static final int SUSPEND_QUERY = 4;
-    static final int RESUME_QUERY = 5;
-    static final int GET_NEXT = 6;
-    static final int GET_PARTIAL = 8;
-    // Execute a prepared query plan, described in XML
-    static final int EXECUTE_QP_QUERY = 10; 
-    static final int RUN_GC = 11; // run the garbage collector
-    static final int SHUTDOWN = 12;
-    // Same as QP_QUERY, but start sending back results immediately,
-    // assuming this is the only outstanding query for this client
-    // (EXECUTE_QP_QUERY and GET_NEXT in one step)
-    static final int SYNCHRONOUS_QP_QUERY = 13;
-    // Just show the optimized plan
-    static final int EXPLAIN_QP_QUERY = 14;
-    // A mutant query
-    static final int MQP_QUERY = 15;
-    static final int DUMPDATA = 16;
 
-    String requestType;
+    public enum RequestType {
+        EXECUTE_QE_QUERY, 
+        KILL_QUERY, 
+        SUSPEND_QUERY, 
+        RESUME_QUERY, 
+        GET_NEXT, 
+        GET_PARTIAL,
+        // Execute a prepared query plan, described in XML
+        EXECUTE_QP_QUERY,
+        // run the garbage collector
+        RUN_GC, 
+        SHUTDOWN,
+        // Same as QP_QUERY, but start sending back results immediately,
+        // assuming this is the only outstanding query for this client
+        // (EXECUTE_QP_QUERY and GET_NEXT in one step)
+        SYNCHRONOUS_QP_QUERY,
+        // Just show the optimized plan
+        EXPLAIN_QP_QUERY,
+        // A mutant query
+        MQP_QUERY, 
+        DUMPDATA,
+        // Prepared (and instrumented) queries
+        PREPARE_QUERY,
+        EXECUTE_PREPARED_QUERY,
+        // Tunables
+        SET_TUNABLE
+    };
+
+    private static HashMap<String, RequestType> queryTypeNames = new HashMap<String, RequestType>();
+    static {
+        queryTypeNames.put("execute_qe_query", RequestType.EXECUTE_QE_QUERY);
+        queryTypeNames.put("kill_query", RequestType.KILL_QUERY);
+        queryTypeNames.put("suspend_query", RequestType.SUSPEND_QUERY);
+        queryTypeNames.put("resume_query", RequestType.RESUME_QUERY);
+        queryTypeNames.put("get_next", RequestType.GET_NEXT);
+        queryTypeNames.put("get_partial", RequestType.GET_PARTIAL);
+        queryTypeNames.put("execute_qp_query", RequestType.EXECUTE_QP_QUERY);
+        queryTypeNames.put("gc", RequestType.RUN_GC);
+        queryTypeNames.put("shutdown", RequestType.SHUTDOWN);
+        queryTypeNames.put("synchronous_qp_query", RequestType.SYNCHRONOUS_QP_QUERY);
+        queryTypeNames.put("explain_qp_query", RequestType.EXPLAIN_QP_QUERY);
+        queryTypeNames.put("mqp_query", RequestType.MQP_QUERY);
+        queryTypeNames.put("dumpdata", RequestType.DUMPDATA);
+        queryTypeNames.put("prepare_query", RequestType.PREPARE_QUERY);
+        queryTypeNames.put("execute_prepared_query", RequestType.EXECUTE_PREPARED_QUERY);
+        queryTypeNames.put("set_tunable", RequestType.SET_TUNABLE);
+    };
+
+    private RequestType requestType;
     int serverID;
     int localID;
-    
+    private boolean sendImmediate;
     String requestData;
 
     public RequestMessage() {
-	serverID = -1;
-	localID = -1;
+        serverID = -1;
+        localID = -1;
     }
 
-    public RequestMessage(int intType) throws InvalidRequestTypeException{
-	setRequestType(intType);
-	serverID = -1;
-	localID = -1;
+    public RequestMessage(RequestType qt) throws InvalidRequestTypeException {
+        this.requestType = qt;
+        serverID = -1;
+        localID = -1;
     }
 
-    public void setRequestType(int intType) throws InvalidRequestTypeException{
-	switch (intType) {
-	case EXECUTE_QE_QUERY: this.requestType = "execute_qe_query";break;
-	case KILL_QUERY:this.requestType = "kill_query";break;
-	case SUSPEND_QUERY:this.requestType = "suspend_query";break;
-	case RESUME_QUERY:this.requestType = "resume_query";break;
-	case GET_NEXT:this.requestType = "get_next";break;
-	case GET_PARTIAL:this.requestType = "get_partial";break;
-	case EXECUTE_QP_QUERY: this.requestType = "execute_qp_query";break;
-        case SYNCHRONOUS_QP_QUERY: this.requestType = "synchronous_qp_query";break;
-        case EXPLAIN_QP_QUERY: this.requestType = "explain_qp_query";break;
-	default: throw new InvalidRequestTypeException();
-	}
+    public void setRequestType(RequestType requestType) {
+        this.requestType = requestType;
+    }
+
+    public void setRequestType(String s) throws InvalidRequestTypeException {
+        if (queryTypeNames.containsKey(s))
+            setRequestType(queryTypeNames.get(s));
+        else
+            throw new InvalidRequestTypeException();
     }
 
     // get the request type of this Message as an integer
-    public int getIntRequestType() {
-	if (requestType.equals("execute_qe_query"))
-	    return EXECUTE_QE_QUERY;
-	if (requestType.equals("kill_query"))
-	    return KILL_QUERY;
-	if (requestType.equals("suspend_query"))
-	    return SUSPEND_QUERY;
-	if (requestType.equals("resume_query"))
-	    return RESUME_QUERY;
-	if (requestType.equals("get_next"))
-	    return GET_NEXT;
-	if (requestType.equals("get_partial"))
-	    return GET_PARTIAL;
-	if (requestType.equals("execute_qp_query"))
-	    return EXECUTE_QP_QUERY;
-	if (requestType.equals("gc"))
-	    return RUN_GC;
-        if (requestType.equals("shutdown"))
-	    return SHUTDOWN;
-	if (requestType.equals("dumpdata"))
-	    return DUMPDATA;
-        if (requestType.equals("synchronous_qp_query"))
-            return SYNCHRONOUS_QP_QUERY;
-        if (requestType.equals("explain_qp_query"))
-            return EXPLAIN_QP_QUERY;
-        if (requestType.equals("mqp_query"))
-            return MQP_QUERY;
-	throw new PEException("Invalid request type: " + requestType);
+    public RequestType getRequestType() {
+        return requestType;
     }
 
     class InvalidRequestTypeException extends Exception {
+        private static final long serialVersionUID = 1L;
     }
 
-	
+    public boolean isSendImmediate() {
+        return sendImmediate;
+    }
+
+    public void setSendImmediate(boolean sendImmediate) {
+        this.sendImmediate = sendImmediate;
+    }
 }
