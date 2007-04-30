@@ -228,4 +228,13 @@ public class XMLUtils {
     	}
     	return true;
     }
+
+    public static double getDouble(Tuple ste, int attrpos) {
+        String sval =
+            ((Node) ste.getAttribute(attrpos))
+                .getChildNodes()
+                .item(0)
+                .getNodeValue();
+        return Double.parseDouble(sval);
+    }
 }

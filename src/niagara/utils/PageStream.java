@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.10 2007/04/28 22:31:33 jinli Exp $
+  $Id: PageStream.java,v 1.11 2007/04/30 19:25:44 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -85,6 +85,10 @@ public class PageStream {
     private int notifiedProducer;
     private int notifiedOnCtrl;
 
+    // if sendImmediate is true, tuples are not buffered,
+    // page is sent immediately
+    private boolean sendImmediate;
+    
     /**
      *  Constructor
      */
@@ -171,16 +175,16 @@ public class PageStream {
 	
 	if(toConsumerQueue.isEmpty()) {
 	    if(timeout > 0) {
-				wait(timeout);
-				if(toConsumerQueue.isEmpty()) {
-					// I timed out...
-					if(VERBOSE)
-					timeouts++;
-					return null;
-				}
+		wait(timeout);
+		if(toConsumerQueue.isEmpty()) {
+		    // I timed out...
+		    if(VERBOSE)
+			timeouts++;
+		    return null;
+		}
 	    } else {
-				// caller does not want to wait on this stream
-				return null;
+		// caller does not want to wait on this stream
+		return null;
 	    }
 	    // else must be something in queue, go on
 	} 
@@ -235,7 +239,7 @@ public class PageStream {
 	    return CtrlFlags.EOS;
 	if(shutdown) 
 	    throw new ShutdownException(shutdownMsg);
-
+        
 	// do SHUTDOWN check on put to make propagation of SHUTDOWN
 	// as fast as possible
 	if(ctrlMsgId == CtrlFlags.SHUTDOWN) {
@@ -543,6 +547,14 @@ public class PageStream {
 	retStr += "\n eos: " + eos + " shutdown: " + shutdown + " " +
 	    shutdownMsg + "\n";
 	return retStr;
+    }
+
+    public boolean isSendImmediate() {
+        return sendImmediate;
+    }
+
+    public void setSendImmediate(boolean sendImmediate) {
+        this.sendImmediate = sendImmediate;
     }
 }
 

@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SourceTupleStream.java,v 1.6 2007/03/08 22:30:31 tufte Exp $
+  $Id: SourceTupleStream.java,v 1.7 2007/04/30 19:25:44 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -208,6 +208,10 @@ public final class SourceTupleStream {
 
     public boolean isClosed() {
 	return status == Closed;
+    }
+
+    public boolean isSendImmediate() {
+        return pageStream.isSendImmediate();
     }
 }
 

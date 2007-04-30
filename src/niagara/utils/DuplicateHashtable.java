@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: DuplicateHashtable.java,v 1.4 2006/12/07 00:42:35 jinli Exp $
+  $Id: DuplicateHashtable.java,v 1.5 2007/04/30 19:25:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -339,5 +339,9 @@ public class DuplicateHashtable {
 	// Clear the hash table
 	//
 	hashtable.clear();
+    }
+
+    public int size() {
+        return hashtable.size();
     }
 }
