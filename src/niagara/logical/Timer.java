@@ -1,4 +1,4 @@
-/* $Id: Timer.java,v 1.5 2005/07/12 02:21:12 vpapad Exp $ */
+/* $Id: Timer.java,v 1.6 2007/04/30 19:21:17 vpapad Exp $ */
 package niagara.logical;
 
 import org.w3c.dom.Element;
@@ -162,10 +162,10 @@ public class Timer extends NullaryOperator {
                     total += currentNumber * HOUR_AS_MILLISECS;
                 else if (tok.indexOf("minute") >= 0)
                     total += currentNumber * MIN_AS_MILLISECS;
-                else if (tok.indexOf("second") >= 0)
-                    total += currentNumber * SEC_AS_MILLISECS;
                 else if (tok.indexOf("millisecond") >= 0)
                     total += currentNumber;
+                else if (tok.indexOf("second") >= 0)
+                    total += currentNumber * SEC_AS_MILLISECS;
                 else
                     throw new InvalidPlanException(
                         "Expected time term, found "

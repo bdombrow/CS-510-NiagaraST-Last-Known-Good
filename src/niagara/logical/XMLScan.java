@@ -1,4 +1,4 @@
-// $Id: XMLScan.java,v 1.4 2007/03/08 22:34:03 tufte Exp $
+// $Id: XMLScan.java,v 1.5 2007/04/30 19:21:17 vpapad Exp $
 
 package niagara.logical;
 
@@ -74,22 +74,47 @@ public class XMLScan extends Stream {
 
     public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
         throws InvalidPlanException {
-        boolean isStream = e.getAttribute("isstream").equalsIgnoreCase("yes");
-				int delay = Integer.getInteger(e.getAttribute("delay")).intValue();
-        if(!isStream && delay > 0) {
-            throw new InvalidPlanException("delay > 0 allowed only if isstream is yes");
-				}
-				
-        streamSpec =
-            new FileScanSpec(e.getAttribute("filename"), isStream, delay);
+        String streamSpecAttr = e.getAttribute("spec");
+        if (streamSpecAttr.length() == 0) {
+            String filename = e.getAttribute("filename");
+            if (filename.length() == 0)
+                throw new InvalidPlanException("You have to specify a filename");
+            boolean isStream = e.getAttribute("isstream").equalsIgnoreCase("yes");
+	    int delay = Integer.getInteger(e.getAttribute("delay")).intValue();
+
+	    if(!isStream && delay > 0) {
+		throw new InvalidPlanException("delay > 0 allowed only if isstream is yes");
+	    }
+
+            streamSpec =
+                new FileScanSpec(filename, isStream, delay);
+        } else {
+            if (e.getAttribute("filename").length() != 0)
+                throw new InvalidPlanException("You can't use both spec and filename at the same time");
+            streamSpec = catalog.getRegisteredStream(streamSpecAttr);
+            if (streamSpec == null)
+                throw new InvalidPlanException("Unknown stream: "
+                        + streamSpecAttr);
+            
+        }
         variable = new Variable(e.getAttribute("id"));
-       
+        
         String[] sattrs = e.getAttribute("attrs").split("\\W+");
         if (sattrs.length == 0 || sattrs[sattrs.length-1].length() == 0)
             throw new InvalidPlanException("XMLScan must unnest at least one attribute");
         attrs = new Attrs();
         for (int i = 0; i < sattrs.length; i++) {
-            attrs.add(new Variable(sattrs[i]));
+            Variable var = null;
+            if (streamSpecAttr.length() != 0) {
+                var = catalog.getStreamAttribute(streamSpecAttr, 
+                        sattrs[i]);
+                if (var == null) 
+                    throw new InvalidPlanException("Unknown attribute '"
+                            + sattrs[i] + "'" + " for stream '" + streamSpecAttr + "'");
+            }
+            else 
+                var = new Variable(sattrs[i]);
+            attrs.add(var);
         }
     }
     

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: LogNode.java,v 1.1 2003/12/24 02:08:28 vpapad Exp $
+  $Id: LogNode.java,v 1.2 2007/04/30 19:21:16 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -396,5 +396,13 @@ public class LogNode implements SchedulablePlan, java.io.Serializable {
 
     public void setSendImmediate() {
 	assert false : "Should not ask this of a log node";
+    }
+
+    public void setPlanID(String planID) {
+        throw new PEException("We do not support prepared plans for XMLQL");
+    }
+
+    public String getPlanID() {
+        throw new PEException("We do not support prepared plans for XMLQL");
     }
 }
