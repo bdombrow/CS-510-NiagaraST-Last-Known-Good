@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalDuplicate.java,v 1.1 2003/12/24 01:49:01 vpapad Exp $
+  $Id: PhysicalDuplicate.java,v 1.2 2007/04/30 00:30:02 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -74,6 +74,16 @@ public class PhysicalDuplicate extends PhysicalOperator {
             putTuple(tupleElement, dest);
         }
     }
+
+    protected void processPunctuation(
+            Punctuation tupleElement,
+            int streamId)
+            throws ShutdownException, InterruptedException {
+            // Copy the input tuple to all the sink streams
+            for (int dest = 0; dest < numSinkStreams; ++dest) {
+                putTuple(tupleElement, dest);
+            }
+        }
 
     public boolean isStateful() {
         return false;
