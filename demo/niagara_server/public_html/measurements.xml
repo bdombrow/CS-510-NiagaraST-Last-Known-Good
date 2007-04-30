@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg">
+<head><title>Monitoring results</title>
+<style type="text/css">
+div[class~='operator'] {
+   display: block;
+}
+div[class~='measurement'] {
+   margin-left: 20px;
+   display: block;
+}
+div[class~='graph'] {
+   display: block;
+}
+
+</style>
+
+<script type='text/javascript' src='measurements.js'></script>
+
+</head>
+
+<body onload="init();" onunload="done();">
+
+<div id="results"> </div>
+</body>
+</html>

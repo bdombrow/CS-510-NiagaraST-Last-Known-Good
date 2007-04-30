@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<showTunables id="show" planID="forever"/>
+
+<select id="select" input="show">
+<pred op="eq"><var value="$operator"/><string value="PhysicalConstruct1"/>
+</pred>
+</select>
+
+<construct id="cons" input="show">
+<![CDATA[
+<tunable operator=$operator type=$type name=$name description=$description value=$value></tunable>
+]]>scan
+</construct> 
+
+</plan>

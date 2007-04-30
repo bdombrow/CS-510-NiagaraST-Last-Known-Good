@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons" planID="forever">
+<timer id="timer" period="100 milliseconds" granularity="1 second" relative="now"/>
+
+<construct id="cons" input="timer">
+<![CDATA[ <output> $timer </output> ]]>
+</construct>
+</plan>

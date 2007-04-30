@@ -1,0 +1,92 @@
+<html>
+<script language="javascript">
+var ROOT_URL = "http://localhost:8020/servlet/httpclient";
+var STYLESHEET_URL = "http://localhost:8020/static/XMLPrettyPrint.xsl";
+var req;
+
+var stylesheet;
+var xsltproc;
+
+function startUp() {
+    stylesheet = document.implementation.createDocument("", "xslt", null);
+    stylesheet.addEventListener("load", loadXSLT, false); 
+    stylesheet.load(STYLESHEET_URL);
+}
+
+function loadXSLT(e) {
+   xsltproc = new XSLTProcessor();
+   xsltproc.importStylesheet(stylesheet);
+}
+
+function onload(event) {
+    if (event.target.readyState == 4) {        
+      var screendoc = parent.result.document;
+      var xmldoc = event.target.responseXML;
+      //alert("response=" + event.target.responseText);
+      rdatas = xmldoc.getElementsByTagName("responseData");
+      for (var i = 0; i < rdatas.length; i++) {
+	  var responseData = rdatas.item(i);
+	  for (var j = 0; j < responseData.childNodes.length; j++) {
+	      var elt = responseData.childNodes[j];
+	      var fragment =
+		  xsltproc.transformToFragment(elt, screendoc);
+	      var fs = screendoc.firstChild;
+	      if (fs.hasChildNodes())
+		  fs.insertBefore(fragment, fs.firstChild);
+	      else
+		  fs.appendChild(fragment);
+	  }
+      }
+    }
+}
+
+function onerror(event) {
+    alert("Error: " + event);
+}
+
+function sendRequest(querytype, querytext) {
+    // branch for native XMLHttpRequest object
+    var content = 'type=' + encodeURIComponent(querytype) + "&" 
+	          + 'query=' + encodeURIComponent(querytext); 
+    if (window.XMLHttpRequest) {
+	req = new XMLHttpRequest();
+	req.onload = onload;
+	req.onerror = onerror;
+	req.multipart = true;
+	req.open("POST", ROOT_URL, true);
+	req.setRequestHeader('Content-Type',
+	                     'application/x-www-form-urlencoded; charset=UTF-8');
+
+	req.send(content);
+    // branch for IE/Windows ActiveX version
+    } else {
+      alert("How do I do the multipart dance in IE?");
+    }
+}
+
+
+function submit_query() {
+    parent.result.document.location = "empty.xml";
+    sendRequest(document.f.type.value, 
+		document.f.query.value);
+}
+
+startUp();
+</script>
+
+<body>
+<center>
+ <FORM name="f">
+   <textarea id="query" name="query" rows="15" cols="70">Bar</textarea>
+   <br />
+   <input id="type" 
+          name="type" value="execute_qp_query" />
+   <input type="button" onclick="submit_query();" value="Submit"> 
+ </FORM>
+
+<script language='javascript'>
+document.f.query.value = "<?xml version='1.0'?>\n<!DOCTYPE plan SYSTEM 'queryplan.dtd'>\n<plan top='cons' planID='forever'>\n<timer id='timer' period='1 second' />\n <prefix id='prefix' length='20' input='timer'/>\n <construct id='cons' input='prefix'>\n <![CDATA[ <time> $timer </time> ]]>\n </construct>\n </plan>";
+</script>
+</center>
+</body>
+</html>

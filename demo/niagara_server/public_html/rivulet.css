@@ -1,0 +1,101 @@
+        @import "all.css"; /* just some basic formatting, no layout stuff */
+
+        body {
+                margin:10px 10px 0px 10px;
+                padding:0px;
+                }
+
+        #leftcontent {
+                position: absolute;
+                left:10px;
+                top:50px;
+                width:300px;
+                background:#fff;
+                border:1px solid #000;
+                }
+
+        #centercontent {
+                background:#fff;
+                margin-left: 299px;
+                margin-right:399px;
+                border:1px solid #000;
+                voice-family: "\"}\"";
+                voice-family: inherit;
+                margin-left: 201px;
+                margin-right:201px;
+                }
+        html>body #centercontent {
+                margin-left: 301px;
+                margin-right:401px;
+                }
+
+        #rightcontent {
+                position: absolute;
+                right:10px;
+                top:50px;
+                width:400px;
+                background:#fff;
+                border:1px solid #000;
+                }
+
+        .displaybox {
+                background:#fff;
+                border:1px solid #000;
+                margin:20px;
+                }
+        #banner {
+                background:#fff;
+                height:40px;
+                border-top:1px solid #000;
+                border-right:1px solid #000;
+                border-left:1px solid #000;
+                voice-family: "\"}\"";
+                voice-family: inherit;
+                height:39px;
+                }
+        html>body #banner {
+                height:39px;
+                }
+        p,h1,pre {
+                margin:0px 10px 10px 10px;
+                }
+
+        h1 {
+                font-size:14px;
+                padding-top:10px;
+                }
+
+        #banner h1 {
+                font-size:14px;
+                padding:10px 10px 0px 10px;
+                margin:0px;
+                }
+
+        #rightcontent p {
+                font-size:10px
+                }
+
+        #planbox {
+                background:#fff;
+                border:1px solid #000;
+                margin:20px;
+                }
+        .smallfiller {
+                background:#fff;
+                height:100px;
+                margin:6px;                
+                }                
+        .planfiller {
+                background:#fff;
+                height:300px;
+                }
+        #messages {
+                background:#fff;
+                margin:10px;
+                }
+        #results {
+                background:#fff;
+                border:1px solid #000;
+                margin:20px;               
+                }
+                

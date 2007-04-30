@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons">
+
+<collectInstrumentation id="instr" plan="forever" 
+operators="PhysicalConstruct1" period="1000"/>
+
+<construct id="cons" input="instr">
+<![CDATA[
+<measurement operator=$operator name=$name time=$time>$value</measurement>
+]]>
+</construct> 
+
+</plan>
