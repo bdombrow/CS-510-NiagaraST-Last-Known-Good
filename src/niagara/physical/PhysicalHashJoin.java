@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoin.java,v 1.4 2007/04/28 21:42:17 jinli Exp $
+  $Id: PhysicalHashJoin.java,v 1.5 2007/04/30 19:23:22 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -626,7 +626,24 @@ public Cost findLocalCost(
     public void setResultDocument(Document doc) {
     	this.doc = doc;
         }   
-    
+
+    public void getInstrumentationValues(ArrayList<String> instrumentationNames, ArrayList<Object> instrumentationValues) {
+        if (instrumented) {
+            instrumentationNames.add("left hashtable size");
+            if (finalSourceTuples == null)
+                instrumentationValues.add(0);
+            else
+                instrumentationValues.add(finalSourceTuples[0].size());
+ 
+            instrumentationNames.add("right hashtable size");
+            if (finalSourceTuples == null)
+                instrumentationValues.add(0);
+            else
+                instrumentationValues.add(finalSourceTuples[1].size());
+            super.getInstrumentationValues(instrumentationNames, instrumentationValues);
+        }
+    }
+
     public void streamClosed( int streamId) 
     throws ShutdownException { 
     	streamClose[streamId] = true;

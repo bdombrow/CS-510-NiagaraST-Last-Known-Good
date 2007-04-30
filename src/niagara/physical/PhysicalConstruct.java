@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstruct.java,v 1.3 2006/11/28 05:16:11 jinli Exp $
+  $Id: PhysicalConstruct.java,v 1.4 2007/04/30 19:23:22 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -187,17 +187,20 @@ public class PhysicalConstruct extends PhysicalOperator {
 	    int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
 	    //Node n = tupleElement.getAttribute(attributeId);
 	    BaseAttr n = (BaseAttr)tupleElement.getAttribute(attributeId);
-	    if(n == null) {
+	    if (n == null) {
 	    	return;
 	    }
 	    
 	    switch(schema.getType()) {
 	    case varType.ELEMENT_VAR:
-        	//localResult.add(n);
-	    	
-	    	Element elt = localDoc.createElement(schema.getName());
-	    	elt.appendChild(localDoc.createTextNode(n.toASCII()));
-	    	localResult.add(elt);
+		Element elt = localDoc.createElement(schema.getName());
+		if (n instanceof XMLAttr) {
+		    Node xnode = localDoc.importNode(((XMLAttr) n).getNodeValue(), true);
+		    elt.appendChild(xnode);
+		} else {
+		    elt.appendChild(localDoc.createTextNode(n.toASCII()));
+		}
+		localResult.add(elt);
 		break;
         
         case varType.CONTENT_VAR:
@@ -332,20 +335,9 @@ public class PhysicalConstruct extends PhysicalOperator {
 			    attributeId =
 	                        ((schemaAttribute) attrData.getValue()).getAttrId();
 	
-	                    // Add the attribute as the result
-	                    // This better BE an attribute!
-	                 
-			    assert tupleElement.getAttribute(attributeId) instanceof XMLAttr:
-			    	"??? - Jenny";
-			    //Node na = tupleElement.getAttribute(attributeId);
-			    Node na = ((XMLAttr)tupleElement.getAttribute(attributeId)).getNodeValue();
-			    if(na == null)
-			    	break;
-			    if(!(na instanceof Attr)) {
-				throw new ShutdownException("Can not use element type variable to create attribute");
-			    }
-	            Attr a = (Attr) na;
-	            resultElement.setAttribute(name, a.getValue());
+			    BaseAttr ba = (BaseAttr) tupleElement.getAttribute(attributeId);
+			    if (ba != null)
+				resultElement.setAttribute(name, ba.toASCII());
 			    break;
 	
 			case varType.CONTENT_VAR:

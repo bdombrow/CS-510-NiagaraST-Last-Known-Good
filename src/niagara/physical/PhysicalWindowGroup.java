@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowGroup.java,v 1.6 2007/04/28 21:48:44 jinli Exp $
+  $Id: PhysicalWindowGroup.java,v 1.7 2007/04/30 19:23:23 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -705,6 +705,16 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
         cost += outputCard * catalog.getDouble("tuple_construction_cost");
         return new Cost(cost);
     }
-    
+
+    public void getInstrumentationValues(ArrayList<String> instrumentationNames, ArrayList<Object> instrumentationValues) {
+        if (instrumented) {
+            instrumentationNames.add("open groups");
+            if (hashtable == null)
+                instrumentationValues.add(0);
+            else
+                instrumentationValues.add(hashtable.size());
+            super.getInstrumentationValues(instrumentationNames, instrumentationValues);
+        }
+    }
 }
 

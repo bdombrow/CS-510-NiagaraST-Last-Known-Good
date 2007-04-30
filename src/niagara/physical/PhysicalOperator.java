@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.4 2007/04/28 21:44:07 jinli Exp $
+  $Id: PhysicalOperator.java,v 1.5 2007/04/30 19:23:22 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,9 @@ package niagara.physical;
  * @version 1.0
  */
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import niagara.connection_server.NiagraServer;
 import niagara.data_manager.DataManager;
 import niagara.optimizer.colombia.Attrs;
@@ -43,8 +46,6 @@ import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.PhysicalOp;
 import niagara.optimizer.rules.Initializable;
 import niagara.query_engine.*;
-import niagara.query_engine.QueryInfo;
-import niagara.query_engine.Schedulable;
 import niagara.utils.*;
 
 import org.w3c.dom.Document;
@@ -53,7 +54,7 @@ import niagara.connection_server.ResultTransmitter;
 import java.util.ArrayList;
 
 public abstract class PhysicalOperator extends PhysicalOp 
-implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
+implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instrumentable {
 
 /*
   The lifecycle of a physical operator can be divided in three 
@@ -123,7 +124,8 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
         
     // for testing
     protected CPUTimer cpuTimer; // = new CPUTimer();
- 
+    
+
     /**
      * This class is used to store the result of a read operation from
      * a set of source streams. There are two components (a) the stream element
@@ -211,11 +213,6 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 	return true;
     }
 
-
-	  public String getStreamName(int streamId) {
-			return sourceStreams[streamId].getName();
-		}
-
     /**
      * This function sets up the flow of control for the operator by
      * reading from input streams and writing to sink streams. All
@@ -288,6 +285,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 			// best we can do is send a message downstream
 			// only send message to active source streams
 			if(activeSourceStreams.contains(sourceId) &&
+                                !sourceStreams[sourceId].isSendImmediate() &&
 			   ResultTransmitter.BUF_FLUSH) {
 			    if(PageStream.VERBOSE)
 				System.out.println(getName() + 
@@ -821,6 +819,16 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
 	assert !sinkStreams[streamId].isClosed() :
 	    "KT putting tuple to closed stream - can I ignore this? previous code ignored it";
 
+        if (NiagraServer.ALLOW_INSTRUMENTATION && instrumented)
+            synchronized(instrSynch) {
+                rateCount++;
+                while (rateCount >= rateLimit)
+                    instrSynch.wait();
+                tuplesOut[streamId]++;
+                if (sampling)
+                    outputSample = tuple;
+            }
+        
 	boolean sent = false;
 	
 	// Loop until the required element is sent 
@@ -1265,5 +1273,120 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable {
     public void streamClosed( int streamId) 
         throws ShutdownException {
         return;
+    }
+
+    public String getStreamName(int streamId) {
+	return sourceStreams[streamId].getName();
+    }
+    
+    // Instrumentation
+    protected boolean instrumented;
+    private boolean sampling;
+    private String[] descTuplesOut;
+    private int[] tuplesOut;
+    private Tuple outputSample;
+    private int rateLimit = Integer.MAX_VALUE;
+    private int rateCount;
+    
+    // Object for synchronization
+    private Object instrSynch = new Object();
+
+    
+    @Tunable(name = "instrumented",
+            type = Tunable.TunableType.BOOLEAN,
+            setter = "setInstrumented",
+            description = "Enable/disable instrumentation")
+   public boolean isInstrumented() {
+       synchronized(instrSynch) {
+           return instrumented;
+       }
+   }
+
+    @Tunable(name = "sampling",
+            type = Tunable.TunableType.BOOLEAN,
+            setter = "setSampling",
+            description = "Enable/disable output tuple sampling")
+   public boolean isSampling() {
+       synchronized(instrSynch) {
+           return sampling;
+       }
+   }
+
+    @Tunable(name = "rateLimit",
+            type = Tunable.TunableType.INTEGER,
+            setter = "setRateLimit",
+            description = "Maximum number of output tuples per collection period")
+   public int getRateLimit() {
+       synchronized(instrSynch) {
+           return rateLimit;
+       }
+   }
+
+    public void setInstrumented(boolean instrumented) {
+        synchronized(instrSynch) {
+            if (this.instrumented == instrumented)
+                return;
+            this.instrumented = instrumented;
+            if (instrumented) {
+                // XXX vpapad: If we ever support plugging in 
+                // new output streams at runtime we'll need
+                // to update this at runtime also (perhaps with
+                // a callback in the method that adds/removes streams). 
+                int numOutputs = getNumberOfOutputs();
+                tuplesOut = new int[numOutputs];
+                descTuplesOut = new String[numOutputs];
+                if (numOutputs == 1)
+                    descTuplesOut[0] = "tuples produced";
+                else
+                    for (int i = 0; i < numOutputs; i++)
+                        descTuplesOut[i] = "tuples produced [" + i + "]";
+            } else {
+                tuplesOut = null;
+                descTuplesOut = null;
+            }
+        }
+    }
+
+    public void setSampling(boolean sampling) {
+        synchronized(instrSynch) {
+            if (this.sampling == sampling)
+                return;
+            this.sampling = sampling;
+            if (sampling && !instrumented)
+                setInstrumented(true);
+            if (!sampling) {
+                outputSample = null;
+            }
+        }
+    }
+
+    public void setRateLimit(int rateLimit) {
+        synchronized(instrSynch) {
+            int prevLimit = this.rateLimit;
+            this.rateLimit = rateLimit;
+            if (rateCount >= prevLimit && rateCount < rateLimit)
+                instrSynch.notify();
+        }
+    }
+    
+    public void getInstrumentationValues(ArrayList<String> instrumentationNames,
+            ArrayList<Object> instrumentationValues) {
+        if (instrumented) {
+            synchronized (instrSynch) {
+                for (int i = 0; i < descTuplesOut.length; i++) {
+                    instrumentationNames.add(descTuplesOut[i]);
+                    instrumentationValues.add(tuplesOut[i]);
+                }
+                if (sampling) {
+                    instrumentationNames.add("output sample");
+                    instrumentationValues.add(outputSample);
+                    outputSample = null;
+                }
+                int prevCount = rateCount;
+                rateCount = 0;
+                if (prevCount >= rateLimit)
+                    instrSynch.notify();
+            }
+        }
     }
 }
