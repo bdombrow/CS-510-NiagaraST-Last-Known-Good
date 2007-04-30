@@ -1,0 +1,177 @@
+$Id: tunables.txt,v 1.1 2007/04/30 19:11:44 vpapad Exp $
+
+1. Queries over HTTP 
+
+   * The server can now accept queries over HTTP. To enable this option,
+   run with ./runServer -accept-http 
+
+   The idea is to make it easy to talk to Niagara with Javascript, 
+   Python, PHP, etc., and not just with Java.
+
+   * You can put static HTML pages to be served in: 
+   demo/niagara_server/public_html
+   
+    These pages will then be accessible at
+   http://localhost:8020/static/ 
+
+   *There's already a very basic index.html there that just gives you
+   a text area where you can paste in a query. There's a sample query
+   there that runs a timer thread and prints out its value every five
+   seconds. Click Submit and you should start seeing the bottom frame
+   update with the new values. Nothing fancy, but hey, it works.
+   (If you're running the Niagara server and your browser on different 
+   machines you need to change the ROOT_URL in basicwebclient.html to 
+   point to your Niagara server machine.)
+
+   * In theory, if a query works with the regular query interface, it
+     should also work over HTTP. Same goes for prepared queries,
+     tunables, instrumentation, etc., everything that I talk about
+     here. 
+
+   * Results flow back as separate XML documents -- each output tuple
+     from the query becomes its own XML document, separated by
+     "\n--<][>--\n". This works using XmlHttpRequest and it should
+     work fine at least with Mozilla.
+
+   * The HTTP interface has the sendImmediate flag set so that results
+     are not delivered in batches.
+
+2. Prepared Queries 
+
+   * You can now "prepare" a plan and execute it at a later
+   time. The name is somewhat misleading since for now you can run a
+   prepared query only once (because a physical Niagara operator can 
+   only be executed once.) 
+
+   * Each prepared plan has an ID. You can give it a meaningful one in
+     the <plan> node with the planID attribute, e.g.: 
+     <plan top="foo" planID="myPlan"> ... </plan>
+     If you don't set planID, or if the one you set is already used 
+     the system will pick its own (1, 2, 3, ...)
+
+   * To prepare a query just do: ./runSimple -qf my.qry -prepare
+
+   * The output of the -prepare command looks like the output of
+   -explain, but the server assigns and registers an ID for each
+   physical operator in the plan and for the plan itself. The output
+   for the prepare query looks like:
+
+     <plan top="PhysicalConstruct1" id="myPlan">
+	   <PhysicalConstruct id="PhysicalConstruct1" 
+	    input="TimerThread1" cost="5.55" schema="cons"/>
+	   <TimerThread id="TimerThread1" cost="5"/>
+     </plan>
+
+     The ID of this plan is now myPlan and you can refer to the
+     TimerThread operator for example as "myPlan.TimerThread1" There's
+     currently no way to specify the IDs of operators as you can with
+     plans -- they will all look like "PhysicalConstruct1",
+     "TimerThread1", etc.
+
+   * You can execute the prepared plan using: 
+     ./runSimple -execute-prepared myPlan
+
+     Once the plan's done executing the server will forget about it.
+
+3. Tunables
+   
+   * Physical operators now support tunables. A tunable is a property
+     that can be queried and modified at runtime from outside the
+     operator. For example you could have the Select operator provide
+     a tunable for adjusting its predicate at run time. 
+
+    * I have implemented only a very basic set of tunables in
+     PhysicalOperator (and thus available for all operators): 
+     - The "instrumented" tunable enables or disables collection of
+     instrumentation data (described below) 
+     - The "sampling" tunable enables collection of sample tuples 
+     as they pass through the operator 
+     - The "rateLimit" tunable limits the number of tuples the
+     operator will process in a collection period (described below)
+
+    * A tunable property has a name, a type (for now there can only be
+    booleans and integers), and a description. It requires a getter
+    method ("what is the current value of the property?") and a setter
+    method ("set the property to this new value").
+
+    * Tunables use the nifty Java 1.5 annotation feature. See for
+      example PhysicalOperator.java You attach the @Tunable annotation
+      to the getter method, and you name the setter method. There's no
+      other code that you have to write. Here's an example:
+
+          @Tunable(name = "instrumented",
+            type = Tunable.TunableType.BOOLEAN,
+            setter = "setInstrumented",
+            description = "Enable/disable instrumentation")
+          public boolean isInstrumented() {
+             synchronized(instrSynch) {
+                 return instrumented;
+             }
+          }
+
+      The tunable ("instrumented") is attached to the getter method
+      ("isInstrumented"), its type is true/false, its setter method is
+      "setInstrumented", and it has a short description. (Because the
+      getter and setter methods will run in a different thread from the
+      operator, they may need to synchronize access to operator
+      attributes). That's all there is!
+
+    * There's a showTunables operator that takes the ID of a prepared
+      plan and lists all the tunables in that plan and their current
+      values. I'm checking in an example query
+      (demo/niagara_serverpublic_html/showtunables.qry)
+
+    * You can set any tunable of a prepared plan from the client, at
+      any time, before or after the plan starts running (although, you
+      have to figure out what setting a tunable is supposed to do in a
+      running plan). The command is: 
+
+      ./runSimple -set "tunable=value"
+
+      for example
+      
+      ./runSimple -set "myPlan.PhysicalConstruct1.instrumented=true"
+      
+
+4. Instrumentation
+
+   * Instrumentation is a mechanism for operators to report data,
+     formatted as (name, value) pairs to the outside world. It's 
+     poll based: the operator collects whatever data it wants 
+     (based on a tunable), and a separate thread comes in 
+     and asks for that data.
+
+   * An operator implements instrumentation with the
+     getInstrumentationValues(names, values). The names and values
+     parameters are ArrayLists: if the operator has a piece of data to
+     report, it adds its name to the names arraylist and its value to
+     the values arraylist. It's up to the operator whether it reports
+     anything. 
+
+     In the version I'm checking in there's no instrumentation at all
+     if the "instrumented" tunable is set to false (the
+     default). There's also a global flag
+     NiagraServer.ALLOW_INSTRUMENTATION that you can set to false if
+     you want to bypass even the check for whether instrumentation is
+     enabled. By default it's true, so even operators that are not
+     instrumented incur a very minor cost of checking "if
+     (instrumented) ...".
+
+   * If instrumented is true, PhysicalOperator reports a count of
+     the tuples each operator has produced. PhysicalHashJoin reports
+     the sizes of its left and right hashtables. PhysicalWindowGroup
+     reports the number of open groups. 
+
+   * There's an operator called collectInstrumentation that takes the
+     ID of a prepared plan, a list of operator IDs, and a collection
+     period, in milliseconds. The operator will wake up every so many
+     milliseconds, ask the specified operators for their
+     instrumentation values and produce 4-tuples: (operator-ID,
+     parameter name, parameter value, time). See
+     demo/niagara_server/public_html/instrumentation.qry for an example.
+
+   * There are two other tunables you can set to get more extensive
+     instrumentation. Setting "sampling" to true keeps a copy of the
+     last tuple the operator produced. Setting "rate_limit" to a
+     number N restricts the operator so that it produces up to N
+     tuples between any two instrumentation collections.
