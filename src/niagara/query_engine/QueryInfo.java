@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryInfo.java,v 1.8 2003/12/24 01:31:48 vpapad Exp $
+  $Id: QueryInfo.java,v 1.9 2007/04/30 19:24:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,6 +29,8 @@
 package niagara.query_engine;
 
 import java.util.Date;
+
+import niagara.connection_server.NiagraServer;
 import niagara.utils.*;
 
 /**
@@ -71,6 +73,9 @@ public class QueryInfo {
     //
     private boolean removeFromActive;
 
+    /** The planID that was issued to this query if it was first "prepared" */
+    private String planID;
+    
     /**
      * Constructor for QueryInfo objects.
      *
@@ -290,6 +295,12 @@ public class QueryInfo {
 	System.out.println("KT: Query with id " + queryId 
 			   + " removed from QueryEngine.activeQueries");
 	
+    // If this query was "prepared", remove it from the catalog now that
+    // it is done -- it cannot be resurrected
+    if (planID != null)
+        NiagraServer.getCatalog().removePreparedPlan(planID);
+    
+    
 	// Clear the interrupted flag of this thread in case it was interrupted
 	// for this query - the function used did not do that and it
 	// seems you can't reset interrupted fla
@@ -319,6 +330,10 @@ public class QueryInfo {
 		return retStr;
     }
 
+
+    public void setPlanID(String planID) {
+        this.planID = planID;
+    }
 }
 
 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryEngine.java,v 1.17 2004/02/11 01:07:09 vpapad Exp $
+  $Id: QueryEngine.java,v 1.18 2007/04/30 19:24:09 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -228,6 +228,9 @@ public class QueryEngine {
                     activeQueries,
                     true);
 
+            if (planRoot.getPlanID() != null)
+                queryInfo.setPlanID(planRoot.getPlanID());
+            
             //call Execution Scheduler to generate the physical
             //plan and execute the group plan.
             scheduler.executeOperators(planRoot, queryInfo);

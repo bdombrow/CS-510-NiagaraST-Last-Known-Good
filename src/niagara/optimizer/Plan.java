@@ -13,6 +13,7 @@ import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.Op;
 import niagara.optimizer.colombia.PhysicalOp;
 import niagara.physical.PhysicalOperator;
+import niagara.query_engine.Instrumentable;
 import niagara.query_engine.PhysicalOperatorQueue;
 import niagara.query_engine.SchedulablePlan;
 import niagara.query_engine.SchemaProducer;
@@ -32,6 +33,9 @@ public class Plan implements SchedulablePlan {
 
     private double cost;
     private String name;
+    
+    // For prepared plans, only appears in top plan node
+    private String planID;
 
     public Plan(Op operator) {
         this.operator = operator;
@@ -240,12 +244,12 @@ public class Plan implements SchedulablePlan {
         return operator.getNumberOfOutputs();
     }
 
-    public void assignNames(HashMap hm) {
+    private void assignNames(HashMap<String, Integer> hm, HashMap<String, Instrumentable> operatorRegistry) {
         if (name != null)
             return;
         // Assign names to children first
         for (int i = 0; i < inputs.length; i++)
-            inputs[i].assignNames(hm);
+            inputs[i].assignNames(hm, operatorRegistry);
 
         String opName = operator.getName();
         Integer count = (Integer) hm.get(opName);
@@ -254,6 +258,8 @@ public class Plan implements SchedulablePlan {
         count = new Integer(count.intValue() + 1);
         name = opName + count;
         hm.put(opName, count);
+        if (operatorRegistry != null && operator instanceof Instrumentable)
+            operatorRegistry.put(name, (Instrumentable) operator);
     }
 
     /**
@@ -279,16 +285,24 @@ public class Plan implements SchedulablePlan {
         sb.append("\n");
     }
 
-    public String planToXML() {
-        assignNames(new HashMap());
+    public String planToXML(String planID, HashMap<String, Instrumentable> operatorRegistry) {
+        assignNames(new HashMap<String, Integer>(), operatorRegistry);
         StringBuffer buf = new StringBuffer("<plan top='");
         buf.append(getName());
+        if (planID != null) {
+            buf.append("' id='");
+            buf.append(planID);
+        }
         buf.append("'>\n");
         subplanToXML(new Hashtable(), buf, new DecimalFormat());
         buf.append("</plan>");
         return buf.toString();
     }
 
+    public String planToXML() {
+        return planToXML(null, null);
+    }
+    
     public String subplanToXML() {
         StringBuffer buf =
             new StringBuffer(
@@ -334,11 +348,35 @@ public class Plan implements SchedulablePlan {
             inputs[i].getRootsAndResources(visited, roots, resources, lookingForRoot);
     }
 
+    public void visitAllNodes(PlanVisitor pv) {
+        HashSet<Plan> hs = new HashSet<Plan>();
+        visitAllNodes(hs, pv);
+    }
+    
+    private void visitAllNodes(HashSet<Plan> visited, PlanVisitor pv) {
+        if (visited.contains(this))
+            return;
+        if (!pv.visit(this))
+            return;
+        visited.add(this);
+        for (Plan child : inputs) {
+            child.visitAllNodes(visited, pv);
+        }
+    }
+    
     public void setCost(double cost) {
         this.cost = cost;
     }
 
     public double getCost() {
         return cost;
+    }
+
+    public String getPlanID() {
+        return planID;
+    }
+
+    public void setPlanID(String planID) {
+        this.planID = planID;
     }
 }

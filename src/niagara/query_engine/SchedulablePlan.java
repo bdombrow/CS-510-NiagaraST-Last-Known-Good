@@ -1,4 +1,4 @@
-/* $Id: SchedulablePlan.java,v 1.5 2003/12/24 01:31:46 vpapad Exp $ */
+/* $Id: SchedulablePlan.java,v 1.6 2007/04/30 19:24:10 vpapad Exp $ */
 package niagara.query_engine;
 
 import niagara.data_manager.DataManager;
@@ -30,4 +30,7 @@ public interface SchedulablePlan {
 
     boolean isSendImmediate();
     void setSendImmediate();
+    
+    void setPlanID(String planID);
+    String getPlanID();
 }
