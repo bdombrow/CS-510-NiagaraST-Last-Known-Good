@@ -316,13 +316,27 @@ public class SimpleClient implements UIDriverIF {
         }
 
         /* read the file into the buffer */
-        int qLen = br.read(cbuf, 0, MAX_QUERY_LEN);
-        if (qLen == MAX_QUERY_LEN) {
-            System.out.println(
-                "Query exceeds maximum length (" + MAX_QUERY_LEN + ")");
-            return null;
+        int qLen = 0;
+        StringBuffer queryString = new StringBuffer();
+
+        while (qLen != -1) {
+                for (int i=0; i<MAX_QUERY_LEN; i++)
+                        cbuf[i] = '\0';
+                qLen = br.read(cbuf, 0, MAX_QUERY_LEN);
+
+                if (qLen == MAX_QUERY_LEN) {
+                        System.out.println(
+                                        "Query exceeds maximum length (" + MAX_QUERY_LEN + ")");
+                        return null;
+                } else {
+                        if (qLen != -1)
+                                queryString.append(cbuf, 0, qLen);
+                        else
+                                queryString.append(cbuf);
+
+                }
         }
-        return new String(cbuf, 0, qLen); /* copies cbuf */
+        return queryString.toString();
 
     }
 
