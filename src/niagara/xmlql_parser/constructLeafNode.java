@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: constructLeafNode.java,v 1.1 2003/12/24 01:19:54 vpapad Exp $
+  $Id: constructLeafNode.java,v 1.2 2007/04/30 19:24:58 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,6 +33,7 @@ package niagara.xmlql_parser;
 
 import niagara.logical.Variable;
 import niagara.optimizer.colombia.Attrs;
+import niagara.optimizer.colombia.Attribute;
 import niagara.utils.CUtil;
 import niagara.utils.PEException;
 
@@ -73,8 +74,10 @@ public class constructLeafNode extends constructBaseNode {
             // XXX vpapad: super ugly - must get "$" out of variables
             if (attr == null && var.charAt(0) == '$')
                 attr = vt.lookUp(var.substring(1));
-            if (attr == null)
+            if (attr == null) {
+            	System.out.println(vt.getVars());
                 throw new PEException("Could not look up variable " + var);
+            }
             leafData = new data(dataType.ATTR, attr);
         }
     }
@@ -100,7 +103,11 @@ public class constructLeafNode extends constructBaseNode {
             // XXX vpapad: super ugly - must get "$" out of variables
             if (varName.charAt(0) == '$')
                 varName = varName.substring(1);
-            return new Attrs(new Variable(varName));
+	    Attribute var = attrs.getAttr(varName);
+	    // This should have been caught at compile time
+	    if (var == null)
+                throw new PEException("Unknown variable: " + varName);
+            return new Attrs(var);
         }
         else
             return new Attrs();

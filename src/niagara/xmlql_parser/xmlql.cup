@@ -238,8 +238,6 @@ Element ::= StartTag:s QueryInConstructList:ql EndTag
 	  | StartTag:s EndTag
 		{:
 			Vector v1 = new Vector();
-			v1.addElement(new constructLeafNode(
-				new data(dataType.IDEN,"")));
 			RESULT = new constructInternalNode(s,v1);
 		:}
 	  ;

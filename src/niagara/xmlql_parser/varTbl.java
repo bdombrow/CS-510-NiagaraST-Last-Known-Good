@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: varTbl.java,v 1.4 2007/03/08 22:34:56 tufte Exp $
+  $Id: varTbl.java,v 1.5 2007/04/30 19:24:58 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +34,7 @@ package niagara.xmlql_parser;
 import java.util.*;
 
 import niagara.logical.NodeDomain;
+import niagara.optimizer.colombia.Attribute;
 import niagara.query_engine.TupleSchema;
 
 public class varTbl {
@@ -46,9 +47,19 @@ public class varTbl {
         public varTbl(TupleSchema ts) {
             varList = new Vector();
             for (int i = 0; i < ts.getLength(); i++) {
-                int varType = ((NodeDomain) ts.getVariable(i).getDomain()).getType();
                 String varName = ts.getVariableName(i);
-                varList.add(new varToAttr(varName, new schemaAttribute(i, varType, varName)));
+                // XXX vpapad: ugh... Really disgusting hack follows
+                // In the presence of non-XML types we need to mess around
+                // with the "domain" of the variable
+                Attribute attr = (ts.getVariable(i));
+                if (! (attr instanceof NodeDomain))
+                    varList.add(new varToAttr(varName, 
+					      new schemaAttribute(i, 
+								  NodeDomain.getDomain(varType.ELEMENT_VAR).getType(), varName)));
+                else {
+                    int varType = ((NodeDomain) ts.getVariable(i).getDomain()).getType();
+                    varList.add(new varToAttr(varName, new schemaAttribute(i, varType, varName)));
+                }
             }
         }
         
