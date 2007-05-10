@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimilaritySpec.java,v 1.3 2007/05/10 05:09:30 jinli Exp $
+  $Id: SimilaritySpec.java,v 1.4 2007/05/10 23:31:04 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -47,11 +47,11 @@ public class SimilaritySpec {
 
 	public SimilaritySpec(String type, int _numOfDays, int _numOfMins, boolean weather) {
     // do something smart
-	if (type.compareToIgnoreCase("AllDays") == 0)
+	if ((type.compareToIgnoreCase("all") == 0) ||  (type.compareToIgnoreCase("AllDays") == 0))
 		sType = SimilarityType.AllDays;
-	else if (type.compareToIgnoreCase("WeekDays") == 0)
+	else if ((type.compareToIgnoreCase("week") == 0) || (type.compareToIgnoreCase("WeekDays") == 0))
 		sType = SimilarityType.WeekDays;
-	else if (type.compareToIgnoreCase("SameDayOfWeek")==0)
+	else if ((type.compareToIgnoreCase("sdow")==0) || (type.compareToIgnoreCase("SameDayOfWeek")==0))
 		sType = SimilarityType.SameDayOfWeek;
 	else
 		System.err.println("unsupported similarity type - "+type);
