@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalPunctQC.java,v 1.2 2007/04/28 21:47:13 jinli Exp $
+  $Id: PhysicalPunctQC.java,v 1.3 2007/05/10 04:54:45 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,7 +63,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
 	// attribute to punctuate on
     private Attribute pAttr;
 	private PunctSpec pSpec;
-    private SimilaritySpec sSpec;
+    //private SimilaritySpec sSpec;
     private PrefetchSpec pfSpec;
     
     // punctuating attribute of the input stream, which we rely 
@@ -90,6 +90,8 @@ public class PhysicalPunctQC extends PhysicalOperator {
     
     private String queryString;
     
+    private Long lastPunct = Long.MIN_VALUE;
+    
     private int count = 0;
     
     public PhysicalPunctQC() {
@@ -102,13 +104,12 @@ public class PhysicalPunctQC extends PhysicalOperator {
     // probably take attr here, and convert to idx in
     // opInitialize
     public PhysicalPunctQC(Attribute pAttr, String timeAttr, String queryString,
-				PunctSpec pSpec, SimilaritySpec sSpec,
-        PrefetchSpec pfSpec) {
+				PunctSpec pSpec, PrefetchSpec pfSpec) {
         setBlockingSourceStreams(blockingSourceStreams);
 
 				this.pAttr = pAttr;
 				this.pSpec = pSpec;
-				this.sSpec = sSpec;
+				//this.sSpec = sSpec;
 				this.pfSpec = pfSpec;
 				this.timeAttr = timeAttr;
 				this.queryString = queryString;
@@ -122,7 +123,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
 				PunctQC pop = (PunctQC) logicalOperator;
 				pAttr = pop.getPunctAttr();
 				pSpec = pop.getPunctSpec();
-				sSpec = pop.getSimilaritySpec();
+				//sSpec = pop.getSimilaritySpec();
 				pfSpec = pop.getPrefetchSpec();
 				spAttr = pop.getStreamPunctAttr();
 				timeAttr = pop.getTimeAttr();
@@ -288,8 +289,13 @@ public class PhysicalPunctQC extends PhysicalOperator {
         	return;
         }
         
-        long start, end;
         long ts = getTupleTimestamp(tuple, 1);
+        synchronized (lastPunct) {
+        	lastPunct = ts; 
+        }
+        
+        long start, end;
+        
         int prefetch = pfSpec.getPrefetchVal();
         
         if (highWatermark < ts+prefetch) {
@@ -304,13 +310,14 @@ public class PhysicalPunctQC extends PhysicalOperator {
         	String endTS = new Timestamp(end*1000).toString();
         	endTS = endTS.substring(0, endTS.length()-2);*/
             if (count == 0) {
-            	start = ts - sSpec.getNumOfMins()*60;
+            	start = ts;
+            	//start = ts - sSpec.getNumOfMins()*60;
             	count++;
             } else
             	start = highWatermark;
         	end = (start + queryCoverage);
         	
-        	String ctrlMsg = newQuery(start, end);
+        	String ctrlMsg = start + " " + end; //newQuery(start, end);
     
         	System.err.println(ctrlMsg);
         	highWatermark = end;
@@ -325,7 +332,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
 	 * @param end
 	 * @return
 	 */
-	private String newQuery(long start, long end) {
+	/*private String newQuery(long start, long end) {
 		Calendar calendar = GregorianCalendar.getInstance();
 		
 		//calendar.setTimeInMillis(start*1000);
@@ -364,18 +371,69 @@ public class PhysicalPunctQC extends PhysicalOperator {
 				
 			}
 			query.append(") order by panetime");
-			
 			break;
 			
-		case WeekDays:						
-			break;
 		case SameDayOfWeek:
+			for (int i = 1; i <= numDays; i++) {				
+				//query.append(queryString.replace("NUMOFDAYS", " '" +i+" days'"));
+				
+				calendar.setTimeInMillis(start*1000);											
+				calendar.roll(Calendar.DAY_OF_YEAR, -i*DAYS_PER_WEEK);				
+				//calendar.add(Calendar.MINUTE, -numMins);				
+				lower = calendar.getTime().toString();
+				
+				calendar.setTimeInMillis(end*1000);			
+				calendar.roll(Calendar.DAY_OF_YEAR, -i*DAYS_PER_WEEK);				
+				//calendar.add(Calendar.MINUTE, numMins);				
+				upper = calendar.getTime().toString();
+				
+				if (i > 1)
+					query.append(" union all ");
+
+				query.append(queryString.replace("NUMOFDAYS", " '" +i*DAYS_PER_WEEK+" days'").replace("TIMEPREDICATE", timePredicate(upper, lower)));
+				
+			}
+			query.append(") order by panetime");
 			break;
+	
+		case WeekDays:	
+			int i = 1, offset = 1, weekday;
+			while (i <= numDays) {
+				calendar.setTimeInMillis(start*1000);											
+				calendar.roll(Calendar.DAY_OF_YEAR, -offset);
+				weekday = calendar.get(Calendar.DAY_OF_WEEK);
+				if (weekday == Calendar.SUNDAY || weekday == Calendar.SATURDAY) {
+					offset++;
+					continue;
+				}
+				//calendar.add(Calendar.MINUTE, -numMins);				
+				lower = calendar.getTime().toString();
+				
+				calendar.setTimeInMillis(end*1000);			
+				calendar.roll(Calendar.DAY_OF_YEAR, -offset);
+				if (weekday == Calendar.SUNDAY || weekday == Calendar.SATURDAY) {
+					offset++;
+					continue;
+				}
+				//calendar.add(Calendar.MINUTE, numMins);				
+				upper = calendar.getTime().toString();
+
+				if (i > 1)
+					query.append(" union all ");
+
+				query.append(queryString.replace("NUMOFDAYS", " '" +offset+" days'").replace("TIMEPREDICATE", timePredicate(upper, lower)));
+				i++;
+				offset++;
+			}
+			query.append(") order by panetime");
+			break;
+			
 		default:
 			System.err.println("unsupported similarity type: "+sSpec.getSimilarityType().toString());
+		
 		}
 		return query.toString();
-	}
+	}*/
     
     public void streamClosed( int streamId) 
     throws ShutdownException {
@@ -409,7 +467,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
      * @see niagara.optimizer.colombia.Op#copy()
      */
     public Op opCopy() {
-        PhysicalPunctQC another = new  PhysicalPunctQC(pAttr, timeAttr, queryString, pSpec, sSpec, pfSpec);
+        PhysicalPunctQC another = new  PhysicalPunctQC(pAttr, timeAttr, queryString, pSpec, pfSpec);
         another.setSPAttr(spAttr);
         return another;
     }
@@ -440,15 +498,13 @@ public class PhysicalPunctQC extends PhysicalOperator {
         return getArity(); // what is this ?? 
     }
     
-    public String timePredicate (String upper, String lower) {
-    	
-    	//StringBuffer query = new StringBuffer(" " + timeFunct  + ">= '" + queryRange[0] + "' and "+ timeFunct + "<= '" +queryRange[1]+"' ");
-    	//query.append(" and dbdetectorid= "+queryRange[2]);
-    	String pred = " "+timeAttr  + ">= " + "TIMESTAMP '"+lower + "' and "+ timeAttr + "< " + "TIMESTAMP '"+upper+ "'";
-
-    	return pred;
-    }
-
+    public void getInstrumentationValues(ArrayList<String> instrumentationNames, ArrayList<Object> instrumentationValues) {
+    	instrumentationNames.add("now");
+    	synchronized (lastPunct) {
+    		instrumentationValues.add(String.valueOf(lastPunct));
+    	}
     
+    	//super.getInstrumentationValues(instrumentationNames, instrumentationValues);
+    }
 }
     
