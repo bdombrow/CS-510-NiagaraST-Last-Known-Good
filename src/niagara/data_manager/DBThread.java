@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.4 2007/05/10 04:51:18 jinli Exp $ */
+/* $Id: DBThread.java,v 1.5 2007/05/10 05:10:10 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -305,9 +305,9 @@ public class DBThread extends SourceThread {
 						exeunt.status.add(Status.DONE);
 					}
 					
-					ArrayList instrumentationNames = new ArrayList ();
-					ArrayList instrumentationValues = new ArrayList ();
-					getInstrumentationValues(instrumentationNames, instrumentationValues);
+					//ArrayList instrumentationNames = new ArrayList ();
+					//ArrayList instrumentationValues = new ArrayList ();
+					//getInstrumentationValues(instrumentationNames, instrumentationValues);
 					
 				} while (true);
 			
