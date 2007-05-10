@@ -1,5 +1,5 @@
 /**
- * $Id: CollectInstrumentationThread.java,v 1.1 2007/04/30 19:19:04 vpapad Exp $
+ * $Id: CollectInstrumentationThread.java,v 1.2 2007/05/10 22:42:42 vpapad Exp $
  *
  */
 
@@ -66,7 +66,8 @@ public class CollectInstrumentationThread extends SourceThread {
     public void setPeriod(int period) {
         this.period = period;
         if (task != null) {
-            task.cancel();
+	    timer.cancel();
+	    task.cancel();
             task = new CollectInstrumentationTask(this);
             timer.scheduleAtFixedRate(task, 0, period);
         }
@@ -167,8 +168,11 @@ public class CollectInstrumentationThread extends SourceThread {
 
         public void run() {
             // If the plan is no longer active, we're done
-            if (!catalog.isActive(plan))
+            if (!catalog.isActive(plan)) {
                 cleanUp();
+		timer.cancel();
+		return;
+	    }
 
             for (Instrumentable op : ops) {
                 long currentTime = (System.nanoTime()) - startTime;
@@ -245,6 +249,7 @@ public class CollectInstrumentationThread extends SourceThread {
 
     public void cleanUp() {
         try {
+	    timer.cancel();
             outputStream.endOfStream();
         } catch (java.lang.InterruptedException ie) {
             /* do nothing */
