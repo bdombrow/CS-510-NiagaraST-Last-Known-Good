@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.48 2007/04/30 19:10:13 vpapad Exp $
+<!-- $Id: queryplan.dtd,v 1.49 2007/05/10 04:56:45 jinli Exp $
      DTD for query plans -->
 
 <!-- 
@@ -334,9 +334,7 @@ specify the db input first and the stream punct input second -->
           id       ID           #REQUIRED
 	        punctattr CDATA       #REQUIRED
 	        puncttype CDATA       #REQUIRED
-	        similarity CDATA       #REQUIRED
 	        prefetch CDATA       #REQUIRED
-		query_string CDATA   #REQUIRED
 		timeattr CDATA		#REQUIRED
 	        input    IDREFS       #REQUIRED
 	  %PositionAttributes;>
@@ -477,6 +475,7 @@ specify the db input first and the stream punct input second -->
 					attr_names   CDATA    #REQUIRED
           query_string CDATA    #REQUIRED
 	  timeattr CDATA	""
+	  similarity CDATA	#IMPLIED
 	  type		CDATA	"continuous"
 	  %PositionAttributes;>
 
