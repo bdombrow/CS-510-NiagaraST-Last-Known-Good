@@ -29,22 +29,20 @@ attr_types="int string"/>
 <windowAverage id="avg" groupby="svgid" avgattr="stspeed" input="bucket"/>
 
 <dbscan id="archive"
-query_string= " "
-timeattr="starttime"
-attr_names="panetime dbsvgid dbspeed"
-attr_types="TS string int"/>
-
-<punctqc id = "pqc"
 
 query_string= "select floor(extract('epoch' from (starttime - (TIMESTAMP '2007-02-06 08:03:00' - interval NUMOFDAYS)))/60) as
 panetime, svgid, avg(speed)
 from loopdata_20sec, detector_svgids  where detector_svgids.detectorid = loopdata_20sec.detectorid and TIMEPREDICATE group by panetime, svgid"
 
+similarity = "samedayofweek  5  3"
 timeattr="starttime"
+attr_names="panetime dbsvgid dbspeed"
+attr_types="TS string int"/>
 
+<punctqc id = "pqc"
+timeattr="starttime"
 punctattr="panetime time_t"
 puncttype = "onchange"
-similarity = "alldays  5  3"
 prefetch = "4  10"
 input="archive dup"/>
 
