@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.6 2007/05/10 05:18:34 jinli Exp $ */
+/* $Id: DBThread.java,v 1.7 2007/05/10 05:52:40 vpapad Exp $ */
 
 package niagara.data_manager;
 
@@ -171,14 +171,14 @@ public class DBThread extends SourceThread {
 		this.outputStream = outputStream;
 	}
 
-	/**
-	 * @see niagara.utils.SerializableToXML#dumpAttributesInXML(StringBuffer)
-	 */
 	public void dumpAttributesInXML(StringBuffer sb) {
-		for (int i = 0; i < Array.getLength(variables); i++) {
-			sb.append(" var='").append(variables[i].getName());
-		}
-		sb.append("'/>");
+	    sb.append(" var='");
+	    for (int i = 0; i < variables.length; i++) {
+		sb.append(variables[i].getName());
+		if (i != variables.length-1)
+		    sb.append(", ");
+	    }
+	    sb.append("'/>");
 	}
 
 	/**
