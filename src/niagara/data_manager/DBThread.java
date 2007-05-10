@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.5 2007/05/10 05:10:10 jinli Exp $ */
+/* $Id: DBThread.java,v 1.6 2007/05/10 05:18:34 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -475,10 +475,13 @@ public class DBThread extends SourceThread {
 		}
     	
     	if (!sSpec.getWeather()) {
-    		if (stage == null)
-    			setStage(similarDate, MILLISEC_PER_SEC*realStart);
-
    	   		similarDate = getSimilarDate (MILLISEC_PER_SEC*realStart, MILLISEC_PER_SEC*Long.valueOf(queryRange[1]));
+   	   		
+   	   		synchronized (synch) {
+   	   			if (stage == null)
+   	   				setStage(similarDate, MILLISEC_PER_SEC*realStart);
+   	   		}
+
    	   		
     	} else {
     		if (nextEpoch(realStart*MILLISEC_PER_SEC)) {
