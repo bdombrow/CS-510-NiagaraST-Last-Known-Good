@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimilaritySpec.java,v 1.2 2007/04/28 21:24:47 jinli Exp $
+  $Id: SimilaritySpec.java,v 1.3 2007/05/10 05:09:30 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -41,8 +41,11 @@ public class SimilaritySpec {
 	private SimilarityType sType;
 	private int numOfDays;
 	private int numOfMins;
+	
+	// -1 means weather is not part of our similarity metric;
+	private boolean weather; 
 
-	public SimilaritySpec(String type, int _numOfDays, int _numOfMins) {
+	public SimilaritySpec(String type, int _numOfDays, int _numOfMins, boolean weather) {
     // do something smart
 	if (type.compareToIgnoreCase("AllDays") == 0)
 		sType = SimilarityType.AllDays;
@@ -55,8 +58,13 @@ public class SimilaritySpec {
 	
     numOfDays = _numOfDays;
     numOfMins = _numOfMins;
+    weather = false;
 	}
 
+	public void setWeather (boolean weather) {
+		this.weather = weather;
+	}
+	
   public SimilarityType getSimilarityType() {
 		return sType;
 	}
@@ -69,6 +77,9 @@ public class SimilaritySpec {
 	  return numOfMins;
   }
   
+  public boolean getWeather () {
+	  return weather;
+  }
   public String toString() {
 		switch(sType) {
 			case AllDays:
