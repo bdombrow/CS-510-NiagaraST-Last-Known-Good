@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.33 2007/04/30 19:17:12 vpapad Exp $
+  $Id: RequestHandler.java,v 1.34 2007/05/15 19:23:53 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -324,7 +324,7 @@ public class RequestHandler {
                     ResponseMessage shutMesg = new ResponseMessage(request,
                             ResponseMessage.END_RESULT);
                     sendResponse(shutMesg);
-                    server.shutdown();
+		    System.exit(0); 
                     break;
                 case SYNCHRONOUS_QP_QUERY:
                     plan = xqpp.parse(request.requestData);
