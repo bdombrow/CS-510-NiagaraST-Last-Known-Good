@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.7 2007/05/10 05:52:40 vpapad Exp $ */
+/* $Id: DBThread.java,v 1.8 2007/05/15 19:24:47 vpapad Exp $ */
 
 package niagara.data_manager;
 
@@ -858,11 +858,7 @@ public class DBThread extends SourceThread {
 			stageElt.setAttribute("endtime", String.valueOf(stage.endtime));
 			stageElt.setAttribute("startdate", String.valueOf(stage.startdate));
 			stageElt.setAttribute("enddate", String.valueOf(stage.enddate));
-			instrumentationValues.add(stageElt);
 			
-	        // send actors
-	        instrumentationNames.add("actors");
-	        
 	        Element actorsElt = doc.createElement("actors");
 	        Element actElt;
 	        if (exeunt != null) {
@@ -894,7 +890,8 @@ public class DBThread extends SourceThread {
 	    		actorsElt.appendChild(actElt);
 	    	}
 	
-	        instrumentationValues.add(actorsElt);
+		stageElt.appendChild(actorsElt);
+	        instrumentationValues.add(stageElt);
     	}
     	//printElt ( (Element) instrumentationValues.get(0));
     	//printElt ( (Element) instrumentationValues.get(1));

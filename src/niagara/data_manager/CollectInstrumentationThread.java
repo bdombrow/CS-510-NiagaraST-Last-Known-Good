@@ -1,5 +1,5 @@
 /**
- * $Id: CollectInstrumentationThread.java,v 1.2 2007/05/10 22:42:42 vpapad Exp $
+ * $Id: CollectInstrumentationThread.java,v 1.3 2007/05/15 19:24:47 vpapad Exp $
  *
  */
 
@@ -186,7 +186,7 @@ public class CollectInstrumentationThread extends SourceThread {
                     if (value == null)
                         continue;
 
-                    Tuple tuple = new Tuple(true, 4);
+                    Tuple tuple = new Tuple(false, 4);
                     tuple.appendAttribute(time);
                     tuple.appendAttribute(opName);
                     tuple.appendAttribute(new StringAttr(instrumentationNames.get(i)));
