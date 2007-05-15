@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoin.java,v 1.5 2007/04/30 19:23:22 vpapad Exp $
+  $Id: PhysicalHashJoin.java,v 1.6 2007/05/15 22:13:29 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -38,6 +38,7 @@ import niagara.physical.predicates.PredicateImpl;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import niagara.utils.*;
+import niagara.utils.BaseAttr.Type;
 
 import org.w3c.dom.*;
 
@@ -328,8 +329,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 
     protected void processPunctuation(Punctuation tuple, int streamId)
     	throws ShutdownException, InterruptedException {
-   	//System.err.println("Physical hash join - processing punct from stream " + getStreamName(streamId));
-    	
+
     	if (ts == null) {
     		//System.err.println("Don't know what to do with this punctuation - no punctation attr is specified");
     		
@@ -351,6 +351,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 		}
 		
 		String punctVal = ts[streamId].getAtomicValue(left, right).trim();
+		
 		if (punctVal.startsWith("(")) 
 		   punctVal = punctVal.substring(2, punctVal.length() - 1);  
 		   
@@ -488,15 +489,17 @@ public class PhysicalHashJoin extends PhysicalJoin {
         }
         
         if (streamId == 0) { // left side punctuation;
-    		int pos = outputTupleSchema.getPosition(ts[1].getName());
-    		Element n = doc.createElement(ts[1].getName());
-    		n.appendChild(doc.createTextNode("*"));
-    		result.setAttribute(pos, n);
-        } else { // right side punctuation;
     		int pos = outputTupleSchema.getPosition(ts[0].getName());
-    		Element n = doc.createElement(ts[0].getName());
-    		n.appendChild(doc.createTextNode("*"));
-    		result.setAttribute(pos, n);        	
+    		result.setAttribute(pos, BaseAttr.createWildStar(BaseAttr.Type.String));
+    		//Element n = doc.createElement(ts[1].getName());
+    		//n.appendChild(doc.createTextNode("*"));
+    		//result.setAttribute(pos, n);
+        } else { // right side punctuation;
+    		int pos = outputTupleSchema.getPosition(ts[1].getName());
+    		result.setAttribute(pos, BaseAttr.createWildStar(BaseAttr.Type.String));
+    		//Element n = doc.createElement(ts[0].getName());
+    		//n.appendChild(doc.createTextNode("*"));
+    		//result.setAttribute(pos, n);        	
         }	
 
         // Add the result to the output
@@ -620,6 +623,8 @@ public Cost findLocalCost(
         op.eqjoinPreds = eqjoinPreds;
         op.extensionJoin = extensionJoin;
         op.punctAttrs = punctAttrs;
+        op.ts = ts;
+        op.streamClose = streamClose;
         return op;
     }
     
