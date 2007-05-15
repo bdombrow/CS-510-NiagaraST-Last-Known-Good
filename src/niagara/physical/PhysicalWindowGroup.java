@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowGroup.java,v 1.7 2007/04/30 19:23:23 vpapad Exp $
+  $Id: PhysicalWindowGroup.java,v 1.8 2007/05/15 22:11:18 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -51,6 +51,8 @@ import niagara.query_engine.TupleSchema;
 import niagara.utils.ShutdownException;
 import niagara.utils.Tuple;
 import niagara.utils.Punctuation;
+import niagara.utils.BaseAttr.Type;
+
 import org.w3c.dom.Node;
 
 
@@ -383,6 +385,28 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 				}
 			}
 		}
+		producePunctuation (Long.valueOf(eaFrom.getAtomicValue(inputTuple, null)));
+	}
+	
+	private void producePunctuation (long wid) 
+	throws InterruptedException, ShutdownException {
+		Punctuation punct = new Punctuation (false);
+		
+		Attrs attributes = outputTupleSchema.getAttrs();
+		
+		/*for (int i = 0; i < attributes.size(); i++) {
+			System.err.println(attributes.get(i).getName());
+		}*/
+		
+		for (int i = 0; i < attributes.size(); i++) {
+			if (attributes.get(i).getName().compareTo(eaFrom.getName()) == 0) {
+				punct.appendAttribute(new LongAttr(wid));
+			} else {
+				punct.appendAttribute(BaseAttr.createWildStar(BaseAttr.Type.String));
+			}
+		}
+		
+		putTuple (punct, 0);
 		
 	}
 	
