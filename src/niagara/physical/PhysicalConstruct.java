@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstruct.java,v 1.4 2007/04/30 19:23:22 vpapad Exp $
+  $Id: PhysicalConstruct.java,v 1.5 2007/05/15 22:15:03 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -62,6 +62,12 @@ public class PhysicalConstruct extends PhysicalOperator {
     // temporary result list storage place
     private NodeVector resultList;
     private int outSize; // save a fcn call each time through
+    
+    private long epoch = Long.MAX_VALUE;
+    private Tuple dumpTuple;
+    
+    private Attribute epochAttr;
+    private int epochAttrIndex = -1;
 
     public PhysicalConstruct() {
         setBlockingSourceStreams(blockingSourceStreams);
@@ -75,10 +81,13 @@ public class PhysicalConstruct extends PhysicalOperator {
         // Initialize the result template 
         this.resultTemplate = constructLogicalOp.getResTemp();
         this.variable = constructLogicalOp.getVariable();
+        this.epochAttr = constructLogicalOp.getEpochAttr();
     }
 
     public void opInitialize() {
         outSize = outputTupleSchema.getLength();
+        if (epochAttr != null)
+        	epochAttrIndex = inputTupleSchemas[0].getPosition(epochAttr.getName());
     }
 
     /**
@@ -94,10 +103,45 @@ public class PhysicalConstruct extends PhysicalOperator {
 
     protected void processTuple(Tuple tuple, int streamId)
         throws InterruptedException, ShutdownException {
-        // Recurse down the result template to construct result
+
+        //dumpTuple is a speical tuple used as epoch seperator;
+    	if (epochAttr != null) {
+	    	if (dumpTuple == null) {
+	        	epoch = 0;
+	        	Tuple t = (Tuple)tuple.clone();
+	        	t.setAttribute(epochAttrIndex, new StringAttr("::::"));
+	
+	            resultList.quickReset(); // just for safety
+	            constructResult(t, resultTemplate, resultList, doc);
+	
+	            // Add all the results in the result list as result tuples
+	            int numResults = resultList.size();
+	            assert numResults == 1 : "HELP numResults is " + numResults;
+	
+	            if (projecting) // We can project some attributes away
+	                dumpTuple = t.copy(outSize, attributeMap);
+	            else // Just clone
+	                dumpTuple = t.copy(outSize);
+	                
+	            // Append the constructed result to end of newly created tuple
+	            Node result = resultList.get(0);
+	            dumpTuple.appendAttribute(result);
+	        }
+	
+	    	long epochVal = Long.valueOf(((BaseAttr)tuple.getAttribute(epochAttrIndex)).toASCII());
+	    	if (epochVal > epoch) {
+	        //if (Long.valueOf(list.item(epochAttrIndex).getFirstChild().getNodeValue()).compareTo(epoch) > 0) {
+	        	// use null tuple as seperator;
+	        	putTuple(dumpTuple, 0);
+	        	epoch = epochVal;
+	        }
+    	}
+    	
+    	// Recurse down the result template to construct result
         resultList.quickReset(); // just for safety
         constructResult(tuple, resultTemplate, resultList, doc);
 
+        
         // Add all the results in the result list as result tuples
         int numResults = resultList.size();
         assert numResults == 1 : "HELP numResults is " + numResults;
@@ -111,15 +155,22 @@ public class PhysicalConstruct extends PhysicalOperator {
                 outputTuple = tuple.copy(outSize);
             
             // Append the constructed result to end of newly created tuple
-            outputTuple.appendAttribute(resultList.get(res));
-
+            Node result = resultList.get(res);
+            outputTuple.appendAttribute(result);
+            
             // Add the new tuple to the result
             putTuple(outputTuple, 0);
         }
 
         resultList.clear();
     }
-
+    
+	protected void processPunctuation(
+			  Punctuation inputTuple,
+			  int streamId)
+	throws ShutdownException, InterruptedException {
+    	processTuple(inputTuple, streamId);
+    }
     /**
      * This function constructs results given a tuple and a result template
      *
@@ -184,13 +235,14 @@ public class PhysicalConstruct extends PhysicalOperator {
         // as an element or a parent
 		//		The value of the leafData is a schema attribute - from it
 		// get the attribute id in the tuple to construct from
-	    int attributeId = ((schemaAttribute) leafData.getValue()).getAttrId();
+	    int attributeId = schema.getAttrId();
 	    //Node n = tupleElement.getAttribute(attributeId);
 	    BaseAttr n = (BaseAttr)tupleElement.getAttribute(attributeId);
 	    if (n == null) {
 	    	return;
 	    }
 	    
+
 	    switch(schema.getType()) {
 	    case varType.ELEMENT_VAR:
 		Element elt = localDoc.createElement(schema.getName());
@@ -313,6 +365,7 @@ public class PhysicalConstruct extends PhysicalOperator {
             data attrData = attribute.getValue();
 		    int attributeId;
 	
+		    	
 		    switch(attrData.getType()) {
 		    case dataType.STRING:
 	                // Add the string value to the result
@@ -326,7 +379,7 @@ public class PhysicalConstruct extends PhysicalOperator {
 	
 	                // Now construct result based on whether it is to be 
 			// interpreted as an element or a parent
-	                switch(schema.getType()) {
+	        switch(schema.getType()) {
 			case varType.ELEMENT_VAR:
 	            // The value of the leafData is a schema attribute
 			    // - from it get the attribute id in the tuple 
@@ -407,7 +460,8 @@ public class PhysicalConstruct extends PhysicalOperator {
         // XXX vpapad TODO constructBaseNode doesn't override equals
         return resultTemplate.equals(other.resultTemplate)
             && variable.equals(other.variable)
-            && equalsNullsAllowed(getLogProp(), other.getLogProp());
+            && equalsNullsAllowed(getLogProp(), other.getLogProp())
+            && equalsNullsAllowed(epochAttr, other.epochAttr);
     }
 
     /**
@@ -418,7 +472,8 @@ public class PhysicalConstruct extends PhysicalOperator {
         // XXX vpapad: We treat resultTemplate as an immutable object
         op.resultTemplate = resultTemplate;
         op.variable = variable;
-	op.outSize = outSize;
+        op.outSize = outSize;
+        op.epochAttr = epochAttr;
         return op;
     }
 
