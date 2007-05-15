@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalConstruct.java,v 1.5 2007/05/15 22:15:03 jinli Exp $
+  $Id: PhysicalConstruct.java,v 1.6 2007/05/15 22:39:02 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,12 +63,6 @@ public class PhysicalConstruct extends PhysicalOperator {
     private NodeVector resultList;
     private int outSize; // save a fcn call each time through
     
-    private long epoch = Long.MAX_VALUE;
-    private Tuple dumpTuple;
-    
-    private Attribute epochAttr;
-    private int epochAttrIndex = -1;
-
     public PhysicalConstruct() {
         setBlockingSourceStreams(blockingSourceStreams);
         resultList = new NodeVector();
@@ -81,13 +75,13 @@ public class PhysicalConstruct extends PhysicalOperator {
         // Initialize the result template 
         this.resultTemplate = constructLogicalOp.getResTemp();
         this.variable = constructLogicalOp.getVariable();
-        this.epochAttr = constructLogicalOp.getEpochAttr();
+        //this.epochAttr = constructLogicalOp.getEpochAttr();
     }
 
     public void opInitialize() {
         outSize = outputTupleSchema.getLength();
-        if (epochAttr != null)
-        	epochAttrIndex = inputTupleSchemas[0].getPosition(epochAttr.getName());
+        //if (epochAttr != null)
+        	//epochAttrIndex = inputTupleSchemas[0].getPosition(epochAttr.getName());
     }
 
     /**
@@ -104,39 +98,6 @@ public class PhysicalConstruct extends PhysicalOperator {
     protected void processTuple(Tuple tuple, int streamId)
         throws InterruptedException, ShutdownException {
 
-        //dumpTuple is a speical tuple used as epoch seperator;
-    	if (epochAttr != null) {
-	    	if (dumpTuple == null) {
-	        	epoch = 0;
-	        	Tuple t = (Tuple)tuple.clone();
-	        	t.setAttribute(epochAttrIndex, new StringAttr("::::"));
-	
-	            resultList.quickReset(); // just for safety
-	            constructResult(t, resultTemplate, resultList, doc);
-	
-	            // Add all the results in the result list as result tuples
-	            int numResults = resultList.size();
-	            assert numResults == 1 : "HELP numResults is " + numResults;
-	
-	            if (projecting) // We can project some attributes away
-	                dumpTuple = t.copy(outSize, attributeMap);
-	            else // Just clone
-	                dumpTuple = t.copy(outSize);
-	                
-	            // Append the constructed result to end of newly created tuple
-	            Node result = resultList.get(0);
-	            dumpTuple.appendAttribute(result);
-	        }
-	
-	    	long epochVal = Long.valueOf(((BaseAttr)tuple.getAttribute(epochAttrIndex)).toASCII());
-	    	if (epochVal > epoch) {
-	        //if (Long.valueOf(list.item(epochAttrIndex).getFirstChild().getNodeValue()).compareTo(epoch) > 0) {
-	        	// use null tuple as seperator;
-	        	putTuple(dumpTuple, 0);
-	        	epoch = epochVal;
-	        }
-    	}
-    	
     	// Recurse down the result template to construct result
         resultList.quickReset(); // just for safety
         constructResult(tuple, resultTemplate, resultList, doc);
@@ -460,8 +421,7 @@ public class PhysicalConstruct extends PhysicalOperator {
         // XXX vpapad TODO constructBaseNode doesn't override equals
         return resultTemplate.equals(other.resultTemplate)
             && variable.equals(other.variable)
-            && equalsNullsAllowed(getLogProp(), other.getLogProp())
-            && equalsNullsAllowed(epochAttr, other.epochAttr);
+            && equalsNullsAllowed(getLogProp(), other.getLogProp());
     }
 
     /**
@@ -473,7 +433,6 @@ public class PhysicalConstruct extends PhysicalOperator {
         op.resultTemplate = resultTemplate;
         op.variable = variable;
         op.outSize = outSize;
-        op.epochAttr = epochAttr;
         return op;
     }
 
