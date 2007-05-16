@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoin.java,v 1.6 2007/05/15 22:13:29 jinli Exp $
+  $Id: PhysicalHashJoin.java,v 1.7 2007/05/16 05:43:14 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -78,6 +78,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
     
     SimpleAtomicEvaluator[] ts = null;
     String[] punctAttrs = null; 
+    boolean [] punctAttrMatch;
     int INTERVAL = 0;
     Document doc;
     
@@ -185,7 +186,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	    
 		long punctTS;
 		Punctuation punct;
-		if (ts != null) { 
+		if (ts != null && ts[streamId]!=null && ts[otherStreamId] != null) { 
 			long timestamp = Long.valueOf(ts[streamId].getAtomicValue(left, right).trim());
 			for (int i=0; i<rgPunct[otherStreamId].size() && fMatch==false; i++) {
 				punct = (Punctuation) rgPunct[otherStreamId].get(i);
@@ -329,70 +330,78 @@ public class PhysicalHashJoin extends PhysicalJoin {
 
     protected void processPunctuation(Punctuation tuple, int streamId)
     	throws ShutdownException, InterruptedException {
-
-    	if (ts == null) {
-    		//System.err.println("Don't know what to do with this punctuation - no punctation attr is specified");
-    		
-    		/**
-    		 * no punctuating attribute is specified, but we want to pass the punctuations on
-    		 */
-    		passOnPunct(tuple, streamId);
-    				
-    		return;
+    	
+    	int otherStreamId = 1-streamId;
+    	Tuple left, right;
+    	String punctVal;
+    	long punctTS = Long.MIN_VALUE;
+    	// if the punctuating attribute is among the joining attributes of the other input,
+    	// then this punctuation can be used to purge the state of the other input;
+    	if (punctAttrMatch[streamId]) {
+			
+			if (streamId == 0) {
+				left = tuple;
+				right = null;
+			} else {
+				left = null;
+				right = tuple;
+			}
+			
+			punctVal = ts[streamId].getAtomicValue(left, right).trim();
+			
+			if (punctVal.startsWith("(")) 
+			   punctVal = punctVal.substring(2, punctVal.length() - 1);  
+			   
+			punctTS = Integer.valueOf(punctVal) ;
+	
+			// see if there are tuples to remove from the other hash table.
+			// check both the partial list and the final list
+			
+			
+			Iterator keys = finalSourceTuples[otherStreamId].keySet().iterator();
+			Vector hashEntry;
+			Iterator list;
+			
+			while (keys.hasNext()) {
+				hashEntry = finalSourceTuples[otherStreamId].get(keys.next());
+				list = hashEntry.iterator();
+		    	while (list.hasNext()) {
+		    		if (otherStreamId == 0) {
+		    			left = (Tuple)list.next();
+		    			right = null;
+		    		} else {
+		    			left = null;
+		    			right = (Tuple)list.next();
+		    		}
+		    		
+		    		if (Double.valueOf(ts[otherStreamId].getAtomicValue(left, right)) < (punctTS - INTERVAL)) {
+		    			
+		    			//System.out.println("Physical Hash purging tuple from stream " + getStreamName(otherStreamId));
+	
+		    			list.remove();
+		    		}
+		    	}
+		    	if (hashEntry.size() == 0)
+		    		keys.remove();
+			}
     	}
-    		
-		Tuple left, right;
-		if (streamId == 0) {
-			left = tuple;
-			right = null;
-		} else {
-			left = null;
-			right = tuple;
-		}
-		
-		String punctVal = ts[streamId].getAtomicValue(left, right).trim();
-		
-		if (punctVal.startsWith("(")) 
-		   punctVal = punctVal.substring(2, punctVal.length() - 1);  
-		   
-		long punctTS = Integer.valueOf(punctVal) ;
-
-		// see if there are tuples to remove from the other hash table.
-		// check both the partial list and the final list
-		int otherStreamId = 1-streamId;
-		
-		Iterator keys = finalSourceTuples[otherStreamId].keySet().iterator();
-		Vector hashEntry;
-		Iterator list;
-		
-		while (keys.hasNext()) {
-			hashEntry = finalSourceTuples[otherStreamId].get(keys.next());
-			list = hashEntry.iterator();
-	    	while (list.hasNext()) {
-	    		if (otherStreamId == 0) {
-	    			left = (Tuple)list.next();
-	    			right = null;
-	    		} else {
-	    			left = null;
-	    			right = (Tuple)list.next();
-	    		}
-	    		
-	    		if (Double.valueOf(ts[otherStreamId].getAtomicValue(left, right)) < (punctTS - INTERVAL)) {
-	    			
-	    			//System.out.println("Physical Hash purging tuple from stream " + getStreamName(otherStreamId));
-
-	    			list.remove();
-	    		}
-	    	}
-	    	if (hashEntry.size() == 0)
-	    		keys.remove();
-		}
-		
+    	
 		// then, produce punctuation and add this punctuation
 		// to the appropriate list of punctuations if necessary
+
+    	// First, if the other stream is closed, it is equivalent to 
+		// an all-star (matching everything) punctuation; 
+		if (streamClose[otherStreamId]) {
+			passOnPunct(tuple, streamId);
+			return;
+		}
+    	
+		// Second, it the other stream isn't end, let's check whether a matching
+		// punctuation has arrived on it;
 		Iterator it = rgPunct[otherStreamId].iterator();
 		int otherTs;
 		boolean fMatch = false;
+		
 
 		while (it.hasNext() && !fMatch) {
 		// We assume linear punctuation of equal granularity on both input streams, 
@@ -463,14 +472,14 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	 */
 	private void passOnPunct(Punctuation tuple, int streamId) 
 	throws InterruptedException, ShutdownException {
-		
-		if (streamClose[1-streamId])
+		putPunctuation (tuple, streamId);
+		/*if (streamClose[1-streamId])
 			putPunctuation(tuple, streamId);
 		else {
 			if (punctBuffer == null)
 				punctBuffer = new ArrayList();
 			punctBuffer.add(tuple);
-		}
+		}*/
 	}
 
 	protected void producePunctuation(
@@ -480,6 +489,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
         throws ShutdownException, InterruptedException {
         Punctuation result;
         
+        System.err.println ("hash join producing punctuation on stream "+streamId);
         if (projecting) {
             result = left.copy(outputTupleSchema.getLength(), leftAttributeMap);
             right.copyInto(result, leftAttributeMap.length, rightAttributeMap);
@@ -596,16 +606,33 @@ public Cost findLocalCost(
         //Initialize the punctuation lists
         rgPunct[0] = new ArrayList();
         rgPunct[1] = new ArrayList();
-        
+
+    	punctAttrMatch = new boolean[2];
+    	punctAttrMatch[0] = false;
+    	punctAttrMatch[1] = false;
+    	
         if (punctAttrs!=null) {
         	ts = new SimpleAtomicEvaluator[2];
-        
-        	ts[0] = new SimpleAtomicEvaluator(punctAttrs[0]);
-        	ts[1] = new SimpleAtomicEvaluator(punctAttrs[1]);
         	
-            ts[0].resolveVariables(inputTupleSchemas[0], 0);
-            ts[1].resolveVariables(inputTupleSchemas[1], 1);
+        	for (int i = 0; i < punctAttrs.length; i++) {
+        		if (punctAttrs[i].compareTo("") != 0) {
+        			ts[i] = new SimpleAtomicEvaluator(punctAttrs[i]);
+        			ts[i].resolveVariables(inputTupleSchemas[i], i);
+        			
+        			Attrs joiningAttrs;
 
+        			// Is the punctuation attribute among the joining
+        			// attributes?
+        			if (i == 0)
+        				joiningAttrs = leftAttrs;
+        			else
+        				joiningAttrs = rightAttrs;
+        			
+        			if (joiningAttrs.getAttr(punctAttrs[i]) != null)
+        				punctAttrMatch[i] = true;
+        			
+        		}
+        	}
         }
         
         streamClose = new boolean[2];
@@ -625,6 +652,7 @@ public Cost findLocalCost(
         op.punctAttrs = punctAttrs;
         op.ts = ts;
         op.streamClose = streamClose;
+        op.punctAttrMatch = punctAttrMatch;
         return op;
     }
     
@@ -651,20 +679,22 @@ public Cost findLocalCost(
 
     public void streamClosed( int streamId) 
     throws ShutdownException { 
+    	// stream close is equivalent to an all-star, matching everything
+    	// punctuation; it purges all the tuples on the other input, and allows
+    	// output of all the punctuations on the other input;
+    	int otherStreamId = 1-streamId;
     	streamClose[streamId] = true;
-    	finalSourceTuples[1-streamId].clear();
-    	if (punctBuffer != null) {
-    		Iterator punctuations = punctBuffer.iterator();
-    		try {
-    			while (punctuations.hasNext()) {
-    				
-    				putPunctuation((Punctuation) punctuations.next(), 1-streamId);
-    				punctuations.remove();
-    			}
-    		} catch (InterruptedException e) {
-    			return;
-    		}
+    	finalSourceTuples[otherStreamId].clear();
+    	Iterator puncts = rgPunct[otherStreamId].iterator();
+    	try {
+    	while (puncts.hasNext()) {
+    		putPunctuation((Punctuation) puncts.next(), otherStreamId);
+			puncts.remove();
     	}
+    	} catch (InterruptedException e) {
+    		System.err.println("Non-interger punctuation value found in HashJoin; don't know what to do"); 
+			return;
+		}
     }
     
     private void putPunctuation (Punctuation tuple, int streamId) 

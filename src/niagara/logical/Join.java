@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Join.java,v 1.4 2007/04/28 21:27:20 jinli Exp $
+  $Id: Join.java,v 1.5 2007/05/16 05:43:15 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -336,12 +336,15 @@ public class Join extends BinaryOperator {
         setJoin(pred, leftVars, rightVars, extJoin);
         
         String punctattr = e.getAttribute("punctattr");
-        if (punctattr=="")
-        	return;
-        punctAttrs = punctattr.split("[\t| ]+");
-                
-        Variable.findVariable(inputProperties[0], punctAttrs[0]);
-        Variable.findVariable(inputProperties[1], punctAttrs[1]);
+        if (punctattr!="") {
+	        punctAttrs = punctattr.split("[\t| |,|;]+", 2);
+	        
+	        for (int i = 0; i < punctAttrs.length; i++) {
+	        	punctAttrs[i] = punctAttrs[i].trim();
+	        	if (punctAttrs[i].compareTo("")!=0)
+	        		Variable.findVariable(inputProperties[i], punctAttrs[i]);
+	        }
+	    }
     }
     public String[] getPunctAttrs() {
     	return punctAttrs;
