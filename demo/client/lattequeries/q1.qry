@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 
-<plan top="cons">
+<plan top="cons" planID="q1">
 
 <filescan id="ld" isstream="yes" delay="1000"
 filename="/stash/datalab/latte/data/2007-02-06_midday.xml"/>
@@ -34,7 +34,7 @@ query_string= "select floor(extract('epoch' from (starttime - (TIMESTAMP '2007-0
 panetime, svgid, avg(speed)
 from loopdata_20sec, detector_svgids  where detector_svgids.detectorid = loopdata_20sec.detectorid and TIMEPREDICATE group by panetime, svgid"
 
-similarity = "samedayofweek  5  3"
+similarity = "sdow  5  3"
 timeattr="starttime"
 attr_names="panetime dbsvgid dbspeed"
 attr_types="TS string int"/>
@@ -50,8 +50,9 @@ input="archive dup"/>
 
 <windowAverage id ="avg_archive" groupby="dbsvgid" avgattr="dbspeed" input="bucket_archive" />
 
-<join id="stream_archive" left="wid_from_bucket svgid" right="wid_from_bucket_archive dbsvgid" input="avg avg_archive">
+<join id="stream_archive" left="wid_from_bucket svgid" right="wid_from_bucket_archive dbsvgid" punctattr="wid_from_bucket wid_from_bucket_archive" input="avg avg_archive">
 </join>
+
 
 <construct id="cons" input="stream_archive">
 <![CDATA[
