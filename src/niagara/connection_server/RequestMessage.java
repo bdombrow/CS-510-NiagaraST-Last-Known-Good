@@ -1,5 +1,5 @@
 /**********************************************************************
- $Id: RequestMessage.java,v 1.11 2007/04/30 23:17:09 jinli Exp $
+ $Id: RequestMessage.java,v 1.12 2007/05/16 17:28:19 vpapad Exp $
  
  
  NIAGARA -- Net Data Management System                                 
@@ -87,6 +87,7 @@ public class RequestMessage {
     int serverID;
     int localID;
     private boolean sendImmediate;
+    private boolean intermittent;
     String requestData;
     boolean asii;
 
@@ -129,5 +130,13 @@ public class RequestMessage {
 
     public void setSendImmediate(boolean sendImmediate) {
         this.sendImmediate = sendImmediate;
+    }
+    
+    public boolean isIntermittent() {
+    	return intermittent;
+    }
+    
+    public void setIntermittent(boolean intermittent) {
+    	this.intermittent = intermittent;
     }
 }

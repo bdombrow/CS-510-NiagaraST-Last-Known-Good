@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.34 2007/05/15 19:23:53 vpapad Exp $
+  $Id: RequestHandler.java,v 1.35 2007/05/16 17:28:19 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -210,13 +210,24 @@ public class RequestHandler {
 
                 case EXECUTE_PREPARED_QUERY:
                     String pID = request.requestData.trim();
-                    optimizedPlan = catalog.getPreparedPlan(pID);
-                    if (optimizedPlan == null) {
-                        sendErrMessage(request, ResponseMessage.ERROR, "Non-existent prepared query id: " + pID);                        
+		    ServerQueryInfo sqi = catalog.getQueryInfo(pID);
+                    if (sqi != null) {
+                        ResultTransmitter trans = sqi.getTransmitter();
+			request.serverID = sqi.getQueryId();
+                        sendQueryId(request);
+			queryList.put(request.serverID, sqi);
+                    	trans.setHandler(this);
                     } else {
-                        optimizedPlan.setPlanID(pID);
-                        assignQueryId(request);
-                        processQPQuery(optimizedPlan, request);
+	                    optimizedPlan = catalog.getPreparedPlan(pID);
+	                    if (optimizedPlan == null) {
+	                        sendErrMessage(request, ResponseMessage.ERROR, 
+	                        		"Non-existent prepared query id: " + pID);                        
+	                    } else {
+	                        optimizedPlan.setPlanID(pID);
+	                        assignQueryId(request);
+	                        sqi = processQPQuery(optimizedPlan, request);
+				catalog.registerQueryInfo(pID, sqi);
+	                    }
                     }
                     break;
 
@@ -324,7 +335,7 @@ public class RequestHandler {
                     ResponseMessage shutMesg = new ResponseMessage(request,
                             ResponseMessage.END_RESULT);
                     sendResponse(shutMesg);
-		    System.exit(0); 
+                    System.exit(0); 
                     break;
                 case SYNCHRONOUS_QP_QUERY:
                     plan = xqpp.parse(request.requestData);
@@ -385,7 +396,7 @@ public class RequestHandler {
 
                     // Store the prepared plan and register its operators
                     // for instrumentation queries
-		    optimizedPlan.setPlanID(plan.getPlanID());
+                    optimizedPlan.setPlanID(plan.getPlanID());
                     String planID = catalog.storePreparedPlan(optimizedPlan);
                     String instrumentedPlanAsXML = 
                         catalog.instrumentPlan(planID);
@@ -554,7 +565,7 @@ public class RequestHandler {
         sendQueryId(request);
     }
 
-    private void processQPQuery(Plan plan, RequestMessage request)
+    private ServerQueryInfo processQPQuery(Plan plan, RequestMessage request)
         throws InvalidPlanException, ShutdownException, IOException {
         // XXX vpapad: commenting out code is a horrible sin
         // if (type.equals("submit_subplan")) {
@@ -622,6 +633,7 @@ public class RequestHandler {
         // KT - DO THIS LAST - otherwise we get unexpectedly null
         // transmitter!!!
         server.qe.execOptimizedQuery(transmitter, plan, qr);
+	return serverQueryInfo;
     }
 
     /**Method used by everyone to send responses to the client
@@ -699,6 +711,13 @@ public class RequestHandler {
         // and we are done!
     }
 
+    public void closeIntermittentConnection(int queryID) throws IOException {
+    	ServerQueryInfo sqi = queryList.remove(queryID);
+	assert sqi != null;
+    	outputWriter.flush();
+    	outputWriter.close();
+    }
+    
     /**Send the queryId that has been assigned to this query. This is the first things that
        is sent to the client after a query is received
        @param request The initial request

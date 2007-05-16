@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryResult.java,v 1.23 2007/04/28 21:49:18 jinli Exp $
+  $Id: QueryResult.java,v 1.24 2007/05/16 17:28:20 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -61,6 +61,7 @@ public class QueryResult {
         public boolean isPartial; // is result partial or final
         public String stringResult;
         public boolean sendStr;
+        public boolean isPunctuation;
         
         public ResultObject() {
         	;
@@ -247,6 +248,7 @@ public class QueryResult {
             assert ctrlFlag
                 == CtrlFlags.NULLFLAG : "Unexpected control flag "
                     + CtrlFlags.name[ctrlFlag];
+            resultObject.isPunctuation = tuple.isPunctuation();
             resultObject.isPartial = tuple.isPartial();
             if (!resultObject.sendStr)
             	resultObject.result = extractXMLDocument(tuple);

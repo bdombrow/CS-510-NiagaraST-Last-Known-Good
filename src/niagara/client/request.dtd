@@ -4,5 +4,6 @@
 <!ATTLIST requestMessage
 	localID CDATA #REQUIRED
 	serverID CDATA "-1"
+	intermittent (true | false) false
 	requestType (execute_qe_query|execute_se_query|kill_query|suspend_query|resume_query|get_next|get_dtd_list|get_dtd|get_partial|gc) #REQUIRED>
 <!ELEMENT requestData (#PCDATA)>

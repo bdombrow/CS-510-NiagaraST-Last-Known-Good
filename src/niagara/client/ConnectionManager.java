@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.19 2007/04/30 19:15:27 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.20 2007/05/16 17:28:17 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,6 +49,7 @@ public class ConnectionManager implements QueryExecutionIF {
     public static final String LOCAL_ID = "localID";
     public static final String SERVER_ID = "serverID";
     public static final String REQUEST_TYPE = "requestType";
+    public static final String INTERMITTENT = "intermittent";
     
     public static final String KILL_QUERY = "kill_query";
     public static final String GET_NEXT = "get_next";
@@ -60,7 +61,10 @@ public class ConnectionManager implements QueryExecutionIF {
     public static final String RUN_GC = "gc";
     public static final String SHUTDOWN = "shutdown";
     public static final String DUMPDATA = "dumpdata";
-    
+
+    public static final String BEGIN_REQUEST_DATA = "<requestData>";
+    public static final String END_REQUEST_DATA = "</requestData>";
+    public static final String END_REQUEST_MESSAGE = "</requestMessage>";
     
     // private variables
     /**
@@ -145,16 +149,14 @@ public class ConnectionManager implements QueryExecutionIF {
 
 	// Register the query
 	final QueryRegistry.Entry e = 
-	    reg.registerQuery(id, query.getText(), query.getType());
+	    reg.registerQuery(id, query);
 	// Set the query type
 	e.type = queryType;
 	    
 	synchronized(writer){
 	    // Send the query to the server
-	    writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" + id 
-			   + "\" "+ SERVER_ID +"=\"-1\""
-			   + " " + REQUEST_TYPE +"= \"" + attr + "\">");
-	    writer.println("<" + REQUEST_DATA + ">");
+	    writer.println(formatMessageHeader(id, -1, attr));
+	    writer.println(BEGIN_REQUEST_DATA);
 	    writer.println("<![CDATA[");
 		
 	    // XXX this is total hack!
@@ -168,8 +170,8 @@ public class ConnectionManager implements QueryExecutionIF {
 		String esc = re.substituteAll(qtext, "ESC]ESC]ESC>");
 		writer.println(esc);
 		writer.println("]]>");
-		writer.println("</" + REQUEST_DATA + ">");
-		writer.println("</" + REQUEST_MESSAGE + ">");
+		writer.println(END_REQUEST_DATA);
+		writer.println(END_REQUEST_MESSAGE);
 	    }
                 catch (REException rexc) {
                     System.out.println("CDATA escaping: regular expression failure");
@@ -200,10 +202,8 @@ public class ConnectionManager implements QueryExecutionIF {
 	
 	synchronized(writer){
 	    // Send the request to the server
-	    writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" + id +"\" "
-			   + SERVER_ID +"=\"" + sid +"\""
-			   + " " + REQUEST_TYPE +"= \"" + KILL_QUERY + "\">");
-	    writer.println("</" + REQUEST_MESSAGE + ">");
+	    writer.println(formatMessageHeader(id, sid, KILL_QUERY));
+	    writer.println(END_REQUEST_MESSAGE);
 	}
 	// Mark this query as killed
 	e.isKilled = true;
@@ -244,10 +244,9 @@ public class ConnectionManager implements QueryExecutionIF {
     
     public void runSpecialFunc(String func) {
 	int id = getID();
-	// Register the query
-	// args are id, query text, query type
+	Query query = new SpecialFunctionQuery(func);
 	final QueryRegistry.Entry e = 
-	    reg.registerQuery(id, func, QueryType.NOTYPE);
+	    reg.registerQuery(id, query);
 	// Set the query type
 	e.type = QueryType.NOTYPE;
 	writeMessageNoSID(id, func); 
@@ -273,14 +272,11 @@ public class ConnectionManager implements QueryExecutionIF {
 	
 	synchronized(writer){
 	    // Send the request to the server
-	    writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" + id +"\" "
-			   + SERVER_ID +"=\"" + sid +"\""
-			   + " " + REQUEST_TYPE +"= \"" + GET_NEXT + "\">");
-	    writer.print("<" + REQUEST_DATA + ">");
+	    writer.println(formatMessageHeader(id, sid, GET_NEXT));
+	    writer.print(BEGIN_REQUEST_DATA);
 	    writer.print(resultCount);
-		writer.println("</" + REQUEST_DATA + ">");
-		writer.println("</" + REQUEST_MESSAGE + ">");
-		
+	    writer.println(END_REQUEST_DATA);
+	    writer.println(END_REQUEST_MESSAGE);
 	}
     }
 
@@ -398,13 +394,25 @@ public class ConnectionManager implements QueryExecutionIF {
 	writeMessage(id, msg, -1);
     }
 
+    private String formatMessageHeader(int localId, int serverId, String request_type) {
+    	StringBuffer sb = new StringBuffer();
+	sb.append("<").append(REQUEST_MESSAGE).append(" ");
+	sb.append(LOCAL_ID).append(" ='").append(String.valueOf(localId)).append("' ");
+	sb.append(SERVER_ID).append(" ='").append(String.valueOf(serverId)).append("' ");
+	sb.append(REQUEST_TYPE).append(" ='").append(request_type).append("' ");
+	Query q = reg.getQueryInfo(localId).query;
+	if (q.isIntermittent())
+	    sb.append("intermittent='true' ");
+	else
+	    sb.append("intermittent='false' ");
+	sb.append(">");
+	return sb.toString();
+    }
+
     private void writeMessage(int id, String msg, int sid) {
 	synchronized(writer){
-	    // Send the request to the server
-	    writer.println("<" + REQUEST_MESSAGE + " " + LOCAL_ID +"=\"" 
-			   + id +"\" " + SERVER_ID +"=\"" + sid +"\""
-			   + " " + REQUEST_TYPE +"= \"" + msg + "\">");
-	    writer.println("</" + REQUEST_MESSAGE + ">");
+	    writer.println(formatMessageHeader(id, sid, msg));
+	    writer.println(END_REQUEST_MESSAGE);
 	}
     }
 }

@@ -14,6 +14,8 @@ public class SimpleClient implements UIDriverIF {
     static int timeout;
     static Timer timer;
 
+    static boolean intermittent;
+    
     //To get times
     long m_start, m_stop;
 
@@ -137,6 +139,7 @@ public class SimpleClient implements UIDriverIF {
         int repetitions;
         int delay;
         int wait;
+        boolean intermittent;
     };
     
     protected static boolean silent;
@@ -214,6 +217,9 @@ public class SimpleClient implements UIDriverIF {
                 req.delay = 0;
                 req.wait = 0;
                 i += 2;
+            } else if (args[i].equals("-intermittent")) {
+                requests.get(requests.size() - 1).intermittent = true; 
+                i += 1;
             } else if (args[i].equals("-set")) {
                 Request req = new Request();
                 requests.add(req);
@@ -275,6 +281,7 @@ public class SimpleClient implements UIDriverIF {
 	            // I removed it - hope this doesn't cause trouble!
 	            // if it is synchronized, causes deadlock on error
 	            synchronized (this) {
+	            	intermittent = req.intermittent;
 	                processQuery(req.type, query);
 	                wait();
 	            }
@@ -373,6 +380,9 @@ public class SimpleClient implements UIDriverIF {
             q = new SetTunable(queryText);
         else
             q = QueryFactory.makeQuery(queryText);
+        
+        q.setIntermittent(intermittent);
+        
         m_start = System.currentTimeMillis();
         final int id = cm.executeQuery(q, Integer.MAX_VALUE);
         if (timeout > 0) {

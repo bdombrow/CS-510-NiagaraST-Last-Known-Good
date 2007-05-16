@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.32 2007/04/30 23:17:08 jinli Exp $
+  $Id: ResultTransmitter.java,v 1.33 2007/05/16 17:28:19 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -63,6 +63,9 @@ public class ResultTransmitter implements Schedulable {
     private static final int BATCHSIZE = 1024; 
 
     private final boolean sendImmediate;
+    private final boolean intermittent;
+    
+    private final Object intermittentSynch = new Object();
     
     // Tags for element and attribute list
     private static final String ELEMENT = "<!ELEMENT";
@@ -96,6 +99,7 @@ public class ResultTransmitter implements Schedulable {
         this.request = request;
         totalResults = 0;
         this.sendImmediate = request.isSendImmediate();
+        this.intermittent = request.isIntermittent();
     }
 
     public void setPrettyprint(boolean prettyprint) {
@@ -257,18 +261,23 @@ public class ResultTransmitter implements Schedulable {
                 // add the result to responseData
                 totalResults--;
                 resultsSoFar++;
-		timedOut = false;
+                timedOut = false;
 
                 if (!QUIET) {
-                    if (!sendImmediate) {
-                        if (response.dataSize() > BATCHSIZE) {
-                            sendResults();
-                        }
-                        response.appendResultData(resultObject, prettyprint);
-                    } else {  // Send results now, no buffering
-                        response.appendResultData(resultObject, prettyprint);
-                        sendResults();
-                    }
+                    response.appendResultData(resultObject, prettyprint);
+		    if (intermittent) {
+			if (resultObject.isPunctuation) {
+			    sendResults();
+			    closeEpoch();
+			    synchronized (intermittentSynch) {
+                        	while (handler == null) {
+				    intermittentSynch.wait();
+                        	}
+			    }
+			}
+                    } else if (sendImmediate || response.dataSize() > BATCHSIZE) {
+			sendResults();
+		    }
                 }
             }
         }
@@ -352,9 +361,7 @@ public class ResultTransmitter implements Schedulable {
                     sendResults();
                 }
 
-                // send the end result response     
-                handler.sendResponse(
-                    new ResponseMessage(request, ResponseMessage.END_RESULT));
+		sendEndResult();
 
                 //everything done! kill the query       
                 handler.killQuery(request.serverID);
@@ -363,7 +370,7 @@ public class ResultTransmitter implements Schedulable {
             case CtrlFlags.TIMED_OUT :
                 // if no more new results have come in a while
                 // send the results and request more..
-                if (!QUIET && timedOut && !queryInfo.isAccumFileQuery()) {
+                if (!QUIET && !intermittent && timedOut && !queryInfo.isAccumFileQuery()) {
 		    if (response.dataSize() != 0) 
 			System.out.println("Timed out twice & have results - sending them");
                     // If we timed out two times in a row, then
@@ -469,5 +476,27 @@ public class ResultTransmitter implements Schedulable {
 
     public void setInstrumented(boolean instrumented) {
         ; // No instrumentation for now
+    }
+    
+    public void setHandler(RequestHandler handler) {
+    	synchronized(intermittentSynch) {
+    		this.handler = handler;
+    		intermittentSynch.notifyAll();
+    	}
+    }
+
+    private void closeEpoch() throws IOException {
+	sendEndResult();
+	handler.closeIntermittentConnection(queryInfo.getQueryId());
+	handler = null;
+	System.err.println("XXX vpapad: Done sending an epoch");
+	synchronized(queryDone) {
+	    queryDone.notifyAll();
+	}
+    }
+
+    private void sendEndResult() throws IOException {
+	handler.sendResponse(new ResponseMessage(request, 
+						 ResponseMessage.END_RESULT));
     }
 }

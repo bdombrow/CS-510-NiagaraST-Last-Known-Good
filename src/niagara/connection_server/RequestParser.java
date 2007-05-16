@@ -1,9 +1,5 @@
 /**********************************************************************
-<<<<<<< RequestParser.java
-  $Id: RequestParser.java,v 1.16 2007/04/30 23:17:08 jinli Exp $
-=======
-  $Id: RequestParser.java,v 1.16 2007/04/30 23:17:08 jinli Exp $
->>>>>>> 1.15
+  $Id: RequestParser.java,v 1.17 2007/05/16 17:28:19 vpapad Exp $
 
   NIAGARA -- Net Data Management System                                 
                                                                         
@@ -59,6 +55,7 @@ public class RequestParser extends HandlerBase implements Runnable {
     static final String REQUEST_DATA = "requestData";
     static final String REQUEST = "request";
     static final String RESULT_TYPE = "resultType";
+    static final String INTERMITTENT = "intermittent";
 
     //local variables
 
@@ -117,6 +114,7 @@ public class RequestParser extends HandlerBase implements Runnable {
 	     currentMesg = new RequestMessage();
 	     currentMesg.localID = Integer.parseInt(atts.getValue(LOCAL_ID));
 	     currentMesg.serverID = Integer.parseInt(atts.getValue(SERVER_ID));
+	     currentMesg.setIntermittent(atts.getValue(INTERMITTENT).equalsIgnoreCase("true"));
 	     
 	     String outputType = atts.getValue(RESULT_TYPE); 
 	     if (outputType != null) {

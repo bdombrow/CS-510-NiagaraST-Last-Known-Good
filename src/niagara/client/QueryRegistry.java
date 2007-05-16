@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: QueryRegistry.java,v 1.6 2003/09/22 01:16:01 vpapad Exp $
+  $Id: QueryRegistry.java,v 1.7 2007/05/16 17:28:18 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -54,6 +54,7 @@ class QueryRegistry
 	// Original Query String
 	public String queryString;
 	
+	public Query query;
 	/**
 	 * This is the id on the server side and is 
 	 * used on the server side to route control msgs.
@@ -82,9 +83,10 @@ class QueryRegistry
 	 * Ctor
 	 * @param s the query string
 	 */
-	public Entry(String s, int queryType)  {
-	    queryString = s;
-	    type = queryType;
+	public Entry(Query query)  {
+	    queryString = query.getText();
+	    type = query.getType();
+	    this.query = query;
 	}
 	
 	/**
@@ -145,7 +147,7 @@ class QueryRegistry
      * @param qString query string
      * @return a reference to a QueryRegistry.Entry object
      */
-    public synchronized QueryRegistry.Entry registerQuery(int id, String qString, int queryType)
+    public synchronized QueryRegistry.Entry registerQuery(int id, Query query)
     {
 	Integer rid = new Integer(id);
 	
@@ -154,7 +156,7 @@ class QueryRegistry
 	    System.err.println("This queryID was already registered. Recode");
 	}
 	
-	Entry e = new Entry(qString, queryType); 
+	Entry e = new Entry(query); 
 	
 	// put the 
 	queryMap.put(rid, e);

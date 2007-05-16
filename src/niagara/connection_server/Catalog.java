@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.13 2007/04/30 19:17:09 vpapad Exp $
+ * $Id: Catalog.java,v 1.14 2007/05/16 17:28:18 vpapad Exp $
  *  
  */
 
@@ -58,6 +58,7 @@ public class Catalog implements ICatalog {
     private HashMap<String, Plan> preparedPlans = new HashMap<String, Plan>();
     /** Registry for instrumented operators */
     private HashMap<String, HashMap<String, Instrumentable>> planIDs2operators = new HashMap<String, HashMap<String, Instrumentable>>();
+    private HashMap<String, ServerQueryInfo> runningPlans = new HashMap<String, ServerQueryInfo>();
     
     // Operator name <-> class mapping
     private HashMap name2class;
@@ -664,10 +665,23 @@ public class Catalog implements ICatalog {
         }
     }
     
+    public ServerQueryInfo getQueryInfo(String planID) {
+    	synchronized(runningPlans) {
+	   if (runningPlans.containsKey(planID))
+	   	return runningPlans.get(planID);
+	   else return null;
+	}
+    }
+
+    public void registerQueryInfo(String planID, ServerQueryInfo sqi) {
+    	runningPlans.put(planID, sqi);
+    }
+    
     public void removePreparedPlan(String planID) {
         synchronized (preparedPlans) {
             preparedPlans.remove(planID);
             planIDs2operators.remove(planID);
+            runningPlans.remove(planID);
         }
     }
     
