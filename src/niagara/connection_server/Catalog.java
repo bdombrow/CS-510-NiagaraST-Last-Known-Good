@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.14 2007/05/16 17:28:18 vpapad Exp $
+ * $Id: Catalog.java,v 1.15 2007/05/17 21:12:05 tufte Exp $
  *  
  */
 
@@ -626,12 +626,15 @@ public class Catalog implements ICatalog {
         }
     }
 
-    public String storePreparedPlan(Plan plan) {
+    public String storePreparedPlan(Plan plan) 
+       throws InvalidPlanException {
         synchronized (preparedPlans) {
             preparedPlanID++;
 	    String planID = plan.getPlanID();
-	    if (planID == null || planID.length() == 0 || preparedPlans.containsKey(planID))
-		planID = String.valueOf(preparedPlanID);
+      if(preparedPlans.containsKey(planID))
+        throw new InvalidPlanException("PlanID Already Exists");
+	    if (planID == null || planID.length() == 0)
+		        planID = String.valueOf(preparedPlanID);
             preparedPlans.put(planID, plan);
             return planID;
         }
