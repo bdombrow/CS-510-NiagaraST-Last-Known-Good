@@ -119,22 +119,17 @@ public class SimpleClient implements UIDriverIF {
     protected static boolean queryfile = false;
     protected static String host;
     protected static int port;
-    
+   /* 
     public enum RequestType {
-        /** Run this query */
         RUN,
-        /** Just show the output of the optimizer for the query */
         EXPLAIN,
-        /** Prepare a query for later execution */
         PREPARE,
-        /** Execute a prepared query */
         EXECUTE_PREPARED,
-        /** Set a tunable parameter */
         SET_TUNABLE
-    }
+    }*/
     
     private static class Request {
-        RequestType type;
+        int type;
         String value;
         int repetitions;
         int delay;
@@ -169,10 +164,10 @@ public class SimpleClient implements UIDriverIF {
                 i += 2;
             } else if (args[i].equals("--help")) {
                 usage();
-            } else if (args[i].equals("-qf")) {
+            } else if (args[i].equals("-execute")) {
                 Request req = new Request();
                 requests.add(req);
-                req.type = RequestType.RUN;
+                req.type = QueryType.QP;
                 req.value = args[i + 1];
                 req.repetitions = 1;
                 req.delay = 0;
@@ -200,18 +195,21 @@ public class SimpleClient implements UIDriverIF {
                 if (requests.size() == 0)
                         usage();
                 Request req = requests.get(requests.size() - 1);
-                req.type = RequestType.EXPLAIN;
+                req.type = QueryType.EXPLAIN;
                 i += 1;
             } else if (args[i].equals("-prepare")) {
-                if (requests.size() == 0)
-                        usage();
-                Request req = requests.get(requests.size() - 1);
-                req.type = RequestType.PREPARE;
-                i += 1;
+                Request req = new Request();
+                requests.add(req);
+                req.type = QueryType.PREPARE;
+                req.value = args[i + 1];
+                req.repetitions = 1;
+                req.delay = 0;
+                req.wait = 0;
+                i += 2;
             } else if (args[i].equals("-execute-prepared")) {
                 Request req = new Request();
                 requests.add(req);
-                req.type = RequestType.EXECUTE_PREPARED;
+                req.type = QueryType.EXECUTE_PREPARED;
                 req.value = args[i + 1];
                 req.repetitions = 1;
                 req.delay = 0;
@@ -223,7 +221,7 @@ public class SimpleClient implements UIDriverIF {
             } else if (args[i].equals("-set")) {
                 Request req = new Request();
                 requests.add(req);
-                req.type = RequestType.SET_TUNABLE;
+                req.type = QueryType.SET_TUNABLE;
                 req.value = args[i + 1];
                 req.repetitions = 1;
                 req.delay = 0;
@@ -258,14 +256,14 @@ public class SimpleClient implements UIDriverIF {
 	    for (int i = 0; i < nQueries; i++) {
 	        Request req = requests.get(i);
 	        switch (req.type) {
-	            case RUN:
-	            case EXPLAIN:
-	            case PREPARE:
+            case QueryType.QP:
+	          case QueryType.EXPLAIN:
+	          case QueryType.PREPARE:
 	                char cbuf[] = new char[MAX_QUERY_LEN];
 	                query = getQueryFromFile((String) req.value, cbuf);
                         break;
-	            case EXECUTE_PREPARED:
-	            case SET_TUNABLE:
+	          case QueryType.EXECUTE_PREPARED:
+	          case QueryType.SET_TUNABLE:
 	                query = req.value;
                         break;
                     // XXX vpapad: Can we throw PEException on the client?!
@@ -347,12 +345,12 @@ public class SimpleClient implements UIDriverIF {
 
     }
 
-    public void processQuery(RequestType type, String fullQueryText) 
+    public void processQuery(int type, String fullQueryText) 
         throws ClientException {
         // remove any leading or trailing whitespace
         String queryText = fullQueryText.trim();
         if (!silent) {
-            System.err.println("Executing query: " + queryText);
+            //System.err.println("Executing query: " + queryText);
             System.err.flush(); // make query print before results
         }
         if (queryText.equalsIgnoreCase(ConnectionManager.RUN_GC)) {
@@ -370,16 +368,17 @@ public class SimpleClient implements UIDriverIF {
         }
 
         Query q = null;
-        if (type == RequestType.EXPLAIN)
+        if (type == QueryType.EXPLAIN)
             q = new ExplainQPQuery(queryText);
-        else if (type == RequestType.PREPARE)
+        else if (type == QueryType.PREPARE)
             q = new PrepareQPQuery(queryText);
-        else if (type == RequestType.EXECUTE_PREPARED)
+        else if (type == QueryType.EXECUTE_PREPARED)
             q = new ExecutePreparedQPQuery(queryText);
-        else if (type == RequestType.SET_TUNABLE)
+        else if (type == QueryType.SET_TUNABLE)
             q = new SetTunable(queryText);
-        else
+        else if (type == QueryType.QP) 
             q = QueryFactory.makeQuery(queryText);
+
         
         q.setIntermittent(intermittent);
         

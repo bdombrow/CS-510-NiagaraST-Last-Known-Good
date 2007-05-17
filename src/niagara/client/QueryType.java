@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryType.java,v 1.7 2007/04/30 19:15:29 vpapad Exp $
+  $Id: QueryType.java,v 1.8 2007/05/17 21:13:22 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,12 +35,21 @@ package niagara.client;
 class QueryType
 {
 	public static final int NOTYPE = -1;
-	public static final int XMLQL = 1;
-	public static final int QP = 4;
-        public static final int SYNCHRONOUS_QP = 5;
-        public static final int EXPLAIN_QP = 6;
-        public static final int MQP = 7;
-        public static final int PREPARE_QP = 8;
-        public static final int EXECUTE_PREPARED = 9;
-        public static final int SET_TUNABLE = 10;
+	//public static final int XMLQL = 1; no longer supported
+	public static final int QP = 4; // assoc with QPQuery-created in query factor
+  public static final int SYNCHRONOUS_QP = 5; // Tracingclient ONLY
+  public static final int EXPLAIN = 6; // was EXPLAIN_QP // ok
+  public static final int MQP = 7; // MQP and LightMQP client only
+  public static final int PREPARE = 8; // was PREPARE_QP - ok
+  public static final int EXECUTE_PREPARED = 9; // ok
+  public static final int SET_TUNABLE = 10; // ok
+
+  // merged RequestType with QueryType
+  // types from Request type were:
+  //RUN, think -> QP
+  //EXPLAIN,
+  //PREPARE,
+  //EXECUTE_PREPARED,
+  //SET_TUNABLE
+
 }

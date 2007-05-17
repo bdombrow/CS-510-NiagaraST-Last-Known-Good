@@ -7,6 +7,5 @@ public class QueryFactory {
 	       return new QPQuery(text);
 		 else
 				 throw new ClientException("Invalid Query: " + text);
-	    //   return new XMLQLQuery(text);
     }
 }

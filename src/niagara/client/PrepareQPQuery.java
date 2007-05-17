@@ -1,4 +1,4 @@
-/* $Id: PrepareQPQuery.java,v 1.1 2007/04/30 19:15:28 vpapad Exp $ */
+/* $Id: PrepareQPQuery.java,v 1.2 2007/05/17 21:13:22 tufte Exp $ */
 package niagara.client;
 
 public class PrepareQPQuery extends Query {
@@ -21,6 +21,6 @@ public class PrepareQPQuery extends Query {
     }
     
     public int getType() {
-    return QueryType.PREPARE_QP;
+    return QueryType.PREPARE;
     }
 }

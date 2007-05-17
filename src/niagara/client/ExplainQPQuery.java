@@ -21,6 +21,6 @@ public class ExplainQPQuery extends Query {
     }
     
     public int getType() {
-    return QueryType.EXPLAIN_QP;
+    return QueryType.EXPLAIN;
     }
 }

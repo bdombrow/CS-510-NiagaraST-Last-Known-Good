@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryExecutionIF.java,v 1.7 2003/09/22 01:16:01 vpapad Exp $
+  $Id: QueryExecutionIF.java,v 1.8 2007/05/17 21:13:22 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,18 +49,6 @@ public interface QueryExecutionIF
 	 * @param id the query id to kill
 	 */
 	public void killQuery(int id) throws ClientException;
-
-	/**
-	 * Suspend the query
-	 * @param id the query id to kill
-	 */
-	public void suspendQuery(int id);
-
-	/**
-	 * Resume the query
-	 * @param id the query id to kill
-	 */
-	public void resumeQuery(int id);
 
 	/**
 	 * Request partial result from a query

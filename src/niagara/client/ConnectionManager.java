@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.20 2007/05/16 17:28:17 vpapad Exp $
+  $Id: ConnectionManager.java,v 1.21 2007/05/17 21:13:21 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,7 +43,7 @@ import niagara.utils.*;
 public class ConnectionManager implements QueryExecutionIF {
     // constants
     public static final int SERVER_PORT = 9020;
-    
+   
     public static final String REQUEST_MESSAGE = "requestMessage";
     public static final String REQUEST_DATA = "requestData";
     public static final String LOCAL_ID = "localID";
@@ -62,9 +62,9 @@ public class ConnectionManager implements QueryExecutionIF {
     public static final String SHUTDOWN = "shutdown";
     public static final String DUMPDATA = "dumpdata";
 
-    public static final String BEGIN_REQUEST_DATA = "<requestData>";
-    public static final String END_REQUEST_DATA = "</requestData>";
-    public static final String END_REQUEST_MESSAGE = "</requestMessage>";
+    public static final String BEGIN_REQUEST_DATA = "<" + REQUEST_DATA + ">";
+    public static final String END_REQUEST_DATA = "</" + REQUEST_DATA + ">";
+    public static final String END_REQUEST_MESSAGE = "</" + REQUEST_MESSAGE + ">";
     
     // private variables
     /**
@@ -159,6 +159,9 @@ public class ConnectionManager implements QueryExecutionIF {
 	    writer.println(BEGIN_REQUEST_DATA);
 	    writer.println("<![CDATA[");
 		
+	    System.out.println(formatMessageHeader(id, -1, attr));
+	    System.out.println(BEGIN_REQUEST_DATA);
+	    System.out.println("<![CDATA[");
 	    // XXX this is total hack!
 	    // the query may contain CDATA sections itself (argh!)
 	    // Hack as follows:
@@ -172,6 +175,10 @@ public class ConnectionManager implements QueryExecutionIF {
 		writer.println("]]>");
 		writer.println(END_REQUEST_DATA);
 		writer.println(END_REQUEST_MESSAGE);
+		System.out.println(esc);
+		System.out.println("]]>");
+		System.out.println(END_REQUEST_DATA);
+		System.out.println(END_REQUEST_MESSAGE);
 	    }
                 catch (REException rexc) {
                     System.out.println("CDATA escaping: regular expression failure");
@@ -179,10 +186,9 @@ public class ConnectionManager implements QueryExecutionIF {
                 }
 	    }
 	    
-        if (queryType == QueryType.XMLQL
-            || queryType == QueryType.QP
-            || queryType == QueryType.EXPLAIN_QP
-            || queryType == QueryType.PREPARE_QP
+        if (queryType == QueryType.QP
+            || queryType == QueryType.EXPLAIN
+            || queryType == QueryType.PREPARE
             || queryType == QueryType.EXECUTE_PREPARED) {
             getNext(id, nResults);
         }
@@ -208,31 +214,6 @@ public class ConnectionManager implements QueryExecutionIF {
 	// Mark this query as killed
 	e.isKilled = true;
     }
-    
-    /**
-     * Suspend the query
-     * @param id the query id to kill
-     */
-    public void suspendQuery(int id) 
-    {
-	int queryType = reg.getQueryType(id);
-	if(queryType == QueryType.XMLQL || queryType == QueryType.QP){
-	    writeMessage(id, SUSPEND_QUERY);
-	} else {}//se stuff
-    }
-    
-    
-    /**
-     * Resume the query
-     * @param id the query id to kill
-     */
-    public void resumeQuery(int id)  {
-	int queryType = reg.getQueryType(id);
-	if(queryType == QueryType.XMLQL || queryType == QueryType.QP){
-	    writeMessage(id, RESUME_QUERY);
-	} else {}//se stuff
-    }
-    
     
     /**
      * Request partial
