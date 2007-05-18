@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestParser.java,v 1.17 2007/05/16 17:28:19 vpapad Exp $
+  $Id: RequestParser.java,v 1.18 2007/05/18 03:06:37 jinli Exp $
 
   NIAGARA -- Net Data Management System                                 
                                                                         
@@ -115,8 +115,8 @@ public class RequestParser extends HandlerBase implements Runnable {
 	     currentMesg.localID = Integer.parseInt(atts.getValue(LOCAL_ID));
 	     currentMesg.serverID = Integer.parseInt(atts.getValue(SERVER_ID));
 	     currentMesg.setIntermittent(atts.getValue(INTERMITTENT).equalsIgnoreCase("true"));
-	     
-	     String outputType = atts.getValue(RESULT_TYPE); 
+	    
+             String outputType = atts.getValue(RESULT_TYPE); 
 	     if (outputType != null) {
 	    	if (outputType.compareToIgnoreCase("text") == 0)
 	    		currentMesg.asii = true;  

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.35 2007/05/16 17:28:19 vpapad Exp $
+  $Id: RequestHandler.java,v 1.36 2007/05/18 03:06:37 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -88,6 +88,8 @@ public class RequestHandler {
     private static String delimiter = "\n--<][>\n";
     /** The footer sent after the last response */
     private static String footer = "\n--<][>--\n";
+    
+    private boolean connectionClose = false;
 
     /**Constructor
        @param sock The socket to read from 
@@ -210,13 +212,18 @@ public class RequestHandler {
 
                 case EXECUTE_PREPARED_QUERY:
                     String pID = request.requestData.trim();
-		    ServerQueryInfo sqi = catalog.getQueryInfo(pID);
+                    ServerQueryInfo sqi = catalog.getQueryInfo(pID);
+                    
                     if (sqi != null) {
                         ResultTransmitter trans = sqi.getTransmitter();
-			request.serverID = sqi.getQueryId();
+                        request.serverID = sqi.getQueryId();
                         sendQueryId(request);
-			queryList.put(request.serverID, sqi);
+                        queryList.put(request.serverID, sqi);
                     	trans.setHandler(this);
+                        if (request.isIntermittent()) {
+                        	fetchEpoch(request, sqi);
+                        }
+
                     } else {
 	                    optimizedPlan = catalog.getPreparedPlan(pID);
 	                    if (optimizedPlan == null) {
@@ -226,10 +233,49 @@ public class RequestHandler {
 	                        optimizedPlan.setPlanID(pID);
 	                        assignQueryId(request);
 	                        sqi = processQPQuery(optimizedPlan, request);
-				catalog.registerQueryInfo(pID, sqi);
+	                        catalog.registerQueryInfo(pID, sqi);
+	                        if (request.isIntermittent()) {
+	                        	fetchEpoch(request, sqi);
+	                        }
 	                    }
                     }
+                    
                     break;
+                    
+                case KILL_PREPARED_QUERY:
+                    String planid = request.requestData.trim();
+                    ServerQueryInfo query = catalog.getQueryInfo(planid);
+                    if (query != null) {
+                        ResultTransmitter trans = query.getTransmitter();
+                        request.serverID = query.getQueryId();
+                        sendQueryId(request);
+                        queryList.put(request.serverID, query);
+                       	
+                        if (trans.getHandler().isConnectionOpen() ) {
+	                        trans.getHandler().sendResponse(new ResponseMessage(request, 
+	         						 ResponseMessage.END_RESULT));
+	                        trans.getHandler().killQuery(request.serverID);
+                        }
+                    	//trans.setHandler(this);
+                       	sendResponse(new ResponseMessage(request, 
+        						 ResponseMessage.END_RESULT));
+
+                        killQuery(request.serverID);
+                        break;
+
+                    } 
+                    Object prepared = catalog.getPreparedPlan(planid);
+                    catalog.removePreparedPlan(planid);
+                    
+                    if (prepared == null && query == null) {
+                    	sendErrMessage(request, ResponseMessage.ERROR, 
+                        		"Non-existent prepared query id: " + planid);
+                    }  else if (prepared != null) {
+                       	sendResponse(new ResponseMessage(request, 
+       						 ResponseMessage.END_RESULT));
+                    	closeConnection();
+                    }                   	
+                	break;
 
                 case MQP_QUERY:
                     plan = xqpp.parse(request.requestData);
@@ -560,6 +606,31 @@ public class RequestHandler {
 
     }
 
+	/**
+	 * @param request
+	 * @param sqi
+	 * @throws IOException
+	 */
+	private void fetchEpoch(RequestMessage request, ServerQueryInfo sqi) throws IOException {
+		// get the most recent epoch;
+		ResponseMessage epoch = sqi.getTransmitter().getMostRecentEpoch();
+		
+		if (epoch != null) {		
+			if (epoch.dataSize() != 0) {
+			 	sendResponse(epoch);
+			}
+			// clear the queue;
+			sqi.getTransmitter().clearEpochQ();
+		}
+		
+		// send end of result msg;
+		sendResponse(new ResponseMessage(request, 
+			 ResponseMessage.END_RESULT));
+		
+		// close the connection;
+		closeIntermittentConnection(sqi.getQueryId());
+	}
+
     private void assignQueryId(RequestMessage request) throws IOException {
         request.serverID = getNextConnServerQueryId();
         sendQueryId(request);
@@ -633,7 +704,7 @@ public class RequestHandler {
         // KT - DO THIS LAST - otherwise we get unexpectedly null
         // transmitter!!!
         server.qe.execOptimizedQuery(transmitter, plan, qr);
-	return serverQueryInfo;
+        return serverQueryInfo;
     }
 
     /**Method used by everyone to send responses to the client
@@ -670,13 +741,16 @@ public class RequestHandler {
      *
      *  @param queryID the id of the query to kill
      */
-    public void killQuery(int queryID) {
+    public void killQuery(int queryID) {    
         // Get the queryInfo object for this request
         ServerQueryInfo queryInfo = queryList.get(queryID);
 
         // Respond to an invalid queryID
         assert queryInfo != null : "Bad query id " + queryID;
 
+        if (queryInfo == null) {
+        	return;
+        }
         // Process Kill message
         // Remove the query from the active queries list
         queryList.remove(queryID);
@@ -684,7 +758,8 @@ public class RequestHandler {
         // destroy the transmitter thread
         assert queryInfo.getTransmitter()
             != null : "KT way bad transmitter is null";
-        queryInfo.getTransmitter().destroy();
+        if (queryInfo.getTransmitter() != null)
+        	queryInfo.getTransmitter().destroy();
 
         // Put a KILL control message down stream
         queryInfo.getQueryResult().kill();
@@ -692,6 +767,7 @@ public class RequestHandler {
         if (queryInfo.isSynchronous()) {
             try {
                 outputWriter.close();
+                connectionClose = true;
             } catch (IOException e) {
                 ; // XXX vpapad: don't know what to do here
             }
@@ -712,12 +788,16 @@ public class RequestHandler {
     }
 
     public void closeIntermittentConnection(int queryID) throws IOException {
-    	ServerQueryInfo sqi = queryList.remove(queryID);
-	assert sqi != null;
+    	//ServerQueryInfo sqi = queryList.remove(queryID);
+	//assert sqi != null;
     	outputWriter.flush();
     	outputWriter.close();
+    	connectionClose = true;
     }
     
+    public boolean isConnectionOpen () {
+    	return !connectionClose;
+    }
     /**Send the queryId that has been assigned to this query. This is the first things that
        is sent to the client after a query is received
        @param request The initial request
@@ -791,6 +871,12 @@ public class RequestHandler {
             removedQueryList.add(temp);
             return removed;
         }
+        
+        /*public void removeAll () {
+        	removedQueryList.addAll(queryList.values());
+        	queryList.clear();
+        	
+        }*/
 
         public boolean queryWasRun(int qid) {
             return removedQueryList.contains(new Integer(qid));
@@ -799,5 +885,6 @@ public class RequestHandler {
         public Enumeration elements() {
             return queryList.elements();
         }
+        
     }
 }

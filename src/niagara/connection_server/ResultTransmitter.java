@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.33 2007/05/16 17:28:19 vpapad Exp $
+  $Id: ResultTransmitter.java,v 1.34 2007/05/18 03:06:36 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -30,6 +30,7 @@ import java.io.*;
 import niagara.query_engine.*;
 import java.net.*;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 import niagara.utils.*;
 import niagara.data_manager.DataManager;
@@ -85,6 +86,9 @@ public class ResultTransmitter implements Schedulable {
 
     private Object queryDone = new Object();
     
+    private ArrayList responseMsgQueue;
+    private ArrayList epochQueue;
+    
     /** Constructor
     @param handler The request handler that created this transmitter
     @param queryInfo The info about the query to be executed
@@ -100,6 +104,8 @@ public class ResultTransmitter implements Schedulable {
         totalResults = 0;
         this.sendImmediate = request.isSendImmediate();
         this.intermittent = request.isIntermittent();
+        responseMsgQueue = new ArrayList ();
+        epochQueue = new ArrayList();
     }
 
     public void setPrettyprint(boolean prettyprint) {
@@ -140,14 +146,16 @@ public class ResultTransmitter implements Schedulable {
             response =
                 new ResponseMessage(request, ResponseMessage.EXECUTION_ERROR);
             response.setData("Message: " + se.getMessage());
-            try {
+            /*try {
                 handler.sendResponse(response);
             } catch (IOException ioe) {
                 // nothing to be done, we did our best
                 System.err.println(
                     "KT unable to send error message to client: "
                         + se.getMessage());
-            }
+            }*/
+            
+            
         } catch (InterruptedException ie) {
             // ditto...
         } catch (IOException ioe) {
@@ -158,7 +166,6 @@ public class ResultTransmitter implements Schedulable {
                 + ioe.toString() + "]");
             queryInfo.getQueryResult().kill();
         }
-        
         synchronized(queryDone) {
             queryDone.notifyAll();
         }
@@ -191,7 +198,8 @@ public class ResultTransmitter implements Schedulable {
             response = new ResponseMessage(request, ResponseMessage.ERROR);
             response.setData("Could Not Fetch the DTD");
         }
-        handler.sendResponse(response);
+        //handler.sendResponse(response);
+        
     }
 
     /**
@@ -253,7 +261,9 @@ public class ResultTransmitter implements Schedulable {
             if (ctrlFlag != CtrlFlags.NULLFLAG) {
                 assert resultObject.result
                     == null : "KT didn't think this should happen";
-                processCtrlMsg(ctrlFlag);
+                synchronized(intermittentSynch) {
+                	processCtrlMsg(ctrlFlag);
+                }
             } else {
                 assert resultObject.result != null : "KT HELP!!!";
 
@@ -265,19 +275,29 @@ public class ResultTransmitter implements Schedulable {
 
                 if (!QUIET) {
                     response.appendResultData(resultObject, prettyprint);
-		    if (intermittent) {
-			if (resultObject.isPunctuation) {
-			    sendResults();
-			    closeEpoch();
-			    synchronized (intermittentSynch) {
-                        	while (handler == null) {
-				    intermittentSynch.wait();
-                        	}
-			    }
-			}
+                    if (intermittent) {
+                    	if (resultObject.isPunctuation) {
+                    		appendToQ(epochQueue, new ResponseMessage (response));
+                    		response.clearData();
+                    		
+                    		/*synchronized (intermittentSynch) {
+                        		if (handler == null) {
+                        			//should toss data here, when there is a punctuation
+                        			continue;
+                    	    	} else {
+		                    		sendResults();
+		                    		closeEpoch();
+                    	    	}
+                    		}*/
+                    		/*synchronized (intermittentSynch) {
+                    			while (handler == null) {
+                    				intermittentSynch.wait();
+                    			}
+                    		}*/
+                    	} 
                     } else if (sendImmediate || response.dataSize() > BATCHSIZE) {
-			sendResults();
-		    }
+                    	sendResults();
+                    }
                 }
             }
         }
@@ -353,7 +373,7 @@ public class ResultTransmitter implements Schedulable {
      * END_PARTIAL, EOS, TIMED_OUT
      */
     private void processCtrlMsg(int ctrlFlag)
-        throws java.io.IOException, ShutdownException {
+        throws java.io.IOException, ShutdownException, InterruptedException {
         switch (ctrlFlag) {
             case CtrlFlags.EOS :
 
@@ -454,12 +474,15 @@ public class ResultTransmitter implements Schedulable {
     }
 
     // send the results collected so far
-    private void sendResults() throws IOException {
-        if (response.dataSize() != 0) {
-            handler.sendResponse(response);
-        }
-        response.clearData();
-        resultsSoFar = 0;
+    private void sendResults() throws IOException, InterruptedException {
+    	
+	    if (response.dataSize() != 0) {
+	         handler.sendResponse(response);
+	    }
+	    response.clearData();
+	    resultsSoFar = 0;	    		
+	    
+
     }
 
     public String getName() {
@@ -481,22 +504,52 @@ public class ResultTransmitter implements Schedulable {
     public void setHandler(RequestHandler handler) {
     	synchronized(intermittentSynch) {
     		this.handler = handler;
-    		intermittentSynch.notifyAll();
     	}
     }
-
-    private void closeEpoch() throws IOException {
-	sendEndResult();
-	handler.closeIntermittentConnection(queryInfo.getQueryId());
-	handler = null;
-	System.err.println("XXX vpapad: Done sending an epoch");
-	synchronized(queryDone) {
-	    queryDone.notifyAll();
-	}
+    
+    public RequestHandler getHandler () {
+    	synchronized(intermittentSynch) {
+    		return this.handler;
+    	}    	
     }
+
+    /*private void closeEpoch() throws IOException {
+	sendEndResult();
+	synchronized(intermittentSynch) {
+		handler.closeIntermittentConnection(queryInfo.getQueryId());
+		handler = null;
+	}
+	System.err.println("XXX vpapad: Done sending an epoch");
+	//synchronized(queryDone) {
+	//    queryDone.notifyAll();
+	//}
+    }*/
 
     private void sendEndResult() throws IOException {
 	handler.sendResponse(new ResponseMessage(request, 
 						 ResponseMessage.END_RESULT));
     }
+    
+    public ResponseMessage getMostRecentEpoch () {
+    	synchronized (epochQueue) {
+    		if (epochQueue.size() != 0) {
+    			return  (ResponseMessage)epochQueue.get(epochQueue.size() - 1);
+    		} else
+    			return null;
+    	}
+    }
+    
+    public void clearEpochQ () {
+    	synchronized (epochQueue) {
+    		epochQueue.clear();
+    		resultsSoFar = 0;
+    	}
+    }
+    
+    private void appendToQ (ArrayList queue, ResponseMessage response) {
+    	synchronized (queue) {
+    		queue.add(response);
+    	}
+    }
+    
 }

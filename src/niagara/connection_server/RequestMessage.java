@@ -1,5 +1,5 @@
 /**********************************************************************
- $Id: RequestMessage.java,v 1.12 2007/05/16 17:28:19 vpapad Exp $
+ $Id: RequestMessage.java,v 1.13 2007/05/18 03:06:38 jinli Exp $
  
  
  NIAGARA -- Net Data Management System                                 
@@ -59,6 +59,7 @@ public class RequestMessage {
         // Prepared (and instrumented) queries
         PREPARE_QUERY,
         EXECUTE_PREPARED_QUERY,
+        KILL_PREPARED_QUERY,
         // Tunables
         SET_TUNABLE
     };
@@ -81,6 +82,7 @@ public class RequestMessage {
         queryTypeNames.put("prepare_query", RequestType.PREPARE_QUERY);
         queryTypeNames.put("execute_prepared_query", RequestType.EXECUTE_PREPARED_QUERY);
         queryTypeNames.put("set_tunable", RequestType.SET_TUNABLE);
+        queryTypeNames.put("kill_prepared_query", RequestType.KILL_PREPARED_QUERY);
     };
 
     private RequestType requestType;
@@ -88,6 +90,7 @@ public class RequestMessage {
     int localID;
     private boolean sendImmediate;
     private boolean intermittent;
+    private boolean killquery;
     String requestData;
     boolean asii;
 
@@ -138,5 +141,5 @@ public class RequestMessage {
     
     public void setIntermittent(boolean intermittent) {
     	this.intermittent = intermittent;
-    }
+    }   
 }

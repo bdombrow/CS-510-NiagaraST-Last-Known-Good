@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResponseMessage.java,v 1.14 2007/04/30 19:17:13 vpapad Exp $
+  $Id: ResponseMessage.java,v 1.15 2007/05/18 03:06:38 jinli Exp $
 
   NIAGARA -- Net Data Management System                                 
                                                                         
@@ -118,6 +118,14 @@ class ResponseMessage
 		this.type = type;
 		responseData = new StringBuffer();
     }
+    
+    public ResponseMessage (ResponseMessage one) {
+    	this.localID = one.localID;
+    	this.serverID = one.serverID;
+    	this.type = one.type;
+    	this.responseData = new StringBuffer ();
+        this.responseData.append(one.responseData);
+    }
 
     /**Convert this response to an XML string
        @return The XML representation of this response
@@ -165,6 +173,7 @@ class ResponseMessage
     public boolean isFinal() {
         return type != QUERY_RESULT && type != SERVER_QUERY_ID;
     }
+    
 }
 
 
