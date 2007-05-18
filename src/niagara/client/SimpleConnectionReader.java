@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.17 2007/04/30 19:15:30 vpapad Exp $
+  $Id: SimpleConnectionReader.java,v 1.18 2007/05/18 20:04:27 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -65,6 +65,8 @@ class SimpleConnectionReader
         int local_id = -1, server_id = -1;
         // Read the connection and throw the callbacks
 
+	boolean end = false;
+
         try {
             ((SimpleClient) ui).setConnectionReader(this);
             BufferedReader br = new BufferedReader(cReader);
@@ -75,6 +77,7 @@ class SimpleConnectionReader
             RE reLidNoPad =
                 new RE("SERVER ERROR - localID\\s*=\\s*\"([0-9]*)\"");
             boolean registered = false;
+            
             line = br.readLine();
             while (line != null) {
                 if (line.indexOf("<response") == 0) {
@@ -96,6 +99,7 @@ class SimpleConnectionReader
                         addResult("\n</niagara:results>");
                         ui.notifyNew(local_id);
                         ui.notifyFinalResult(local_id);
+			end = true;
                     }
                 } else if (line.indexOf("</response") == 0) {
                     // ignore line
@@ -119,10 +123,12 @@ class SimpleConnectionReader
                 "Invalid response message reg exception " + e.getMessage());
 
         } catch (java.io.IOException ioe) {
+	    if (!end) {
             System.err.println(
                 "Unable to read from server " + ioe.getMessage());
             ioe.printStackTrace();
             throw new PEException("Unable to read from server");
+	    }
         }
     }
 }
