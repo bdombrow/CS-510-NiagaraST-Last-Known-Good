@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.21 2007/05/17 21:13:21 tufte Exp $
+  $Id: ConnectionManager.java,v 1.22 2007/05/18 00:25:28 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,7 +49,9 @@ public class ConnectionManager implements QueryExecutionIF {
     public static final String LOCAL_ID = "localID";
     public static final String SERVER_ID = "serverID";
     public static final String REQUEST_TYPE = "requestType";
+    static final String RESULT_TYPE = "resultType";
     public static final String INTERMITTENT = "intermittent";
+    public static final String KILL_PREPARE = "kill-prepared";
     
     public static final String KILL_QUERY = "kill_query";
     public static final String GET_NEXT = "get_next";
@@ -154,9 +156,9 @@ public class ConnectionManager implements QueryExecutionIF {
 	e.type = queryType;
 	    
 	synchronized(writer){
-	    // Send the query to the server
 	    writer.println(formatMessageHeader(id, -1, attr));
 	    writer.println(BEGIN_REQUEST_DATA);
+
 	    writer.println("<![CDATA[");
 		
 	    System.out.println(formatMessageHeader(id, -1, attr));
@@ -189,7 +191,8 @@ public class ConnectionManager implements QueryExecutionIF {
         if (queryType == QueryType.QP
             || queryType == QueryType.EXPLAIN
             || queryType == QueryType.PREPARE
-            || queryType == QueryType.EXECUTE_PREPARED) {
+            || queryType == QueryType.EXECUTE_PREPARED
+            || queryType == QueryType.KILL_PREPARED) {
             getNext(id, nResults);
         }
 
@@ -381,12 +384,15 @@ public class ConnectionManager implements QueryExecutionIF {
 	sb.append(LOCAL_ID).append(" ='").append(String.valueOf(localId)).append("' ");
 	sb.append(SERVER_ID).append(" ='").append(String.valueOf(serverId)).append("' ");
 	sb.append(REQUEST_TYPE).append(" ='").append(request_type).append("' ");
+	/* only for test purpose - to test text output */ 
+	//sb.append(RESULT_TYPE).append(" ='").append("text").append("' ");
 	Query q = reg.getQueryInfo(localId).query;
 	if (q.isIntermittent())
 	    sb.append("intermittent='true' ");
 	else
 	    sb.append("intermittent='false' ");
-	sb.append(">");
+	
+    sb.append(">");
 	return sb.toString();
     }
 

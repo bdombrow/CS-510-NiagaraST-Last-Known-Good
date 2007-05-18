@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: QueryType.java,v 1.8 2007/05/17 21:13:22 tufte Exp $
+  $Id: QueryType.java,v 1.9 2007/05/18 00:25:29 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,6 +43,7 @@ class QueryType
   public static final int PREPARE = 8; // was PREPARE_QP - ok
   public static final int EXECUTE_PREPARED = 9; // ok
   public static final int SET_TUNABLE = 10; // ok
+  public static final int KILL_PREPARED = 11; // kill a prepared kill;
 
   // merged RequestType with QueryType
   // types from Request type were:

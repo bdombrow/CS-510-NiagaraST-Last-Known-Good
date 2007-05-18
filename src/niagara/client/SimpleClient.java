@@ -135,6 +135,7 @@ public class SimpleClient implements UIDriverIF {
         int delay;
         int wait;
         boolean intermittent;
+        boolean killprepared;
     };
     
     protected static boolean silent;
@@ -215,6 +216,15 @@ public class SimpleClient implements UIDriverIF {
                 req.delay = 0;
                 req.wait = 0;
                 i += 2;
+            } else if (args[i].equals("-kill-prepared")) {
+            	Request req = new Request();
+            	requests.add(req);
+            	req.type = QueryType.KILL_PREPARED;
+            	req.value = args[i+1];
+            	req.repetitions = 1;
+            	req.delay = 0;
+            	req.wait = 0;
+                i += 2; 
             } else if (args[i].equals("-intermittent")) {
                 requests.get(requests.size() - 1).intermittent = true; 
                 i += 1;
@@ -263,6 +273,7 @@ public class SimpleClient implements UIDriverIF {
 	                query = getQueryFromFile((String) req.value, cbuf);
                         break;
 	          case QueryType.EXECUTE_PREPARED:
+	          case QueryType.KILL_PREPARED:
 	          case QueryType.SET_TUNABLE:
 	                query = req.value;
                         break;
@@ -378,10 +389,12 @@ public class SimpleClient implements UIDriverIF {
             q = new SetTunable(queryText);
         else if (type == QueryType.QP) 
             q = QueryFactory.makeQuery(queryText);
+        else if (type == QueryType.KILL_PREPARED)
+        	q = new KillPreparedQPQuery(queryText);
 
         
         q.setIntermittent(intermittent);
-        
+
         m_start = System.currentTimeMillis();
         final int id = cm.executeQuery(q, Integer.MAX_VALUE);
         if (timeout > 0) {
