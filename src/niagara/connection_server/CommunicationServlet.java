@@ -1,5 +1,5 @@
 /*
- * $Id: CommunicationServlet.java,v 1.8 2007/04/30 19:17:10 vpapad Exp $
+ * $Id: CommunicationServlet.java,v 1.9 2007/05/19 16:57:05 vpapad Exp $
  */
 
 package niagara.connection_server;
@@ -26,7 +26,7 @@ public class CommunicationServlet extends HttpServlet {
     // maps subquery id -> Send operator
     private Hashtable queries;
 
-    private static final boolean doDebug = true;
+    private static final boolean doDebug = false;
 
     private XMLQueryPlanParser xqpp;
 

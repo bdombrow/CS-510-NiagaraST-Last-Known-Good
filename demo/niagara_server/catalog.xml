@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: catalog.xml,v 1.5 2007/04/30 19:10:13 vpapad Exp $ --><catalog>
+<!-- $Id: catalog.xml,v 1.6 2007/05/19 16:57:03 vpapad Exp $ --><catalog>
   <streams>
     <stream delay="-1" filename="/stash/datalab/datastreams-student/streamdata/auctions10k.xml" isStream="yes" name="auctions">
       <var name="id" type="int"/>
@@ -43,6 +43,7 @@
     <param name="query threads" value="5"/>
     <param name="operator threads" value="30"/>
     <param name="sendStr" value="false"/>
+    <param name="update catalog file on shutdown" value="true"/>
   </configuration>
   
   <operators>
@@ -452,17 +453,6 @@
         local files, URLs, or resolver addresses (servers that can resolve
         the URN). This element is reconstructed on every server shutdown,
         manual edits while the server is running will be lost! -->
-
-
-
-
-
-
-
-
-
-
-
 <resources>
 </resources>
 </catalog>

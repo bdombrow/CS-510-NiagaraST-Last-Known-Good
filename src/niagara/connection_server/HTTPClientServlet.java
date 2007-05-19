@@ -1,5 +1,5 @@
 /*
- * $Id: HTTPClientServlet.java,v 1.1 2007/04/30 19:17:10 vpapad Exp $
+ * $Id: HTTPClientServlet.java,v 1.2 2007/05/19 16:57:05 vpapad Exp $
  */
 
 package niagara.connection_server;
@@ -17,7 +17,7 @@ public class HTTPClientServlet extends HttpServlet {
 
     private NiagraServer server;
 
-    private static final boolean doDebug = true;
+    private static final boolean doDebug = false;
 
     
     public void init(ServletConfig sc) throws ServletException {
@@ -28,7 +28,7 @@ public class HTTPClientServlet extends HttpServlet {
             throws IOException {
         debug("HTTP request received");
         res.setContentType("multipart/x-mixed-replace;boundary=\"<][>\"");
-        cerr("query= " + req.getParameter("query"));
+        debug("query= " + req.getParameter("query"));
         new RequestHandler(req.getParameter("query"), req.getParameter("type"),
                 res, server);
         debug("HTTP request processed");

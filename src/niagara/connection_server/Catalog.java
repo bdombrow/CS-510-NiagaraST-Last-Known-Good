@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.15 2007/05/17 21:12:05 tufte Exp $
+ * $Id: Catalog.java,v 1.16 2007/05/19 16:57:05 vpapad Exp $
  *  
  */
 
@@ -524,17 +524,11 @@ public class Catalog implements ICatalog {
     public void shutdown() {
         Element root = document.getDocumentElement();
         NodeList resourcesList = root.getElementsByTagName("resources");
-        Element resources;
-        if (resourcesList.getLength() != 0) {
-            // Delete it, we will create it anew
-            resources = (Element) resourcesList.item(0);
-            root.removeChild(resources);
-        }
-        resources = document.createElement("resources");
+        Element oldResources = (Element) resourcesList.item(0);
+        Element resources = document.createElement("resources");
 
         Iterator keys = resourceNames.iterator();
         while (keys.hasNext()) {
-
             String urn = (String) keys.next();
             Element r = document.createElement("resource");
             r.setAttribute("name", urn);
@@ -567,21 +561,21 @@ public class Catalog implements ICatalog {
             resources.appendChild(r);
         }
         resources.appendChild(document.createTextNode("\n"));
-        root.appendChild(resources);
-        root.appendChild(document.createTextNode("\n"));
-
+        root.replaceChild(resources, oldResources);
 
        // Save resources
-        try {
-            // XXX vpapad: yeah, I know, referencing apache directly sucks
-            XMLSerializer serializer = new XMLSerializer (new FileWriter(filename), null);
-            serializer.asDOMSerializer();
-            serializer.serialize(document);
-        } catch (FileNotFoundException e) {
-            cerr("Catalog file does not exist.");
-        } catch (IOException e) {
-            cerr("Problems encountered while saving catalog file" + e.getMessage());
-        }
+	if (getBooleanConfigParam("update catalog file on shutdown")) {
+	    try {
+		// XXX vpapad: yeah, I know, referencing apache directly sucks
+		XMLSerializer serializer = new XMLSerializer (new FileWriter(filename), null);
+		serializer.asDOMSerializer();
+		serializer.serialize(document);
+	    } catch (FileNotFoundException e) {
+		cerr("Catalog file does not exist.");
+	    } catch (IOException e) {
+		cerr("Problems encountered while saving catalog file" + e.getMessage());
+	    }
+	}
     }
 
     // for testing
