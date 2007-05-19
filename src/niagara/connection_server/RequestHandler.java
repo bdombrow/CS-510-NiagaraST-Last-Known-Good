@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.37 2007/05/19 00:55:15 jinli Exp $
+  $Id: RequestHandler.java,v 1.38 2007/05/19 01:28:41 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -263,18 +263,28 @@ public class RequestHandler {
                         killQuery(request.serverID);
                         break;
 
-                    } 
-                    Object prepared = catalog.getPreparedPlan(planid);
-                    catalog.removePreparedPlan(planid);
-                    
-                    if (prepared == null && query == null) {
-                    	sendErrMessage(request, ResponseMessage.ERROR, 
-                        		"Non-existent prepared query id: " + planid);
-                    }  else if (prepared != null) {
-                       	sendResponse(new ResponseMessage(request, 
-       						 ResponseMessage.END_RESULT));
-                    	closeConnection();
-                    }                   	
+                    } else {
+	                    Plan prepared = catalog.getPreparedPlan(planid);
+	                    catalog.removePreparedPlan(planid);
+	                    
+	                    assignQueryId(request);
+	                    
+	                    if (prepared == null ) {
+	                    	sendErrMessage(request, ResponseMessage.ERROR, 
+	                        		"Non-existent prepared query id: " + planid);
+	                    }  else  {
+	                       	sendResponse(new ResponseMessage(request, 
+	       						 ResponseMessage.END_RESULT));
+	                    }
+	                    // We don't want to actually *run* the plan!
+	                    // Replace the plan with a constant operator
+	                    // having the prepared plan as its content
+	                    
+	                    optimizedPlan = new Plan(new ConstantOpThread(
+	                            "<kill_prepared id='" + planid +"'/>", new Attrs()));
+
+	                    processQPQuery(optimizedPlan, request);
+                    }
                 	break;
 
                 case MQP_QUERY:
