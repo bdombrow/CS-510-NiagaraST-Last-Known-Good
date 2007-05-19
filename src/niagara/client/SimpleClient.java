@@ -15,7 +15,8 @@ public class SimpleClient implements UIDriverIF {
     static Timer timer;
 
     static boolean intermittent;
-    
+    protected static boolean quiet;    
+
     //To get times
     long m_start, m_stop;
 
@@ -106,34 +107,38 @@ public class SimpleClient implements UIDriverIF {
 	System.exit(-1);
     }
 
-    protected static void usage() {
+    protected static void usage(String msg) {
+        if(msg != null)
+          System.err.println("Error: " + msg);
         System.err.println(
-            "Usage: SimpleClient -qf QueryFileName(s) [-port port] \n");
-                                        //       "[-h host] [-t timeout]" +
-          //  + "[-x repetitions] [-d delay] [-w wait] [-o outputFileName]\n"
-          //  + "[-quiet] [-prepare | -explain] [-execute-prepared queryId] [-set \"tunable=value\"] [-ch client host] [-cp client port] [-silent]");
+            "Usage: SimpleClient (-execute QueryFileName(s) " 
+            + " | -prepare QueryFileName | -execute-prepared planId | "
+            + " | -explain QueryFileName) "
+            + " [-port port] [-h host] [-intermittent] [-t timeout] "
+            + " [-silent] "
+            + "\n");
+          // for testing   "[-x repetitions] [-d delay] [-o outputFileName]\n"
+          //  + " [-set \"tunable=value\"] 
+          //  mqp only (i think) KT [-ch client host] [-cp client port] [-silent]");
         System.exit(-1);
     }
 
-    protected static ArrayList<Request> requests = new ArrayList<Request>();
+    protected static Request request = null;
     protected static boolean queryfile = false;
     protected static String host;
     protected static int port;
-   /* 
-    public enum RequestType {
-        RUN,
-        EXPLAIN,
-        PREPARE,
-        EXECUTE_PREPARED,
-        SET_TUNABLE
-    }*/
     
     private static class Request {
+      public Request() {
+        this.type = -1;
+        this.value = null;
+        this.repetitions = 1;
+        this.delay = 0;
+      }
         int type;
         String value;
         int repetitions;
         int delay;
-        int wait;
         boolean intermittent;
         boolean killprepared;
     };
@@ -142,7 +147,6 @@ public class SimpleClient implements UIDriverIF {
     // XXX vpapad: ugly... SimpleClient can't do this yet
     protected static String outputFileName;
     // XXX vpapad: even uglier... these only apply to MQPClient
-    protected static boolean quiet;
     protected static String clientHost = "localhost";
     protected static int clientPort = 3020;
     
@@ -151,9 +155,10 @@ public class SimpleClient implements UIDriverIF {
         host = "localhost"; // the defaults
         port = ConnectionManager.SERVER_PORT;
 
+        boolean got_type = false;
+        request = new Request();
         int i = 0;
         while (i < args.length) {
-            int starti = i;
             if (args[i].equals("-h")) {
                 host = args[i + 1];
                 i += 2;
@@ -164,79 +169,61 @@ public class SimpleClient implements UIDriverIF {
                 timeout = Integer.parseInt(args[i + 1]);
                 i += 2;
             } else if (args[i].equals("--help")) {
-                usage();
+                usage("");
             } else if (args[i].equals("-execute")) {
-                Request req = new Request();
-                requests.add(req);
-                req.type = QueryType.QP;
-                req.value = args[i + 1];
-                req.repetitions = 1;
-                req.delay = 0;
-                req.wait = 0;
+                check_ok_get_type(got_type);
+                got_type = true;
+                request.type = QueryType.QP;
+                request.value = args[i+1];
                 i += 2;
+            } else if (args[i].equals("-prepare")) {
+                check_ok_get_type(got_type);
+                got_type = true;
+                request.type = QueryType.PREPARE;
+                request.value = args[i+1];
+                i += 2;
+            } else if (args[i].equals("-execute-prepared")) {
+                check_ok_get_type(got_type);
+                got_type = true;
+                request.type = QueryType.EXECUTE_PREPARED;
+                request.value = args[i+1];
+                i += 2;
+            } else if (args[i].equals("-kill-prepared")) {
+                check_ok_get_type(got_type);
+                got_type = true;
+                request.type = QueryType.KILL_PREPARED;
+                request.value = args[i+1];
+                i += 2; 
+            } else if (args[i].equals("-kill-foobar")) {
+                check_ok_get_type(got_type);
+                got_type = true;
+                request.type = QueryType.KILL_FOOBAR;
+                request.value = args[i+1];
+                i += 2; 
+            } else if (args[i].equals("-set")) {
+                check_ok_get_type(got_type);
+                got_type = true;
+                request.type = QueryType.SET_TUNABLE;
+                request.value = args[i+1];
+                i += 2; 
+            } else if (args[i].equals("-explain")) {
+                check_ok_get_type(got_type);
+                got_type = true;
+                request.type = QueryType.EXPLAIN;
+                request.value = args[i+1];
+                i += 1;
             } else if (args[i].equals("-x")) {
-                requests.get(requests.size() - 1).repetitions = 
-                    Integer.parseInt(args[i + 1]);
+                request.repetitions = Integer.parseInt(args[i + 1]);
                 i += 2;
             } else if (args[i].equals("-d")) {
-                requests.get(requests.size() - 1).delay = 
-                    Integer.parseInt(args[i + 1]);
-                i += 2;
-            } else if (args[i].equals("-w")) {
-                requests.get(requests.size() - 1).wait = 
-                    Integer.parseInt(args[i + 1]);
+                request.delay = Integer.parseInt(args[i + 1]);
                 i += 2;
             } else if (args[i].equals("-o")) {
                 outputFileName = args[i + 1];
                 i += 2;
-            } else if (args[i].equals("-quiet")) {
-                quiet = true;
-                i++;
-            } else if (args[i].equals("-explain")) {
-                if (requests.size() == 0)
-                        usage();
-                Request req = requests.get(requests.size() - 1);
-                req.type = QueryType.EXPLAIN;
-                i += 1;
-            } else if (args[i].equals("-prepare")) {
-                Request req = new Request();
-                requests.add(req);
-                req.type = QueryType.PREPARE;
-                req.value = args[i + 1];
-                req.repetitions = 1;
-                req.delay = 0;
-                req.wait = 0;
-                i += 2;
-            } else if (args[i].equals("-execute-prepared")) {
-                Request req = new Request();
-                requests.add(req);
-                req.type = QueryType.EXECUTE_PREPARED;
-                req.value = args[i + 1];
-                req.repetitions = 1;
-                req.delay = 0;
-                req.wait = 0;
-                i += 2;
-            } else if (args[i].equals("-kill-prepared")) {
-            	Request req = new Request();
-            	requests.add(req);
-            	req.type = QueryType.KILL_PREPARED;
-            	req.value = args[i+1];
-            	req.repetitions = 1;
-            	req.delay = 0;
-            	req.wait = 0;
-                i += 2; 
             } else if (args[i].equals("-intermittent")) {
-                requests.get(requests.size() - 1).intermittent = true; 
+                request.intermittent = true; 
                 i += 1;
-            } else if (args[i].equals("-set")) {
-                Request req = new Request();
-                requests.add(req);
-                req.type = QueryType.SET_TUNABLE;
-                req.value = args[i + 1];
-                req.repetitions = 1;
-                req.delay = 0;
-                req.wait = 0;
-                i += 2;
             } else if (args[i].equals("-ch")) {
                 clientHost = args[i + 1];
                 i += 2;
@@ -247,42 +234,41 @@ public class SimpleClient implements UIDriverIF {
                 silent = true;
                 i++;
             } else {
-                usage();
-            }
-
-            if (starti == i) {
-                usage();
+                usage("invalid option " + args[i]);
             }
         }
-	if(requests.size() == 0)
-	    usage();
+        if (!got_type) {
+           usage("didn't get request type");
+        }
+    }
+   
+    protected static void check_ok_get_type(boolean got_type) {
+       if(got_type)
+        usage("Only one request per invocation");
     }
     
     protected void processQueries() {
         String query = null;
 
         try {
-	    int nQueries = requests.size();
-	    for (int i = 0; i < nQueries; i++) {
-	        Request req = requests.get(i);
-	        switch (req.type) {
+	        switch (request.type) {
             case QueryType.QP:
 	          case QueryType.EXPLAIN:
 	          case QueryType.PREPARE:
 	                char cbuf[] = new char[MAX_QUERY_LEN];
-	                query = getQueryFromFile((String) req.value, cbuf);
+	                query = getQueryFromFile((String) request.value, cbuf);
                         break;
 	          case QueryType.EXECUTE_PREPARED:
 	          case QueryType.KILL_PREPARED:
+	          case QueryType.KILL_FOOBAR:
 	          case QueryType.SET_TUNABLE:
-	                query = req.value;
+	                query = request.value;
                         break;
                     // XXX vpapad: Can we throw PEException on the client?!
 	        }
 	        
-	        int reps = req.repetitions;
-	        int delay = req.delay;
-	        int wait = req.wait;
+          int reps = request.repetitions;
+	        int delay = request.delay;
 	        for (int j = 0; j < reps; j++) {
 	            if (j > 0 && delay > 0)
 	                Thread.sleep(delay);
@@ -290,16 +276,12 @@ public class SimpleClient implements UIDriverIF {
 	            // I removed it - hope this doesn't cause trouble!
 	            // if it is synchronized, causes deadlock on error
 	            synchronized (this) {
-	            	intermittent = req.intermittent;
-	                processQuery(req.type, query);
+	            	intermittent = request.intermittent;
+	                processQuery(request.type, query);
 	                wait();
 	            }
 	        }
-	        if (i < nQueries - 1 && wait > 0)
-	            Thread.sleep(wait);
-	        
-	    }
-	    System.exit(0);
+	        System.exit(0);
         } catch (IOException e) {
 			      ecode = true;
             System.err.println(
@@ -391,6 +373,8 @@ public class SimpleClient implements UIDriverIF {
             q = QueryFactory.makeQuery(queryText);
         else if (type == QueryType.KILL_PREPARED)
         	q = new KillPreparedQPQuery(queryText);
+        else if (type == QueryType.KILL_FOOBAR)
+        	q = new KillFooPreparedQPQuery(queryText);
 
         
         q.setIntermittent(intermittent);
