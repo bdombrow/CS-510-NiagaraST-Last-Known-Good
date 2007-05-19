@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.36 2007/05/18 03:06:37 jinli Exp $
+  $Id: RequestHandler.java,v 1.37 2007/05/19 00:55:15 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -619,16 +619,12 @@ public class RequestHandler {
 			if (epoch.dataSize() != 0) {
 			 	sendResponse(epoch);
 			}
-			// clear the queue;
-			sqi.getTransmitter().clearEpochQ();
 		}
 		
-		// send end of result msg;
-		sendResponse(new ResponseMessage(request, 
-			 ResponseMessage.END_RESULT));
-		
-		// close the connection;
-		closeIntermittentConnection(sqi.getQueryId());
+		// Disconnect the connection.
+		// The client side is supposed to close the connection on
+		// receiving the END_RESULT msg;
+		disconnectIntermittentConnection(request, sqi.getQueryId());
 	}
 
     private void assignQueryId(RequestMessage request) throws IOException {
@@ -766,6 +762,7 @@ public class RequestHandler {
 
         if (queryInfo.isSynchronous()) {
             try {
+            	outputWriter.flush();
                 outputWriter.close();
                 connectionClose = true;
             } catch (IOException e) {
@@ -787,11 +784,15 @@ public class RequestHandler {
         // and we are done!
     }
 
-    public void closeIntermittentConnection(int queryID) throws IOException {
+    public void disconnectIntermittentConnection(RequestMessage request, int queryID) throws IOException {
     	//ServerQueryInfo sqi = queryList.remove(queryID);
 	//assert sqi != null;
+		// send end of result msg;
+		sendResponse(new ResponseMessage(request, 
+			 ResponseMessage.END_RESULT));
+		
     	outputWriter.flush();
-    	outputWriter.close();
+    	//outputWriter.close();
     	connectionClose = true;
     }
     

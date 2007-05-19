@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: SimpleConnectionReader.java,v 1.18 2007/05/18 20:04:27 jinli Exp $
+  $Id: SimpleConnectionReader.java,v 1.19 2007/05/19 00:55:14 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -65,11 +65,11 @@ class SimpleConnectionReader
         int local_id = -1, server_id = -1;
         // Read the connection and throw the callbacks
 
-	boolean end = false;
-
+        boolean end = false;
+        BufferedReader br = new BufferedReader(cReader);
         try {
             ((SimpleClient) ui).setConnectionReader(this);
-            BufferedReader br = new BufferedReader(cReader);
+            
             String line;
             RE re =
                 new RE("<responseMessage .*localID\\s*=\\s*\"([0-9]*)\"\\s*serverID\\s*=\\s*\"([0-9]*)\"\\s*responseType\\s*=\\s*\"server_query_id\"");
@@ -79,7 +79,7 @@ class SimpleConnectionReader
             boolean registered = false;
             
             line = br.readLine();
-            while (line != null) {
+            while  (line != null) {
                 if (line.indexOf("<response") == 0) {
                     if (!registered
                         && line.indexOf("\"server_query_id\"") != -1) {
@@ -99,7 +99,7 @@ class SimpleConnectionReader
                         addResult("\n</niagara:results>");
                         ui.notifyNew(local_id);
                         ui.notifyFinalResult(local_id);
-			end = true;
+                        end = true;
                     }
                 } else if (line.indexOf("</response") == 0) {
                     // ignore line
@@ -117,18 +117,19 @@ class SimpleConnectionReader
                 }
                 line = br.readLine();
             }
+            br.close();
         } catch (gnu.regexp.REException e) {
             e.printStackTrace();
             throw new PEException(
                 "Invalid response message reg exception " + e.getMessage());
 
         } catch (java.io.IOException ioe) {
-	    if (!end) {
+        	if (!end) {
             System.err.println(
                 "Unable to read from server " + ioe.getMessage());
             ioe.printStackTrace();
             throw new PEException("Unable to read from server");
-	    }
+        	}
         }
     }
 }

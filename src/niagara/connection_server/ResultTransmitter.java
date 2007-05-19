@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.34 2007/05/18 03:06:36 jinli Exp $
+  $Id: ResultTransmitter.java,v 1.35 2007/05/19 00:55:15 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -86,7 +86,6 @@ public class ResultTransmitter implements Schedulable {
 
     private Object queryDone = new Object();
     
-    private ArrayList responseMsgQueue;
     private ArrayList epochQueue;
     
     /** Constructor
@@ -104,7 +103,6 @@ public class ResultTransmitter implements Schedulable {
         totalResults = 0;
         this.sendImmediate = request.isSendImmediate();
         this.intermittent = request.isIntermittent();
-        responseMsgQueue = new ArrayList ();
         epochQueue = new ArrayList();
     }
 
@@ -277,7 +275,7 @@ public class ResultTransmitter implements Schedulable {
                     response.appendResultData(resultObject, prettyprint);
                     if (intermittent) {
                     	if (resultObject.isPunctuation) {
-                    		appendToQ(epochQueue, new ResponseMessage (response));
+                    		appendToEpochQ(new ResponseMessage (response));
                     		response.clearData();
                     		
                     		/*synchronized (intermittentSynch) {
@@ -531,24 +529,35 @@ public class ResultTransmitter implements Schedulable {
     }
     
     public ResponseMessage getMostRecentEpoch () {
+    	try {
     	synchronized (epochQueue) {
-    		if (epochQueue.size() != 0) {
-    			return  (ResponseMessage)epochQueue.get(epochQueue.size() - 1);
-    		} else
-    			return null;
-    	}
-    }
-    
-    public void clearEpochQ () {
-    	synchronized (epochQueue) {
+    		while (epochQueue.size() == 0) {
+    			epochQueue.wait();
+    		}
+    		ResponseMessage resp = (ResponseMessage)epochQueue.get(epochQueue.size() - 1);
     		epochQueue.clear();
     		resultsSoFar = 0;
+    		return resp;
+    	}
+    	} catch (InterruptedException e) {
+    		System.err.println ("Interrupted in getMostRecentEpoch");
+    		return null;
     	}
     }
     
-    private void appendToQ (ArrayList queue, ResponseMessage response) {
-    	synchronized (queue) {
-    		queue.add(response);
+    /*public void clearEpochQ () {
+    	synchronized (epochQueue) {
+    		if (epochQueue.size() != 0) {
+	    		epochQueue.clear();
+	    		resultsSoFar = 0;
+    		}
+    	}
+    }*/
+    
+    private void appendToEpochQ (ResponseMessage response) {
+    	synchronized (epochQueue) {
+    		epochQueue.add(response);
+    		epochQueue.notifyAll();
     	}
     }
     
