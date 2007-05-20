@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.8 2007/05/15 19:24:47 vpapad Exp $ */
+/* $Id: DBThread.java,v 1.9 2007/05/20 21:05:37 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -50,6 +50,7 @@ public class DBThread extends SourceThread {
     private static final int MAX_HISTORY = 60;
     private static final int LOOKBACK = 30;
     private static final int WEATHER_OFFSET = 1; 
+    private static final int TIME_COLUMN = 1;
 
 	// think these are optimization time??
 	public DBScanSpec dbScanSpec;
@@ -81,11 +82,14 @@ public class DBThread extends SourceThread {
 		//for x-axis
 		long starttime, endtime;
 		// for y-axis
-		long startdate, enddate;	
+		ArrayList<Long> dates;
+		
+        Actors activeActors;
+        Actors exeunt;
 	};
 	
 	private class Actors {
-		ArrayList <Long> dates;
+		//ArrayList <Long> dates;
 		ArrayList <Long> starts;
 		ArrayList <Long> ends;
 		ArrayList <Status> status;
@@ -93,9 +97,9 @@ public class DBThread extends SourceThread {
 	
 	enum Status {FUTURE, DONE, PROGRESS};
 
-	private Stage stage;
-	private Actors activeActors;
-	private Actors exeunt;
+	private ArrayList<Stage> stagelist;
+	//private Actors activeActors;
+	//private Actors exeunt;
 	
 	// object for synchronization;
 	private Object synch = new Object(); 
@@ -281,7 +285,13 @@ public class DBThread extends SourceThread {
 					
 					// an actor is in progress
 					synchronized (synch) {
-						activeActors.status.set(0, Status.PROGRESS);
+						//activeActors.status.set(0, Status.PROGRESS);
+						for (Stage curr: stagelist) {
+							if (curr.activeActors.status.size() != 0) {
+								curr.activeActors.status.set(0, Status.PROGRESS);
+								break;
+							}
+						}
 					}
 					
 					rs = stmt.executeQuery(queryString);
@@ -293,16 +303,23 @@ public class DBThread extends SourceThread {
 					
 					// the actor is done, moved to exeunt list;
 					synchronized (synch) {
-						if (exeunt == null) {
-							exeunt = new Actors();
-							exeunt.starts = new ArrayList <Long> ();
-							exeunt.ends = new ArrayList <Long> ();
-							exeunt.status = new ArrayList <Status> ();
+						//Stage curr = stagelist.get(stagelist.size() - 1);
+						for (Stage curr: stagelist) {
+							if (curr.activeActors.status.size() != 0) {
+								if (curr.exeunt == null) {
+									curr.exeunt = new Actors();
+									curr.exeunt.starts = new ArrayList <Long> ();
+									curr.exeunt.ends = new ArrayList <Long> ();
+									curr.exeunt.status = new ArrayList <Status> ();
+								}
+								curr.exeunt.starts.add(curr.activeActors.starts.remove(0));
+								curr.exeunt.ends.add(curr.activeActors.ends.remove(0));
+								curr.activeActors.status.remove(0);
+								curr.exeunt.status.add(Status.DONE);
+
+								break;		
+							}
 						}
-						exeunt.starts.add(activeActors.starts.remove(0));
-						exeunt.ends.add(activeActors.ends.remove(0));
-						activeActors.status.remove(0);
-						exeunt.status.add(Status.DONE);
 					}
 					
 					//ArrayList instrumentationNames = new ArrayList ();
@@ -475,32 +492,38 @@ public class DBThread extends SourceThread {
 		}
     	
     	if (!sSpec.getWeather()) {
-   	   		similarDate = getSimilarDate (MILLISEC_PER_SEC*realStart, MILLISEC_PER_SEC*Long.valueOf(queryRange[1]));
+   	   		similarDate = getSimilarDate (MILLISEC_PER_SEC*realStart, 
+   	   				MILLISEC_PER_SEC*Long.valueOf(queryRange[1]));
    	   		
    	   		synchronized (synch) {
-   	   			if (stage == null)
-   	   				setStage(similarDate, MILLISEC_PER_SEC*realStart);
+   	   			if (stagelist == null) {
+   	   				stagelist = new ArrayList ();
+   	   				stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*realStart));
+   	   			}
    	   		}
-
-   	   		
     	} else {
     		if (nextEpoch(realStart*MILLISEC_PER_SEC)) {
     			ResultSet rs;
     			int num = 0; 
     			similarDate = new ArrayList ();
     			while (similarDate.size() < sSpec.getNumOfDays() && num < MAX_HISTORY/LOOKBACK) {
-    				rs = stmt.executeQuery(similarWeather(MILLISEC_PER_SEC*(realStart+num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN), getRainfall(realStart)));
+    				rs = stmt.executeQuery(similarWeather(
+    						MILLISEC_PER_SEC*(realStart+num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN), 
+    						getRainfall(realStart)));
     				extractSimilarDate (similarDate, rs);
     				num++;
     			}
     		} 
     		
     		synchronized (synch) {
-	    		if (stage == null)
-	    			setStage(similarDate, MILLISEC_PER_SEC*realStart);
-	    		else
+	    		if (stagelist == null) {
+	    			stagelist = new ArrayList ();
+	    			stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*realStart));
+	    		} else {
 	    			// change stage
-	    			setStage(similarDate, stage.starttime);
+	    			long startTS = stagelist.get(0).starttime;
+	    			stagelist.add(setStage(similarDate, startTS));
+	    		}
     		}
     		
     	}
@@ -538,18 +561,20 @@ public class DBThread extends SourceThread {
      * @return
      */
     private String newQuery (ArrayList <Long> date, long start, long end) {
-    	
+    	assert (stagelist != null): "how can stagelist be null";
     	synchronized (synch) {
-			if (activeActors == null) {
-				activeActors = new Actors();
-				activeActors.starts = new ArrayList <Long> ();
-				activeActors.ends = new ArrayList <Long> ();
-				activeActors.status = new ArrayList ();
+    		Stage curr = stagelist.get(stagelist.size() - 1);
+    		
+			if (curr.activeActors == null) {
+				curr.activeActors = new Actors();
+				curr.activeActors.starts = new ArrayList <Long> ();
+				curr.activeActors.ends = new ArrayList <Long> ();
+				curr.activeActors.status = new ArrayList ();
 			}
-			activeActors.dates = date;
-			activeActors.starts.add(start);
-			activeActors.ends.add(end);
-			activeActors.status.add(Status.FUTURE);
+			//activeActors.dates = date;
+			curr.activeActors.starts.add(start);
+			curr.activeActors.ends.add(end);
+			curr.activeActors.status.add(Status.FUTURE);
 		}
 
 		
@@ -602,13 +627,17 @@ public class DBThread extends SourceThread {
 	 * @param date
 	 * @param start
 	 */
-	private void setStage(ArrayList<Long> date, long start) {
-		if (stage == null) 
-			stage = new Stage ();
+	private Stage setStage(ArrayList<Long> date, long start) {
+		 
+		Stage	stage = new Stage ();
 		
 		stage.starttime = start;
 		stage.endtime = stage.starttime + ONE_DEMO_RUN;
-		stage.startdate = Long.MAX_VALUE;
+        stage.dates = new ArrayList <Long> ();
+        stage.dates = date; 
+        
+        return stage;
+		/*stage.startdate = Long.MAX_VALUE;
 		stage.enddate = Long.MIN_VALUE;
 		
 		for ( Long time : date) {
@@ -616,7 +645,7 @@ public class DBThread extends SourceThread {
 				stage.startdate = time;
 			if (time > stage.enddate)
 				stage.enddate = time;
-		}
+		}*/
 	}
     
 	/**
@@ -803,7 +832,7 @@ public class DBThread extends SourceThread {
 		int count = 0;
 		
 		while (rs.next() && count < sSpec.getNumOfDays()) {
-			time = rs.getDate(1).getTime();
+			time = rs.getDate(TIME_COLUMN).getTime();
 			similarDate.add(time);
 			count++;
 		}
@@ -834,7 +863,7 @@ public class DBThread extends SourceThread {
     public void getInstrumentationValues(ArrayList<String> instrumentationNames, ArrayList<Object> instrumentationValues) {
 
     	synchronized (synch) {
-	    	if (stage == null || activeActors == null)
+    		if (stagelist == null)
 	        	return; 
 	
 	    	try {
@@ -852,47 +881,62 @@ public class DBThread extends SourceThread {
 	        }
 	        
 			// first set up the stage
-			instrumentationNames.add("stage");
-			Element stageElt = doc.createElement("stage");
-			stageElt.setAttribute("starttime", String.valueOf(stage.starttime));
-			stageElt.setAttribute("endtime", String.valueOf(stage.endtime));
-			stageElt.setAttribute("startdate", String.valueOf(stage.startdate));
-			stageElt.setAttribute("enddate", String.valueOf(stage.enddate));
-			
-	        Element actorsElt = doc.createElement("actors");
-	        Element actElt;
-	        if (exeunt != null) {
-	        	for (int i = 0; i < exeunt.starts.size(); i++) {
-	        		actElt = doc.createElement("actor");
-	        		actElt.setAttribute("start", String.valueOf(exeunt.starts.get(i)));
-	        		actElt.setAttribute("end", String.valueOf(exeunt.ends.get(i)));
-	        		actElt.setAttribute("status", "done");
-	        		actorsElt.appendChild(actElt);
-	        	}
-	        }
-	        
-	    	for (int i = 0; i < activeActors.starts.size(); i++) {
-	    		actElt = doc.createElement("actor");
-	    		actElt.setAttribute("start", String.valueOf(activeActors.starts.get(i)));
-	    		actElt.setAttribute("end", String.valueOf(activeActors.ends.get(i)));
-	    		switch (activeActors.status.get(i)) {
-	    		case PROGRESS:
-	    			actElt.setAttribute("status", "progress");
-	    			break;
-	    		
-	    		case FUTURE:
-	    			actElt.setAttribute("status", "future");
-	    			break;
-	    		
-	    		default:
-	    			System.err.println ("supported actor status");
-	    		}
-	    		actorsElt.appendChild(actElt);
-	    	}
-	
-		stageElt.appendChild(actorsElt);
-	        instrumentationValues.add(stageElt);
+
+			instrumentationNames.add("stagelist");
+			Element stagelistElt = doc.createElement("stagelist");
+			for (int i = 0; i < stagelist.size(); i++) {
+				Element stageElt = doc.createElement ("stage"+i); 
+				Stage curr = stagelist.get(i);
+				stageElt.setAttribute("starttime", String.valueOf(curr.starttime));
+				stageElt.setAttribute("endtime", String.valueOf(curr.endtime));
+	            StringBuffer datelist = new StringBuffer();
+	            for (int j = 0; j < curr.dates.size(); j++) {
+	                datelist.append (String.valueOf(curr.dates.get(j))+ " ");
+	            }
+	            stageElt.setAttribute("dates", datelist.toString());
+				//stageElt.setAttribute("dates", String.valueOf(stage.startdate));
+				//stageElt.setAttribute("enddate", String.valueOf(stage.enddate));
+				//instrumentationValues.add(stageElt);
+				
+		        // send actors
+		        //instrumentationNames.add("actors");
+		        
+		        Element actorsElt = doc.createElement("actors");
+		        Element actElt;
+		        if (curr.exeunt != null) {
+		        	for (int j = 0; j < curr.exeunt.starts.size(); j++) {
+		        		actElt = doc.createElement("actor");
+		        		actElt.setAttribute("start", String.valueOf(curr.exeunt.starts.get(j)));
+		        		actElt.setAttribute("end", String.valueOf(curr.exeunt.ends.get(j)));
+		        		actElt.setAttribute("status", "done");
+		        		actorsElt.appendChild(actElt);
+		        	}
+		        }
+		        
+		    	for (int j = 0; j < curr.activeActors.starts.size(); j++) {
+		    		actElt = doc.createElement("actor");
+		    		actElt.setAttribute("start", String.valueOf(curr.activeActors.starts.get(j)));
+		    		actElt.setAttribute("end", String.valueOf(curr.activeActors.ends.get(j)));
+		    		switch (curr.activeActors.status.get(i)) {
+		    		case PROGRESS:
+		    			actElt.setAttribute("status", "progress");
+		    			break;
+		    		
+		    		case FUTURE:
+		    			actElt.setAttribute("status", "future");
+		    			break;
+		    		
+		    		default:
+		    			System.err.println ("supported actor status");
+		    		}
+		    		actorsElt.appendChild(actElt);
+		    	}
+		    	stageElt.appendChild(actorsElt);
+		    	stagelistElt.appendChild(stageElt);
+			}
+	    	instrumentationValues.add(stagelistElt);
     	}
+
     	//printElt ( (Element) instrumentationValues.get(0));
     	//printElt ( (Element) instrumentationValues.get(1));
     	
