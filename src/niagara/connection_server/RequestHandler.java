@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.38 2007/05/19 01:28:41 jinli Exp $
+  $Id: RequestHandler.java,v 1.39 2007/05/20 00:29:46 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -324,7 +324,15 @@ public class RequestHandler {
                             "Query suspension no longer allowed");
 
                 case KILL_QUERY:
+                    String id = request.requestData.trim();                 
+                    Plan prepared = catalog.getPreparedPlan(id);
+
+                	if (prepared!=null) {
+                        sendErrMessage(request, ResponseMessage.ERROR, 
+                        		"Kill prepared query with kill-prepared");                        
+                	} else {
                     killQuery(request.serverID);
+                	}
                     break;
 
                 case GET_NEXT:

@@ -1,5 +1,5 @@
 /*
- * $Id: StreamThread.java,v 1.32 2007/04/30 19:19:05 vpapad Exp $
+ * $Id: StreamThread.java,v 1.33 2007/05/20 00:29:46 jinli Exp $
  */
 
 package niagara.data_manager;
@@ -185,7 +185,8 @@ public class StreamThread extends SourceThread {
 	    }
 		
 	} catch (org.xml.sax.SAXException saxE){
-	    System.err.println("StreamThread::SAX exception parsing document. Message: " 
+	    //System.err.println("StreamThread::SAX exception parsing document. Message: " 
+		System.err.println("StreamThread::Message: "
 			       + saxE.getMessage());
 	    shutdown = true;
 	    message = "SAX Exception " + saxE.getMessage();
