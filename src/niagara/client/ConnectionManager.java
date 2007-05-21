@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ConnectionManager.java,v 1.22 2007/05/18 00:25:28 jinli Exp $
+  $Id: ConnectionManager.java,v 1.23 2007/05/21 18:51:01 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -154,16 +154,15 @@ public class ConnectionManager implements QueryExecutionIF {
 	    reg.registerQuery(id, query);
 	// Set the query type
 	e.type = queryType;
-	    
+	   
+  // kt - here is where messages to be sent to server are
+  // prepared
 	synchronized(writer){
 	    writer.println(formatMessageHeader(id, -1, attr));
 	    writer.println(BEGIN_REQUEST_DATA);
 
 	    writer.println("<![CDATA[");
 		
-	    System.out.println(formatMessageHeader(id, -1, attr));
-	    System.out.println(BEGIN_REQUEST_DATA);
-	    System.out.println("<![CDATA[");
 	    // XXX this is total hack!
 	    // the query may contain CDATA sections itself (argh!)
 	    // Hack as follows:
@@ -177,10 +176,6 @@ public class ConnectionManager implements QueryExecutionIF {
 		writer.println("]]>");
 		writer.println(END_REQUEST_DATA);
 		writer.println(END_REQUEST_MESSAGE);
-		System.out.println(esc);
-		System.out.println("]]>");
-		System.out.println(END_REQUEST_DATA);
-		System.out.println(END_REQUEST_MESSAGE);
 	    }
                 catch (REException rexc) {
                     System.out.println("CDATA escaping: regular expression failure");
