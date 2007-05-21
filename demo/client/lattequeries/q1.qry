@@ -21,7 +21,7 @@ type="one_time"
 attr_names="detectorid, svgid"
 attr_types="int string"/>
 
-<join id="addSVGId" left="stdetectorid" right="detectorid" punctattr="" input="dup svgid_relation">
+<join id="addSVGId" left="stdetectorid" right="detectorid" punctattr="time_t, " input="dup svgid_relation">
 </join>
 
 <bucket id="bucket" wintype="1" winattr="time_t" range="180" slide="60" input="addSVGId"/>
