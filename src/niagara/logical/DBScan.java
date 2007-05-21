@@ -1,4 +1,4 @@
-// $Id: DBScan.java,v 1.4 2007/05/21 05:00:26 tufte Exp $
+// $Id: DBScan.java,v 1.5 2007/05/21 15:41:07 tufte Exp $
 
 package niagara.logical;
 
@@ -82,18 +82,20 @@ public class DBScan extends NullaryOperator  {
         	variables[i] = new Variable(attrNames[i]);	
         }
         
-        String similarityStr = e.getAttribute("similarity");
-        if(similarityStr == ""  || similarityStr == null) {
-          throw new InvalidPlanException("Null or empty similarity string");
-        }
-        String [] similarityMetric = e.getAttribute("similarity").split("[\t | ]+");
-       	sSpec = new SimilaritySpec(similarityMetric[0], 
-       				Integer.valueOf(similarityMetric[1]), Integer.valueOf(similarityMetric[2]), false);
-       	// if weather is the fourth of our similarity metric
-       	if (similarityMetric.length == 4) {
-       		if (similarityMetric[3].compareToIgnoreCase("weather") == 0)
-       			sSpec.setWeather(true);
-       	}
+      String similarityStr = e.getAttribute("similarity");
+      if (similarityStr != "") {
+      	String [] similarityMetric = e.getAttribute("similarity").split("[\t | ]+");
+        if(similarityMetric.length != 3 &&
+            similarityMetric.length != 4) 
+          throw new InvalidPlanException("Invalid similarity string " + similarityStr);
+     		sSpec = new SimilaritySpec(similarityMetric[0], 
+     				Integer.valueOf(similarityMetric[1]), Integer.valueOf(similarityMetric[2]), false);
+     		// if weather is the fourth of our similarity metric
+     		if (similarityMetric.length == 4) {
+     			if (similarityMetric[3].compareToIgnoreCase("weather") == 0)
+     				sSpec.setWeather(true);
+     		}
+      }
     }  
     
     public SimilaritySpec getSimilaritySpec() {
