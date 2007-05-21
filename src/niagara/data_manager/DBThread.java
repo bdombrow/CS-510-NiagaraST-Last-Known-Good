@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.9 2007/05/20 21:05:37 jinli Exp $ */
+/* $Id: DBThread.java,v 1.10 2007/05/21 00:13:59 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -885,7 +885,7 @@ public class DBThread extends SourceThread {
 			instrumentationNames.add("stagelist");
 			Element stagelistElt = doc.createElement("stagelist");
 			for (int i = 0; i < stagelist.size(); i++) {
-				Element stageElt = doc.createElement ("stage"+i); 
+				Element stageElt = doc.createElement ("stage"); 
 				Stage curr = stagelist.get(i);
 				stageElt.setAttribute("starttime", String.valueOf(curr.starttime));
 				stageElt.setAttribute("endtime", String.valueOf(curr.endtime));
@@ -901,7 +901,7 @@ public class DBThread extends SourceThread {
 		        // send actors
 		        //instrumentationNames.add("actors");
 		        
-		        Element actorsElt = doc.createElement("actors");
+		        //Element actorsElt = doc.createElement("actors");
 		        Element actElt;
 		        if (curr.exeunt != null) {
 		        	for (int j = 0; j < curr.exeunt.starts.size(); j++) {
@@ -909,7 +909,8 @@ public class DBThread extends SourceThread {
 		        		actElt.setAttribute("start", String.valueOf(curr.exeunt.starts.get(j)));
 		        		actElt.setAttribute("end", String.valueOf(curr.exeunt.ends.get(j)));
 		        		actElt.setAttribute("status", "done");
-		        		actorsElt.appendChild(actElt);
+		        		//actorsElt.appendChild(actElt);
+		        		stageElt.appendChild(actElt);
 		        	}
 		        }
 		        
@@ -929,9 +930,10 @@ public class DBThread extends SourceThread {
 		    		default:
 		    			System.err.println ("supported actor status");
 		    		}
-		    		actorsElt.appendChild(actElt);
+		    		//actorsElt.appendChild(actElt);
+		    		stageElt.appendChild(actElt);
 		    	}
-		    	stageElt.appendChild(actorsElt);
+		    	//stageElt.appendChild(actorsElt);
 		    	stagelistElt.appendChild(stageElt);
 			}
 	    	instrumentationValues.add(stagelistElt);
