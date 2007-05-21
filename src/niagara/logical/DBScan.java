@@ -1,4 +1,4 @@
-// $Id: DBScan.java,v 1.3 2007/05/10 04:51:17 jinli Exp $
+// $Id: DBScan.java,v 1.4 2007/05/21 05:00:26 tufte Exp $
 
 package niagara.logical;
 
@@ -83,16 +83,17 @@ public class DBScan extends NullaryOperator  {
         }
         
         String similarityStr = e.getAttribute("similarity");
-        if (similarityStr != "") {
-        	String [] similarityMetric = e.getAttribute("similarity").split("[\t | ]+");
-       		sSpec = new SimilaritySpec(similarityMetric[0], 
-       				Integer.valueOf(similarityMetric[1]), Integer.valueOf(similarityMetric[2]), false);
-       		// if weather is the fourth of our similarity metric
-       		if (similarityMetric.length == 4) {
-       			if (similarityMetric[3].compareToIgnoreCase("weather") == 0)
-       				sSpec.setWeather(true);
-       		}
+        if(similarityStr == ""  || similarityStr == null) {
+          throw new InvalidPlanException("Null or empty similarity string");
         }
+        String [] similarityMetric = e.getAttribute("similarity").split("[\t | ]+");
+       	sSpec = new SimilaritySpec(similarityMetric[0], 
+       				Integer.valueOf(similarityMetric[1]), Integer.valueOf(similarityMetric[2]), false);
+       	// if weather is the fourth of our similarity metric
+       	if (similarityMetric.length == 4) {
+       		if (similarityMetric[3].compareToIgnoreCase("weather") == 0)
+       			sSpec.setWeather(true);
+       	}
     }  
     
     public SimilaritySpec getSimilaritySpec() {
