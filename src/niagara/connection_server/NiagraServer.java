@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.34 2007/04/30 19:17:11 vpapad Exp $
+  $Id: NiagraServer.java,v 1.35 2007/05/22 21:48:43 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -343,6 +343,9 @@ public class NiagraServer {
     /** Simple method for info messages - just outputs to stdout now
      * we can extend it later to do something fancier */
     public static void info(String msg) {
-        cout(msg);
+        cout("INFO: " + msg);
+    }
+    public static void warning(String msg) {
+        cerr("WARNING: " + msg);
     }
 }

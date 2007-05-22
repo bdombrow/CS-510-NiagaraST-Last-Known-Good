@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.18 2007/05/22 20:10:03 vpapad Exp $
+ * $Id: Catalog.java,v 1.19 2007/05/22 21:48:42 vpapad Exp $
  *  
  */
 
@@ -56,6 +56,7 @@ public class Catalog implements ICatalog {
     /** Prepared plans */
     private int preparedPlanID = 0;
     private HashMap<String, Plan> preparedPlans = new HashMap<String, Plan>();
+    private Stack<String> orderedPlanIDs = new Stack<String>();
     /** Registry for instrumented operators */
     private HashMap<String, HashMap<String, Instrumentable>> planIDs2operators = new HashMap<String, HashMap<String, Instrumentable>>();
     private HashMap<String, ServerQueryInfo> runningPlans = new HashMap<String, ServerQueryInfo>();
@@ -621,32 +622,35 @@ public class Catalog implements ICatalog {
     }
 
     public String storePreparedPlan(Plan plan) 
-       throws InvalidPlanException {
-        synchronized (preparedPlans) {
-            preparedPlanID++;
-	    String planID = plan.getPlanID();
-      if(preparedPlans.containsKey(planID))
-        throw new InvalidPlanException("PlanID Already Exists");
-	    if (planID == null || planID.length() == 0)
-		        planID = String.valueOf(preparedPlanID);
-            preparedPlans.put(planID, plan);
-            return planID;
-        }
+    throws InvalidPlanException {
+    	synchronized (preparedPlans) {
+    		preparedPlanID++;
+    		String planID = plan.getPlanID();
+    		if(preparedPlans.containsKey(planID))
+    			throw new InvalidPlanException("PlanID Already Exists");
+    		if (planID == null || planID.length() == 0)
+    			planID = String.valueOf(preparedPlanID);
+    		preparedPlans.put(planID, plan);
+    		orderedPlanIDs.push(planID);
+    		return planID;
+    	}
     }
     
     public Instrumentable getOperator(String planID, String operatorName) {
-        synchronized (preparedPlans) {
-            HashMap<String, Instrumentable> hm = planIDs2operators.get(planID);
-            if (hm == null && planID.equals("*")) {
-            	Plan p = getPreparedPlan("*");
-            	if (p == null) 
-            		return null;
-            	hm = planIDs2operators.get(p.getPlanID());
-            }
-            if (hm == null)
-            	return null;
-            return hm.get(operatorName);
-        }
+    	synchronized (preparedPlans) {
+    		HashMap<String, Instrumentable> hm = planIDs2operators.get(planID);
+    		if (hm == null) {
+    			if (planID.equals("*")) {
+    				if (orderedPlanIDs.isEmpty())
+    					return null;
+    				if (orderedPlanIDs.size() > 1)
+    					NiagraServer.warning("Querying for planid=* when multiple plans are prepared");
+    				return getOperator(orderedPlanIDs.peek(), operatorName);
+    			}
+    			return null;
+    		}
+    		return hm.get(operatorName);
+    	}
     }
     
     public String instrumentPlan(String planID) {
@@ -666,31 +670,28 @@ public class Catalog implements ICatalog {
         synchronized (preparedPlans) {
             Plan plan = preparedPlans.get(planID);
             if (plan == null && planID.equals("*")) {
-            	// * => return a plan, any plan
-            	Collection<Plan> coll = preparedPlans.values();
-            	if (!coll.isEmpty()) {
-            		plan = (Plan) coll.toArray()[0];
-            	}
+            		return getPreparedPlan(orderedPlanIDs.peek());
             }
             return plan;
         }
     }
     
     public ServerQueryInfo getQueryInfo(String planID) {
-    	synchronized(runningPlans) {
-	   if (runningPlans.containsKey(planID))
-	   	return runningPlans.get(planID);
-	   else return null;
-	}
+    	synchronized(preparedPlans) {
+    		return runningPlans.get(planID);
+    	}
     }
 
     public void registerQueryInfo(String planID, ServerQueryInfo sqi) {
-    	runningPlans.put(planID, sqi);
+    	synchronized(preparedPlans) {
+    		runningPlans.put(planID, sqi);
+    	}
     }
     
     public void removePreparedPlan(String planID) {
         synchronized (preparedPlans) {
             preparedPlans.remove(planID);
+            orderedPlanIDs.remove(planID);
             planIDs2operators.remove(planID);
             runningPlans.remove(planID);
         }
@@ -698,9 +699,10 @@ public class Catalog implements ICatalog {
     
     public boolean isActive(String planID) {
         synchronized(preparedPlans) {
-        	if (planID.equals("*"))
-        		return (!planIDs2operators.isEmpty());
-            return planIDs2operators.containsKey(planID);
+        	boolean active = planIDs2operators.containsKey(planID); 
+        	if (!active && planID.equals("*"))
+        		return isActive(orderedPlanIDs.peek());
+            return active; 
         }
     }
     
