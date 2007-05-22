@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.10 2007/05/21 00:13:59 jinli Exp $ */
+/* $Id: DBThread.java,v 1.11 2007/05/22 22:25:56 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -52,6 +52,8 @@ public class DBThread extends SourceThread {
     private static final int WEATHER_OFFSET = 1; 
     private static final int TIME_COLUMN = 1;
 
+	private final boolean DEBUG = false;
+	
 	// think these are optimization time??
 	public DBScanSpec dbScanSpec;
 	private Attribute[] variables;
@@ -281,7 +283,8 @@ public class DBThread extends SourceThread {
 
 					
 					String queryString = (String) newQueries.remove(0);
-					System.err.println(queryString);
+					if (DEBUG)
+						System.err.println(queryString);
 					
 					// an actor is in progress
 					synchronized (synch) {
@@ -813,7 +816,9 @@ public class DBThread extends SourceThread {
 		queryString.append(" group by reporttime having avg(rainfall) >=" + (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall + WEATHER_OFFSET));
 		queryString.append(" order by abs(avg(rainfall) - " + rainfall + ")");
 		
-		System.err.println(queryString.toString());
+		if (DEBUG)
+			System.err.println(queryString.toString());
+		
 		return queryString.toString();
 	}
 	
