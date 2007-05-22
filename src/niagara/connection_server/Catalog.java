@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.16 2007/05/19 16:57:05 vpapad Exp $
+ * $Id: Catalog.java,v 1.17 2007/05/22 19:33:38 vpapad Exp $
  *  
  */
 
@@ -637,8 +637,11 @@ public class Catalog implements ICatalog {
     public Instrumentable getOperator(String planID, String operatorName) {
         synchronized (preparedPlans) {
             HashMap<String, Instrumentable> hm = planIDs2operators.get(planID);
+            if (hm == null && planID.equals("*")) {
+            	hm = planIDs2operators.get(getPreparedPlan("*").getPlanID());
+            }
             if (hm == null)
-                return null;
+            	return null;
             return hm.get(operatorName);
         }
     }
@@ -658,7 +661,15 @@ public class Catalog implements ICatalog {
         // XXX vpapad: Remember that prepared plans cannot 
         // currently be executed more than once
         synchronized (preparedPlans) {
-            return preparedPlans.get(planID);
+            Plan plan = preparedPlans.get(planID);
+            if (plan == null && planID.equals("*")) {
+            	// * => return a plan, any plan
+            	Collection<Plan> coll = preparedPlans.values();
+            	if (!coll.isEmpty()) {
+            		plan = (Plan) coll.toArray()[0];
+            	}
+            }
+            return plan;
         }
     }
     
@@ -684,6 +695,8 @@ public class Catalog implements ICatalog {
     
     public boolean isActive(String planID) {
         synchronized(preparedPlans) {
+        	if (planID.equals("*"))
+        		return (!planIDs2operators.isEmpty());
             return planIDs2operators.containsKey(planID);
         }
     }
