@@ -211,7 +211,7 @@ public class SimpleClient implements UIDriverIF {
                 got_type = true;
                 request.type = QueryType.EXPLAIN;
                 request.value = args[i+1];
-                i += 1;
+                i += 2;
             } else if (args[i].equals("-x")) {
                 request.repetitions = Integer.parseInt(args[i + 1]);
                 i += 2;
