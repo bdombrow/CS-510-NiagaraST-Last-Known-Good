@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PrefetchSpec.java,v 1.2 2007/04/28 21:24:47 jinli Exp $
+  $Id: PrefetchSpec.java,v 1.3 2007/05/22 22:18:55 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -33,7 +33,8 @@
 package niagara.logical;
 
 public class PrefetchSpec {
-  // prefetch and coverage are specified in minutes;
+  
+  // prefetch and coverage are specified in seconds;
 	
   private int prefetchVal;
   private int coverage;
@@ -62,8 +63,8 @@ public class PrefetchSpec {
 
   public PrefetchSpec(String pfSpecStr) {
 	  String[] parameters = pfSpecStr.split("[\t| ]+" );
-	  prefetchVal = Integer.valueOf(parameters[0]) * 60;
-	  coverage = Integer.valueOf(parameters[1]) * 60;
+	  prefetchVal = Integer.valueOf(parameters[0]);
+	  coverage = Integer.valueOf(parameters[1]);
   }
 
   public PrefetchType getPrefetchType() {
