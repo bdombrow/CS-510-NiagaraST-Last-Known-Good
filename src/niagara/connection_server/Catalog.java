@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.17 2007/05/22 19:33:38 vpapad Exp $
+ * $Id: Catalog.java,v 1.18 2007/05/22 20:10:03 vpapad Exp $
  *  
  */
 
@@ -638,7 +638,10 @@ public class Catalog implements ICatalog {
         synchronized (preparedPlans) {
             HashMap<String, Instrumentable> hm = planIDs2operators.get(planID);
             if (hm == null && planID.equals("*")) {
-            	hm = planIDs2operators.get(getPreparedPlan("*").getPlanID());
+            	Plan p = getPreparedPlan("*");
+            	if (p == null) 
+            		return null;
+            	hm = planIDs2operators.get(p.getPlanID());
             }
             if (hm == null)
             	return null;
