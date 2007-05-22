@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.11 2007/05/22 22:25:56 jinli Exp $ */
+/* $Id: DBThread.java,v 1.12 2007/05/22 23:09:16 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -303,6 +303,7 @@ public class DBThread extends SourceThread {
 					int numAttrs = dbScanSpec.getNumAttrs();
 									
 					putResults(rs, numAttrs);
+					
 					
 					// the actor is done, moved to exeunt list;
 					synchronized (synch) {
@@ -919,13 +920,16 @@ public class DBThread extends SourceThread {
 		        	}
 		        }
 		        
+		        boolean flag = false;
 		    	for (int j = 0; j < curr.activeActors.starts.size(); j++) {
 		    		actElt = doc.createElement("actor");
 		    		actElt.setAttribute("start", String.valueOf(curr.activeActors.starts.get(j)));
 		    		actElt.setAttribute("end", String.valueOf(curr.activeActors.ends.get(j)));
-		    		switch (curr.activeActors.status.get(i)) {
+		    		switch (curr.activeActors.status.get(j)) {
 		    		case PROGRESS:
 		    			actElt.setAttribute("status", "progress");
+		    			assert !flag: "progress stuff!";
+		    			flag = true;
 		    			break;
 		    		
 		    		case FUTURE:
