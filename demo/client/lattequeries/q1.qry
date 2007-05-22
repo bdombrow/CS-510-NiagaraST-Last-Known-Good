@@ -3,7 +3,7 @@
 
 <plan top="cons" planID="q1">
 
-<filescan id="ld" isstream="yes" delay="1000"
+<filescan id="ld" isstream="yes" delay="20"
 filename="/stash/datalab/latte/data/2007-02-06_midday.xml"/>
 
 <unnest id="dts" regexp="dts" datatype="XML" input="ld"/>
@@ -12,7 +12,13 @@ filename="/stash/datalab/latte/data/2007-02-06_midday.xml"/>
 <unnest id="stdetectorid" regexp="i" root="$d" datatype="Integer" input="d"/>
 <unnest id="stspeed" regexp="s" root="$d" datatype="Integer" input="stdetectorid"/>
 
-<dup id="dup" branch="2" input="stspeed"/>
+<select id="sel" input="stspeed">
+<pred op="gt">
+       <var value="$stspeed"></var><number value ="0"></number>
+</pred>
+</select>
+
+<dup id="dup" input="sel" branch="2"/>
 
 <dbscan id="svgid_relation" 
 query_string="select DISTINCT detectorid, svgid from detector_svgids"
@@ -34,7 +40,7 @@ query_string= "select floor(extract('epoch' from (starttime - (TIMESTAMP '2007-0
 panetime, svgid, avg(speed)
 from loopdata_20sec, detector_svgids  where detector_svgids.detectorid = loopdata_20sec.detectorid and TIMEPREDICATE group by panetime, svgid"
 
-similarity = "sdow  5  3"
+similarity = "week  5  3 true"
 timeattr="starttime"
 attr_names="panetime dbsvgid dbspeed"
 attr_types="TS string int"/>
@@ -43,7 +49,7 @@ attr_types="TS string int"/>
 timeattr="starttime"
 punctattr="panetime time_t"
 puncttype = "onchange"
-prefetch = "4  10"
+prefetch = "0  20"
 input="archive dup"/>
 
 <bucket id="bucket_archive" wintype="1" winattr="panetime" range="6" slide="1" start="0" input="pqc" />
