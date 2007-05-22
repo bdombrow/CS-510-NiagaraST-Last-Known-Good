@@ -1,5 +1,5 @@
 /*
- * $Id: Catalog.java,v 1.19 2007/05/22 21:48:42 vpapad Exp $
+ * $Id: Catalog.java,v 1.20 2007/05/22 22:18:08 vpapad Exp $
  *  
  */
 
@@ -669,7 +669,7 @@ public class Catalog implements ICatalog {
         // currently be executed more than once
         synchronized (preparedPlans) {
             Plan plan = preparedPlans.get(planID);
-            if (plan == null && planID.equals("*")) {
+            if (plan == null && planID.equals("*") && !orderedPlanIDs.empty()) {
             		return getPreparedPlan(orderedPlanIDs.peek());
             }
             return plan;
@@ -701,7 +701,7 @@ public class Catalog implements ICatalog {
         synchronized(preparedPlans) {
         	boolean active = planIDs2operators.containsKey(planID); 
         	if (!active && planID.equals("*"))
-        		return isActive(orderedPlanIDs.peek());
+        		return (!orderedPlanIDs.isEmpty()) && isActive(orderedPlanIDs.peek());
             return active; 
         }
     }
