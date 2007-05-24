@@ -3,7 +3,6 @@
 <title>Database Access Patterns</title>
 <LINK rel="stylesheet" type="text/css" href="demo.css">
 </head>
-<script type="text/javascript;e4x=1" src="console.js"></script>
 <script type="text/javascript;e4x=1" src="util.js"></script>
 <script type="text/javascript;e4x=1" src="textcanvas.js"></script>
 <script type="text/javascript;e4x=1" src="canvas.js"></script>
@@ -13,6 +12,9 @@
 
 <body onload="on_load();" onresize="on_resize();">
 <div id="canvasContainer"></div>
-<p><div id="status">Status: Loading</div></p>
+<canvas id="bufferCanvas" height="500" width="500"></canvas>
+<button id="restart" onClick="restart();">(Re)start</button>
+<button id="snapshot" onClick="snapshot();">Snapshot</button>
+<div id="status">Status: Not started</div>
 </body>
 </html>

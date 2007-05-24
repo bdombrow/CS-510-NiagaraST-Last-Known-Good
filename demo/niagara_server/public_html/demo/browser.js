@@ -5,6 +5,10 @@ function on_resize() {
 function on_load() {
 	init_canvas();
 	resize_canvas();
+}
+
+function restart() {
+	reset_canvas();
 	submit_query();
 }
 
