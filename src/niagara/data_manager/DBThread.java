@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.13 2007/05/24 03:46:47 jinli Exp $ */
+/* $Id: DBThread.java,v 1.14 2007/05/24 04:22:18 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -45,7 +45,7 @@ public class DBThread extends SourceThread {
 	public static final int HOUR_PER_DAY = 24;
     public static final int DAYS_PER_WEEK = 7;
     
-    private static final int ONE_DEMO_RUN = 2 * MIN_PER_HOUR * SECOND_PER_MIN * MILLISEC_PER_SEC;
+    private static final int ONE_DEMO_RUN = 4 * MIN_PER_HOUR * SECOND_PER_MIN * MILLISEC_PER_SEC;
     
     // the maximum prefetch allowed; in seconds;
     private static final long LOOK_AHEAD = 600; 
@@ -54,7 +54,7 @@ public class DBThread extends SourceThread {
     private static final int PANE = 60;
     
     private static final double RATIO = 0.5;
-    
+       
     // weather similarity hack;
     private static final int MAX_HISTORY = 60;
     private static final int LOOKBACK = 30;
