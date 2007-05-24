@@ -3,7 +3,7 @@
 
 <plan top="cons" planID="q1">
 
-<filescan id="ld" isstream="yes" delay="20"
+<filescan id="ld" isstream="yes" delay="0"
 filename="/stash/datalab/latte/data/2007-02-06_midday.xml"/>
 
 <unnest id="dts" regexp="dts" datatype="XML" input="ld"/>
@@ -41,6 +41,7 @@ panetime, svgid, avg(speed)
 from loopdata_20sec, detector_svgids  where detector_svgids.detectorid = loopdata_20sec.detectorid and TIMEPREDICATE group by panetime, svgid"
 
 similarity = "week  5  3 true"
+prefetch = "600 20"
 timeattr="starttime"
 attr_names="panetime dbsvgid dbspeed"
 attr_types="TS string int"/>
@@ -49,7 +50,6 @@ attr_types="TS string int"/>
 timeattr="starttime"
 punctattr="panetime time_t"
 puncttype = "onchange"
-prefetch = "0  20"
 input="archive dup"/>
 
 <bucket id="bucket_archive" wintype="1" winattr="panetime" range="6" slide="1" start="0" input="pqc" />
