@@ -1,4 +1,4 @@
-/* $Id: PhysicalPredicatedUnnest.java,v 1.3 2006/10/24 22:08:34 jinli Exp $ */
+/* $Id: PhysicalPredicatedUnnest.java,v 1.4 2007/05/24 22:54:20 vpapad Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -118,7 +118,8 @@ public class PhysicalPredicatedUnnest extends PhysicalOperator {
                 tuple = inputTuple.copy(outSize);
 
             if (reallyUnnesting)
-                tuple.setAttribute(outputPos, n);
+                tuple.setAttribute(outputPos, 
+                		BaseAttr.createAttr(inputTuple, n, variable));
 
             putTuple(tuple, 0);
         }

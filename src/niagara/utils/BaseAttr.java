@@ -1,5 +1,7 @@
 package niagara.utils;
 
+import niagara.optimizer.colombia.Attribute;
+
 import org.w3c.dom.Node;
 
 public abstract class BaseAttr {
@@ -60,6 +62,37 @@ public abstract class BaseAttr {
         	throw new PEException ("JL: Unsupported data type: " + attrType.toString() + " :");
 
 		attr.wildStar();
+		return attr;
+	}
+
+	public static BaseAttr createAttr(Tuple inputTuple, Node n, 
+			Attribute variable) {
+		BaseAttr attr;
+		BaseAttr.Type type = variable.getDataType(); 
+
+		switch (type) {
+		case String: 
+			attr = new StringAttr();
+			break;
+		case Int: 
+			attr = new IntegerAttr();
+			break;
+		case Long: 
+			attr = new LongAttr();
+			break;
+		case TS: 
+			attr = new TSAttr();
+			break;
+		case XML: 
+			attr = new XMLAttr();
+			break;
+		default: 
+			throw new PEException ("JL: Unsupported data type");
+		}
+		if (inputTuple != null)
+			attr.loadFromXMLNode(n);
+		else
+			attr.loadPunctFromXMLNode(n);
 		return attr;
 	}
 	

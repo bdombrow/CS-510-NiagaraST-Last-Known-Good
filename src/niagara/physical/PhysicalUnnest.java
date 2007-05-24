@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.7 2007/03/08 22:34:29 tufte Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.8 2007/05/24 22:54:20 vpapad Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -115,32 +115,7 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         // Append a reachable node to the output tuple
         // and put the tuple in the output stream
         if (reallyUnnesting) {
-        	BaseAttr attr;
-        	BaseAttr.Type type = variable.getDataType(); 
-        	
-        	switch (type) {
-        	case String: 
-        		attr = new StringAttr();
-        		break;
-        	case Int: 
-        		attr = new IntegerAttr();
-        		break;
-        	case Long: 
-        		attr = new LongAttr();
-        		break;
-        	case TS: 
-        		attr = new TSAttr();
-        		break;
-        	case XML: 
-        		attr = new XMLAttr();
-        		break;
-        	default: 
-        		throw new PEException ("JL: Unsupported data type");
-        	}
-        	if (inputTuple != null)
-        		attr.loadFromXMLNode(n);
-        	else
-        		attr.loadPunctFromXMLNode(n);
+        	BaseAttr attr = BaseAttr.createAttr(inputTuple, n, variable);
         	//inputTuple.setAttribute(outputPos, attr);
         	if (inputTuple != null) {
         		inputTuple.setAttribute(outputPos, attr);
