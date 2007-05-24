@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalPunctQC.java,v 1.3 2007/05/10 04:54:45 jinli Exp $
+  $Id: PhysicalPunctQC.java,v 1.4 2007/05/24 03:46:49 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,7 +64,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
     private Attribute pAttr;
 	private PunctSpec pSpec;
     //private SimilaritySpec sSpec;
-    private PrefetchSpec pfSpec;
+    //private PrefetchSpec pfSpec;
     
     // punctuating attribute of the input stream, which we rely 
     // on to retrieve data from db
@@ -82,9 +82,6 @@ public class PhysicalPunctQC extends PhysicalOperator {
     // queryInterval should specify the coverage of each database query; 
     //private int queryGranularity = 1*20; //each database query covers 100 second data;
     
-    // high watermark on db data;
-    private long highWatermark;
-    
     // the time attribute of db data  
     private String timeAttr;
     
@@ -92,8 +89,11 @@ public class PhysicalPunctQC extends PhysicalOperator {
     
     private Long lastPunct = Long.MIN_VALUE;
     
-    private int count = 0;
+    // private int count = 0;
+    // high watermark on db data;
+    // private long highWatermark;
     
+
     public PhysicalPunctQC() {
         setBlockingSourceStreams(blockingSourceStreams);
     }
@@ -104,13 +104,13 @@ public class PhysicalPunctQC extends PhysicalOperator {
     // probably take attr here, and convert to idx in
     // opInitialize
     public PhysicalPunctQC(Attribute pAttr, String timeAttr, String queryString,
-				PunctSpec pSpec, PrefetchSpec pfSpec) {
+				PunctSpec pSpec) {
         setBlockingSourceStreams(blockingSourceStreams);
 
 				this.pAttr = pAttr;
 				this.pSpec = pSpec;
 				//this.sSpec = sSpec;
-				this.pfSpec = pfSpec;
+				//this.pfSpec = pfSpec;
 				this.timeAttr = timeAttr;
 				this.queryString = queryString;
     }
@@ -124,7 +124,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
 				pAttr = pop.getPunctAttr();
 				pSpec = pop.getPunctSpec();
 				//sSpec = pop.getSimilaritySpec();
-				pfSpec = pop.getPrefetchSpec();
+				//pfSpec = pop.getPrefetchSpec();
 				spAttr = pop.getStreamPunctAttr();
 				timeAttr = pop.getTimeAttr();
 				queryString = pop.getQueryString();
@@ -135,7 +135,6 @@ public class PhysicalPunctQC extends PhysicalOperator {
         // initialize ts to -1 so we can detect the first
         // tuple 
 		lastts= Long.MIN_VALUE;
-		highWatermark = Long.MIN_VALUE;
 
 		pIdx = new int[2];
 		
@@ -253,7 +252,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
 	    // Create a punctuation based on the last timestamp value
       // punct should be last ts value plus *s for all other
       // attrs
-      assert lastts > 0 : "uh-oh negative ts value!! KT ";
+      //assert lastts > 0 : "uh-oh negative ts value!! KT ";
 
       // HERE - FIX - DON'T KNOW HOW TO CREATE NEW * ATTRS
       Punctuation punct = new Punctuation(false); // what does false mean?
@@ -294,21 +293,18 @@ public class PhysicalPunctQC extends PhysicalOperator {
         	lastPunct = ts; 
         }
         
-        long start, end;
+    	int ctrlFlag = CtrlFlags.CHANGE_QUERY;
+
+    	sendCtrlMsgUpStream(ctrlFlag, String.valueOf(ts), 0);
+
+    	
+        /*long start, end;
         
         int prefetch = pfSpec.getPrefetchVal();
         
         if (highWatermark < ts+prefetch) {
             int queryCoverage = pfSpec.getCoverage();
 
-            /*start = ts + prefetch;
-        	end = start + queryCoverage;
-        	
-        	String startTS = new Timestamp(start*1000).toString();       	
-        	startTS = startTS.substring(0, startTS.length()-2);
-    
-        	String endTS = new Timestamp(end*1000).toString();
-        	endTS = endTS.substring(0, endTS.length()-2);*/
             if (count == 0) {
             	start = ts;
             	//start = ts - sSpec.getNumOfMins()*60;
@@ -324,7 +320,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
         	int ctrlFlag = CtrlFlags.CHANGE_QUERY;
 
         	sendCtrlMsgUpStream(ctrlFlag, ctrlMsg, 0);
-        }        
+        }       */ 
     }
 
 	/**
@@ -467,7 +463,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
      * @see niagara.optimizer.colombia.Op#copy()
      */
     public Op opCopy() {
-        PhysicalPunctQC another = new  PhysicalPunctQC(pAttr, timeAttr, queryString, pSpec, pfSpec);
+        PhysicalPunctQC another = new  PhysicalPunctQC(pAttr, timeAttr, queryString, pSpec);
         another.setSPAttr(spAttr);
         return another;
     }

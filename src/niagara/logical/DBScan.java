@@ -1,4 +1,4 @@
-// $Id: DBScan.java,v 1.5 2007/05/21 15:41:07 tufte Exp $
+// $Id: DBScan.java,v 1.6 2007/05/24 03:46:48 jinli Exp $
 
 package niagara.logical;
 
@@ -21,15 +21,19 @@ public class DBScan extends NullaryOperator  {
 	/** todo: needs to create multiple attributes */
 	private Attribute[] variables;
 	private DBScanSpec dbScanSpec;
+	
 	private SimilaritySpec sSpec;
+	
+	private PrefetchSpec pfSpec;
 	   
 	// Required zero-argument constructor
     public DBScan() {}
     
-    public DBScan(DBScanSpec dbScanSpec, Attribute[] variables, SimilaritySpec sSpec) {
+    public DBScan(DBScanSpec dbScanSpec, Attribute[] variables, SimilaritySpec sSpec, PrefetchSpec pfSpec) {
         this.dbScanSpec = dbScanSpec;
         this.variables = variables;
         this.sSpec = sSpec;
+		this.pfSpec = pfSpec;
     }
     
     /**
@@ -42,6 +46,7 @@ public class DBScan extends NullaryOperator  {
     public void dump() {
 	System.out.println("DBScan Operator: ");
 	dbScanSpec.dump(System.out);
+    System.out.println("   "+pfSpec.toString());
 	System.out.println();
     }
 
@@ -52,14 +57,14 @@ public class DBScan extends NullaryOperator  {
     }
     
     public Op opCopy() {
-        return new DBScan((DBScanSpec) dbScanSpec, variables, sSpec);
+        return new DBScan((DBScanSpec) dbScanSpec, variables, sSpec, pfSpec);
     }
 
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof DBScan)) return false;
         if (obj.getClass() != DBScan.class) return obj.equals(this);
         DBScan other = (DBScan) obj;
-        return dbScanSpec.equals(other.dbScanSpec) && 
+        return dbScanSpec.equals(other.dbScanSpec) && equalsNullsAllowed(pfSpec, other.pfSpec) &&
         	variables.equals(other.variables) && equalsNullsAllowed(sSpec, other.sSpec);
     }
 
@@ -84,7 +89,7 @@ public class DBScan extends NullaryOperator  {
         
       String similarityStr = e.getAttribute("similarity");
       if (similarityStr != "") {
-      	String [] similarityMetric = e.getAttribute("similarity").split("[\t | ]+");
+      	String [] similarityMetric = similarityStr.split("[\t | ]+");
         if(similarityMetric.length != 3 &&
             similarityMetric.length != 4) 
           throw new InvalidPlanException("Invalid similarity string " + similarityStr);
@@ -96,14 +101,25 @@ public class DBScan extends NullaryOperator  {
      				sSpec.setWeather(true);
      		}
       }
+      String prefetchStr = e.getAttribute("prefetch");
+      if (prefetchStr != "") {
+    	  String[] prefetch = prefetchStr.split("[\t| ]+");
+    	  if (prefetch.length != 2)
+    		  throw new InvalidPlanException("Invalid prefetch string "+prefetchStr);
+    	  
+    	  pfSpec = new PrefetchSpec(prefetchStr);  
+      }
+		
     }  
     
     public SimilaritySpec getSimilaritySpec() {
 		return sSpec;
     }
 
+    public PrefetchSpec getPrefetchSpec() {
+		return pfSpec;
+    }
 
-    
     public DBScanSpec getSpec() {
         return dbScanSpec;
     }

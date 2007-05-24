@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PunctQC.java,v 1.3 2007/05/10 04:54:44 jinli Exp $
+  $Id: PunctQC.java,v 1.4 2007/05/24 03:46:48 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -45,7 +45,7 @@ public class PunctQC extends BinaryOperator {
   
 	private PunctSpec pSpec;
     //private SimilaritySpec sSpec;
-    private PrefetchSpec pfSpec;
+    //private PrefetchSpec pfSpec;
     private String queryString;
     
     //The attribute we are punctuating on
@@ -66,10 +66,10 @@ public class PunctQC extends BinaryOperator {
     // attribute we are punctuating on, a punctuation
     // specification, and a query control specification
     public PunctQC(Attribute pAttr, String timeAttr, PunctSpec pSpec, 
-         PrefetchSpec pfSpec, String queryString) {
+          String queryString) {
 			this.pAttr = pAttr;
 			this.pSpec = pSpec;
-			this.pfSpec = pfSpec;
+
 			this.timeAttr = timeAttr;
 			this.queryString = queryString;
     }
@@ -93,7 +93,7 @@ public class PunctQC extends BinaryOperator {
         StringBuffer strBuf = new StringBuffer();
         strBuf.append("PunctQC: Punct: " + pSpec.toString() +
 						          " Attr: " + pAttr.getName());
-        strBuf.append("Prefetching: " + pfSpec.toString());
+
         strBuf.append("Stream Punctuating Attr: "+spAttr.getName());
         return strBuf.toString();
     }
@@ -106,10 +106,6 @@ public class PunctQC extends BinaryOperator {
 			return pSpec;
     }
    
-    public PrefetchSpec getPrefetchSpec() {
-			return pfSpec;
-    }
-    
     public Attribute getStreamPunctAttr() {
     	return spAttr;
     }
@@ -146,7 +142,7 @@ public class PunctQC extends BinaryOperator {
     }
 
     public Op opCopy() {
-        PunctQC other =  new PunctQC(this.pAttr, this.timeAttr, this.pSpec, this.pfSpec, this.queryString);
+        PunctQC other =  new PunctQC(this.pAttr, this.timeAttr, this.pSpec, this.queryString);
         other.setSPAttr(this.spAttr);
         return other;
     }
@@ -159,12 +155,11 @@ public class PunctQC extends BinaryOperator {
         PunctQC op = (PunctQC) obj;
         return pAttr.equals(op.pAttr) &&
                    pSpec.equals(op.pSpec) &&
-                   pfSpec.equals(op.pfSpec) &&
                    spAttr.equals(op.spAttr);
     }
 
     public int hashCode() {
-        return pAttr.hashCode() ^ pSpec.hashCode() ^ pfSpec.hashCode() ^ spAttr.hashCode();
+        return pAttr.hashCode() ^ pSpec.hashCode()  ^ spAttr.hashCode();
     }
 
     public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
@@ -184,8 +179,6 @@ public class PunctQC extends BinaryOperator {
 				spAttr = Variable.findVariable(inputProperties[1], punctAttrs[1]);
 
 				pSpec = new PunctSpec(e.getAttribute("puncttype"));
-
-				pfSpec = new PrefetchSpec(e.getAttribute("prefetch"));
 				
 				queryString = e.getAttribute("query_string").trim();
 				timeAttr =  e.getAttribute("timeattr").trim();

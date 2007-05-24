@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.12 2007/05/22 23:09:16 jinli Exp $ */
+/* $Id: DBThread.java,v 1.13 2007/05/24 03:46:47 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -19,6 +19,7 @@ import niagara.query_engine.TupleSchema;
 import niagara.utils.*;
 import niagara.utils.BaseAttr.Type;
 import niagara.logical.SimilaritySpec;
+import niagara.logical.PrefetchSpec;
 
 // for jdbc
 import java.sql.Connection;
@@ -46,6 +47,14 @@ public class DBThread extends SourceThread {
     
     private static final int ONE_DEMO_RUN = 2 * MIN_PER_HOUR * SECOND_PER_MIN * MILLISEC_PER_SEC;
     
+    // the maximum prefetch allowed; in seconds;
+    private static final long LOOK_AHEAD = 600; 
+    
+    // pane size of the db query; in seconds;
+    private static final int PANE = 60;
+    
+    private static final double RATIO = 0.5;
+    
     // weather similarity hack;
     private static final int MAX_HISTORY = 60;
     private static final int LOOKBACK = 30;
@@ -58,6 +67,7 @@ public class DBThread extends SourceThread {
 	public DBScanSpec dbScanSpec;
 	private Attribute[] variables;
 	private SimilaritySpec sSpec;
+	private PrefetchSpec pfSpec;
 	
 	// database connection;
 	private Connection conn = null;
@@ -73,8 +83,24 @@ public class DBThread extends SourceThread {
 	private boolean finish = false;
 	private boolean shutdown = false; 
 	
+    // high watermark on the time predicate of db query;
+    private long highWatermark = Long.MIN_VALUE;
+
 	// whether this is a first query got from punctQC? 
 	private int count = 0;
+	
+	// high watermark time monitored or stream and db;
+	private long streamTime=Long.MIN_VALUE, dbTime = Long.MIN_VALUE;
+	
+	private class Query {
+		public Query (String query, long end) {
+			queryStr = query;
+			upperTS = end;
+		}
+		
+		String queryStr;
+		long upperTS;
+	}
 	
 	// intrumentation
 	boolean polled = false;
@@ -118,6 +144,7 @@ public class DBThread extends SourceThread {
 		dbScanSpec = op.getSpec();
 		variables = op.getVariables();
 		sSpec = op.getSimilaritySpec();
+		pfSpec = op.getPrefetchSpec();
 	}
 
 	public void constructTupleSchema(TupleSchema[] inputSchemas) {
@@ -170,6 +197,7 @@ public class DBThread extends SourceThread {
 		dt.dbScanSpec = dbScanSpec;
 		dt.variables = variables;
 		dt.sSpec = sSpec;
+		dt.pfSpec = pfSpec;
 		return dt;
 	}
 
@@ -231,6 +259,8 @@ public class DBThread extends SourceThread {
 			stmt.execute("SET work_mem=100000");
 			String qs;
 			
+			long roundtrip;
+			
 			// one time db query;
 			if (dbScanSpec.oneTime()) {
 				qs = dbScanSpec.getQueryString();
@@ -261,6 +291,7 @@ public class DBThread extends SourceThread {
 						break;
 					}
 						
+					checkForSinkCtrlMsg(-1);
 					/*
 					 * if this is a continuous db scan
 					 */	
@@ -270,7 +301,7 @@ public class DBThread extends SourceThread {
 							break;
 						} else {
 							//blocking call to get ctrl msg;
-							checkForSinkCtrlMsg();
+							checkForSinkCtrlMsg(1*MILLISEC_PER_SEC);
 							
 							if (newQueries.size()==0)
 								continue;
@@ -278,13 +309,12 @@ public class DBThread extends SourceThread {
 					}
 						
 					stmt = conn.createStatement();
-					System.out.println("Attempting to execute query.");
-					
-
-					
-					String queryString = (String) newQueries.remove(0);
 					if (DEBUG)
-						System.err.println(queryString);
+						System.out.println("Attempting to execute query.");
+									
+					Query curQuery = (Query) newQueries.remove(0);
+					if (DEBUG)
+						System.err.println(curQuery.queryStr);
 					
 					// an actor is in progress
 					synchronized (synch) {
@@ -297,13 +327,25 @@ public class DBThread extends SourceThread {
 						}
 					}
 					
-					rs = stmt.executeQuery(queryString);
-				
+					System.err.println("before execute: "+streamTime);
+					
+					roundtrip = streamTime;
+					
+					rs = stmt.executeQuery(curQuery.queryStr);
+					checkAllSinkCtrlMsg();
 					// Now do something with the ResultSet ....
 					int numAttrs = dbScanSpec.getNumAttrs();
 									
 					putResults(rs, numAttrs);
+					dbTime = curQuery.upperTS;
 					
+					roundtrip = streamTime - roundtrip;					
+
+					System.err.println("after execute: "+streamTime);
+					
+					System.err.println ("db time: "+dbTime);
+					
+					adjustPrefetch(roundtrip);
 					
 					// the actor is done, moved to exeunt list;
 					synchronized (synch) {
@@ -388,6 +430,44 @@ public class DBThread extends SourceThread {
 	
 
 	}	// end of run method
+
+	/**
+	 * @param roundtrip
+	 */
+	private void adjustPrefetch(long roundtrip) 
+	throws java.lang.InterruptedException, ShutdownException, SQLException {
+		// if database data lags behind? (dbTime is smaller than streamTime)
+		
+		checkForSinkCtrlMsg(-1);
+		if (!intime ()) {
+			int size = pfSpec.getCoverage();
+			System.err.println("++++++++++++++++++roundtrip time: "+roundtrip);
+			System.err.println("db is beind");
+			// is database keeping up?
+			if (roundtrip > size) {
+				// increase db query size, which decreases db load
+				System.err.println("increase coverage: "+pfSpec.getCoverage()+ "by "+PANE);
+				pfSpec.setCoverage(size + PANE);
+			} else { 
+				// if database keeps up, and database data lags behind,
+				// we should increase prefetching 
+				int val = pfSpec.getPrefetchVal();
+				System.err.println("increase prefetch: "+pfSpec.getPrefetchVal()+ "by "+PANE);
+				pfSpec.setPrefetchVal(val + PANE);
+			}
+		} else if (farAhead ()) { // is database data far ahead of the stream? - this means we need to buffer too much
+			int size = pfSpec.getCoverage();
+			System.err.println("db is too far ahead");
+			if (roundtrip < size - PANE) {
+				System.err.println("decrease coverage: "+pfSpec.getCoverage()+ "by "+PANE);
+				pfSpec.setCoverage(size-PANE);
+			} else {
+				System.err.println("decrease prefetch: "+pfSpec.getPrefetchVal()+ "by "+PANE);
+				int val = pfSpec.getPrefetchVal();
+				pfSpec.setPrefetchVal(val-PANE);
+			}
+		}
+	}
 	
 	private void putResults (ResultSet rs, int numAttrs) 
 		throws SQLException, ShutdownException, InterruptedException {
@@ -440,22 +520,42 @@ public class DBThread extends SourceThread {
 
 	}
 	
-    public void checkForSinkCtrlMsg()
+    public void checkForSinkCtrlMsg(int timeout)
 	throws java.lang.InterruptedException, ShutdownException, SQLException {
 	// Loop over all sink streams, checking for control elements
     ArrayList ctrl;
 
     // Make sure the stream is not closed before checking is done
     if (!outputStream.isClosed()) {
-    	ctrl = outputStream.getCtrlMsg(1*MILLISEC_PER_SEC);
+    	ctrl = outputStream.getCtrlMsg(timeout);
+    	//ctrl = outputStream.getCtrlMsg(1*MILLISEC_PER_SEC);
 	    
     	// If got a ctrl message, process it
     	if (ctrl != null) {
     		processCtrlMsgFromSink(ctrl);
-    	} else {
-    		
     	}
-    	}
+    }
+    }
+    
+    private void checkAllSinkCtrlMsg () 
+    throws java.lang.InterruptedException, ShutdownException, SQLException{
+
+        ArrayList ctrlMsgList = new ArrayList ();
+
+        // Make sure the stream is not closed before checking is done
+        if (!outputStream.isClosed()) {
+            ArrayList ctrl;
+        	do {
+        	ctrl = outputStream.getCtrlMsg(-1);
+    	    
+        	// If got a ctrl message, process it
+        	if (ctrl != null) {
+        		ctrlMsgList.add(ctrl);
+        	}
+        	} while (ctrl != null);
+        }
+        for (Object ctrl : ctrlMsgList)
+        	processCtrlMsgFromSink((ArrayList)ctrl);
     }
     
     public void processCtrlMsgFromSink(ArrayList ctrl) 
@@ -467,7 +567,10 @@ public class DBThread extends SourceThread {
     	String ctrlMsg = (String)ctrl.get(1);
     	switch (ctrlFlag) {
     	case CtrlFlags.CHANGE_QUERY:
-    		newQueries.add(changeQuery(ctrlMsg));
+    		String range = queryRange(ctrlMsg);
+    		if (range != null)
+    			newQueries.add(changeQuery(range));
+    		streamTime = Long.valueOf(ctrlMsg);
     		break;
     	case CtrlFlags.READY_TO_FINISH:
     		System.err.println("live stream ends...");
@@ -483,7 +586,37 @@ public class DBThread extends SourceThread {
     	}
     }
     
-    private String changeQuery (String queryPara) 
+    private String queryRange (String msg) {
+    	
+        long start, end, ts;
+        
+        ts = Long.valueOf (msg.trim());
+        
+        int prefetch = pfSpec.getPrefetchVal();
+        
+        if (highWatermark < ts+prefetch) {
+            int queryCoverage = pfSpec.getCoverage();
+
+            if (count == 0) {
+            	start = ts;
+            	//start = ts - sSpec.getNumOfMins()*60;
+            	count++;
+            } else
+            	start = highWatermark;
+	        
+            end = (start + queryCoverage);
+	        	
+	        String range = start + " " + end; //newQuery(start, end);
+	    
+	        System.err.println(range);
+	        highWatermark = end;
+        	
+        	return range;
+    	}
+        return null;
+    }
+    
+    private Query changeQuery (String queryPara) 
     throws java.lang.InterruptedException, ShutdownException, SQLException {
     	String[] queryRange = queryPara.split("[ |\t]+");
     	assert queryRange.length == 2: "Jenny - range is more than a pair?!";
@@ -564,7 +697,7 @@ public class DBThread extends SourceThread {
      * @param date An arrayList of dates with similar weather;
      * @return
      */
-    private String newQuery (ArrayList <Long> date, long start, long end) {
+    private Query newQuery (ArrayList <Long> date, long start, long end) {
     	assert (stagelist != null): "how can stagelist be null";
     	synchronized (synch) {
     		Stage curr = stagelist.get(stagelist.size() - 1);
@@ -586,10 +719,6 @@ public class DBThread extends SourceThread {
 		Calendar calendar = GregorianCalendar.getInstance();
 		Calendar past = GregorianCalendar.getInstance();
 		
-		//calendar.setTimeInMillis(start*1000);
-		//String startTS = calendar.getTime().toString();
-		//calendar.setTimeInMillis(end*1000);
-		//String endTS = calendar.getTime().toString();
 		int numDays = sSpec.getNumOfDays();
 		int numMins = sSpec.getNumOfMins();
 
@@ -624,7 +753,8 @@ public class DBThread extends SourceThread {
 				
 		}
 		query.append(") order by panetime");
-		return query.toString();
+		return new Query (query.toString(), end/1000);
+
     }
 
 	/**
@@ -641,15 +771,6 @@ public class DBThread extends SourceThread {
         stage.dates = date; 
         
         return stage;
-		/*stage.startdate = Long.MAX_VALUE;
-		stage.enddate = Long.MIN_VALUE;
-		
-		for ( Long time : date) {
-			if (time < stage.startdate)
-				stage.startdate = time;
-			if (time > stage.enddate)
-				stage.enddate = time;
-		}*/
 	}
     
 	/**
@@ -674,27 +795,8 @@ public class DBThread extends SourceThread {
 				calendar.roll(Calendar.DAY_OF_YEAR, -i);				
 
 				dates.add(calendar.getTimeInMillis());
-
-				/*
-				if (i > 1)
-					query.append(" union all ");
-				
-				//query.append(queryString.replace("NUMOFDAYS", " '" +i+" days'"));
-				
-				calendar.setTimeInMillis(start);											
-				calendar.roll(Calendar.DAY_OF_YEAR, -i);				
-				//calendar.add(Calendar.MINUTE, -numMins);				
-				lower = calendar.getTime().toString();
-				
-				calendar.setTimeInMillis(end);			
-				calendar.roll(Calendar.DAY_OF_YEAR, -i);				
-				//calendar.add(Calendar.MINUTE, numMins);				
-				upper = calendar.getTime().toString();
-				
-				query.append(dbScanSpec.getQueryString().replace("NUMOFDAYS", " '" +i+" days'").replace("TIMEPREDICATE", timePredicate(upper, lower)));
-				*/
 			}
-			//query.append(") order by panetime");
+
 			break;
 			
 		case SameDayOfWeek:
@@ -703,25 +805,8 @@ public class DBThread extends SourceThread {
 				calendar.roll(Calendar.DAY_OF_YEAR, -i*DAYS_PER_WEEK);				
 
 				dates.add(calendar.getTimeInMillis());
-
-				/*
-				calendar.setTimeInMillis(start);											
-				calendar.roll(Calendar.DAY_OF_YEAR, -i*DAYS_PER_WEEK);				
-				
-				lower = calendar.getTime().toString();
-				
-				calendar.setTimeInMillis(end);			
-				calendar.roll(Calendar.DAY_OF_YEAR, -i*DAYS_PER_WEEK);				
-				
-				upper = calendar.getTime().toString();
-				
-				if (i > 1)
-					query.append(" union all ");
-
-				query.append(dbScanSpec.getQueryString().replace("NUMOFDAYS", " '" +i*DAYS_PER_WEEK+" days'").replace("TIMEPREDICATE", timePredicate(upper, lower)));
-				*/
 			}
-			//query.append(") order by panetime");
+
 			break;
 	
 		case WeekDays:	
@@ -738,35 +823,8 @@ public class DBThread extends SourceThread {
 				offset++;
 				dates.add(calendar.getTimeInMillis());
 
-				/*
-				calendar.setTimeInMillis(start);											
-				calendar.roll(Calendar.DAY_OF_YEAR, -offset);
-				weekday = calendar.get(Calendar.DAY_OF_WEEK);
-				if (weekday == Calendar.SUNDAY || weekday == Calendar.SATURDAY) {
-					offset++;
-					continue;
-				}
-				//calendar.add(Calendar.MINUTE, -numMins);				
-				lower = calendar.getTime().toString();
-				
-				calendar.setTimeInMillis(end);			
-				calendar.roll(Calendar.DAY_OF_YEAR, -offset);
-				if (weekday == Calendar.SUNDAY || weekday == Calendar.SATURDAY) {
-					offset++;
-					continue;
-				}
-				//calendar.add(Calendar.MINUTE, numMins);				
-				upper = calendar.getTime().toString();
-
-				if (i > 1)
-					query.append(" union all ");
-
-				query.append(dbScanSpec.getQueryString().replace("NUMOFDAYS", " '" +offset+" days'").replace("TIMEPREDICATE", timePredicate(upper, lower)));
-				i++;
-				offset++;
-				*/
 			}
-			//query.append(") order by panetime");
+
 			break;
 			
 		default:
@@ -774,8 +832,6 @@ public class DBThread extends SourceThread {
 		
 		}
 		return dates;
-		//return newQuery(dates, start, end);
-		//return query.toString();
 	}
 
 	
@@ -851,8 +907,6 @@ public class DBThread extends SourceThread {
 	
 	public String timePredicate (String upper, String lower) {
     	
-    	//StringBuffer query = new StringBuffer(" " + timeFunct  + ">= '" + queryRange[0] + "' and "+ timeFunct + "<= '" +queryRange[1]+"' ");
-    	//query.append(" and dbdetectorid= "+queryRange[2]);
     	String pred = " "+dbScanSpec.getTimeAttr()  + ">= " + "TIMESTAMP '"+lower + "' and "+ dbScanSpec.getTimeAttr() + "< " + "TIMESTAMP '"+upper+ "'";
 
     	return pred;
@@ -900,15 +954,8 @@ public class DBThread extends SourceThread {
 	                datelist.append (String.valueOf(curr.dates.get(j))+ " ");
 	            }
 	            stageElt.setAttribute("dates", datelist.toString());
-				//stageElt.setAttribute("dates", String.valueOf(stage.startdate));
-				//stageElt.setAttribute("enddate", String.valueOf(stage.enddate));
-				//instrumentationValues.add(stageElt);
-				
-		        // send actors
-		        //instrumentationNames.add("actors");
-		        
-		        //Element actorsElt = doc.createElement("actors");
-		        Element actElt;
+
+	            Element actElt;
 		        if (curr.exeunt != null) {
 		        	for (int j = 0; j < curr.exeunt.starts.size(); j++) {
 		        		actElt = doc.createElement("actor");
@@ -939,19 +986,12 @@ public class DBThread extends SourceThread {
 		    		default:
 		    			System.err.println ("supported actor status");
 		    		}
-		    		//actorsElt.appendChild(actElt);
 		    		stageElt.appendChild(actElt);
 		    	}
-		    	//stageElt.appendChild(actorsElt);
 		    	stagelistElt.appendChild(stageElt);
 			}
 	    	instrumentationValues.add(stagelistElt);
     	}
-
-    	//printElt ( (Element) instrumentationValues.get(0));
-    	//printElt ( (Element) instrumentationValues.get(1));
-    	
-    	//super.getInstrumentationValues(instrumentationNames, instrumentationValues);
     }
     
     private void printElt (Node elt) {
@@ -969,5 +1009,26 @@ public class DBThread extends SourceThread {
     	for (int i = 0; i < nodes.getLength(); i++) {
     		printElt(nodes.item(i));
     	}
+    }
+    
+    private boolean intime () {
+    	// if streamTime or dbTime is not initialized, just return true,
+    	// because we aren't ready to make any decision yet.
+    	if (streamTime == Long.MIN_VALUE || dbTime == Long.MIN_VALUE) {
+    		return true;
+    	}
+    	
+    	return dbTime > streamTime;
+    }
+    
+    private boolean farAhead () {
+    	// if streamTime or dbTime is not initialized, just return true,
+    	// because we aren't ready to make any decision yet.
+    	if (streamTime == Long.MIN_VALUE || dbTime == Long.MIN_VALUE) {
+    		return false;
+    	}
+    	
+    	return dbTime > streamTime + LOOK_AHEAD;
+
     }
 }
