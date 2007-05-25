@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.17 2007/05/25 04:12:05 vpapad Exp $ */
+/* $Id: DBThread.java,v 1.18 2007/05/25 04:52:12 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -61,7 +61,7 @@ public class DBThread extends SourceThread {
     private static final int WEATHER_OFFSET = 20; 
     private static final int TIME_COLUMN = 1;
 
-	private final boolean DEBUG = false;
+	private final boolean DEBUG = true;
 	
 	// think these are optimization time??
 	public DBScanSpec dbScanSpec;
@@ -650,12 +650,14 @@ public class DBThread extends SourceThread {
     			ResultSet rs;
     			int num = 0; 
     			similarDate = new ArrayList ();
+
     			while (similarDate.size() < sSpec.getNumOfDays() && num < MAX_HISTORY/LOOKBACK) {
+        			stmt = conn.createStatement();
     				rs = stmt.executeQuery(similarWeather(
     						MILLISEC_PER_SEC*(realStart+num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN), 
     						getRainfall(realStart)));
     				extractSimilarDate (similarDate, rs);
-    				
+    				stmt.close();
     				num++;
     			}
     		} 
@@ -737,7 +739,10 @@ public class DBThread extends SourceThread {
 		String upper, lower;
 		int offset;
 		
-		for (int i = 0; i < numDays; i++) {
+		int size = date.size();
+		
+		//for (int i = 0; i < numDays; i++) {
+		for (int i = 0; i < size; i++) {
 			if (i > 0)
 				query.append(" union all ");
 			
@@ -881,7 +886,7 @@ public class DBThread extends SourceThread {
 			queryString.append(" and extract(DOW from reporttime)="+dayOfWeek);
 			break;
 		case WeekDays:
-			queryString.append(" extract(DOW from reporttime) <> 0 and extract(DOW from reporttime <> 6)");
+			queryString.append(" and extract(DOW from reporttime) <> 0 and extract(DOW from reporttime) <> 6");
 			break;
 		default:
 			System.err.println("unsupported similarity type"); 
