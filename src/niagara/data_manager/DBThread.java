@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.15 2007/05/25 01:55:01 jinli Exp $ */
+/* $Id: DBThread.java,v 1.16 2007/05/25 03:36:14 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -58,7 +58,7 @@ public class DBThread extends SourceThread {
     // weather similarity hack;
     private static final int MAX_HISTORY = 60;
     private static final int LOOKBACK = 30;
-    private static final int WEATHER_OFFSET = 1; 
+    private static final int WEATHER_OFFSET = 20; 
     private static final int TIME_COLUMN = 1;
 
 	private final boolean DEBUG = false;
@@ -91,6 +91,13 @@ public class DBThread extends SourceThread {
 	
 	// high watermark time monitored or stream and db;
 	private long streamTime=Long.MIN_VALUE, dbTime = Long.MIN_VALUE;
+	
+	private static long weather [][] = {
+		{1171980000, 18}, 
+		{1171983600, 8}, 
+		{1171987200, 0}, 
+		{1171990800, 0}, 
+		{1171994400, 0}};
 	
 	private class Query {
 		public Query (String query, long end) {
@@ -648,6 +655,7 @@ public class DBThread extends SourceThread {
     						MILLISEC_PER_SEC*(realStart+num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN), 
     						getRainfall(realStart)));
     				extractSimilarDate (similarDate, rs);
+    				
     				num++;
     			}
     		} 
@@ -682,7 +690,7 @@ public class DBThread extends SourceThread {
     	
     	int hour = calendar.get(Calendar.HOUR_OF_DAY);
     	
-    	System.err.println("********************hour: "+hour+"  epoch: "+epoch+"***********************");
+    	//System.err.println("********************hour: "+hour+"  epoch: "+epoch+"***********************");
     	if (hour == epoch)
     		return false;
     	else {
@@ -728,6 +736,7 @@ public class DBThread extends SourceThread {
 		//query.append(queryString);
 		String upper, lower;
 		int offset;
+		
 		for (int i = 0; i < numDays; i++) {
 			if (i > 0)
 				query.append(" union all ");
@@ -840,7 +849,54 @@ public class DBThread extends SourceThread {
 	 * @param rainfall
 	 * @return the query string for retrieve date with similar weather
 	 */
-	private String similarWeather (long time, int rainfall) {
+	private String similarWeather (long time, long rainfall) {
+		
+		int hour, dayOfWeek;
+		
+		String rain;
+		if (rainfall > 0)
+			rain = ">";
+		else
+			rain = "=";
+		
+		StringBuffer queryString = new StringBuffer ("select reporttime, abs(avg(rainfall)-"+rainfall+") from hydra " );
+		Calendar calendar = GregorianCalendar.getInstance();
+		calendar.setTimeInMillis(time);
+		
+		hour = calendar.get(Calendar.HOUR_OF_DAY);
+		dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+		
+		// look at the past month
+		queryString.append(" where reporttime < TIMESTAMP '"+calendar.getTime().toString() +"'");
+		calendar.roll(Calendar.DAY_OF_YEAR, -LOOKBACK);
+		queryString.append(" and reporttime >= TIMESTAMP '"+calendar.getTime().toString() + "'");
+		
+		// look at the same hour
+		queryString.append(" and extract (HOUR from reporttime)="+hour);
+		
+		switch (sSpec.getSimilarityType()) {
+		case AllDays:
+			break;
+		case SameDayOfWeek:
+			queryString.append(" and extract(DOW from reporttime)="+dayOfWeek);
+			break;
+		case WeekDays:
+			queryString.append(" extract(DOW from reporttime) <> 0 and extract(DOW from reporttime <> 6)");
+			break;
+		default:
+			System.err.println("unsupported similarity type"); 
+		}
+		//queryString.append(" group by reporttime having avg(rainfall) >=" + (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall + WEATHER_OFFSET));
+		queryString.append(" group by reporttime having avg(rainfall) " + rain + " 0");
+		queryString.append(" order by abs(avg(rainfall) - " + rainfall + ")");
+		
+		if (DEBUG)
+			System.err.println(queryString.toString());
+		
+		return queryString.toString();
+	}
+
+	/*private String similarWeather (long time, long rainfall) {
 		
 		int hour, dayOfWeek;
 		StringBuffer queryString = new StringBuffer ("select reporttime, abs(avg(rainfall)-"+rainfall+") from hydra " );
@@ -877,7 +933,7 @@ public class DBThread extends SourceThread {
 			System.err.println(queryString.toString());
 		
 		return queryString.toString();
-	}
+	}*/
 	
 	/**
 	 * get result from the db query to retrieve date with similar weather  
@@ -898,10 +954,16 @@ public class DBThread extends SourceThread {
 			similarDate.add(time);
 			count++;
 		}
+		
 		return similarDate;
 	}
 	
-	private int getRainfall (long time) {
+	private long getRainfall (long time) {
+		for (int i = 0; i < weather.length; i++) {
+			if (weather[i][0] <= time && time < weather[i][0] + MIN_PER_HOUR*SECOND_PER_MIN)
+				return weather[i][1];
+		}
+		
 		return 0;
 	}
 	
