@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalBucket.java,v 1.7 2007/04/28 21:38:58 jinli Exp $
+  $Id: PhysicalBucket.java,v 1.8 2007/05/25 04:13:03 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -291,9 +291,9 @@ public class PhysicalBucket extends PhysicalOperator {
 					  int streamId)
 	throws ShutdownException, InterruptedException {
  
-	   long wid=0, mod;
+	   long wid=0;
 	   long timestamp;
-	   int length;
+
 	   String punctVal;
 	   
 	   ArrayList values = new ArrayList();
@@ -305,8 +305,12 @@ public class PhysicalBucket extends PhysicalOperator {
 	   //String tmp = punctVal.substring(1, length - 1).trim();
 	   //length = tmp.length();
 	   //punctVal = tmp.substring(1, length);
-	    
-	   timestamp = Long.parseLong(punctVal);
+	   try { 
+		   timestamp = Long.parseLong(punctVal);
+	   } catch (NumberFormatException e) {
+		   System.err.println (punctVal + " is not a long integer - Bucket cannot handle such a punctuating attribute");
+		   return;
+	   }
 	   
 	   // punctuation may come in a finer granularity; e.g., 20 seconds rather than 1 minute;
 	   if (slide != 1)
