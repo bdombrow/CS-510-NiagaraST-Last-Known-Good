@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.19 2007/05/25 20:42:36 jinli Exp $ */
+/* $Id: DBThread.java,v 1.20 2007/05/25 21:54:10 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -100,13 +100,15 @@ public class DBThread extends SourceThread {
 		{1171994400, 0}};
 	
 	private class Query {
-		public Query (String query, long end) {
+		public Query (String query, long start, long end) {
 			queryStr = query;
-			upperTS = end;
+		    this.start = start;
+			this.end = end;
 		}
 		
 		String queryStr;
-		long upperTS;
+		long start, end;
+		//long upperTS;
 	}
 	
 	// intrumentation
@@ -344,7 +346,7 @@ public class DBThread extends SourceThread {
 					int numAttrs = dbScanSpec.getNumAttrs();
 									
 					putResults(rs, numAttrs);
-					dbTime = curQuery.upperTS;
+					dbTime = curQuery.end;
 					
 					roundtrip = streamTime - roundtrip;					
 
@@ -700,7 +702,6 @@ public class DBThread extends SourceThread {
     		return true;
     	}
     }
-
     
     /**
      * 
@@ -718,13 +719,10 @@ public class DBThread extends SourceThread {
 				curr.activeActors.ends = new ArrayList <Long> ();
 				curr.activeActors.status = new ArrayList ();
 			}
-			//activeActors.dates = date;
 			curr.activeActors.starts.add(start);
 			curr.activeActors.ends.add(end);
 			curr.activeActors.status.add(Status.FUTURE);
 		}
-
-		
 
 		Calendar calendar = GregorianCalendar.getInstance();
 		Calendar past = GregorianCalendar.getInstance();
@@ -767,8 +765,7 @@ public class DBThread extends SourceThread {
 				
 		}
 		query.append(") order by panetime");
-		return new Query (query.toString(), end/1000);
-
+		return new Query (query.toString(), start/MILLISEC_PER_SEC, end/MILLISEC_PER_SEC);
     }
 
 	/**
@@ -1014,9 +1011,16 @@ public class DBThread extends SourceThread {
 			instrumentationNames.add("stagelist");
 			Element stagelistElt = doc.createElement("stagelist");
 			stagelistElt.setAttribute("now", String.valueOf(streamTime));
-			if (stagelist.size()>10) {
-				System.err.println ("too many stages");
-			}
+			
+			// lag is how database data lags behind stream data;
+			long lag = streamTime - dbTime;
+			if (lag < 0)
+				lag = 0;
+				
+			stagelistElt.setAttribute("lag", String.valueOf(lag*MILLISEC_PER_SEC));
+			
+			long archive = 0;
+			
 			for (int i = 0; i < stagelist.size(); i++) {
 				Element stageElt = doc.createElement ("stage"); 
 				Stage curr = stagelist.get(i);
@@ -1035,6 +1039,10 @@ public class DBThread extends SourceThread {
 		        		actElt.setAttribute("status", "done");
 		        		//actorsElt.appendChild(actElt);
 		        		stageElt.appendChild(actElt);
+		        		
+		        		// actors that are both done and ahead of stream time contribute to buffered archive
+		        		if (curr.exeunt.ends.get(j) > streamTime*MILLISEC_PER_SEC)
+		        			archive += curr.exeunt.ends.get(j) - curr.exeunt.starts.get(j);
 		        	}
 		        }
 		        
@@ -1061,6 +1069,8 @@ public class DBThread extends SourceThread {
 		    	}
 		    	stagelistElt.appendChild(stageElt);
 			}
+			stagelistElt.setAttribute("buffered archive", String.valueOf(archive));
+			
 	    	instrumentationValues.add(stagelistElt);
     	}
     }
