@@ -41,6 +41,8 @@ function parse_response(text) {
 	} else if (response.@responseType == "query_result") {
 		set_status("Processing");		
 		stagelistXML = response.responseData.value.stagelist;
+		set_lag(stagelistXML.@lag);
+		set_buffered(stagelistXML.@buffered);
 		load_stagelist(stagelistXML);
 	}
 }

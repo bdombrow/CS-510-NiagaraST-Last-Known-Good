@@ -1,16 +1,16 @@
 var MIN_WIDTH = 500;
-var MIN_HEIGHT = 500;
+var MIN_HEIGHT = 400;
 var MARGIN_WIDTH = 150;
 var MARGIN_HEIGHT = 150;
 
-var DAY_TOTAL_HEIGHT = 40;
-var DAY_MARGIN = 10;
+var DAY_TOTAL_HEIGHT = 25;
+var DAY_MARGIN = 8;
 var DAY_HEIGHT = DAY_TOTAL_HEIGHT - DAY_MARGIN;
-var SPACER_HEIGHT = 20;
-var DAY_PLUS = 3;
+var SPACER_HEIGHT = 8;
+var DAY_PLUS = -3;
 var SPACER_PLUS = -3;
 
-var MILLISECONDS_PER_PIXEL = 5000;
+var MILLISECONDS_PER_PIXEL = 10000;
 
 var MILLISECONDS_IN_DAY = 24*60*60*1000;
 
@@ -65,7 +65,7 @@ function recordMouseUp(evt) {
 		var old_pos = canvas_xpos;
 		var new_xpos = canvas_xpos - mouseUpX + mouseDownX; 
 		new_xpos = max(0, new_xpos);
-		new_xpos = min(stagelist.pixel_length + 50, new_xpos);
+		new_xpos = min(stagelist.pixel_length - 10, new_xpos);
 		canvas_xpos = new_xpos;
 		user_just_scrolled = true;
 		update_canvas();
@@ -119,11 +119,8 @@ function redraw_canvas() {
 	    }
 	}
 
-	if (buffer_canvas_width > buffer_canvas.width ||
-		buffer_canvas_height > buffer_canvas.height) {
-	    buffer_canvas.width = buffer_canvas_width + 20;
-	    buffer_canvas.height = buffer_canvas_height;
-	}
+    buffer_canvas.width = buffer_canvas_width + 20;
+    buffer_canvas.height = buffer_canvas_height;
 
     now_xpos = stagelist.now.diff(stagelist.start_time) / MILLISECONDS_PER_PIXEL;    
     for each (var stage in stagelist.stage_list) {
@@ -158,14 +155,9 @@ function redraw_canvas() {
 
     if (user_just_scrolled) {
 		user_just_scrolled = false;
-    } else {
-		if (now_xpos - canvas_xpos > (4*canvas_width)/5) {
-		    if (stagelist.ended != "true") {
-				canvas_xpos = now_xpos - ceil(canvas_width / 4);
-		    } else {
-				canvas_xpos = stage_list.pixel_length - canvas_width + 20;
-	    	}
-		} 
+    } else if (now_xpos - canvas_xpos > (4*canvas_width)/5 
+    			&& stagelist.ended != "true") {
+		canvas_xpos = now_xpos - ceil(canvas_width / 4);
     }
 
     update_canvas();
@@ -193,7 +185,7 @@ function update_canvas() {
 		canvas.addLabel(-70, ypos, o.date_string);
 	    }
     }
-    
+
     var start_time = stagelist.start_time.after(canvas_xpos * MILLISECONDS_PER_PIXEL);
     canvas.addLabel(0, buffer_canvas.height + 20, start_time.time_string);
     var end_time = stagelist.start_time.after((canvas_xpos + canvas_width) * MILLISECONDS_PER_PIXEL);
@@ -205,13 +197,14 @@ function update_canvas() {
 	var now_label_xpos = now_xpos - canvas_xpos - 40;
 	if (now_label_xpos + 100 > canvas_width) {
 		now_label_xpos = canvas_width - 100;
+	} if ((now_xpos >= canvas_xpos) && (now_xpos - canvas_xpos <= canvas_width)) {
+	    canvas.addLabel(now_label_xpos, -30, stagelist.now.second_string);
 	}
-    canvas.addLabel(now_label_xpos, -30, stagelist.now.second_string);
 }
 
 function Stagelist(stagelistXML) {
     this.now = new JustTime(parseInt(stagelistXML.@now) * 1000);
-    this.start_time = this.end_time = this.now;
+    this.start_time = this.end_time = null;
 	this.ended = stagelistXML.@ended;
 	
     this.stage_list = new Array();
@@ -223,8 +216,13 @@ function Stagelist(stagelistXML) {
     var day_list = new Array();
     for each (var stage in this.stage_list) {
 		day_list = day_list.concat(stage.day_list);
-		this.start_time = this.start_time.min(stage.start_time);
-		this.end_time = this.end_time.max(stage.end_time);
+		if (this.start_time == null) {
+			this.start_time = stage.start_time;
+			this.end_time = stage.end_time;
+		} else {
+			this.start_time = this.start_time.min(stage.start_time);
+			this.end_time = this.end_time.max(stage.end_time);
+		}
     }
     day_list.sort(compare_days);
     var unique_list = new Array();
@@ -247,7 +245,7 @@ function Stagelist(stagelistXML) {
 	    prev_day = day;
     }
     
-    this.pixel_length = (this.end_time.diff(this.start_time)) * MILLISECONDS_PER_PIXEL;
+    this.pixel_length = ceil((this.end_time.diff(this.start_time)) / MILLISECONDS_PER_PIXEL);
  }
 
  function Stage(stageXML, now) {
@@ -272,8 +270,6 @@ function Stagelist(stagelistXML) {
      }
      this.start_time = start_time;
      this.end_time = end_time;
-     this.start_time = new JustTime(stageXML.@starttime);
-     this.end_time = new JustTime(stageXML.@endtime);
  }
 
  function Actor(actorXML, now) {
@@ -349,7 +345,10 @@ function fill(num) {
 
      this.date_string = (this.day.getMonth()+1) + "/" + this.day.getDate();
      this.is_next_day_of = function(other_day) {
-	 return (this.day - other_day.day == MILLISECONDS_IN_DAY);
+		 return (this.day - other_day.day == MILLISECONDS_IN_DAY);
+     }
+     this.days_in_between = function (other_day) {
+     	return ceil(absdiff(this.day, other_day.day) / MILLISECONDS_IN_DAY);
      }
      this.height = DAY_TOTAL_HEIGHT;
      this.kind = "day";
@@ -358,8 +357,8 @@ function fill(num) {
 function Spacer(day_1, day_2) {
     this.day_1 = day_1;
     this.day_2 = day_2;
-    this.height = SPACER_HEIGHT;
-    this.date_string = "..."
+    this.height = day_1.days_in_between(day_2) * SPACER_HEIGHT;
+    this.date_string = "";
     this.kind = "spacer";
 }
 
@@ -371,7 +370,7 @@ function load_stagelist(stagelistXML) {
 function snapshot() {
     var req_width=canvas_width + MARGIN_WIDTH;
     var req_height= canvas_height + MARGIN_HEIGHT;
-    var snap = window.open('snapshot.html', "Snapshot",
+    var snap = window.open('snapshot.html', "Snapshot-" + Date.now(),
 			   "width=" + req_width +",height=" + req_height);
     snap.stagelistXML = stagelistXML;
 }

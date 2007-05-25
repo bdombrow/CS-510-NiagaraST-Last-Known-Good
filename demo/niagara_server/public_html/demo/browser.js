@@ -18,3 +18,20 @@ function set_status(str) {
 	statusDiv.appendChild(document.createTextNode("Status: " + str));
 }
 
+function set_lag(str) {
+	var statusDiv = document.getElementById("lag");
+	statusDiv.removeChild(statusDiv.firstChild);
+	if (str != "0") {
+		statusDiv.setAttribute("class", "biglag");
+	} else {
+		statusDiv.setAttribute("class", "status");
+	}
+	statusDiv.appendChild(document.createTextNode("Lag: " + str + " ms"));
+}
+
+function set_buffered(str) {
+	var statusDiv = document.getElementById("buffered");
+	statusDiv.removeChild(statusDiv.firstChild);
+	statusDiv.appendChild(document.createTextNode("Archive buffering: " + parseInt(str)/1000 + " seconds of data"));
+}
+
