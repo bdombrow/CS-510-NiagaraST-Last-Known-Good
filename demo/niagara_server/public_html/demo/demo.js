@@ -5,9 +5,9 @@ var query = (<r><![CDATA[
 	<!DOCTYPE plan SYSTEM 'queryplan.dtd'>
 	<plan top="cons">
 	<collectInstrumentation id='instr' plan='*'
-	 operators="DBThread2,PhysicalPunctQC1" period="1000"/>
+	 operators="DBThread2" period="1000"/>
 	<construct id="cons" input="instr">
-	<cdata><property id=$name>$value</property></cdata>
+	<cdata>$value</cdata>
 	</construct>
 	</plan> 
 	]]></r>).toString();
@@ -36,14 +36,11 @@ function parse_response(text) {
 	} else if (response.@responseType == "end_result") {
 		set_status("Query ended");
 		deactivateQuery();
+		stagelistXML.@ended = "true";
+		load_stagelist(stagelistXML);
 	} else if (response.@responseType == "query_result") {
 		set_status("Processing");		
-		var kind = response.responseData.property.@id;
-		if (kind == "stagelist") {
-			stagelistXML = response.responseData.property.value.stagelist;
-		} else {
-			stagelistXML.@now = response.responseData.property.value;
-			load_stagelist(stagelistXML);
-		}
+		stagelistXML = response.responseData.value.stagelist;
+		load_stagelist(stagelistXML);
 	}
 }

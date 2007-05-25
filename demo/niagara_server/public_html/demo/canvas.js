@@ -3,19 +3,16 @@ var MIN_HEIGHT = 500;
 var MARGIN_WIDTH = 150;
 var MARGIN_HEIGHT = 150;
 
-var DAY_TOTAL_HEIGHT = 60;
+var DAY_TOTAL_HEIGHT = 40;
 var DAY_MARGIN = 10;
 var DAY_HEIGHT = DAY_TOTAL_HEIGHT - DAY_MARGIN;
 var SPACER_HEIGHT = 20;
-var DAY_PLUS = 13;
-var SPACER_PLUS = -13;
+var DAY_PLUS = 3;
+var SPACER_PLUS = -3;
 
-var MILLISECONDS_PER_PIXEL = 10000;
+var MILLISECONDS_PER_PIXEL = 5000;
 
 var MILLISECONDS_IN_DAY = 24*60*60*1000;
-var MILLISECONDS_IN_HOUR = 60*60*1000;
-var MILLISECONDS_IN_MINUTE = 60*1000;
-var MILLISECONDS_IN_SECOND = 5000;
 
 var canvas_width = MIN_WIDTH;
 var canvas_height = MIN_HEIGHT;
@@ -36,15 +33,22 @@ var stagelist;
 var stagelistXML;
 
 var outline_colors = {
-    "done" : 'rgb(20,200,20)',
+    "buffered" : 'rgb(20,200,20)',
+    "purged" : 'rgb(20,200,20)',
     "progress" : 'rgb(255, 200, 50)',
-    "future" : 'rgb(255, 0, 0)'
+    "progress_late" : 'rgb(255, 200, 50)',
+    "future" : 'rgb(192, 192, 192)',
+    "future_late" : 'rgb(192, 192, 192)'
 }
 
+
 var fill_colors = {
-    "done" : 'rgba(20, 200,20, 0.5)',
+    "buffered" : 'rgba(20,200, 20, 0.5)',
+    "purged" : 'rgba(20, 200, 20, 0)',
     "progress" : 'rgba(255, 200, 50, 0.5)',
-    "future" : 'rgba(255, 100, 100, 0.5)'
+    "progress_late" : 'rgba(255, 0, 0, 0.5)',
+    "future" : 'rgba(192, 192, 192, 0.4)',
+    "future_late" : 'rgba(255, 0, 0, 0.75)'
 }
 
 var now_strokestyle = 'rgb(255, 0, 0)';
@@ -58,14 +62,14 @@ function recordMouseDown(evt) {
 function recordMouseUp(evt) {
     mouseUpX = evt.clientX;
     if (mouseDownX != null) {
-	var old_pos = canvas_xpos;
-	var new_xpos = canvas_xpos - mouseUpX + mouseDownX; 
-	new_xpos = max(0, new_xpos);
-	new_xpos = min(canvas_width, new_xpos);
-	canvas_xpos = new_xpos;
-	user_just_scrolled = true;
-	update_canvas();
-	mouseUpX = mouseDownX = null;
+		var old_pos = canvas_xpos;
+		var new_xpos = canvas_xpos - mouseUpX + mouseDownX; 
+		new_xpos = max(0, new_xpos);
+		new_xpos = min(stagelist.pixel_length + 50, new_xpos);
+		canvas_xpos = new_xpos;
+		user_just_scrolled = true;
+		update_canvas();
+		mouseUpX = mouseDownX = null;
     }
 }
 
@@ -115,8 +119,11 @@ function redraw_canvas() {
 	    }
 	}
 
-    buffer_canvas.width = buffer_canvas_width;
-    buffer_canvas.height = buffer_canvas_height;
+	if (buffer_canvas_width > buffer_canvas.width ||
+		buffer_canvas_height > buffer_canvas.height) {
+	    buffer_canvas.width = buffer_canvas_width + 20;
+	    buffer_canvas.height = buffer_canvas_height;
+	}
 
     now_xpos = stagelist.now.diff(stagelist.start_time) / MILLISECONDS_PER_PIXEL;    
     for each (var stage in stagelist.stage_list) {
@@ -130,12 +137,12 @@ function redraw_canvas() {
 			    var ypos = day_ypos[day.date_string];
 			    ctx.fillStyle = outline_colors[actor.status];
 			    ctx.fillRect(xpos, ypos, width, height);
-			    if (width > 4 && height > 4) {
-				ctx.clearRect(xpos + 2, ypos + 2,
-					      width - 4, height - 4);
+			    if (width >= 4 && height >= 4) {
+				ctx.clearRect(xpos + 1, ypos + 1,
+					      width - 2, height - 2);
 				ctx.fillStyle = fill_colors[actor.status];
-				ctx.fillRect(xpos + 2, ypos + 2,
-					      width - 4, height - 4);
+				ctx.fillRect(xpos + 1, ypos + 1,
+					      width - 2, height - 2);
 			    }
 			}
 		}
@@ -150,15 +157,15 @@ function redraw_canvas() {
     ctx.stroke();
 
     if (user_just_scrolled) {
-	user_just_scrolled = false;
+		user_just_scrolled = false;
     } else {
-	if (now_xpos - canvas_xpos > (3*canvas_width)/4) {
-	    if (now_xpos < buffer_canvas.width) {
-			canvas_xpos = now_xpos - ceil(canvas_width / 4);
-	    } else {
-			canvas_xpos = buffer_canvas.width - canvas_width;
-	    }
-	} 
+		if (now_xpos - canvas_xpos > (4*canvas_width)/5) {
+		    if (stagelist.ended != "true") {
+				canvas_xpos = now_xpos - ceil(canvas_width / 4);
+		    } else {
+				canvas_xpos = stage_list.pixel_length - canvas_width + 20;
+	    	}
+		} 
     }
 
     update_canvas();
@@ -204,28 +211,28 @@ function update_canvas() {
 
 function Stagelist(stagelistXML) {
     this.now = new JustTime(parseInt(stagelistXML.@now) * 1000);
-    this.start_time = this.now;
-    this.end_time = this.now;
-
+    this.start_time = this.end_time = this.now;
+	this.ended = stagelistXML.@ended;
+	
     this.stage_list = new Array();
     for each (var stageXML in stagelistXML..stage) {
-	this.stage_list.push(new Stage(stageXML));
+		this.stage_list.push(new Stage(stageXML, this.now));
     }
 
     // Merge, order, and deduplicate visible days from all stages
     var day_list = new Array();
     for each (var stage in this.stage_list) {
-	day_list = day_list.concat(stage.day_list);
-	this.start_time = this.start_time.min(stage.start_time);
-	this.end_time = this.end_time.max(stage.end_time);
+		day_list = day_list.concat(stage.day_list);
+		this.start_time = this.start_time.min(stage.start_time);
+		this.end_time = this.end_time.max(stage.end_time);
     }
     day_list.sort(compare_days);
     var unique_list = new Array();
     for (di in day_list) {
-	var ul = unique_list.length;
-	if (ul == 0 || day_list[di].gt(unique_list[ul-1])) {
-	    unique_list.push(day_list[di]);
-	}
+		var ul = unique_list.length;
+		if (ul == 0 || day_list[di].gt(unique_list[ul-1])) {
+		    unique_list.push(day_list[di]);
+		}
     }
 
     this.day_list = new Array();
@@ -239,27 +246,51 @@ function Stagelist(stagelistXML) {
 	    }
 	    prev_day = day;
     }
+    
+    this.pixel_length = (this.end_time.diff(this.start_time)) * MILLISECONDS_PER_PIXEL;
  }
 
- function Stage(stageXML) {
+ function Stage(stageXML, now) {
      var date_str_list = stageXML.@dates;
      this.day_list = new Array();
      for each (var date_str in date_str_list.split(" ")) {
 	 if (date_str.length > 0)
 	     this.day_list.push(new JustDay(date_str));
      }
+     this.actor_list = new Array();
+     var start_time = null;
+     var end_time = null;
+     for each (var actorXML in stageXML..actor) {
+     	var actor = new Actor(actorXML, now);
+     	if (start_time == null || actor.start_time.before(start_time)) {
+     		start_time = actor.start_time;
+     	}
+     	if (end_time == null || end_time.before(actor.end_time)) {
+     		end_time = actor.end_time;
+     	}
+		this.actor_list.push(actor);
+     }
+     this.start_time = start_time;
+     this.end_time = end_time;
      this.start_time = new JustTime(stageXML.@starttime);
      this.end_time = new JustTime(stageXML.@endtime);
-     this.actor_list = new Array();
-     for each (var actorXML in stageXML..actor) {
-	 this.actor_list.push(new Actor(actorXML));
-     }
  }
 
- function Actor(actorXML) {
+ function Actor(actorXML, now) {
      this.start_time = new JustTime(actorXML.@start);
      this.end_time = new JustTime(actorXML.@end);
      this.status = actorXML.@status;
+     if (this.status == "done") {
+     	if (this.end_time.before(now)) {
+     		this.status = "purged";
+     	} else {
+     		this.status = "buffered";
+     	}
+     } else if (this.status == "progress" && this.start_time.before(now)) {
+		this.status = "progress_late";
+     } else if (this.status == "future" && this.start_time.before(now)) {
+		this.status = "future_late";
+     }
  }
 
  function JustTime(str) {
@@ -288,6 +319,9 @@ function Stagelist(stagelistXML) {
 	 return this.time - other_time.time;
      }
 
+	this.before = function(other_time) {
+		return this.time < other_time.time;
+	}
      this.after = function(interval) {
 	 var new_time = this.time.getTime() + parseInt(interval);
 	 return new JustTime(new_time);
