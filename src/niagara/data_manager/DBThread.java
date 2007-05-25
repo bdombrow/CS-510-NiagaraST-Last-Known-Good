@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.20 2007/05/25 21:54:10 jinli Exp $ */
+/* $Id: DBThread.java,v 1.21 2007/05/25 22:01:22 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -1069,7 +1069,7 @@ public class DBThread extends SourceThread {
 		    	}
 		    	stagelistElt.appendChild(stageElt);
 			}
-			stagelistElt.setAttribute("buffered archive", String.valueOf(archive));
+			stagelistElt.setAttribute("buffered", String.valueOf(archive));
 			
 	    	instrumentationValues.add(stagelistElt);
     	}
