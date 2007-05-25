@@ -1,5 +1,5 @@
 /**
- * $Id: CollectInstrumentationThread.java,v 1.3 2007/05/15 19:24:47 vpapad Exp $
+ * $Id: CollectInstrumentationThread.java,v 1.4 2007/05/25 04:12:05 vpapad Exp $
  *
  */
 
@@ -167,13 +167,6 @@ public class CollectInstrumentationThread extends SourceThread {
         }
 
         public void run() {
-            // If the plan is no longer active, we're done
-            if (!catalog.isActive(plan)) {
-                cleanUp();
-		timer.cancel();
-		return;
-	    }
-
             for (Instrumentable op : ops) {
                 long currentTime = (System.nanoTime()) - startTime;
                 
@@ -243,6 +236,13 @@ public class CollectInstrumentationThread extends SourceThread {
                 }
                 instrumentationNames.clear();
                 instrumentationValues.clear();
+            }
+
+            // If the plan is no longer active, we're done
+            if (!catalog.isActive(plan)) {
+                cleanUp();
+                timer.cancel();
+                return;
             }
         }
     }

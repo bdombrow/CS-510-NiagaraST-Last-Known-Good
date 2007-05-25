@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.16 2007/05/25 03:36:14 jinli Exp $ */
+/* $Id: DBThread.java,v 1.17 2007/05/25 04:12:05 vpapad Exp $ */
 
 package niagara.data_manager;
 
@@ -1010,8 +1010,6 @@ public class DBThread extends SourceThread {
 			for (int i = 0; i < stagelist.size(); i++) {
 				Element stageElt = doc.createElement ("stage"); 
 				Stage curr = stagelist.get(i);
-				stageElt.setAttribute("starttime", String.valueOf(curr.starttime));
-				stageElt.setAttribute("endtime", String.valueOf(curr.endtime));
 	            StringBuffer datelist = new StringBuffer();
 	            for (int j = 0; j < curr.dates.size(); j++) {
 	                datelist.append (String.valueOf(curr.dates.get(j))+ " ");
