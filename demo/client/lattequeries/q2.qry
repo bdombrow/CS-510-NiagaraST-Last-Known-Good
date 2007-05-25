@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<plan top="cons" planID="q1">
+
+<filescan id="ld" isstream="yes" delay="200"
+filename="/stash/datalab/latte/data/2007-02-20_AM.xml"/>
+
+<unnest id="dts" regexp="dts" datatype="XML" input="ld"/>
+<unnest id="time_t" regexp="time_t" datatype="TS" input="dts"/>
+<unnest id="d" regexp="d" root = "$dts" datatype="XML" input="time_t"/>
+<unnest id="stdetectorid" regexp="i" root="$d" datatype="Integer" input="d"/>
+<unnest id="stspeed" regexp="s" root="$d" datatype="Integer" input="stdetectorid"/>
+
+<select id="sel" input="stspeed">
+<pred op="gt">
+       <var value="$stspeed"></var><number value ="0"></number>
+</pred>
+</select>
+
+<dup id="dup" input="sel" branch="2"/>
+
+<dbscan id="svgid_relation" 
+query_string="select DISTINCT detectorid, svgid from detector_svgids"
+timeattr="" 
+type="one_time"
+attr_names="detectorid, svgid"
+attr_types="int string"/>
+
+<join id="addSVGId" left="stdetectorid" right="detectorid" punctattr="time_t, " input="dup svgid_relation">
+</join>
+
+<bucket id="bucket" wintype="1" winattr="time_t" range="180" slide="60" input="addSVGId"/>
+
+<windowAverage id="avg" groupby="svgid" avgattr="stspeed" input="bucket"/>
+
+<dbscan id="archive"
+
+query_string= "select floor(extract('epoch' from (starttime - (TIMESTAMP '2007-02-20 06:00:00' - interval NUMOFDAYS)))/60) as
+panetime, svgid, avg(speed)
+from loopdata_20sec, detector_svgids  where detector_svgids.detectorid = loopdata_20sec.detectorid and TIMEPREDICATE group by panetime, svgid"
+
+similarity = "week  3  3 true"
+prefetch = "0 60"
+timeattr="starttime"
+attr_names="panetime dbsvgid dbspeed"
+attr_types="TS string int"/>
+
+<punctqc id = "pqc"
+timeattr="starttime"
+punctattr="panetime time_t"
+puncttype = "onchange"
+input="archive dup"/>
+
+<bucket id="bucket_archive" wintype="1" winattr="panetime" range="6" slide="1" start="0" input="pqc" />
+
+<windowAverage id ="avg_archive" groupby="dbsvgid" avgattr="dbspeed" input="bucket_archive" />
+
+<join id="stream_archive" left="wid_from_bucket svgid" right="wid_from_bucket_archive dbsvgid" punctattr="wid_from_bucket wid_from_bucket_archive" input="avg avg_archive">
+</join>
+
+
+<construct id="cons" input="stream_archive">
+<![CDATA[
+<result>
+  $svgid
+  $avg
+  $avg_archive
+  $wid_from_bucket
+</result>
+]]>
+</construct>
+</plan>
