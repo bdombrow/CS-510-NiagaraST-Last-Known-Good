@@ -3,7 +3,7 @@
 
 <plan top="cons" planID="q1">
 
-<filescan id="ld" isstream="yes" delay="0"
+<filescan id="ld" isstream="yes" delay="200"
 filename="/stash/datalab/latte/data/2007-02-06_midday.xml"/>
 
 <unnest id="dts" regexp="dts" datatype="XML" input="ld"/>
@@ -36,12 +36,12 @@ attr_types="int string"/>
 
 <dbscan id="archive"
 
-query_string= "select floor(extract('epoch' from (starttime - (TIMESTAMP '2007-02-06 08:03:00' - interval NUMOFDAYS)))/60) as
+query_string= "select floor(extract('epoch' from (starttime - (TIMESTAMP '2007-02-06 08:00:00' - interval NUMOFDAYS)))/60) as
 panetime, svgid, avg(speed)
 from loopdata_20sec, detector_svgids  where detector_svgids.detectorid = loopdata_20sec.detectorid and TIMEPREDICATE group by panetime, svgid"
 
-similarity = "week  5  3 true"
-prefetch = "600 20"
+similarity = "week  5  3 false"
+prefetch = "0 120"
 timeattr="starttime"
 attr_names="panetime dbsvgid dbspeed"
 attr_types="TS string int"/>
