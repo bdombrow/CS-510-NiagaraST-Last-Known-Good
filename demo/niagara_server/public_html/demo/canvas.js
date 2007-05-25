@@ -204,7 +204,7 @@ function update_canvas() {
 
 function Stagelist(stagelistXML) {
     this.now = new JustTime(parseInt(stagelistXML.@now) * 1000);
-    this.start_time = this.end_time = null;
+    this.start_time = this.end_time = this.now;
 	this.ended = stagelistXML.@ended;
 	
     this.stage_list = new Array();
@@ -216,13 +216,8 @@ function Stagelist(stagelistXML) {
     var day_list = new Array();
     for each (var stage in this.stage_list) {
 		day_list = day_list.concat(stage.day_list);
-		if (this.start_time == null) {
-			this.start_time = stage.start_time;
-			this.end_time = stage.end_time;
-		} else {
-			this.start_time = this.start_time.min(stage.start_time);
-			this.end_time = this.end_time.max(stage.end_time);
-		}
+		this.start_time = this.start_time.min(stage.start_time);
+		this.end_time = this.end_time.max(stage.end_time);
     }
     day_list.sort(compare_days);
     var unique_list = new Array();
