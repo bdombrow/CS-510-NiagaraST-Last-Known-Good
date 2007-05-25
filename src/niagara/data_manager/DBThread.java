@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.18 2007/05/25 04:52:12 jinli Exp $ */
+/* $Id: DBThread.java,v 1.19 2007/05/25 20:42:36 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -61,7 +61,7 @@ public class DBThread extends SourceThread {
     private static final int WEATHER_OFFSET = 20; 
     private static final int TIME_COLUMN = 1;
 
-	private final boolean DEBUG = true;
+	private final boolean DEBUG = false;
 	
 	// think these are optimization time??
 	public DBScanSpec dbScanSpec;
@@ -660,18 +660,18 @@ public class DBThread extends SourceThread {
     				stmt.close();
     				num++;
     			}
+        		synchronized (synch) {
+    	    		if (stagelist == null) {
+    	    			stagelist = new ArrayList ();
+    	    			stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*realStart));
+    	    		} else {
+    	    			// change stage
+    	    			long startTS = stagelist.get(0).starttime;
+    	    			stagelist.add(setStage(similarDate, startTS));
+    	    		}
+        		}
     		} 
     		
-    		synchronized (synch) {
-	    		if (stagelist == null) {
-	    			stagelist = new ArrayList ();
-	    			stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*realStart));
-	    		} else {
-	    			// change stage
-	    			long startTS = stagelist.get(0).starttime;
-	    			stagelist.add(setStage(similarDate, startTS));
-	    		}
-    		}
     		
     	}
 
@@ -965,8 +965,10 @@ public class DBThread extends SourceThread {
 	
 	private long getRainfall (long time) {
 		for (int i = 0; i < weather.length; i++) {
-			if (weather[i][0] <= time && time < weather[i][0] + MIN_PER_HOUR*SECOND_PER_MIN)
+			if (weather[i][0] <= time && time < weather[i][0] + MIN_PER_HOUR*SECOND_PER_MIN) {
+				System.err.println("this must be wrong - we found matching time");
 				return weather[i][1];
+			}
 		}
 		
 		return 0;
@@ -1012,6 +1014,9 @@ public class DBThread extends SourceThread {
 			instrumentationNames.add("stagelist");
 			Element stagelistElt = doc.createElement("stagelist");
 			stagelistElt.setAttribute("now", String.valueOf(streamTime));
+			if (stagelist.size()>10) {
+				System.err.println ("too many stages");
+			}
 			for (int i = 0; i < stagelist.size(); i++) {
 				Element stageElt = doc.createElement ("stage"); 
 				Stage curr = stagelist.get(i);
