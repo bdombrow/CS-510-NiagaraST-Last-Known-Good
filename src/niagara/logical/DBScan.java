@@ -1,4 +1,4 @@
-// $Id: DBScan.java,v 1.6 2007/05/24 03:46:48 jinli Exp $
+// $Id: DBScan.java,v 1.7 2007/05/25 03:06:35 jinli Exp $
 
 package niagara.logical;
 
@@ -97,7 +97,7 @@ public class DBScan extends NullaryOperator  {
      				Integer.valueOf(similarityMetric[1]), Integer.valueOf(similarityMetric[2]), false);
      		// if weather is the fourth of our similarity metric
      		if (similarityMetric.length == 4) {
-     			if (similarityMetric[3].compareToIgnoreCase("weather") == 0)
+     			if (similarityMetric[3].compareToIgnoreCase("true") == 0)
      				sSpec.setWeather(true);
      		}
       }
