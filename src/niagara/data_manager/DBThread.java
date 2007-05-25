@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.14 2007/05/24 04:22:18 jinli Exp $ */
+/* $Id: DBThread.java,v 1.15 2007/05/25 01:55:01 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -944,6 +944,7 @@ public class DBThread extends SourceThread {
 
 			instrumentationNames.add("stagelist");
 			Element stagelistElt = doc.createElement("stagelist");
+			stagelistElt.setAttribute("now", String.valueOf(streamTime));
 			for (int i = 0; i < stagelist.size(); i++) {
 				Element stageElt = doc.createElement ("stage"); 
 				Stage curr = stagelist.get(i);
