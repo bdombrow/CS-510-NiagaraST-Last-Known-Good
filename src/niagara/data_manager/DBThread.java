@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.21 2007/05/25 22:01:22 jinli Exp $ */
+/* $Id: DBThread.java,v 1.22 2007/05/27 06:29:34 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -84,7 +84,7 @@ public class DBThread extends SourceThread {
 	private boolean shutdown = false; 
 	
     // high watermark on the time predicate of db query;
-    private long highWatermark = Long.MIN_VALUE;
+    private long query_highWatermark = Long.MIN_VALUE;
 
 	// whether this is a first query got from punctQC? 
 	private int count = 0;
@@ -467,13 +467,18 @@ public class DBThread extends SourceThread {
 		} else if (farAhead ()) { // is database data far ahead of the stream? - this means we need to buffer too much
 			int size = pfSpec.getCoverage();
 			System.err.println("db is too far ahead");
-			if (roundtrip < size - PANE) {
-				System.err.println("decrease coverage: "+pfSpec.getCoverage()+ "by "+PANE);
-				pfSpec.setCoverage(size-PANE);
+			//if (roundtrip < size - PANE) {
+			if (roundtrip < size*RATIO) {
+				System.err.println("decrease coverage: "+pfSpec.getCoverage()+ "by "+size*RATIO);
+				pfSpec.setCoverage(Double.valueOf(size*RATIO).intValue());
+
+				//System.err.println("decrease coverage: "+pfSpec.getCoverage()+ "by "+PANE);
+				//pfSpec.setCoverage(size-PANE);
 			} else {
 				System.err.println("decrease prefetch: "+pfSpec.getPrefetchVal()+ "by "+PANE);
 				int val = pfSpec.getPrefetchVal();
-				pfSpec.setPrefetchVal(val-PANE);
+				//pfSpec.setPrefetchVal(val-PANE);
+				pfSpec.setPrefetchVal(Double.valueOf(val*RATIO).intValue());
 			}
 		}
 	}
@@ -603,22 +608,26 @@ public class DBThread extends SourceThread {
         
         int prefetch = pfSpec.getPrefetchVal();
         
-        if (highWatermark < ts+prefetch) {
+        if (query_highWatermark < ts+prefetch) {
             int queryCoverage = pfSpec.getCoverage();
-
+            
             if (count == 0) {
-            	start = ts;
+            	start = ts - sSpec.getNumOfMins()*SECOND_PER_MIN;
             	//start = ts - sSpec.getNumOfMins()*60;
             	count++;
             } else
-            	start = highWatermark;
+            	start = query_highWatermark;
 	        
             end = (start + queryCoverage);
-	        	
-	        String range = start + " " + end; //newQuery(start, end);
+        	if (end < streamTime+pfSpec.getPrefetchVal()) {
+        		end = streamTime + pfSpec.getPrefetchVal();
+        	}
+            
+	        String range = start + " " + end; 
 	    
-	        System.err.println(range);
-	        highWatermark = end;
+	        if (DEBUG)
+	        	System.err.println(range);
+	        query_highWatermark = end;
         	
         	return range;
     	}
@@ -629,26 +638,22 @@ public class DBThread extends SourceThread {
     throws java.lang.InterruptedException, ShutdownException, SQLException {
     	String[] queryRange = queryPara.split("[ |\t]+");
     	assert queryRange.length == 2: "Jenny - range is more than a pair?!";
-
-    	long realStart = Long.valueOf(queryRange[0]);;
-		
-    	if (count == 0) {
-			realStart -= sSpec.getNumOfMins()*SECOND_PER_MIN;
-			count++;
-		}
+    	
+    	long start = Long.valueOf(queryRange[0]);
+    	long end = Long.valueOf(queryRange[1]);
     	
     	if (!sSpec.getWeather()) {
-   	   		similarDate = getSimilarDate (MILLISEC_PER_SEC*realStart, 
+   	   		similarDate = getSimilarDate (MILLISEC_PER_SEC*start, 
    	   				MILLISEC_PER_SEC*Long.valueOf(queryRange[1]));
    	   		
    	   		synchronized (synch) {
    	   			if (stagelist == null) {
    	   				stagelist = new ArrayList ();
-   	   				stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*realStart));
+   	   				stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*start));
    	   			}
    	   		}
     	} else {
-    		if (nextEpoch(realStart*MILLISEC_PER_SEC)) {
+    		if (nextEpoch(start*MILLISEC_PER_SEC)) {
     			ResultSet rs;
     			int num = 0; 
     			similarDate = new ArrayList ();
@@ -656,8 +661,8 @@ public class DBThread extends SourceThread {
     			while (similarDate.size() < sSpec.getNumOfDays() && num < MAX_HISTORY/LOOKBACK) {
         			stmt = conn.createStatement();
     				rs = stmt.executeQuery(similarWeather(
-    						MILLISEC_PER_SEC*(realStart+num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN), 
-    						getRainfall(realStart)));
+    						MILLISEC_PER_SEC*(start+num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN), 
+    						getRainfall(start)));
     				extractSimilarDate (similarDate, rs);
     				stmt.close();
     				num++;
@@ -665,7 +670,7 @@ public class DBThread extends SourceThread {
         		synchronized (synch) {
     	    		if (stagelist == null) {
     	    			stagelist = new ArrayList ();
-    	    			stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*realStart));
+    	    			stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*start));
     	    		} else {
     	    			// change stage
     	    			long startTS = stagelist.get(0).starttime;
@@ -673,12 +678,10 @@ public class DBThread extends SourceThread {
     	    		}
         		}
     		} 
-    		
-    		
     	}
 
     	// form query to retrieve archive data from db;
-    	return newQuery (similarDate, MILLISEC_PER_SEC*realStart, MILLISEC_PER_SEC*Long.valueOf(queryRange[1]));
+    	return newQuery (similarDate, MILLISEC_PER_SEC*start, MILLISEC_PER_SEC*end);
     }
     
     /**
@@ -949,7 +952,7 @@ public class DBThread extends SourceThread {
 	private ArrayList extractSimilarDate (ArrayList similarDate, ResultSet rs) 
 	throws SQLException, ShutdownException, InterruptedException {
 		long time;
-		int count = 0;
+		int count = similarDate.size();
 		
 		while (rs.next() && count < sSpec.getNumOfDays()) {
 			time = rs.getDate(TIME_COLUMN).getTime();
