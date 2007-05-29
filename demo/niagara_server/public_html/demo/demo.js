@@ -36,8 +36,11 @@ function parse_response(text) {
 	} else if (response.@responseType == "end_result") {
 		set_status("Query ended");
 		deactivateQuery();
-		stagelistXML.@ended = "true";
-		load_stagelist(stagelistXML);
+		if (stagelistXML != undefined) {
+			stagelistXML.@ended = "true";
+			load_stagelist(stagelistXML);
+		}
+		restartTimeout();
 	} else if (response.@responseType == "query_result") {
 		set_status("Processing");		
 		stagelistXML = response.responseData.value.stagelist;

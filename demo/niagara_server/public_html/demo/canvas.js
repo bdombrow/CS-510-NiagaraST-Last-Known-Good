@@ -121,6 +121,13 @@ function redraw_canvas() {
 
     buffer_canvas.width = buffer_canvas_width + 20;
     buffer_canvas.height = buffer_canvas_height;
+    if (canvas_xpos > buffer_canvas.width) {
+    	canvas_xpos = 0;
+    }
+    if (buffer_canvas.height != canvas_height) {
+    	canvas_height = buffer_canvas.height;
+    	canvas.setDimensions(canvas_width, canvas_height);
+    }
 
     now_xpos = stagelist.now.diff(stagelist.start_time) / MILLISECONDS_PER_PIXEL;    
     for each (var stage in stagelist.stage_list) {

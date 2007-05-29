@@ -1,5 +1,5 @@
 // Event handlers for browser events.
-// $Id: ajax.js,v 1.2 2007/05/24 17:50:39 vpapad Exp $
+// $Id: ajax.js,v 1.3 2007/05/29 17:08:17 vpapad Exp $
 
 var req;
 var timeoutWatch;
@@ -7,18 +7,23 @@ var timeout;
 var TIMEOUT = 3000;
 var queryActive;
 
+
 function armTimeoutWatch() {
     if (timeout != undefined)
-	window.clearTimeout(timeout);
+		window.clearTimeout(timeout);
     timeoutWatch = Date.now();
     timeout = setTimeout(checkTimeoutWatch, TIMEOUT);
 }
 
 function checkTimeoutWatch() {
     if (queryActive && (Date.now() - timeoutWatch >= TIMEOUT)) {
-	error_handler("Connection timed out -- restarting");
+		error_handler("Connection timed out -- restarting");
     }
     armTimeoutWatch();
+}
+
+function restartTimeout() {
+	setTimeout(submit_query, TIMEOUT);
 }
 
 function activateQuery() {
