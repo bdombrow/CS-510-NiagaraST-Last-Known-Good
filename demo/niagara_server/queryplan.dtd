@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.50 2007/05/24 03:49:54 jinli Exp $
+<!-- $Id: queryplan.dtd,v 1.51 2007/05/31 03:42:00 jinli Exp $
      DTD for query plans -->
 
 <!-- 
@@ -86,6 +86,8 @@
 <!ATTLIST windowAverage
 	  groupby  CDATA		#REQUIRED
 	  avgattr  CDATA		#REQUIRED
+          sumattr  CDATA		#IMPLIED
+          countattr CDATA		#IMPLIED
 	  wid	   CDATA		""
 	  %StandardAttributes;>
 
