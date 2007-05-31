@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalWindowAverage.java,v 1.2 2006/12/18 21:50:03 jinli Exp $
+  $Id: PhysicalWindowAverage.java,v 1.3 2007/05/31 03:36:23 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +34,7 @@ import niagara.utils.StringAttr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
+import java.util.ArrayList;
 
 /**
  * This is the <code>PhysicalCountOperator</code> that extends the
@@ -47,6 +48,7 @@ import org.w3c.dom.Text;
 public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 
 	int totalCost = 0;
+	ArrayList values = new ArrayList ();
 	/**
 	 * This function updates the statistics with a value
 	 *
@@ -59,10 +61,15 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 	// KT - is this correct??
 	// code from old mrege results:
 	//finalResult.updateStatistics(((Integer) ungroupedResult).intValue());
-	result.count++;	
-	//result.doubleVal +=  ((Double)((Vector)ungroupedResult).get(0)).doubleValue(); // sum
-	result.doubleVal +=  ((Double) ungroupedResult).doubleValue(); // sum
-	    
+	if (ae.size() == 1) {
+		result.count++;	
+		//result.doubleVal +=  ((Double)((Vector)ungroupedResult).get(0)).doubleValue(); // sum
+		result.doubleVal +=  ((Double) ungroupedResult).doubleValue(); // sum
+	} else {
+		// the first item is sum; the second is count;
+		result.doubleVal += ((Double)((ArrayList)ungroupedResult).get(0)).doubleValue();
+		result.count += ((Integer)((ArrayList)ungroupedResult).get(1)).doubleValue();
+	}
 	}
 
 
@@ -95,11 +102,22 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 
 	// First get the atomic values
 	atomicValues.clear();
-	ae.getAtomicValues(tupleElement, atomicValues);
+	values.clear();
+	if (ae.size() == 1) {
+		ae.get(0).getAtomicValues(tupleElement, atomicValues);	
+		assert atomicValues.size() == 1 : "Must have exactly one atomic value";
+		return new Double(((BaseAttr)atomicValues.get(0)).toASCII());
+	} else {
+		assert ae.size() == 2: "Must have at most 2 aggregate attributes for average";
+		ae.get(0).getAtomicValues(tupleElement, atomicValues);
+		values.add(new Double(((BaseAttr)atomicValues.get(0)).toASCII()));
+		
+		atomicValues.clear();
+		ae.get(1).getAtomicValues(tupleElement, atomicValues);
+		values.add(new Integer(((BaseAttr)atomicValues.get(0)).toASCII()));
+		return values;
 
-	assert atomicValues.size() == 1 : "Must have exactly one atomic value";
-	
-	return new Double(((BaseAttr)atomicValues.get(0)).toASCII());
+	}
 	}
 
 	/**

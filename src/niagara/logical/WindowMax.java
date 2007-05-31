@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowMax.java,v 1.1 2003/12/24 02:08:28 vpapad Exp $
+  $Id: WindowMax.java,v 1.2 2007/05/31 03:36:21 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +34,8 @@
  */
 
 package niagara.logical;
+import java.util.ArrayList;
+
 import org.w3c.dom.*;
 
 import niagara.connection_server.Catalog;
@@ -48,7 +50,10 @@ public class WindowMax extends WindowAggregate {
 
 	public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog) 
 	throws InvalidPlanException {
-	super.loadFromXML(e, inputProperties, "maxattr");
+		ArrayList aggrAttrNames = new ArrayList ();
+		aggrAttrNames.add("maxattr");
+
+		super.loadFromXML(e, inputProperties, aggrAttrNames);
 	}
 
 	protected WindowAggregate getInstance() {

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalWindowCount.java,v 1.2 2006/12/18 21:50:02 jinli Exp $
+  $Id: PhysicalWindowCount.java,v 1.3 2007/05/31 03:36:22 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -91,7 +91,7 @@ public class PhysicalWindowCount extends PhysicalWindowAggregate {
 
 	// First get the atomic values
 	atomicValues.clear();
-	ae.getAtomicValues(tupleElement, atomicValues);
+	ae.get(0).getAtomicValues(tupleElement, atomicValues);
 
 	assert atomicValues.size() == 1 : "Must have exactly one atomic value";
 

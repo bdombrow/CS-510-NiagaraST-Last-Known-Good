@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowAggregate.java,v 1.3 2005/08/15 01:47:56 jinli Exp $
+  $Id: WindowAggregate.java,v 1.4 2007/05/31 03:36:20 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,6 +27,7 @@
 package niagara.logical;
 
 import org.w3c.dom.*;
+import java.util.ArrayList;
 
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.*;
@@ -42,21 +43,23 @@ public abstract class WindowAggregate extends WindowGroup {
 
 	// the attribute on which the aggregation function should
 	// be performed
-	protected Attribute aggrAttr;
+	protected ArrayList<Attribute> aggrAttr = new ArrayList();
 	protected abstract WindowAggregate getInstance();
 
 	protected void loadFromXML(Element e, 
 				   LogicalProperty[] inputProperties,
-				   String aggrAttrName) 
+				   ArrayList<String> aggrAttrName) 
 	throws InvalidPlanException {
-
-		String aggAttrStr = e.getAttribute(aggrAttrName);
-		aggrAttr = Variable.findVariable(inputProperties[0], aggAttrStr);
+		
+		for (String name: aggrAttrName) {
+		String aggAttrStr = e.getAttribute(name);
+		aggrAttr.add(Variable.findVariable(inputProperties[0], aggAttrStr));
+		}
 		loadGroupingAttrsFromXML(e, inputProperties[0], "groupby");
 		loadWindowAttrsFromXML(e, inputProperties[0]);
 	}
 
-	public Attribute getAggrAttr() {
+	public ArrayList getAggrAttr() {
 	return aggrAttr;
 	}
 
@@ -64,7 +67,11 @@ public abstract class WindowAggregate extends WindowGroup {
 	System.out.println("opName");
 	System.out.print("Grouping Attrs: ");
 	groupingAttrs.dump();
-	System.err.println("Aggregate Attr: " + aggrAttr.getName());
+	System.err.print("Aggregate Attr: " );
+	for (Attribute attr : aggrAttr) {
+		System.err.print(attr.getName()+" ");
+	}
+	System.err.println(" ");
 	}
 
 	public Op opCopy() {

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowGroup.java,v 1.4 2005/08/15 01:47:56 jinli Exp $
+  $Id: WindowGroup.java,v 1.5 2007/05/31 03:36:21 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 

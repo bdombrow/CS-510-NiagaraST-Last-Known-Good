@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowAverage.java,v 1.1 2003/12/24 02:08:30 vpapad Exp $
+  $Id: WindowAverage.java,v 1.2 2007/05/31 03:36:20 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,6 +35,7 @@
 
 package niagara.logical;
 import org.w3c.dom.*;
+import java.util.ArrayList;
 
 import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
@@ -48,7 +49,23 @@ public class WindowAverage extends WindowAggregate {
 
 	public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog) 
 	throws InvalidPlanException {
-	super.loadFromXML(e, inputProperties, "avgattr");
+		ArrayList aggrAttrNames = new ArrayList ();
+		String attrName1, attrName2;
+		
+		attrName1 = e.getAttribute("avgattr");
+		if (attrName1 != "") {
+			aggrAttrNames.add("avgattr");
+		} else {
+			attrName1 = e.getAttribute("sumattr");
+			attrName2 = e.getAttribute("countattr");
+			if (attrName1 != "" && attrName2 != "" ) {
+				aggrAttrNames.add("sumattr");
+				aggrAttrNames.add("countattr");				
+			} else {
+				throw new InvalidPlanException("no aggregate attribute specified"); 
+			}
+		}
+		super.loadFromXML(e, inputProperties, aggrAttrNames);
 	}
 
 	protected WindowAggregate getInstance() {

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowCount.java,v 1.1 2003/12/24 02:08:29 vpapad Exp $
+  $Id: WindowCount.java,v 1.2 2007/05/31 03:36:20 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +34,8 @@
  */
 
 package niagara.logical;
+import java.util.ArrayList;
+
 import org.w3c.dom.*;
 
 import niagara.connection_server.Catalog;
@@ -48,7 +50,10 @@ public class WindowCount extends WindowAggregate {
 
 	public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog) 
 	throws InvalidPlanException {
-	super.loadFromXML(e, inputProperties, "countattr");
+		ArrayList aggrAttrNames = new ArrayList ();
+		aggrAttrNames.add("countattr");
+
+		super.loadFromXML(e, inputProperties, aggrAttrNames);
 	}
 
 	protected WindowAggregate getInstance() {

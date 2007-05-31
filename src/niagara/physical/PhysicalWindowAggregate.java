@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowAggregate.java,v 1.4 2006/12/18 21:50:02 jinli Exp $
+  $Id: PhysicalWindowAggregate.java,v 1.5 2007/05/31 03:36:22 jinli Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -49,8 +49,8 @@ import niagara.optimizer.colombia.LogicalOp;
 
 public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 
-	Attribute aggrAttr;
-	AtomicEvaluator ae;
+	ArrayList <Attribute> aggrAttr = new ArrayList();
+	ArrayList <AtomicEvaluator> ae = new ArrayList();
 	ArrayList atomicValues;
 
 	protected abstract PhysicalWindowAggregate getInstance();
@@ -65,12 +65,14 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 	}
 
 	protected void initializeForExecution() {
-		ae = new AtomicEvaluator(aggrAttr.getName());
-		ae.resolveVariables(inputTupleSchemas[0], 0);
+		for (Attribute attr: aggrAttr) {
+			ae.add(new AtomicEvaluator(attr.getName()));
+			ae.get(ae.size() - 1).resolveVariables(inputTupleSchemas[0], 0);			
+		}
 		atomicValues = new ArrayList();
 	}
 
-	protected final Double getDoubleValue (Tuple tupleElement) 
+	/*protected final Double getDoubleValue (Tuple tupleElement) 
 	throws ShutdownException {
 	try {
 		// First get the atomic values
@@ -83,7 +85,7 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 	} catch (java.lang.NumberFormatException nfe) {
 		throw new ShutdownException(nfe.getMessage());
 	} 
-	}
+	}*/
 
 	/**
 	 * This function merges a grouped result with an ungrouped result
