@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.22 2007/05/27 06:29:34 jinli Exp $ */
+/* $Id: DBThread.java,v 1.23 2007/05/31 18:49:01 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -58,10 +58,10 @@ public class DBThread extends SourceThread {
     // weather similarity hack;
     private static final int MAX_HISTORY = 60;
     private static final int LOOKBACK = 30;
-    private static final int WEATHER_OFFSET = 20; 
+    private static final int WEATHER_OFFSET = 3; 
     private static final int TIME_COLUMN = 1;
 
-	private final boolean DEBUG = false;
+	private final boolean DEBUG = true;
 	
 	// think these are optimization time??
 	public DBScanSpec dbScanSpec;
@@ -92,12 +92,21 @@ public class DBThread extends SourceThread {
 	// high watermark time monitored or stream and db;
 	private long streamTime=Long.MIN_VALUE, dbTime = Long.MIN_VALUE;
 	
-	private static long weather [][] = {
+	private static long weather_02_20 [][] = {
+		{1171976400, 14},
 		{1171980000, 18}, 
 		{1171983600, 8}, 
 		{1171987200, 0}, 
 		{1171990800, 0}, 
 		{1171994400, 0}};
+        private static long weather [][] = {
+                {1174338000, 8},
+                {1174341600, 6},
+                {1174345200, 5},
+                {1174348800, 6},
+                {1174352400, 4},
+                {1174356000, 1}
+        };
 	
 	private class Query {
 		public Query (String query, long start, long end) {
@@ -117,7 +126,7 @@ public class DBThread extends SourceThread {
 	
 	private class Stage {
 		//for x-axis
-		long starttime, endtime;
+		//long starttime, endtime;
 		// for y-axis
 		ArrayList<Long> dates;
 		
@@ -192,8 +201,6 @@ public class DBThread extends SourceThread {
 		if (o.getClass() != getClass())
 			return o.equals(this);
 		// XXX vpapad: Spec.equals is Object.equals
-		if (dbScanSpec.equals(((DBThread) o).dbScanSpec))
-			System.err.println("DBSCAN equals true");
 		return dbScanSpec.equals(((DBThread) o).dbScanSpec) ^ 
 				equalsNullsAllowed(sSpec, ((DBThread) o).sSpec);
 	}
@@ -336,7 +343,7 @@ public class DBThread extends SourceThread {
 						}
 					}
 					
-					System.err.println("before execute: "+streamTime);
+					//System.err.println("before execute: "+streamTime);
 					
 					roundtrip = streamTime;
 					
@@ -350,9 +357,9 @@ public class DBThread extends SourceThread {
 					
 					roundtrip = streamTime - roundtrip;					
 
-					System.err.println("after execute: "+streamTime);
+					//System.err.println("after execute: "+streamTime);
 					
-					System.err.println ("db time: "+dbTime);
+					//System.err.println ("db time: "+dbTime);
 					
 					adjustPrefetch(roundtrip);
 					
@@ -450,7 +457,7 @@ public class DBThread extends SourceThread {
 		checkForSinkCtrlMsg(-1);
 		if (!intime ()) {
 			int size = pfSpec.getCoverage();
-			System.err.println("++++++++++++++++++roundtrip time: "+roundtrip);
+			//System.err.println("++++++++++++++++++roundtrip time: "+roundtrip);
 			System.err.println("db is beind");
 			// is database keeping up?
 			if (roundtrip > size) {
@@ -461,8 +468,10 @@ public class DBThread extends SourceThread {
 				// if database keeps up, and database data lags behind,
 				// we should increase prefetching 
 				int val = pfSpec.getPrefetchVal();
-				System.err.println("increase prefetch: "+pfSpec.getPrefetchVal()+ "by "+PANE);
-				pfSpec.setPrefetchVal(val + PANE);
+				if (val <= pfSpec.getCoverage()) {
+					System.err.println("increase prefetch: "+pfSpec.getPrefetchVal()+ "by "+PANE);
+					pfSpec.setPrefetchVal(val + PANE);
+				}
 			}
 		} else if (farAhead ()) { // is database data far ahead of the stream? - this means we need to buffer too much
 			int size = pfSpec.getCoverage();
@@ -581,10 +590,11 @@ public class DBThread extends SourceThread {
     	String ctrlMsg = (String)ctrl.get(1);
     	switch (ctrlFlag) {
     	case CtrlFlags.CHANGE_QUERY:
+    		streamTime = Long.valueOf(ctrlMsg);
     		String range = queryRange(ctrlMsg);
     		if (range != null)
     			newQueries.add(changeQuery(range));
-    		streamTime = Long.valueOf(ctrlMsg);
+    		
     		break;
     	case CtrlFlags.READY_TO_FINISH:
     		System.err.println("live stream ends...");
@@ -649,11 +659,13 @@ public class DBThread extends SourceThread {
    	   		synchronized (synch) {
    	   			if (stagelist == null) {
    	   				stagelist = new ArrayList ();
-   	   				stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*start));
+   	   				//stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*start));
+   	   				stagelist.add(setStage(similarDate));
    	   			}
    	   		}
     	} else {
-    		if (nextEpoch(start*MILLISEC_PER_SEC)) {
+    		//if (nextEpoch(start*MILLISEC_PER_SEC)) {
+    		if (nextEpoch(streamTime*MILLISEC_PER_SEC)) {
     			ResultSet rs;
     			int num = 0; 
     			similarDate = new ArrayList ();
@@ -661,8 +673,10 @@ public class DBThread extends SourceThread {
     			while (similarDate.size() < sSpec.getNumOfDays() && num < MAX_HISTORY/LOOKBACK) {
         			stmt = conn.createStatement();
     				rs = stmt.executeQuery(similarWeather(
-    						MILLISEC_PER_SEC*(start+num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN), 
-    						getRainfall(start)));
+    						MILLISEC_PER_SEC*(streamTime-num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN),
+    						//MILLISEC_PER_SEC*(start-num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN),
+    						getRainfall(streamTime)));
+    						//getRainfall(start)));
     				extractSimilarDate (similarDate, rs);
     				stmt.close();
     				num++;
@@ -670,11 +684,13 @@ public class DBThread extends SourceThread {
         		synchronized (synch) {
     	    		if (stagelist == null) {
     	    			stagelist = new ArrayList ();
-    	    			stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*start));
+    	    			//stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*start));
+    	    			stagelist.add(setStage(similarDate));
     	    		} else {
     	    			// change stage
-    	    			long startTS = stagelist.get(0).starttime;
-    	    			stagelist.add(setStage(similarDate, startTS));
+    	    			//long startTS = stagelist.get(0).starttime;
+    	    			//stagelist.add(setStage(similarDate, startTS));
+    	    			stagelist.add(setStage(similarDate));
     	    		}
         		}
     		} 
@@ -693,7 +709,7 @@ public class DBThread extends SourceThread {
     	Calendar calendar = GregorianCalendar.getInstance();
     	
     	calendar.setTimeInMillis(start);
-    	System.err.println(calendar.getTime().toString());
+    	//System.err.println(calendar.getTime().toString());
     	
     	int hour = calendar.get(Calendar.HOUR_OF_DAY);
     	
@@ -775,12 +791,13 @@ public class DBThread extends SourceThread {
 	 * @param date
 	 * @param start
 	 */
-	private Stage setStage(ArrayList<Long> date, long start) {
+	//private Stage setStage(ArrayList<Long> date, long start) {
+    private Stage setStage(ArrayList<Long> date) {
 		 
 		Stage	stage = new Stage ();
 		
-		stage.starttime = start;
-		stage.endtime = stage.starttime + ONE_DEMO_RUN;
+		//stage.starttime = start;
+		//stage.endtime = stage.starttime + ONE_DEMO_RUN;
         stage.dates = new ArrayList <Long> ();
         stage.dates = date; 
         
@@ -811,6 +828,11 @@ public class DBThread extends SourceThread {
 				dates.add(calendar.getTimeInMillis());
 			}
 
+			if (numDays == 0 ) {
+				calendar.setTimeInMillis(start);											
+				dates.add(calendar.getTimeInMillis());
+			}
+			
 			break;
 			
 		case SameDayOfWeek:
@@ -868,6 +890,9 @@ public class DBThread extends SourceThread {
 		Calendar calendar = GregorianCalendar.getInstance();
 		calendar.setTimeInMillis(time);
 		
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		
 		hour = calendar.get(Calendar.HOUR_OF_DAY);
 		dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 		
@@ -891,8 +916,8 @@ public class DBThread extends SourceThread {
 		default:
 			System.err.println("unsupported similarity type"); 
 		}
-		//queryString.append(" group by reporttime having avg(rainfall) >=" + (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall + WEATHER_OFFSET));
-		queryString.append(" group by reporttime having avg(rainfall) " + rain + " 0");
+		queryString.append(" group by reporttime having avg(rainfall) >=" + (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall + WEATHER_OFFSET));
+		//queryString.append(" group by reporttime having avg(rainfall) " + rain + " 0");
 		queryString.append(" order by abs(avg(rainfall) - " + rainfall + ")");
 		
 		if (DEBUG)
@@ -966,7 +991,6 @@ public class DBThread extends SourceThread {
 	private long getRainfall (long time) {
 		for (int i = 0; i < weather.length; i++) {
 			if (weather[i][0] <= time && time < weather[i][0] + MIN_PER_HOUR*SECOND_PER_MIN) {
-				System.err.println("this must be wrong - we found matching time");
 				return weather[i][1];
 			}
 		}
