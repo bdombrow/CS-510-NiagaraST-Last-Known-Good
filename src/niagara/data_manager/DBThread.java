@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.23 2007/05/31 18:49:01 jinli Exp $ */
+/* $Id: DBThread.java,v 1.24 2007/06/01 18:54:27 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -61,7 +61,7 @@ public class DBThread extends SourceThread {
     private static final int WEATHER_OFFSET = 3; 
     private static final int TIME_COLUMN = 1;
 
-	private final boolean DEBUG = true;
+	private final boolean DEBUG = false;
 	
 	// think these are optimization time??
 	public DBScanSpec dbScanSpec;
@@ -263,10 +263,10 @@ public class DBThread extends SourceThread {
 			System.out.println("Attempting to connect to server.");
 			//conn = DriverManager.getConnection("jdbc:postgresql://barista.cs.pdx.edu/latte", "tufte", "loopdata");
 			Properties properties = new Properties();
-			properties.setProperty("user", "tufte");
+			properties.setProperty("user", "jinli");
 			properties.setProperty("password", "loopdata");
 
-			conn = DriverManager.getConnection("jdbc:postgresql://barista.cs.pdx.edu/latte", properties);
+			conn = DriverManager.getConnection("jdbc:postgresql://localhost/latte", properties);
 
 			System.out.println("Connected.");
 			
