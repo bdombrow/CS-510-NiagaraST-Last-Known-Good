@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.24 2007/06/01 18:54:27 jinli Exp $ */
+/* $Id: DBThread.java,v 1.25 2007/06/08 08:37:36 jinli Exp $ */
 
 package niagara.data_manager;
 
@@ -92,20 +92,21 @@ public class DBThread extends SourceThread {
 	// high watermark time monitored or stream and db;
 	private long streamTime=Long.MIN_VALUE, dbTime = Long.MIN_VALUE;
 	
-	private static long weather_02_20 [][] = {
+	/*private static long weather_02_20 [][] = {
 		{1171976400, 14},
 		{1171980000, 18}, 
 		{1171983600, 8}, 
 		{1171987200, 0}, 
 		{1171990800, 0}, 
-		{1171994400, 0}};
-        private static long weather [][] = {
-                {1174338000, 8},
-                {1174341600, 6},
-                {1174345200, 5},
-                {1174348800, 6},
-                {1174352400, 4},
-                {1174356000, 1}
+		{1171994400, 0}};*/
+
+  private static long weather [][] = {
+    {1174338000, 8},
+    {1174341600, 6},
+    {1174345200, 5},
+    {1174348800, 6},
+    {1174352400, 4},
+    {1174356000, 1}
         };
 	
 	private class Query {
@@ -880,22 +881,21 @@ public class DBThread extends SourceThread {
 		
 		int hour, dayOfWeek;
 		
-		String rain;
-		if (rainfall > 0)
-			rain = ">";
-		else
-			rain = "=";
-		
-		StringBuffer queryString = new StringBuffer ("select reporttime, abs(avg(rainfall)-"+rainfall+") from hydra " );
+		StringBuffer queryString = new StringBuffer ("select reporttime, abs(avg(rainfall)-"+rainfall+") from hydra ");
 		Calendar calendar = GregorianCalendar.getInstance();
 		calendar.setTimeInMillis(time);
+	
+    //System.err.println(calendar.getTime().toString());
+    //System.err.println("day of week before: "+calendar.get(Calendar.DAY_OF_WEEK));
 		
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		
 		hour = calendar.get(Calendar.HOUR_OF_DAY);
-		dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-		
+		dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)-1;
+    //System.err.println(calendar.getTime().toString());
+    //System.err.println("day of week after: "+dayOfWeek);
+
 		// look at the past month
 		queryString.append(" where reporttime < TIMESTAMP '"+calendar.getTime().toString() +"'");
 		calendar.roll(Calendar.DAY_OF_YEAR, -LOOKBACK);
@@ -916,12 +916,25 @@ public class DBThread extends SourceThread {
 		default:
 			System.err.println("unsupported similarity type"); 
 		}
-		queryString.append(" group by reporttime having avg(rainfall) >=" + (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall + WEATHER_OFFSET));
-		//queryString.append(" group by reporttime having avg(rainfall) " + rain + " 0");
-		queryString.append(" order by abs(avg(rainfall) - " + rainfall + ")");
-		
-		if (DEBUG)
-			System.err.println(queryString.toString());
+    
+
+/*    if (rainfall > 0) {
+  		queryString.append(" group by reporttime having avg(rainfall) >=" + (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall + WEATHER_OFFSET));
+      queryString.append(" order by abs(avg(rainfall) -" + rainfall +")");
+    } else {
+      queryString.append(" group by reporttime having avg(rainfall) =" + " 0");
+      queryString.append(" order by reporttime desc");
+    }
+*/
+
+  		queryString.append(" group by reporttime having avg(rainfall) >=" + (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall + WEATHER_OFFSET));
+      if (rainfall > 0)
+         queryString.append(" order by abs(avg(rainfall) -" + rainfall +")");
+      else 
+        queryString.append(" order by reporttime desc");
+      
+
+		//queryString.append(" order by abs(avg(rainfall) - " + rainfall + ")");
 		
 		return queryString.toString();
 	}
@@ -991,7 +1004,8 @@ public class DBThread extends SourceThread {
 	private long getRainfall (long time) {
 		for (int i = 0; i < weather.length; i++) {
 			if (weather[i][0] <= time && time < weather[i][0] + MIN_PER_HOUR*SECOND_PER_MIN) {
-				return weather[i][1];
+        System.err.println ("++++++++++++++rainfall is not 0++++++++++++");
+        return weather[i][1];
 			}
 		}
 		
