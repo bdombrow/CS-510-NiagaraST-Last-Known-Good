@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.11 2007/04/30 19:25:44 vpapad Exp $
+  $Id: PageStream.java,v 1.12 2007/08/06 22:39:10 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -310,41 +310,12 @@ public class PageStream {
     	return producerGetCtrlMsg(timeout);
     }
     
-    /*private synchronized ArrayList producerGetCtrlMsg() throws ShutdownException{
-	// shutdown takes priority over all other messages
-	if(shutdown)
-	    throw new ShutdownException(shutdownMsg);
-
-	// Check for end of stream and raise exception if necessary
-	assert !eos : "KT Reading after end of stream";
-	
-	// Get first element, if any, in the down stream buffer
-	if (toProducerQueue.isEmpty()) {
-		return null;
-	    //return CtrlFlags.NULLFLAG;
-	} else {
-		
-	    // no notification, no one ever blocks on toProducerQueue
-	    TuplePage ctrlPage = toProducerQueue.get();
-	    ArrayList ctrl = null;
-	    int ctrlFlag = ctrlPage.getFlag();
-	    if (ctrlFlag != CtrlFlags.NULLFLAG) {
-	    	ctrl = new ArrayList(2);	
-	    	ctrl.add(ctrlFlag);
-	    	ctrl.add(ctrlPage.getCtrlMsg());
-	    }
-	    //int retVal = ctrlPage.getFlag();
-	    returnCtrlPage(ctrlPage); // make page avail for reuse
-	    //return retVal;
-	    return ctrl;
-	}
-    }*/
-    
     private synchronized ArrayList producerGetCtrlMsg(int timeout) 
 	throws java.lang.InterruptedException, ShutdownException {
     	// shutdown takes priority over all other messages
-    	if(shutdown)
+    	if(shutdown) {
     	    throw new ShutdownException(shutdownMsg);
+      }
 
     	// Check for end of stream and raise exception if necessary
     	assert !eos : "KT Reading after end of stream";
@@ -369,9 +340,7 @@ public class PageStream {
    	    	ctrl.add(ctrlFlag);
    	    	ctrl.add(ctrlPage.getCtrlMsg());
    	    }
-   	    //int retVal = ctrlPage.getFlag();
    	    returnCtrlPage(ctrlPage); // make page avail for reuse
-   	    //return retVal;
    	    return ctrl;
     }
 
@@ -527,8 +496,10 @@ public class PageStream {
     }
 
     private void returnCtrlPage(TuplePage returnPage) {
-	if(extraCtrlPage != null)
+	if(extraCtrlPage != null) {
 	    System.out.println("KT dropping extra control page");
+      System.out.println("KT " . toString());
+  }
 	returnPage.setFlag(CtrlFlags.NULLFLAG);
 	extraCtrlPage = returnPage;
     }

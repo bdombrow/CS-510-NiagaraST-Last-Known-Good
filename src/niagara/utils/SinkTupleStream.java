@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.16 2007/04/28 22:34:04 jinli Exp $
+  $Id: SinkTupleStream.java,v 1.17 2007/08/06 22:39:10 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -137,15 +137,6 @@ public final class SinkTupleStream {
     else 
     	return processCtrlFlag(ctrl);
     	 
-    
-	//int ctrlFlag =  pageStream.getCtrlMsgFromSink();
-
-	// we have to handle getpartials in case the operator or
-	// stream below us can't handle them (or isn't supposed
-	// to get getPartials for optimization reasons)
-	// Also, we handle REQ_BUF_FLUSH
-	//return processCtrlFlag(ctrlFlag);
-    
     }
     
     /**
@@ -226,7 +217,7 @@ public final class SinkTupleStream {
 
 	// stream above an operator using this put should
 	// always reflect partials
-	assert (Integer) ret.get(0) != CtrlFlags.GET_PARTIAL: 
+	assert (ret == null) || ((Integer) ret.get(0) != CtrlFlags.GET_PARTIAL): 
 	    "KT unexpected get partial request";
 
 	// handle a flush buffer request
@@ -318,33 +309,35 @@ public final class SinkTupleStream {
     	return null;
     
     int ctrlFlag = (Integer) ctrl.get(0);
-	switch(ctrlFlag) {
-	case CtrlFlags.REQUEST_BUF_FLUSH:
-	    if(PageStream.VERBOSE)
-		System.out.println(pageStream.getName() + 
+	    switch(ctrlFlag) {
+	    case CtrlFlags.REQUEST_BUF_FLUSH:
+	      if(PageStream.VERBOSE)
+		      System.out.println(pageStream.getName() + 
 				   " received request for buffer flush ");
-	    return flushBuffer(); // returns NULLFLAG or GET_PARTIAL
-	    
-	case CtrlFlags.GET_PARTIAL:
-	    if(reflectPartial) {
-		reflectPartial(); // void
-		return null;
-	    } else {
-	    ctrl.set(0, CtrlFlags.GET_PARTIAL);
-	    ctrl.set(1, null);
-		return ctrl;
-	    }
+	        return flushBuffer(); // returns NULLFLAG or GET_PARTIAL
+	    case CtrlFlags.GET_PARTIAL:
+	      if(reflectPartial) {
+		      reflectPartial(); // void
+		      return null;
+	      } else {
+	        ctrl.set(0, CtrlFlags.GET_PARTIAL);
+	        ctrl.set(1, null);
+		      return ctrl;
+	      }
 
-	//case CtrlFlags.NULLFLAG:
-	//	return null;
-	case CtrlFlags.CHANGE_QUERY:
-	case CtrlFlags.READY_TO_FINISH:
-	    return ctrl;
+	    case CtrlFlags.CHANGE_QUERY:
+	    case CtrlFlags.READY_TO_FINISH:
+	      return ctrl;
 	    	    
-	default:
-	    assert false : "KT Unexpected control flag" 
-		+ CtrlFlags.name[ctrlFlag];
-	    return null;
+	    case CtrlFlags.SHUTDOWN:
+        assert pageStream.shutdownReceived() :
+          "KT shutdown flag in queue but pagestream says shutdown not received";
+        throw new ShutdownException(pageStream.getShutdownMsg());
+
+	    default:
+	      assert false : "KT Unexpected control flag" 
+		      + CtrlFlags.name[ctrlFlag];
+	        return null;
 	}
     }
     
