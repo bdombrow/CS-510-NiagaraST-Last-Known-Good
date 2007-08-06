@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoin.java,v 1.7 2007/05/16 05:43:14 jinli Exp $
+  $Id: PhysicalHashJoin.java,v 1.8 2007/08/06 22:36:08 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -202,7 +202,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 				if (punctVal.startsWith("(")) 
 					punctVal = punctVal.substring(2, punctVal.length() - 1);  
 			   
-				punctTS = Integer.valueOf(punctVal);
+				punctTS = Long.valueOf(punctVal);
 			
 			
 			
@@ -352,7 +352,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 			if (punctVal.startsWith("(")) 
 			   punctVal = punctVal.substring(2, punctVal.length() - 1);  
 			   
-			punctTS = Integer.valueOf(punctVal) ;
+			punctTS = Long.valueOf(punctVal) ;
 	
 			// see if there are tuples to remove from the other hash table.
 			// check both the partial list and the final list
@@ -399,7 +399,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 		// Second, it the other stream isn't end, let's check whether a matching
 		// punctuation has arrived on it;
 		Iterator it = rgPunct[otherStreamId].iterator();
-		int otherTs;
+		long otherTs;
 		boolean fMatch = false;
 		
 
@@ -417,7 +417,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 			if (punctVal.startsWith("(")) 
 			   punctVal = punctVal.substring(2, punctVal.length() - 1);  
 			   
-			otherTs = Integer.valueOf(punctVal);
+			otherTs = Long.valueOf(punctVal);
 
 			if ((punctTS - INTERVAL) == otherTs) {
 				if (streamId == 0)
