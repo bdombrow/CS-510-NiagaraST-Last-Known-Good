@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.35 2007/05/22 21:48:43 vpapad Exp $
+  $Id: NiagraServer.java,v 1.36 2007/08/29 18:36:08 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -85,6 +85,9 @@ public class NiagraServer {
     public static boolean ALLOW_INSTRUMENTATION = true;
     public static boolean RUNNING_NIPROF = false;
     public static boolean TIME_OPERATORS = false;
+
+    public static boolean DEBUG = false;
+    public static boolean DEBUG2 = false;
 
     public NiagraServer() {
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -237,6 +240,11 @@ public class NiagraServer {
                 TIME_OPERATORS = true;
             } else if (args[i].equals("-accept-http")) {
                 acceptHTTP = true;
+            } else if (args[i].equals("-debug")) {
+                DEBUG = true;
+            } else if (args[i].equals("-debug2")) {
+                DEBUG = true;
+                DEBUG2 = true;
             } else {
                 cerr("Unknown option: " + args[i]);
                 usage();

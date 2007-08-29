@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalHashJoin.java,v 1.8 2007/08/06 22:36:08 tufte Exp $
+  $Id: PhysicalHashJoin.java,v 1.9 2007/08/29 18:36:11 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +34,7 @@ import niagara.logical.*;
 import niagara.logical.predicates.*;
 import niagara.optimizer.colombia.*;
 import niagara.physical.predicates.PredicateImpl;
+import niagara.connection_server.NiagraServer;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -488,8 +489,9 @@ public class PhysicalHashJoin extends PhysicalJoin {
         int streamId)
         throws ShutdownException, InterruptedException {
         Punctuation result;
-        
-        System.err.println ("hash join producing punctuation on stream "+streamId);
+       
+        if(NiagraServer.DEBUG)
+          System.err.println ("hash join producing punctuation on stream "+streamId);
         if (projecting) {
             result = left.copy(outputTupleSchema.getLength(), leftAttributeMap);
             right.copyInto(result, leftAttributeMap.length, rightAttributeMap);

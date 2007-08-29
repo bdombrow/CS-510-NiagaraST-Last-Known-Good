@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalBucket.java,v 1.8 2007/05/25 04:13:03 jinli Exp $
+  $Id: PhysicalBucket.java,v 1.9 2007/08/29 18:36:11 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -32,6 +32,7 @@ import niagara.utils.*;
 import niagara.logical.*;
 import niagara.optimizer.colombia.*;
 import niagara.query_engine.*;
+import niagara.connection_server.NiagraServer;
 
 import org.w3c.dom.*;
 import java.lang.Object;
@@ -318,8 +319,9 @@ public class PhysicalBucket extends PhysicalOperator {
 			   return;
 	      
 	   wid = (long)((timestamp+1) - start) / slide - 1;
-	   
-	   System.err.println("window_id: "+wid + "   timestamp: "+timestamp);
+	  
+     if(NiagraServer.DEBUG)
+	    System.err.println("window_id: "+wid + "   timestamp: "+timestamp);
 	   if (timestamp < -1000) 
 		   System.err.println("sth is wrong ...");
 

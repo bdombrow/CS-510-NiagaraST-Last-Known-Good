@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.25 2007/06/08 08:37:36 jinli Exp $ */
+/* $Id: DBThread.java,v 1.26 2007/08/29 18:36:09 tufte Exp $ */
 
 package niagara.data_manager;
 
@@ -20,6 +20,7 @@ import niagara.utils.*;
 import niagara.utils.BaseAttr.Type;
 import niagara.logical.SimilaritySpec;
 import niagara.logical.PrefetchSpec;
+import niagara.connection_server.NiagraServer;
 
 // for jdbc
 import java.sql.Connection;
@@ -52,8 +53,9 @@ public class DBThread extends SourceThread {
     
     // pane size of the db query; in seconds;
     private static final int PANE = 60;
-    
     private static final double RATIO = 0.5;
+    public static final boolean ADAPTING = false;
+
        
     // weather similarity hack;
     private static final int MAX_HISTORY = 60;
@@ -61,7 +63,6 @@ public class DBThread extends SourceThread {
     private static final int WEATHER_OFFSET = 3; 
     private static final int TIME_COLUMN = 1;
 
-	private final boolean DEBUG = false;
 	
 	// think these are optimization time??
 	public DBScanSpec dbScanSpec;
@@ -262,12 +263,7 @@ public class DBThread extends SourceThread {
 
 		try {
 			System.out.println("Attempting to connect to server.");
-			//conn = DriverManager.getConnection("jdbc:postgresql://barista.cs.pdx.edu/latte", "tufte", "loopdata");
-			Properties properties = new Properties();
-			properties.setProperty("user", "jinli");
-			properties.setProperty("password", "loopdata");
-
-			conn = DriverManager.getConnection("jdbc:postgresql://localhost/latte", properties);
+			conn = DriverManager.getConnection("jdbc:postgresql://barista.cs.pdx.edu/latte", "tufte", "loopdata");
 
 			System.out.println("Connected.");
 			
@@ -284,15 +280,14 @@ public class DBThread extends SourceThread {
 				System.out.println("query string: "+qs);
 		
 				System.out.println("DB Query is:" + qs);
-				//stmt = conn.createStatement();
-				System.out.println("Attempting to execute query.");
+				System.out.println("Attempting to execute one-time query.");
 
 				rs = stmt.executeQuery(qs);
-				//System.out.println("Executed.");				
+				System.out.println("Executed.");				
 		
 				// Now do something with the ResultSet ....
 				int numAttrs = dbScanSpec.getNumAttrs();
-				//System.out.println("Num Attrs: " + numAttrs);
+				System.out.println("Num Attrs: " + numAttrs);
 				
 				putResults(rs, numAttrs);
 
@@ -326,11 +321,11 @@ public class DBThread extends SourceThread {
 					}
 						
 					stmt = conn.createStatement();
-					if (DEBUG)
-						System.out.println("Attempting to execute query.");
+					if (NiagraServer.DEBUG)
+						System.out.println("Attempting to execute continuous query.");
 									
 					Query curQuery = (Query) newQueries.remove(0);
-					if (DEBUG)
+					if (NiagraServer.DEBUG)
 						System.err.println(curQuery.queryStr);
 					
 					// an actor is in progress
@@ -343,8 +338,9 @@ public class DBThread extends SourceThread {
 							}
 						}
 					}
-					
-					//System.err.println("before execute: "+streamTime);
+				
+          if(NiagraServer.DEBUG2)
+					  System.err.println("before execute: "+streamTime);
 					
 					roundtrip = streamTime;
 					
@@ -358,11 +354,14 @@ public class DBThread extends SourceThread {
 					
 					roundtrip = streamTime - roundtrip;					
 
-					//System.err.println("after execute: "+streamTime);
+          if(NiagraServer.DEBUG)
+					  System.err.println("after execute: "+streamTime);
 					
-					//System.err.println ("db time: "+dbTime);
-					
-					adjustPrefetch(roundtrip);
+          if(NiagraServer.DEBUG2)
+					  System.err.println ("db time: "+dbTime);
+				
+          if(ADAPTING)
+					  adjustPrefetch(roundtrip);
 					
 					// the actor is done, moved to exeunt list;
 					synchronized (synch) {
@@ -458,7 +457,8 @@ public class DBThread extends SourceThread {
 		checkForSinkCtrlMsg(-1);
 		if (!intime ()) {
 			int size = pfSpec.getCoverage();
-			//System.err.println("++++++++++++++++++roundtrip time: "+roundtrip);
+      if(NiagraServer.DEBUG2)
+			  System.err.println("++++++++++++++++++roundtrip time: "+roundtrip);
 			System.err.println("db is beind");
 			// is database keeping up?
 			if (roundtrip > size) {
@@ -636,7 +636,7 @@ public class DBThread extends SourceThread {
             
 	        String range = start + " " + end; 
 	    
-	        if (DEBUG)
+	        if (NiagraServer.DEBUG)
 	        	System.err.println(range);
 	        query_highWatermark = end;
         	

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.5 2007/04/30 19:23:22 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.6 2007/08/29 18:36:11 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -287,7 +287,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 			if(activeSourceStreams.contains(sourceId) &&
                                 !sourceStreams[sourceId].isSendImmediate() &&
 			   ResultTransmitter.BUF_FLUSH) {
-			    if(PageStream.VERBOSE)
+			    if(NiagraServer.DEBUG2)
 				System.out.println(getName() + 
 					   "Requesting buffer flush on stream " 
 						   + sourceId);
@@ -909,6 +909,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      */
     protected void sendCtrlMsgUpStream(int ctrlFlag, String ctrlMsg, int streamId) 
     	throws ShutdownException, InterruptedException{
+        if(NiagraServer.DEBUG)
     	    System.err.println("sendCtrlMsgUpStream "+ CtrlFlags.name[ctrlFlag]);
     		if (sourceStreams[streamId].isClosed()){
     			return;

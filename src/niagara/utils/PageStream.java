@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.12 2007/08/06 22:39:10 tufte Exp $
+  $Id: PageStream.java,v 1.13 2007/08/29 18:36:12 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -29,6 +29,7 @@
 package niagara.utils;
 
 import java.util.ArrayList;
+import niagara.connection_server.NiagraServer;
 
 // Note on removal of upStreamContrlQueue (now toConsumerQueue) and priority put
 // instead of priority put, we have  PageStream check
@@ -75,7 +76,6 @@ public class PageStream {
     private String name;
 
     // instrumentation code
-    public static boolean VERBOSE = false;
     private int timeouts;
     //private int existingDataPagesUsed;
     //private int dataPagesAllocd;
@@ -104,7 +104,7 @@ public class PageStream {
 	shutdown = false;
 	this.name = name;
 
-	if(VERBOSE) {
+	if(NiagraServer.DEBUG2) {
 	    // instrumentation
 	    timeouts = 0;
 	    //existingDataPagesUsed = 0;
@@ -178,7 +178,7 @@ public class PageStream {
 		wait(timeout);
 		if(toConsumerQueue.isEmpty()) {
 		    // I timed out...
-		    if(VERBOSE)
+		    if(NiagraServer.DEBUG2)
 			timeouts++;
 		    return null;
 		}
@@ -206,7 +206,7 @@ public class PageStream {
 	    " Stream name: " + name;
 
 	if(notifyProducer) {
-	    if(VERBOSE)
+	    if(NiagraServer.DEBUG2)
 		notifiedProducer++;
 	    notify();
 	}
@@ -258,7 +258,7 @@ public class PageStream {
 	toProducerQueue.put(getCtrlPage(ctrlMsgId, ctrlMsgStr));
 	
 	if(notify) {
-	    if(VERBOSE)
+	    if(NiagraServer.DEBUG2)
 		notifiedOnCtrl++;
 	    notify();
 	}
@@ -430,7 +430,7 @@ public class PageStream {
 	    toConsumerQueue.put(page);
 
 	    if(notifyConsumer) {
-		if(VERBOSE)
+		if(NiagraServer.DEBUG2)
 		    notifiedConsumer++;
 		notify();
 	    }
@@ -449,7 +449,7 @@ public class PageStream {
 	// If the stream was previously closed, throw an exception
 	assert !eos : "KT end of stream received twice";
 	eos = true;
-	if(VERBOSE) {
+	if(NiagraServer.DEBUG2) {
 	    System.out.println("PageStream: " + name + " results.");
 	    System.out.println("   Timeouts: " + timeouts);
 	    //System.out.println("Existing Data Pages Used " 
@@ -497,8 +497,10 @@ public class PageStream {
 
     private void returnCtrlPage(TuplePage returnPage) {
 	if(extraCtrlPage != null) {
+    if(NiagraServer.DEBUG) {
 	    System.out.println("KT dropping extra control page");
       System.out.println("KT " . toString());
+     }
   }
 	returnPage.setFlag(CtrlFlags.NULLFLAG);
 	extraCtrlPage = returnPage;

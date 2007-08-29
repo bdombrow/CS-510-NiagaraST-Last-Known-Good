@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.17 2007/08/06 22:39:10 tufte Exp $
+  $Id: SinkTupleStream.java,v 1.18 2007/08/29 18:36:13 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -43,6 +43,7 @@ package niagara.utils;
 
 import org.w3c.dom.Node;
 import java.util.ArrayList;
+import niagara.connection_server.NiagraServer;
 
 public final class SinkTupleStream {
 
@@ -311,7 +312,7 @@ public final class SinkTupleStream {
     int ctrlFlag = (Integer) ctrl.get(0);
 	    switch(ctrlFlag) {
 	    case CtrlFlags.REQUEST_BUF_FLUSH:
-	      if(PageStream.VERBOSE)
+	      if(NiagraServer.DEBUG2)
 		      System.out.println(pageStream.getName() + 
 				   " received request for buffer flush ");
 	        return flushBuffer(); // returns NULLFLAG or GET_PARTIAL

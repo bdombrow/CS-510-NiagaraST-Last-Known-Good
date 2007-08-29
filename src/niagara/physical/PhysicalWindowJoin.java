@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalWindowJoin.java,v 1.1 2006/12/07 00:06:31 jinli Exp $
+  $Id: PhysicalWindowJoin.java,v 1.2 2007/08/29 18:36:12 tufte Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -34,6 +34,7 @@ import niagara.logical.*;
 import niagara.logical.predicates.*;
 import niagara.optimizer.colombia.*;
 import niagara.physical.predicates.PredicateImpl;
+import niagara.connection_server.NiagraServer;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -316,7 +317,10 @@ public class PhysicalWindowJoin extends PhysicalJoin {
 		throws ShutdownException, InterruptedException {
 		
 		try {
-		int pos = inputTupleSchemas[streamId].getPosition("timestamp"+(streamId+1));
+
+    if(NiagraServer.DEBUG)
+      System.out.println("processing punct from stream " + streamId);
+    int pos = inputTupleSchemas[streamId].getPosition("timestamp"+(streamId+1));
 		//Node tsNode = tuple.getAttribute(pos);
 		BaseAttr tsNode = (BaseAttr)tuple.getAttribute(pos);
 		//int ts = Integer.valueOf(tsNode.getFirstChild().getNodeValue()) + 1 - INTERVAL;
