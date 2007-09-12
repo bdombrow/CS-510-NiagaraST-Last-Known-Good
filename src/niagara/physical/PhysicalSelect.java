@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSelect.java,v 1.1 2003/12/24 01:49:01 vpapad Exp $
+  $Id: PhysicalSelect.java,v 1.2 2007/09/12 19:30:37 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -96,9 +96,7 @@ public class PhysicalSelect extends PhysicalOperator {
     protected void processPunctuation(Punctuation inputTuple,
 				      int streamId)
 	throws ShutdownException, InterruptedException {
-	if (inputTuple.isPunctuation()) {
-	    putTuple(inputTuple, streamId);
-	}
+	putTuple(inputTuple, 0);
     }
 
     public boolean isStateful() {
