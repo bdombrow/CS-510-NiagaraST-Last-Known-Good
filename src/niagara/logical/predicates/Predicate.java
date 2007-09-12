@@ -1,4 +1,4 @@
-/* $Id: Predicate.java,v 1.3 2005/10/05 17:36:38 vpapad Exp $ */
+/* $Id: Predicate.java,v 1.4 2007/09/12 19:30:21 vpapad Exp $ */
 package niagara.logical.predicates;
 
 //import java.util.*;
@@ -138,35 +138,43 @@ abstract public class Predicate implements condition {
     public static Predicate loadFromXML(Element e,
 					LogicalProperty[] inputProperties)
         throws InvalidPlanException {
-    
-	if (e == null)
+    	if (e == null)
 	    return True.getTrue();
-	
+
         Element l, r;
         l = r = null;
 
         Node c = e.getFirstChild();
-        do {
-            if (c.getNodeType() == Node.ELEMENT_NODE) {
-                if (l == null)
-                    l = (Element) c;
-                else if (r == null)
-                    r = (Element) c;
-            }
-            c = c.getNextSibling();
-        } while (c != null);
+	if (c != null) {
+	    do {
+		if (c.getNodeType() == Node.ELEMENT_NODE) {
+		    if (l == null)
+			l = (Element) c;
+		    else if (r == null)
+			r = (Element) c;
+		}
+		c = c.getNextSibling();
+	    } while (c != null);
+	}
 
-        if (e.getNodeName().equals("and")) {
+	String nodeName = e.getNodeName();
+        if (nodeName.equals("false")) {
+	    return False.getFalse();
+	}
+	else if (nodeName.equals("true")) {
+	    return True.getTrue();
+	}
+        else if (nodeName.equals("and")) {
             Predicate left = loadFromXML(l, inputProperties);
             Predicate right = loadFromXML(r, inputProperties);
 
             return new And(left, right);
-        } else if (e.getNodeName().equals("or")) {
+        } else if (nodeName.equals("or")) {
             Predicate left = loadFromXML(l, inputProperties);
             Predicate right = loadFromXML(r, inputProperties);
 
             return new Or(left, right);
-        } else if (e.getNodeName().equals("not")) {
+        } else if (nodeName.equals("not")) {
             Predicate child = loadFromXML(l, inputProperties);
 
             return new Not(child);
