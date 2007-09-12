@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.51 2007/05/31 03:42:00 jinli Exp $
+<!-- $Id: queryplan.dtd,v 1.52 2007/09/12 19:32:53 vpapad Exp $
      DTD for query plans -->
 
 <!-- 
@@ -185,7 +185,7 @@
 	  range	  CDATA		       "" 	
 	  %StandardAttributes;>
 
-<!ELEMENT select  (and | or | not | pred)>
+<!ELEMENT select  (and | or | not | true | false | pred)>
 <!ATTLIST select 
 	  %StandardAttributes;>
 
@@ -217,7 +217,7 @@
 	It's necessary to specify them when using a hash join 
 	implementation.
 -->
-<!ELEMENT join (and | or | not | pred)?>
+<!ELEMENT join (and | or | not | true | false | pred)?>
 <!ATTLIST join
           id       ID                   #REQUIRED
 	  left	   CDATA		#IMPLIED
@@ -227,7 +227,7 @@
           extensionjoin (left | right | both | none)  "none"
 	  %PositionAttributes;>
 
-<!ELEMENT windowJoin (and | or | not | pred)? >
+<!ELEMENT windowJoin (and | or | not | true | false | pred)? >
 <!ATTLIST windowJoin
           id    ID              #REQUIRED
           left  CDATA           #REQUIRED
@@ -241,9 +241,11 @@
           oop   (yes | no)      "yes"
           %PositionAttributes;>
 
-<!ELEMENT and     (and | or | not | pred)+>
-<!ELEMENT or      (and | or | not | pred)+>
-<!ELEMENT not     (and | or | not | pred)>
+<!ELEMENT and     (and | or | not | true | false | pred)+>
+<!ELEMENT true	  EMPTY>
+<!ELEMENT false	  EMPTY>
+<!ELEMENT or      (and | or | not | true | false | pred)+>
+<!ELEMENT not     (and | or | not | true | false | pred)>
 
 <!ELEMENT pred    (number | string | var | path)+>
 <!ATTLIST pred
