@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: RequestHandler.java,v 1.39 2007/05/20 00:29:46 jinli Exp $
+  $Id: RequestHandler.java,v 1.40 2007/10/05 20:45:28 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -35,7 +35,9 @@ import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.ArrayList;
+import java.lang.management.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -90,6 +92,8 @@ public class RequestHandler {
     private static String footer = "\n--<][>--\n";
     
     private boolean connectionClose = false;
+
+    private static HashMap<Long, Long> threadCPUTimes = new HashMap<Long, Long>();
 
     /**Constructor
        @param sock The socket to read from 
@@ -393,6 +397,7 @@ public class RequestHandler {
                                 .setData("Profiler not running - unable to dump data");
                         sendResponse(errMesg);
                     }
+		    showCPUTimes();
                     break;
                 case SHUTDOWN:
                     System.out.println("Shutdown message received");
@@ -857,6 +862,23 @@ public class RequestHandler {
                     + "\" to client " + "Error message: " + ioe.getMessage());
             ioe.printStackTrace();
         }
+    }
+
+    private void showCPUTimes() {
+	ThreadMXBean mxbean = ManagementFactory.getThreadMXBean();
+	long[] threadIDs = mxbean.getAllThreadIds();
+	System.err.println("\tTHREADNAME\tCPUTIME");
+	for (long threadID : threadIDs) {
+	    long threadCPUTime = mxbean.getThreadCpuTime(threadID);
+	    long diff = threadCPUTime;
+	    if (threadCPUTimes.containsKey(threadID)) {
+		diff -= threadCPUTimes.get(threadID);
+	    } 
+	    threadCPUTimes.put(threadID, threadCPUTime);
+	    diff /= 1000000; // nanoseconds -> milliseconds
+	    if (diff > 0)
+		System.err.println("CPUTIME\t" + mxbean.getThreadInfo(threadID).getThreadName() + "\t" + diff);
+	}
     }
 
     /**Class for storing the ServerQueryInfo objects into a hashtable and accessing it
