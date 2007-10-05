@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SinkTupleStream.java,v 1.18 2007/08/29 18:36:13 tufte Exp $
+  $Id: SinkTupleStream.java,v 1.19 2007/10/05 21:14:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import niagara.connection_server.NiagraServer;
 
 public final class SinkTupleStream {
-
     private PageStream pageStream;
     private TuplePage buffer;
 
@@ -99,7 +98,7 @@ public final class SinkTupleStream {
      *
      */
     public void endOfStream() 
-	throws java.lang.InterruptedException, ShutdownException{
+	throws InterruptedException, ShutdownException{
 	// pageStream sends an EOS up stream and sets an isClosed flag
 	status = Closed;
     ArrayList ctrl = putCtrlMsg(CtrlFlags.EOS, "End of Stream");
@@ -127,8 +126,8 @@ public final class SinkTupleStream {
      *         NULLFLAG if there is no such element
      */
     // 
-    public ArrayList getCtrlMsg(int timeout) throws ShutdownException,
-    java.lang.InterruptedException {
+    public ArrayList getCtrlMsg(int timeout) 
+    throws ShutdownException, InterruptedException {
 	// dont check eos or shutdown,  pageStream will do it
     ArrayList ctrl;
     ctrl = pageStream.getCtrlMsgFromSink(timeout);
@@ -158,7 +157,7 @@ public final class SinkTupleStream {
      */
 
     public ArrayList putTuple(Tuple tuple)
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
 	// try to put the tuple in the buffer, if the buffer is full
 	// flush it - leave an empty buffer for next call
 	
@@ -177,7 +176,7 @@ public final class SinkTupleStream {
     }	
 
     public void putTupleNoCtrlMsg(Tuple tuple)
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
 	// try to put the tuple in the buffer, if the buffer is full
 	// flush it - leave an empty buffer for next call
 	
@@ -193,7 +192,7 @@ public final class SinkTupleStream {
      * this is for the use of StreamScan, DTDScan, etc.
      */
     public void put(Node node) 
-        throws java.lang.InterruptedException, ShutdownException {
+        throws InterruptedException, ShutdownException {
 
 	Tuple tuple = null;
 
@@ -427,5 +426,9 @@ public final class SinkTupleStream {
 
     public boolean isClosed() {
 	return status == Closed;
+    }
+    
+    public void setNotifyOnSink(MailboxFlag notifyMe) {
+    	pageStream.setNotifyOnSink(notifyMe);
     }
 }

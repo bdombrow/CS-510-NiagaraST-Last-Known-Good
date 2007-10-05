@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.13 2007/08/29 18:36:12 tufte Exp $
+  $Id: PageStream.java,v 1.14 2007/10/05 21:14:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,7 +46,6 @@ import niagara.connection_server.NiagraServer;
 
 
 public class PageStream {
-
     // Buffer for propagating tuples and control elements to Consumer
     private PageQueue toConsumerQueue; //upStreamQueue;
     
@@ -88,6 +87,28 @@ public class PageStream {
     // if sendImmediate is true, tuples are not buffered,
     // page is sent immediately
     private boolean sendImmediate;
+    
+    
+    /*
+	 * XXX vpapad: Here's the idea for replacing timeouts with notifications.
+	 * There are two threads using this PageStream, Source and Sink. Source and
+	 * Sink can expect a PageStream that has something to report to them to
+	 * notify them. Source waits on notifyOnSink, Sink waits on notifyOnSource.
+	 * Bah. Confusing.
+	 * In my understanding, there are 4 events that require notification:
+	 * - new page from source -> notify sink
+	 * - eos flag becomes true -> notify sink
+	 * - control message from sink -> notify source
+	 * - shutdown flag becomes true -> notify the other side
+	 * 
+	 * To get the notification behavior a thread needs to register itself as a 
+	 * source or a sink. Otherwise, no notifications are issued (and the thread
+	 * needs to use timeouts.) 
+	 */  
+    /** Object to notify when the source has put something in */ 
+    private MailboxFlag notifyOnSource;
+    /** Object to notify when the sink has put something in */ 
+    private MailboxFlag notifyOnSink;
     
     /**
      *  Constructor
@@ -144,12 +165,12 @@ public class PageStream {
      */
     // to be called by SourceTupleStream ONLY
     public TuplePage getPageFromSource(int timeout) 
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
 	return consumerGetPage(timeout);
     }
 
     private synchronized TuplePage consumerGetPage (int timeout) 
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
 
 	if(shutdown) 
 	    throw new ShutdownException(shutdownMsg);
@@ -262,6 +283,9 @@ public class PageStream {
 		notifiedOnCtrl++;
 	    notify();
 	}
+
+	notifySource();
+	
 	return CtrlFlags.NULLFLAG; // indicates success
     }
 
@@ -306,12 +330,12 @@ public class PageStream {
     //}
     
     public ArrayList getCtrlMsgFromSink(int timeout) 
-    throws java.lang.InterruptedException, ShutdownException {
+    throws InterruptedException, ShutdownException {
     	return producerGetCtrlMsg(timeout);
     }
     
     private synchronized ArrayList producerGetCtrlMsg(int timeout) 
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
     	// shutdown takes priority over all other messages
     	if(shutdown) {
     	    throw new ShutdownException(shutdownMsg);
@@ -322,6 +346,11 @@ public class PageStream {
     	
     	// Get first element, if any, in the down stream buffer
     	if (timeout >= 0)
+    		// XXX vpapad I think there's a potential bug here.
+    		// In consumerGetPage() timeout=0 means don't wait.
+    		// Here, timeout=0 calls wait(0), which means wait forever.
+    		// One needs to call this function with timeout=-1 to get the
+    		// non-blocking behavior!
     		while (toProducerQueue.isEmpty()) {
     			wait(timeout);
     		}
@@ -362,12 +391,12 @@ public class PageStream {
      */
     // to be called by SinkTupleStream ONLY
     public ArrayList putPageToSink(TuplePage page) 
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
 	return producerPutPage(page);
     }
 
     private synchronized ArrayList producerPutPage(TuplePage page) 
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
 
 	// shutdown takes priority over everything
 	if(shutdown)
@@ -390,8 +419,7 @@ public class PageStream {
 
 	// If there is a control element in the down stream buffer, 
 	// then return that
-	
-	if (!toProducerQueue.isEmpty()) {
+	if (toProducerQueue.isNonEmpty()) {
 	    TuplePage ctrlPage = toProducerQueue.get();
 
 	    String ctrlMsg = ctrlPage.getCtrlMsg();
@@ -415,7 +443,7 @@ public class PageStream {
 	    // message is just arriving into the consumers
 	    // input stream
 	    if(page.getFlag() == CtrlFlags.SHUTDOWN) {
-		shutdown = true; 
+		shutdown = true;
 		shutdownMsg = page.getCtrlMsg();
 		//System.out.println("KT: Thread " + 
 		//		   Thread.currentThread().getName() + 
@@ -434,6 +462,9 @@ public class PageStream {
 		    notifiedConsumer++;
 		notify();
 	    }
+
+	    notifySink();
+	    
 	    return null; // indicates successful put
 	}	
     }
@@ -449,6 +480,7 @@ public class PageStream {
 	// If the stream was previously closed, throw an exception
 	assert !eos : "KT end of stream received twice";
 	eos = true;
+	notifySource();
 	if(NiagraServer.DEBUG2) {
 	    System.out.println("PageStream: " + name + " results.");
 	    System.out.println("   Timeouts: " + timeouts);
@@ -529,5 +561,25 @@ public class PageStream {
     public void setSendImmediate(boolean sendImmediate) {
         this.sendImmediate = sendImmediate;
     }
+
+    private void notifySink() {
+    	if (notifyOnSource != null)
+	    notifyOnSource.raise();
+    }
+
+    private void notifySource() {
+    	if (notifyOnSink != null)
+	    notifyOnSink.raise();
+    }
+
+    public void setNotifyOnSink(MailboxFlag notifyOnSink) {
+	this.notifyOnSink = notifyOnSink;
+    }
+
+    public void setNotifyOnSource(MailboxFlag notifyOnSource) {
+	this.notifyOnSource = notifyOnSource;
+    }
+
+
 }
 

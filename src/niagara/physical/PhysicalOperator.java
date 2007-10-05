@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.6 2007/08/29 18:36:11 tufte Exp $
+  $Id: PhysicalOperator.java,v 1.7 2007/10/05 21:13:51 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -124,7 +124,12 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
         
     // for testing
     protected CPUTimer cpuTimer; // = new CPUTimer();
-    
+
+    /* Set to false to revert to the original timeout behavior */
+    public static final boolean USE_NOTIFICATIONS = false;
+
+    /** Object to receive notifications on */
+    private MailboxFlag notifyMe;
 
     /**
      * This class is used to store the result of a read operation from
@@ -225,6 +230,9 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	    cpuTimer.start();
 	}
 
+	if (USE_NOTIFICATIONS)
+	    registerWithStreams();
+	
 	// Set up an object for reading from source streams
 	SourceStreamsObject sourceObject = new SourceStreamsObject();
 
@@ -240,7 +248,12 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 		// Read the object from any of the valid input streams,
 		// timing out if nothing available in any input stream
 		// does use a timeout
-		getFromSourceStreams(sourceObject, timedOut);
+
+		if (USE_NOTIFICATIONS)
+		    getFromSource(sourceObject);
+		else
+		    getFromSourceStreams(sourceObject, timedOut);
+
 
 		if (!(sourceObject.tuple == null)) {
 		    timedOut = false;
@@ -303,7 +316,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 		}
 
 	    } // end of while loop
-	} catch (java.lang.InterruptedException e) {
+	} catch (InterruptedException e) {
 	    shutDownOperator("Operator Interrupted");
 	    internalCleanUp("interrupted");
 	    return;
@@ -461,7 +474,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      */
     private void getFromSourceStreams (SourceStreamsObject sourceObject,
 				       boolean timedOutLastTime)
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
 	
 	// Get the number of source streams to read from
 	// and calculate the time out for each stream
@@ -527,17 +540,87 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	return;
     }
 
+    
+    /* XXX vpapad: this is a version of getFromSourceStreams that uses
+     * notifications instead of timeouts. Calling it will return a tuple
+     * or BLOCK until a notification is received. To avoid changing the rest
+     * of the code, once notified it returns null and the next call will have
+     * to pick up the actual tuple. */
+    private void getFromSource(SourceStreamsObject sourceObject) 
+	throws InterruptedException, ShutdownException {
+	// Get the number of source streams to read from
+	int numActiveSourceStreams = activeSourceStreams.size();
+
+	// Make sure the last read source stream is a valid index
+	if (lastReadSourceStream >= numActiveSourceStreams) {
+	    lastReadSourceStream = 0;
+	}
+
+	// Start from next source stream
+	lastReadSourceStream = (lastReadSourceStream + 1)
+	    % numActiveSourceStreams;
+
+	// Store this stream index
+	int startReadSourceStream = lastReadSourceStream;
+
+	// Loop over all source streams, until a full round is completed
+	do {
+	    // Get the next stream id to read from
+	    int streamId = activeSourceStreams.get(lastReadSourceStream);
+	    
+	    Tuple tuple = sourceStreams[streamId].getTuple(-1);
+	    
+	    if (tuple != null) {
+		// We have a tuple, set appropriate values for result
+		// and return indicating the operator can continue
+		sourceObject.tuple = tuple;
+		sourceObject.streamId = streamId;
+		return;
+	    } else {
+		// getTuple returned null, meaning we got a control
+		// message or the call timed out
+		
+		int ctrlFlag = sourceStreams[streamId].getCtrlFlag();
+		
+		// if we timed out, try the next stream
+		if (ctrlFlag == CtrlFlags.TIMED_OUT) {
+		    lastReadSourceStream = (lastReadSourceStream + 1)
+			% numActiveSourceStreams;
+		    continue;
+		}
+		
+		// ok, we got a ctrl message, so process it
+		// No tuple element to be returned
+		sourceObject.tuple = null;
+		processCtrlMsgFromSource(ctrlFlag, streamId);
+		return;
+	    }
+	} while (startReadSourceStream != lastReadSourceStream);
+
+	// Nothing is going to come out of this round...
+	sourceObject.tuple = null;
+
+	// XXX vpapad: 
+	// We hope that most of the time we find something to process in the 
+	// preceding loop. If we haven't, there is a possibility that the 
+	// notification came while we were doing something else.
+	//  We cannot prevent this by holding the notifyMe lock in the loop 
+	// above as that leads to deadlock. So we need to check for missed
+	// notifications in a separate step. Double ugh.
+	notifyMe.waitOn();
+    }
+    
 
     /**
      * This function checks the sink streams for any control messages
      * and processes them if necessary
      *
-     * @exception java.lang.InterruptedException If the thread is interrupted
+     * @exception InterruptedException If the thread is interrupted
      *            during execution
      * @exception ShutdownException query shutdown by user or execution error
      */
     private void checkForSinkCtrlMsg()
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
 	// Loop over all sink streams, checking for control elements
     ArrayList ctrl;
 	for (int sinkId = 0; sinkId < numSinkStreams; sinkId++) {
@@ -938,7 +1021,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      * @exception ShutdownException query shutdown by user or execution error
      */
     private void sendCtrlMsgToSink(int ctrlFlag, String ctrlMsg, int streamId)
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
 	ArrayList newCtrl;
 	do {
 	     newCtrl = sinkStreams[streamId].putCtrlMsg(ctrlFlag,
@@ -1179,7 +1262,11 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      * @return name of the operator
      */
     public String getName() {
-        return NiagraServer.getCatalog().getOperatorName(getClass());
+        String name = NiagraServer.getCatalog().getOperatorName(getClass());
+	if (id == null) 
+	    return name;
+	else
+	    return name + "(" + id + ")";
     }
 
     public void dumpAttributesInXML(StringBuffer sb) {
@@ -1389,5 +1476,15 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
                     instrSynch.notify();
             }
         }
+    }
+    
+    private void registerWithStreams() {
+    	notifyMe = new MailboxFlag();
+    	for (int i = 0; i < sinkStreams.length; i++) {
+    		sinkStreams[i].setNotifyOnSink(notifyMe);
+    	}
+    	for (int i = 0; i < sourceStreams.length; i++) {
+    		sourceStreams[i].setNotifyOnSource(notifyMe);
+    	}
     }
 }

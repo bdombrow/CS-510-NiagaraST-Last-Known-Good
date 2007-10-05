@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: SourceTupleStream.java,v 1.7 2007/04/30 19:25:44 vpapad Exp $
+  $Id: SourceTupleStream.java,v 1.8 2007/10/05 21:14:01 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -113,7 +113,7 @@ public final class SourceTupleStream {
      *             in the middle of execution - KT what does this mean???
      */    
     public Tuple getTuple(int timeout)  
-	throws java.lang.InterruptedException, ShutdownException {
+	throws InterruptedException, ShutdownException {
 	
 	ctrlFlag = CtrlFlags.NULLFLAG; // for safety
 
@@ -205,13 +205,17 @@ public final class SourceTupleStream {
     public void setStatus(int newStatus) {
 	status = newStatus;
     }
-
+    
     public boolean isClosed() {
 	return status == Closed;
     }
 
     public boolean isSendImmediate() {
         return pageStream.isSendImmediate();
+    }
+
+    public void setNotifyOnSource(MailboxFlag notifyMe) {
+    	pageStream.setNotifyOnSource(notifyMe);
     }
 }
 

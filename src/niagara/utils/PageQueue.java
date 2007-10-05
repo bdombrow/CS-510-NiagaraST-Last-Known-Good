@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PageQueue.java,v 1.6 2007/04/28 22:31:34 jinli Exp $
+  $Id: PageQueue.java,v 1.7 2007/10/05 21:14:00 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,8 +64,7 @@ public class PageQueue
      *
      * @param length the length of this queue; 
      **/
-    public PageQueue(int len , boolean expandable, String name)
-    {
+    public PageQueue(int len, boolean expandable, String name) {
 	if(length <= 0)
 	    length = 5;
 	
@@ -82,6 +81,10 @@ public class PageQueue
 	return (head == tail);
     }
     
+    
+    public boolean isNonEmpty() {
+    	return (head != tail);
+    }
 
     /**
      * @return true if the queue is full; false otherwise
@@ -96,7 +99,7 @@ public class PageQueue
      * return null if the queue is empty
      **/
     public TuplePage get() {
-	if(!isEmpty()) {
+	if(isNonEmpty()) {
 	    head = (head + 1) % length;
 	    TuplePage p = queue[head];
 	    queue[head] = null;
@@ -139,7 +142,7 @@ public class PageQueue
 	    }
 	} 
     }
-    
+
     private boolean expandQueue() {
     	//System.err.println("Expanding queue: current len " + length);
     if(length>=100)
