@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.7 2007/10/05 21:13:51 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.8 2007/10/05 21:22:51 vpapad Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -126,7 +126,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
     protected CPUTimer cpuTimer; // = new CPUTimer();
 
     /* Set to false to revert to the original timeout behavior */
-    public static final boolean USE_NOTIFICATIONS = false;
+    public static final boolean USE_NOTIFICATIONS = true;
 
     /** Object to receive notifications on */
     private MailboxFlag notifyMe;
