@@ -1,4 +1,4 @@
-// $Id: XMLScan.java,v 1.5 2007/04/30 19:21:17 vpapad Exp $
+// $Id: XMLScan.java,v 1.6 2007/11/11 03:21:09 tufte Exp $
 
 package niagara.logical;
 
@@ -80,7 +80,7 @@ public class XMLScan extends Stream {
             if (filename.length() == 0)
                 throw new InvalidPlanException("You have to specify a filename");
             boolean isStream = e.getAttribute("isstream").equalsIgnoreCase("yes");
-	    int delay = Integer.getInteger(e.getAttribute("delay")).intValue();
+	    int delay = Integer.parseInt(e.getAttribute("delay"));
 
 	    if(!isStream && delay > 0) {
 		throw new InvalidPlanException("delay > 0 allowed only if isstream is yes");
