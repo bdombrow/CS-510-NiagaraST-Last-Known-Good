@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: NiagraServer.java,v 1.36 2007/08/29 18:36:08 tufte Exp $
+  $Id: NiagraServer.java,v 1.37 2008/10/21 23:11:30 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -56,6 +56,8 @@ public class NiagraServer {
     private static int saxdom_page_size = SAXDOM_DEFAULT_PAGE_SIZE;
 
     private static boolean acceptHTTP = false;
+    
+    public static boolean RJFM = false;
     
     // The port for client communication 
     private static int client_port = 9020;
@@ -240,7 +242,10 @@ public class NiagraServer {
                 TIME_OPERATORS = true;
             } else if (args[i].equals("-accept-http")) {
                 acceptHTTP = true;
-            } else if (args[i].equals("-debug")) {
+            } else if (args[i].equals("-RJFM-debug")) {
+            	RJFM = true;
+            }
+            else if (args[i].equals("-debug")) {
                 DEBUG = true;
             } else if (args[i].equals("-debug2")) {
                 DEBUG = true;
@@ -287,6 +292,7 @@ public class NiagraServer {
         cout("\t-saxdom-pages <number> Number of SAXDOM pages.");
         cout("\t-saxdom-page-size <number> Size of each SAXDOM page.");
         cout("\t-accept-http Accept queries over HTTP.");
+        cout("\t-RJFM-debug use for message passing debugging.");      
         cout("\t-help   print this help screen");
         System.exit(-1);
     }

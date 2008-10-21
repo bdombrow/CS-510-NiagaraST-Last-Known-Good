@@ -1,4 +1,4 @@
-/* $Id: DBThread.java,v 1.26 2007/08/29 18:36:09 tufte Exp $ */
+/* $Id: DBThread.java,v 1.27 2008/10/21 23:11:35 rfernand Exp $ */
 
 package niagara.data_manager;
 

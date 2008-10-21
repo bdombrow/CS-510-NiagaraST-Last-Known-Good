@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowGroup.java,v 1.8 2007/05/15 22:11:18 jinli Exp $
+  $Id: PhysicalWindowGroup.java,v 1.9 2008/10/21 23:11:48 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -67,6 +67,12 @@ import org.w3c.dom.Node;
 
 public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
+    // Feedback Punctuation propagation
+    boolean propagate;
+	/* Guard */
+	String guardOutput = "*";
+	String fAttr;
+	
     // These are private nested classes used within the operator  
 	// Copied from PhysicalGroup
 
@@ -86,6 +92,8 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
         // This is a representative tuple of the hash entry
         Tuple representativeTuple;
+        
+
 
         /**
          * This is the constructor of a hash entry that initialize it with
@@ -249,6 +257,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
         
 		windowAttr = ((WindowGroup)logicalOperator).getWindowAttr();
 		widName = ((WindowGroup)logicalOperator).getWid();
+		propagate = ((WindowGroup)logicalOperator).getPropagate();
         
         // have subclass do initialization
         localInitFrom(logicalOperator);
@@ -262,6 +271,9 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     	PhysicalWindowGroup op = localCopy();
     	op.groupAttributeList = groupAttributeList;
     	op.widName = widName;
+    	op.propagate = propagate;
+    	op.guardOutput = guardOutput;
+    	op.fAttr = fAttr;
     	return op;
         }
 
@@ -276,6 +288,12 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     			((PhysicalWindowGroup)o).groupAttributeList))
     	    return false;
     	if(!widName.equals(((PhysicalWindowGroup)o).widName))
+    		return false;
+    	if(((PhysicalWindowGroup)o).propagate != propagate)
+    		return false;
+    	if(!((PhysicalWindowGroup)o).guardOutput.equals(guardOutput))
+    		return false;
+    	if(!((PhysicalWindowGroup)o).fAttr.equals(fAttr))
     		return false;
     	return localEquals(o);
         }
@@ -326,6 +344,9 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 			  Punctuation inputTuple,
 			  int streamId)
 	throws ShutdownException, InterruptedException {
+		
+		//System.err.println(this.id + " process punct");
+		
 		HashEntry groupResult = null;
 		if(numGroupingAttributes == 0)
 			assert false : "not supported yet - yell at Kristin";
@@ -410,45 +431,75 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		
 	}
 	
-    private void putResult(HashEntry hashEntry, boolean partial) 
-	throws InterruptedException, ShutdownException {
-	// Update hash entry for partial results
-	hashEntry.updatePartialResult(currPartialResultId);
+    private void putResult(HashEntry hashEntry, boolean partial)
+			throws InterruptedException, ShutdownException {
+    	
 
-	// Get the result object if at least partial or final
-	// result is not null
-	Object partialResult = hashEntry.getPartialResult();
-	Object finalResult = hashEntry.getFinalResult();
+    	
+		// Update hash entry for partial results
+		hashEntry.updatePartialResult(currPartialResultId);
 
-	BaseAttr resultNode = null;
+		// Get the result object if at least partial or final
+		// result is not null
+		Object partialResult = hashEntry.getPartialResult();
+		Object finalResult = hashEntry.getFinalResult();
 
-	if (partialResult != null || finalResult != null) {
-    	resultNode = this.constructResult(partialResult, finalResult);
-	}
+		BaseAttr resultNode = null;
 
-	// If there is a non- empty result, then create tuple and add to
-	// result
-	if (resultNode != null) {
-    	Tuple tupleElement = createTuple(resultNode, 
-    							hashEntry.getRepresentativeTuple(),
-								partial);
-    
-	    // Add the tuple to the result
-	    putTuple(tupleElement, 0);
-	}
+		if (partialResult != null || finalResult != null) {
+			resultNode = this.constructResult(partialResult, finalResult);
+		}
+
+		// If there is a non- empty result, then create tuple and add to
+		// result
+		if (resultNode != null) {
+			Tuple tupleElement = createTuple(resultNode, hashEntry
+					.getRepresentativeTuple(), partial);
+
+	
+			
+//putTuple(tupleElement,0);
+			
+			if (guardOutput.equals("*")){
+			putTuple(tupleElement,0); 
+			}
+			else {
+				int pos = outputTupleSchema.getPosition(fAttr);
+				IntegerAttr v = (IntegerAttr)tupleElement.getAttribute(pos);    
+				String tupleGuard = v.toASCII();	
+				//System.err.println("Read: " + tupleGuard);
+				
+				if(guardOutput.equals(tupleGuard)){
+					putTuple(tupleElement,0);
+					//System.err.println("Allowed production of tuple with value: " + tupleGuard);
+					//System.out.println(this.getName() + "produced a tuple.");
+
+				}
+				//else {
+					//putTuple(tupleElement,0);
+					//System.err.println("Avoided production of tuple with value: " + tupleGuard);
+					//System.err.println(this.getName() + "avoided sending a tuple.");
+				//}
+				
+			
+			}
+		}
 	}
 
 
 
 	/**
-	 * This function processes a tuple element read from a source stream
-	 * when the operator is in a blocking state. This over-rides the
-	 * corresponding function in the base class.
-	 *
-	 * @param tupleElement The tuple element read from a source stream
-	 * @param streamId The source stream from which the tuple was read
-	 *
-	 * @exception ShutdownException query shutdown by user or execution error
+	 * This function processes a tuple element read from a source stream when
+	 * the operator is in a blocking state. This over-rides the corresponding
+	 * function in the base class.
+	 * 
+	 * @param tupleElement
+	 *            The tuple element read from a source stream
+	 * @param streamId
+	 *            The source stream from which the tuple was read
+	 * 
+	 * @exception ShutdownException
+	 *                query shutdown by user or execution error
 	 */
     
 	

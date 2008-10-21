@@ -1,4 +1,4 @@
-// $Id: DBScan.java,v 1.7 2007/05/25 03:06:35 jinli Exp $
+// $Id: DBScan.java,v 1.8 2008/10/21 23:11:38 rfernand Exp $
 
 package niagara.logical;
 

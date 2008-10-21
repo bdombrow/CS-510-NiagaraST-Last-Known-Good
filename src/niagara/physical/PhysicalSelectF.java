@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSelect.java,v 1.3 2008/10/21 23:11:47 rfernand Exp $
+  $Id: PhysicalSelectF.java,v 1.1 2008/10/21 23:11:47 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,8 +27,7 @@
 
 package niagara.physical;
 
-import java.util.ArrayList;
-
+import niagara.connection_server.*;
 import niagara.utils.*;
 import niagara.logical.Select;
 import niagara.logical.predicates.Predicate;
@@ -40,21 +39,20 @@ import niagara.query_engine.*;
  * Implementation of the Select operator.
  */
  
-public class PhysicalSelect extends PhysicalOperator {
+public class PhysicalSelectF extends PhysicalOperator {
     // No blocking source streams
     private static final boolean[] blockingSourceStreams = { false };
 
+    boolean produceOutput;
+  
+    // tuple counter
+    private int tupleCount = 0;
+    
     // The is the predicate to apply to the tuples
     private Predicate pred;    
     private PredicateImpl predEval;
     
-    String guardOutput = "*";
-    String fAttr;
-    
-    
-    
-    
-    public PhysicalSelect() {
+    public PhysicalSelectF() {
         setBlockingSourceStreams(blockingSourceStreams);
     }
     
@@ -64,68 +62,11 @@ public class PhysicalSelect extends PhysicalOperator {
     }
 
     public Op opCopy() {
-        PhysicalSelect p = new PhysicalSelect();
+        PhysicalSelectF p = new PhysicalSelectF();
         p.pred = pred;
         p.predEval = predEval;
         return p;
     }
-   
-    void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
-			throws java.lang.InterruptedException, ShutdownException {
-		// downstream control message is GET_PARTIAL
-		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
-		// REQ_BUF_FLUSH is handled inside SinkTupleStream
-		// here (SHUTDOWN is handled with exceptions)
-
-		if (ctrl == null)
-			return;
-
-		int ctrlFlag = (Integer) ctrl.get(0);
-
-		switch (ctrlFlag) {
-		case CtrlFlags.GET_PARTIAL:
-			processGetPartialFromSink(streamId);
-			break;
-		case CtrlFlags.MESSAGE:
-			//System.err.println(this.getName() + "***Got message: "
-				//	+ ctrl.get(1));
-
-			String[] feedback = ctrl.get(1).toString().split("#");
-
-			fAttr = feedback[0];
-			guardOutput = feedback[1];
-
-			break;
-		default:
-			assert false : "KT unexpected control message from sink "
-					+ CtrlFlags.name[ctrlFlag];
-		}
-	}    
-    
-//    void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
-//			throws java.lang.InterruptedException, ShutdownException {
-//		// downstream control message is GET_PARTIAL
-//		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
-//		// REQ_BUF_FLUSH is handled inside SinkTupleStream
-//		// here (SHUTDOWN is handled with exceptions)
-//
-//		if (ctrl == null)
-//			return;
-//
-//		int ctrlFlag = (Integer) ctrl.get(0);
-//
-//		switch (ctrlFlag) {
-//		case CtrlFlags.GET_PARTIAL:
-//			processGetPartialFromSink(streamId);
-//			break;
-//		case CtrlFlags.MESSAGE:
-//			System.err.println(this.getName() + "Got message: " + ctrl.get(1));
-//			break;
-//		default:
-//			assert false : "KT unexpected control message from sink "
-//					+ CtrlFlags.name[ctrlFlag];
-//		}
-//	}
     
     /**
      * This function processes a tuple element read from a source stream
@@ -142,30 +83,22 @@ public class PhysicalSelect extends PhysicalOperator {
 			     Tuple inputTuple, int streamId)
 	throws ShutdownException, InterruptedException {
 	// Evaluate the predicate on the desired attribute of the tuple
-    	
-		if (guardOutput.equals("*")) {
-			if (predEval.evaluate(inputTuple, null))
-			    putTuple(inputTuple, 0);
-		}else {
-			int pos = outputTupleSchema.getPosition(fAttr);
-			IntegerAttr v = (IntegerAttr)inputTuple.getAttribute(pos);    
-			String tupleGuard = v.toASCII();	
-			//System.err.println("Read: " + tupleGuard);
-			
-			if(guardOutput.equals(tupleGuard)){
-				if (predEval.evaluate(inputTuple, null))
-					putTuple(inputTuple,0);
-				//System.out.println(this.getName() + "produced a tuple.");
-
-				//System.err.println("Allowed production of tuple with value: " + tupleGuard);
-			}
-			else {
-				//putTuple(tupleElement,0);
-				//System.err.println("Avoided production of tuple with value: " + tupleGuard);
-				//System.err.println(this.getName() + "avoided sending a tuple.");
-			}			
-			}
-    	
+    	if (predEval.evaluate(inputTuple, null)) {
+    	    tupleCount++;
+    	    String ctrlMessage = this.getName();
+    		if (produceOutput) {
+	    putTuple(inputTuple, 0);
+	    System.out.println(ctrlMessage + " has produced " + tupleCount + " tuples, with flag " + produceOutput);
+    		Thread.sleep(500);
+    		}
+    		else System.out.println(this.getName() + "has suppressed output of tuple " + tupleCount);
+	   	if (tupleCount > 5) {
+	   		if(NiagraServer.RJFM) System.err.println(this.getName() + " has sent a Control Message, flag is " + produceOutput);
+	   		sendCtrlMsgUpStream(CtrlFlags.MESSAGE, ctrlMessage, 0);
+	   		Thread.sleep(500);
+	   		if(NiagraServer.RJFM) System.err.println(this.getName() +" has returned from sendCtrlMsgUpStream.");
+	   	}
+	}
     }
     
     /**
@@ -203,12 +136,12 @@ public class PhysicalSelect extends PhysicalOperator {
     }
     
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalSelect))
+        if (o == null || !(o instanceof PhysicalSelectF))
             return false;
-        if (o.getClass() != PhysicalSelect.class)
+        if (o.getClass() != PhysicalSelectF.class)
             return o.equals(this);
         return pred.equals(
-            ((PhysicalSelect) o).pred);
+            ((PhysicalSelectF) o).pred);
     }
 
     /**

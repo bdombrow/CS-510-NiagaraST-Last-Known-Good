@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalBucket.java,v 1.9 2007/08/29 18:36:11 tufte Exp $
+  $Id: PhysicalBucket.java,v 1.10 2008/10/21 23:11:46 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -56,6 +56,9 @@ public class PhysicalBucket extends PhysicalOperator {
     private long windowId_from = 0;
     private long windowId_to = 0;    
     private int windowCount = 0;
+    private boolean propagate;
+    String guardOutput = "*";
+    String fAttr;
 
     private Document doc;
     
@@ -75,8 +78,47 @@ public class PhysicalBucket extends PhysicalOperator {
 	setBlockingSourceStreams(blockingSourceStreams);
     }
     
+    void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
+		throws java.lang.InterruptedException, ShutdownException {
+	// downstream control message is GET_PARTIAL
+	// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
+	// REQ_BUF_FLUSH is handled inside SinkTupleStream
+	// here (SHUTDOWN is handled with exceptions)
+
+	if (ctrl == null)
+		return;
+
+	int ctrlFlag = (Integer) ctrl.get(0);
+
+	switch (ctrlFlag) {
+	case CtrlFlags.GET_PARTIAL:
+		processGetPartialFromSink(streamId);
+		break;
+	case CtrlFlags.MESSAGE:
+		//System.err.println(this.getName() + "***Got message: " + ctrl.get(1)
+			//	+ " with propagate =  " + propagate);
+		
+		String [] feedback = ctrl.get(1).toString().split("#");
+		
+		fAttr = feedback[0];
+		guardOutput = feedback[1];
+		
+		
+		if (propagate) {
+			sendCtrlMsgUpStream(ctrlFlag, ctrl.get(1).toString(), 0);
+			//System.err.println(this.getName() + "Sent message: "
+				//	+ ctrl.get(1));
+		}
+		break;
+	default:
+		assert false : "KT unexpected control message from sink "
+				+ CtrlFlags.name[ctrlFlag];
+	}
+}
+    
     public void opInitFrom(LogicalOp logicalOperator) { //I think I should change the logical operator to groupOp and related stuff
 	// Get the averaging attribute of the average logical operator
+    	propagate = ((Bucket) logicalOperator).getPropagate();
 	windowAttribute = ((Bucket) logicalOperator).getWindowAttr();
 	windowType = ((Bucket) logicalOperator).getWindowType();		
 	range = ((Bucket) logicalOperator).getWindowRange();
@@ -96,9 +138,12 @@ public class PhysicalBucket extends PhysicalOperator {
 	p.widName = widName;
 	p.start = start;
 	p.ae = ae;
+	p.propagate = propagate;
 
 	return p;
     }
+    
+
     
     public void opInitialize() {
 	setBlockingSourceStreams(blockingSourceStreams);
@@ -116,24 +161,41 @@ public class PhysicalBucket extends PhysicalOperator {
      * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected void processTuple (
-			     Tuple inputTuple, int streamId)
-	throws ShutdownException, InterruptedException {
-	Tuple result;
-	//If we haven't already picked up a template tuple,
-	// copy this one.
-	if (tupleDataSample == null)
-		tupleDataSample = inputTuple;
+    protected void processTuple(Tuple inputTuple, int streamId)
+			throws ShutdownException, InterruptedException {
+		Tuple result;
+		// If we haven't already picked up a template tuple,
+		// copy this one.
+		if (tupleDataSample == null)
+			tupleDataSample = inputTuple;
+
+		count++;
+		result = appendWindowId(inputTuple, streamId);
+		if (guardOutput.equals("*")) {
+			putTuple(result, 0);
+		} else {
+			int pos = outputTupleSchema.getPosition(fAttr);
+			IntegerAttr v = (IntegerAttr)result.getAttribute(pos);    
+			String tupleGuard = v.toASCII();	
+			//System.err.println("Read: " + tupleGuard);
 			
-	count++;
-    result = appendWindowId(inputTuple, streamId);
-    putTuple(result, 0);	    
-	if ((count % slide == 0) && (windowType == 0)) {
-		//output a punctuation to say windowId_from is completed			
-		putTuple (createPunctuation (inputTuple, windowId_from), 0);
-	}    		
-        
-    }
+			if(guardOutput.equals(tupleGuard)){
+				putTuple(result,0);
+				//System.err.println("Allowed production of tuple with value: " + tupleGuard);
+				//System.out.println(this.getName() + "produced a tuple.");
+			}
+			else {
+				//putTuple(tupleElement,0);
+				//System.err.println("Avoided production of tuple with value: " + tupleGuard);
+				//System.err.println(this.getName() + "avoided sending a tuple.");
+			}			
+			}
+		if ((count % slide == 0) && (windowType == 0)) {
+			// output a punctuation to say windowId_from is completed
+			putTuple(createPunctuation(inputTuple, windowId_from), 0);
+
+		}
+	}
    
     protected Tuple appendWindowId (Tuple inputTuple, int steamId) 
     throws ShutdownException, InterruptedException {

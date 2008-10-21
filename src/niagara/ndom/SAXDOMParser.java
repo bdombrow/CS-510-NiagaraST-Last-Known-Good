@@ -1,5 +1,5 @@
 /**
- * $Id: SAXDOMParser.java,v 1.20 2007/04/28 21:34:45 jinli Exp $
+ * $Id: SAXDOMParser.java,v 1.21 2008/10/21 23:11:45 rfernand Exp $
  *
  */
 
@@ -239,12 +239,13 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
               }
 						if(delay>0) {
 							try {
-								String namespace = doc.getDocumentElement().getNamespaceURI();
+								/* XXX: RJFM */
+								/*String namespace = doc.getDocumentElement().getNamespaceURI();
 								if (namespace != null &&
-						          namespace.equals("http://www.cse.ogi.edu/dot/niagara/punct")){
-									System.out.println("delaying " + delay + " seconds");
+						          namespace.equals("http://www.cse.ogi.edu/dot/niagara/punct")){*/
+									//System.out.println("delaying " + delay + " seconds");
 									Thread.sleep(delay); // sleep is in milliseconds
-                }
+                // }
 							} catch(java.lang.InterruptedException ie) {
 								// do nothing...
 							}

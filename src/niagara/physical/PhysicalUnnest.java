@@ -1,4 +1,4 @@
-/* $Id: PhysicalUnnest.java,v 1.8 2007/05/24 22:54:20 vpapad Exp $ */
+/* $Id: PhysicalUnnest.java,v 1.9 2008/10/21 23:11:48 rfernand Exp $ */
 package niagara.physical;
 
 import org.w3c.dom.*;
@@ -128,6 +128,8 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
         //putTuple(inputTuple, 0);
     	if (inputTuple != null) {
     		putTuple(inputTuple, 0);
+    		// XXX: RJFM
+    		//Thread.sleep(15);
     	} else {
     		putTuple(inputPunct, 0);
     	}

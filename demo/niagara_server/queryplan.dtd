@@ -1,4 +1,4 @@
-<!-- $Id: queryplan.dtd,v 1.52 2007/09/12 19:32:53 vpapad Exp $
+<!-- $Id: queryplan.dtd,v 1.53 2008/10/21 23:11:13 rfernand Exp $
      DTD for query plans -->
 
 <!-- 
@@ -11,15 +11,15 @@
 <!ELEMENT plan     (unnest | sort | expression | avg |
 		    slidingAvg | sum | slidingSum | max |
 		    slidingMax | count | slidingCount | incrmax |
-		    incravg | select | dup | union | join |
+		    incravg | select | magic | selecto | dup | union | join |
 		    dtdscan | resource | constant | timer |
 		    prefix | punctuate | send | display | topn |
 		    firehosescan | filescan | construct | 
 		    bucket | partitionavg | partitionmax |
 		    accumulate | nest | magic_construct | 
-		    windowCount | windowMax | windowAverage  | windowJoin |
+		    windowCount | windowMax | windowAverage  | windowJoin | impute |
         showTunables | collectInstrumentation |
-		    store | load | xmlscan | dbscan | punctqc | present)+>
+		    store | load | xmlscan | dbscan | dbscanimpute | punctqc | present)+>
 		    
 <!ATTLIST plan top IDREF        #REQUIRED
                planID CDATA     ""
@@ -86,9 +86,10 @@
 <!ATTLIST windowAverage
 	  groupby  CDATA		#REQUIRED
 	  avgattr  CDATA		#REQUIRED
-          sumattr  CDATA		#IMPLIED
-          countattr CDATA		#IMPLIED
+      sumattr  CDATA		#IMPLIED
+      countattr CDATA		#IMPLIED
 	  wid	   CDATA		""
+	  propagate (yes | no) "yes"
 	  %StandardAttributes;>
 
 <!ELEMENT slidingAvg     EMPTY>
@@ -188,6 +189,19 @@
 <!ELEMENT select  (and | or | not | true | false | pred)>
 <!ATTLIST select 
 	  %StandardAttributes;>
+	  
+<!ELEMENT magic  (and | or | not | true | false | pred)>
+<!ATTLIST magic 
+      interval	CDATA	#REQUIRED
+      punctattr	CDATA	#REQUIRED
+      timeattr  CDATA   #REQUIRED   
+      propagate (yes|no) "yes"
+	  %StandardAttributes;>
+
+<!ELEMENT selecto  (and | or | not | true | false | pred)>
+<!ATTLIST selecto 
+          special (yes | no) "no"
+	  %StandardAttributes;>	  
 
 <!ELEMENT dup  EMPTY>
 <!ATTLIST dup
@@ -342,6 +356,16 @@ specify the db input first and the stream punct input second -->
 	        input    IDREFS       #REQUIRED
 	  %PositionAttributes;>
 
+<!ELEMENT impute EMPTY>
+<!ATTLIST impute
+          id       ID           #REQUIRED
+	        punctattr CDATA       #REQUIRED
+	        puncttype CDATA       #REQUIRED
+		timeattr CDATA		#REQUIRED
+	        input    IDREFS       #REQUIRED
+	  %PositionAttributes;>
+
+
 <!-- Punctuate on specification
      punctattr is the attribute to be punctuated
 		 puncttype is the type of punctuation/specification -
@@ -367,6 +391,7 @@ specify the db input first and the stream punct input second -->
 	  wid	   CDATA	""
 	  order    (yes|no)     "yes"
 	  start    CDATA        ""
+	  propagate (yes|no)    "no"
 	  %StandardAttributes;>
 
 <!ELEMENT describe EMPTY>
@@ -473,6 +498,18 @@ specify the db input first and the stream punct input second -->
 
 <!ELEMENT dbscan  EMPTY>
 <!ATTLIST dbscan 
+          id       ID           #REQUIRED
+					attr_types   CDATA		#REQUIRED
+					attr_names   CDATA    #REQUIRED
+          query_string CDATA    #REQUIRED
+	  timeattr CDATA	""
+	  similarity CDATA	#IMPLIED
+          prefetch CDATA        #IMPLIED
+	  type		CDATA	"continuous"
+	  %PositionAttributes;>
+
+<!ELEMENT dbscanimpute  EMPTY>
+<!ATTLIST dbscanimpute 
           id       ID           #REQUIRED
 					attr_types   CDATA		#REQUIRED
 					attr_names   CDATA    #REQUIRED

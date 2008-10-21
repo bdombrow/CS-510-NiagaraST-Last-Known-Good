@@ -1,6 +1,4 @@
 /**********************************************************************
-  $Id: PhysicalSelect.java,v 1.3 2008/10/21 23:11:47 rfernand Exp $
-
 
   NIAGARA -- Net Data Management System                                 
                                                                         
@@ -24,13 +22,18 @@
    Rome Research Laboratory Contract No. F30602-97-2-0247.  
 **********************************************************************/
 
+/*
+ * Magic operator
+ * RJFM 2008.09.23
+ * Used to drive the CIDR query (simulates sending feedback every 
+ * fixed time interval.)
+ */
 
 package niagara.physical;
 
 import java.util.ArrayList;
-
 import niagara.utils.*;
-import niagara.logical.Select;
+import niagara.logical.Magic;
 import niagara.logical.predicates.Predicate;
 import niagara.optimizer.colombia.*;
 import niagara.physical.predicates.PredicateImpl;
@@ -40,92 +43,58 @@ import niagara.query_engine.*;
  * Implementation of the Select operator.
  */
  
-public class PhysicalSelect extends PhysicalOperator {
+public class PhysicalMagic extends PhysicalOperator {
     // No blocking source streams
     private static final boolean[] blockingSourceStreams = { false };
 
+    // Propagate?
+    private boolean propagate;
+    
+    // Interval
+    private long interval;
+    
+    // Attribute to punctuate on
+    private Attribute pAttr;
+    
+    // Attribute to read time from
+    private Attribute tAttr;
+    
     // The is the predicate to apply to the tuples
     private Predicate pred;    
     private PredicateImpl predEval;
     
-    String guardOutput = "*";
-    String fAttr;
+    // State
+    private int watermark = 0;
+    private int segment = 1;
+    
+    // Granularity of window id (can we get this dynamically?)
+    private int widInMillis = 60000;
     
     
-    
-    
-    public PhysicalSelect() {
+    public PhysicalMagic() {
         setBlockingSourceStreams(blockingSourceStreams);
     }
     
     public void opInitFrom(LogicalOp logicalOperator) {
-        pred = ((Select)logicalOperator).getPredicate();	
+        pred = ((Magic)logicalOperator).getPredicate();	
         predEval =  pred.getImplementation();
+        interval = ((Magic)logicalOperator).getInterval();
+        pAttr = ((Magic)logicalOperator).getPunctAttr();
+        tAttr = ((Magic)logicalOperator).getTimeAttr();
+        propagate = ((Magic)logicalOperator).getPropagate();
+        
     }
 
     public Op opCopy() {
-        PhysicalSelect p = new PhysicalSelect();
+        PhysicalMagic p = new PhysicalMagic();
         p.pred = pred;
         p.predEval = predEval;
+        p.interval = interval;
+        p.pAttr = pAttr;
+        p.tAttr = tAttr;
+        p.propagate = propagate;
         return p;
     }
-   
-    void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
-			throws java.lang.InterruptedException, ShutdownException {
-		// downstream control message is GET_PARTIAL
-		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
-		// REQ_BUF_FLUSH is handled inside SinkTupleStream
-		// here (SHUTDOWN is handled with exceptions)
-
-		if (ctrl == null)
-			return;
-
-		int ctrlFlag = (Integer) ctrl.get(0);
-
-		switch (ctrlFlag) {
-		case CtrlFlags.GET_PARTIAL:
-			processGetPartialFromSink(streamId);
-			break;
-		case CtrlFlags.MESSAGE:
-			//System.err.println(this.getName() + "***Got message: "
-				//	+ ctrl.get(1));
-
-			String[] feedback = ctrl.get(1).toString().split("#");
-
-			fAttr = feedback[0];
-			guardOutput = feedback[1];
-
-			break;
-		default:
-			assert false : "KT unexpected control message from sink "
-					+ CtrlFlags.name[ctrlFlag];
-		}
-	}    
-    
-//    void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
-//			throws java.lang.InterruptedException, ShutdownException {
-//		// downstream control message is GET_PARTIAL
-//		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
-//		// REQ_BUF_FLUSH is handled inside SinkTupleStream
-//		// here (SHUTDOWN is handled with exceptions)
-//
-//		if (ctrl == null)
-//			return;
-//
-//		int ctrlFlag = (Integer) ctrl.get(0);
-//
-//		switch (ctrlFlag) {
-//		case CtrlFlags.GET_PARTIAL:
-//			processGetPartialFromSink(streamId);
-//			break;
-//		case CtrlFlags.MESSAGE:
-//			System.err.println(this.getName() + "Got message: " + ctrl.get(1));
-//			break;
-//		default:
-//			assert false : "KT unexpected control message from sink "
-//					+ CtrlFlags.name[ctrlFlag];
-//		}
-//	}
     
     /**
      * This function processes a tuple element read from a source stream
@@ -138,34 +107,45 @@ public class PhysicalSelect extends PhysicalOperator {
      * @exception ShutdownException query shutdown by user or execution error
      */
 
+    private int nextSegment(int current) {
+    	if (current == 8)
+    		return 1;
+    	return current + 1;
+ 
+    }
+    
+    
     protected void processTuple (
 			     Tuple inputTuple, int streamId)
 	throws ShutdownException, InterruptedException {
+    	// don't actually evaluate the predicate (this is inherited from select and will go away)
 	// Evaluate the predicate on the desired attribute of the tuple
+	//if (predEval.evaluate(inputTuple, null))
     	
-		if (guardOutput.equals("*")) {
-			if (predEval.evaluate(inputTuple, null))
-			    putTuple(inputTuple, 0);
-		}else {
-			int pos = outputTupleSchema.getPosition(fAttr);
-			IntegerAttr v = (IntegerAttr)inputTuple.getAttribute(pos);    
-			String tupleGuard = v.toASCII();	
-			//System.err.println("Read: " + tupleGuard);
-			
-			if(guardOutput.equals(tupleGuard)){
-				if (predEval.evaluate(inputTuple, null))
-					putTuple(inputTuple,0);
-				//System.out.println(this.getName() + "produced a tuple.");
+    	
+    	/** This is the magic! */
+    	
+    	// read parameters
+    	int pos = inputTupleSchemas[0].getPosition(tAttr.getName());
+    	IntegerAttr t = (IntegerAttr) inputTuple.getAttribute(pos);
+        int tval = Integer.parseInt(t.toASCII());
 
-				//System.err.println("Allowed production of tuple with value: " + tupleGuard);
+		if ((tval * widInMillis) - watermark >= interval) {
+			// change segment
+			segment = nextSegment(segment);
+			watermark += interval;
+			// send feedback: don't need to see other segments
+			String msg = pAttr + "#" + segment;
+			if(propagate){
+			sendCtrlMsgUpStream(CtrlFlags.MESSAGE,msg,0);
+			System.err.println(this.getName() + " sent message: " + msg);
 			}
-			else {
-				//putTuple(tupleElement,0);
-				//System.err.println("Avoided production of tuple with value: " + tupleGuard);
-				//System.err.println(this.getName() + "avoided sending a tuple.");
-			}			
-			}
-    	
+		}
+	
+        
+	    putTuple(inputTuple, 0);
+	    //System.err.println("Currently in segment: " + segment);
+	    //System.err.println("interval: " + interval + " punctattr: " + pAttr.getName() + " timeattr: " + tAttr.getName() + " := " + tval);
     }
     
     /**
@@ -203,19 +183,34 @@ public class PhysicalSelect extends PhysicalOperator {
     }
     
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalSelect))
+        if (o == null || !(o instanceof PhysicalMagic))
             return false;
-        if (o.getClass() != PhysicalSelect.class)
+        if (o.getClass() != PhysicalMagic.class)
             return o.equals(this);
+        if (interval != ((PhysicalMagic) o).interval)
+        	return false;
+        if (pAttr.getName() != ((PhysicalMagic) o).pAttr.getName())
+        	return false;
+        if (tAttr.getName() != ((PhysicalMagic) o).tAttr.getName())
+        	return false;
+        if (propagate != ((PhysicalMagic)o).propagate)
+        	return false;
         return pred.equals(
-            ((PhysicalSelect) o).pred);
+            ((PhysicalMagic) o).pred);
     }
 
     /**
      * @see java.lang.Object#hashCode()
      */
     public int hashCode() {
-        return pred.hashCode();
+    	int p = 0;
+    	if (propagate)
+    		p = 1;
+    	
+        return pred.hashCode()
+        	   ^ (int)interval
+               ^ pAttr.hashCode()
+               ^ tAttr.hashCode() ^ p;
     }
     
     /**

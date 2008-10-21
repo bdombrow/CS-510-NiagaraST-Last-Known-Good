@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowGroup.java,v 1.5 2007/05/31 03:36:21 jinli Exp $
+  $Id: WindowGroup.java,v 1.6 2008/10/21 23:11:39 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -50,7 +50,12 @@ public abstract class WindowGroup extends Group {
 	protected int range;
 	protected int slide;
 	protected String widName;
+	protected boolean propagate = false;
     
+	public boolean getPropagate(){
+		return propagate;
+	}
+	
 
 	/**
 	 * This function returns the skolem attributes associated with the group
@@ -133,6 +138,12 @@ public abstract class WindowGroup extends Group {
 	protected void loadWindowAttrsFromXML(Element e, 
 						LogicalProperty inputLogProp) 
 	throws InvalidPlanException {
+		String propagateAttribute = e.getAttribute("propagate");
+		
+		if(propagateAttribute.equals("yes"))
+			propagate = true;
+		
+		
 	String windowAttribute = e.getAttribute("winattr");
 	String type = e.getAttribute("wintype");
 	String windowRange = e.getAttribute("range");

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalSelect.java,v 1.3 2008/10/21 23:11:47 rfernand Exp $
+  $Id: PhysicalSelecto.java,v 1.1 2008/10/21 23:11:47 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,10 +27,8 @@
 
 package niagara.physical;
 
-import java.util.ArrayList;
-
 import niagara.utils.*;
-import niagara.logical.Select;
+import niagara.logical.Selecto;
 import niagara.logical.predicates.Predicate;
 import niagara.optimizer.colombia.*;
 import niagara.physical.predicates.PredicateImpl;
@@ -40,92 +38,36 @@ import niagara.query_engine.*;
  * Implementation of the Select operator.
  */
  
-public class PhysicalSelect extends PhysicalOperator {
+public class PhysicalSelecto extends PhysicalOperator {
+	
+	
+	
     // No blocking source streams
     private static final boolean[] blockingSourceStreams = { false };
 
     // The is the predicate to apply to the tuples
     private Predicate pred;    
     private PredicateImpl predEval;
+    private String special;
+    private int flag = 0;
     
-    String guardOutput = "*";
-    String fAttr;
-    
-    
-    
-    
-    public PhysicalSelect() {
+    public PhysicalSelecto() {
         setBlockingSourceStreams(blockingSourceStreams);
     }
     
     public void opInitFrom(LogicalOp logicalOperator) {
-        pred = ((Select)logicalOperator).getPredicate();	
+        pred = ((Selecto)logicalOperator).getPredicate();	
         predEval =  pred.getImplementation();
+        special = ((Selecto)logicalOperator).getSpecial();
     }
 
     public Op opCopy() {
-        PhysicalSelect p = new PhysicalSelect();
+        PhysicalSelecto p = new PhysicalSelecto();
         p.pred = pred;
         p.predEval = predEval;
+        p.special = special;
         return p;
     }
-   
-    void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
-			throws java.lang.InterruptedException, ShutdownException {
-		// downstream control message is GET_PARTIAL
-		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
-		// REQ_BUF_FLUSH is handled inside SinkTupleStream
-		// here (SHUTDOWN is handled with exceptions)
-
-		if (ctrl == null)
-			return;
-
-		int ctrlFlag = (Integer) ctrl.get(0);
-
-		switch (ctrlFlag) {
-		case CtrlFlags.GET_PARTIAL:
-			processGetPartialFromSink(streamId);
-			break;
-		case CtrlFlags.MESSAGE:
-			//System.err.println(this.getName() + "***Got message: "
-				//	+ ctrl.get(1));
-
-			String[] feedback = ctrl.get(1).toString().split("#");
-
-			fAttr = feedback[0];
-			guardOutput = feedback[1];
-
-			break;
-		default:
-			assert false : "KT unexpected control message from sink "
-					+ CtrlFlags.name[ctrlFlag];
-		}
-	}    
-    
-//    void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
-//			throws java.lang.InterruptedException, ShutdownException {
-//		// downstream control message is GET_PARTIAL
-//		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
-//		// REQ_BUF_FLUSH is handled inside SinkTupleStream
-//		// here (SHUTDOWN is handled with exceptions)
-//
-//		if (ctrl == null)
-//			return;
-//
-//		int ctrlFlag = (Integer) ctrl.get(0);
-//
-//		switch (ctrlFlag) {
-//		case CtrlFlags.GET_PARTIAL:
-//			processGetPartialFromSink(streamId);
-//			break;
-//		case CtrlFlags.MESSAGE:
-//			System.err.println(this.getName() + "Got message: " + ctrl.get(1));
-//			break;
-//		default:
-//			assert false : "KT unexpected control message from sink "
-//					+ CtrlFlags.name[ctrlFlag];
-//		}
-//	}
     
     /**
      * This function processes a tuple element read from a source stream
@@ -138,48 +80,38 @@ public class PhysicalSelect extends PhysicalOperator {
      * @exception ShutdownException query shutdown by user or execution error
      */
 
-    protected void processTuple (
-			     Tuple inputTuple, int streamId)
-	throws ShutdownException, InterruptedException {
-	// Evaluate the predicate on the desired attribute of the tuple
-    	
-		if (guardOutput.equals("*")) {
-			if (predEval.evaluate(inputTuple, null))
-			    putTuple(inputTuple, 0);
-		}else {
-			int pos = outputTupleSchema.getPosition(fAttr);
-			IntegerAttr v = (IntegerAttr)inputTuple.getAttribute(pos);    
-			String tupleGuard = v.toASCII();	
-			//System.err.println("Read: " + tupleGuard);
-			
-			if(guardOutput.equals(tupleGuard)){
-				if (predEval.evaluate(inputTuple, null))
-					putTuple(inputTuple,0);
-				//System.out.println(this.getName() + "produced a tuple.");
-
-				//System.err.println("Allowed production of tuple with value: " + tupleGuard);
+    protected void processTuple(Tuple inputTuple, int streamId)
+			throws ShutdownException, InterruptedException {
+		// Evaluate the predicate on the desired attribute of the tuple
+		if (predEval.evaluate(inputTuple, null)) {
+			if (special.equals("yes")) {
+				if (flag == 1) {
+					putTuple(inputTuple, 0);
+					flag = 0;
+				} else if (flag == 0) {
+					flag = 1;
+				}
+			} else {
+				putTuple(inputTuple, 0);
 			}
-			else {
-				//putTuple(tupleElement,0);
-				//System.err.println("Avoided production of tuple with value: " + tupleGuard);
-				//System.err.println(this.getName() + "avoided sending a tuple.");
-			}			
-			}
-    	
-    }
+		}
+	}
     
     /**
-     * This function processes a punctuation element read from a source stream
-     * when the operator is non-blocking. This over-rides the corresponding
-     * function in the base class.
-     *
-     * Punctuations can simply be sent to the next operator from Select
-     *
-     * @param inputTuple The tuple element read from a source stream
-     * @param streamId The source stream from which the tuple was read
-     *
-     * @exception ShutdownException query shutdown by user or execution error
-     */
+	 * This function processes a punctuation element read from a source stream
+	 * when the operator is non-blocking. This over-rides the corresponding
+	 * function in the base class.
+	 * 
+	 * Punctuations can simply be sent to the next operator from Select
+	 * 
+	 * @param inputTuple
+	 *            The tuple element read from a source stream
+	 * @param streamId
+	 *            The source stream from which the tuple was read
+	 * 
+	 * @exception ShutdownException
+	 *                query shutdown by user or execution error
+	 */
     protected void processPunctuation(Punctuation inputTuple,
 				      int streamId)
 	throws ShutdownException, InterruptedException {
@@ -203,12 +135,12 @@ public class PhysicalSelect extends PhysicalOperator {
     }
     
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof PhysicalSelect))
+        if (o == null || !(o instanceof PhysicalSelecto))
             return false;
-        if (o.getClass() != PhysicalSelect.class)
+        if (o.getClass() != PhysicalSelecto.class)
             return o.equals(this);
         return pred.equals(
-            ((PhysicalSelect) o).pred);
+            ((PhysicalSelecto) o).pred);
     }
 
     /**

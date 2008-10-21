@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PageStream.java,v 1.14 2007/10/05 21:14:00 vpapad Exp $
+  $Id: PageStream.java,v 1.15 2008/10/21 23:11:52 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -64,7 +64,7 @@ public class PageStream {
     private boolean shutdown;
     private String shutdownMsg;
 
-    private final int STREAM_CAPACITY = 5;
+    private final int STREAM_CAPACITY = 1; // RJFM - I assume this is the number of Tuple Pages in the inter-operator buffer?
     public static int MAX_DELAY = 1000;
 
     // keep extra pages around that can be reused 

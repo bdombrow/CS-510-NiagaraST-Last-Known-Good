@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowAggregate.java,v 1.4 2007/05/31 03:36:20 jinli Exp $
+  $Id: WindowAggregate.java,v 1.5 2008/10/21 23:11:39 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,10 +46,14 @@ public abstract class WindowAggregate extends WindowGroup {
 	protected ArrayList<Attribute> aggrAttr = new ArrayList();
 	protected abstract WindowAggregate getInstance();
 
+	// propagation flag
+	//protected boolean propagate = false;
+	
 	protected void loadFromXML(Element e, 
 				   LogicalProperty[] inputProperties,
 				   ArrayList<String> aggrAttrName) 
 	throws InvalidPlanException {
+		
 		
 		for (String name: aggrAttrName) {
 		String aggAttrStr = e.getAttribute(name);
@@ -63,10 +67,15 @@ public abstract class WindowAggregate extends WindowGroup {
 	return aggrAttr;
 	}
 
+	public boolean getPropagate(){
+		return propagate;
+	}
+	
 	protected void dump(String opName) {
 	System.out.println("opName");
 	System.out.print("Grouping Attrs: ");
 	groupingAttrs.dump();
+	System.out.println("Propagate: " + propagate);
 	System.err.print("Aggregate Attr: " );
 	for (Attribute attr : aggrAttr) {
 		System.err.print(attr.getName()+" ");
@@ -80,23 +89,32 @@ public abstract class WindowAggregate extends WindowGroup {
 	op.groupingAttrs = this.groupingAttrs;
 	op.aggrAttr = this.aggrAttr;
 	op.widName = widName;
+	op.propagate = propagate;
 
 	return op;
 	}
 
 	public int hashCode() {
-		return groupingAttrs.hashCode() ^ aggrAttr.hashCode() ^ widName.hashCode();
+		int p = 0;
+		if(propagate)
+			p = 1;
+		return groupingAttrs.hashCode() ^ aggrAttr.hashCode() ^ widName.hashCode() ^ p;
 	}
 
 	public boolean equals(Object obj) {
 		if (obj == null)
-		return false;
-	if(!this.getClass().isInstance(obj)) 
-		return false;
-		if (obj.getClass() != this.getClass()) 
-		return obj.equals(this);
+			return false;
+		if (!this.getClass().isInstance(obj))
+			return false;
+		if (obj.getClass() != this.getClass())
+			return obj.equals(this);
+
 		WindowAggregate other = (WindowAggregate) obj;
-	return groupingAttrs.equals(other.groupingAttrs) &&
-		aggrAttr.equals(other.aggrAttr) && widName.equals(other.widName);
-	}    
+		if (propagate == other.propagate) {
+			return groupingAttrs.equals(other.groupingAttrs)
+					&& aggrAttr.equals(other.aggrAttr)
+					&& widName.equals(other.widName);
+		}
+		return false;
+	}
 }

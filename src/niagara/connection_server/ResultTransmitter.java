@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: ResultTransmitter.java,v 1.35 2007/05/19 00:55:15 jinli Exp $
+  $Id: ResultTransmitter.java,v 1.36 2008/10/21 23:11:30 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -390,7 +390,7 @@ public class ResultTransmitter implements Schedulable {
                 // send the results and request more..
                 if (!QUIET && !intermittent && timedOut && !queryInfo.isAccumFileQuery()) {
 		    if (response.dataSize() != 0) 
-			System.out.println("Timed out twice & have results - sending them");
+			//RJFM System.out.println("Timed out twice & have results - sending them");
                     // If we timed out two times in a row, then
                     // send the results
                     sendResults();

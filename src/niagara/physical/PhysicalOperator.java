@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalOperator.java,v 1.8 2007/10/05 21:22:51 vpapad Exp $
+  $Id: PhysicalOperator.java,v 1.9 2008/10/21 23:11:47 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -126,7 +126,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
     protected CPUTimer cpuTimer; // = new CPUTimer();
 
     /* Set to false to revert to the original timeout behavior */
-    public static final boolean USE_NOTIFICATIONS = true;
+    public static final boolean USE_NOTIFICATIONS = true; 
 
     /** Object to receive notifications on */
     private MailboxFlag notifyMe;
@@ -283,7 +283,9 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 		// Now check to see whether there are any control elements 
 		// from the sink streams and process them if so.
 		// no timeout here
+		//System.out.println(this.getName() + " is about to call checkForSink");
 		checkForSinkCtrlMsg();
+		//System.out.println(this.getName() + " called checkForSink");
 
 		// Send flush buffer requests to source streams
 		// maybe they have tuples in their buffers that they
@@ -619,28 +621,28 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      *            during execution
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void checkForSinkCtrlMsg()
-	throws InterruptedException, ShutdownException {
-	// Loop over all sink streams, checking for control elements
-    ArrayList ctrl;
-	for (int sinkId = 0; sinkId < numSinkStreams; sinkId++) {
-	    // Make sure the stream is not closed before checking is done
-	    if (!sinkStreams[sinkId].isClosed()) {
-	    // -1 means a non-blocking call on getCtrlMsg 	
-	    ctrl = sinkStreams[sinkId].getCtrlMsg(-1);
-	    
-		// If got a ctrl message, process it
-		//if (ctrlFlag !=  CtrlFlags.NULLFLAG)
-	    if (ctrl != null)
-		    processCtrlMsgFromSink(ctrl, sinkId);
-	    }
+    private void checkForSinkCtrlMsg() throws InterruptedException,
+			ShutdownException {
+		// Loop over all sink streams, checking for control elements
+		ArrayList ctrl;
+		for (int sinkId = 0; sinkId < numSinkStreams; sinkId++) {
+			// Make sure the stream is not closed before checking is done
+			if (!sinkStreams[sinkId].isClosed()) {
+				
+				// -1 means a non-blocking call on getCtrlMsg
+				ctrl = sinkStreams[sinkId].getCtrlMsg(-1);
+
+				if (ctrl != null) {
+					processCtrlMsgFromSink(ctrl, sinkId);
+				} 
+			}
+		}
 	}
-    }
 
     /**
-     * This function closes all sink streams that have not previously
-     * been closed.
-     */
+	 * This function closes all sink streams that have not previously been
+	 * closed.
+	 */
     private void closeSinkStreams ()  {
 	// Loop over all unclosed sink streams and close them
 	// this will send EOS messages up all the sink streams
@@ -818,27 +820,30 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      *            during execution
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
-	throws java.lang.InterruptedException, ShutdownException {
-	// downstream control message is GET_PARTIAL
-	// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG 
-	// REQ_BUF_FLUSH is handled inside SinkTupleStream
-	// here (SHUTDOWN is handled with exceptions)
+    /* private */void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
+			throws java.lang.InterruptedException, ShutdownException {
+		// downstream control message is GET_PARTIAL
+		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
+		// REQ_BUF_FLUSH is handled inside SinkTupleStream
+		// here (SHUTDOWN is handled with exceptions)
 
-    if (ctrl == null)
-    	return;
-    
-    int ctrlFlag =(Integer) ctrl.get(0);
+		if (ctrl == null)
+			return;
 
-	switch (ctrlFlag) {
-	case CtrlFlags.GET_PARTIAL:
-	    processGetPartialFromSink(streamId);
-	    break;
-	default:
-	    assert false : "KT unexpected control message from sink " 
-		+ CtrlFlags.name[ctrlFlag];
+		int ctrlFlag = (Integer) ctrl.get(0);
+
+		switch (ctrlFlag) {
+		case CtrlFlags.GET_PARTIAL:
+			processGetPartialFromSink(streamId);
+			break;
+		case CtrlFlags.MESSAGE:
+			System.err.println(this.getName() + "(unspecialized) Got message: " + ctrl.get(1));
+			break;
+		default:
+			assert false : "KT unexpected control message from sink "
+					+ CtrlFlags.name[ctrlFlag];
+		}
 	}
-    }
         
     /**
      * This function processes a GetPartialResult control element received
@@ -853,7 +858,8 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      *            during execution
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void processGetPartialFromSink(int streamId)
+    // should be visible if it is to be overwritten
+    void processGetPartialFromSink(int streamId)
 	throws java.lang.InterruptedException, ShutdownException {
 
 	if (sinkStreamsPartialResultCount[streamId] == 0) {
@@ -917,7 +923,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	// Loop until the required element is sent 
 	while (!sent) {
 	    // Try to send to the required sink stream
-	    ArrayList ctrl = sinkStreams[streamId].putTuple(tuple);
+	    ArrayList ctrl = sinkStreams[streamId].putTuple(tuple); //XXX: perhaps out of the loop?
 
 	    // Check if it was successfull
 	    if (ctrl == null) {

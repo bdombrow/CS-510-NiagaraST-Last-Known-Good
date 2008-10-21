@@ -1,5 +1,5 @@
 /**
- * $Id: ConstantScan.java,v 1.1 2003/12/24 02:08:28 vpapad Exp $
+ * $Id: ConstantScan.java,v 1.2 2008/10/21 23:11:38 rfernand Exp $
  *
  */
 
@@ -51,7 +51,7 @@ public class ConstantScan extends NullaryOperator {
 
     public void dumpAttributesInXML(StringBuffer sb) {
         if (vars.size() > 0) {
-            sb.append("vars='").append(((Variable) vars.get(0)).getName());
+            sb.append("vars='").append(((Variable) vars.get(0)).getName()); 
             for (int i = 1; i < vars.size(); i++) {
                 sb.append(",").append(((Variable) vars.get(i)).getName());
             }

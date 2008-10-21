@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: TuplePage.java,v 1.8 2007/04/28 22:34:04 jinli Exp $
+  $Id: TuplePage.java,v 1.9 2008/10/21 23:11:53 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -46,7 +46,9 @@ public class TuplePage {
     private Tuple tuples[];
 
     // number of tuples in a page
-    private final static int PAGE_SIZE = 30;
+    // For CIDR: apparently a multiple of detectors per segment * segments + 1 (for puncts.)
+    // 361
+    private final static int PAGE_SIZE = 1;
 
     // pointer to the first open position in the tuple array
     // tuples are filled in sequentially starting at position 0
@@ -97,7 +99,7 @@ public class TuplePage {
     }
 
     public void setFlag(int flag) {
-	assert flag >= CtrlFlags.NULLFLAG && flag <= CtrlFlags.READY_TO_FINISH:
+	assert flag >= CtrlFlags.NULLFLAG && flag <= CtrlFlags.MESSAGE:
 	    "KT invalid control flag in createControlPage " + flag;
 	this.flag = flag;
     }

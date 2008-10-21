@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: WindowAverage.java,v 1.2 2007/05/31 03:36:20 jinli Exp $
+  $Id: WindowAverage.java,v 1.3 2008/10/21 23:11:39 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -47,11 +47,12 @@ public class WindowAverage extends WindowAggregate {
 	super.dump("windowAverageOp");
 	}
 
+
 	public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog) 
 	throws InvalidPlanException {
 		ArrayList aggrAttrNames = new ArrayList ();
 		String attrName1, attrName2;
-		
+	
 		attrName1 = e.getAttribute("avgattr");
 		if (attrName1 != "") {
 			aggrAttrNames.add("avgattr");
@@ -67,7 +68,7 @@ public class WindowAverage extends WindowAggregate {
 		}
 		super.loadFromXML(e, inputProperties, aggrAttrNames);
 	}
-
+	
 	protected WindowAggregate getInstance() {
 	return new WindowAverage();
 	}

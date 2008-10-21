@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalUnion.java,v 1.1 2003/12/24 01:49:00 vpapad Exp $
+  $Id: PhysicalUnion.java,v 1.2 2008/10/21 23:11:47 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -48,6 +48,11 @@ public class PhysicalUnion extends PhysicalOperator {
 	private boolean hasMappings;
 	private int outSize;
 
+	private int tupleCounter = 0;
+	private int leftCounter = 0;
+	private int rightCounter = 0;
+	boolean slowStream = true;
+	
 	public PhysicalUnion() {
 		// XXX vpapad: here we have to initialize blockingSourceStreams
 		// but we don't know how many input streams we have yet. 
@@ -58,6 +63,7 @@ public class PhysicalUnion extends PhysicalOperator {
 
 	public PhysicalUnion(int arity) {
 		setBlockingSourceStreams(new boolean[arity]);
+		//setBlockingSourceStreams(false false);
 	}
 
 	public void opInitFrom(LogicalOp logicalOperator) {
@@ -94,20 +100,106 @@ public class PhysicalUnion extends PhysicalOperator {
 	 *
 	 * @exception ShutdownException query shutdown by user or execution error
 	 */
-	protected void processTuple(
-		Tuple inputTuple,
-		int streamId)
-		throws ShutdownException, InterruptedException {
+	
+	/* This is Case B
+	 * 
+	protected void processTuple(Tuple inputTuple, int streamId)
+			throws ShutdownException, InterruptedException {
 
-		if (hasMappings) { // We need to move some attributes
-			putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
-		} else {
-			// just send the original tuple along
-			putTuple(inputTuple, 0);
+		if (streamId == 0)
+			leftCounter++;
+		else
+			rightCounter++;
 
+		//tupleCounter++;
+
+			if ((leftCounter - rightCounter) == 61) {
+				// send message
+				sendCtrlMsgUpStream(CtrlFlags.MESSAGE, "From Union, With Love", 1);
+				// reset counters
+				leftCounter = 0;
+				rightCounter = 0;
+				//System.err.println("UNION sent the message");
+				//Thread.sleep(100);
+			}
+
+			tupleCounter++;
+			long time = System.currentTimeMillis();
+			System.out.println(tupleCounter + "," + time);
+			if (hasMappings) { // We need to move some attributes
+				putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
+			} else {
+				// just send the original tuple along
+				putTuple(inputTuple, 0);
+			}
+	}
+	*/
+
+	/*
+	 *  This is case A
+	 *  
+	 * 	protected void processTuple(Tuple inputTuple, int streamId)
+			throws ShutdownException, InterruptedException {
+
+		if (streamId == 0)
+			leftCounter++;
+		else
+			rightCounter++;
+
+		//tupleCounter++;
+
+		if (slowStream) {
+			if ((leftCounter - rightCounter) == 61) {
+				slowStream = false;
+			}
+		}
+
+		if (streamId == 0) {
+			tupleCounter++;
+			long time = System.currentTimeMillis();
+			System.out.println(tupleCounter + "," + time);
+			if (hasMappings) { // We need to move some attributes
+				putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
+			} else {
+				// just send the original tuple along
+				putTuple(inputTuple, 0);
+			}
+		}
+
+		else if (slowStream) {
+			tupleCounter++;
+			long time = System.currentTimeMillis();
+			System.out.println(tupleCounter + "," + time);
+			if (hasMappings) { // We need to move some attributes
+				putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
+			} else {
+				// just send the original tuple along
+				putTuple(inputTuple, 0);
+			}
 		}
 	}
 
+	 * 
+	 */
+	
+/* This is the code that generated the first output (with timers, etc.) */
+	protected void processTuple(
+			Tuple inputTuple,
+			int streamId)
+			throws ShutdownException, InterruptedException {
+	// XXX: RJFM
+			tupleCounter++;		
+			long time = System.currentTimeMillis();
+			System.out.println( tupleCounter + "," + time );
+			if (hasMappings) { // We need to move some attributes
+				putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
+			} else {
+				// just send the original tuple along
+				putTuple(inputTuple, 0);
+
+			}
+		}
+	
 	/**
 	 * This function handles punctuations for the given operator. For
 	 * Union, we have to make sure all inputs have reported equal

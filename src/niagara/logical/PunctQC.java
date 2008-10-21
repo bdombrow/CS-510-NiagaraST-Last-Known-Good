@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PunctQC.java,v 1.4 2007/05/24 03:46:48 jinli Exp $
+  $Id: PunctQC.java,v 1.5 2008/10/21 23:11:39 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 

@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: Bucket.java,v 1.5 2007/04/28 21:26:13 jinli Exp $
+  $Id: Bucket.java,v 1.6 2008/10/21 23:11:38 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -52,6 +52,7 @@ public class Bucket extends UnaryOperator {
 	protected String stInput;
 	private String name;
 	private long starttime;
+	private boolean propagate = false;
 
     public void dump() {
 	System.out.println("BucketOp");
@@ -68,11 +69,15 @@ public class Bucket extends UnaryOperator {
 	op.stInput = stInput;
 	op.name = name;
 	op.widName = widName;
+	op.propagate = propagate;
 	return op;
     }
     
     public int hashCode() {
-	return range ^ slide ^ windowType ^ windowAttr.hashCode() ^ hashCodeNullsAllowed(stInput);
+    	int p = 0;
+    	if(propagate)
+    		p =1;
+	return range ^ slide ^ windowType ^ windowAttr.hashCode() ^ hashCodeNullsAllowed(stInput) ^ p;
     }
     
     public boolean equals(Object obj) {
@@ -89,6 +94,8 @@ public class Bucket extends UnaryOperator {
 	if (widName != null)
 		if(!widName.equals(other.widName))
 			return false;
+	if(!propagate)
+		return false;
 	return (windowType == other.windowType) &&
 		(range == other.range) &&
 		(slide == other.slide) && (starttime == other.starttime);
@@ -102,6 +109,7 @@ public class Bucket extends UnaryOperator {
 	String windowRange = e.getAttribute("range");
 	String windowSlide = e.getAttribute("slide");
 	widName = e.getAttribute("wid");
+
 	
 	if (widName.length() == 0)
 		widName = name;
@@ -128,6 +136,12 @@ public class Bucket extends UnaryOperator {
     
     public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)    
 	throws InvalidPlanException {
+    	
+    	String propagateAttribute = e.getAttribute("propagate");
+    	
+    	if(propagateAttribute.equals("yes"))
+    		propagate = true;
+    	
 		name = e.getAttribute("id");
 		stInput = e.getAttribute("input");
 		if (e.getAttribute("start") != "")
@@ -139,6 +153,9 @@ public class Bucket extends UnaryOperator {
     
     public Attribute getWindowAttr() {
 	return windowAttr;
+    }
+    public boolean getPropagate(){
+    	return propagate;
     }
     public int getWindowType() {
 	return windowType;

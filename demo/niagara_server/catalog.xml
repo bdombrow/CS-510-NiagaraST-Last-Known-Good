@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: catalog.xml,v 1.6 2007/05/19 16:57:03 vpapad Exp $ --><catalog>
+<!-- $Id: catalog.xml,v 1.7 2008/10/21 23:11:13 rfernand Exp $ --><catalog>
   <streams>
     <stream delay="-1" filename="/stash/datalab/datastreams-student/streamdata/auctions10k.xml" isStream="yes" name="auctions">
       <var name="id" type="int"/>
@@ -60,7 +60,10 @@
     </logical>
     <logical class="niagara.logical.DBScan" name="dbscan">
             <physical class="niagara.data_manager.DBThread" name="DBThread"/>      
-    </logical>            
+    </logical>    
+    <logical class="niagara.logical.DBScanImpute" name="dbscanimpute">
+            <physical class="niagara.data_manager.DBThreadImpute" name="DBThreadImpute"/>      
+    </logical>         
     <logical class="niagara.logical.XMLScan" name="xmlscan"/>
     <logical class="niagara.logical.Timer" name="timer">
       <physical class="niagara.data_manager.TimerThread" name="TimerThread"/>
@@ -86,6 +89,12 @@
     </logical>
     <logical class="niagara.logical.Select" name="select">
       <physical class="niagara.physical.PhysicalSelect" name="PhysicalSelect"/>
+    </logical>
+    <logical class="niagara.logical.Magic" name="magic">
+      <physical class="niagara.physical.PhysicalMagic" name="PhysicalMagic"/>
+    </logical>
+    <logical class="niagara.logical.Selecto" name="selecto">
+      <physical class="niagara.physical.PhysicalSelecto" name="PhysicalSelecto"/>
     </logical>
     <logical class="niagara.logical.Join" name="join">
       <physical class="niagara.physical.PhysicalNLJoin" name="NestedLoopsJoin"/>
@@ -165,6 +174,9 @@
     <logical class="niagara.logical.PunctQC" name="punctqc">
        <physical class="niagara.physical.PhysicalPunctQC" name="PhysicalPunctQC"/>
     </logical>
+    <logical class="niagara.logical.Impute" name="impute">
+       <physical class="niagara.physical.PhysicalImpute" name="PhysicalImpute"/>
+    </logical>    
     <logical class="niagara.logical.Bucket" name="bucket">
        <physical class="niagara.physical.PhysicalBucket" name="PhysicalBucket"/>
     </logical>
@@ -202,6 +214,14 @@
   		<before><logical name="select"/></before>
  		<after><op name="PhysicalSelect"/></after>
   	</rule> 
+ 	<rule name="select to PhysicalMagic" type="simple">
+  		<before><logical name="magic"/></before>
+ 		<after><op name="PhysicalMagic"/></after>
+  	</rule> 
+  	<rule name="selecto to PhysicalSelecto" type="simple">
+  		<before><logical name="selecto"/></before>
+ 		<after><op name="PhysicalSelecto"/></after>
+  	</rule>
   	<rule name="join to HashJoin" promise="5" type="simple">
   		<before><logical condition="isEquiJoin" name="join"/></before>
  		<after><op name="HashJoin"/></after>
@@ -221,7 +241,11 @@
   	<rule name="dbscan to DBThread" type="simple">
   		<before><logical name="dbscan"/></before>
  		<after><op name="DBThread"/></after>
-  	</rule>  	
+  	</rule> 
+  	<rule name="dbscanimpute to DBThreadImpute" type="simple">
+  		<before><logical name="dbscanimpute"/></before>
+ 		<after><op name="DBThreadImpute"/></after>
+  	</rule> 	
        <rule name="showTunables to ShowTunablesThread" type="simple">
                <before><logical name="showTunables"/></before>
                <after><op name="ShowTunablesThread"/></after>
@@ -351,6 +375,11 @@
 		<before><logical name="punctqc"/></before>
 		<after><op name="PhysicalPunctQC"/></after>
 	</rule>
+	<rule name="impute to PhysicalImpute" type="simple">
+		<before><logical name="impute"/></before>
+		<after><op name="PhysicalImpute"/></after>
+	</rule>	
+	<!--
   	<rule argument="unn" condition="isPushableInto" name="select-unnest to PhysicalPredicatedUnnest" type="constructed">
   		<before>
   			<op name="sel" op="select">
@@ -365,6 +394,7 @@
 	  		</op>
   		</after>
   	</rule>
+  	-->
   	
   	<!-- The duplicate-free join reordering rules from Pellenkoft et al., VLDB '97 -->
   	<rule class="niagara.optimizer.rules.CommuteJoin" mask="CommuteJoin,AssociateJoinRtoL,AssociateJoinLtoR,Exchange" name="CommuteJoin" type="custom"/>
@@ -374,7 +404,7 @@
 
   	<rule class="niagara.optimizer.rules.SelectIntoJoin" name="SelectIntoJoin" type="custom"/>
   	<rule class="niagara.optimizer.rules.PushJoinPredicates" name="PushJoinPredicates" type="custom"/>
-  	<rule class="niagara.optimizer.rules.SelectThruUnnest" name="SelectThruUnnest" type="custom"/>
+  	<rule class="niagara.optimizer.rules.SelectThruUnnest" name="SelectThruUnnest" type="custom"/> 
   	<rule name="EmptySelectToNoOp" type="simple">
   		<before><logical condition="isEmpty" name="select"/></before>
   		<after><op name="noop"/></after>

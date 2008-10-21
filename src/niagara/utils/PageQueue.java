@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PageQueue.java,v 1.7 2007/10/05 21:14:00 vpapad Exp $
+  $Id: PageQueue.java,v 1.8 2008/10/21 23:11:52 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -128,7 +128,7 @@ public class PageQueue
 	    tail = (tail + 1) % length;
 	    queue[tail] = page;
 	} else if (expandable) {
-		System.out.println("is full tail is " + tail + "head is " + head);
+		//RJFM System.out.println("is full tail is " + tail + "head is " + head);
 	    if(expandQueue()) {
 	       put(page);
             } else {

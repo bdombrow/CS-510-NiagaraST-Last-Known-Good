@@ -1,6 +1,6 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowAggregate.java,v 1.5 2007/05/31 03:36:22 jinli Exp $
+  $Id: PhysicalWindowAggregate.java,v 1.6 2008/10/21 23:11:48 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -53,6 +53,9 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 	ArrayList <AtomicEvaluator> ae = new ArrayList();
 	ArrayList atomicValues;
 
+	// Propagate
+	//boolean propagate;
+	
 	protected abstract PhysicalWindowAggregate getInstance();
 	protected abstract BaseAttr constructAggrResult(AggrResult partialResult,
 						AggrResult finalResult);
@@ -60,6 +63,7 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 						 Object ungroupedResult);
 
 	protected void localInitFrom(LogicalOp logicalOperator) {
+		//propagate = ((WindowAggregate)logicalOperator).getPropagate();
 		aggrAttr = ((WindowAggregate)logicalOperator).getAggrAttr();
 		widName = ((WindowAggregate)logicalOperator).getWid();
 	}
@@ -72,20 +76,18 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 		atomicValues = new ArrayList();
 	}
 
-	/*protected final Double getDoubleValue (Tuple tupleElement) 
-	throws ShutdownException {
-	try {
-		// First get the atomic values
-		atomicValues.clear();
-		ae.getAtomicValues(tupleElement, atomicValues);
-		assert atomicValues.size() == 1 : "Need exactly one atomic value";
-	    
-		// Try to convert to double 
-		return new Double((String)(atomicValues.get(0)));
-	} catch (java.lang.NumberFormatException nfe) {
-		throw new ShutdownException(nfe.getMessage());
-	} 
-	}*/
+
+	
+	/*
+	 * protected final Double getDoubleValue (Tuple tupleElement) throws
+	 * ShutdownException { try { // First get the atomic values
+	 * atomicValues.clear(); ae.getAtomicValues(tupleElement, atomicValues);
+	 * assert atomicValues.size() == 1 : "Need exactly one atomic value";
+	 *  // Try to convert to double return new
+	 * Double((String)(atomicValues.get(0))); } catch
+	 * (java.lang.NumberFormatException nfe) { throw new
+	 * ShutdownException(nfe.getMessage()); } }
+	 */
 
 	/**
 	 * This function merges a grouped result with an ungrouped result
@@ -125,15 +127,20 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 		PhysicalWindowAggregate op = getInstance();
 		op.aggrAttr = this.aggrAttr;
 		op.widName = widName;
+		//op.propagate = propagate;
 		return op;
 	}
 
 	protected boolean localEquals(Object o) {
 		return aggrAttr.equals(((PhysicalWindowAggregate)o).aggrAttr) &&
-			   widName.equals(((PhysicalWindowAggregate)o).widName);
+			   widName.equals(((PhysicalWindowAggregate)o).widName); //&& 
+			   //(propagate && ((PhysicalWindowAggregate)o).propagate);
 	}
 
 	public int hashCode() {
+		//int i = 0;
+		//if (propagate)
+			//i = 1;
 		return groupAttributeList.hashCode() ^ aggrAttr.hashCode() ^ widName.hashCode();
 	}
 

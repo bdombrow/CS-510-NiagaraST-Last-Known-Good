@@ -1,5 +1,5 @@
 /**********************************************************************
-  $Id: PhysicalWindowAverage.java,v 1.3 2007/05/31 03:36:23 jinli Exp $
+  $Id: PhysicalWindowAverage.java,v 1.4 2008/10/21 23:11:48 rfernand Exp $
 
 
   NIAGARA -- Net Data Management System                                 
@@ -27,9 +27,13 @@
 
 package niagara.physical;
 
+import niagara.logical.WindowAggregate;
+import niagara.optimizer.colombia.LogicalOp;
 import niagara.utils.Tuple;
 import niagara.utils.BaseAttr;
 import niagara.utils.StringAttr;
+import niagara.utils.ShutdownException;
+import niagara.utils.CtrlFlags;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -49,12 +53,21 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 
 	int totalCost = 0;
 	ArrayList values = new ArrayList ();
+	
+
+	
 	/**
 	 * This function updates the statistics with a value
 	 *
 	 * @param newValue The value by which the statistics are to be
 	 *                 updated
 	 */
+	
+	protected void localInitFrom(LogicalOp logicalOperator) {
+		aggrAttr = ((WindowAggregate)logicalOperator).getAggrAttr();
+		widName = ((WindowAggregate)logicalOperator).getWid();
+	}
+	
 	public void updateAggrResult (PhysicalWindowAggregate.AggrResult result, 
 				  Object ungroupedResult) {
 	// Increment the number of values
@@ -72,7 +85,73 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 	}
 	}
 
+	   void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
+			throws java.lang.InterruptedException, ShutdownException {
+		// downstream control message is GET_PARTIAL
+		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
+		// REQ_BUF_FLUSH is handled inside SinkTupleStream
+		// here (SHUTDOWN is handled with exceptions)
 
+		   
+		   
+		if (ctrl == null) {
+			return;
+		} else {
+			//System.err.println(this.getName() + " is not null ");
+		}
+
+		int ctrlFlag = (Integer) ctrl.get(0);
+
+		switch (ctrlFlag) {
+		case CtrlFlags.GET_PARTIAL:
+			processGetPartialFromSink(streamId);
+			break;
+		case CtrlFlags.MESSAGE:
+			System.err.println(this.getName() + "***Got message: " + ctrl.get(1)
+					+ " with propagate =  " + propagate);
+			
+			String [] feedback = ctrl.get(1).toString().split("#");
+			
+			fAttr = feedback[0];
+			guardOutput = feedback[1];
+			
+			
+			if (propagate) {
+				sendCtrlMsgUpStream(ctrlFlag, ctrl.get(1).toString(), 0);
+			}
+			break;
+		default:
+			assert false : "KT unexpected control message from sink "
+					+ CtrlFlags.name[ctrlFlag];
+		}
+	}
+	
+//	void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
+//	throws java.lang.InterruptedException, ShutdownException {
+//	// downstream control message is GET_PARTIAL
+//	// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG 
+//	// REQ_BUF_FLUSH is handled inside SinkTupleStream
+//	// here (SHUTDOWN is handled with exceptions)
+//
+//    if (ctrl == null)
+//    	return;
+//    
+//    int ctrlFlag =(Integer) ctrl.get(0);
+//
+//	switch (ctrlFlag) {
+//	/*case CtrlFlags.GET_PARTIAL:
+//	    processGetPartialFromSink(streamId);
+//	    break;*/
+//	case CtrlFlags.MESSAGE:
+//		System.err.println(this.getName() + " got message: " + ctrl.get(1));
+//		//sendCtrlMsgUpStream(CtrlFlags.MESSAGE, "From PunctQC, With Love", 0);
+//		break;
+//	default:
+//	    assert false : "KT unexpected control message from sink " 
+//		+ CtrlFlags.name[ctrlFlag];
+//	}
+//    } 
+	
 	////////////////////////////////////////////////////////////////////
 	// These are the private variables of the class                   //
 	////////////////////////////////////////////////////////////////////
