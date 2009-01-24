@@ -1,28 +1,28 @@
 
 /**********************************************************************
-  $Id: PhysicalWindowGroup.java,v 1.9 2008/10/21 23:11:48 rfernand Exp $
+  $Id: PhysicalWindowGroup.java,v 1.9 2008-10-21 23:11:48 rfernand Exp $
 
 
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-					   Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
+  NIAGARA -- Net Data Management System
+
+  Copyright (c)    Computer Sciences Department, University of
+					   Wisconsin -- Madison
+  All Rights Reserved.
+
+  Permission to use, copy, modify and distribute this software and
+  its documentation is hereby granted, provided that both the
+  copyright notice and this permission notice appear in all copies
+  of the software, derivative works or modified versions, and any
+  portions thereof, and that both notices appear in supporting
+  documentation.
+
+  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY
+  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "
+  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND
+  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.
+
+  This software was developed with support by DARPA through
+   Rome Research Laboratory Contract No. F30602-97-2-0247.
 **********************************************************************/
 
 
@@ -72,8 +72,8 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 	/* Guard */
 	String guardOutput = "*";
 	String fAttr;
-	
-    // These are private nested classes used within the operator  
+
+    // These are private nested classes used within the operator
 	// Copied from PhysicalGroup
 
     /**
@@ -92,7 +92,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
         // This is a representative tuple of the hash entry
         Tuple representativeTuple;
-        
+
 
 
         /**
@@ -115,7 +115,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
             // Initialize the representative tuple
             //this.representativeTuple = representativeTuple;
-            
+
             // to support window aggregates
             this.representativeTuple = (Tuple) representativeTuple.clone();
 
@@ -204,7 +204,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
 	// The list of attributes to group by
     protected Vector groupAttributeList;
-    private Hasher hasher;
+    protected Hasher hasher;
 
     // This is the hash table for performing grouping efficiently
     protected Hashtable hashtable;
@@ -217,20 +217,20 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     // partial results
     protected int currPartialResultId;
     protected Document doc;
-    private int numGroupingAttributes;
+    protected int numGroupingAttributes;
     private int[] attributeIds;
     private HashEntry singleGroupResult;
-	
 
-	//streamIds, together with window, record the tuple element and Id 
+
+	//streamIds, together with window, record the tuple element and Id
 	//for a tuple in the current sliding window
-	//    
+	//
 	protected ArrayList streamIds;
 	protected Attribute windowAttr;
 	protected String widName;
 	SimpleAtomicEvaluator eaFrom, eaTo;
 	//private int widFromPos, widToPos;
-    
+
 	///////////////////////////////////////////////////////////////////////////
 	// These are the methods of the PhysicalWindowGroupOperator class          //
 	///////////////////////////////////////////////////////////////////////////
@@ -250,29 +250,29 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 	public PhysicalWindowGroup() {
 		setBlockingSourceStreams(blockingSourceStreams);
 	}
-	
+
 	public final void opInitFrom(LogicalOp logicalOperator) {
         skolem grouping = ((niagara.logical.Group)logicalOperator).getSkolemAttributes();
         groupAttributeList = grouping.getVarList();
-        
+
 		windowAttr = ((WindowGroup)logicalOperator).getWindowAttr();
 		widName = ((WindowGroup)logicalOperator).getWid();
 		propagate = ((WindowGroup)logicalOperator).getPropagate();
-        
+
         // have subclass do initialization
         localInitFrom(logicalOperator);
     }
-	
+
 	abstract protected void localInitFrom(LogicalOp logicalOperator);
 
 	//Copied from PhysicalGroup
-	
+
     public final Op opCopy() {
     	PhysicalWindowGroup op = localCopy();
     	op.groupAttributeList = groupAttributeList;
     	op.widName = widName;
     	op.propagate = propagate;
-    	op.guardOutput = guardOutput;
+        op.guardOutput = guardOutput;
     	op.fAttr = fAttr;
     	return op;
         }
@@ -305,28 +305,28 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
          * @return True if the operator is to continue and false otherwise
          */
         protected final void opInitialize() {
-        
+
         eaFrom = new SimpleAtomicEvaluator ("wid_from_"+widName);
         eaFrom.resolveVariables(inputTupleSchemas[0], 0);
         eaTo = new SimpleAtomicEvaluator ("wid_to_"+widName);
         eaTo.resolveVariables(inputTupleSchemas[0], 0);
-            
+
         numGroupingAttributes = groupAttributeList.size();
 
     	if(numGroupingAttributes > 0) {
     	    hasher = new Hasher(groupAttributeList);
     	    hasher.resolveVariables(inputTupleSchemas[0]);
-    	    
+
     	    rgstPValues = new String[groupAttributeList.size()];
     	    rgstTValues = new String[groupAttributeList.size()];
     	    hashtable = new Hashtable();
-    	    
+
     	    // get the attr indices
     	    Attribute attr;
     	    attributeIds = new int[numGroupingAttributes];
     	    for(int i = 0; i<numGroupingAttributes; i++) {
     		attr = (Attribute) groupAttributeList.get(i);
-    		attributeIds[i] = 
+    		attributeIds[i] =
     		    inputTupleSchemas[0].getPosition(attr.getName());
     	    }
     	} else {
@@ -344,9 +344,9 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 			  Punctuation inputTuple,
 			  int streamId)
 	throws ShutdownException, InterruptedException {
-		
+
 		//System.err.println(this.id + " process punct");
-		
+
 		HashEntry groupResult = null;
 		if(numGroupingAttributes == 0)
 			assert false : "not supported yet - yell at Kristin";
@@ -358,10 +358,10 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 			//Not a punctuation for the group attribute. Ignore it.
 			return;
 		}
-	
+
 		String [] punctValues = new String[numGroupingAttributes];
 		hasher.getValuesFromKey(stPunctKey, punctValues);
-	
+
 		//Does the punctuation punctuates on every grouping attribiute?
 		boolean idealPunct = true;
 		for (int i = 0; i < numGroupingAttributes; i++)
@@ -369,8 +369,8 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 				idealPunct = false;
 				break;
 			}
-		
-		// Yes. The punctuation punctuates on every grouping attributes 
+
+		// Yes. The punctuation punctuates on every grouping attributes
 		if (idealPunct) {
 			groupResult = (HashEntry) hashtable.get(stPunctKey);
 
@@ -381,44 +381,57 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 				String tmpPos = inputTuple.getAttribute(pos).getFirstChild().getNodeValue();
 			}*/ // for debugging
 			hashtable.remove(stPunctKey);
-		} 
+		}
 		// No. Need to walk through the hashtable
 		else {
-			Iterator keys = hashtable.keySet().iterator();
+			Set keys = hashtable.keySet();
+
+			LinkedList removes = new LinkedList();
+			LinkedList puts = new LinkedList();
+
 			String groupKey;
 			String[] groupKeyValues = new String[numGroupingAttributes];
 			boolean match;
-			while (keys.hasNext()) {
-				groupKey = (String)keys.next();
+			for (Object key : keys) {
+				groupKey = (String)key;
 				hasher.getValuesFromKey(groupKey, groupKeyValues);
 				match = true;
 				for (int i=0; i<numGroupingAttributes; i++) {
 					// if groupKeyValues match punctVals, output the result
-					if (groupKeyValues[i].compareTo(punctValues[i]) != 0 && 
+					if (groupKeyValues[i].compareTo(punctValues[i]) != 0 &&
 							punctValues[i].trim().compareTo("*") != 0) {
 						match = false;
 						break;
 					}
 				}
 				if (match) {
-					putResult((HashEntry)hashtable.get(groupKey), false);
-					keys.remove();
+					puts.add(hashtable.get(groupKey));
+					removes.add(key);
 				}
 			}
+
+			for (Object p : puts) {
+				putResult((HashEntry)p, false);
+			}
+
+			for (Object r : removes) {
+				hashtable.remove(r);
+			}
+
 		}
 		producePunctuation (Long.valueOf(eaFrom.getAtomicValue(inputTuple, null)));
 	}
-	
-	private void producePunctuation (long wid) 
+
+	private void producePunctuation (long wid)
 	throws InterruptedException, ShutdownException {
 		Punctuation punct = new Punctuation (false);
-		
+
 		Attrs attributes = outputTupleSchema.getAttrs();
-		
+
 		/*for (int i = 0; i < attributes.size(); i++) {
 			System.err.println(attributes.get(i).getName());
 		}*/
-		
+
 		for (int i = 0; i < attributes.size(); i++) {
 			if (attributes.get(i).getName().compareTo(eaFrom.getName()) == 0) {
 				punct.appendAttribute(new LongAttr(wid));
@@ -426,16 +439,16 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 				punct.appendAttribute(BaseAttr.createWildStar(BaseAttr.Type.String));
 			}
 		}
-		
+
 		putTuple (punct, 0);
-		
+
 	}
-	
+
     private void putResult(HashEntry hashEntry, boolean partial)
 			throws InterruptedException, ShutdownException {
-    	
 
-    	
+
+
 		// Update hash entry for partial results
 		hashEntry.updatePartialResult(currPartialResultId);
 
@@ -456,19 +469,19 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 			Tuple tupleElement = createTuple(resultNode, hashEntry
 					.getRepresentativeTuple(), partial);
 
-	
-			
+
+
 //putTuple(tupleElement,0);
-			
+
 			if (guardOutput.equals("*")){
-			putTuple(tupleElement,0); 
+			putTuple(tupleElement,0);
 			}
 			else {
 				int pos = outputTupleSchema.getPosition(fAttr);
-				IntegerAttr v = (IntegerAttr)tupleElement.getAttribute(pos);    
-				String tupleGuard = v.toASCII();	
+				IntegerAttr v = (IntegerAttr)tupleElement.getAttribute(pos);
+				String tupleGuard = v.toASCII();
 				//System.err.println("Read: " + tupleGuard);
-				
+
 				if(guardOutput.equals(tupleGuard)){
 					putTuple(tupleElement,0);
 					//System.err.println("Allowed production of tuple with value: " + tupleGuard);
@@ -480,8 +493,8 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 					//System.err.println("Avoided production of tuple with value: " + tupleGuard);
 					//System.err.println(this.getName() + "avoided sending a tuple.");
 				//}
-				
-			
+
+
 			}
 		}
 	}
@@ -492,41 +505,41 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 	 * This function processes a tuple element read from a source stream when
 	 * the operator is in a blocking state. This over-rides the corresponding
 	 * function in the base class.
-	 * 
+	 *
 	 * @param tupleElement
 	 *            The tuple element read from a source stream
 	 * @param streamId
 	 *            The source stream from which the tuple was read
-	 * 
+	 *
 	 * @exception ShutdownException
 	 *                query shutdown by user or execution error
 	 */
-    
-	
+
+
 	//****Look at a tuple once, and hash it to multiple hash entries
     //****  -Jenny
-    protected final void blockingProcessTuple(     
+    protected final void blockingProcessTuple(
     		Tuple tupleElement,
     	        int streamId)
     throws ShutdownException {
-    	Object ungroupedResult = 
+    	Object ungroupedResult =
     	this.constructUngroupedResult(tupleElement);
     	if(ungroupedResult == null)
     		return;
-		
+
 		int tupleSize = tupleElement.size();
-	
+
 		int from = Integer.parseInt(eaFrom.getAtomicValue(tupleElement, null));
 		int to = Integer.parseInt(eaTo.getAtomicValue(tupleElement, null));
 
 		HashEntry prevResult;
-    		    
-    	
-    	
+
+
+
     	String key = hasher.hashKey(tupleElement);
     	String [] values = new String[numGroupingAttributes];
     	hasher.getValuesFromKey(key, values);
-    	
+
     	IntegerAttr wid;
     	String hashKey;
     	// Probe hash table to see whether result for this hashcode
@@ -535,22 +548,22 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     		values[numGroupingAttributes-1] = String.valueOf(i);
     		hashKey = hasher.hashKey(values);
     		prevResult = (HashEntry) hashtable.get(hashKey);
-    		
+
     		if (prevResult == null) {
     			wid = new IntegerAttr(i);
-    			
+
     	    	Tuple tmpTuple = (Tuple) tupleElement.clone();
 
-    			tmpTuple.setAttribute(tupleSize-2, wid);	
+    			tmpTuple.setAttribute(tupleSize-2, wid);
     			// If it does not have the result, just create new one
     			// with the current partial result id with the tupleElement
     			// as the representative tuple
     			prevResult = new HashEntry(currPartialResultId, tmpTuple);
-    	    
+
     			// Add the entry to hash table
     			// hashtable.put(key, prevResult);
     			hashtable.put(hashKey, prevResult);
-    	    
+
     		} else {
     			// It did have the result - update partial results
     			prevResult.updatePartialResult(currPartialResultId);
@@ -563,24 +576,24 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
     			this.mergeResults(
     					  prevResult.getPartialResult(),
     					  ungroupedResult);
-    		    
+
     		    // Update the partial result
     		    prevResult.setPartialResult(newPartialResult);
     		} else {
     		    // Merge the final result so far with current ungrouped result
     		    Object newFinalResult =
-    			this.mergeResults(prevResult.getFinalResult(), 
+    			this.mergeResults(prevResult.getFinalResult(),
     					  ungroupedResult);
-    			    
+
     		    // Update the final result
     		    prevResult.setFinalResult(newFinalResult);
     		}
     		prevResult = null;
-    		
+
     	}
-    		    
-    } 
-    	    	    
+
+    }
+
 	/**
 	 * This function returns the current output of the operator. This
 	 * function is invoked only when the operator is blocking. This
@@ -619,7 +632,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		}
 	}
 
-	private void putEmptyResult(boolean partial) 
+	private void putEmptyResult(boolean partial)
 	throws InterruptedException, ShutdownException {
 		BaseAttr emptyResult = constructEmptyResult();
 
@@ -632,7 +645,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 						emptyResult,
 						null, // No representative tuple
 						partial);
-    
+
 			// Add the tuple to the result
 			putTuple(tupleElement, 0);
 		}
@@ -722,7 +735,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
      */
 
     protected abstract Object constructUngroupedResult(
-				   Tuple tupleElement) 
+				   Tuple tupleElement)
 	throws ShutdownException;
 
     /**

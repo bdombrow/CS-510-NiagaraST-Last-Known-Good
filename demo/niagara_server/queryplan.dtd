@@ -1,7 +1,7 @@
-<!-- $Id: queryplan.dtd,v 1.53 2008/10/21 23:11:13 rfernand Exp $
+<!-- $Id: queryplan.dtd,v 1.53 2008-10-21 23:11:13 rfernand Exp $
      DTD for query plans -->
 
-<!-- 
+<!--
      Plan is a dummy node, representing the output of a query plan.
      top is a ref to the topmost operator, usually a construct.
 -->
@@ -14,27 +14,27 @@
 		    incravg | select | magic | selecto | dup | union | join |
 		    dtdscan | resource | constant | timer |
 		    prefix | punctuate | send | display | topn |
-		    firehosescan | filescan | construct | 
+		    firehosescan | filescan | construct |
 		    bucket | partitionavg | partitionmax |
-		    accumulate | nest | magic_construct | 
+		    accumulate | nest | magic_construct |
 		    windowCount | windowMax | windowAverage  | windowJoin | impute |
         showTunables | collectInstrumentation |
 		    store | load | xmlscan | dbscan | dbscanimpute | punctqc | present)+>
-		    
+
 <!ATTLIST plan top IDREF        #REQUIRED
                planID CDATA     ""
           %PositionAttributes;>
 
-<!-- 
-     For all operators, an "id" attribute is required, so that other 
-     operators may reference them. 
+<!--
+     For all operators, an "id" attribute is required, so that other
+     operators may reference them.
 -->
 <!ENTITY % StandardAttributes "id ID   #REQUIRED
 	 input     IDREF               #REQUIRED
-         location  CDATA               #IMPLIED                        
+         location  CDATA               #IMPLIED
 	 %PositionAttributes;">
 
-<!-- 
+<!--
      type : Whether we want the element itself, its content, or its tag name
      root:  Where is the regular expression rooted. Default: unnest's input
      regexp: The XML-QL regular expression
@@ -45,7 +45,7 @@
 -->
 
 <!ELEMENT unnest     EMPTY>
-<!ATTLIST unnest 
+<!ATTLIST unnest
 
 	  type	   (tag|element|content) "element"
 	  datatype	(String|XML|Integer|Long|TS) "String"
@@ -55,7 +55,7 @@
 	  %StandardAttributes;>
 
 <!ELEMENT sort     EMPTY>
-<!ATTLIST sort 
+<!ATTLIST sort
 
 	  order	   (descending|ascending) "descending"
 	  comparison (alphabetic|numeric) "alphabetic"
@@ -68,7 +68,7 @@
      in the input schema -->
 <!-- KT - believe you need either an expression or a class -->
 <!ELEMENT expression     EMPTY>
-<!ATTLIST expression 
+<!ATTLIST expression
 
 	  class   CDATA           ""
 	  expression CDATA	  ""
@@ -77,7 +77,7 @@
 
 
 <!ELEMENT avg     EMPTY>
-<!ATTLIST avg 
+<!ATTLIST avg
 	  groupby  CDATA	       #REQUIRED
 	  avgattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
@@ -93,7 +93,7 @@
 	  %StandardAttributes;>
 
 <!ELEMENT slidingAvg     EMPTY>
-<!ATTLIST slidingAvg 
+<!ATTLIST slidingAvg
 	  groupby  CDATA	       #REQUIRED
 	  avgattr  CDATA	       #REQUIRED
 	  range    CDATA               #REQUIRED
@@ -101,13 +101,13 @@
 	  %StandardAttributes;>
 
 <!ELEMENT sum     EMPTY>
-<!ATTLIST sum 
+<!ATTLIST sum
 	  groupby  CDATA	       #REQUIRED
 	  sumattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT slidingSum     EMPTY>
-<!ATTLIST slidingSum 
+<!ATTLIST slidingSum
 	  groupby  CDATA	       #REQUIRED
 	  sumattr  CDATA	       #REQUIRED
 	  every    CDATA	       #REQUIRED
@@ -115,7 +115,7 @@
 	  %StandardAttributes;>
 
 <!ELEMENT max     EMPTY>
-<!ATTLIST max 
+<!ATTLIST max
 	  groupby  CDATA	       #REQUIRED
 	  maxattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
@@ -126,9 +126,9 @@
 	  maxattr  CDATA		#REQUIRED
 	  wid	   CDATA		""
 	  %StandardAttributes;>
-	  
+
 <!ELEMENT slidingMax     EMPTY>
-<!ATTLIST slidingMax 
+<!ATTLIST slidingMax
 	  groupby  CDATA	       #REQUIRED
 	  maxattr  CDATA	       #REQUIRED
 	  every    CDATA	       #REQUIRED
@@ -136,7 +136,7 @@
 	  %StandardAttributes;>
 
 <!ELEMENT count     EMPTY>
-<!ATTLIST count 
+<!ATTLIST count
 	  groupby  CDATA	       #REQUIRED
 	  countattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
@@ -146,10 +146,11 @@
 	  groupby    CDATA		#REQUIRED
 	  countattr  CDATA		#REQUIRED
 	  wid	     CDATA		""
+	  propagate (yes | no) "yes"
 	  %StandardAttributes;>
 
 <!ELEMENT slidingCount     EMPTY>
-<!ATTLIST slidingCount 
+<!ATTLIST slidingCount
 	  groupby  CDATA	       #REQUIRED
 	  countattr  CDATA	       #REQUIRED
 	  every    CDATA	       #REQUIRED
@@ -157,12 +158,12 @@
 	  %StandardAttributes;>
 
 <!ELEMENT incrmax     EMPTY>
-<!ATTLIST incrmax 
+<!ATTLIST incrmax
 	  groupby  CDATA	       #REQUIRED
 	  maxattr  CDATA	       #REQUIRED
 	  emptygroupvalue  CDATA       #REQUIRED
 	  %StandardAttributes;>
-	  
+
 <!ELEMENT partitionmax EMPTY>
 <!ATTLIST partitionmax
 	  groupby  CDATA	       #REQUIRED
@@ -171,9 +172,9 @@
 	  range    CDATA	       ""
 	  emptygroupvalue  CDATA       #REQUIRED
 	  %StandardAttributes;>
-	  
+
 <!ELEMENT incravg     EMPTY>
-<!ATTLIST incravg 
+<!ATTLIST incravg
 	  groupby  CDATA	       #REQUIRED
 	  avgattr  CDATA	       #REQUIRED
 	  %StandardAttributes;>
@@ -182,30 +183,30 @@
 <!ATTLIST partitionavg
 	  groupby CDATA		       #REQUIRED
 	  avgattr CDATA		       #REQUIRED
-	  landmark CDATA	       #REQUIRED	
-	  range	  CDATA		       "" 	
+	  landmark CDATA	       #REQUIRED
+	  range	  CDATA		       ""
 	  %StandardAttributes;>
 
 <!ELEMENT select  (and | or | not | true | false | pred)>
-<!ATTLIST select 
+<!ATTLIST select
 	  %StandardAttributes;>
-	  
+
 <!ELEMENT magic  (and | or | not | true | false | pred)>
-<!ATTLIST magic 
+<!ATTLIST magic
       interval	CDATA	#REQUIRED
       punctattr	CDATA	#REQUIRED
-      timeattr  CDATA   #REQUIRED   
+      timeattr  CDATA   #REQUIRED
       propagate (yes|no) "yes"
 	  %StandardAttributes;>
 
 <!ELEMENT selecto  (and | or | not | true | false | pred)>
-<!ATTLIST selecto 
+<!ATTLIST selecto
           special (yes | no) "no"
-	  %StandardAttributes;>	  
+	  %StandardAttributes;>
 
 <!ELEMENT dup  EMPTY>
 <!ATTLIST dup
-          branch   CDATA    #REQUIRED 
+          branch   CDATA    #REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT union  (mapping*)>
@@ -228,7 +229,7 @@
 
 <!--
         "left" and "right" are lists of variables used in an equijoin.
-	It's necessary to specify them when using a hash join 
+	It's necessary to specify them when using a hash join
 	implementation.
 -->
 <!ELEMENT join (and | or | not | true | false | pred)?>
@@ -269,7 +270,7 @@
           value   CDATA                #REQUIRED>
 
 <!ELEMENT string  EMPTY>
-<!ATTLIST string 
+<!ATTLIST string
           value   CDATA                #REQUIRED>
 
 <!ELEMENT var  EMPTY>
@@ -282,23 +283,23 @@
           path  CDATA                #REQUIRED>
 
 <!ELEMENT dtdscan  (url)+>
-<!ATTLIST dtdscan 
+<!ATTLIST dtdscan
           id       ID           #REQUIRED
 	  %PositionAttributes;>
 
 <!ELEMENT resource EMPTY>
-<!ATTLIST resource 
+<!ATTLIST resource
           id       ID           #REQUIRED
           urn      CDATA        #REQUIRED
 	  %PositionAttributes;>
 
-<!-- Constant is a pseudo-operator for including a document verbatim 
-     as a source in a query plan. The document should be included 
+<!-- Constant is a pseudo-operator for including a document verbatim
+     as a source in a query plan. The document should be included
      as a CDATA section, to avoid costly parse phases. Important
      caveat: CDATA sections cannot nest! -->
-  
+
 <!ELEMENT constant  (#PCDATA)>
-<!ATTLIST constant 
+<!ATTLIST constant
           id       ID           #REQUIRED
 	  %PositionAttributes;>
 
@@ -306,7 +307,7 @@
      time intervals (period, slack, and granularity) is
      one or more (<number>, <time term>) pairs, for example:
      "3 hours" and "1 hour 10 minutes" are valid time intervals
-     
+
 	 period:      time between clock ticks
 	 relative:    the date we measure time relative to
 	              empty string  ->  regular Java/POSIX epoch
@@ -317,13 +318,13 @@
 	 granularity: reported time is rounded down to a multiple of "granularity"
 -->
 <!ELEMENT timer EMPTY>
-<!ATTLIST timer 
+<!ATTLIST timer
           id       ID           #REQUIRED
           period   CDATA		#REQUIRED
           relative CDATA		"now"
-          slack	   CDATA	    ""  
+          slack	   CDATA	    ""
           delay    CDATA		""
-          warp     CDATA		"1" 
+          warp     CDATA		"1"
           granularity CDATA     "1 second"
 	  %PositionAttributes;>
 
@@ -345,8 +346,8 @@
 
 <!-- punctuate/query control - does both functions of
 punctuating a stream from the database and also taking input
-from the punctuation on the stream 
-specify the db input first and the stream punct input second --> 
+from the punctuation on the stream
+specify the db input first and the stream punct input second -->
 <!ELEMENT punctqc EMPTY>
 <!ATTLIST punctqc
           id       ID           #REQUIRED
@@ -374,7 +375,7 @@ specify the db input first and the stream punct input second -->
 <!ATTLIST punctuateonspec
           id       ID           #REQUIRED
 	  punctattr CDATA       #REQUIRED
-	  puncttype (onchange) "onchange" 
+	  puncttype (onchange) "onchange"
 	  input    IDREFS       #REQUIRED
 	  %PositionAttributes;>
 
@@ -382,7 +383,7 @@ specify the db input first and the stream punct input second -->
      wid is needed  when the window aggregate is not the next to bucket-->
 
 <!ELEMENT bucket EMPTY>
-<!ATTLIST bucket 
+<!ATTLIST bucket
 	  id	   ID		#REQUIRED
 	  range	   CDATA	#REQUIRED
 	  slide	   CDATA	#REQUIRED
@@ -402,49 +403,49 @@ specify the db input first and the stream punct input second -->
 	  %PositionAttributes;>
 
 <!ELEMENT send EMPTY>
-<!ATTLIST send 
+<!ATTLIST send
           id       ID           #REQUIRED
           query_id CDATA        #REQUIRED
 	  %PositionAttributes;>
 
 <!-- Send results of the query back to the client -->
 <!ELEMENT display EMPTY>
-<!ATTLIST display 
+<!ATTLIST display
           id       ID           #REQUIRED
           query_id CDATA        #REQUIRED
           client_location CDATA #REQUIRED
 	  %PositionAttributes;>
 
-<!-- Top n tuples --> 
+<!-- Top n tuples -->
 <!ELEMENT topn EMPTY>
 <!ATTLIST topn
 	  order	   (descending|ascending) "descending"
 	  comparison (alphabetic|numeric) "alphabetic"
 	  sort_by  CDATA        #REQUIRED
-          number   CDATA        #REQUIRED        
+          number   CDATA        #REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT firehosescan  EMPTY>
-<!ATTLIST firehosescan 
+<!ATTLIST firehosescan
           id             ID           #REQUIRED
 	  host	         CDATA   #REQUIRED
 	  port	         CDATA   #REQUIRED
-	  rate	         CDATA   #REQUIRED 
+	  rate	         CDATA   #REQUIRED
 	  datatype  (xmlb | subfile | temp | auction | dtd |auction_stream | file | packet) "auction"
-	  num_gen_calls  CDATA   #REQUIRED  
+	  num_gen_calls  CDATA   #REQUIRED
 	  desc           CDATA   ""
 	  desc2          CDATA   "bidperson"
-	  num_tl_elts    CDATA   "1"   
+	  num_tl_elts    CDATA   "1"
 	  prettyprint   (yes | no)  "no"
 	  trace          CDATA   ""
 	  %PositionAttributes;>
 
-<!-- NOTE: num_gen_calls is the number of times the generator will be called 
+<!-- NOTE: num_gen_calls is the number of times the generator will be called
            to generate data. if num_gen_calls is 0, the generator will be
            called over and over until the stream is shutdown.
-           
+
            num_tl_elts is the number of top level elements in a document
-           generated in one call to the generator. This value controls, 
+           generated in one call to the generator. This value controls,
            for example, how many PLAY elements there are in a GAMEDATA
            document in the XMLB data. This attribute is applicable to
            XMLB and AUCTION generators only.
@@ -460,7 +461,7 @@ specify the db input first and the stream punct input second -->
            xmlb:    num_tl_elts   (no desc)
            subfile: desc          (no num_tl_elts)
            temp:    desc              "
-           auction: desc, num_tl_elts, desc2 
+           auction: desc, num_tl_elts, desc2
 	 	desc is startFileName, desc2 specifies type of data
            dtd:     desc          (no num_tl_elts)
 	   auction_stream: desc is not necessary, num_tl_elts not
@@ -471,7 +472,7 @@ specify the db input first and the stream punct input second -->
 
 
 <!ELEMENT filescan  EMPTY>
-<!ATTLIST filescan 
+<!ATTLIST filescan
           id       ID           #REQUIRED
           filename CDATA        #REQUIRED
           delay    CDATA        "-1"
@@ -482,7 +483,7 @@ specify the db input first and the stream punct input second -->
      contain only one document -->
 
 <!ELEMENT xmlscan EMPTY>
-<!ATTLIST xmlscan 
+<!ATTLIST xmlscan
           id       ID           #REQUIRED
 	  spec	   CDATA	""
           filename CDATA        ""
@@ -497,7 +498,7 @@ specify the db input first and the stream punct input second -->
      filename explicitly, but not both. -->
 
 <!ELEMENT dbscan  EMPTY>
-<!ATTLIST dbscan 
+<!ATTLIST dbscan
           id       ID           #REQUIRED
 					attr_types   CDATA		#REQUIRED
 					attr_names   CDATA    #REQUIRED
@@ -509,7 +510,7 @@ specify the db input first and the stream punct input second -->
 	  %PositionAttributes;>
 
 <!ELEMENT dbscanimpute  EMPTY>
-<!ATTLIST dbscanimpute 
+<!ATTLIST dbscanimpute
           id       ID           #REQUIRED
 					attr_types   CDATA		#REQUIRED
 					attr_names   CDATA    #REQUIRED
@@ -525,11 +526,11 @@ specify the db input first and the stream punct input second -->
           value    CDATA        #REQUIRED>
 
 <!ELEMENT construct  ANY>
-<!ATTLIST construct 
+<!ATTLIST construct
           %StandardAttributes;>
 
 <!ELEMENT magic_construct  ANY>
-<!ATTLIST magic_construct  
+<!ATTLIST magic_construct
           %StandardAttributes;>
 
 <!ELEMENT accumulate EMPTY>
@@ -542,18 +543,18 @@ specify the db input first and the stream punct input second -->
 	  %StandardAttributes;>
 
 <!ELEMENT nest ANY>
-<!ATTLIST nest 
+<!ATTLIST nest
 	  neston    CDATA	       #REQUIRED
           %StandardAttributes;>
 
 <!ELEMENT store EMPTY>
-<!ATTLIST store 
+<!ATTLIST store
 	  root CDATA  #REQUIRED
 	  resource CDATA  #REQUIRED
           %StandardAttributes;>
 
 <!ELEMENT load EMPTY>
-<!ATTLIST load 
+<!ATTLIST load
        id       ID           #REQUIRED
 	  variable CDATA  #REQUIRED
 	  resource CDATA  #REQUIRED
@@ -565,7 +566,7 @@ specify the db input first and the stream punct input second -->
 	  input    IDREFS		#REQUIRED
 	  punctattr	CDATA		#REQUIRED
 	  %PositionAttributes;>
-         
+
 <!ELEMENT showTunables EMPTY>
 <!ATTLIST showTunables
        id       ID           #REQUIRED
