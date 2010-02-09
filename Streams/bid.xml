@@ -1,0 +1,2402 @@
+<niagara:stream xmlns:niagara ="http://www.cse.ogi.edu/dot/niagara">
+<bid>
+	<auction>1</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>1110</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>5700</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>1470</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>1710</price>
+</bid>
+<bid>
+	<auction>5</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>6500</price>
+</bid>
+<bid>
+	<auction>6</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>1260</price>
+</bid>
+<bid>
+	<auction>7</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>1800</price>
+</bid>
+<bid>
+	<auction>8</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>1910</price>
+</bid>
+<bid>
+	<auction>9</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>1370</price>
+</bid>
+<bid>
+	<auction>10</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>6900</price>
+</bid>
+<bid>
+	<auction>11</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>7000</price>
+</bid>
+<bid>
+	<auction>12</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>2060</price>
+</bid>
+<bid>
+	<auction>13</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>2180</price>
+</bid>
+<bid>
+	<auction>14</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>1730</price>
+</bid>
+<bid>
+	<auction>15</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>2430</price>
+</bid>
+<bid>
+	<auction>16</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>1910</price>
+</bid>
+<bid>
+	<auction>17</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>1940</price>
+</bid>
+<bid>
+	<auction>18</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>1570</price>
+</bid>
+<bid>
+	<auction>19</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>1980</price>
+</bid>
+<bid>
+	<auction>20</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>2480</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>100000</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>111</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>57</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>147</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>171</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>65</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>126</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>180</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>137</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>69</price>
+</bid>
+<bid>
+	<auction>0</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>70</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>206</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>218</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>173</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>243</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>191</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>194</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>157</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>198</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>248</price>
+</bid>
+<bid>
+	<auction>1</auction>
+	<time>0</time>
+	<bidder>0</bidder>
+	<price>1110</price>
+</bid>
+<bid>
+	<auction>2</auction>
+	<time>1</time>
+	<bidder>2</bidder>
+	<price>5700</price>
+</bid>
+<bid>
+	<auction>3</auction>
+	<time>2</time>
+	<bidder>1</bidder>
+	<price>1470</price>
+</bid>
+<bid>
+	<auction>4</auction>
+	<time>3</time>
+	<bidder>1</bidder>
+	<price>1710</price>
+</bid>
+<bid>
+	<auction>5</auction>
+	<time>4</time>
+	<bidder>0</bidder>
+	<price>6500</price>
+</bid>
+<bid>
+	<auction>6</auction>
+	<time>5</time>
+	<bidder>2</bidder>
+	<price>1260</price>
+</bid>
+<bid>
+	<auction>7</auction>
+	<time>6</time>
+	<bidder>1</bidder>
+	<price>1800</price>
+</bid>
+<bid>
+	<auction>8</auction>
+	<time>7</time>
+	<bidder>1</bidder>
+	<price>1910</price>
+</bid>
+<bid>
+	<auction>9</auction>
+	<time>8</time>
+	<bidder>1</bidder>
+	<price>1370</price>
+</bid>
+<bid>
+	<auction>10</auction>
+	<time>9</time>
+	<bidder>2</bidder>
+	<price>6900</price>
+</bid>
+<bid>
+	<auction>11</auction>
+	<time>10</time>
+	<bidder>1</bidder>
+	<price>7000</price>
+</bid>
+<bid>
+	<auction>12</auction>
+	<time>11</time>
+	<bidder>0</bidder>
+	<price>2060</price>
+</bid>
+<bid>
+	<auction>13</auction>
+	<time>12</time>
+	<bidder>2</bidder>
+	<price>2180</price>
+</bid>
+<bid>
+	<auction>14</auction>
+	<time>13</time>
+	<bidder>0</bidder>
+	<price>1730</price>
+</bid>
+<bid>
+	<auction>15</auction>
+	<time>14</time>
+	<bidder>2</bidder>
+	<price>2430</price>
+</bid>
+<bid>
+	<auction>16</auction>
+	<time>15</time>
+	<bidder>2</bidder>
+	<price>1910</price>
+</bid>
+<bid>
+	<auction>17</auction>
+	<time>16</time>
+	<bidder>1</bidder>
+	<price>1940</price>
+</bid>
+<bid>
+	<auction>18</auction>
+	<time>17</time>
+	<bidder>0</bidder>
+	<price>1570</price>
+</bid>
+<bid>
+	<auction>19</auction>
+	<time>18</time>
+	<bidder>0</bidder>
+	<price>1980</price>
+</bid>
+<bid>
+	<auction>20</auction>
+	<time>19</time>
+	<bidder>2</bidder>
+	<price>2480</price>
+</bid>
+</niagara:stream>

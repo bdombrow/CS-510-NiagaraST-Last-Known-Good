@@ -1,0 +1,1813 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:stream xmlns:niagara="http://www.cse.ogi.edu/dot/niagara" xmlns:punct="http://www.cse.ogi.edu/dot/niagara/punct">
+<detectors>
+<time_t>1205586000365</time_t>
+<time_s>Sat, 15, Mar 2008 06:00:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>21</speed><occupancy>12</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>54</speed><occupancy>70</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586000365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586020365</time_t>
+<time_s>Sat, 15, Mar 2008 06:00:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>18</speed><occupancy>50</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>16</speed><occupancy>72</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586020365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586040365</time_t>
+<time_s>Sat, 15, Mar 2008 06:00:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>5</speed><occupancy>46</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>6</speed><occupancy>64</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586040365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586060365</time_t>
+<time_s>Sat, 15, Mar 2008 06:01:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>9</speed><occupancy>11</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>39</speed><occupancy>35</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586060365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586080365</time_t>
+<time_s>Sat, 15, Mar 2008 06:01:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>22</speed><occupancy>11</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>30</speed><occupancy>19</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586080365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586100365</time_t>
+<time_s>Sat, 15, Mar 2008 06:01:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>20</speed><occupancy>94</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>19</speed><occupancy>69</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586100365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586120365</time_t>
+<time_s>Sat, 15, Mar 2008 06:02:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>13</speed><occupancy>91</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>52</speed><occupancy>62</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586120365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586140365</time_t>
+<time_s>Sat, 15, Mar 2008 06:02:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>27</speed><occupancy>39</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>50</speed><occupancy>39</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586140365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586160365</time_t>
+<time_s>Sat, 15, Mar 2008 06:02:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>12</speed><occupancy>25</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>45</speed><occupancy>61</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586160365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586180365</time_t>
+<time_s>Sat, 15, Mar 2008 06:03:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>58</speed><occupancy>17</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>18</speed><occupancy>27</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586180365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586200365</time_t>
+<time_s>Sat, 15, Mar 2008 06:03:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>16</speed><occupancy>94</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>15</speed><occupancy>27</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586200365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586220365</time_t>
+<time_s>Sat, 15, Mar 2008 06:03:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>6</speed><occupancy>10</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>47</speed><occupancy>56</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586220365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586240365</time_t>
+<time_s>Sat, 15, Mar 2008 06:04:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>46</speed><occupancy>70</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>29</speed><occupancy>89</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586240365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586260365</time_t>
+<time_s>Sat, 15, Mar 2008 06:04:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>48</speed><occupancy>29</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>19</speed><occupancy>44</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586260365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586280365</time_t>
+<time_s>Sat, 15, Mar 2008 06:04:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>30</speed><occupancy>33</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>45</speed><occupancy>22</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586280365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586300365</time_t>
+<time_s>Sat, 15, Mar 2008 06:05:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>0</speed><occupancy>76</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>26</speed><occupancy>74</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586300365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586320365</time_t>
+<time_s>Sat, 15, Mar 2008 06:05:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>0</speed><occupancy>40</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>5</speed><occupancy>64</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586320365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586340365</time_t>
+<time_s>Sat, 15, Mar 2008 06:05:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>30</speed><occupancy>89</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>14</speed><occupancy>33</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586340365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586360365</time_t>
+<time_s>Sat, 15, Mar 2008 06:06:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>49</speed><occupancy>54</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>36</speed><occupancy>13</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586360365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586380365</time_t>
+<time_s>Sat, 15, Mar 2008 06:06:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>45</speed><occupancy>18</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>43</speed><occupancy>21</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586380365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586400365</time_t>
+<time_s>Sat, 15, Mar 2008 06:06:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>0</speed><occupancy>74</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>39</speed><occupancy>45</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586400365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586420365</time_t>
+<time_s>Sat, 15, Mar 2008 06:07:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>16</speed><occupancy>64</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>49</speed><occupancy>81</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586420365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586440365</time_t>
+<time_s>Sat, 15, Mar 2008 06:07:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>34</speed><occupancy>36</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>42</speed><occupancy>14</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586440365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586460365</time_t>
+<time_s>Sat, 15, Mar 2008 06:07:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>32</speed><occupancy>72</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>43</speed><occupancy>49</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586460365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586480365</time_t>
+<time_s>Sat, 15, Mar 2008 06:08:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>26</speed><occupancy>40</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>40</speed><occupancy>32</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586480365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586500365</time_t>
+<time_s>Sat, 15, Mar 2008 06:08:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>13</speed><occupancy>76</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>30</speed><occupancy>41</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586500365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586520365</time_t>
+<time_s>Sat, 15, Mar 2008 06:08:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>18</speed><occupancy>65</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>0</speed><occupancy>33</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586520365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586540365</time_t>
+<time_s>Sat, 15, Mar 2008 06:09:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>27</speed><occupancy>20</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>26</speed><occupancy>63</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586540365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586560365</time_t>
+<time_s>Sat, 15, Mar 2008 06:09:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>45</speed><occupancy>90</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>7</speed><occupancy>44</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586560365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586580365</time_t>
+<time_s>Sat, 15, Mar 2008 06:09:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>11</speed><occupancy>23</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>53</speed><occupancy>79</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586580365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586600365</time_t>
+<time_s>Sat, 15, Mar 2008 06:10:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>31</speed><occupancy>97</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>18</speed><occupancy>47</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586600365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586620365</time_t>
+<time_s>Sat, 15, Mar 2008 06:10:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>8</speed><occupancy>76</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>10</speed><occupancy>38</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586620365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586640365</time_t>
+<time_s>Sat, 15, Mar 2008 06:10:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>13</speed><occupancy>97</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>51</speed><occupancy>84</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586640365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586660365</time_t>
+<time_s>Sat, 15, Mar 2008 06:11:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>0</speed><occupancy>98</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>19</speed><occupancy>40</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586660365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586680365</time_t>
+<time_s>Sat, 15, Mar 2008 06:11:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>16</speed><occupancy>99</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>44</speed><occupancy>10</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586680365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586700365</time_t>
+<time_s>Sat, 15, Mar 2008 06:11:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>5</speed><occupancy>61</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>34</speed><occupancy>44</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586700365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586720365</time_t>
+<time_s>Sat, 15, Mar 2008 06:12:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>57</speed><occupancy>12</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>5</speed><occupancy>98</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586720365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586740365</time_t>
+<time_s>Sat, 15, Mar 2008 06:12:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>54</speed><occupancy>78</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>56</speed><occupancy>93</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586740365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586760365</time_t>
+<time_s>Sat, 15, Mar 2008 06:12:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>40</speed><occupancy>85</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>29</speed><occupancy>44</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586760365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586780365</time_t>
+<time_s>Sat, 15, Mar 2008 06:13:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>20</speed><occupancy>45</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>39</speed><occupancy>88</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586780365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586800365</time_t>
+<time_s>Sat, 15, Mar 2008 06:13:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>50</speed><occupancy>14</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>37</speed><occupancy>91</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586800365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586820365</time_t>
+<time_s>Sat, 15, Mar 2008 06:13:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>48</speed><occupancy>88</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>35</speed><occupancy>28</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586820365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586840365</time_t>
+<time_s>Sat, 15, Mar 2008 06:14:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>12</speed><occupancy>71</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>7</speed><occupancy>24</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586840365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586860365</time_t>
+<time_s>Sat, 15, Mar 2008 06:14:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>35</speed><occupancy>57</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>40</speed><occupancy>50</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586860365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586880365</time_t>
+<time_s>Sat, 15, Mar 2008 06:14:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>48</speed><occupancy>77</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>23</speed><occupancy>24</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586880365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586900365</time_t>
+<time_s>Sat, 15, Mar 2008 06:15:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>24</speed><occupancy>88</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>7</speed><occupancy>54</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586900365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586920365</time_t>
+<time_s>Sat, 15, Mar 2008 06:15:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>36</speed><occupancy>83</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>47</speed><occupancy>79</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586920365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586940365</time_t>
+<time_s>Sat, 15, Mar 2008 06:15:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>58</speed><occupancy>42</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>50</speed><occupancy>80</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586940365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586960365</time_t>
+<time_s>Sat, 15, Mar 2008 06:16:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>46</speed><occupancy>79</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>20</speed><occupancy>46</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586960365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205586980365</time_t>
+<time_s>Sat, 15, Mar 2008 06:16:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>40</speed><occupancy>37</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>28</speed><occupancy>73</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205586980365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587000365</time_t>
+<time_s>Sat, 15, Mar 2008 06:16:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>40</speed><occupancy>96</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>56</speed><occupancy>36</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587000365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587020365</time_t>
+<time_s>Sat, 15, Mar 2008 06:17:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>44</speed><occupancy>22</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>12</speed><occupancy>50</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587020365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587040365</time_t>
+<time_s>Sat, 15, Mar 2008 06:17:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>51</speed><occupancy>85</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>11</speed><occupancy>20</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587040365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587060365</time_t>
+<time_s>Sat, 15, Mar 2008 06:17:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>5</speed><occupancy>63</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>19</speed><occupancy>49</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587060365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587080365</time_t>
+<time_s>Sat, 15, Mar 2008 06:18:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>24</speed><occupancy>84</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>59</speed><occupancy>55</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587080365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587100365</time_t>
+<time_s>Sat, 15, Mar 2008 06:18:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>16</speed><occupancy>14</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>62</speed><occupancy>31</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587100365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587120365</time_t>
+<time_s>Sat, 15, Mar 2008 06:18:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>42</speed><occupancy>10</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>0</speed><occupancy>66</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587120365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587140365</time_t>
+<time_s>Sat, 15, Mar 2008 06:19:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>15</speed><occupancy>33</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>9</speed><occupancy>69</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587140365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587160365</time_t>
+<time_s>Sat, 15, Mar 2008 06:19:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>43</speed><occupancy>29</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>28</speed><occupancy>72</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587160365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587180365</time_t>
+<time_s>Sat, 15, Mar 2008 06:19:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>6</speed><occupancy>47</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>17</speed><occupancy>98</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587180365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587200365</time_t>
+<time_s>Sat, 15, Mar 2008 06:20:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>5</speed><occupancy>70</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>30</speed><occupancy>42</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587200365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587220365</time_t>
+<time_s>Sat, 15, Mar 2008 06:20:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>44</speed><occupancy>19</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>31</speed><occupancy>62</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587220365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587240365</time_t>
+<time_s>Sat, 15, Mar 2008 06:20:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>11</speed><occupancy>31</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>28</speed><occupancy>19</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587240365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587260365</time_t>
+<time_s>Sat, 15, Mar 2008 06:21:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>9</speed><occupancy>56</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>59</speed><occupancy>21</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587260365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587280365</time_t>
+<time_s>Sat, 15, Mar 2008 06:21:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>56</speed><occupancy>96</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>0</speed><occupancy>63</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587280365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587300365</time_t>
+<time_s>Sat, 15, Mar 2008 06:21:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>63</speed><occupancy>96</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>49</speed><occupancy>14</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587300365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587320365</time_t>
+<time_s>Sat, 15, Mar 2008 06:22:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>21</speed><occupancy>23</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>60</speed><occupancy>26</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587320365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587340365</time_t>
+<time_s>Sat, 15, Mar 2008 06:22:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>45</speed><occupancy>67</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>6</speed><occupancy>13</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587340365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587360365</time_t>
+<time_s>Sat, 15, Mar 2008 06:22:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>42</speed><occupancy>67</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>0</speed><occupancy>67</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587360365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587380365</time_t>
+<time_s>Sat, 15, Mar 2008 06:23:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>63</speed><occupancy>53</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>5</speed><occupancy>99</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587380365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587400365</time_t>
+<time_s>Sat, 15, Mar 2008 06:23:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>44</speed><occupancy>26</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>63</speed><occupancy>50</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587400365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587420365</time_t>
+<time_s>Sat, 15, Mar 2008 06:23:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>31</speed><occupancy>40</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>60</speed><occupancy>30</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587420365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587440365</time_t>
+<time_s>Sat, 15, Mar 2008 06:24:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>30</speed><occupancy>21</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>11</speed><occupancy>39</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587440365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587460365</time_t>
+<time_s>Sat, 15, Mar 2008 06:24:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>20</speed><occupancy>92</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>29</speed><occupancy>29</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587460365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587480365</time_t>
+<time_s>Sat, 15, Mar 2008 06:24:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>22</speed><occupancy>14</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>5</speed><occupancy>56</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587480365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587500365</time_t>
+<time_s>Sat, 15, Mar 2008 06:25:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>10</speed><occupancy>46</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>26</speed><occupancy>23</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587500365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587520365</time_t>
+<time_s>Sat, 15, Mar 2008 06:25:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>48</speed><occupancy>39</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>27</speed><occupancy>92</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587520365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587540365</time_t>
+<time_s>Sat, 15, Mar 2008 06:25:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>49</speed><occupancy>74</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>22</speed><occupancy>84</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587540365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587560365</time_t>
+<time_s>Sat, 15, Mar 2008 06:26:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>57</speed><occupancy>22</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>12</speed><occupancy>76</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587560365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587580365</time_t>
+<time_s>Sat, 15, Mar 2008 06:26:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>57</speed><occupancy>29</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>33</speed><occupancy>36</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587580365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587600365</time_t>
+<time_s>Sat, 15, Mar 2008 06:26:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>45</speed><occupancy>61</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>17</speed><occupancy>75</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587600365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587620365</time_t>
+<time_s>Sat, 15, Mar 2008 06:27:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>52</speed><occupancy>29</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>9</speed><occupancy>44</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587620365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587640365</time_t>
+<time_s>Sat, 15, Mar 2008 06:27:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>8</speed><occupancy>13</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>54</speed><occupancy>81</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587640365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587660365</time_t>
+<time_s>Sat, 15, Mar 2008 06:27:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>29</speed><occupancy>35</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>41</speed><occupancy>80</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587660365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587680365</time_t>
+<time_s>Sat, 15, Mar 2008 06:28:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>37</speed><occupancy>28</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>36</speed><occupancy>30</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587680365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587700365</time_t>
+<time_s>Sat, 15, Mar 2008 06:28:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>39</speed><occupancy>46</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>60</speed><occupancy>50</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587700365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587720365</time_t>
+<time_s>Sat, 15, Mar 2008 06:28:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>16</speed><occupancy>36</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>22</speed><occupancy>68</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587720365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587740365</time_t>
+<time_s>Sat, 15, Mar 2008 06:29:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>60</speed><occupancy>54</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>22</speed><occupancy>70</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587740365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587760365</time_t>
+<time_s>Sat, 15, Mar 2008 06:29:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>23</speed><occupancy>81</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>38</speed><occupancy>93</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587760365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587780365</time_t>
+<time_s>Sat, 15, Mar 2008 06:29:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>64</speed><occupancy>27</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>18</speed><occupancy>25</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587780365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587800365</time_t>
+<time_s>Sat, 15, Mar 2008 06:30:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>33</speed><occupancy>62</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>11</speed><occupancy>12</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587800365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587820365</time_t>
+<time_s>Sat, 15, Mar 2008 06:30:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>5</speed><occupancy>67</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>27</speed><occupancy>36</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587820365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587840365</time_t>
+<time_s>Sat, 15, Mar 2008 06:30:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>17</speed><occupancy>63</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>9</speed><occupancy>97</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587840365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587860365</time_t>
+<time_s>Sat, 15, Mar 2008 06:31:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>7</speed><occupancy>66</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>20</speed><occupancy>69</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587860365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587880365</time_t>
+<time_s>Sat, 15, Mar 2008 06:31:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>13</speed><occupancy>16</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>31</speed><occupancy>33</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587880365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587900365</time_t>
+<time_s>Sat, 15, Mar 2008 06:31:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>44</speed><occupancy>70</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>0</speed><occupancy>78</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587900365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587920365</time_t>
+<time_s>Sat, 15, Mar 2008 06:32:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>50</speed><occupancy>53</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>12</speed><occupancy>11</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587920365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587940365</time_t>
+<time_s>Sat, 15, Mar 2008 06:32:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>22</speed><occupancy>44</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>5</speed><occupancy>38</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587940365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587960365</time_t>
+<time_s>Sat, 15, Mar 2008 06:32:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>11</speed><occupancy>73</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>48</speed><occupancy>13</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587960365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205587980365</time_t>
+<time_s>Sat, 15, Mar 2008 06:33:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>38</speed><occupancy>51</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>29</speed><occupancy>98</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205587980365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588000365</time_t>
+<time_s>Sat, 15, Mar 2008 06:33:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>7</speed><occupancy>71</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>5</speed><occupancy>19</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588000365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588020365</time_t>
+<time_s>Sat, 15, Mar 2008 06:33:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>24</speed><occupancy>11</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>0</speed><occupancy>59</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588020365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588040365</time_t>
+<time_s>Sat, 15, Mar 2008 06:34:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>51</speed><occupancy>41</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>62</speed><occupancy>64</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588040365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588060365</time_t>
+<time_s>Sat, 15, Mar 2008 06:34:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>61</speed><occupancy>85</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>57</speed><occupancy>89</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588060365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588080365</time_t>
+<time_s>Sat, 15, Mar 2008 06:34:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>10</speed><occupancy>46</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>10</speed><occupancy>45</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588080365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588100365</time_t>
+<time_s>Sat, 15, Mar 2008 06:35:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>16</speed><occupancy>85</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>9</speed><occupancy>26</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588100365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588120365</time_t>
+<time_s>Sat, 15, Mar 2008 06:35:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>11</speed><occupancy>62</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>55</speed><occupancy>38</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588120365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588140365</time_t>
+<time_s>Sat, 15, Mar 2008 06:35:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>17</speed><occupancy>92</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>22</speed><occupancy>82</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588140365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588160365</time_t>
+<time_s>Sat, 15, Mar 2008 06:36:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>57</speed><occupancy>23</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>13</speed><occupancy>75</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588160365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588180365</time_t>
+<time_s>Sat, 15, Mar 2008 06:36:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>36</speed><occupancy>28</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>49</speed><occupancy>42</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588180365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588200365</time_t>
+<time_s>Sat, 15, Mar 2008 06:36:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>43</speed><occupancy>74</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>63</speed><occupancy>68</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588200365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588220365</time_t>
+<time_s>Sat, 15, Mar 2008 06:37:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>29</speed><occupancy>38</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>12</speed><occupancy>53</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588220365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588240365</time_t>
+<time_s>Sat, 15, Mar 2008 06:37:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>7</speed><occupancy>89</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>40</speed><occupancy>55</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588240365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588260365</time_t>
+<time_s>Sat, 15, Mar 2008 06:37:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>23</speed><occupancy>60</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>19</speed><occupancy>63</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588260365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588280365</time_t>
+<time_s>Sat, 15, Mar 2008 06:38:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>19</speed><occupancy>55</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>51</speed><occupancy>54</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588280365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588300365</time_t>
+<time_s>Sat, 15, Mar 2008 06:38:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>40</speed><occupancy>74</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>0</speed><occupancy>69</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588300365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588320365</time_t>
+<time_s>Sat, 15, Mar 2008 06:38:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>16</speed><occupancy>87</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>10</speed><occupancy>79</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588320365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588340365</time_t>
+<time_s>Sat, 15, Mar 2008 06:39:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>40</speed><occupancy>56</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>41</speed><occupancy>69</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588340365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588360365</time_t>
+<time_s>Sat, 15, Mar 2008 06:39:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>60</speed><occupancy>19</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>5</speed><occupancy>71</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588360365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588380365</time_t>
+<time_s>Sat, 15, Mar 2008 06:39:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>22</speed><occupancy>97</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>15</speed><occupancy>90</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588380365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588400365</time_t>
+<time_s>Sat, 15, Mar 2008 06:40:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>18</speed><occupancy>88</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>60</speed><occupancy>62</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588400365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588420365</time_t>
+<time_s>Sat, 15, Mar 2008 06:40:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>0</speed><occupancy>52</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>27</speed><occupancy>91</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588420365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588440365</time_t>
+<time_s>Sat, 15, Mar 2008 06:40:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>41</speed><occupancy>99</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>8</speed><occupancy>55</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588440365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588460365</time_t>
+<time_s>Sat, 15, Mar 2008 06:41:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>10</speed><occupancy>55</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>59</speed><occupancy>36</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588460365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588480365</time_t>
+<time_s>Sat, 15, Mar 2008 06:41:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>20</speed><occupancy>68</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>10</speed><occupancy>16</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588480365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588500365</time_t>
+<time_s>Sat, 15, Mar 2008 06:41:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>24</speed><occupancy>75</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>30</speed><occupancy>78</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588500365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588520365</time_t>
+<time_s>Sat, 15, Mar 2008 06:42:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>31</speed><occupancy>38</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>0</speed><occupancy>89</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588520365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588540365</time_t>
+<time_s>Sat, 15, Mar 2008 06:42:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>57</speed><occupancy>65</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>11</speed><occupancy>44</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588540365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588560365</time_t>
+<time_s>Sat, 15, Mar 2008 06:42:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>26</speed><occupancy>45</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>19</speed><occupancy>10</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588560365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588580365</time_t>
+<time_s>Sat, 15, Mar 2008 06:43:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>31</speed><occupancy>66</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>32</speed><occupancy>55</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588580365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588600365</time_t>
+<time_s>Sat, 15, Mar 2008 06:43:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>59</speed><occupancy>29</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>61</speed><occupancy>35</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588600365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588620365</time_t>
+<time_s>Sat, 15, Mar 2008 06:43:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>23</speed><occupancy>60</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>15</speed><occupancy>34</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588620365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588640365</time_t>
+<time_s>Sat, 15, Mar 2008 06:44:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>56</speed><occupancy>19</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>0</speed><occupancy>56</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588640365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588660365</time_t>
+<time_s>Sat, 15, Mar 2008 06:44:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>34</speed><occupancy>40</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>33</speed><occupancy>87</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588660365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588680365</time_t>
+<time_s>Sat, 15, Mar 2008 06:44:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>52</speed><occupancy>53</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>14</speed><occupancy>12</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588680365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588700365</time_t>
+<time_s>Sat, 15, Mar 2008 06:45:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>57</speed><occupancy>92</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>57</speed><occupancy>69</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588700365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588720365</time_t>
+<time_s>Sat, 15, Mar 2008 06:45:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>42</speed><occupancy>38</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>35</speed><occupancy>12</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588720365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588740365</time_t>
+<time_s>Sat, 15, Mar 2008 06:45:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>0</speed><occupancy>85</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>20</speed><occupancy>32</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588740365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588760365</time_t>
+<time_s>Sat, 15, Mar 2008 06:46:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>37</speed><occupancy>98</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>16</speed><occupancy>41</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588760365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588780365</time_t>
+<time_s>Sat, 15, Mar 2008 06:46:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>4</volume><speed>9</speed><occupancy>57</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>14</speed><occupancy>25</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588780365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588800365</time_t>
+<time_s>Sat, 15, Mar 2008 06:46:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>11</speed><occupancy>90</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>7</speed><occupancy>27</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588800365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588820365</time_t>
+<time_s>Sat, 15, Mar 2008 06:47:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>18</speed><occupancy>19</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>52</speed><occupancy>75</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588820365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588840365</time_t>
+<time_s>Sat, 15, Mar 2008 06:47:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>41</speed><occupancy>80</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>57</speed><occupancy>62</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588840365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588860365</time_t>
+<time_s>Sat, 15, Mar 2008 06:47:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>61</speed><occupancy>80</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>28</speed><occupancy>44</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588860365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588880365</time_t>
+<time_s>Sat, 15, Mar 2008 06:48:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>22</speed><occupancy>81</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>45</speed><occupancy>60</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588880365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588900365</time_t>
+<time_s>Sat, 15, Mar 2008 06:48:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>16</speed><occupancy>24</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>31</speed><occupancy>37</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588900365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588920365</time_t>
+<time_s>Sat, 15, Mar 2008 06:48:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>49</speed><occupancy>65</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>38</speed><occupancy>30</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588920365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588940365</time_t>
+<time_s>Sat, 15, Mar 2008 06:49:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>28</speed><occupancy>95</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>33</speed><occupancy>59</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588940365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588960365</time_t>
+<time_s>Sat, 15, Mar 2008 06:49:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>52</speed><occupancy>32</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>25</speed><occupancy>77</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588960365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205588980365</time_t>
+<time_s>Sat, 15, Mar 2008 06:49:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>55</speed><occupancy>59</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>45</speed><occupancy>77</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205588980365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589000365</time_t>
+<time_s>Sat, 15, Mar 2008 06:50:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>23</speed><occupancy>28</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>32</speed><occupancy>89</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589000365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589020365</time_t>
+<time_s>Sat, 15, Mar 2008 06:50:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>63</speed><occupancy>65</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>17</speed><occupancy>52</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589020365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589040365</time_t>
+<time_s>Sat, 15, Mar 2008 06:50:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>9</speed><occupancy>91</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>51</speed><occupancy>72</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589040365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589060365</time_t>
+<time_s>Sat, 15, Mar 2008 06:51:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>52</speed><occupancy>44</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>18</speed><occupancy>50</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589060365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589080365</time_t>
+<time_s>Sat, 15, Mar 2008 06:51:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>7</volume><speed>24</speed><occupancy>86</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>14</speed><occupancy>81</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589080365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589100365</time_t>
+<time_s>Sat, 15, Mar 2008 06:51:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>58</speed><occupancy>44</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>45</speed><occupancy>51</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589100365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589120365</time_t>
+<time_s>Sat, 15, Mar 2008 06:52:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>33</speed><occupancy>55</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>0</speed><occupancy>74</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589120365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589140365</time_t>
+<time_s>Sat, 15, Mar 2008 06:52:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>30</speed><occupancy>90</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>2</volume><speed>16</speed><occupancy>54</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589140365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589160365</time_t>
+<time_s>Sat, 15, Mar 2008 06:52:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>57</speed><occupancy>45</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>64</speed><occupancy>44</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589160365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589180365</time_t>
+<time_s>Sat, 15, Mar 2008 06:53:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>14</speed><occupancy>13</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>23</speed><occupancy>66</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589180365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589200365</time_t>
+<time_s>Sat, 15, Mar 2008 06:53:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>11</speed><occupancy>53</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>15</speed><occupancy>68</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589200365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589220365</time_t>
+<time_s>Sat, 15, Mar 2008 06:53:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>9</volume><speed>13</speed><occupancy>26</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>0</speed><occupancy>99</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589220365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589240365</time_t>
+<time_s>Sat, 15, Mar 2008 06:54:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>64</speed><occupancy>18</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>17</speed><occupancy>41</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589240365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589260365</time_t>
+<time_s>Sat, 15, Mar 2008 06:54:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>35</speed><occupancy>36</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>52</speed><occupancy>79</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589260365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589280365</time_t>
+<time_s>Sat, 15, Mar 2008 06:54:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>37</speed><occupancy>90</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>20</speed><occupancy>52</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589280365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589300365</time_t>
+<time_s>Sat, 15, Mar 2008 06:55:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>38</speed><occupancy>17</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>0</speed><occupancy>81</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589300365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589320365</time_t>
+<time_s>Sat, 15, Mar 2008 06:55:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>47</speed><occupancy>88</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>43</speed><occupancy>53</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589320365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589340365</time_t>
+<time_s>Sat, 15, Mar 2008 06:55:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>57</speed><occupancy>90</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>61</speed><occupancy>58</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589340365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589360365</time_t>
+<time_s>Sat, 15, Mar 2008 06:56:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>44</speed><occupancy>78</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>8</volume><speed>32</speed><occupancy>38</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589360365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589380365</time_t>
+<time_s>Sat, 15, Mar 2008 06:56:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>0</speed><occupancy>93</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>5</volume><speed>0</speed><occupancy>13</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589380365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589400365</time_t>
+<time_s>Sat, 15, Mar 2008 06:56:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>0</volume><speed>22</speed><occupancy>75</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>48</speed><occupancy>48</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589400365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589420365</time_t>
+<time_s>Sat, 15, Mar 2008 06:57:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>3</volume><speed>34</speed><occupancy>41</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>9</volume><speed>14</speed><occupancy>87</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589420365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589440365</time_t>
+<time_s>Sat, 15, Mar 2008 06:57:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>36</speed><occupancy>52</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>1</volume><speed>6</speed><occupancy>59</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589440365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589460365</time_t>
+<time_s>Sat, 15, Mar 2008 06:57:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>5</volume><speed>37</speed><occupancy>89</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>0</volume><speed>41</speed><occupancy>67</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589460365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589480365</time_t>
+<time_s>Sat, 15, Mar 2008 06:58:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>56</speed><occupancy>84</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>43</speed><occupancy>95</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589480365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589500365</time_t>
+<time_s>Sat, 15, Mar 2008 06:58:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>16</speed><occupancy>80</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>7</volume><speed>5</speed><occupancy>73</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589500365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589520365</time_t>
+<time_s>Sat, 15, Mar 2008 06:58:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>1</volume><speed>56</speed><occupancy>13</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>6</volume><speed>53</speed><occupancy>72</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589520365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589540365</time_t>
+<time_s>Sat, 15, Mar 2008 06:59:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>6</speed><occupancy>81</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>19</speed><occupancy>61</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589540365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589560365</time_t>
+<time_s>Sat, 15, Mar 2008 06:59:20</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>2</volume><speed>23</speed><occupancy>67</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>3</volume><speed>21</speed><occupancy>73</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589560365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589580365</time_t>
+<time_s>Sat, 15, Mar 2008 06:59:40</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>8</volume><speed>23</speed><occupancy>39</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>9</speed><occupancy>86</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589580365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+<detectors>
+<time_t>1205589600365</time_t>
+<time_s>Sat, 15, Mar 2008 07:00:00</time_s>
+<detector><detector_id>1000</detector_id><segment_id>1</segment_id><volume>6</volume><speed>44</speed><occupancy>52</occupancy></detector>
+<detector><detector_id>1001</detector_id><segment_id>1</segment_id><volume>4</volume><speed>31</speed><occupancy>87</occupancy></detector>
+</detectors>
+<punct:detectors>
+<time_t>1205589600365</time_t>
+<time_s>*</time_s>
+</punct:detectors>
+</niagara:stream>

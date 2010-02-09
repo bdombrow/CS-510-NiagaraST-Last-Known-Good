@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- Simple Windowed aggregation over traffic data -->
+
+<plan top="cons">
+
+<!-- Internalize stream -->
+
+<filescan id ="data" isstream="yes" delay="0" filename="G:\niagarast\Streams\trafficDataStream.xml"/>
+
+<unnest id="detectors" regexp="detectors" datatype="XML" input="data"/>
+<unnest id="time_t" regexp="time_t" datatype="TS" input="detectors"/>
+<unnest id="time_s" regexp="time_s" root="$detectors" datatype="String" input="time_t"/>
+<unnest id="detector" regexp="detector" root="$detectors" datatype="XML" input="time_s"/>
+<unnest id="detector_id" regexp="detector_id" root="$detector" datatype="Integer" input="detector"/>
+<unnest id="segment_id" regexp="segment_id" root="$detector" datatype="Integer" input="detector_id"/>
+<unnest id="volume" regexp="volume" root="$detector" datatype="Integer" input="segment_id"/>
+<unnest id="speed" regexp="speed" root="$detector" datatype="Integer" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$detector" datatype="Integer" input="speed"/>
+
+<!-- Simple aggregation to 1 minute -->
+
+<bucket id="bucket" wintype="1" winattr="$time_t" range="60000" slide="60000" input="speed" propagate="no"/>
+
+<windowAverage id="agg" groupby="$detector_id $segment_id" avgattr="$speed" input="bucket" propagate="no"/>
+
+<construct id="cons" input="agg">
+<![CDATA[
+<result>
+ $wid_from_bucket
+ $detector_id
+ $segment_id
+ $agg
+</result>
+]]>
+
+
+</construct>
+</plan>

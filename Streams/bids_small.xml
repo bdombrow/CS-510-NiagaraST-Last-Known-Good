@@ -1,0 +1,392 @@
+<niagara:stream xmlns:niagara ="http://www.cse.ogi.edu/dot/niagara">
+<bid>
+	<auctionid>0</auctionid>
+	<time>0</time>
+	<bidderid>2</bidderid>
+	<amt>57.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>2</time>
+	<bidderid>1</bidderid>
+	<amt>147.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>3</time>
+	<bidderid>1</bidderid>
+	<amt>171.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>4</time>
+	<bidderid>0</bidderid>
+	<amt>65.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>6</time>
+	<bidderid>1</bidderid>
+	<amt>180.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>7</time>
+	<bidderid>1</bidderid>
+	<amt>191.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>9</time>
+	<bidderid>2</bidderid>
+	<amt>69.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>10</time>
+	<bidderid>1</bidderid>
+	<amt>70.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>11</time>
+	<bidderid>0</bidderid>
+	<amt>206.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>12</time>
+	<bidderid>2</bidderid>
+	<amt>218.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>14</time>
+	<bidderid>2</bidderid>
+	<amt>243.00</amt>
+</bid>
+<bid>
+	<auctionid>3</auctionid>
+	<time>16</time>
+	<bidderid>1</bidderid>
+	<amt>194.00</amt>
+</bid>
+<bid>
+	<auctionid>3</auctionid>
+	<time>18</time>
+	<bidderid>0</bidderid>
+	<amt>198.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>19</time>
+	<bidderid>2</bidderid>
+	<amt>248.00</amt>
+</bid>
+<bid>
+	<auctionid>3</auctionid>
+	<time>20</time>
+	<bidderid>1</bidderid>
+	<amt>200.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>21</time>
+	<bidderid>1</bidderid>
+	<amt>94.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>23</time>
+	<bidderid>2</bidderid>
+	<amt>116.00</amt>
+</bid>
+<bid>
+	<auctionid>3</auctionid>
+	<time>24</time>
+	<bidderid>0</bidderid>
+	<amt>220.00</amt>
+</bid>
+<bid>
+	<auctionid>3</auctionid>
+	<time>25</time>
+	<bidderid>1</bidderid>
+	<amt>234.00</amt>
+</bid>
+<bid>
+	<auctionid>3</auctionid>
+	<time>26</time>
+	<bidderid>0</bidderid>
+	<amt>236.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>28</time>
+	<bidderid>2</bidderid>
+	<amt>128.00</amt>
+</bid>
+<bid>
+	<auctionid>3</auctionid>
+	<time>29</time>
+	<bidderid>2</bidderid>
+	<amt>261.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>31</time>
+	<bidderid>2</bidderid>
+	<amt>273.00</amt>
+</bid>
+<bid>
+	<auctionid>3</auctionid>
+	<time>32</time>
+	<bidderid>1</bidderid>
+	<amt>269.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>36</time>
+	<bidderid>2</bidderid>
+	<amt>284.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>38</time>
+	<bidderid>1</bidderid>
+	<amt>309.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>39</time>
+	<bidderid>2</bidderid>
+	<amt>332.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>41</time>
+	<bidderid>1</bidderid>
+	<amt>343.00</amt>
+</bid>
+<bid>
+	<auctionid>6</auctionid>
+	<time>43</time>
+	<bidderid>0</bidderid>
+	<amt>98.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>46</time>
+	<bidderid>0</bidderid>
+	<amt>133.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>50</time>
+	<bidderid>0</bidderid>
+	<amt>350.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>53</time>
+	<bidderid>1</bidderid>
+	<amt>370.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>55</time>
+	<bidderid>0</bidderid>
+	<amt>137.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>56</time>
+	<bidderid>0</bidderid>
+	<amt>387.00</amt>
+</bid>
+<bid>
+	<auctionid>6</auctionid>
+	<time>57</time>
+	<bidderid>1</bidderid>
+	<amt>123.00</amt>
+</bid>
+<bid>
+	<auctionid>6</auctionid>
+	<time>58</time>
+	<bidderid>0</bidderid>
+	<amt>141.00</amt>
+</bid>
+<bid>
+	<auctionid>8</auctionid>
+	<time>62</time>
+	<bidderid>1</bidderid>
+	<amt>172.00</amt>
+</bid>
+<bid>
+	<auctionid>9</auctionid>
+	<time>64</time>
+	<bidderid>1</bidderid>
+	<amt>184.00</amt>
+</bid>
+<bid>
+	<auctionid>6</auctionid>
+	<time>65</time>
+	<bidderid>2</bidderid>
+	<amt>162.00</amt>
+</bid>
+<bid>
+	<auctionid>9</auctionid>
+	<time>67</time>
+	<bidderid>2</bidderid>
+	<amt>202.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>68</time>
+	<bidderid>1</bidderid>
+	<amt>143.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>70</time>
+	<bidderid>2</bidderid>
+	<amt>410.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>71</time>
+	<bidderid>2</bidderid>
+	<amt>158.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>73</time>
+	<bidderid>1</bidderid>
+	<amt>432.00</amt>
+</bid>
+<bid>
+	<auctionid>3</auctionid>
+	<time>75</time>
+	<bidderid>2</bidderid>
+	<amt>291.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>76</time>
+	<bidderid>0</bidderid>
+	<amt>456.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>77</time>
+	<bidderid>0</bidderid>
+	<amt>479.00</amt>
+</bid>
+<bid>
+	<auctionid>9</auctionid>
+	<time>78</time>
+	<bidderid>1</bidderid>
+	<amt>222.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>79</time>
+	<bidderid>0</bidderid>
+	<amt>164.00</amt>
+</bid>
+<bid>
+	<auctionid>9</auctionid>
+	<time>81</time>
+	<bidderid>1</bidderid>
+	<amt>243.00</amt>
+</bid>
+<bid>
+	<auctionid>9</auctionid>
+	<time>82</time>
+	<bidderid>0</bidderid>
+	<amt>252.00</amt>
+</bid>
+<bid>
+	<auctionid>9</auctionid>
+	<time>84</time>
+	<bidderid>0</bidderid>
+	<amt>258.00</amt>
+</bid>
+<bid>
+	<auctionid>3</auctionid>
+	<time>86</time>
+	<bidderid>1</bidderid>
+	<amt>315.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>87</time>
+	<bidderid>1</bidderid>
+	<amt>186.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>88</time>
+	<bidderid>2</bidderid>
+	<amt>486.00</amt>
+</bid>
+<bid>
+	<auctionid>6</auctionid>
+	<time>89</time>
+	<bidderid>0</bidderid>
+	<amt>184.00</amt>
+</bid>
+<bid>
+	<auctionid>6</auctionid>
+	<time>92</time>
+	<bidderid>2</bidderid>
+	<amt>203.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>93</time>
+	<bidderid>1</bidderid>
+	<amt>197.00</amt>
+</bid>
+<bid>
+	<auctionid>8</auctionid>
+	<time>94</time>
+	<bidderid>0</bidderid>
+	<amt>186.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>95</time>
+	<bidderid>1</bidderid>
+	<amt>494.00</amt>
+</bid>
+<bid>
+	<auctionid>8</auctionid>
+	<time>99</time>
+	<bidderid>0</bidderid>
+	<amt>194.00</amt>
+</bid>
+<bid>
+	<auctionid>0</auctionid>
+	<time>100</time>
+	<bidderid>1</bidderid>
+	<amt>207.00</amt>
+</bid>
+<bid>
+	<auctionid>1</auctionid>
+	<time>101</time>
+	<bidderid>1</bidderid>
+	<amt>513.00</amt>
+</bid>
+<bid>
+	<auctionid>8</auctionid>
+	<time>102</time>
+	<bidderid>0</bidderid>
+	<amt>197.00</amt>
+</bid>
+<bid>
+	<auctionid>6</auctionid>
+	<time>103</time>
+	<bidderid>2</bidderid>
+	<amt>217.00</amt>
+</bid>
+</niagara:stream>
