@@ -2,6 +2,7 @@ niagara.client
 niagara.client.qpclient
 niagara.connection_server
 niagara.data_manager
+niagara.exception
 niagara.firehose
 niagara.logical
 niagara.logical.path
