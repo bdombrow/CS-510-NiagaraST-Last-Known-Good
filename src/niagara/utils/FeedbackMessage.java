@@ -1,5 +1,7 @@
 package niagara.utils;
 
+import niagara.exception.*;
+
 /***
  * 
  * @author rfernand
@@ -23,7 +25,7 @@ public class FeedbackMessage {
 	 *
 	 */
 	public enum FeedbackType {CONTROL, ASSUMED};
-	
+
 	// Properties
 	/***
 	 * @return Feedback type
@@ -35,19 +37,26 @@ public class FeedbackMessage {
 	 * 
 	 * @return Feedback punctuation object
 	 */
-	public Punctuation getPunctuation() {
-		// TODO: assert this call occurs iff type is feedback
-		return _punctuation;
+	public Punctuation getPunctuation() throws FeedbackException {
+
+		if (_type == FeedbackType.CONTROL) {
+			throw new FeedbackException("Requested punctuation from a Control Message.");
+		} else {
+			return _punctuation;
+		}
 	}
 
 	/***
 	 * 
 	 * @return Control Message object
 	 */
-	public ControlMessage getControlMessage() {
-		// TODO: assert this call occurs iff type is control
+	public ControlMessage getControlMessage() throws FeedbackException{
+		if(_type != FeedbackType.CONTROL) {
+			throw new FeedbackException("Requested control message from a Feedback Punctuation.");
+		} else {
 
-		return _controlMessage;
+			return _controlMessage;
+		}
 	}
 
 	// Ctor

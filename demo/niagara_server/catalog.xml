@@ -93,9 +93,6 @@
     <logical class="niagara.logical.Magic" name="magic">
       <physical class="niagara.physical.PhysicalMagic" name="PhysicalMagic"/>
     </logical>
-    <logical class="niagara.logical.Selecto" name="selecto">
-      <physical class="niagara.physical.PhysicalSelecto" name="PhysicalSelecto"/>
-    </logical>
     <logical class="niagara.logical.Join" name="join">
       <physical class="niagara.physical.PhysicalNLJoin" name="NestedLoopsJoin"/>
       <physical class="niagara.physical.PhysicalHashJoin" name="HashJoin"/>
@@ -218,10 +215,6 @@
   		<before><logical name="magic"/></before>
  		<after><op name="PhysicalMagic"/></after>
   	</rule> 
-  	<rule name="selecto to PhysicalSelecto" type="simple">
-  		<before><logical name="selecto"/></before>
- 		<after><op name="PhysicalSelecto"/></after>
-  	</rule>
   	<rule name="join to HashJoin" promise="5" type="simple">
   		<before><logical condition="isEquiJoin" name="join"/></before>
  		<after><op name="HashJoin"/></after>

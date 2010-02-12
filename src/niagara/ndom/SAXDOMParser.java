@@ -77,7 +77,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser{
 	}
 	catch (SAXNotSupportedException e) {
 	    throw new PEException(
-		"SAXDOMParser: Parser does not support a required feature");
+		"SAXDOMParser: Parser does not support a required feature: " + e.getMessage());
 	}
         catch (SAXException e) {
             // parsing error
