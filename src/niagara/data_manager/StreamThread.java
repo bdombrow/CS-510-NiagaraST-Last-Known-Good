@@ -251,7 +251,8 @@ public class StreamThread extends SourceThread {
 	    if(!shutdown)
 		outputStream.endOfStream();
 	    else 
-		outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, message);
+	    	// REFACTOR
+		outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, message);
 	} catch (java.lang.InterruptedException ie) {
 	    /* do nothing */
 	} catch (ShutdownException se) {

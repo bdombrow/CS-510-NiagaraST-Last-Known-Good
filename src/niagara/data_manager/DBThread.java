@@ -298,7 +298,7 @@ public class DBThread extends SourceThread {
 					 * response to query shutdown;
 					 */
 					if (shutdown) {
-						outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "bouncing back SHUTDOWN msg");
+						outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, "bouncing back SHUTDOWN msg");
 						
 						break;
 					}
@@ -396,7 +396,7 @@ public class DBThread extends SourceThread {
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
 			try {
-				outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, ex.getMessage());
+				outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, ex.getMessage());
 			} catch (Exception e) {
 				// just ignore it
 			}
@@ -409,7 +409,7 @@ public class DBThread extends SourceThread {
 			// no need to send shutdown, we must have got it from the output stream
 		} catch(InterruptedException ie) {
 			try {
-				outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, ie.getMessage());
+				outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, ie.getMessage());
 			} catch (Exception e) {
 				// just ignore it
 			}
@@ -587,27 +587,27 @@ public class DBThread extends SourceThread {
     	if (ctrl == null)
     		return;
     	
-    	int ctrlFlag = (Integer)ctrl.get(0); 
+    	ControlFlag ctrlFlag = (ControlFlag)ctrl.get(0); 
     	String ctrlMsg = (String)ctrl.get(1);
     	switch (ctrlFlag) {
-    	case CtrlFlags.CHANGE_QUERY:
+    	case CHANGE_QUERY:
     		streamTime = Long.valueOf(ctrlMsg);
     		String range = queryRange(ctrlMsg);
     		if (range != null)
     			newQueries.add(changeQuery(range));
     		
     		break;
-    	case CtrlFlags.READY_TO_FINISH:
+    	case READY_TO_FINISH:
     		System.err.println("live stream ends...");
     		finish = true;
     		break;
-    	case CtrlFlags.SHUTDOWN: //handle query shutdown;
+    	case SHUTDOWN: //handle query shutdown;
     		System.err.println("ready to shutdown at DBThread");
     		shutdown = true;
     		break;
     	default:
-    		assert false : "KT unexpected control message from source " + 
-		    CtrlFlags.name[ctrlFlag];
+    		assert false : "KT unexpected control message from source " + ctrlFlag.flagName(); 
+		    
     	}
     }
     

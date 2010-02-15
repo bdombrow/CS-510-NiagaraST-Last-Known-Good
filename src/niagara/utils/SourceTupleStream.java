@@ -47,7 +47,8 @@ public final class SourceTupleStream {
     private TuplePage buffer;
 
     // flag of most recent control message received
-    private int ctrlFlag;
+    private ControlFlag ctrlFlag;
+    //private int ctrlFlag;
     
     int status; // open, closed, synchpartial, etc
 
@@ -115,7 +116,7 @@ public final class SourceTupleStream {
     public Tuple getTuple(int timeout)  
 	throws InterruptedException, ShutdownException {
 	
-	ctrlFlag = CtrlFlags.NULLFLAG; // for safety
+	ctrlFlag = ControlFlag.NULLFLAG; // for safety
 
 	// get allowed after eos
 	if(buffer == null) {
@@ -123,7 +124,7 @@ public final class SourceTupleStream {
 	    buffer = pageStream.getPageFromSource(timeout);
 	    // if getPageFromSource returns null, it means it timed out
 	    if(buffer == null) {
-		ctrlFlag = CtrlFlags.TIMED_OUT;
+		ctrlFlag = ControlFlag.TIMED_OUT;
 		return null;
 	    }
 
@@ -140,7 +141,7 @@ public final class SourceTupleStream {
 	    Tuple retTuple = buffer.get();
 
 	    // never leave an empty buffer without a control flag around
-	    if(buffer.isEmpty() && buffer.getFlag() == CtrlFlags.NULLFLAG) {
+	    if(buffer.isEmpty() && buffer.getFlag() == ControlFlag.NULLFLAG) {
 		pageStream.returnTuplePage(buffer);
 		buffer = null;
 	    }
@@ -150,7 +151,7 @@ public final class SourceTupleStream {
 	    //           but there is a control flag to be processed
 	    //        2) we just received empty page with control flag
 	    //        3) we received totally empty page (no data, no control)
-	    if(buffer.getFlag() != CtrlFlags.NULLFLAG) {
+	    if(buffer.getFlag() != ControlFlag.NULLFLAG) {
 		// handle cases 1 and 2 by returning control flag
 		ctrlFlag = buffer.getFlag();
 		pageStream.returnTuplePage(buffer);
@@ -172,7 +173,8 @@ public final class SourceTupleStream {
      * @return returns CtrlFlags.NULLFLAG on success, control flag
      *      otherwise
      */
-    public int putCtrlMsg(int ctrlMsgId, String ctrlMsg) 
+    // REFACTOR
+    public ControlFlag putCtrlMsg(ControlFlag ctrlMsgId, String ctrlMsg) 
 	throws ShutdownException{
 	return pageStream.putCtrlMsgToSource(ctrlMsgId, ctrlMsg);
     }    
@@ -180,9 +182,12 @@ public final class SourceTupleStream {
     /**
      * Returns the controlFlag detected during previous getNextTuple call
      */
-    public int getCtrlFlag() {
-	return ctrlFlag;
+    public ControlFlag getCtrlFlag() {
+    	return ctrlFlag;
     }
+    /*public int getCtrlFlag() {
+	return ctrlFlag;
+    }*/
 
     /**
      * Return a string representation of this stream
@@ -193,8 +198,7 @@ public final class SourceTupleStream {
     {
 	String retStr = new String ("\nTuple Buffer\n");
 	retStr += buffer.toString();
-	retStr += "\nstatus: " + status + " ctrlFlag " + 
-	    CtrlFlags.name[ctrlFlag] + "\n";
+	retStr += "\nstatus: " + status + " ctrlFlag " + ctrlFlag.flagName() + "\n"; 
 	return retStr;
     }
 

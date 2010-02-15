@@ -52,7 +52,8 @@ public class ShowTunablesThread extends SourceThread implements PlanVisitor {
         try {
             if (msg != null)
                 System.err.println("ShowTunablesThread: " + msg);
-            outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, msg);
+            // REFACTOR
+            outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, msg);
             planID = null;
             outputStream = null;
             doc = null;

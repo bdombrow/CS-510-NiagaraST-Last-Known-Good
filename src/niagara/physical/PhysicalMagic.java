@@ -137,7 +137,7 @@ public class PhysicalMagic extends PhysicalOperator {
 			// send feedback: don't need to see other segments
 			String msg = pAttr + "#" + segment;
 			if(propagate){
-			sendCtrlMsgUpStream(CtrlFlags.MESSAGE,msg,0);
+			sendCtrlMsgUpStream(ControlFlag.MESSAGE,msg,0);
 			System.err.println(this.getName() + " sent message: " + msg);
 			}
 		}

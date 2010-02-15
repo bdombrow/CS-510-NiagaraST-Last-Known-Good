@@ -1,20 +1,20 @@
 package niagara.utils;
 
 public class CtrlSig {
-    private int flag = CtrlFlags.NULLFLAG;
+    private ControlFlag flag = ControlFlag.NULLFLAG;
     private String msg = null;
     
     public CtrlSig () {}
     
-    public CtrlSig (int ctrlFlag, String ctrlMsg) {
+    public CtrlSig (ControlFlag ctrlFlag, String ctrlMsg) {
     	flag = ctrlFlag;
     	msg = ctrlMsg; 
     }
     
-    public int getCtrlFlag() {return flag;}
+    public ControlFlag getCtrlFlag() {return flag;}
     public String getCtrlMsg() {return msg;}
     
-    public void setCtrlFlag(int ctrlFlag) {flag = ctrlFlag;}
+    public void setCtrlFlag(ControlFlag ctrlFlag) {flag = ctrlFlag;}
     public void setCtrlMsg(String ctrlMsg) {msg = ctrlMsg;}
     
 }

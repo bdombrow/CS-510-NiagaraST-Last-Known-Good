@@ -221,7 +221,7 @@ public class PageStream {
 	TuplePage ret = toConsumerQueue.get();
 
 	// KT - DEL after functions - just for checking
-	assert ret.getFlag() != CtrlFlags.SHUTDOWN:
+	assert ret.getFlag() != ControlFlag.SHUTDOWN:
 	    "KT shouldn't get here. Thread: " +
 	    Thread.currentThread().getName() + 
 	    " Stream name: " + name;
@@ -246,24 +246,25 @@ public class PageStream {
      */
     // To be called by SourceTupleStream ONLY
     // just a wrapper with a better name for calling program
-    public int putCtrlMsgToSource(int ctrlMsgId,
+    // REFACTOR
+    public ControlFlag putCtrlMsgToSource(ControlFlag ctrlMsgId,
 				  String ctrlMsgStr) 
 	throws ShutdownException {
 	return consumerPutCtrlMsg(ctrlMsgId, ctrlMsgStr);
     }
 
-    private synchronized int consumerPutCtrlMsg(int ctrlMsgId,
+    private synchronized ControlFlag consumerPutCtrlMsg(ControlFlag ctrlMsgId,
 						String ctrlMsgStr) 
 	throws ShutdownException {
     
 	if(eos)
-	    return CtrlFlags.EOS;
+	    return ControlFlag.EOS;
 	if(shutdown) 
 	    throw new ShutdownException(shutdownMsg);
         
 	// do SHUTDOWN check on put to make propagation of SHUTDOWN
 	// as fast as possible
-	if(ctrlMsgId == CtrlFlags.SHUTDOWN) {
+	if(ctrlMsgId == ControlFlag.SHUTDOWN) {
 	    shutdown = true;
 	    shutdownMsg = ctrlMsgStr;
 	}
@@ -286,7 +287,7 @@ public class PageStream {
 
 	notifySource();
 	
-	return CtrlFlags.NULLFLAG; // indicates success
+	return ControlFlag.NULLFLAG; // indicates success
     }
 
     // to be called by SourceTupleStream ONLY
@@ -363,8 +364,8 @@ public class PageStream {
    	    // no notification, no one ever blocks on toProducerQueue
    	    TuplePage ctrlPage = toProducerQueue.get();
    	    ArrayList ctrl = null;
-   	    int ctrlFlag = ctrlPage.getFlag();
-   	    if (ctrlFlag != CtrlFlags.NULLFLAG) {
+   	    ControlFlag ctrlFlag = ctrlPage.getFlag();
+   	    if (ctrlFlag != ControlFlag.NULLFLAG) {
    	    	ctrl = new ArrayList(2);	
    	    	ctrl.add(ctrlFlag);
    	    	ctrl.add(ctrlPage.getCtrlMsg());
@@ -423,8 +424,8 @@ public class PageStream {
 	    TuplePage ctrlPage = toProducerQueue.get();
 
 	    String ctrlMsg = ctrlPage.getCtrlMsg();
-	    int ctrlFlag = ctrlPage.getFlag();
-	    if(ctrlFlag == CtrlFlags.SHUTDOWN) {
+	    ControlFlag ctrlFlag = ctrlPage.getFlag();
+	    if(ctrlFlag == ControlFlag.SHUTDOWN) {
 	    	assert shutdown : "@*#$!#*$";
 			returnCtrlPage(ctrlPage);
 			throw new ShutdownException(ctrlMsg);
@@ -442,7 +443,7 @@ public class PageStream {
 	    // the producer, but for the consumer - note that this shutdown
 	    // message is just arriving into the consumers
 	    // input stream
-	    if(page.getFlag() == CtrlFlags.SHUTDOWN) {
+	    if(page.getFlag() == ControlFlag.SHUTDOWN) {
 		shutdown = true;
 		shutdownMsg = page.getCtrlMsg();
 		//System.out.println("KT: Thread " + 
@@ -513,7 +514,7 @@ public class PageStream {
 	return new TuplePage();
     }
 
-    private TuplePage getCtrlPage(int ctrlMsgId, String ctrlMsgStr) {
+    private TuplePage getCtrlPage(ControlFlag ctrlMsgId, String ctrlMsgStr) {
 	if(extraCtrlPage != null) {
 	    TuplePage ret = extraCtrlPage;
 	    extraCtrlPage = null;
@@ -534,7 +535,7 @@ public class PageStream {
       System.out.println("KT " . toString());
      }
   }
-	returnPage.setFlag(CtrlFlags.NULLFLAG);
+	returnPage.setFlag(ControlFlag.NULLFLAG);
 	extraCtrlPage = returnPage;
     }
 

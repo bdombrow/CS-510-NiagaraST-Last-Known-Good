@@ -30,14 +30,14 @@ public class FeedbackMessage {
 	/***
 	 * @return Feedback type
 	 */
-	public FeedbackType getType() {
+	public FeedbackType type() {
 		return _type;
 	}
 	/***
 	 * 
 	 * @return Feedback punctuation object
 	 */
-	public Punctuation getPunctuation() throws FeedbackException {
+	public Punctuation punctuation() throws FeedbackException {
 
 		if (_type == FeedbackType.CONTROL) {
 			throw new FeedbackException("Requested punctuation from a Control Message.");
@@ -50,7 +50,7 @@ public class FeedbackMessage {
 	 * 
 	 * @return Control Message object
 	 */
-	public ControlMessage getControlMessage() throws FeedbackException{
+	public ControlMessage controlMessage() throws FeedbackException{
 		if(_type != FeedbackType.CONTROL) {
 			throw new FeedbackException("Requested control message from a Feedback Punctuation.");
 		} else {

@@ -10,21 +10,21 @@ package niagara.utils;
 public class ControlMessage {
 
 	// Fields
-	private CtrlFlags _flag;
+	private ControlFlag _flag;
 	private String _message;
 
 	// Properties
 	/***
 	 * @return Control Flag
 	 */
-	public CtrlFlags getFlag() {
+	public ControlFlag flag() {
 		return _flag;
 	}
 
 	/***
 	 * @return Control Message
 	 */
-	public String getMessage() {
+	public String message() {
 		return _message;
 	}
 
@@ -33,7 +33,7 @@ public class ControlMessage {
 	 * @param flag Control Flag
 	 * @param message Control message
 	 */
-	public ControlMessage(CtrlFlags flag, String message) {
+	public ControlMessage(ControlFlag flag, String message) {
 		this._flag = flag;
 		this._message = message;
 	}

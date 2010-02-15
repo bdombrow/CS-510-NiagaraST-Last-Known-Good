@@ -294,9 +294,9 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 		    sleepTime = 0; // reset
 		    timedOut = false; // lets not use timeouts next time around
 
-		    int ctrlFlag = CtrlFlags.NULLFLAG;
+		    ControlFlag ctrlFlag = ControlFlag.NULLFLAG;
 		    for(int sourceId = 0; sourceId < numSourceStreams &&
-			     ctrlFlag == CtrlFlags.NULLFLAG; sourceId++) {
+			     ctrlFlag == ControlFlag.NULLFLAG; sourceId++) {
 			// best we can do is send a message downstream
 			// only send message to active source streams
 			if(activeSourceStreams.contains(sourceId) &&
@@ -307,9 +307,9 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 					   "Requesting buffer flush on stream " 
 						   + sourceId);
 			    ctrlFlag = sourceStreams[sourceId].
-				         putCtrlMsg(CtrlFlags.REQUEST_BUF_FLUSH,
+				         putCtrlMsg(ControlFlag.REQUEST_BUF_FLUSH,
 					 null);
-			    if(ctrlFlag != CtrlFlags.NULLFLAG) {
+			    if(ctrlFlag != ControlFlag.NULLFLAG) {
 				processCtrlMsgFromSource(ctrlFlag, sourceId);
 			    }
 			}
@@ -409,7 +409,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	for(int i = 0; i<numSourceStreams; i++) {
 	    if(!sourceStreams[i].isClosed()) {
 		try {
-		    sendCtrlMsgToSource(CtrlFlags.SHUTDOWN, msg, i);
+		    sendCtrlMsgToSource(ControlFlag.SHUTDOWN, msg, i);
 		} catch(ShutdownException e) {
 		} catch(InterruptedException e) {
 		}
@@ -418,7 +418,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	for(int i = 0; i<numSinkStreams; i++) {
 	    if(!sinkStreams[i].isClosed()) {
 		try {
-		    sendCtrlMsgToSink(CtrlFlags.SHUTDOWN, msg, i);
+		    sendCtrlMsgToSink(ControlFlag.SHUTDOWN, msg, i);
 		} catch (ShutdownException e) {
 		} catch (InterruptedException e) {
 		}
@@ -441,7 +441,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	for(int i = 0; i<numSourceStreams; i++) {
 	    if(!sourceStreams[i].isClosed()) {
 		try {
-		    sendCtrlMsgToSource(CtrlFlags.SHUTDOWN, null, i);
+		    sendCtrlMsgToSource(ControlFlag.SHUTDOWN, null, i);
 		} catch(ShutdownException e) {
 		} catch(InterruptedException e) {
 		}
@@ -519,10 +519,10 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 		// getNextTuple returned null, meaning we got a control
 		// message or the call timed out
 
-		int ctrlFlag = sourceStreams[streamId].getCtrlFlag();
+		ControlFlag ctrlFlag = sourceStreams[streamId].getCtrlFlag();
 
 		// if we timed out, try the next stream
-		if(ctrlFlag == CtrlFlags.TIMED_OUT) {
+		if(ctrlFlag == ControlFlag.TIMED_OUT) {
 		    sleepTime += timeout;
 		    lastReadSourceStream = 
 			(lastReadSourceStream + 1)%numActiveSourceStreams;
@@ -582,10 +582,10 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 		// getTuple returned null, meaning we got a control
 		// message or the call timed out
 		
-		int ctrlFlag = sourceStreams[streamId].getCtrlFlag();
+		ControlFlag ctrlFlag = sourceStreams[streamId].getCtrlFlag();
 		
 		// if we timed out, try the next stream
-		if (ctrlFlag == CtrlFlags.TIMED_OUT) {
+		if (ctrlFlag == ControlFlag.TIMED_OUT) {
 		    lastReadSourceStream = (lastReadSourceStream + 1)
 			% numActiveSourceStreams;
 		    continue;
@@ -670,14 +670,15 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      *            during execution
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void processCtrlMsgFromSource (int ctrlFlag, int streamId)
+    // REFACTOR
+    private void processCtrlMsgFromSource (ControlFlag ctrlFlag, int streamId)
 	throws java.lang.InterruptedException, ShutdownException {
 	// upstream control messages are SYNCH_PARTIAL
 	// END_PARTIAL and EOS. We should not get GET_PARTIAL,
 	// NULLFLAG or SHUTDOWN here (SHUTDOWN handled with exceptions)
 
 	switch (ctrlFlag) {
-	case CtrlFlags.SYNCH_PARTIAL:
+	case SYNCH_PARTIAL:
 	    // This stream should no longer be active and should be
 	    // in sychronizing partial state
 	    activeSourceStreams.remove(streamId);
@@ -686,7 +687,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	    updatePartialResultCreation ();
 	    return;
 
-	case CtrlFlags.END_PARTIAL:
+	case END_PARTIAL:
 	    // End of partial result, so stop reading from this stream
 	    // and set status appropriately
 	    activeSourceStreams.remove(streamId);
@@ -695,7 +696,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	    updatePartialResultCreation ();
 	    return;
 
-	case CtrlFlags.EOS:		
+	case EOS:		
 	    // This is the end of stream, so mark the stream as closed
 	    // and remove it from the list of streams to read from
 	    sourceStreams[streamId].setStatus(SourceTupleStream.Closed);
@@ -720,8 +721,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	    return;
 
 	    default:
-		assert false : "KT unexpected control message from source " + 
-		    CtrlFlags.name[ctrlFlag];
+		assert false : "KT unexpected control message from source " + ctrlFlag.flagName(); 
 	}
     }
     
@@ -802,9 +802,9 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	    // If the output is a partial result, then put the appropriate
 	    // control msg, else send a synchronize partial message
 	    if (isPartialOutput) {
-		sendCtrlMsgToSinks(CtrlFlags.END_PARTIAL, null);
+		sendCtrlMsgToSinks(ControlFlag.END_PARTIAL, null);
 	    } else {
-		sendCtrlMsgToSinks(CtrlFlags.SYNCH_PARTIAL, null);
+		sendCtrlMsgToSinks(ControlFlag.SYNCH_PARTIAL, null);
 	    }
 	}
     }
@@ -830,19 +830,18 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 		if (ctrl == null)
 			return;
 
-		int ctrlFlag = (Integer) ctrl.get(0);
+		ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
 
 		switch (ctrlFlag) {
-		case CtrlFlags.GET_PARTIAL:
+		case GET_PARTIAL:
 			processGetPartialFromSink(streamId);
 			break;
-		case CtrlFlags.MESSAGE:
+		case MESSAGE:
 			System.err.println(this.getName() + "(unspecialized) Got message: " + ctrl.get(1));
 			break;
 		default:
-			assert false : "KT unexpected control message from sink "
-					+ CtrlFlags.name[ctrlFlag];
-		}
+			assert false : "KT unexpected control message from sink " + ctrlFlag.flagName();
+			}
 	}
         
     /**
@@ -872,7 +871,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
 	    }
 	    // Send the control element to all the open source streams
 	    if(existsUnClosedSourceStream())
-		sendCtrlMsgToSources(CtrlFlags.GET_PARTIAL, null);
+		sendCtrlMsgToSources(ControlFlag.GET_PARTIAL, null);
 	    // else ignore GET_PARTIAL, final results are coming soon KT
 	} else {
 	    // This is a duplicate control element
@@ -952,21 +951,20 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void sendCtrlMsgToSource (int ctrlFlag, String ctrlMsg, 
+    private void sendCtrlMsgToSource (ControlFlag ctrlFlag, String ctrlMsg, 
 				      int streamId)
 	throws ShutdownException, InterruptedException{
-	int retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag, 
+	ControlFlag retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag, 
 							     ctrlMsg);
 
-	if(retCtrlFlag == CtrlFlags.EOS) {
+	if(retCtrlFlag == ControlFlag.EOS) {
 	    processCtrlMsgFromSource(retCtrlFlag, streamId);
 	    return;
 	} 
 
 	// only control flag putCtrlMsg may return is EOS
-	assert retCtrlFlag == CtrlFlags.NULLFLAG :
-	    "Unexpected ctrl flag in sendCtrlMsgToSource " +
-	    CtrlFlags.name[retCtrlFlag];
+	assert retCtrlFlag == ControlFlag.NULLFLAG :
+	    "Unexpected ctrl flag in sendCtrlMsgToSource " + retCtrlFlag.flagName();
 	return;
     }
 
@@ -978,7 +976,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void sendCtrlMsgToSources(int ctrlFlag, String ctrlMsg)
+    private void sendCtrlMsgToSources(ControlFlag ctrlFlag, String ctrlMsg)
 	throws ShutdownException, InterruptedException {
 	// Loop over all source streams and put the control
 	// element in all open ones
@@ -996,24 +994,24 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      * 
      * 
      */
-    protected void sendCtrlMsgUpStream(int ctrlFlag, String ctrlMsg, int streamId) 
+    // REFACTOR
+    protected void sendCtrlMsgUpStream(ControlFlag ctrlFlag, String ctrlMsg, int streamId) 
     	throws ShutdownException, InterruptedException{
         if(NiagraServer.DEBUG)
-    	    System.err.println("sendCtrlMsgUpStream "+ CtrlFlags.name[ctrlFlag]);
+    	    System.err.println("sendCtrlMsgUpStream "+ ctrlFlag.flagName());
     		if (sourceStreams[streamId].isClosed()){
     			return;
     		}
-    		int retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag, 
+    		ControlFlag retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag, 
     								     ctrlMsg);
     		
-    		if(retCtrlFlag == CtrlFlags.EOS) {
+    		if(retCtrlFlag == ControlFlag.EOS) {
     		    processCtrlMsgFromSource(retCtrlFlag, streamId);
     		    return;
     		} 
     		
-    		assert retCtrlFlag == CtrlFlags.NULLFLAG :
-    		    "Unexpected ctrl flag in sendCtrlMsgUpStream " +
-    		    CtrlFlags.name[retCtrlFlag];
+    		assert retCtrlFlag == ControlFlag.NULLFLAG :
+    		    "Unexpected ctrl flag in sendCtrlMsgUpStream " + retCtrlFlag.flagName();
     		return;
     }
 
@@ -1026,7 +1024,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void sendCtrlMsgToSink(int ctrlFlag, String ctrlMsg, int streamId)
+    private void sendCtrlMsgToSink(ControlFlag ctrlFlag, String ctrlMsg, int streamId)
 	throws InterruptedException, ShutdownException {
 	ArrayList newCtrl;
 	do {
@@ -1049,7 +1047,7 @@ implements SchemaProducer, SerializableToXML, Initializable, Schedulable, Instru
      *
      * @exception ShutdownException query shutdown by user or execution error
      */
-    private void sendCtrlMsgToSinks(int ctrlFlag, String ctrlMsg)
+    private void sendCtrlMsgToSinks(ControlFlag ctrlFlag, String ctrlMsg)
 	throws java.lang.InterruptedException, ShutdownException {
 
 	// Loop over all sink streams and put the control

@@ -31,7 +31,7 @@ import niagara.utils.Tuple;
 import niagara.utils.BaseAttr;
 import niagara.utils.IntegerAttr;
 import niagara.utils.ShutdownException;
-import niagara.utils.CtrlFlags;
+import niagara.utils.ControlFlag;
 import niagara.utils.Punctuation;
 import niagara.utils.StringAttr;
 import niagara.utils.OperatorDoneException;
@@ -89,13 +89,13 @@ public class PhysicalWindowCount extends PhysicalWindowAggregate {
             // We can continue assuming ctrl has something in it
         }
 
-        int ctrlFlag = (Integer) ctrl.get(0);
+        ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
 
         switch (ctrlFlag) {
-            case CtrlFlags.GET_PARTIAL:
+            case GET_PARTIAL:
                 processGetPartialFromSink(streamId);
                 break;
-            case CtrlFlags.MESSAGE:
+            case MESSAGE:
                 System.err.println(this.getName() + "***Got message: "
                     + ctrl.get(1) + " with propagate =  " + propagate);
                 String [] feedback = ctrl.get(1).toString().split("#");
@@ -109,8 +109,7 @@ public class PhysicalWindowCount extends PhysicalWindowAggregate {
                 System.out.println("Purged internal state for: " + fAttr + " with guard: " + guardOutput);
                 break;
             default:
-                assert false : "KT unexpected control message from sink "
-                    + CtrlFlags.name[ctrlFlag];
+                assert false : "KT unexpected control message from sink " + ctrlFlag.flagName();
                 break;
         }
     }

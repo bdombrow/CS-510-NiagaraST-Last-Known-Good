@@ -55,7 +55,7 @@ public class TuplePage {
     int currentPos; 
     int bufSize;
 
-    private int flag;
+    private ControlFlag flag;
     private String ctrlMsg;
 
     // the page has "getMode" for when you are reading from the page
@@ -87,10 +87,11 @@ public class TuplePage {
 	currentPos = 0;
 	bufSize = 0;
 	getMode = false;
-	flag = CtrlFlags.NULLFLAG;
+	flag = ControlFlag.NULLFLAG;
     }
 
-    public static TuplePage createControlPage(int controlMsgId,
+    // REFACTOR
+    public static TuplePage createControlPage(ControlFlag controlMsgId,
 					      String ctrlMsgStr) {
 	TuplePage ret = new TuplePage(true);
 	ret.setFlag(controlMsgId);
@@ -98,9 +99,7 @@ public class TuplePage {
 	return ret;
     }
 
-    public void setFlag(int flag) {
-	assert flag >= CtrlFlags.NULLFLAG && flag <= CtrlFlags.MESSAGE:
-	    "KT invalid control flag in createControlPage " + flag;
+    public void setFlag(ControlFlag flag) {
 	this.flag = flag;
     }
 
@@ -184,9 +183,14 @@ public class TuplePage {
 	return currentPos == bufSize;
     }
 
-    public int getFlag() {
-	return flag;
+    /***
+     * 
+     * @return ControlFlag 
+     */
+    public ControlFlag getFlag() {
+    return flag;
     }
+
 
     public boolean hasTuples() {
         if(tuples == null)

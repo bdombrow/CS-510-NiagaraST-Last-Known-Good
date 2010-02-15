@@ -234,7 +234,7 @@ public class PhysicalImpute extends PhysicalOperator {
 			}
 
 
-			int ctrlFlag = CtrlFlags.CHANGE_QUERY; // defined as 9
+			ControlFlag ctrlFlag = ControlFlag.CHANGE_QUERY; 
 			sendCtrlMsgUpStream(ctrlFlag, ctrlMessage, 0); // sent to DBThread (id 0)
 			
 
@@ -326,7 +326,7 @@ public class PhysicalImpute extends PhysicalOperator {
 				// the dbthread;
 				System.err
 						.println("the stream is going to end. Sending out the Shutdown msg ..");
-			sendCtrlMsgUpStream(CtrlFlags.READY_TO_FINISH, null, 0);
+			sendCtrlMsgUpStream(ControlFlag.READY_TO_FINISH, null, 0);
 		} catch (InterruptedException e) {
 			;
 		}

@@ -98,7 +98,8 @@ class FetchThread implements Runnable {
 	    throw new PEException(" !!! *** Fetch Failed");
 	} catch (InterruptedException ie) {
 	    try {
-		req.s.putCtrlMsg(CtrlFlags.SHUTDOWN, "Interrupted");
+	    	//REFACTOR
+		req.s.putCtrlMsg(ControlFlag.SHUTDOWN, "Interrupted");
 	    } catch (ShutdownException se) {  // ignore
 	    } catch (InterruptedException ine) {} // ignore
 	} catch (ShutdownException se) {

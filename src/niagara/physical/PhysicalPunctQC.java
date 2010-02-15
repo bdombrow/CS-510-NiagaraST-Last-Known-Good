@@ -293,7 +293,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
         	lastPunct = ts; 
         }
         
-    	int ctrlFlag = CtrlFlags.CHANGE_QUERY;
+    	ControlFlag ctrlFlag = ControlFlag.CHANGE_QUERY;
 
     	sendCtrlMsgUpStream(ctrlFlag, String.valueOf(ts), 0);
 
@@ -437,7 +437,7 @@ public class PhysicalPunctQC extends PhysicalOperator {
     if (streamId == 1) // the stream ends;
     	//send a READY_TO_FINISH msg to its left input source, which is the dbthread;
     	System.err.println("the stream is going to end. Sending out the Shutdown msg ..");
-    	sendCtrlMsgUpStream(CtrlFlags.READY_TO_FINISH, null, 0);
+    	sendCtrlMsgUpStream(ControlFlag.READY_TO_FINISH, null, 0);
     } catch (InterruptedException e) {
     	;
     }

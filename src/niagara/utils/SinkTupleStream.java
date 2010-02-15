@@ -101,16 +101,16 @@ public final class SinkTupleStream {
 	throws InterruptedException, ShutdownException{
 		// pageStream sends an EOS up stream and sets an isClosed flag
 		status = Closed;
-		ArrayList ctrl = putCtrlMsg(CtrlFlags.EOS, "End of Stream");
+		ArrayList ctrl = putCtrlMsg(ControlFlag.EOS, "End of Stream");
 		if (ctrl != null) {
-			int ctrlFlag =(Integer) ctrl.get(0);
+			ControlFlag ctrlFlag =(ControlFlag) ctrl.get(0);
 
-			if(ctrlFlag == CtrlFlags.GET_PARTIAL ||
-					ctrlFlag == CtrlFlags.REQUEST_BUF_FLUSH ) {
+			if(ctrlFlag == ControlFlag.GET_PARTIAL ||
+					ctrlFlag == ControlFlag.REQUEST_BUF_FLUSH ) {
 				// ignore since we just sent eos
 			} else {
-				assert ctrlFlag == CtrlFlags.NULLFLAG :
-					"KT Unexpected ctrl flag " + CtrlFlags.name[ctrlFlag];
+				assert ctrlFlag == ControlFlag.NULLFLAG :
+					"KT Unexpected ctrl flag " + ctrlFlag.flagName();
 			}
 		}
 		pageStream.endOfStream();
@@ -190,7 +190,7 @@ public final class SinkTupleStream {
 
 		ArrayList ret = putTuple(tuple);
 		assert ret == null : 
-			"KT unexpected control message " + CtrlFlags.name[(Integer) ret.get(0)];
+			"KT unexpected control message " + ((ControlFlag)ret.get(0)).flagName();
 		return;
 	}	
 
@@ -225,7 +225,7 @@ public final class SinkTupleStream {
 
 		// stream above an operator using this put should
 		// always reflect partials
-		assert (ret == null) || ((Integer) ret.get(0) != CtrlFlags.GET_PARTIAL): 
+		assert (ret == null) || ((ControlFlag) ret.get(0) != ControlFlag.GET_PARTIAL): 
 			"KT unexpected get partial request";
 
 		// handle a flush buffer request
@@ -234,7 +234,8 @@ public final class SinkTupleStream {
 		// stream above an operator using this put should
 		// always reflect partials
 		assert ret == null: 
-			"KT Unexpected ctrl flag " + CtrlFlags.name[(Integer) ret.get(0)];
+			"KT Unexpected ctrl flag " + ((ControlFlag)ret.get(0)).flagName();
+		// REFACTOR
 	}
 
 	/**
@@ -250,18 +251,18 @@ public final class SinkTupleStream {
 	 *
 	 * @return CtrlFlags.NULLFLAG on success, control flag otherwise
 	 */
-	public ArrayList putCtrlMsg(int controlMsgId, String ctrlMsg)
+	public ArrayList putCtrlMsg(ControlFlag controlMsgId, String ctrlMsg)
 	throws java.lang.InterruptedException, ShutdownException {
 		// KT control element put should cause partially full page to be 
 		// sent 
-		assert buffer.getFlag() == CtrlFlags.NULLFLAG :
+		assert buffer.getFlag() == ControlFlag.NULLFLAG :
 			"KT buffer already has a flag!";
 		buffer.setFlag(controlMsgId);
 		buffer.setCtrlMsg(ctrlMsg);
 		ArrayList ctrl = flushBuffer();
 		if(ctrl != null) {
 			// put failed! better reset the buffer
-			buffer.setFlag(CtrlFlags.NULLFLAG);
+			buffer.setFlag(ControlFlag.NULLFLAG);
 		}
 		return ctrl;
 	}
@@ -276,7 +277,7 @@ public final class SinkTupleStream {
 	 * or NULLFLAG
 	 */
 	public ArrayList flushBuffer() throws ShutdownException, InterruptedException {
-		if(buffer.isEmpty() && buffer.getFlag() == CtrlFlags.NULLFLAG) {
+		if(buffer.isEmpty() && buffer.getFlag() == ControlFlag.NULLFLAG) {
 			// don't flush an empty buffer...
 			return null;
 		} else {
@@ -291,11 +292,11 @@ public final class SinkTupleStream {
 				ret = processCtrlFlag(ctrl);
 			}
 			assert ret == null ||
-			(Integer)ret.get(0) == CtrlFlags.GET_PARTIAL || 
-			(Integer)ret.get(0) == CtrlFlags.CHANGE_QUERY ||
-			(Integer)ret.get(0) == CtrlFlags.MESSAGE ||
-			(Integer)ret.get(0) == CtrlFlags.READY_TO_FINISH: 
-				"KT Unexpected ctrl flag " + CtrlFlags.name[(Integer)ret.get(0)];
+			(ControlFlag)ret.get(0) == ControlFlag.GET_PARTIAL || 
+			(ControlFlag)ret.get(0) == ControlFlag.CHANGE_QUERY ||
+			(ControlFlag)ret.get(0) == ControlFlag.MESSAGE ||
+			(ControlFlag)ret.get(0) == ControlFlag.READY_TO_FINISH: 
+				"KT Unexpected ctrl flag " + ((ControlFlag)ret.get(0)).flagName();
 			return ret;
 		}
 	}
@@ -316,37 +317,36 @@ public final class SinkTupleStream {
 		if (ctrl == null)
 			return null;
 
-		int ctrlFlag = (Integer) ctrl.get(0);
+		ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
 		switch(ctrlFlag) {
-		case CtrlFlags.REQUEST_BUF_FLUSH:
+		case REQUEST_BUF_FLUSH:
 			if(NiagraServer.DEBUG2)
 				System.out.println(pageStream.getName() + 
 				" received request for buffer flush ");
 			return flushBuffer(); // returns NULLFLAG or GET_PARTIAL
-		case CtrlFlags.GET_PARTIAL:
+		case GET_PARTIAL:
 			if(reflectPartial) {
 				reflectPartial(); // void
 				return null;
 			} else {
-				ctrl.set(0, CtrlFlags.GET_PARTIAL);
+				ctrl.set(0, ControlFlag.GET_PARTIAL);
 				ctrl.set(1, null);
 				return ctrl;
 			}
-		case CtrlFlags.MESSAGE:
+		case MESSAGE:
 			//System.out.println(pageStream.getName() + "is returning a ctrl msg");
 			return ctrl;
-		case CtrlFlags.CHANGE_QUERY:
-		case CtrlFlags.READY_TO_FINISH:
+		case CHANGE_QUERY:
+		case READY_TO_FINISH:
 			return ctrl;
 
-		case CtrlFlags.SHUTDOWN:
+		case SHUTDOWN:
 			assert pageStream.shutdownReceived() :
 				"KT shutdown flag in queue but pagestream says shutdown not received";
 			throw new ShutdownException(pageStream.getShutdownMsg());
 
 		default:
-			assert false : "KT Unexpected control flag" 
-				+ CtrlFlags.name[ctrlFlag];
+			assert false : "KT Unexpected control flag " + ctrlFlag.flagName(); 
 		return null;
 		}
 	}
@@ -410,9 +410,10 @@ public final class SinkTupleStream {
 
 		// if reflectPartial is true - flushBuffer and therefore 
 		// putCtrlMsg will always return NULLFLAG
-		ArrayList ctrl = putCtrlMsg(CtrlFlags.SYNCH_PARTIAL, null);
+		ArrayList ctrl = putCtrlMsg(ControlFlag.SYNCH_PARTIAL, null);
 		assert ctrl == null: 
-			"KT Unexpected ctrl flag " + CtrlFlags.name[(Integer) ctrl.get(0)];
+			"KT Unexpected ctrl flag " + ((ControlFlag)ctrl.get(0)).flagName();
+		// REFACTOR
 	}
 
 	/**

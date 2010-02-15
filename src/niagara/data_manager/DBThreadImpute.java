@@ -204,7 +204,7 @@ public class DBThreadImpute extends SourceThread {
 				//System.out.println("Attempting to execute one-time query.");
 
 				//Query q;
-				
+
 				rs = stmt.executeQuery(qs);
 				//System.out.println("Executed.");
 
@@ -213,10 +213,10 @@ public class DBThreadImpute extends SourceThread {
 				//System.out.println("Num Attrs: " + numAttrs);
 
 				//putResults(rs, numAttrs);
-                putResults(rs,numAttrs);
+				putResults(rs,numAttrs);
 				outputStream.endOfStream();
 
-                //System.out.println("I put the results...");
+				//System.out.println("I put the results...");
 
 
 			} else
@@ -225,8 +225,8 @@ public class DBThreadImpute extends SourceThread {
 					 * response to query shutdown;
 					 */
 					if (shutdown) {
-						outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN,
-								"bouncing back SHUTDOWN msg");
+						outputStream.putCtrlMsg(ControlFlag.SHUTDOWN,
+						"bouncing back SHUTDOWN msg");
 
 						break;
 					}
@@ -252,7 +252,7 @@ public class DBThreadImpute extends SourceThread {
 					stmt = conn.createStatement();
 					if (NiagraServer.DEBUG)
 						System.out
-								.println("Attempting to execute continuous query.");
+						.println("Attempting to execute continuous query.");
 
 					Query curQuery = (Query) newQueries.remove(0);
 					if (NiagraServer.DEBUG)
@@ -274,7 +274,7 @@ public class DBThreadImpute extends SourceThread {
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
 			try {
-				outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, ex.getMessage());
+				outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, ex.getMessage());
 			} catch (Exception e) {
 				// just ignore it
 			}
@@ -288,7 +288,7 @@ public class DBThreadImpute extends SourceThread {
 			// stream
 		} catch (InterruptedException ie) {
 			try {
-				outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, ie.getMessage());
+				outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, ie.getMessage());
 			} catch (Exception e) {
 				// just ignore it
 			}
@@ -326,7 +326,7 @@ public class DBThreadImpute extends SourceThread {
 	} // end of run method
 
 	private void putResults(ResultSet rs, int numAttrs) throws SQLException,
-			ShutdownException, InterruptedException {
+	ShutdownException, InterruptedException {
 
 		while (rs.next()) {
 			Tuple newtuple = new Tuple(false, numAttrs);
@@ -378,8 +378,8 @@ public class DBThreadImpute extends SourceThread {
 	}
 
 	public void checkForSinkCtrlMsg(int timeout)
-			throws java.lang.InterruptedException, ShutdownException,
-			SQLException {
+	throws java.lang.InterruptedException, ShutdownException,
+	SQLException {
 		// Loop over all sink streams, checking for control elements
 		ArrayList ctrl;
 
@@ -396,7 +396,7 @@ public class DBThreadImpute extends SourceThread {
 	}
 
 	private void checkAllSinkCtrlMsg() throws java.lang.InterruptedException,
-			ShutdownException, SQLException {
+	ShutdownException, SQLException {
 
 		ArrayList ctrlMsgList = new ArrayList();
 
@@ -424,25 +424,25 @@ public class DBThreadImpute extends SourceThread {
 	 */
 
 	public void processCtrlMsgFromSink(ArrayList ctrl) throws SQLException,
-			ShutdownException, InterruptedException {
+	ShutdownException, InterruptedException {
 		if (ctrl == null) {
 			System.err.println("I am null :-(");
 			return;
 		}
 
-		int ctrlFlag = (Integer) ctrl.get(0);
+		ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
 		String ctrlMsg = (String) ctrl.get(1);
 		switch (ctrlFlag) {
-		case CtrlFlags.IMPUTE:
+		case IMPUTE:
 			System.err.println("Received Flag");
 			newQueries.add("SELECT 1,1,impute_value,1 FROM impute_value(1,1)");
 			break;
-		case CtrlFlags.MESSAGE:
+		case MESSAGE:
 			//System.err.println("I am " + this.getName() + " and I received this message: " + ctrl.get(1));
 			//if (newQueries.size() < 30){
 			//CASE B newQueries = new ArrayList();
 			break;
-		case CtrlFlags.CHANGE_QUERY:
+		case CHANGE_QUERY:
 
 			/*
 			 * XXX RJFM: We perform all query processing here.
@@ -451,14 +451,14 @@ public class DBThreadImpute extends SourceThread {
 			 * Second, we rewrite the query substituting the appropriate parameters.
 			 * Third, add the newly constructed query to the queue.
 			 */
-			
+
 			//System.err.println("Received Imputation Flag");
-			
+
 			// XXX Extract values
 			// var[0] = timestamp
 			// var[1] = speed at station_a
 			// var[3] = speed at station_c
-	        String[] var;
+			String[] var;
 			var = new String[5];
 			int i = 0;
 			StringTokenizer token = new StringTokenizer(ctrlMsg,"#");
@@ -467,26 +467,25 @@ public class DBThreadImpute extends SourceThread {
 				//System.out.println("var["+i+"]-> "+var[i]);
 				i++;
 			}
-			
+
 			Query q = new Query(dbScanSpec.getQueryString());
 			q.queryStr = (q.queryStr).replace("DATA", "'" + var[0] + "', " + var[1] + ", imputed_value, " + var[3]);
 			//q.queryStr = (q.queryStr).replace("DATA", "'" + var[0] + "', " + var[1] + ", imputed_value2, " + var[3]);
 			q.queryStr = (q.queryStr).replace("SOURCE", "imputed_value( " + var[1] + "," + var[3] + ")");
 			//q.queryStr = (q.queryStr).replace("SOURCE", "imputed_value2( " + var[1] + "," + var[3] + ",10)");
-	        //System.err.println("query:" + q.queryStr);
+			//System.err.println("query:" + q.queryStr);
 			newQueries.add(q);
 			break;
-		case CtrlFlags.READY_TO_FINISH:
+		case READY_TO_FINISH:
 			System.err.println("live stream ends...");
 			finish = true;
 			break;
-		case CtrlFlags.SHUTDOWN: // handle query shutdown;
+		case SHUTDOWN: // handle query shutdown;
 			System.err.println("ready to shutdown at DBThreadImpute");
 			shutdown = true;
 			break;
 		default:
-			assert false : "KT unexpected control message from source "
-					+ CtrlFlags.name[ctrlFlag];
+			assert false : "KT unexpected control message from source " + ctrlFlag.flagName();
 		}
 	}
 

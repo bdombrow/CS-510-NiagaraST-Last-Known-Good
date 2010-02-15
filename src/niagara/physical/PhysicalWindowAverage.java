@@ -33,7 +33,7 @@ import niagara.utils.Tuple;
 import niagara.utils.BaseAttr;
 import niagara.utils.StringAttr;
 import niagara.utils.ShutdownException;
-import niagara.utils.CtrlFlags;
+import niagara.utils.ControlFlag;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -100,13 +100,13 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 			//System.err.println(this.getName() + " is not null ");
 		}
 
-		int ctrlFlag = (Integer) ctrl.get(0);
+		ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
 
 		switch (ctrlFlag) {
-		case CtrlFlags.GET_PARTIAL:
+		case GET_PARTIAL:
 			processGetPartialFromSink(streamId);
 			break;
-		case CtrlFlags.MESSAGE:
+		case MESSAGE:
 			System.err.println(this.getName() + "***Got message: " + ctrl.get(1)
 					+ " with propagate =  " + propagate);
 			
@@ -121,8 +121,7 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 			}
 			break;
 		default:
-			assert false : "KT unexpected control message from sink "
-					+ CtrlFlags.name[ctrlFlag];
+			assert false : "KT unexpected control message from sink " + ctrlFlag.flagName();
 		}
 	}
 	

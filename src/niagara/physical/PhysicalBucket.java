@@ -27,16 +27,32 @@
 
 package niagara.physical;
 
-import niagara.utils.*;
-
-import niagara.logical.*;
-import niagara.optimizer.colombia.*;
-import niagara.query_engine.*;
-import niagara.connection_server.NiagraServer;
-
-import org.w3c.dom.*;
-import java.lang.Object;
 import java.util.ArrayList;
+
+import niagara.connection_server.NiagraServer;
+import niagara.logical.Bucket;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Cost;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
+import niagara.optimizer.colombia.PhysicalProperty;
+import niagara.query_engine.TupleSchema;
+import niagara.utils.BaseAttr;
+import niagara.utils.ControlFlag;
+import niagara.utils.IntegerAttr;
+import niagara.utils.LongAttr;
+import niagara.utils.Punctuation;
+import niagara.utils.ShutdownException;
+import niagara.utils.StringAttr;
+import niagara.utils.Tuple;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 /**
  * Implementation of the Select operator.
@@ -88,13 +104,13 @@ public class PhysicalBucket extends PhysicalOperator {
 	if (ctrl == null)
 		return;
 
-	int ctrlFlag = (Integer) ctrl.get(0);
+	ControlFlag ctrlFlag = (ControlFlag)ctrl.get(0);
 
 	switch (ctrlFlag) {
-	case CtrlFlags.GET_PARTIAL:
+	case GET_PARTIAL:
 		processGetPartialFromSink(streamId);
 		break;
-	case CtrlFlags.MESSAGE:
+	case MESSAGE:
 		//System.err.println(this.getName() + "***Got message: " + ctrl.get(1)
 			//	+ " with propagate =  " + propagate);
 		
@@ -111,8 +127,7 @@ public class PhysicalBucket extends PhysicalOperator {
 		}
 		break;
 	default:
-		assert false : "KT unexpected control message from sink "
-				+ CtrlFlags.name[ctrlFlag];
+		assert false : "KT unexpected control message from sink " + ctrlFlag.flagName();
 	}
 }
     

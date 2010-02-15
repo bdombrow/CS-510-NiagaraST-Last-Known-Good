@@ -133,7 +133,7 @@ public class QueryResult {
      *
      * @returns Returns the control flag received from stream
      */
-    public int getNextResult(ResultObject resultObject)
+    public ControlFlag getNextResult(ResultObject resultObject)
         throws java.lang.InterruptedException, ShutdownException {
         // -1 indicates no timeout - infinite timeout
         return internalGetNext(-1, resultObject);
@@ -147,7 +147,7 @@ public class QueryResult {
      * @param resultObject An object to be filled in with the result
      *
      */
-    public int getNextResult(int timeout, ResultObject resultObject)
+    public ControlFlag getNextResult(int timeout, ResultObject resultObject)
         throws ShutdownException, InterruptedException {
         return internalGetNext(timeout, resultObject);
     }
@@ -172,11 +172,11 @@ public class QueryResult {
         System.out.println("QR putting partial request down stream");
         // May return EOS, throw ShutdonwnEx or return NULLFLAG
         // Think I can ignore EOS...famous last words
-        int ctrlFlag = outputStream.putCtrlMsg(CtrlFlags.GET_PARTIAL, null);
+        ControlFlag ctrlFlag = outputStream.putCtrlMsg(ControlFlag.GET_PARTIAL, null);
 
         assert(
-            ctrlFlag == CtrlFlags.EOS
-                || ctrlFlag == CtrlFlags.NULLFLAG) : "Unexpected control flag";
+            ctrlFlag == ControlFlag.EOS
+                || ctrlFlag == ControlFlag.NULLFLAG) : "Unexpected control flag";
 
         // Set the status of generating partial results
         generatingPartialResult = true;
@@ -193,7 +193,7 @@ public class QueryResult {
             // return from outputStream.putCtrlMsg could be:
             // NULLFLAG, SHUTDOWN, SYNCH_PARTIAL, END_PARTIAL, EOS
             // can ignore all of them
-            outputStream.putCtrlMsg(CtrlFlags.SHUTDOWN, "kill query");
+            outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, "kill query");
         } catch (ShutdownException e) {
             // ignore since we are killing query...
         }
@@ -205,8 +205,8 @@ public class QueryResult {
      *
      * @returns a result status, similar to what is in resultObject.status
      */
-    public int requestBufFlush() throws ShutdownException {
-        return outputStream.putCtrlMsg(CtrlFlags.REQUEST_BUF_FLUSH, null);
+    public ControlFlag requestBufFlush() throws ShutdownException {
+        return outputStream.putCtrlMsg(ControlFlag.REQUEST_BUF_FLUSH, null);
     }
 
     /**
@@ -221,7 +221,7 @@ public class QueryResult {
      *            during execution. This happens only without a timeout
      */
 
-    private int internalGetNext(int timeout, ResultObject resultObject)
+    private ControlFlag internalGetNext(int timeout, ResultObject resultObject)
         throws InterruptedException, ShutdownException {
 
         // Get the next element from the query output stream
@@ -234,20 +234,20 @@ public class QueryResult {
         }
 
         Tuple tuple = outputStream.getTuple(timeout);
-        int ctrlFlag = outputStream.getCtrlFlag();
+        ControlFlag ctrlFlag = outputStream.getCtrlFlag();
 
         // Now handle the various types of results
         if (tuple == null) {
             // process the control message
-            if (ctrlFlag == CtrlFlags.END_PARTIAL
-                || ctrlFlag == CtrlFlags.SYNCH_PARTIAL) {
+            if (ctrlFlag == ControlFlag.END_PARTIAL
+                || ctrlFlag == ControlFlag.SYNCH_PARTIAL) {
                 assert generatingPartialResult : "Unexpected partial result";
                 generatingPartialResult = false;
             }
         } else {
             assert ctrlFlag
-                == CtrlFlags.NULLFLAG : "Unexpected control flag "
-                    + CtrlFlags.name[ctrlFlag];
+                == ControlFlag.NULLFLAG : "Unexpected control flag "
+                    + ctrlFlag.flagName();
             resultObject.isPunctuation = tuple.isPunctuation();
             resultObject.isPartial = tuple.isPartial();
             if (!resultObject.sendStr)
