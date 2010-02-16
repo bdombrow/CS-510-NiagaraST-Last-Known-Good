@@ -3,11 +3,11 @@ package niagara.utils;
 import niagara.exception.*;
 
 /***
- * 
- * @author rfernand
- * 
  * FeedbackMessage is an object sent contrary to stream direction. 
  * Objects sent as feedback can be control messages or punctuation.
+ * 
+ * @author rfernand
+ * @version 1.0
  *
  */
 
@@ -20,11 +20,15 @@ public class FeedbackMessage {
 
 	/***
 	 * Types of feedback supported
+	 * 
 	 * CONTROL - Control Messages
 	 * ASSUMED - Assumed Punctuation
 	 *
 	 */
-	public enum FeedbackType {CONTROL, ASSUMED};
+	public enum FeedbackType {
+		CONTROL,
+		ASSUMED;
+	};
 
 	// Properties
 	/***

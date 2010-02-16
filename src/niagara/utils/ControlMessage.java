@@ -1,11 +1,12 @@
 package niagara.utils;
 
 /***
- * 
- * @author rfernand
- *
  * ControlMessage objects carry a Control Flag and a Message string. 
  * They are used for various Windowing functions and to drive PunctQC/DBScan interaction.
+ * 
+ * @author rfernand
+ * @version 1.0
+ *
  */
 public class ControlMessage {
 

@@ -2,8 +2,10 @@ package niagara.exception;
 
 /***
  * 
- * @author rfernand
  * Custom exception for use in feedback-related functions.
+ * 
+ * @author rfernand
+ * @version 1.0
  */
 public class FeedbackException extends Exception{
 

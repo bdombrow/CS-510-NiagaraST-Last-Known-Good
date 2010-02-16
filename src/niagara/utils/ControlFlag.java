@@ -33,7 +33,8 @@ package niagara.utils;
  * ControlFlag is an enumeration of control messages which are passed
  * up and downstream during query processing.
  * 
- * @version 2.0
+ *  Stream direction (downstream):        Producer -> Consumer
+ *  Counter-stream direction (upstream):  Producer <- Consumer
  * 
  * NULLFLAG - just a value to indicate no flag 
  * SHUTDOWN - shutdown is irregular shutdown - due to operator error
@@ -66,9 +67,9 @@ package niagara.utils;
  *       buffer. This is for the case where the producer is producing
  *       tuples slowly - to make sure we still get data in this case.
  *
+ * @author rfernand
+ * @version 2.0
  *
- *  Stream direction (downstream):        Producer -> Consumer
- *  Counter-stream direction (upstream):  Producer <- Consumer
  */
 
 
