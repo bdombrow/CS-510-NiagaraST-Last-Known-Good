@@ -1,19 +1,8 @@
-/**
- * $Id: ConstantScan.java,v 1.2 2008/10/21 23:11:38 rfernand Exp $
- *
- */
-
 package niagara.logical;
 
-/**
- * Constant is a pseudo operator that can be used to embed an XML document
- * in a query
- */
 
-import java.util.*;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
@@ -23,6 +12,15 @@ import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
 import niagara.utils.XMLUtils;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+/***
+ * 
+ * Constant is a pseudo operator that can be used to embed an XML document
+ * in a query
+ */
+@SuppressWarnings("unchecked")
 public class ConstantScan extends NullaryOperator {
 
     private Attrs vars;
@@ -115,7 +113,7 @@ public class ConstantScan extends NullaryOperator {
         // Parse the vars attribute 
         // XXX vpapad: does this work?
         StringTokenizer st = new StringTokenizer(vars, ",");
-        ArrayList variables = new ArrayList();
+		ArrayList variables = new ArrayList();
         while (st.hasMoreTokens()) {
             variables.add(new Variable(st.nextToken()));
         }

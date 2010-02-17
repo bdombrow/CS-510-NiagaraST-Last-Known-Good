@@ -1,31 +1,34 @@
-/* $Id: PhysicalPartitionAvg.java,v 1.1 2003/12/24 01:49:02 vpapad Exp $ */
 package niagara.physical;
 
 import java.util.ArrayList;
 import java.util.Vector;
 
 import niagara.logical.PartitionAvg;
-import niagara.optimizer.colombia.*;
-import niagara.utils.*;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.Op;
+import niagara.utils.Tuple;
 
 import org.w3c.dom.Node;
 
+@SuppressWarnings("unchecked")
 public class PhysicalPartitionAvg extends PhysicalPartitionGroup {
 	class GroupStatistics {
-	int count;
-	double sum;
+		int count;
+		double sum;
 	}
-		
+
 	private Attribute avgAttribute;
 	private AtomicEvaluator ae;
 	private ArrayList values;
-//	private static Double emptyGroupValue;
+
+	// private static Double emptyGroupValue;
 
 	public void opInitFrom(LogicalOp logicalOperator) {
 		super.opInitFrom(logicalOperator);
 		// Get the averaging attribute from the logical operator
 		avgAttribute = ((PartitionAvg) logicalOperator).getAvgAttribute();
-	//	emptyGroupValue = Double.valueOf("0");
+		// emptyGroupValue = Double.valueOf("0");
 	}
 
 	public void opInitialize() {
@@ -36,101 +39,99 @@ public class PhysicalPartitionAvg extends PhysicalPartitionGroup {
 	}
 
 	/**
-	 * @see niagara.query_engine.PhysicalIncrementalGroup#processTuple(Tuple, Object)
+	 * @see niagara.query_engine.PhysicalIncrementalGroup#processTuple(Tuple,
+	 *      Object)
 	 */
-	public Object processTuple(
-		Tuple tuple,
-		Object previousGroupInfo) {
-		
+	public Object processTuple(Tuple tuple, Object previousGroupInfo) {
+
 		ae.getAtomicValues(tuple, values);
-	try {
-		if (landmark) {
-			GroupStatistics prevAverage = (GroupStatistics) previousGroupInfo;
-			GroupStatistics newAverage;
-						
-			double newValue = Double.parseDouble((String) values.get(0));
-			values.clear();
-			newAverage = new GroupStatistics();
+		try {
+			if (landmark) {
+				GroupStatistics prevAverage = (GroupStatistics) previousGroupInfo;
+				GroupStatistics newAverage;
 
-			// New group
-			if(prevAverage == null) {
-				newAverage.count = 1;
-				newAverage.sum = newValue;
-				return newAverage;
+				double newValue = Double.parseDouble((String) values.get(0));
+				values.clear();
+				newAverage = new GroupStatistics();
+
+				// New group
+				if (prevAverage == null) {
+					newAverage.count = 1;
+					newAverage.sum = newValue;
+					return newAverage;
+				}
+				// We already have statistics for the group
+				newAverage.count = prevAverage.count + 1;
+				newAverage.sum = prevAverage.sum + newValue;
+				double newAvg = newAverage.sum / newAverage.count;
+				double prevAvg = prevAverage.sum / prevAverage.count;
+				// We're messing with floating point arithmetic here,
+				// this test may fail...
+				if (newAvg != prevAvg)
+					return newAverage;
+				else
+					// No change in group
+					return prevAverage;
+
+			} else {
+				Vector newGroup = (Vector) previousGroupInfo;
+
+				Double newValue = Double.valueOf((String) values.get(0));
+				values.clear();
+
+				int index = ((Double) newGroup.firstElement()).intValue();
+				Double expiredValue = (Double) newGroup.elementAt(index);
+				// if (expiredValue == null)
+				// expiredValue = Double.valueOf("0");
+				newGroup.set(index, newValue);
+				index = index + 1;
+
+				if (index > range)
+					index = 1;
+
+				newGroup.set(0, new Double(index));
+				// Double max = findMax(newGroup);
+				double sum = ((Double) newGroup.elementAt(range + 1))
+						.doubleValue();
+				int count = ((Double) newGroup.elementAt(range + 2)).intValue();
+
+				if (count < range) // for the initial several windows;
+					count += 1;
+
+				sum = sum - expiredValue.doubleValue() + newValue.doubleValue();
+
+				newGroup.set(range + 1, new Double(sum));
+				newGroup.set(range + 2, new Double(count));
+
+				return newGroup;
 			}
-			// We already have statistics for the group
-			newAverage.count = prevAverage.count + 1;
-			newAverage.sum = prevAverage.sum + newValue;
-			double newAvg = newAverage.sum / newAverage.count;
-			double prevAvg = prevAverage.sum / prevAverage.count;
-			// We're messing with floating point arithmetic here,
-			// this test may fail...
-			if (newAvg != prevAvg) 
-				return newAverage;
-			else
-				// No change in group
-				return prevAverage;
-					
-		} else {
-			Vector newGroup = (Vector) previousGroupInfo;
-			
-			Double newValue = Double.valueOf((String) values.get(0));
-			values.clear();
-			
-			int index = ((Double)newGroup.firstElement()).intValue();
-			Double expiredValue = (Double)newGroup.elementAt(index);
-			//if (expiredValue == null)
-			//	expiredValue = Double.valueOf("0");
-			newGroup.set(index, newValue);
-			index = index + 1;
-			
-			if (index > range)
-				index = 1;
-				
-			newGroup.set(0, new Double(index));
-			//Double max = findMax(newGroup);
-			double sum = ((Double)newGroup.elementAt(range+1)).doubleValue();
-			int count = ((Double)newGroup.elementAt(range+2)).intValue();
-			
-			if (count < range) //for the initial several windows;
-				count += 1;
-				
-			sum = sum - expiredValue.doubleValue() + newValue.doubleValue();
-			
-			newGroup.set(range+1, new Double(sum));
-			newGroup.set(range+2, new Double(count));
 
-			return newGroup;
+		} catch (NumberFormatException nfe) {
+			throw new RuntimeException("XXX vpapad what do we do here?!");
 		}
-				
-	} catch (NumberFormatException nfe) {
-		throw new RuntimeException("XXX vpapad what do we do here?!");
 	}
-	}
-	
+
 	/**
 	 * @see niagara.query_engine.PhysicalIncrementalGroup#emptyGroupValue()
 	 */
 	public Object emptyGroupValue() {
-		//return null;
+		// return null;
 		return Double.valueOf("0");
 	}
-	
 
 	public Vector EmptyGroup() {
 
-		Vector emptyGroup = new Vector(range  +3);
+		Vector emptyGroup = new Vector(range + 3);
 		emptyGroup.addElement(Double.valueOf("1"));
-		//the first element is the pointer to the next available element to put the new input item;
-		//the last two elements are used to save the current sum and count;
-		for (int i = 1; i <= range; i++ )
+		// the first element is the pointer to the next available element to put
+		// the new input item;
+		// the last two elements are used to save the current sum and count;
+		for (int i = 1; i <= range; i++)
 			emptyGroup.addElement(emptyGroupValue());
 		emptyGroup.addElement(Double.valueOf("0"));
 		emptyGroup.addElement(Double.valueOf("0"));
-		return emptyGroup;		
+		return emptyGroup;
 	}
-	
-
 
 	/**
 	 * @see niagara.query_engine.PhysicalIncrementalGroup#constructOutput(Object)
@@ -141,16 +142,17 @@ public class PhysicalPartitionAvg extends PhysicalPartitionGroup {
 				return doc.createTextNode(String.valueOf(0.0));
 			GroupStatistics gs = (GroupStatistics) groupInfo;
 			double avg = gs.sum / gs.count;
-				return doc.createTextNode(String.valueOf(avg));
-						
+			return doc.createTextNode(String.valueOf(avg));
+
 		} else {
-			double sum = ((Double)((Vector) groupInfo).elementAt(range+1)).doubleValue();
-			double count = ((Double)((Vector) groupInfo).elementAt(range+2)).doubleValue();
+			double sum = ((Double) ((Vector) groupInfo).elementAt(range + 1))
+					.doubleValue();
+			double count = ((Double) ((Vector) groupInfo).elementAt(range + 2))
+					.doubleValue();
 			double avg = sum / count;
 			return doc.createTextNode(String.valueOf(avg));
 		}
-		
-		
+
 	}
 
 	public Op opCopy() {
@@ -165,8 +167,8 @@ public class PhysicalPartitionAvg extends PhysicalPartitionGroup {
 			return false;
 		if (o.getClass() != PhysicalPartitionAvg.class)
 			return o.equals(this);
-		return logicalGroupOperator.equals(
-			((PhysicalPartitionAvg) o).logicalGroupOperator);
+		return logicalGroupOperator
+				.equals(((PhysicalPartitionAvg) o).logicalGroupOperator);
 	}
 
 	public int hashCode() {

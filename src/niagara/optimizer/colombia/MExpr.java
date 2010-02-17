@@ -1,224 +1,206 @@
-/* $Id: MExpr.java,v 1.7 2003/09/16 04:45:29 vpapad Exp $ 
-   Colombia -- Java version of the Columbia Database Optimization Framework
-
-   Copyright (c)    Dept. of Computer Science , Portland State
-   University and Dept. of  Computer Science & Engineering,
-   OGI School of Science & Engineering, OHSU. All Rights Reserved.
-
-   Permission to use, copy, modify, and distribute this software and
-   its documentation is hereby granted, provided that both the
-   copyright notice and this permission notice appear in all copies
-   of the software, derivative works or modified versions, and any
-   portions thereof, and that both notices appear in supporting
-   documentation.
-
-   THE AUTHORS, THE DEPT. OF COMPUTER SCIENCE DEPT. OF PORTLAND STATE
-   UNIVERSITY AND DEPT. OF COMPUTER SCIENCE & ENGINEERING AT OHSU ALLOW
-   USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION, AND THEY DISCLAIM ANY
-   LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE
-   USE OF THIS SOFTWARE.
-
-   This software was developed with support of NSF grants IRI-9118360,
-   IRI-9119446, IRI-9509955, IRI-9610013, IRI-9619977, IIS 0086002,
-   and DARPA (ARPA order #8230, CECOM contract DAAB07-91-C-Q518).
-*/
 package niagara.optimizer.colombia;
 
 import java.util.BitSet;
 
 /**
-   MULTI_EXPRESSIONS
-
-   MExpr is a compact form of Expr which utilizes sharing.  Inputs are
-   GROUPs instead of EXPRs, so the MExpr embodies several EXPRs.
-   All searching is done with M_EXPRs, so each contains lots of state.
-*/
+ * MULTI_EXPRESSIONS
+ * 
+ * MExpr is a compact form of Expr which utilizes sharing. Inputs are GROUPs
+ * instead of EXPRs, so the MExpr embodies several EXPRs. All searching is done
+ * with M_EXPRs, so each contains lots of state.
+ */
 public class MExpr {
-    private BitSet ruleMask; //If 1, do not fire rule with that index
+	private BitSet ruleMask; // If 1, do not fire rule with that index
 
-    private Op op; //Operator
-    private Group[] inputs;
-    private int grpID; //I reside in this group
-    private Group group; // XXX vpapad: transition uses of group_id -> group
-    public Group getGroup() {
-        return group;
-    }
+	private Op op; // Operator
+	private Group[] inputs;
+	private int grpID; // I reside in this group
+	private Group group; // XXX vpapad: transition uses of group_id -> group
 
-    // link to the next mexpr in the same group 
-    private MExpr nextMExpr;
+	public Group getGroup() {
+		return group;
+	}
 
-    Op getOp() {
-        return op;
-    }
+	// link to the next mexpr in the same group
+	private MExpr nextMExpr;
 
-    public Group getInput(int i) {
-        return inputs[i];
-    }
+	Op getOp() {
+		return op;
+	}
 
-    void setInput(int i, Group group) {
-        inputs[i] = group;
-    }
-    int getGrpID() {
-        return grpID;
-    }
-    int getArity() {
-        return op.getArity();
-    }
+	public Group getInput(int i) {
+		return inputs[i];
+	}
 
-    void setNextMExpr(MExpr mExpr) {
-        nextMExpr = mExpr;
-    }
-    MExpr getNextMExpr() {
-        return nextMExpr;
-    }
+	void setInput(int i, Group group) {
+		inputs[i] = group;
+	}
 
-    //We just fired this rule, so update dont_fire bit vector
-    public void fire_rule(int rule_no) {
-        ruleMask.set(rule_no);
-    }
+	int getGrpID() {
+		return grpID;
+	}
 
-    //Can I fire this rule? 
-    boolean canFire(int rule_no) {
-        return !ruleMask.get(rule_no);
-    }
+	int getArity() {
+		return op.getArity();
+	}
 
-    // Transform an Expr into an MExpr.  
-    // May involve creating new Groups.
-    public MExpr(Expr expr, int grpid, SSP ssp) {
-        op = expr.getOp().copy();
-        grpID = (grpid == SSP.NEW_GRPID) ? ssp.getNewGrpID() : grpid;
-        Expr input;
-        ruleMask = new BitSet(ssp.getRulesetSize());
+	void setNextMExpr(MExpr mExpr) {
+		nextMExpr = mExpr;
+	}
 
-        // copy in the sub-expression
-        int arity = getArity();
-        inputs = new Group[arity];
-        for (int i = 0; i < arity; i++) {
-            input = expr.getInput(i);
+	MExpr getNextMExpr() {
+		return nextMExpr;
+	}
 
-            if (input.getOp().isLeaf())
-                // deal with LeafOp, sharing the existed group
-                inputs[i] = ((LeafOp) input.getOp()).getGroup();
-            else {
-                // create a new sub group
-                MExpr MExpr = ssp.copyIn(input, SSP.NEW_GRPID, true);
-                inputs[i] = MExpr.getGroup();
-            }
-        }
-        ssp.getTracer().newMExpr(this);
-    }
+	// We just fired this rule, so update dont_fire bit vector
+	public void fire_rule(int rule_no) {
+		ruleMask.set(rule_no);
+	}
 
-    // copy constructor
-    // for now, only use for copy into winner circle, 
-    // so only consider physical mexpr, omitting some data members
-    public MExpr(MExpr other) {
-        op = other.getOp().copy();
-        ((PhysicalOp) op).setLogProp(((PhysicalOp) other.getOp()).getLogProp());
-        grpID = other.getGrpID();
-        assert op.isPhysical() || op.is_item();
+	// Can I fire this rule?
+	boolean canFire(int rule_no) {
+		return !ruleMask.get(rule_no);
+	}
 
-        int arity = op.getArity();
-        if (arity > 0) {
-            inputs = new Group[arity];
-            while (--arity >= 0)
-                inputs[arity] = other.getInput(arity);
-        }
-    }
+	// Transform an Expr into an MExpr.
+	// May involve creating new Groups.
+	public MExpr(Expr expr, int grpid, SSP ssp) {
+		op = expr.getOp().copy();
+		grpID = (grpid == SSP.NEW_GRPID) ? ssp.getNewGrpID() : grpid;
+		Expr input;
+		ruleMask = new BitSet(ssp.getRulesetSize());
 
-    // XXX vpapad: lousy hashcode implementation
-    public int hashCode() {
-        int hash = op.hashCode();
-        for (int i = 0; inputs != null && i < inputs.length; i++)
-            hash = hash ^ (inputs[i].hashCode() + i);
-        return hash;
-    }
+		// copy in the sub-expression
+		int arity = getArity();
+		inputs = new Group[arity];
+		for (int i = 0; i < arity; i++) {
+			input = expr.getInput(i);
 
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof MExpr))
-            return false;
-        MExpr mexpr = (MExpr) o;
-        if (!op.equals(mexpr.op) || inputs.length != mexpr.inputs.length)
-            return false;
-        for (int i = 0; i < inputs.length; i++) {
-            if (inputs[i] != mexpr.inputs[i])
-                return false;
-        }
+			if (input.getOp().isLeaf())
+				// deal with LeafOp, sharing the existed group
+				inputs[i] = ((LeafOp) input.getOp()).getGroup();
+			else {
+				// create a new sub group
+				MExpr MExpr = ssp.copyIn(input, SSP.NEW_GRPID, true);
+				inputs[i] = MExpr.getGroup();
+			}
+		}
+		ssp.getTracer().newMExpr(this);
+	}
 
-        return true;
-    }
+	// copy constructor
+	// for now, only use for copy into winner circle,
+	// so only consider physical mexpr, omitting some data members
+	public MExpr(MExpr other) {
+		op = other.getOp().copy();
+		((PhysicalOp) op).setLogProp(((PhysicalOp) other.getOp()).getLogProp());
+		grpID = other.getGrpID();
+		assert op.isPhysical() || op.is_item();
 
-    // String LightDump() {
-    //         String os;
-    //         String temp;
-    //         os = (*Op).Dump();
-    //         int Size = getArity();
-    //         for(int i=0;i<Size;i++)
-    //         {
-    //                 temp.Format("%s%d", " , ", Inputs[i]);
-    //                 os += temp;
-    //         }
-    //         return os;
-    // }
-    // String Dump()
-    // {
-    //         String os;
-    //         String temp;
-    //         os = (*Op).Dump();
-    //         int Size = getArity();
-    //         for(int i=0;i<Size;i++)
-    //         {
-    //                 temp.Format("%s%d", " , ", Inputs[i]);
-    //                 os += temp;
-    //         }
-    //         temp += "[" + FindLocalCost().Dump() + "]; ";
-    //         os += temp;
-    //         return os;
-    // }
-    // Assisting Function -- will call PhysicalOp::FindLocalCost()
-    // Cost FindLocalCost() {
-    //         LogicalProperty LocalLogProp = Ssp.GetGroup(GetGrpID()).getLogProp();
-    //         LogicalProperty **LogProps = new LogicalProperty* [getArity()];
-    //         for(int i=0;i<getArity();i++)
-    //         {
-    //                 LogProps[i]=Ssp.GetGroup(GetInput(i)).getLogProp();
-    //         }
-    //         return ((PhysicalOp*)Op).FindLocalCost(LocalLogProp, LogProps);
+		int arity = op.getArity();
+		if (arity > 0) {
+			inputs = new Group[arity];
+			while (--arity >= 0)
+				inputs[arity] = other.getInput(arity);
+		}
+	}
 
-    void setRuleMask(BitSet v) {
-        ruleMask.clear();
-        ruleMask.or(v);
-    }
+	// XXX vpapad: lousy hashcode implementation
+	public int hashCode() {
+		int hash = op.hashCode();
+		for (int i = 0; inputs != null && i < inputs.length; i++)
+			hash = hash ^ (inputs[i].hashCode() + i);
+		return hash;
+	}
 
-    void addRuleMask(BitSet v) {
-        ruleMask.or(v);
-    }
+	public boolean equals(Object o) {
+		if (o == null || !(o instanceof MExpr))
+			return false;
+		MExpr mexpr = (MExpr) o;
+		if (!op.equals(mexpr.op) || inputs.length != mexpr.inputs.length)
+			return false;
+		for (int i = 0; i < inputs.length; i++) {
+			if (inputs[i] != mexpr.inputs[i])
+				return false;
+		}
 
-    /**
-     * Sets the group.
-     * @param group The group to set
-     */
-    public void setGroup(Group group) {
-        this.group = group;
-        if (op.isPhysical())
-            ((PhysicalOp) op).setLogProp(group.getLogProp());
-    }
+		return true;
+	}
 
-    public String toString() {
-        String opName = op.getName();
-        if (inputs == null || inputs.length == 0)
-            return opName;
-        switch (inputs.length) {
-            case 0 :
-            case 1 :
-                return "(" + opName + " " + inputs[0] + ")";
-            case 2 :
-                return "(" + inputs[0] + " " + opName + " " + inputs[1] + ")";
-            default :
-                String result = "(" + opName;
-                for (int i = 0; i < inputs.length; i++)
-                    result += " " + inputs[i];
-                result += ")";
-                return result;
-        }
-    }
+	// String LightDump() {
+	// String os;
+	// String temp;
+	// os = (*Op).Dump();
+	// int Size = getArity();
+	// for(int i=0;i<Size;i++)
+	// {
+	// temp.Format("%s%d", " , ", Inputs[i]);
+	// os += temp;
+	// }
+	// return os;
+	// }
+	// String Dump()
+	// {
+	// String os;
+	// String temp;
+	// os = (*Op).Dump();
+	// int Size = getArity();
+	// for(int i=0;i<Size;i++)
+	// {
+	// temp.Format("%s%d", " , ", Inputs[i]);
+	// os += temp;
+	// }
+	// temp += "[" + FindLocalCost().Dump() + "]; ";
+	// os += temp;
+	// return os;
+	// }
+	// Assisting Function -- will call PhysicalOp::FindLocalCost()
+	// Cost FindLocalCost() {
+	// LogicalProperty LocalLogProp = Ssp.GetGroup(GetGrpID()).getLogProp();
+	// LogicalProperty **LogProps = new LogicalProperty* [getArity()];
+	// for(int i=0;i<getArity();i++)
+	// {
+	// LogProps[i]=Ssp.GetGroup(GetInput(i)).getLogProp();
+	// }
+	// return ((PhysicalOp*)Op).FindLocalCost(LocalLogProp, LogProps);
+
+	void setRuleMask(BitSet v) {
+		ruleMask.clear();
+		ruleMask.or(v);
+	}
+
+	void addRuleMask(BitSet v) {
+		ruleMask.or(v);
+	}
+
+	/**
+	 * Sets the group.
+	 * 
+	 * @param group
+	 *            The group to set
+	 */
+	public void setGroup(Group group) {
+		this.group = group;
+		if (op.isPhysical())
+			((PhysicalOp) op).setLogProp(group.getLogProp());
+	}
+
+	public String toString() {
+		String opName = op.getName();
+		if (inputs == null || inputs.length == 0)
+			return opName;
+		switch (inputs.length) {
+		case 0:
+		case 1:
+			return "(" + opName + " " + inputs[0] + ")";
+		case 2:
+			return "(" + inputs[0] + " " + opName + " " + inputs[1] + ")";
+		default:
+			String result = "(" + opName;
+			for (int i = 0; i < inputs.length; i++)
+				result += " " + inputs[i];
+			result += ")";
+			return result;
+		}
+	}
 }

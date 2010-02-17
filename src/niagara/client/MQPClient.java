@@ -1,141 +1,138 @@
-/**
- * $Id: MQPClient.java,v 1.9 2007/04/30 19:15:28 vpapad Exp $
- */
-
 package niagara.client;
-
-import niagara.utils.XMLUtils;
-
-import org.apache.xerces.parsers.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
 
 import java.io.StringReader;
 
-// For Jetty Servlet engine
-import org.mortbay.http.*;
+import niagara.utils.XMLUtils;
+
+import org.apache.xerces.parsers.DOMParser;
+import org.mortbay.http.HttpContext;
+import org.mortbay.http.HttpServer;
 import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.util.*;
+import org.mortbay.util.InetAddrPort;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class MQPClient extends SimpleClient {
-    // ??? still requires xerces parser - do we want
-    // to convert this to niagara.ndom.DOMParser??
-    private static DOMParser parser;
-    
-    private static MQPClient mqpclient;
-    
-    private static int queryId;
-    private static String nextId() {
-        return String.valueOf(++queryId);
-    }
-    
-    public MQPClient(String host, int port) {
-        SimpleConnectionReader cr = new SimpleConnectionReader(host, port, this);
-        // Do not proceed if we didn't manage to connect
-        if (!cr.isInitialized()) 
-            return;
-        cm = new ConnectionManager(cr);
-        mqpclient = this;
-    }
+	// ??? still requires xerces parser - do we want
+	// to convert this to niagara.ndom.DOMParser??
+	private static DOMParser parser;
 
-    public static MQPClient getMQPClient() {
-        return mqpclient;
-    }
-    
-    public void processQuery(String queryText) {
-        // parse the query string
-        InputSource is = new InputSource(new StringReader(queryText));
+	private static MQPClient mqpclient;
 
-        try {
-            parser.parse(is);
-        } catch (Exception e) {
-            cerr("Exception while parsing plan file: ");
-            e.printStackTrace();
-            System.exit(-1);
-        }
+	private static int queryId;
 
-        Element plan = null;
-        String query = "";
+	private static String nextId() {
+		return String.valueOf(++queryId);
+	}
 
-        Document d = parser.getDocument();
+	public MQPClient(String host, int port) {
+		SimpleConnectionReader cr = new SimpleConnectionReader(host, port, this);
+		// Do not proceed if we didn't manage to connect
+		if (!cr.isInitialized())
+			return;
+		cm = new ConnectionManager(cr);
+		mqpclient = this;
+	}
 
-        // Get root element
-        plan = d.getDocumentElement();
+	public static MQPClient getMQPClient() {
+		return mqpclient;
+	}
 
-        // Change 'top' attribute to 'display'
-        String old_top = plan.getAttribute("top");
-        plan.setAttribute("top", "display");
+	public void processQuery(String queryText) {
+		// parse the query string
+		InputSource is = new InputSource(new StringReader(queryText));
 
-        // Create a display element and set id and client attributes
-        Element display = d.createElement("display");
-        display.setAttribute("id", "display");
-        display.setAttribute("input", old_top);
-        StringBuffer loc = new StringBuffer();
-        loc.append("http://").append(clientHost).append(":").
-            append(clientPort).append("/servlet/display");
-        display.setAttribute("client_location", loc.toString());
-        display.setAttribute("query_id", nextId());
+		try {
+			parser.parse(is);
+		} catch (Exception e) {
+			cerr("Exception while parsing plan file: ");
+			e.printStackTrace();
+			System.exit(-1);
+		}
 
-        // Add display as the first child of plan
-        plan.insertBefore(display, plan.getFirstChild());
+		Element plan = null;
+		String query = "";
 
-        // Get the query in string format
-	// don't use prettyprint - vassilis is a unix guy, he certainly
-	// won't want any extra characters messing up his query
-        // XXX vassilis: of course not!
-        query = XMLUtils.flatten(d, false); 
+		Document d = parser.getDocument();
 
-        // Send plan to server, and wait for results
-        m_start = System.currentTimeMillis();
-        try {
-            cm.executeQuery(new MQPQuery(query),
-                            Integer.MAX_VALUE);
-        } catch (ClientException ce) {
-            errorMessage(queryId, ce.getMessage());           
-        }
-    }
+		// Get root element
+		plan = d.getDocumentElement();
 
-    public static void main(String args[]) {
-        parser = new DOMParser();        
-        parseArguments(args);
-        try {
-            parser.setFeature("http://xml.org/sax/features/validation", false);
-            parser.setFeature(
-                "http://apache.org/xml/features/nonvalidating/load-external-dtd",
-                false);
+		// Change 'top' attribute to 'display'
+		String old_top = plan.getAttribute("top");
+		plan.setAttribute("top", "display");
 
-        } catch (SAXException e) {
-            System.out.println("error in setting up parser feature");
-            e.printStackTrace();
-        }
-        
-        MQPClient c = new MQPClient(host, port);
-        c.startHTTPServer();
-        c.processQueries();
-    }
+		// Create a display element and set id and client attributes
+		Element display = d.createElement("display");
+		display.setAttribute("id", "display");
+		display.setAttribute("input", old_top);
+		StringBuffer loc = new StringBuffer();
+		loc.append("http://").append(clientHost).append(":").append(clientPort)
+				.append("/servlet/display");
+		display.setAttribute("client_location", loc.toString());
+		display.setAttribute("query_id", nextId());
 
-    void startHTTPServer() {
-        try {
-            // Start HTTP server for interserver communication
-            HttpServer hs = new HttpServer();
-            hs.addListener(new InetAddrPort(clientPort));
-            HttpContext hc = hs.addContext(null, "/servlet/*");
+		// Add display as the first child of plan
+		plan.insertBefore(display, plan.getFirstChild());
 
-            ServletHandler sh = new ServletHandler();
-            ServletHolder sholder =
-                sh.addServlet("/display", "niagara.client.DisplayServlet");
+		// Get the query in string format
+		// don't use prettyprint - vassilis is a unix guy, he certainly
+		// won't want any extra characters messing up his query
+		// XXX vassilis: of course not!
+		query = XMLUtils.flatten(d, false);
 
-            hc.addHandler(sh);
-            hs.start();
-        } catch (Exception e) {
-            cerr("Exception while setting up HTTP server:");
-            e.printStackTrace();
-            System.exit(-1);
-        }
-    }
+		// Send plan to server, and wait for results
+		m_start = System.currentTimeMillis();
+		try {
+			cm.executeQuery(new MQPQuery(query), Integer.MAX_VALUE);
+		} catch (ClientException ce) {
+			errorMessage(queryId, ce.getMessage());
+		}
+	}
 
-    public static void cerr(String msg) {
-        System.err.println("MQPClient: " + msg);
-    }
+	public static void main(String args[]) {
+		parser = new DOMParser();
+		parseArguments(args);
+		try {
+			parser.setFeature("http://xml.org/sax/features/validation", false);
+			parser
+					.setFeature(
+							"http://apache.org/xml/features/nonvalidating/load-external-dtd",
+							false);
+
+		} catch (SAXException e) {
+			System.out.println("error in setting up parser feature");
+			e.printStackTrace();
+		}
+
+		MQPClient c = new MQPClient(host, port);
+		c.startHTTPServer();
+		c.processQueries();
+	}
+
+	void startHTTPServer() {
+		try {
+			// Start HTTP server for interserver communication
+			HttpServer hs = new HttpServer();
+			hs.addListener(new InetAddrPort(clientPort));
+			HttpContext hc = hs.addContext(null, "/servlet/*");
+
+			ServletHandler sh = new ServletHandler();
+			// ServletHolder sholder =
+			sh.addServlet("/display", "niagara.client.DisplayServlet");
+
+			hc.addHandler(sh);
+			hs.start();
+		} catch (Exception e) {
+			cerr("Exception while setting up HTTP server:");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+
+	public static void cerr(String msg) {
+		System.err.println("MQPClient: " + msg);
+	}
 }

@@ -1,5 +1,4 @@
-<!-- $Id: sample_queryplan.dtd,v 1.1 2007/02/14 03:35:15 jinli Exp $
-     DTD for query plans -->
+<!-- DTD for query plans -->
 
 <!-- 
      Plan is a dummy node, representing the output of a query plan.

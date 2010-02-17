@@ -1,41 +1,43 @@
-/* PartitionGroup, Jenny $Id */
 package niagara.logical;
 
 import java.util.Vector;
 
-import niagara.optimizer.colombia.*;
-import niagara.xmlql_parser.*;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Attrs;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.xmlql_parser.skolem;
 
 public abstract class PartitionGroup extends UnaryOperator {
 	// The skolem attributes associated with the group operator
 	protected skolem skolemAttributes;
 
-	public PartitionGroup() {}
-    
+	public PartitionGroup() {
+	}
+
 	public PartitionGroup(skolem skolemAttributes) {
 		this.skolemAttributes = skolemAttributes;
 	}
-    
+
 	public void setSkolemAttributes(skolem skolemAttributes) {
-	this.skolemAttributes = skolemAttributes;
+		this.skolemAttributes = skolemAttributes;
 	}
 
 	public skolem getSkolemAttributes() {
-	return skolemAttributes;
+		return skolemAttributes;
 	}
 
-	/** Does the output schema of this operator include the old group value?*/
+	/** Does the output schema of this operator include the old group value? */
 	public boolean outputOldValue() {
 		return false;
 	}
-	
-	public abstract Boolean landmark();
-	
-	public abstract Integer getRange(); 
 
-	public LogicalProperty findLogProp(
-		ICatalog catalog,
-		LogicalProperty[] input) {
+	public abstract Boolean landmark();
+
+	public abstract Integer getRange();
+
+	@SuppressWarnings("unchecked")
+	public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
 		LogicalProperty inpLogProp = input[0];
 		// XXX vpapad: Really crude, we assume incremental groupbys
 		// have the same cardinality as their input
@@ -48,11 +50,10 @@ public abstract class PartitionGroup extends UnaryOperator {
 			Attribute a = (Attribute) groupbyAttrs.get(i);
 			attrs.add(a);
 		}
-		if (outputOldValue()) 
+		if (outputOldValue())
 			attrs.add(new Variable("old" + skolemAttributes.getName()));
 		attrs.add(new Variable(skolemAttributes.getName()));
-        
-		return  new LogicalProperty(card, attrs, inpLogProp.isLocal());
+
+		return new LogicalProperty(card, attrs, inpLogProp.isLocal());
 	}
 }
-

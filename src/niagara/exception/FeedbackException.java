@@ -7,15 +7,17 @@ package niagara.exception;
  * @author rfernand
  * @version 1.0
  */
-public class FeedbackException extends Exception{
+public class FeedbackException extends Exception {
+
+	private static final long serialVersionUID = 1L;
 
 	/***
 	 * 
-	 * @param message Description of the exception to be thrown.
+	 * @param message
+	 *            Description of the exception to be thrown.
 	 */
-	public FeedbackException(String message){
+	public FeedbackException(String message) {
 		super("Exception thrown while using Feedback-related code. " + message);
-}
-	
-	
+	}
+
 }

@@ -1,57 +1,33 @@
-
-/**********************************************************************
-  $Id: set.java,v 1.1 2003/12/24 01:19:54 vpapad Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
-**********************************************************************/
-
-
-/**
-*
-* This class is used to represent sets in XML-QL.
-* e.g $A IN {author, editor}
-*
-*
-*/
 package niagara.xmlql_parser;
 
-import java.util.*;
+import java.util.Vector;
 
+@SuppressWarnings("unchecked")
+/**
+ *
+ * This class is used to represent sets in XML-QL.
+ * e.g $A IN {author, editor}
+ *
+ *
+ */
 public class set implements condition {
-	private Vector set;     // list of identifiers (author and editor in
-			        //        the above example)
-	private String var;     // the set variable ($A in the above example)
+	private Vector set; // list of identifiers (author and editor in
+	// the above example)
+	private String var; // the set variable ($A in the above example)
 	private regExp equivRE; // produced by ORing the identifiers
-				// the above example will give :
-				//             |
-				//            / \
-				//       author editor
+
+	// the above example will give :
+	// |
+	// / \
+	// author editor
 
 	/**
 	 * Constructor
-	 *
-	 * @param the name of the variable
-	 * @param the list of identifiers
+	 * 
+	 * @param the
+	 *            name of the variable
+	 * @param the
+	 *            list of identifiers
 	 */
 
 	public set(String _var, Vector _set) {
@@ -86,8 +62,9 @@ public class set implements condition {
 
 	/**
 	 * print to the standard output
-	 *
-	 * @param number of tabs at the beginning of each line
+	 * 
+	 * @param number
+	 *            of tabs at the beginning of each line
 	 */
 
 	public void dump(int i) {

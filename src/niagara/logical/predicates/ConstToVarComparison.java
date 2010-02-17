@@ -1,13 +1,14 @@
-/* ConstToVarComparison.java,v 1.4 2002/12/10 01:21:22 vpapad Exp */
 package niagara.logical.predicates;
+
 import java.util.ArrayList;
 
-import niagara.logical.*;
+import niagara.logical.Variable;
 import niagara.optimizer.colombia.Attrs;
 import niagara.physical.predicates.ConstToVarComparisonImpl;
 import niagara.physical.predicates.PredicateImpl;
 
 
+@SuppressWarnings("unchecked")
 public class ConstToVarComparison extends Comparison {
     private Constant left;
     private Variable right;

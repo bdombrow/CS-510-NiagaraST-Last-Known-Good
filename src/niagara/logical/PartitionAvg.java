@@ -1,51 +1,53 @@
-/* PartitionAvg.java, Jenny$Id */
 package niagara.logical;
 
-import org.w3c.dom.Element;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
+import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.Attribute;
-import niagara.connection_server.Catalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
-import niagara.xmlql_parser.*;
+import niagara.xmlql_parser.skolem;
 
-import java.util.Vector;
-import java.util.StringTokenizer;
+import org.w3c.dom.Element;
 
 public class PartitionAvg extends PartitionGroup {
 	private Attribute avgAttribute;
 	private Integer range = null;
 	private Boolean landmark = null;
 
-	public PartitionAvg() {}
-    
+	public PartitionAvg() {
+	}
+
 	public PartitionAvg(skolem skolemAttributes, Attribute avgAttribute) {
 		super(skolemAttributes);
 		this.avgAttribute = avgAttribute;
 	}
 
-/*	public Double getEmptyGroupValue() {
-	return emptyGroupValue;
-	}*/
-	
+	/*
+	 * public Double getEmptyGroupValue() { return emptyGroupValue; }
+	 */
+
 	public Attribute getAvgAttribute() {
 		return avgAttribute;
 	}
-	
+
 	public Boolean landmark() {
 		return landmark;
 	}
-	
-	public Integer getRange () {
+
+	public Integer getRange() {
 		return range;
 	}
-	
+
 	public boolean outputOldValue() {
 		return true;
 	}
 
-	public void dump() {System.out.println(getName());}
+	public void dump() {
+		System.out.println(getName());
+	}
 
 	public Op opCopy() {
 		PartitionAvg op = new PartitionAvg(skolemAttributes, avgAttribute);
@@ -53,7 +55,7 @@ public class PartitionAvg extends PartitionGroup {
 		op.range = range;
 		return op;
 	}
-    
+
 	public boolean equals(Object o) {
 		if (o == null || !(o instanceof PartitionAvg))
 			return false;
@@ -64,17 +66,18 @@ public class PartitionAvg extends PartitionGroup {
 			if (!range.equals(ia.range))
 				return false;
 		return skolemAttributes.equals(ia.skolemAttributes)
-			&& avgAttribute.equals(ia.avgAttribute)
-			&& landmark.equals(ia.landmark);
-			//&& range.equals(ia.range);
+				&& avgAttribute.equals(ia.avgAttribute)
+				&& landmark.equals(ia.landmark);
+		// && range.equals(ia.range);
 	}
-    
+
 	public int hashCode() {
 		return skolemAttributes.hashCode() ^ avgAttribute.hashCode();
 	}
- 
-	public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
-		throws InvalidPlanException {
+
+	@SuppressWarnings("unchecked")
+	public void loadFromXML(Element e, LogicalProperty[] inputProperties,
+			Catalog catalog) throws InvalidPlanException {
 		String id = e.getAttribute("id");
 		String groupby = e.getAttribute("groupby");
 		String avgattr = e.getAttribute("avgattr");
@@ -82,7 +85,7 @@ public class PartitionAvg extends PartitionGroup {
 		String landmarkAttr = e.getAttribute("landmark");
 
 		LogicalProperty inputLogProp = inputProperties[0];
-            
+
 		// Parse the groupby attribute to see what to group on
 		Vector groupbyAttrs = new Vector();
 		StringTokenizer st = new StringTokenizer(groupby);
@@ -99,4 +102,3 @@ public class PartitionAvg extends PartitionGroup {
 		landmark = Boolean.valueOf(landmarkAttr);
 	}
 }
-

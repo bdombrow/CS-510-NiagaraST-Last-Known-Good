@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-#$Id: runSimple,v 1.8 2007/04/30 18:59:58 vpapad Exp $
 
 use Cwd;
 

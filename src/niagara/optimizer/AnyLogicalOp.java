@@ -1,4 +1,3 @@
-/* $Id$ */
 package niagara.optimizer;
 
 import niagara.optimizer.colombia.ICatalog;
@@ -10,59 +9,61 @@ import niagara.utils.PEException;
 /**
  * AnyLogicalOp matches any logical operator
  */
+@SuppressWarnings("unchecked")
 public class AnyLogicalOp extends LogicalOp {
 
-    /**
-     * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog, LogicalProperty[])
-     */
-    public LogicalProperty findLogProp(
-        ICatalog catalog,
-        LogicalProperty[] input) {
-        throw new PEException("AnyLogicalOp has indeterminate logical properties");
-    }
+	/**
+	 * @see niagara.optimizer.colombia.LogicalOp#findLogProp(ICatalog,
+	 *      LogicalProperty[])
+	 */
+	public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+		throw new PEException(
+				"AnyLogicalOp has indeterminate logical properties");
+	}
 
-    /**
-     * @see niagara.optimizer.colombia.Op#copy()
-     */
-    public Op opCopy() {
-        return new AnyLogicalOp();
-    }
+	/**
+	 * @see niagara.optimizer.colombia.Op#copy()
+	 */
+	public Op opCopy() {
+		return new AnyLogicalOp();
+	}
 
-    /**
-     * @see niagara.optimizer.colombia.Op#getName()
-     */
-    public String getName() {
-        return "AnyLogicalOp";
-    }
+	/**
+	 * @see niagara.optimizer.colombia.Op#getName()
+	 */
+	public String getName() {
+		return "AnyLogicalOp";
+	}
 
-    /** */
-    public int getArity() {
-        throw new PEException("AnyLogicalOp has different arities at different times");
-    }
+	/** */
+	public int getArity() {
+		throw new PEException(
+				"AnyLogicalOp has different arities at different times");
+	}
 
-    /**
-     * @see java.lang.Object#equals(Object)
-     */
-    public boolean equals(Object obj) {
-        return (obj != null && obj instanceof AnyLogicalOp);
-    }
+	/**
+	 * @see java.lang.Object#equals(Object)
+	 */
+	public boolean equals(Object obj) {
+		return (obj != null && obj instanceof AnyLogicalOp);
+	}
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
-    public int hashCode() {
-        return 0;
-    }
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+		return 0;
+	}
 
-    public boolean opMatch(Class other) {
-        return true;
-    }
-    
-    /**
-     * @see niagara.optimizer.colombia.Op#matches(Op)
-     */
-    public boolean matches(Op other) {
-        return true;
-    }
+	public boolean opMatch(Class other) {
+		return true;
+	}
+
+	/**
+	 * @see niagara.optimizer.colombia.Op#matches(Op)
+	 */
+	public boolean matches(Op other) {
+		return true;
+	}
 
 }

@@ -1,199 +1,154 @@
-/* $Id: Cost.java,v 1.4 2003/02/25 06:19:08 vpapad Exp $ 
-   Colombia -- Java version of the Columbia Database Optimization Framework
-
-   Copyright (c)    Dept. of Computer Science , Portland State
-   University and Dept. of  Computer Science & Engineering,
-   OGI School of Science & Engineering, OHSU. All Rights Reserved.
-
-   Permission to use, copy, modify, and distribute this software and
-   its documentation is hereby granted, provided that both the
-   copyright notice and this permission notice appear in all copies
-   of the software, derivative works or modified versions, and any
-   portions thereof, and that both notices appear in supporting
-   documentation.
-
-   THE AUTHORS, THE DEPT. OF COMPUTER SCIENCE DEPT. OF PORTLAND STATE
-   UNIVERSITY AND DEPT. OF COMPUTER SCIENCE & ENGINEERING AT OHSU ALLOW
-   USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION, AND THEY DISCLAIM ANY
-   LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE
-   USE OF THIS SOFTWARE.
-
-   This software was developed with support of NSF grants IRI-9118360,
-   IRI-9119446, IRI-9509955, IRI-9610013, IRI-9619977, IIS 0086002,
-   and DARPA (ARPA order #8230, CECOM contract DAAB07-91-C-Q518).
-*/
 package niagara.optimizer.colombia;
 
 /**
-Cost of executing a physical operator, expression or multiexpression
-Cost cannot be associated with a multiexpression, since cost is
-determined by properties desired.  For example, a SELECT will cost
-more if sorted is required.
-
-Cost value of -1 = infinite cost.  
-Any other negative cost is considered an error.
-*/
+ * Cost of executing a physical operator, expression or multiexpression Cost
+ * cannot be associated with a multiexpression, since cost is determined by
+ * properties desired. For example, a SELECT will cost more if sorted is
+ * required.
+ * 
+ * Cost value of -1 = infinite cost. Any other negative cost is considered an
+ * error.
+ */
 public class Cost {
-    // XXX vpapad: -1 is a poor choice for infinite cost
-    // We could use Double.POSITIVE_INFINITY and eliminate
-    // lots of useless checks
+	// XXX vpapad: -1 is a poor choice for infinite cost
+	// We could use Double.POSITIVE_INFINITY and eliminate
+	// lots of useless checks
 
-    private double value; // Later this may be a base class specialized
-    // to various costs: CPU, IO, etc.
-    
-    public Cost() {
-        value = 0;
-    }
+	private double value; // Later this may be a base class specialized
 
-    public Cost(double value) {
-        assert value == -1 || value >= 0;
-        this.value = value;
-    }
+	// to various costs: CPU, IO, etc.
 
-    public Cost(Cost c) {
-        this.value = c.value;
-    }
-    //finalCost() makes "this" equal to the total of local and input costs. 
-    // It is an error if any input is null.  
-    // In a parallel environment, this may involve max.
-    void finalCost(Cost localCost, Cost[] totalInputCost) {
-        value = localCost.value;
-        if (totalInputCost == null) return;
-        for (int i = 0; i < totalInputCost.length; i++) {
-            assert(totalInputCost[i] != null);
-            value += totalInputCost[i].value;
-        }
-    }
+	public Cost() {
+		value = 0;
+	}
 
-    public double getValue() {
-        return value;
-    }
+	public Cost(double value) {
+		assert value == -1 || value >= 0;
+		this.value = value;
+	}
 
-    public String toString() {
-        return Double.toString(value);
-    }
+	public Cost(Cost c) {
+		this.value = c.value;
+	}
 
-    public boolean equals(Object other) {
-        if (other == null || !(other instanceof Cost)) return false;
-        if (other.getClass() != Cost.class) return other.equals(this);
-        return (value == ((Cost) other).value);
-    }
-    
-    public boolean greaterThanEqual(Cost other) {
-        if (value == -1)
-            return true;
-        if (other.value == -1) // -1 means Infinite 
-            return false;
-        return this.value >= other.value;
-    }
+	// finalCost() makes "this" equal to the total of local and input costs.
+	// It is an error if any input is null.
+	// In a parallel environment, this may involve max.
+	void finalCost(Cost localCost, Cost[] totalInputCost) {
+		value = localCost.value;
+		if (totalInputCost == null)
+			return;
+		for (int i = 0; i < totalInputCost.length; i++) {
+			assert (totalInputCost[i] != null);
+			value += totalInputCost[i].value;
+		}
+	}
 
-    public boolean nonZero() {
-        return value > 0 || value == -1;
-    }
+	public double getValue() {
+		return value;
+	}
 
-    public boolean lessThan(Cost other) {
-        if (value == -1)
-            return (false);
+	public String toString() {
+		return Double.toString(value);
+	}
 
-        if (other.value == -1) // -1 means Infinite 
-            return (true);
+	public boolean equals(Object other) {
+		if (other == null || !(other instanceof Cost))
+			return false;
+		if (other.getClass() != Cost.class)
+			return other.equals(this);
+		return (value == ((Cost) other).value);
+	}
 
-        return (this.value < other.value);
-    }
+	public boolean greaterThanEqual(Cost other) {
+		if (value == -1)
+			return true;
+		if (other.value == -1) // -1 means Infinite
+			return false;
+		return this.value >= other.value;
+	}
 
-    public boolean greaterThan(Cost other) {
-        if (value == -1)
-            return (true);
+	public boolean nonZero() {
+		return value > 0 || value == -1;
+	}
 
-        if (other.value == -1) // -1 means Infinite 
-            return (false);
+	public boolean lessThan(Cost other) {
+		if (value == -1)
+			return (false);
 
-        return (this.value > other.value);
-    }
+		if (other.value == -1) // -1 means Infinite
+			return (true);
 
-    public void subtract(Cost other) {
-       if (value == -1 || other.value == -1)    // -1 means Infinite 
-            value = -1; 
-        else
-            value -= other.value;
-    }
+		return (this.value < other.value);
+	}
 
-    public void add(Cost other) {
-       if (value == -1 || other.value == -1)    // -1 means Infinite 
-            return;
-        else
-            value += other.value;
-    }
-    
-    public Cost times(double factor) {
-        return new Cost(value*factor);
-    }
-    
-    public void divide(int parts) {
-        if (value == -1)
-            return;
-        value /= parts;
-    }
-    
-    /* XXX vpapad: commenting out overriden operators
-       to see which of these are needed
-    
-    
-     Cost& operator*=(double EPS) 
-    {
-    	assert(EPS > 0) ;
-    
-    	if(Value==-1)	// -1 means Infinite 
-    		Value = 0;	
-    	else
-    		Value *= EPS;
-    
-        return (*this);
-    }
-    
-     Cost& operator/=(int arity) 
-    {
-    	assert(arity > 0) ;
-    
-    	if(Value==-1)	// -1 means Infinite 
-    		Value = 0;	
-    	else
-    		Value /= arity;
-    
-        return (*this);
-    }
-    
-     Cost& operator=(const Cost &other) 
-    {
-    	this->Value = other.Value;
-        return (*this);
-    }
-    
-    
-     Cost& operator*(double EPS) 
-    {
-    	assert(EPS >= 0) ;
-    
-    	Cost *temp ;
-    	if(Value==-1)	// -1 means Infinite 
-    		temp = new Cost (0);	
-    	else
-    		temp = new Cost (Value * EPS);
-    	return (*temp);
-    	
-    }
-    
-     Cost& operator/(int arity) 
-    {
-    	assert(arity > 0) ;
-    
-    	Cost *temp;
-    	if(Value==-1)	// -1 means Infinite 
-    		temp = new Cost(0);	
-    	else
-    		temp = new Cost (Value / arity);
-    
-        return (*temp);
-    }
-    */
+	public boolean greaterThan(Cost other) {
+		if (value == -1)
+			return (true);
+
+		if (other.value == -1) // -1 means Infinite
+			return (false);
+
+		return (this.value > other.value);
+	}
+
+	public void subtract(Cost other) {
+		if (value == -1 || other.value == -1) // -1 means Infinite
+			value = -1;
+		else
+			value -= other.value;
+	}
+
+	public void add(Cost other) {
+		if (value == -1 || other.value == -1) // -1 means Infinite
+			return;
+		else
+			value += other.value;
+	}
+
+	public Cost times(double factor) {
+		return new Cost(value * factor);
+	}
+
+	public void divide(int parts) {
+		if (value == -1)
+			return;
+		value /= parts;
+	}
+
+	/*
+	 * XXX vpapad: commenting out overriden operators to see which of these are
+	 * needed
+	 * 
+	 * 
+	 * Cost& operator*=(double EPS) { assert(EPS > 0) ;
+	 * 
+	 * if(Value==-1) // -1 means Infinite Value = 0; else Value *= EPS;
+	 * 
+	 * return (*this); }
+	 * 
+	 * Cost& operator/=(int arity) { assert(arity > 0) ;
+	 * 
+	 * if(Value==-1) // -1 means Infinite Value = 0; else Value /= arity;
+	 * 
+	 * return (*this); }
+	 * 
+	 * Cost& operator=(const Cost &other) { this->Value = other.Value; return
+	 * (*this); }
+	 * 
+	 * 
+	 * Cost& operator*(double EPS) { assert(EPS >= 0) ;
+	 * 
+	 * Cost *temp ; if(Value==-1) // -1 means Infinite temp = new Cost (0); else
+	 * temp = new Cost (Value * EPS); return (*temp);
+	 * 
+	 * }
+	 * 
+	 * Cost& operator/(int arity) { assert(arity > 0) ;
+	 * 
+	 * Cost *temp; if(Value==-1) // -1 means Infinite temp = new Cost(0); else
+	 * temp = new Cost (Value / arity);
+	 * 
+	 * return (*temp); }
+	 */
 }

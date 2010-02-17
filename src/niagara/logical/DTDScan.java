@@ -1,214 +1,196 @@
-/**********************************************************************
-  $Id: DTDScan.java,v 1.1 2003/12/24 02:08:29 vpapad Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
-**********************************************************************/
-
-
 package niagara.logical;
 
-import java.util.*;
+import java.util.Vector;
+
+import niagara.connection_server.Catalog;
+import niagara.connection_server.InvalidPlanException;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Attrs;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
+import niagara.optimizer.rules.Initializable;
+import niagara.xmlql_parser.data;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import niagara.connection_server.Catalog;
-import niagara.connection_server.InvalidPlanException;
-import niagara.optimizer.colombia.*;
-import niagara.optimizer.rules.Initializable;
-import niagara.xmlql_parser.*;
-
 /**
- * This class represent dtd Scan operator that fetches the data sources,
- * parses it and then returns the DOM tree to the operator above it.
- *
+ * This class represent dtd Scan operator that fetches the data sources, parses
+ * it and then returns the DOM tree to the operator above it.
+ * 
  */
+@SuppressWarnings("unchecked")
 public class DTDScan extends NullaryOperator implements Initializable {
-   /** the attribute we create */
-   private Attribute variable;
-   private Vector docs;// Vector of urls to scan.
-   private String type;// dtd name (e.g book.dtd)
+	/** the attribute we create */
+	private Attribute variable;
+	private Vector docs;// Vector of urls to scan.
+	private String type;// dtd name (e.g book.dtd)
 
-    public DTDScan() {}
-    
-    public DTDScan(Attribute variable, Vector docs, String type) {
-        this.variable = variable;
-        this.docs = docs;
-        this.type = type;
-    }
-    
-    public DTDScan(DTDScan op) {
-        this(op.variable, op.docs, op.type);
-    }
-    
-    public Op opCopy() {
-        return new DTDScan(this);
-    }
-    
-    public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
-        LogicalProperty lp = null;
+	public DTDScan() {
+	}
 
-        float card = 0;
-        boolean local = true;
+	public DTDScan(Attribute variable, Vector docs, String type) {
+		this.variable = variable;
+		this.docs = docs;
+		this.type = type;
+	}
 
-        // Cardinality is the sum of document cardinalities,
-        // locality is the conjunction of document localities
-        for (int i = 0; i < docs.size(); i++) {
-            lp = catalog.getLogProp((String) docs.get(i));
-            card += lp.getCardinality();
-            local |= lp.isLocal();
-        }
-        
-        return new LogicalProperty(
-            card,
-            new Attrs(variable),
-            local);
-    }
+	public DTDScan(DTDScan op) {
+		this(op.variable, op.docs, op.type);
+	}
 
-    /** Initialize the dtdscan from a resource operator */
-    public void initFrom(LogicalOp op) {
-        Resource rop = (Resource) op;
-        docs = new Vector();
-        docs.addAll(rop.getCatalog().getURL(rop.getURN()));
-        variable = rop.getVariable();
-    }
-    
-   /**
-    * @return list of XML data sources (either URLs or local files)
-    */
-   public Vector getDocs() {
-	return docs;
-   }
+	public Op opCopy() {
+		return new DTDScan(this);
+	}
 
-    /**
-     * This function sets the vector of documents associated with the
-     * dtd scan operator
-     *
-     * @param docVector The set of documents associated with the operator
-     */
+	public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
+		LogicalProperty lp = null;
 
-    public void setDocs (Vector docVector) {
-	docs = docVector;
-    }
+		float card = 0;
+		boolean local = true;
 
-    public Attribute getVariable() {
-        return variable;
-    }
-    
-   /**
-    * @return DTD type of the XML sources to query
-    */
-   public String getDtdType() {
-	return type;
-   }
-  
-   /**
-    * sets the parameters for this operator
-    *
-    * @param list of XML data sources
-    * @param DTD type of these sources
-    */
-   public void setDtdScan(Vector v, String s) {
-	docs = v;
-	type = s;
-   }
+		// Cardinality is the sum of document cardinalities,
+		// locality is the conjunction of document localities
+		for (int i = 0; i < docs.size(); i++) {
+			lp = catalog.getLogProp((String) docs.get(i));
+			card += lp.getCardinality();
+			local |= lp.isLocal();
+		}
 
-   /**
-    * prints this operator to the standard output
-    */
-   public void dump() {
-      System.out.println("DtdScan :");
-      for(int i=0;i<docs.size();i++) {
-	 Object o = docs.elementAt(i);
-	 if(o instanceof String)
-	    System.out.println("\t"+(String)o);
-	 else if(o instanceof data)
-	    ((data)o).dump();
-      }
-      System.out.println("\t"+type);
-   }
+		return new LogicalProperty(card, new Attrs(variable), local);
+	}
 
-   /**
-    * dummy toString method
-    *
-    * @return String representation of this operator
-    */
-   public String toString() {
-      StringBuffer strBuf = new StringBuffer();
-      strBuf.append("Data Scan");
-      return strBuf.toString();
-   }
+	/** Initialize the dtdscan from a resource operator */
+	public void initFrom(LogicalOp op) {
+		Resource rop = (Resource) op;
+		docs = new Vector();
+		docs.addAll(rop.getCatalog().getURL(rop.getURN()));
+		variable = rop.getVariable();
+	}
 
-    public void dumpChildrenInXML(StringBuffer sb) {
-        sb.append(">");
-        for (int i = 0; i < docs.size(); i++)
-            sb.append("<url value='").append(docs.elementAt(i)).append("'/>");
-        sb.append("</dtdscan>");
-    }
-    
-    public boolean isSourceOp() {
-	return true;
-    }
+	/**
+	 * @return list of XML data sources (either URLs or local files)
+	 */
+	public Vector getDocs() {
+		return docs;
+	}
 
-    public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof DTDScan))
-            return false;
-        if (obj.getClass() != DTDScan.class)
-            return obj.equals(this);
-        DTDScan other = (DTDScan) obj;
-        if ((type == null) != (other.type == null))  return false;
-        if (type != null && !type.equals(other.type)) return false;
-        return variable.equals(other.variable) && docs.equals(other.docs);
-    }
+	/**
+	 * This function sets the vector of documents associated with the dtd scan
+	 * operator
+	 * 
+	 * @param docVector
+	 *            The set of documents associated with the operator
+	 */
 
-    public int hashCode() {
-        int hashCode = 0;
-        if (variable != null)
-            hashCode ^= variable.hashCode();
-        if (docs != null)
-            hashCode ^= docs.hashCode();
-        if (type != null)
-            hashCode ^= type.hashCode();
-        return hashCode;
-    }
+	public void setDocs(Vector docVector) {
+		docs = docVector;
+	}
 
-    public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog)
-        throws InvalidPlanException {
-        String id = e.getAttribute("id");
+	public Attribute getVariable() {
+		return variable;
+	}
 
-        // The node's children contain URLs
-        Vector urls = new Vector();
-        NodeList children = ((Element) e).getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            if (child.getNodeType() != Node.ELEMENT_NODE)
-                continue;
-            urls.addElement(((Element) child).getAttribute("value"));
-        }
+	/**
+	 * @return DTD type of the XML sources to query
+	 */
+	public String getDtdType() {
+		return type;
+	}
 
-        setDocs(urls);
-        variable = new Variable(id, NodeDomain.getDOMNode());
-    }
-   
+	/**
+	 * sets the parameters for this operator
+	 * 
+	 * @param list
+	 *            of XML data sources
+	 * @param DTD
+	 *            type of these sources
+	 */
+	public void setDtdScan(Vector v, String s) {
+		docs = v;
+		type = s;
+	}
+
+	/**
+	 * prints this operator to the standard output
+	 */
+	public void dump() {
+		System.out.println("DtdScan :");
+		for (int i = 0; i < docs.size(); i++) {
+			Object o = docs.elementAt(i);
+			if (o instanceof String)
+				System.out.println("\t" + (String) o);
+			else if (o instanceof data)
+				((data) o).dump();
+		}
+		System.out.println("\t" + type);
+	}
+
+	/**
+	 * dummy toString method
+	 * 
+	 * @return String representation of this operator
+	 */
+	public String toString() {
+		StringBuffer strBuf = new StringBuffer();
+		strBuf.append("Data Scan");
+		return strBuf.toString();
+	}
+
+	public void dumpChildrenInXML(StringBuffer sb) {
+		sb.append(">");
+		for (int i = 0; i < docs.size(); i++)
+			sb.append("<url value='").append(docs.elementAt(i)).append("'/>");
+		sb.append("</dtdscan>");
+	}
+
+	public boolean isSourceOp() {
+		return true;
+	}
+
+	public boolean equals(Object obj) {
+		if (obj == null || !(obj instanceof DTDScan))
+			return false;
+		if (obj.getClass() != DTDScan.class)
+			return obj.equals(this);
+		DTDScan other = (DTDScan) obj;
+		if ((type == null) != (other.type == null))
+			return false;
+		if (type != null && !type.equals(other.type))
+			return false;
+		return variable.equals(other.variable) && docs.equals(other.docs);
+	}
+
+	public int hashCode() {
+		int hashCode = 0;
+		if (variable != null)
+			hashCode ^= variable.hashCode();
+		if (docs != null)
+			hashCode ^= docs.hashCode();
+		if (type != null)
+			hashCode ^= type.hashCode();
+		return hashCode;
+	}
+
+	public void loadFromXML(Element e, LogicalProperty[] inputProperties,
+			Catalog catalog) throws InvalidPlanException {
+		String id = e.getAttribute("id");
+
+		// The node's children contain URLs
+		Vector urls = new Vector();
+		NodeList children = ((Element) e).getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node child = children.item(i);
+			if (child.getNodeType() != Node.ELEMENT_NODE)
+				continue;
+			urls.addElement(((Element) child).getAttribute("value"));
+		}
+
+		setDocs(urls);
+		variable = new Variable(id, NodeDomain.getDOMNode());
+	}
+
 }

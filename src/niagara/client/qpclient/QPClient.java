@@ -1,6 +1,3 @@
-/**
- * $Id: QPClient.java,v 1.9 2008/10/21 23:11:25 rfernand Exp $
- */
 /*
 package niagara.client.qpclient;
 

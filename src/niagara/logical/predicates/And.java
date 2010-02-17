@@ -1,4 +1,3 @@
-/* $Id: And.java,v 1.1 2003/12/24 02:03:51 vpapad Exp $ */
 package niagara.logical.predicates;
 
 import java.util.ArrayList;
@@ -24,7 +23,8 @@ public class And extends BinaryPredicate {
     /**
      * @see niagara.logical.Predicate#getReferencedVariables(ArrayList)
      */
-    public void getReferencedVariables(ArrayList al) {
+    @SuppressWarnings("unchecked")
+	public void getReferencedVariables(ArrayList al) {
         left.getReferencedVariables(al);
         right.getReferencedVariables(al);
     }

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: catalog.xml,v 1.7 2008/10/21 23:11:13 rfernand Exp $ --><catalog>
+<catalog>
   <streams>
     <stream delay="-1" filename="/stash/datalab/datastreams-student/streamdata/auctions10k.xml" isStream="yes" name="auctions">
       <var name="id" type="int"/>

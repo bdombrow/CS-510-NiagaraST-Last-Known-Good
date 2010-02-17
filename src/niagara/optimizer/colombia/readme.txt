@@ -1,4 +1,4 @@
-/* $Id: readme.txt,v 1.3 2003/02/25 06:19:08 vpapad Exp $ 
+/*  
    Colombia -- Java version of the Columbia Database Optimization Framework
 
    Copyright (c)    Dept. of Computer Science , Portland State

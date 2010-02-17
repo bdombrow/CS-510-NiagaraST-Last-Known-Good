@@ -1,28 +1,6 @@
-/* $Id: DBThread.java,v 1.27 2008/10/21 23:11:35 rfernand Exp $ */
-
 package niagara.data_manager;
 
-/**
- * Niagra DataManager DBThread - an input thread to connect to a database,
- * execute a query and put the results into a stream of tuples that can be
- * processed by the database
- */
-
 import java.lang.reflect.Array;
-import org.w3c.dom.*;
-import javax.xml.parsers.*;
-
-import niagara.logical.DBScan;
-import niagara.logical.DBScanSpec;
-import niagara.optimizer.colombia.*;
-import niagara.query_engine.TupleSchema;
-import niagara.utils.*;
-import niagara.utils.BaseAttr.Type;
-import niagara.logical.SimilaritySpec;
-import niagara.logical.PrefetchSpec;
-import niagara.connection_server.NiagraServer;
-
-// for jdbc
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -31,49 +9,89 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Properties;
-import java.sql.Time;
 
-/**
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import niagara.connection_server.NiagraServer;
+import niagara.logical.DBScan;
+import niagara.logical.DBScanSpec;
+import niagara.logical.PrefetchSpec;
+import niagara.logical.SimilaritySpec;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Attrs;
+import niagara.optimizer.colombia.Cost;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
+import niagara.query_engine.TupleSchema;
+import niagara.utils.BaseAttr;
+import niagara.utils.CPUTimer;
+import niagara.utils.ControlFlag;
+import niagara.utils.IntegerAttr;
+import niagara.utils.JProf;
+import niagara.utils.LongAttr;
+import niagara.utils.PEException;
+import niagara.utils.ShutdownException;
+import niagara.utils.SinkTupleStream;
+import niagara.utils.StringAttr;
+import niagara.utils.TSAttr;
+import niagara.utils.Tuple;
+import niagara.utils.XMLAttr;
+
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+/***
+ * Niagara DataManager DBThread - an input thread to connect to a database,
+ * execute a query and put the results into a stream of tuples that can be
+ * processed by the database
+ * 
  * DBThread provides a SourceThread compatible interface to fetch data from a
  * rdbms via jdbc
  */
-public class DBThread extends SourceThread {	
+@SuppressWarnings( { "unchecked", "unused" })
+public class DBThread extends SourceThread {
 	// some truth we all know;
 	public static final int SECOND_PER_MIN = 60;
 	public static final int MILLISEC_PER_SEC = 1000;
 	public static final int MIN_PER_HOUR = 60;
 	public static final int HOUR_PER_DAY = 24;
-    public static final int DAYS_PER_WEEK = 7;
-    
-    private static final int ONE_DEMO_RUN = 4 * MIN_PER_HOUR * SECOND_PER_MIN * MILLISEC_PER_SEC;
-    
-    // the maximum prefetch allowed; in seconds;
-    private static final long LOOK_AHEAD = 600; 
-    
-    // pane size of the db query; in seconds;
-    private static final int PANE = 60;
-    private static final double RATIO = 0.5;
-    public static final boolean ADAPTING = false;
+	public static final int DAYS_PER_WEEK = 7;
 
-       
-    // weather similarity hack;
-    private static final int MAX_HISTORY = 60;
-    private static final int LOOKBACK = 30;
-    private static final int WEATHER_OFFSET = 3; 
-    private static final int TIME_COLUMN = 1;
+	private static final int ONE_DEMO_RUN = 4 * MIN_PER_HOUR * SECOND_PER_MIN
+			* MILLISEC_PER_SEC;
 
-	
+	// the maximum prefetch allowed; in seconds;
+	private static final long LOOK_AHEAD = 600;
+
+	// pane size of the db query; in seconds;
+	private static final int PANE = 60;
+	private static final double RATIO = 0.5;
+	public static final boolean ADAPTING = false;
+
+	// weather similarity hack;
+	private static final int MAX_HISTORY = 60;
+	private static final int LOOKBACK = 30;
+	private static final int WEATHER_OFFSET = 3;
+	private static final int TIME_COLUMN = 1;
+
 	// think these are optimization time??
 	public DBScanSpec dbScanSpec;
 	private Attribute[] variables;
 	private SimilaritySpec sSpec;
 	private PrefetchSpec pfSpec;
-	
+
 	// database connection;
 	private Connection conn = null;
 	private Statement stmt = null;
-	
+
 	private ArrayList similarDate;
 	private long epoch = -1;
 
@@ -82,80 +100,74 @@ public class DBThread extends SourceThread {
 	public CPUTimer cpuTimer;
 	private ArrayList newQueries;
 	private boolean finish = false;
-	private boolean shutdown = false; 
-	
-    // high watermark on the time predicate of db query;
-    private long query_highWatermark = Long.MIN_VALUE;
+	private boolean shutdown = false;
 
-	// whether this is a first query got from punctQC? 
+	// high watermark on the time predicate of db query;
+	private long query_highWatermark = Long.MIN_VALUE;
+
+	// whether this is a first query got from punctQC?
 	private int count = 0;
-	
-	// high watermark time monitored or stream and db;
-	private long streamTime=Long.MIN_VALUE, dbTime = Long.MIN_VALUE;
-	
-	/*private static long weather_02_20 [][] = {
-		{1171976400, 14},
-		{1171980000, 18}, 
-		{1171983600, 8}, 
-		{1171987200, 0}, 
-		{1171990800, 0}, 
-		{1171994400, 0}};*/
 
-  private static long weather [][] = {
-    {1174338000, 8},
-    {1174341600, 6},
-    {1174345200, 5},
-    {1174348800, 6},
-    {1174352400, 4},
-    {1174356000, 1}
-        };
-	
+	// high watermark time monitored or stream and db;
+	private long streamTime = Long.MIN_VALUE, dbTime = Long.MIN_VALUE;
+
+	/*
+	 * private static long weather_02_20 [][] = { {1171976400, 14}, {1171980000,
+	 * 18}, {1171983600, 8}, {1171987200, 0}, {1171990800, 0}, {1171994400, 0}};
+	 */
+
+	private static long weather[][] = { { 1174338000, 8 }, { 1174341600, 6 },
+			{ 1174345200, 5 }, { 1174348800, 6 }, { 1174352400, 4 },
+			{ 1174356000, 1 } };
+
 	private class Query {
-		public Query (String query, long start, long end) {
+		public Query(String query, long start, long end) {
 			queryStr = query;
-		    this.start = start;
+			this.start = start;
 			this.end = end;
 		}
-		
+
 		String queryStr;
 		long start, end;
-		//long upperTS;
+		// long upperTS;
 	}
-	
+
 	// intrumentation
 	boolean polled = false;
 	Document doc;
-	
+
 	private class Stage {
-		//for x-axis
-		//long starttime, endtime;
+		// for x-axis
+		// long starttime, endtime;
 		// for y-axis
 		ArrayList<Long> dates;
-		
-        Actors activeActors;
-        Actors exeunt;
+
+		Actors activeActors;
+		Actors exeunt;
 	};
-	
+
 	private class Actors {
-		//ArrayList <Long> dates;
-		ArrayList <Long> starts;
-		ArrayList <Long> ends;
-		ArrayList <Status> status;
+		// ArrayList <Long> dates;
+		ArrayList<Long> starts;
+		ArrayList<Long> ends;
+		ArrayList<Status> status;
 	};
-	
-	enum Status {FUTURE, DONE, PROGRESS};
+
+	enum Status {
+		FUTURE, DONE, PROGRESS
+	};
 
 	private ArrayList<Stage> stagelist;
-	//private Actors activeActors;
-	//private Actors exeunt;
-	
+	// private Actors activeActors;
+	// private Actors exeunt;
+
 	// object for synchronization;
-	private Object synch = new Object(); 
-	
+	private Object synch = new Object();
+
 	public DBThread() {
 		newQueries = new ArrayList();
 	}
-	
+
 	/**
 	 * @see niagara.optimizer.colombia.PhysicalOp#initFrom(LogicalOp)
 	 */
@@ -203,8 +215,8 @@ public class DBThread extends SourceThread {
 		if (o.getClass() != getClass())
 			return o.equals(this);
 		// XXX vpapad: Spec.equals is Object.equals
-		return dbScanSpec.equals(((DBThread) o).dbScanSpec) ^ 
-				equalsNullsAllowed(sSpec, ((DBThread) o).sSpec);
+		return dbScanSpec.equals(((DBThread) o).dbScanSpec)
+				^ equalsNullsAllowed(sSpec, ((DBThread) o).sSpec);
 	}
 
 	/**
@@ -224,13 +236,13 @@ public class DBThread extends SourceThread {
 	}
 
 	public void dumpAttributesInXML(StringBuffer sb) {
-	    sb.append(" var='");
-	    for (int i = 0; i < variables.length; i++) {
-		sb.append(variables[i].getName());
-		if (i != variables.length-1)
-		    sb.append(", ");
-	    }
-	    sb.append("'/>");
+		sb.append(" var='");
+		for (int i = 0; i < variables.length; i++) {
+			sb.append(variables[i].getName());
+			if (i != variables.length - 1)
+				sb.append(", ");
+		}
+		sb.append("'/>");
 	}
 
 	/**
@@ -239,22 +251,21 @@ public class DBThread extends SourceThread {
 	 */
 	public void run() {
 
-		
 		try {
 			Class.forName("org.postgresql.Driver");
-	
+
 		} catch (ClassNotFoundException e) {
 			System.out.println("Class not found " + e.getMessage());
 			return;
 		}
 		if (niagara.connection_server.NiagraServer.RUNNING_NIPROF)
 			JProf.registerThreadName(this.getName());
-	
+
 		if (niagara.connection_server.NiagraServer.TIME_OPERATORS) {
 			this.cpuTimer = new CPUTimer();
 			this.cpuTimer.start();
 		}
-	
+
 		// steps
 		// connect to the database
 		// execute the query
@@ -263,133 +274,141 @@ public class DBThread extends SourceThread {
 
 		try {
 			System.out.println("Attempting to connect to server.");
-			conn = DriverManager.getConnection("jdbc:postgresql://barista.cs.pdx.edu/latte", "tufte", "loopdata");
+			conn = DriverManager.getConnection(
+					"jdbc:postgresql://barista.cs.pdx.edu/latte", "tufte",
+					"loopdata");
 
 			System.out.println("Connected.");
-			
+
 			stmt = conn.createStatement();
 
 			stmt.execute("SET work_mem=100000");
 			String qs;
-			
+
 			long roundtrip;
-			
+
 			// one time db query;
 			if (dbScanSpec.oneTime()) {
 				qs = dbScanSpec.getQueryString();
-				System.out.println("query string: "+qs);
-		
+				System.out.println("query string: " + qs);
+
 				System.out.println("DB Query is:" + qs);
 				System.out.println("Attempting to execute one-time query.");
 
 				rs = stmt.executeQuery(qs);
-				System.out.println("Executed.");				
-		
+				System.out.println("Executed.");
+
 				// Now do something with the ResultSet ....
 				int numAttrs = dbScanSpec.getNumAttrs();
 				System.out.println("Num Attrs: " + numAttrs);
-				
+
 				putResults(rs, numAttrs);
 
 				outputStream.endOfStream();
-			} else 
+			} else
 				do { // continuous db scan
 					/*
 					 * response to query shutdown;
 					 */
 					if (shutdown) {
-						outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, "bouncing back SHUTDOWN msg");
-						
+						outputStream.putCtrlMsg(ControlFlag.SHUTDOWN,
+								"bouncing back SHUTDOWN msg");
+
 						break;
 					}
-						
+
 					checkForSinkCtrlMsg(-1);
 					/*
 					 * if this is a continuous db scan
-					 */	
-					if (newQueries.size()==0) {
-						if (finish){
+					 */
+					if (newQueries.size() == 0) {
+						if (finish) {
 							outputStream.endOfStream();
 							break;
 						} else {
-							//blocking call to get ctrl msg;
-							checkForSinkCtrlMsg(1*MILLISEC_PER_SEC);
-							
-							if (newQueries.size()==0)
+							// blocking call to get ctrl msg;
+							checkForSinkCtrlMsg(1 * MILLISEC_PER_SEC);
+
+							if (newQueries.size() == 0)
 								continue;
 						}
 					}
-						
+
 					stmt = conn.createStatement();
 					if (NiagraServer.DEBUG)
-						System.out.println("Attempting to execute continuous query.");
-									
+						System.out
+								.println("Attempting to execute continuous query.");
+
 					Query curQuery = (Query) newQueries.remove(0);
 					if (NiagraServer.DEBUG)
 						System.err.println(curQuery.queryStr);
-					
+
 					// an actor is in progress
 					synchronized (synch) {
-						//activeActors.status.set(0, Status.PROGRESS);
-						for (Stage curr: stagelist) {
+						// activeActors.status.set(0, Status.PROGRESS);
+						for (Stage curr : stagelist) {
 							if (curr.activeActors.status.size() != 0) {
-								curr.activeActors.status.set(0, Status.PROGRESS);
+								curr.activeActors.status
+										.set(0, Status.PROGRESS);
 								break;
 							}
 						}
 					}
-				
-          if(NiagraServer.DEBUG2)
-					  System.err.println("before execute: "+streamTime);
-					
+
+					if (NiagraServer.DEBUG2)
+						System.err.println("before execute: " + streamTime);
+
 					roundtrip = streamTime;
-					
+
 					rs = stmt.executeQuery(curQuery.queryStr);
 					checkAllSinkCtrlMsg();
 					// Now do something with the ResultSet ....
 					int numAttrs = dbScanSpec.getNumAttrs();
-									
+
 					putResults(rs, numAttrs);
 					dbTime = curQuery.end;
-					
-					roundtrip = streamTime - roundtrip;					
 
-          if(NiagraServer.DEBUG)
-					  System.err.println("after execute: "+streamTime);
-					
-          if(NiagraServer.DEBUG2)
-					  System.err.println ("db time: "+dbTime);
-				
-          if(ADAPTING)
-					  adjustPrefetch(roundtrip);
-					
+					roundtrip = streamTime - roundtrip;
+
+					if (NiagraServer.DEBUG)
+						System.err.println("after execute: " + streamTime);
+
+					if (NiagraServer.DEBUG2)
+						System.err.println("db time: " + dbTime);
+
+					if (ADAPTING)
+						adjustPrefetch(roundtrip);
+
 					// the actor is done, moved to exeunt list;
 					synchronized (synch) {
-						//Stage curr = stagelist.get(stagelist.size() - 1);
-						for (Stage curr: stagelist) {
+						// Stage curr = stagelist.get(stagelist.size() - 1);
+						for (Stage curr : stagelist) {
 							if (curr.activeActors.status.size() != 0) {
 								if (curr.exeunt == null) {
 									curr.exeunt = new Actors();
-									curr.exeunt.starts = new ArrayList <Long> ();
-									curr.exeunt.ends = new ArrayList <Long> ();
-									curr.exeunt.status = new ArrayList <Status> ();
+									curr.exeunt.starts = new ArrayList<Long>();
+									curr.exeunt.ends = new ArrayList<Long>();
+									curr.exeunt.status = new ArrayList<Status>();
 								}
-								curr.exeunt.starts.add(curr.activeActors.starts.remove(0));
-								curr.exeunt.ends.add(curr.activeActors.ends.remove(0));
+								curr.exeunt.starts.add(curr.activeActors.starts
+										.remove(0));
+								curr.exeunt.ends.add(curr.activeActors.ends
+										.remove(0));
 								curr.activeActors.status.remove(0);
 								curr.exeunt.status.add(Status.DONE);
 
-								break;		
+								break;
 							}
 						}
 					}
-					
-					//ArrayList instrumentationNames = new ArrayList ();
-					//ArrayList instrumentationValues = new ArrayList ();
-					//getInstrumentationValues(instrumentationNames, instrumentationValues);
-					
+
+					// ArrayList instrumentationNames = new ArrayList ();
+					// ArrayList instrumentationValues = new ArrayList ();
+					// getInstrumentationValues(instrumentationNames,
+					// instrumentationValues);
+
 				} while (true);
-			
+
 		} catch (SQLException ex) {
 			// handle any errors
 			System.out.println("SQLException: " + ex.getMessage());
@@ -400,110 +419,118 @@ public class DBThread extends SourceThread {
 			} catch (Exception e) {
 				// just ignore it
 			}
-		} catch(ShutdownException se) {
+		} catch (ShutdownException se) {
 			try {
-			//outputStream.endOfStream();
+				// outputStream.endOfStream();
 			} catch (Exception e) {
-				//ignore it
+				// ignore it
 			}
-			// no need to send shutdown, we must have got it from the output stream
-		} catch(InterruptedException ie) {
+			// no need to send shutdown, we must have got it from the output
+			// stream
+		} catch (InterruptedException ie) {
 			try {
 				outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, ie.getMessage());
 			} catch (Exception e) {
 				// just ignore it
 			}
 		} finally {
-		 // it is a good idea to release
-		 // resources in a finally{} block
-		 // in reverse-order of their creation
-		 // if they are no-longer needed
-	
-		 if (rs != null) {
-		 try {
-			 rs.close();
-		 } catch (SQLException sqlEx) { // ignore
-			 rs = null;
-		 }
-		 }
-	
-		 if (stmt != null) {
-		 try {
-			 stmt.close();
-		 } catch (SQLException sqlEx) { // ignore
-			 stmt = null;
-		 }
-		 }
-	
-		 if (conn != null) {
-		 try {
-			 conn.close();
-		 } catch (SQLException sqlEx) { // ignore
-			 conn = null;
-		 }
-		 }
-	   }// end of finally
-	
+			// it is a good idea to release
+			// resources in a finally{} block
+			// in reverse-order of their creation
+			// if they are no-longer needed
 
-	}	// end of run method
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException sqlEx) { // ignore
+					rs = null;
+				}
+			}
+
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException sqlEx) { // ignore
+					stmt = null;
+				}
+			}
+
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException sqlEx) { // ignore
+					conn = null;
+				}
+			}
+		}// end of finally
+
+	} // end of run method
 
 	/**
 	 * @param roundtrip
 	 */
-	private void adjustPrefetch(long roundtrip) 
-	throws java.lang.InterruptedException, ShutdownException, SQLException {
+	private void adjustPrefetch(long roundtrip)
+			throws java.lang.InterruptedException, ShutdownException,
+			SQLException {
 		// if database data lags behind? (dbTime is smaller than streamTime)
-		
+
 		checkForSinkCtrlMsg(-1);
-		if (!intime ()) {
+		if (!intime()) {
 			int size = pfSpec.getCoverage();
-      if(NiagraServer.DEBUG2)
-			  System.err.println("++++++++++++++++++roundtrip time: "+roundtrip);
+			if (NiagraServer.DEBUG2)
+				System.err.println("++++++++++++++++++roundtrip time: "
+						+ roundtrip);
 			System.err.println("db is beind");
 			// is database keeping up?
 			if (roundtrip > size) {
 				// increase db query size, which decreases db load
-				System.err.println("increase coverage: "+pfSpec.getCoverage()+ "by "+PANE);
+				System.err.println("increase coverage: " + pfSpec.getCoverage()
+						+ "by " + PANE);
 				pfSpec.setCoverage(size + PANE);
-			} else { 
+			} else {
 				// if database keeps up, and database data lags behind,
-				// we should increase prefetching 
+				// we should increase prefetching
 				int val = pfSpec.getPrefetchVal();
 				if (val <= pfSpec.getCoverage()) {
-					System.err.println("increase prefetch: "+pfSpec.getPrefetchVal()+ "by "+PANE);
+					System.err.println("increase prefetch: "
+							+ pfSpec.getPrefetchVal() + "by " + PANE);
 					pfSpec.setPrefetchVal(val + PANE);
 				}
 			}
-		} else if (farAhead ()) { // is database data far ahead of the stream? - this means we need to buffer too much
+		} else if (farAhead()) { // is database data far ahead of the stream? -
+									// this means we need to buffer too much
 			int size = pfSpec.getCoverage();
 			System.err.println("db is too far ahead");
-			//if (roundtrip < size - PANE) {
-			if (roundtrip < size*RATIO) {
-				System.err.println("decrease coverage: "+pfSpec.getCoverage()+ "by "+size*RATIO);
-				pfSpec.setCoverage(Double.valueOf(size*RATIO).intValue());
+			// if (roundtrip < size - PANE) {
+			if (roundtrip < size * RATIO) {
+				System.err.println("decrease coverage: " + pfSpec.getCoverage()
+						+ "by " + size * RATIO);
+				pfSpec.setCoverage(Double.valueOf(size * RATIO).intValue());
 
-				//System.err.println("decrease coverage: "+pfSpec.getCoverage()+ "by "+PANE);
-				//pfSpec.setCoverage(size-PANE);
+				// System.err.println("decrease coverage: "+pfSpec.getCoverage()+
+				// "by "+PANE);
+				// pfSpec.setCoverage(size-PANE);
 			} else {
-				System.err.println("decrease prefetch: "+pfSpec.getPrefetchVal()+ "by "+PANE);
+				System.err.println("decrease prefetch: "
+						+ pfSpec.getPrefetchVal() + "by " + PANE);
 				int val = pfSpec.getPrefetchVal();
-				//pfSpec.setPrefetchVal(val-PANE);
-				pfSpec.setPrefetchVal(Double.valueOf(val*RATIO).intValue());
+				// pfSpec.setPrefetchVal(val-PANE);
+				pfSpec.setPrefetchVal(Double.valueOf(val * RATIO).intValue());
 			}
 		}
 	}
-	
-	private void putResults (ResultSet rs, int numAttrs) 
-		throws SQLException, ShutdownException, InterruptedException {
+
+	private void putResults(ResultSet rs, int numAttrs) throws SQLException,
+			ShutdownException, InterruptedException {
 
 		while (rs.next()) {
 			Tuple newtuple = new Tuple(false, numAttrs);
-			for(int i = 1; i<= numAttrs; i++) {
+			for (int i = 1; i <= numAttrs; i++) {
 				// get attribut type
 				// then create the appropriate object
 				// finally, load attribute into the tuple
 				BaseAttr attr;
-				switch(dbScanSpec.getAttrType(i-1)) {
+				switch (dbScanSpec.getAttrType(i - 1)) {
 				case Int:
 					attr = new IntegerAttr();
 					Integer iObj = new Integer(rs.getInt(i));
@@ -528,216 +555,226 @@ public class DBThread extends SourceThread {
 					attr.loadFromObject(rs.getString(i));
 					break;
 				default:
-					throw new PEException("Invalid type " + dbScanSpec.getAttrType(i));
+					throw new PEException("Invalid type "
+							+ dbScanSpec.getAttrType(i));
 				}
-				
+
 				newtuple.appendAttribute(attr);
-			}  // end for
+			} // end for
 			ArrayList ctrl = outputStream.putTuple(newtuple);
-			while(ctrl != null) {
+			while (ctrl != null) {
 				processCtrlMsgFromSink(ctrl);
 				ctrl = outputStream.flushBuffer();
-				//assert ctrlFlag == CtrlFlags.NULLFLAG: "bad ctrl flag ";
+				// assert ctrlFlag == CtrlFlags.NULLFLAG: "bad ctrl flag ";
 			}
-			
-		} // end while				
+
+		} // end while
 
 	}
-	
-    public void checkForSinkCtrlMsg(int timeout)
-	throws java.lang.InterruptedException, ShutdownException, SQLException {
-	// Loop over all sink streams, checking for control elements
-    ArrayList ctrl;
 
-    // Make sure the stream is not closed before checking is done
-    if (!outputStream.isClosed()) {
-    	ctrl = outputStream.getCtrlMsg(timeout);
-    	//ctrl = outputStream.getCtrlMsg(1*MILLISEC_PER_SEC);
-	    
-    	// If got a ctrl message, process it
-    	if (ctrl != null) {
-    		processCtrlMsgFromSink(ctrl);
-    	}
-    }
-    }
-    
-    private void checkAllSinkCtrlMsg () 
-    throws java.lang.InterruptedException, ShutdownException, SQLException{
+	public void checkForSinkCtrlMsg(int timeout)
+			throws java.lang.InterruptedException, ShutdownException,
+			SQLException {
+		// Loop over all sink streams, checking for control elements
+		ArrayList ctrl;
 
-        ArrayList ctrlMsgList = new ArrayList ();
+		// Make sure the stream is not closed before checking is done
+		if (!outputStream.isClosed()) {
+			ctrl = outputStream.getCtrlMsg(timeout);
+			// ctrl = outputStream.getCtrlMsg(1*MILLISEC_PER_SEC);
 
-        // Make sure the stream is not closed before checking is done
-        if (!outputStream.isClosed()) {
-            ArrayList ctrl;
-        	do {
-        	ctrl = outputStream.getCtrlMsg(-1);
-    	    
-        	// If got a ctrl message, process it
-        	if (ctrl != null) {
-        		ctrlMsgList.add(ctrl);
-        	}
-        	} while (ctrl != null);
-        }
-        for (Object ctrl : ctrlMsgList)
-        	processCtrlMsgFromSink((ArrayList)ctrl);
-    }
-    
-    public void processCtrlMsgFromSink(ArrayList ctrl) 
-    	throws SQLException, ShutdownException, InterruptedException {
-    	if (ctrl == null)
-    		return;
-    	
-    	ControlFlag ctrlFlag = (ControlFlag)ctrl.get(0); 
-    	String ctrlMsg = (String)ctrl.get(1);
-    	switch (ctrlFlag) {
-    	case CHANGE_QUERY:
-    		streamTime = Long.valueOf(ctrlMsg);
-    		String range = queryRange(ctrlMsg);
-    		if (range != null)
-    			newQueries.add(changeQuery(range));
-    		
-    		break;
-    	case READY_TO_FINISH:
-    		System.err.println("live stream ends...");
-    		finish = true;
-    		break;
-    	case SHUTDOWN: //handle query shutdown;
-    		System.err.println("ready to shutdown at DBThread");
-    		shutdown = true;
-    		break;
-    	default:
-    		assert false : "KT unexpected control message from source " + ctrlFlag.flagName(); 
-		    
-    	}
-    }
-    
-    private String queryRange (String msg) {
-    	
-        long start, end, ts;
-        
-        ts = Long.valueOf (msg.trim());
-        
-        int prefetch = pfSpec.getPrefetchVal();
-        
-        if (query_highWatermark < ts+prefetch) {
-            int queryCoverage = pfSpec.getCoverage();
-            
-            if (count == 0) {
-            	start = ts - sSpec.getNumOfMins()*SECOND_PER_MIN;
-            	//start = ts - sSpec.getNumOfMins()*60;
-            	count++;
-            } else
-            	start = query_highWatermark;
-	        
-            end = (start + queryCoverage);
-        	if (end < streamTime+pfSpec.getPrefetchVal()) {
-        		end = streamTime + pfSpec.getPrefetchVal();
-        	}
-            
-	        String range = start + " " + end; 
-	    
-	        if (NiagraServer.DEBUG)
-	        	System.err.println(range);
-	        query_highWatermark = end;
-        	
-        	return range;
-    	}
-        return null;
-    }
-    
-    private Query changeQuery (String queryPara) 
-    throws java.lang.InterruptedException, ShutdownException, SQLException {
-    	String[] queryRange = queryPara.split("[ |\t]+");
-    	assert queryRange.length == 2: "Jenny - range is more than a pair?!";
-    	
-    	long start = Long.valueOf(queryRange[0]);
-    	long end = Long.valueOf(queryRange[1]);
-    	
-    	if (!sSpec.getWeather()) {
-   	   		similarDate = getSimilarDate (MILLISEC_PER_SEC*start, 
-   	   				MILLISEC_PER_SEC*Long.valueOf(queryRange[1]));
-   	   		
-   	   		synchronized (synch) {
-   	   			if (stagelist == null) {
-   	   				stagelist = new ArrayList ();
-   	   				//stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*start));
-   	   				stagelist.add(setStage(similarDate));
-   	   			}
-   	   		}
-    	} else {
-    		//if (nextEpoch(start*MILLISEC_PER_SEC)) {
-    		if (nextEpoch(streamTime*MILLISEC_PER_SEC)) {
-    			ResultSet rs;
-    			int num = 0; 
-    			similarDate = new ArrayList ();
+			// If got a ctrl message, process it
+			if (ctrl != null) {
+				processCtrlMsgFromSink(ctrl);
+			}
+		}
+	}
 
-    			while (similarDate.size() < sSpec.getNumOfDays() && num < MAX_HISTORY/LOOKBACK) {
-        			stmt = conn.createStatement();
-    				rs = stmt.executeQuery(similarWeather(
-    						MILLISEC_PER_SEC*(streamTime-num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN),
-    						//MILLISEC_PER_SEC*(start-num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN),
-    						getRainfall(streamTime)));
-    						//getRainfall(start)));
-    				extractSimilarDate (similarDate, rs);
-    				stmt.close();
-    				num++;
-    			}
-        		synchronized (synch) {
-    	    		if (stagelist == null) {
-    	    			stagelist = new ArrayList ();
-    	    			//stagelist.add(setStage(similarDate, MILLISEC_PER_SEC*start));
-    	    			stagelist.add(setStage(similarDate));
-    	    		} else {
-    	    			// change stage
-    	    			//long startTS = stagelist.get(0).starttime;
-    	    			//stagelist.add(setStage(similarDate, startTS));
-    	    			stagelist.add(setStage(similarDate));
-    	    		}
-        		}
-    		} 
-    	}
+	private void checkAllSinkCtrlMsg() throws java.lang.InterruptedException,
+			ShutdownException, SQLException {
 
-    	// form query to retrieve archive data from db;
-    	return newQuery (similarDate, MILLISEC_PER_SEC*start, MILLISEC_PER_SEC*end);
-    }
-    
-    /**
-     * 
-     * @param start
-     * @return
-     */
-    private boolean nextEpoch (long start) {
-    	Calendar calendar = GregorianCalendar.getInstance();
-    	
-    	calendar.setTimeInMillis(start);
-    	//System.err.println(calendar.getTime().toString());
-    	
-    	int hour = calendar.get(Calendar.HOUR_OF_DAY);
-    	
-    	//System.err.println("********************hour: "+hour+"  epoch: "+epoch+"***********************");
-    	if (hour == epoch)
-    		return false;
-    	else {
-    		epoch = hour;
-    		return true;
-    	}
-    }
-    
-    /**
-     * 
-     * @param date An arrayList of dates with similar weather;
-     * @return
-     */
-    private Query newQuery (ArrayList <Long> date, long start, long end) {
-    	assert (stagelist != null): "how can stagelist be null";
-    	synchronized (synch) {
-    		Stage curr = stagelist.get(stagelist.size() - 1);
-    		
+		ArrayList ctrlMsgList = new ArrayList();
+
+		// Make sure the stream is not closed before checking is done
+		if (!outputStream.isClosed()) {
+			ArrayList ctrl;
+			do {
+				ctrl = outputStream.getCtrlMsg(-1);
+
+				// If got a ctrl message, process it
+				if (ctrl != null) {
+					ctrlMsgList.add(ctrl);
+				}
+			} while (ctrl != null);
+		}
+		for (Object ctrl : ctrlMsgList)
+			processCtrlMsgFromSink((ArrayList) ctrl);
+	}
+
+	public void processCtrlMsgFromSink(ArrayList ctrl) throws SQLException,
+			ShutdownException, InterruptedException {
+		if (ctrl == null)
+			return;
+
+		ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
+		String ctrlMsg = (String) ctrl.get(1);
+		switch (ctrlFlag) {
+		case CHANGE_QUERY:
+			streamTime = Long.valueOf(ctrlMsg);
+			String range = queryRange(ctrlMsg);
+			if (range != null)
+				newQueries.add(changeQuery(range));
+
+			break;
+		case READY_TO_FINISH:
+			System.err.println("live stream ends...");
+			finish = true;
+			break;
+		case SHUTDOWN: // handle query shutdown;
+			System.err.println("ready to shutdown at DBThread");
+			shutdown = true;
+			break;
+		default:
+			assert false : "KT unexpected control message from source "
+					+ ctrlFlag.flagName();
+
+		}
+	}
+
+	private String queryRange(String msg) {
+
+		long start, end, ts;
+
+		ts = Long.valueOf(msg.trim());
+
+		int prefetch = pfSpec.getPrefetchVal();
+
+		if (query_highWatermark < ts + prefetch) {
+			int queryCoverage = pfSpec.getCoverage();
+
+			if (count == 0) {
+				start = ts - sSpec.getNumOfMins() * SECOND_PER_MIN;
+				// start = ts - sSpec.getNumOfMins()*60;
+				count++;
+			} else
+				start = query_highWatermark;
+
+			end = (start + queryCoverage);
+			if (end < streamTime + pfSpec.getPrefetchVal()) {
+				end = streamTime + pfSpec.getPrefetchVal();
+			}
+
+			String range = start + " " + end;
+
+			if (NiagraServer.DEBUG)
+				System.err.println(range);
+			query_highWatermark = end;
+
+			return range;
+		}
+		return null;
+	}
+
+	private Query changeQuery(String queryPara)
+			throws java.lang.InterruptedException, ShutdownException,
+			SQLException {
+		String[] queryRange = queryPara.split("[ |\t]+");
+		assert queryRange.length == 2 : "Jenny - range is more than a pair?!";
+
+		long start = Long.valueOf(queryRange[0]);
+		long end = Long.valueOf(queryRange[1]);
+
+		if (!sSpec.getWeather()) {
+			similarDate = getSimilarDate(MILLISEC_PER_SEC * start,
+					MILLISEC_PER_SEC * Long.valueOf(queryRange[1]));
+
+			synchronized (synch) {
+				if (stagelist == null) {
+					stagelist = new ArrayList();
+					// stagelist.add(setStage(similarDate,
+					// MILLISEC_PER_SEC*start));
+					stagelist.add(setStage(similarDate));
+				}
+			}
+		} else {
+			// if (nextEpoch(start*MILLISEC_PER_SEC)) {
+			if (nextEpoch(streamTime * MILLISEC_PER_SEC)) {
+				ResultSet rs;
+				int num = 0;
+				similarDate = new ArrayList();
+
+				while (similarDate.size() < sSpec.getNumOfDays()
+						&& num < MAX_HISTORY / LOOKBACK) {
+					stmt = conn.createStatement();
+					rs = stmt.executeQuery(similarWeather(MILLISEC_PER_SEC
+							* (streamTime - num * LOOKBACK * HOUR_PER_DAY
+									* MIN_PER_HOUR * SECOND_PER_MIN),
+					// MILLISEC_PER_SEC*(start-num*LOOKBACK*HOUR_PER_DAY*MIN_PER_HOUR*SECOND_PER_MIN),
+							getRainfall(streamTime)));
+					// getRainfall(start)));
+					extractSimilarDate(similarDate, rs);
+					stmt.close();
+					num++;
+				}
+				synchronized (synch) {
+					if (stagelist == null) {
+						stagelist = new ArrayList();
+						// stagelist.add(setStage(similarDate,
+						// MILLISEC_PER_SEC*start));
+						stagelist.add(setStage(similarDate));
+					} else {
+						// change stage
+						// long startTS = stagelist.get(0).starttime;
+						// stagelist.add(setStage(similarDate, startTS));
+						stagelist.add(setStage(similarDate));
+					}
+				}
+			}
+		}
+
+		// form query to retrieve archive data from db;
+		return newQuery(similarDate, MILLISEC_PER_SEC * start, MILLISEC_PER_SEC
+				* end);
+	}
+
+	/**
+	 * 
+	 * @param start
+	 * @return
+	 */
+	private boolean nextEpoch(long start) {
+		Calendar calendar = GregorianCalendar.getInstance();
+
+		calendar.setTimeInMillis(start);
+		// System.err.println(calendar.getTime().toString());
+
+		int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+		// System.err.println("********************hour: "+hour+"  epoch: "+epoch+"***********************");
+		if (hour == epoch)
+			return false;
+		else {
+			epoch = hour;
+			return true;
+		}
+	}
+
+	/**
+	 * 
+	 * @param date
+	 *            An arrayList of dates with similar weather;
+	 * @return
+	 */
+	private Query newQuery(ArrayList<Long> date, long start, long end) {
+		assert (stagelist != null) : "how can stagelist be null";
+		synchronized (synch) {
+			Stage curr = stagelist.get(stagelist.size() - 1);
+
 			if (curr.activeActors == null) {
 				curr.activeActors = new Actors();
-				curr.activeActors.starts = new ArrayList <Long> ();
-				curr.activeActors.ends = new ArrayList <Long> ();
-				curr.activeActors.status = new ArrayList ();
+				curr.activeActors.starts = new ArrayList<Long>();
+				curr.activeActors.ends = new ArrayList<Long>();
+				curr.activeActors.status = new ArrayList();
 			}
 			curr.activeActors.starts.add(start);
 			curr.activeActors.ends.add(end);
@@ -746,65 +783,69 @@ public class DBThread extends SourceThread {
 
 		Calendar calendar = GregorianCalendar.getInstance();
 		Calendar past = GregorianCalendar.getInstance();
-		
+
 		int numDays = sSpec.getNumOfDays();
 		int numMins = sSpec.getNumOfMins();
 
 		StringBuffer query = new StringBuffer("(");
 
-		//queryString.replace ("NUMOFDAYS", "interval '1 day'");
-		//query.append(queryString);
+		// queryString.replace ("NUMOFDAYS", "interval '1 day'");
+		// query.append(queryString);
 		String upper, lower;
 		int offset;
-		
+
 		int size = date.size();
-		
-		//for (int i = 0; i < numDays; i++) {
+
+		// for (int i = 0; i < numDays; i++) {
 		for (int i = 0; i < size; i++) {
 			if (i > 0)
 				query.append(" union all ");
-			
-			past.setTimeInMillis((Long)date.get(i));
-							
+
+			past.setTimeInMillis((Long) date.get(i));
+
 			calendar.setTimeInMillis(start);
-			
-			// the offset (in number of days) between now and the picked date with similar weather 			
-			offset = calendar.get(Calendar.DAY_OF_YEAR) - past.get(Calendar.DAY_OF_YEAR); 
-			
-			
+
+			// the offset (in number of days) between now and the picked date
+			// with similar weather
+			offset = calendar.get(Calendar.DAY_OF_YEAR)
+					- past.get(Calendar.DAY_OF_YEAR);
+
 			calendar.roll(Calendar.DAY_OF_YEAR, -offset);
 
 			lower = calendar.getTime().toString();
-				
-			calendar.setTimeInMillis(end);			
-			calendar.roll(Calendar.DAY_OF_YEAR, -offset);				
-			//calendar.add(Calendar.MINUTE, numMins);				
+
+			calendar.setTimeInMillis(end);
+			calendar.roll(Calendar.DAY_OF_YEAR, -offset);
+			// calendar.add(Calendar.MINUTE, numMins);
 			upper = calendar.getTime().toString();
-			
-			query.append(dbScanSpec.getQueryString().replace("NUMOFDAYS", " '" +offset+" days'").replace("TIMEPREDICATE", timePredicate(upper, lower)));
-				
+
+			query.append(dbScanSpec.getQueryString().replace("NUMOFDAYS",
+					" '" + offset + " days'").replace("TIMEPREDICATE",
+					timePredicate(upper, lower)));
+
 		}
 		query.append(") order by panetime");
-		return new Query (query.toString(), start/MILLISEC_PER_SEC, end/MILLISEC_PER_SEC);
-    }
+		return new Query(query.toString(), start / MILLISEC_PER_SEC, end
+				/ MILLISEC_PER_SEC);
+	}
 
 	/**
 	 * @param date
 	 * @param start
 	 */
-	//private Stage setStage(ArrayList<Long> date, long start) {
-    private Stage setStage(ArrayList<Long> date) {
-		 
-		Stage	stage = new Stage ();
-		
-		//stage.starttime = start;
-		//stage.endtime = stage.starttime + ONE_DEMO_RUN;
-        stage.dates = new ArrayList <Long> ();
-        stage.dates = date; 
-        
-        return stage;
+	// private Stage setStage(ArrayList<Long> date, long start) {
+	private Stage setStage(ArrayList<Long> date) {
+
+		Stage stage = new Stage();
+
+		// stage.starttime = start;
+		// stage.endtime = stage.starttime + ONE_DEMO_RUN;
+		stage.dates = new ArrayList<Long>();
+		stage.dates = date;
+
+		return stage;
 	}
-    
+
 	/**
 	 * @param start
 	 * @param end
@@ -812,44 +853,46 @@ public class DBThread extends SourceThread {
 	 */
 	private ArrayList getSimilarDate(long start, long end) {
 		Calendar calendar = GregorianCalendar.getInstance();
-		
+
 		int numDays = sSpec.getNumOfDays();
 		int numMins = sSpec.getNumOfMins();
 
 		StringBuffer query = new StringBuffer("(");
 
-		ArrayList <Long> dates = new ArrayList();
+		ArrayList<Long> dates = new ArrayList();
 		String upper, lower;
 		switch (sSpec.getSimilarityType()) {
 		case AllDays:
 			for (int i = 1; i <= numDays; i++) {
-				calendar.setTimeInMillis(start);											
-				calendar.roll(Calendar.DAY_OF_YEAR, -i);				
+				calendar.setTimeInMillis(start);
+				calendar.roll(Calendar.DAY_OF_YEAR, -i);
 
 				dates.add(calendar.getTimeInMillis());
 			}
 
-			if (numDays == 0 ) {
-				calendar.setTimeInMillis(start);											
+			if (numDays == 0) {
+				calendar.setTimeInMillis(start);
 				dates.add(calendar.getTimeInMillis());
 			}
-			
+
 			break;
-			
+
 		case SameDayOfWeek:
-			for (int i = 1; i <= numDays; i++) {				
-				calendar.setTimeInMillis(start);											
-				calendar.roll(Calendar.DAY_OF_YEAR, -i*DAYS_PER_WEEK);				
+			for (int i = 1; i <= numDays; i++) {
+				calendar.setTimeInMillis(start);
+				calendar.roll(Calendar.DAY_OF_YEAR, -i * DAYS_PER_WEEK);
 
 				dates.add(calendar.getTimeInMillis());
 			}
 
 			break;
-	
-		case WeekDays:	
-			int i = 1, offset = 1, weekday;
+
+		case WeekDays:
+			int i = 1,
+			offset = 1,
+			weekday;
 			while (i <= numDays) {
-				calendar.setTimeInMillis(start);											
+				calendar.setTimeInMillis(start);
 				calendar.roll(Calendar.DAY_OF_YEAR, -offset);
 				weekday = calendar.get(Calendar.DAY_OF_WEEK);
 				if (weekday == Calendar.SUNDAY || weekday == Calendar.SATURDAY) {
@@ -863,123 +906,130 @@ public class DBThread extends SourceThread {
 			}
 
 			break;
-			
+
 		default:
-			System.err.println("unsupported similarity type: "+sSpec.getSimilarityType().toString());
-		
+			System.err.println("unsupported similarity type: "
+					+ sSpec.getSimilarityType().toString());
+
 		}
 		return dates;
 	}
 
-	
 	/**
 	 * @param time
 	 * @param rainfall
 	 * @return the query string for retrieve date with similar weather
 	 */
-	private String similarWeather (long time, long rainfall) {
-		
+	private String similarWeather(long time, long rainfall) {
+
 		int hour, dayOfWeek;
-		
-		StringBuffer queryString = new StringBuffer ("select reporttime, abs(avg(rainfall)-"+rainfall+") from hydra ");
+
+		StringBuffer queryString = new StringBuffer(
+				"select reporttime, abs(avg(rainfall)-" + rainfall
+						+ ") from hydra ");
 		Calendar calendar = GregorianCalendar.getInstance();
 		calendar.setTimeInMillis(time);
-	
-    //System.err.println(calendar.getTime().toString());
-    //System.err.println("day of week before: "+calendar.get(Calendar.DAY_OF_WEEK));
-		
+
+		// System.err.println(calendar.getTime().toString());
+		// System.err.println("day of week before: "+calendar.get(Calendar.DAY_OF_WEEK));
+
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
-		
+
 		hour = calendar.get(Calendar.HOUR_OF_DAY);
-		dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)-1;
-    //System.err.println(calendar.getTime().toString());
-    //System.err.println("day of week after: "+dayOfWeek);
+		dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+		// System.err.println(calendar.getTime().toString());
+		// System.err.println("day of week after: "+dayOfWeek);
 
 		// look at the past month
-		queryString.append(" where reporttime < TIMESTAMP '"+calendar.getTime().toString() +"'");
+		queryString.append(" where reporttime < TIMESTAMP '"
+				+ calendar.getTime().toString() + "'");
 		calendar.roll(Calendar.DAY_OF_YEAR, -LOOKBACK);
-		queryString.append(" and reporttime >= TIMESTAMP '"+calendar.getTime().toString() + "'");
-		
+		queryString.append(" and reporttime >= TIMESTAMP '"
+				+ calendar.getTime().toString() + "'");
+
 		// look at the same hour
-		queryString.append(" and extract (HOUR from reporttime)="+hour);
-		
+		queryString.append(" and extract (HOUR from reporttime)=" + hour);
+
 		switch (sSpec.getSimilarityType()) {
 		case AllDays:
 			break;
 		case SameDayOfWeek:
-			queryString.append(" and extract(DOW from reporttime)="+dayOfWeek);
+			queryString
+					.append(" and extract(DOW from reporttime)=" + dayOfWeek);
 			break;
 		case WeekDays:
-			queryString.append(" and extract(DOW from reporttime) <> 0 and extract(DOW from reporttime) <> 6");
+			queryString
+					.append(" and extract(DOW from reporttime) <> 0 and extract(DOW from reporttime) <> 6");
 			break;
 		default:
-			System.err.println("unsupported similarity type"); 
+			System.err.println("unsupported similarity type");
 		}
-    
 
-/*    if (rainfall > 0) {
-  		queryString.append(" group by reporttime having avg(rainfall) >=" + (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall + WEATHER_OFFSET));
-      queryString.append(" order by abs(avg(rainfall) -" + rainfall +")");
-    } else {
-      queryString.append(" group by reporttime having avg(rainfall) =" + " 0");
-      queryString.append(" order by reporttime desc");
-    }
-*/
+		/*
+		 * if (rainfall > 0) {
+		 * queryString.append(" group by reporttime having avg(rainfall) >=" +
+		 * (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall +
+		 * WEATHER_OFFSET)); queryString.append(" order by abs(avg(rainfall) -"
+		 * + rainfall +")"); } else {
+		 * queryString.append(" group by reporttime having avg(rainfall) =" +
+		 * " 0"); queryString.append(" order by reporttime desc"); }
+		 */
 
-  		queryString.append(" group by reporttime having avg(rainfall) >=" + (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall + WEATHER_OFFSET));
-      if (rainfall > 0)
-         queryString.append(" order by abs(avg(rainfall) -" + rainfall +")");
-      else 
-        queryString.append(" order by reporttime desc");
-      
+		queryString.append(" group by reporttime having avg(rainfall) >="
+				+ (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <="
+				+ (rainfall + WEATHER_OFFSET));
+		if (rainfall > 0)
+			queryString
+					.append(" order by abs(avg(rainfall) -" + rainfall + ")");
+		else
+			queryString.append(" order by reporttime desc");
 
-		//queryString.append(" order by abs(avg(rainfall) - " + rainfall + ")");
-		
+		// queryString.append(" order by abs(avg(rainfall) - " + rainfall +
+		// ")");
+
 		return queryString.toString();
 	}
 
-	/*private String similarWeather (long time, long rainfall) {
-		
-		int hour, dayOfWeek;
-		StringBuffer queryString = new StringBuffer ("select reporttime, abs(avg(rainfall)-"+rainfall+") from hydra " );
-		Calendar calendar = GregorianCalendar.getInstance();
-		calendar.setTimeInMillis(time);
-		
-		hour = calendar.get(Calendar.HOUR_OF_DAY);
-		dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-		
-		// look at the past month
-		queryString.append(" where reporttime < TIMESTAMP '"+calendar.getTime().toString() +"'");
-		calendar.roll(Calendar.DAY_OF_YEAR, -LOOKBACK);
-		queryString.append(" and reporttime >= TIMESTAMP '"+calendar.getTime().toString() + "'");
-		
-		// look at the same hour
-		queryString.append(" and extract (HOUR from reporttime)="+hour);
-		
-		switch (sSpec.getSimilarityType()) {
-		case AllDays:
-			break;
-		case SameDayOfWeek:
-			queryString.append(" and extract(DOW from reporttime)="+dayOfWeek);
-			break;
-		case WeekDays:
-			queryString.append(" extract(DOW from reporttime) <> 0 and extract(DOW from reporttime <> 6)");
-			break;
-		default:
-			System.err.println("unsupported similarity type"); 
-		}
-		queryString.append(" group by reporttime having avg(rainfall) >=" + (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall + WEATHER_OFFSET));
-		queryString.append(" order by abs(avg(rainfall) - " + rainfall + ")");
-		
-		if (DEBUG)
-			System.err.println(queryString.toString());
-		
-		return queryString.toString();
-	}*/
-	
+	/*
+	 * private String similarWeather (long time, long rainfall) {
+	 * 
+	 * int hour, dayOfWeek; StringBuffer queryString = new StringBuffer
+	 * ("select reporttime, abs(avg(rainfall)-"+rainfall+") from hydra " );
+	 * Calendar calendar = GregorianCalendar.getInstance();
+	 * calendar.setTimeInMillis(time);
+	 * 
+	 * hour = calendar.get(Calendar.HOUR_OF_DAY); dayOfWeek =
+	 * calendar.get(Calendar.DAY_OF_WEEK);
+	 * 
+	 * // look at the past month
+	 * queryString.append(" where reporttime < TIMESTAMP '"
+	 * +calendar.getTime().toString() +"'"); calendar.roll(Calendar.DAY_OF_YEAR,
+	 * -LOOKBACK);
+	 * queryString.append(" and reporttime >= TIMESTAMP '"+calendar.getTime
+	 * ().toString() + "'");
+	 * 
+	 * // look at the same hour
+	 * queryString.append(" and extract (HOUR from reporttime)="+hour);
+	 * 
+	 * switch (sSpec.getSimilarityType()) { case AllDays: break; case
+	 * SameDayOfWeek:
+	 * queryString.append(" and extract(DOW from reporttime)="+dayOfWeek);
+	 * break; case WeekDays:queryString.append(
+	 * " extract(DOW from reporttime) <> 0 and extract(DOW from reporttime <> 6)"
+	 * ); break; default: System.err.println("unsupported similarity type"); }
+	 * queryString.append(" group by reporttime having avg(rainfall) >=" +
+	 * (rainfall - WEATHER_OFFSET) + " and avg(rainfall) <=" + (rainfall +
+	 * WEATHER_OFFSET)); queryString.append(" order by abs(avg(rainfall) - " +
+	 * rainfall + ")");
+	 * 
+	 * if (DEBUG) System.err.println(queryString.toString());
+	 * 
+	 * return queryString.toString(); }
+	 */
+
 	/**
-	 * get result from the db query to retrieve date with similar weather  
+	 * get result from the db query to retrieve date with similar weather
 	 * 
 	 * @param rs
 	 * @param numAttrs
@@ -987,38 +1037,41 @@ public class DBThread extends SourceThread {
 	 * @throws ShutdownException
 	 * @throws InterruptedException
 	 */
-	private ArrayList extractSimilarDate (ArrayList similarDate, ResultSet rs) 
-	throws SQLException, ShutdownException, InterruptedException {
+	private ArrayList extractSimilarDate(ArrayList similarDate, ResultSet rs)
+			throws SQLException, ShutdownException, InterruptedException {
 		long time;
 		int count = similarDate.size();
-		
+
 		while (rs.next() && count < sSpec.getNumOfDays()) {
 			time = rs.getDate(TIME_COLUMN).getTime();
 			similarDate.add(time);
 			count++;
 		}
-		
+
 		return similarDate;
 	}
-	
-	private long getRainfall (long time) {
+
+	private long getRainfall(long time) {
 		for (int i = 0; i < weather.length; i++) {
-			if (weather[i][0] <= time && time < weather[i][0] + MIN_PER_HOUR*SECOND_PER_MIN) {
-        System.err.println ("++++++++++++++rainfall is not 0++++++++++++");
-        return weather[i][1];
+			if (weather[i][0] <= time
+					&& time < weather[i][0] + MIN_PER_HOUR * SECOND_PER_MIN) {
+				System.err
+						.println("++++++++++++++rainfall is not 0++++++++++++");
+				return weather[i][1];
 			}
 		}
-		
+
 		return 0;
 	}
-	
-	public String timePredicate (String upper, String lower) {
-    	
-    	String pred = " "+dbScanSpec.getTimeAttr()  + ">= " + "TIMESTAMP '"+lower + "' and "+ dbScanSpec.getTimeAttr() + "< " + "TIMESTAMP '"+upper+ "'";
 
-    	return pred;
-    }
+	public String timePredicate(String upper, String lower) {
 
+		String pred = " " + dbScanSpec.getTimeAttr() + ">= " + "TIMESTAMP '"
+				+ lower + "' and " + dbScanSpec.getTimeAttr() + "< "
+				+ "TIMESTAMP '" + upper + "'";
+
+		return pred;
+	}
 
 	/**
 	 * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
@@ -1026,131 +1079,146 @@ public class DBThread extends SourceThread {
 	public void dumpChildrenInXML(StringBuffer sb) {
 		;
 	}
-	
-    public void getInstrumentationValues(ArrayList<String> instrumentationNames, ArrayList<Object> instrumentationValues) {
 
-    	synchronized (synch) {
-    		if (stagelist == null)
-	        	return; 
-	
-	    	try {
-	    	if (!polled) { 
-	            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	            DocumentBuilder db = dbf.newDocumentBuilder();
-	            DOMImplementation di = db.getDOMImplementation();
-	
-	            doc = di.createDocument("http://www.cs.pdx.edu/~jinli/lattedemo", "lattedemo", null);
-	
-	    		polled = true;
-	        } 
-	    	}catch (ParserConfigurationException e) {
-	        	System.err.println("DocumentBuilder cannot be created which satisfies the configuration requested");
-	        }
-	        
+	public void getInstrumentationValues(
+			ArrayList<String> instrumentationNames,
+			ArrayList<Object> instrumentationValues) {
+
+		synchronized (synch) {
+			if (stagelist == null)
+				return;
+
+			try {
+				if (!polled) {
+					DocumentBuilderFactory dbf = DocumentBuilderFactory
+							.newInstance();
+					DocumentBuilder db = dbf.newDocumentBuilder();
+					DOMImplementation di = db.getDOMImplementation();
+
+					doc = di.createDocument(
+							"http://www.cs.pdx.edu/~jinli/lattedemo",
+							"lattedemo", null);
+
+					polled = true;
+				}
+			} catch (ParserConfigurationException e) {
+				System.err
+						.println("DocumentBuilder cannot be created which satisfies the configuration requested");
+			}
+
 			// first set up the stage
 
 			instrumentationNames.add("stagelist");
 			Element stagelistElt = doc.createElement("stagelist");
 			stagelistElt.setAttribute("now", String.valueOf(streamTime));
-			
+
 			// lag is how database data lags behind stream data;
 			long lag = streamTime - dbTime;
 			if (lag < 0)
 				lag = 0;
-				
-			stagelistElt.setAttribute("lag", String.valueOf(lag*MILLISEC_PER_SEC));
-			
-			long archive = 0;
-			
-			for (int i = 0; i < stagelist.size(); i++) {
-				Element stageElt = doc.createElement ("stage"); 
-				Stage curr = stagelist.get(i);
-	            StringBuffer datelist = new StringBuffer();
-	            for (int j = 0; j < curr.dates.size(); j++) {
-	                datelist.append (String.valueOf(curr.dates.get(j))+ " ");
-	            }
-	            stageElt.setAttribute("dates", datelist.toString());
 
-	            Element actElt;
-		        if (curr.exeunt != null) {
-		        	for (int j = 0; j < curr.exeunt.starts.size(); j++) {
-		        		actElt = doc.createElement("actor");
-		        		actElt.setAttribute("start", String.valueOf(curr.exeunt.starts.get(j)));
-		        		actElt.setAttribute("end", String.valueOf(curr.exeunt.ends.get(j)));
-		        		actElt.setAttribute("status", "done");
-		        		//actorsElt.appendChild(actElt);
-		        		stageElt.appendChild(actElt);
-		        		
-		        		// actors that are both done and ahead of stream time contribute to buffered archive
-		        		if (curr.exeunt.ends.get(j) > streamTime*MILLISEC_PER_SEC)
-		        			archive += curr.exeunt.ends.get(j) - curr.exeunt.starts.get(j);
-		        	}
-		        }
-		        
-		        boolean flag = false;
-		    	for (int j = 0; j < curr.activeActors.starts.size(); j++) {
-		    		actElt = doc.createElement("actor");
-		    		actElt.setAttribute("start", String.valueOf(curr.activeActors.starts.get(j)));
-		    		actElt.setAttribute("end", String.valueOf(curr.activeActors.ends.get(j)));
-		    		switch (curr.activeActors.status.get(j)) {
-		    		case PROGRESS:
-		    			actElt.setAttribute("status", "progress");
-		    			assert !flag: "progress stuff!";
-		    			flag = true;
-		    			break;
-		    		
-		    		case FUTURE:
-		    			actElt.setAttribute("status", "future");
-		    			break;
-		    		
-		    		default:
-		    			System.err.println ("supported actor status");
-		    		}
-		    		stageElt.appendChild(actElt);
-		    	}
-		    	stagelistElt.appendChild(stageElt);
+			stagelistElt.setAttribute("lag", String.valueOf(lag
+					* MILLISEC_PER_SEC));
+
+			long archive = 0;
+
+			for (int i = 0; i < stagelist.size(); i++) {
+				Element stageElt = doc.createElement("stage");
+				Stage curr = stagelist.get(i);
+				StringBuffer datelist = new StringBuffer();
+				for (int j = 0; j < curr.dates.size(); j++) {
+					datelist.append(String.valueOf(curr.dates.get(j)) + " ");
+				}
+				stageElt.setAttribute("dates", datelist.toString());
+
+				Element actElt;
+				if (curr.exeunt != null) {
+					for (int j = 0; j < curr.exeunt.starts.size(); j++) {
+						actElt = doc.createElement("actor");
+						actElt.setAttribute("start", String
+								.valueOf(curr.exeunt.starts.get(j)));
+						actElt.setAttribute("end", String
+								.valueOf(curr.exeunt.ends.get(j)));
+						actElt.setAttribute("status", "done");
+						// actorsElt.appendChild(actElt);
+						stageElt.appendChild(actElt);
+
+						// actors that are both done and ahead of stream time
+						// contribute to buffered archive
+						if (curr.exeunt.ends.get(j) > streamTime
+								* MILLISEC_PER_SEC)
+							archive += curr.exeunt.ends.get(j)
+									- curr.exeunt.starts.get(j);
+					}
+				}
+
+				boolean flag = false;
+				for (int j = 0; j < curr.activeActors.starts.size(); j++) {
+					actElt = doc.createElement("actor");
+					actElt.setAttribute("start", String
+							.valueOf(curr.activeActors.starts.get(j)));
+					actElt.setAttribute("end", String
+							.valueOf(curr.activeActors.ends.get(j)));
+					switch (curr.activeActors.status.get(j)) {
+					case PROGRESS:
+						actElt.setAttribute("status", "progress");
+						assert !flag : "progress stuff!";
+						flag = true;
+						break;
+
+					case FUTURE:
+						actElt.setAttribute("status", "future");
+						break;
+
+					default:
+						System.err.println("supported actor status");
+					}
+					stageElt.appendChild(actElt);
+				}
+				stagelistElt.appendChild(stageElt);
 			}
 			stagelistElt.setAttribute("buffered", String.valueOf(archive));
-			
-	    	instrumentationValues.add(stagelistElt);
-    	}
-    }
-    
-    private void printElt (Node elt) {
-    	NamedNodeMap attrs = elt.getAttributes();
-    	
-    	if ( attrs.getLength() != 0) {
-    		for (int i = 0; i < attrs.getLength(); i++) {
-    			System.out.println( "attr name: " + attrs.item(i).getNodeName() + " attri value: " + attrs.item(i).getNodeValue());
-    		}
-    		return;
-    	}
-    	
-    	NodeList nodes = elt.getChildNodes();
-    	
-    	for (int i = 0; i < nodes.getLength(); i++) {
-    		printElt(nodes.item(i));
-    	}
-    }
-    
-    private boolean intime () {
-    	// if streamTime or dbTime is not initialized, just return true,
-    	// because we aren't ready to make any decision yet.
-    	if (streamTime == Long.MIN_VALUE || dbTime == Long.MIN_VALUE) {
-    		return true;
-    	}
-    	
-    	return dbTime > streamTime;
-    }
-    
-    private boolean farAhead () {
-    	// if streamTime or dbTime is not initialized, just return true,
-    	// because we aren't ready to make any decision yet.
-    	if (streamTime == Long.MIN_VALUE || dbTime == Long.MIN_VALUE) {
-    		return false;
-    	}
-    	
-    	return dbTime > streamTime + LOOK_AHEAD;
 
-    }
+			instrumentationValues.add(stagelistElt);
+		}
+	}
+
+	private void printElt(Node elt) {
+		NamedNodeMap attrs = elt.getAttributes();
+
+		if (attrs.getLength() != 0) {
+			for (int i = 0; i < attrs.getLength(); i++) {
+				System.out.println("attr name: " + attrs.item(i).getNodeName()
+						+ " attri value: " + attrs.item(i).getNodeValue());
+			}
+			return;
+		}
+
+		NodeList nodes = elt.getChildNodes();
+
+		for (int i = 0; i < nodes.getLength(); i++) {
+			printElt(nodes.item(i));
+		}
+	}
+
+	private boolean intime() {
+		// if streamTime or dbTime is not initialized, just return true,
+		// because we aren't ready to make any decision yet.
+		if (streamTime == Long.MIN_VALUE || dbTime == Long.MIN_VALUE) {
+			return true;
+		}
+
+		return dbTime > streamTime;
+	}
+
+	private boolean farAhead() {
+		// if streamTime or dbTime is not initialized, just return true,
+		// because we aren't ready to make any decision yet.
+		if (streamTime == Long.MIN_VALUE || dbTime == Long.MIN_VALUE) {
+			return false;
+		}
+
+		return dbTime > streamTime + LOOK_AHEAD;
+
+	}
 }

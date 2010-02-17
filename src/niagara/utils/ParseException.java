@@ -9,30 +9,33 @@ package niagara.utils;
  */
 
 /**
- * <code> ParseException </code>  An error generated
- * during by the parsing of an xml file
- *
+ * <code> ParseException </code> An error generated during by the parsing of an
+ * xml file
+ * 
  * @see Exception
  */
 
+@SuppressWarnings("serial")
 public class ParseException extends Exception {
-  
-    /**
-     * constructor
-     * @see Exception
-     */
-    public ParseException() {  
-        super();
-    }
-    
-    /**
-     * constructor
-     * @param msg the exception message
-     * @see Exception
-     */
-    public ParseException(String msg) 
-    {
-        super(msg);
-    }
-    
-} 
+
+	/**
+	 * constructor
+	 * 
+	 * @see Exception
+	 */
+	public ParseException() {
+		super();
+	}
+
+	/**
+	 * constructor
+	 * 
+	 * @param msg
+	 *            the exception message
+	 * @see Exception
+	 */
+	public ParseException(String msg) {
+		super(msg);
+	}
+
+}

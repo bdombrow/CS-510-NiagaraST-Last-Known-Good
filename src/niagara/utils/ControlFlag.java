@@ -1,33 +1,4 @@
-
-/**********************************************************************
-  $Id: CtrlFlags.java,v 1.4 2008/10/21 23:11:52 rfernand Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
- **********************************************************************/
-
-
 package niagara.utils;
-
 
 /** 
  * ControlFlag is an enumeration of control messages which are passed
@@ -71,25 +42,23 @@ package niagara.utils;
  * @version 2.0
  *
  */
-
-
 public enum ControlFlag {
 	NULLFLAG("NullFlag"), 
-	SHUTDOWN("Shutdown"), 						// upstream & downstream
-	GET_PARTIAL("GetPartial"),					// upstream only
-	SYNCH_PARTIAL("SynchPartial"),				// downstream only
-	END_PARTIAL("EndPartial"),					// downstream only
-	EOS("EndOfStream"),							// downstream only
-	REQUEST_BUF_FLUSH("RequestBufferFlush"),	// upstream only
-	TIMED_OUT("TimedOut"),						// for returning status only
+	SHUTDOWN("Shutdown"),                    // upstream & downstream
+	GET_PARTIAL("GetPartial"),               // upstream only
+	SYNCH_PARTIAL("SynchPartial"),           // downstream only
+	END_PARTIAL("EndPartial"),               // downstream only
+	EOS("EndOfStream"),                      // downstream only
+	REQUEST_BUF_FLUSH("RequestBufferFlush"), // upstream only
+	TIMED_OUT("TimedOut"),                   // for returning status only
 	CHANGE_QUERY("ChangeQuery"),
 	READY_TO_FINISH("ReadyToFinish"),
-	IMPUTE("Impute"),							// RJFM for imputation prototype (ambiguous; PunctQC)
-	MESSAGE("Message"); 						// RJFM Assumed punctuation prototype (upstream only)
+	IMPUTE("Impute"),                        // RJFM for imputation prototype (ambiguous; PunctQC)
+	MESSAGE("Message");                      // RJFM Assumed punctuation prototype (upstream only)
 
 	private final String _flagName;
 
-	ControlFlag(String flagName){
+	ControlFlag(String flagName) {
 		this._flagName = flagName;
 	}
 
@@ -97,6 +66,8 @@ public enum ControlFlag {
 	 * 
 	 * @return Name of the control flag.
 	 */
-	public String flagName() {return _flagName;}
+	public String flagName() {
+		return _flagName;
+	}
 
 }

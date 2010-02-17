@@ -1,27 +1,3 @@
-/* $Id: ApplyRule.java,v 1.9 2003/09/16 04:45:29 vpapad Exp $
-   Colombia -- Java version of the Columbia Database Optimization Framework
-
-   Copyright (c)    Dept. of Computer Science , Portland State
-   University and Dept. of  Computer Science & Engineering,
-   OGI School of Science & Engineering, OHSU. All Rights Reserved.
-
-   Permission to use, copy, modify, and distribute this software and
-   its documentation is hereby granted, provided that both the
-   copyright notice and this permission notice appear in all copies
-   of the software, derivative works or modified versions, and any
-   portions thereof, and that both notices appear in supporting
-   documentation.
-
-   THE AUTHORS, THE DEPT. OF COMPUTER SCIENCE DEPT. OF PORTLAND STATE
-   UNIVERSITY AND DEPT. OF COMPUTER SCIENCE & ENGINEERING AT OHSU ALLOW
-   USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION, AND THEY DISCLAIM ANY
-   LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE
-   USE OF THIS SOFTWARE.
-
-   This software was developed with support of NSF grants IRI-9118360,
-   IRI-9119446, IRI-9509955, IRI-9610013, IRI-9619977, IIS 0086002,
-   and DARPA (ARPA order #8230, CECOM contract DAAB07-91-C-Q518).
- */
 package niagara.optimizer.colombia;
 
 import java.util.ArrayList;
@@ -29,515 +5,488 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
-  ============================================================
-  ApplyRule - Task to Apply a rule to a Multi-Expression
-  ============================================================ 
-  
-*/
+ * ============================================================ ApplyRule - Task
+ * to Apply a rule to a Multi-Expression
+ * ============================================================
+ */
 public class ApplyRule extends Task {
-    private Rule rule; // rule to apply
-    private MExpr mexpr; // root of expr. before rule
-    private boolean explore; // if this task is for exploring
-    private boolean last; // if this task is the last task for the group
-    Cost epsBound;
-    // if global eps pruning is on, this is the eps bound for eps pruning
-    // else it is zero
+	private Rule rule; // rule to apply
+	private MExpr mexpr; // root of expr. before rule
+	private boolean explore; // if this task is for exploring
+	private boolean last; // if this task is the last task for the group
+	Cost epsBound;
 
-    public ApplyRule(
-        SSP ssp,
-        Rule rule,
-        MExpr mexpr,
-        boolean explore,
-        Context context,
-        boolean last,
-        Cost bound) {
-        super(ssp, context);
-        this.ssp = ssp;
-        this.rule = rule;
-        this.mexpr = mexpr;
-        this.explore = explore;
-        this.last = last;
-        this.epsBound = bound;
-    }
+	// if global eps pruning is on, this is the eps bound for eps pruning
+	// else it is zero
 
-    public ApplyRule(
-        SSP ssp,
-        Rule rule,
-        MExpr mexpr,
-        boolean explore,
-        Context context,
-        boolean last) {
-        this(ssp, rule, mexpr, explore, context, last, null);
-    }
+	public ApplyRule(SSP ssp, Rule rule, MExpr mexpr, boolean explore,
+			Context context, boolean last, Cost bound) {
+		super(ssp, context);
+		this.ssp = ssp;
+		this.rule = rule;
+		this.mexpr = mexpr;
+		this.explore = explore;
+		this.last = last;
+		this.epsBound = bound;
+	}
 
-    // XXX vpapad: was destructor
-    public void delete() {
-        if (last) {
-            Group Group = mexpr.getGroup();
-            if (!explore) {
-                Context LocalCont = context;
-                //What prop is required of
-                PhysicalProperty LocalReqdProp = LocalCont.getPhysProp();
-                Winner Winner = Group.getWinner(LocalReqdProp);
+	public ApplyRule(SSP ssp, Rule rule, MExpr mexpr, boolean explore,
+			Context context, boolean last) {
+		this(ssp, rule, mexpr, explore, context, last, null);
+	}
 
-                if (Winner != null)
-                    assert !Winner.getDone();
+	// XXX vpapad: was destructor
+	public void delete() {
+		if (last) {
+			Group Group = mexpr.getGroup();
+			if (!explore) {
+				Context LocalCont = context;
+				// What prop is required of
+				PhysicalProperty LocalReqdProp = LocalCont.getPhysProp();
+				Winner Winner = Group.getWinner(LocalReqdProp);
 
-                // mark the winner as done
-                Winner.setDone();
-                // this's still the last applied rule in the group, 
-                // so mark the group with completed optimization or exploration
-                Group.setOptimized(true);
-            } else
-                Group.setExplored(true);
-        }
-    }
+				if (Winner != null)
+					assert !Winner.getDone();
 
-    public void perform() {
-        //if stop generating logical expression when epsilon prune is applied
-        //if this context is done, stop
-        if (!ssp.GEN_LOG) {
-            //Check that this context is not done
-            if (context.isFinished()) {
-                delete();
-                return;
-            }
-        } else {
-            //if not stop generating logical expression when epsilon prune is applied
-            //if this context is done and the substitute is physical, if the substitute
-            //is logical continue
-            if (context.isFinished() && rule.isLogicalToPhysical()) {
-                delete();
-                return;
-            }
-        }
-        //Check again to see that the rule has not been fired since this was put on the stack
-        if (!rule.canFire(mexpr)) {
-            ssp.getTracer().ruleMasked(rule, mexpr);
-            delete();
-            return;
-        }
+				// mark the winner as done
+				Winner.setDone();
+				// this's still the last applied rule in the group,
+				// so mark the group with completed optimization or exploration
+				Group.setOptimized(true);
+			} else
+				Group.setExplored(true);
+		}
+	}
 
-        // main variables for the loop over all possible bindings
-        Bindery bindery; // Expression bindery.
-        //    Used to bind expr to rule's pattern
+	@SuppressWarnings("unchecked")
+	public void perform() {
+		// if stop generating logical expression when epsilon prune is applied
+		// if this context is done, stop
+		if (!ssp.GEN_LOG) {
+			// Check that this context is not done
+			if (context.isFinished()) {
+				delete();
+				return;
+			}
+		} else {
+			// if not stop generating logical expression when epsilon prune is
+			// applied
+			// if this context is done and the substitute is physical, if the
+			// substitute
+			// is logical continue
+			if (context.isFinished() && rule.isLogicalToPhysical()) {
+				delete();
+				return;
+			}
+		}
+		// Check again to see that the rule has not been fired since this was
+		// put on the stack
+		if (!rule.canFire(mexpr)) {
+			ssp.getTracer().ruleMasked(rule, mexpr);
+			delete();
+			return;
+		}
 
-        //be sure to delete all these after they are used.
-        Expr before; // see below
-        Expr after; // see below
+		// main variables for the loop over all possible bindings
+		Bindery bindery; // Expression bindery.
+		// Used to bind expr to rule's pattern
 
-        MExpr NewMExpr; // version of "after" placed in MEMO
+		// be sure to delete all these after they are used.
+		Expr before; // see below
+		Expr after; // see below
 
-        //Guide to closely related variables
+		MExpr NewMExpr; // version of "after" placed in MEMO
 
-        //    pattern 
-        //     ApplyRule has a rule member data.  pattern is member data
-        //     of that rule.  It describes (as an Expr) existing expressions 
-        //     to be bound,
-        //  sustitute
-        //     from the same rule, as with pattern.  Describes (as an Expr)
-        //     the new expression.
-        //  before
-        //     the existing expression which is currently bound to the pattern
-        //     by the bindery.
-        //  after
-        //     the new expression, in Expr form, corresponding to the substitute.
-        //  NewMExpr
-        //     the new expression, in MEXPR form, which has been included in the
-        //     search space.
+		// Guide to closely related variables
 
-        // Loop over all Bindinges of expr to pattern of rule
-        bindery = new Bindery(mexpr, rule.getPattern(), ssp);
-        int rule_matched = 0;
-        int rule_fired = 0;
-        if (!ssp.SORT_AFTERS) {
-            while (bindery.advance()) {
-                rule_matched++;
-                // There must be a Binding since advance() returned non-null.
-                // Extract the bound Expr from the bindery
-                before = bindery.extract_expr();
-                //            PTRACE0("new Binding is: " + before.Dump());
-                //#ifdef _DEBUG
-                //            Bindings[rule.get_index()]++;
-                //#endif
-                // check the rule's condition function
-                Context Cont = context;
-                PhysicalProperty ReqdProp = Cont.getPhysProp();
-                //What prop is required of
+		// pattern
+		// ApplyRule has a rule member data. pattern is member data
+		// of that rule. It describes (as an Expr) existing expressions
+		// to be bound,
+		// sustitute
+		// from the same rule, as with pattern. Describes (as an Expr)
+		// the new expression.
+		// before
+		// the existing expression which is currently bound to the pattern
+		// by the bindery.
+		// after
+		// the new expression, in Expr form, corresponding to the substitute.
+		// NewMExpr
+		// the new expression, in MEXPR form, which has been included in the
+		// search space.
 
-                if (!rule.condition(before, mexpr, ReqdProp)) {
-                    //                PTRACE0("Binding FAILS condition function, expr: " + mexpr.Dump());
-                    continue; // try to find another binding
-                }
-                // rule will actually be fired, rule_is_fired is useful later for setting before_mask 
-                rule_fired++;
+		// Loop over all Bindinges of expr to pattern of rule
+		bindery = new Bindery(mexpr, rule.getPattern(), ssp);
+		int rule_matched = 0;
+		int rule_fired = 0;
+		if (!ssp.SORT_AFTERS) {
+			while (bindery.advance()) {
+				rule_matched++;
+				// There must be a Binding since advance() returned non-null.
+				// Extract the bound Expr from the bindery
+				before = bindery.extract_expr();
+				// PTRACE0("new Binding is: " + before.Dump());
+				// #ifdef _DEBUG
+				// Bindings[rule.get_index()]++;
+				// #endif
+				// check the rule's condition function
+				Context Cont = context;
+				PhysicalProperty ReqdProp = Cont.getPhysProp();
+				// What prop is required of
 
-                //PTRACE0("Binding SATISFIES condition function.  Mexpr: " + mexpr.Dump());
+				if (!rule.condition(before, mexpr, ReqdProp)) {
+					// PTRACE0("Binding FAILS condition function, expr: " +
+					// mexpr.Dump());
+					continue; // try to find another binding
+				}
+				// rule will actually be fired, rule_is_fired is useful later
+				// for setting before_mask
+				rule_fired++;
 
-                //#ifdef _DEBUG
-                //            Conditions[rule.get_index()]++;
-                //#endif
-                // try to derive a new substitute expression
-                after = rule.nextSubstitute(before, mexpr, ReqdProp);
-                if (after == null) continue;
+				// PTRACE0("Binding SATISFIES condition function.  Mexpr: " +
+				// mexpr.Dump());
 
-                //            PTRAClE0("substitute expr is : " + after.Dump());
+				// #ifdef _DEBUG
+				// Conditions[rule.get_index()]++;
+				// #endif
+				// try to derive a new substitute expression
+				after = rule.nextSubstitute(before, mexpr, ReqdProp);
+				if (after == null)
+					continue;
 
-                // include substitute in MEMO, find duplicates, etc.
-                int group_no = mexpr.getGrpID();
+				// PTRAClE0("substitute expr is : " + after.Dump());
 
-                if (ssp.NO_PHYS_IN_GROUP) {
-                    // don't include physical mexprs into group
-                    if (after.getOp().isLogical())
-                        NewMExpr = ssp.copyIn(after, group_no);
-                    else
-                        NewMExpr = new MExpr(after, group_no, ssp);
-                } else //include physical mexpr into group
-                    NewMExpr = ssp.copyIn(after, group_no);
+				// include substitute in MEMO, find duplicates, etc.
+				int group_no = mexpr.getGrpID();
 
-                // If substitute was already known 
-                if (NewMExpr == null) {
-                    after = null; // "after" no longer used
-                    continue; // try to find another substitute
-                }
-                after = null; // "after" no longer used
+				if (ssp.NO_PHYS_IN_GROUP) {
+					// don't include physical mexprs into group
+					if (after.getOp().isLogical())
+						NewMExpr = ssp.copyIn(after, group_no);
+					else
+						NewMExpr = new MExpr(after, group_no, ssp);
+				} else
+					// include physical mexpr into group
+					NewMExpr = ssp.copyIn(after, group_no);
 
-                //Give this expression the rule's mask
-                NewMExpr.setRuleMask(rule.getMask());
+				// If substitute was already known
+				if (NewMExpr == null) {
+					after = null; // "after" no longer used
+					continue; // try to find another substitute
+				}
+				after = null; // "after" no longer used
 
-                //We need to handle this case for rules like project.null,
-                //by merging groups
-                assert mexpr.getGrpID() == NewMExpr.getGrpID();
+				// Give this expression the rule's mask
+				NewMExpr.setRuleMask(rule.getMask());
 
-                boolean Flag = false;
-                if (last)
-                    // this's the last applied rule in the group,pass it to the new task
-                    {
-                    last = false;
-                    // turn off this, since it's no longer the last task
-                    Flag = true;
-                }
+				// We need to handle this case for rules like project.null,
+				// by merging groups
+				assert mexpr.getGrpID() == NewMExpr.getGrpID();
 
-                // follow-on tasks
-                if (explore) // optimizer is exploring, the new mexpr must be logical expr
-                    {
-                    assert NewMExpr.getOp().isLogical();
-                    //                            PTRACE0("new task to explore new expression," 
-                    //                "pushing O_EXPR exploring expr: " + NewMExpr.Dump());
-                    if (ssp.GlobepsPruning) {
-                        Cost eps_bound = new Cost(epsBound);
-                        ssp.addTask(
-                            new O_EXPR(
-                                ssp,
-                                NewMExpr,
-                                true,
-                                context,
-                                Flag,
-                                eps_bound));
-                    } else
-                        ssp.addTask(
-                            new O_EXPR(ssp, NewMExpr, true, context, Flag));
-                } // optimizer is exploring
-                else { // optimizer is optimizing
-                    // for a logical op, try further transformations
-                    if (NewMExpr.getOp().isLogical()) {
-                        //                    PTRACE0("new task to optimize new expression,pushing O_EXPR, expr: " + NewMExpr.Dump());
-                        if (ssp.GlobepsPruning) {
-                            Cost eps_bound = new Cost(epsBound);
-                            ssp.addTask(
-                                new O_EXPR(
-                                    ssp,
-                                    NewMExpr,
-                                    false,
-                                    context,
-                                    Flag,
-                                    eps_bound));
-                        } else
-                            ssp.addTask(
-                                new O_EXPR(
-                                    ssp,
-                                    NewMExpr,
-                                    false,
-                                    context,
-                                    Flag));
-                    } // further transformations to optimize new expr
-                    else {
-                        // for a physical operator, optimize the inputs
-                        /* must be done even if op_arg.arity == 0 in order to calculate costs */
-                        assert NewMExpr.getOp().isPhysical();
-                        //                    PTRACE0("new task to optimize inputs,pushing O_INPUT, epxr: " + NewMExpr.Dump());
-                        if (ssp.GlobepsPruning) {
-                            Cost eps_bound = new Cost(epsBound);
-                            ssp.addTask(
-                                new O_INPUTS(
-                                    NewMExpr,
-                                    context,
-                                    Flag,
-                                    eps_bound));
-                        } else {
-                            int contextNo = 0;
-                            int j = 0;
-                                ssp.addTask(
-                                    new O_INPUTS(
-                                        NewMExpr,
-                                        context,
-                                        Flag,
-                                        null));
-                        }
+				boolean Flag = false;
+				if (last)
+				// this's the last applied rule in the group,pass it to the new
+				// task
+				{
+					last = false;
+					// turn off this, since it's no longer the last task
+					Flag = true;
+				}
 
-                    } // for a physical operator, optimize the inputs
+				// follow-on tasks
+				if (explore) // optimizer is exploring, the new mexpr must be
+				// logical expr
+				{
+					assert NewMExpr.getOp().isLogical();
+					// PTRACE0("new task to explore new expression,"
+					// "pushing O_EXPR exploring expr: " + NewMExpr.Dump());
+					if (ssp.GlobepsPruning) {
+						Cost eps_bound = new Cost(epsBound);
+						ssp.addTask(new O_EXPR(ssp, NewMExpr, true, context,
+								Flag, eps_bound));
+					} else
+						ssp.addTask(new O_EXPR(ssp, NewMExpr, true, context,
+								Flag));
+				} // optimizer is exploring
+				else { // optimizer is optimizing
+					// for a logical op, try further transformations
+					if (NewMExpr.getOp().isLogical()) {
+						// PTRACE0("new task to optimize new expression,pushing O_EXPR, expr: "
+						// + NewMExpr.Dump());
+						if (ssp.GlobepsPruning) {
+							Cost eps_bound = new Cost(epsBound);
+							ssp.addTask(new O_EXPR(ssp, NewMExpr, false,
+									context, Flag, eps_bound));
+						} else
+							ssp.addTask(new O_EXPR(ssp, NewMExpr, false,
+									context, Flag));
+					} // further transformations to optimize new expr
+					else {
+						// for a physical operator, optimize the inputs
+						/*
+						 * must be done even if op_arg.arity == 0 in order to
+						 * calculate costs
+						 */
+						assert NewMExpr.getOp().isPhysical();
+						// PTRACE0("new task to optimize inputs,pushing O_INPUT, epxr: "
+						// + NewMExpr.Dump());
+						if (ssp.GlobepsPruning) {
+							Cost eps_bound = new Cost(epsBound);
+							ssp.addTask(new O_INPUTS(NewMExpr, context, Flag,
+									eps_bound));
+						} else {
+							// int contextNo = 0;
+							// int j = 0;
+							ssp.addTask(new O_INPUTS(NewMExpr, context, Flag,
+									null));
+						}
 
-                } // optimizer is optimizing
+					} // for a physical operator, optimize the inputs
 
-            } // try all possible bindings
-        } else {
-            // a temporary array just for holding the elements
-            ArrayList AfterArray = new ArrayList();
-            // get all the substitutions, put them in the array, sort the array
-            // according to the estimanted cost, and push the most expensive task 
-            // first, so that we can get lowest LB soon
-            while (bindery.advance()) {
-                rule_matched++;
-                // There must be a Binding since advance() returned non-null.
-                // Extract the bound Expr from the bindery
-                before = bindery.extract_expr();
-                // PTRACE ("new Binding is: %s", before.Dump());
+				} // optimizer is optimizing
 
-                // check the rule's context function
-                Context Cont = context;
-                PhysicalProperty ReqdProp = Cont.getPhysProp();
-                //What prop is required of
-                if (!rule.condition(before, mexpr, ReqdProp)) {
-                    // PTRACE ("Binding FAILS condition function, expr: %s",mexpr.Dump());
-                    continue; // try to find another binding
-                }
+			} // try all possible bindings
+		} else {
+			// a temporary array just for holding the elements
+			ArrayList AfterArray = new ArrayList();
+			// get all the substitutions, put them in the array, sort the array
+			// according to the estimanted cost, and push the most expensive
+			// task
+			// first, so that we can get lowest LB soon
+			while (bindery.advance()) {
+				rule_matched++;
+				// There must be a Binding since advance() returned non-null.
+				// Extract the bound Expr from the bindery
+				before = bindery.extract_expr();
+				// PTRACE ("new Binding is: %s", before.Dump());
 
-                // rule will actually be fired, rule_is_fired is useful later for setting before_mask 
-                rule_fired++;
+				// check the rule's context function
+				Context Cont = context;
+				PhysicalProperty ReqdProp = Cont.getPhysProp();
+				// What prop is required of
+				if (!rule.condition(before, mexpr, ReqdProp)) {
+					// PTRACE
+					// ("Binding FAILS condition function, expr: %s",mexpr.Dump());
+					continue; // try to find another binding
+				}
 
-                //PTRACE ("Binding SATISFIES condition function.  Mexpr: %s",mexpr.Dump());
+				// rule will actually be fired, rule_is_fired is useful later
+				// for setting before_mask
+				rule_fired++;
 
-                // try to derive a new substitute expression
-                after = rule.nextSubstitute(before, mexpr, ReqdProp);
-                if (after == null) continue;
-                
-                //PTRACE("substitute expr is : %s", after.Dump());
+				// PTRACE
+				// ("Binding SATISFIES condition function.  Mexpr: %s",mexpr.Dump());
 
-                // include substitute in MEMO, find duplicates, etc.
-                int group_no = mexpr.getGrpID();
+				// try to derive a new substitute expression
+				after = rule.nextSubstitute(before, mexpr, ReqdProp);
+				if (after == null)
+					continue;
 
-                if (ssp.NO_PHYS_IN_GROUP) {
-                    // don't include physical mexprs into group
-                    if (after.getOp().isLogical())
-                        NewMExpr = ssp.copyIn(after, group_no);
-                    else
-                        NewMExpr = new MExpr(after, group_no, ssp);
-                } else //include physcial mexpr into group
-                    NewMExpr = ssp.copyIn(after, group_no);
+				// PTRACE("substitute expr is : %s", after.Dump());
 
-                // If substitute was already known 
-                if (NewMExpr == null) {
-                    //PTRACE("duplicate substitute %s", after.Dump());
+				// include substitute in MEMO, find duplicates, etc.
+				int group_no = mexpr.getGrpID();
 
-                    after = null; // "after" no longer used
+				if (ssp.NO_PHYS_IN_GROUP) {
+					// don't include physical mexprs into group
+					if (after.getOp().isLogical())
+						NewMExpr = ssp.copyIn(after, group_no);
+					else
+						NewMExpr = new MExpr(after, group_no, ssp);
+				} else
+					// include physcial mexpr into group
+					NewMExpr = ssp.copyIn(after, group_no);
 
-                    continue; // try to find another substitute
-                }
+				// If substitute was already known
+				if (NewMExpr == null) {
+					// PTRACE("duplicate substitute %s", after.Dump());
 
-                //PTRACE("New Mexpr is : %s", NewMExpr.Dump());
+					after = null; // "after" no longer used
 
-                after = null; // "after" no longer used
+					continue; // try to find another substitute
+				}
 
-                //Give this expression the rule's mask
-                NewMExpr.setRuleMask(rule.getMask());
+				// PTRACE("New Mexpr is : %s", NewMExpr.Dump());
 
-                AFTERS element = new AFTERS();
-                element.m_expr = NewMExpr;
-                //calculate the estimate cost
-                Cost[] InputCost = null;
-                Cost TotalCost = new Cost(0);
-                Cost LocalCost;
-                LogicalProperty[] InputLogProp = null;
-                int arity = NewMExpr.getArity();
-                if (arity > 0) {
-                    InputCost = new Cost[arity];
-                    InputLogProp = new LogicalProperty[arity];
-                    int input;
-                    for (input = 0; input < arity; input++) {
-                        Group IG = NewMExpr.getInput(input);
-                        InputCost[input] = IG.getLowerBd();
-                        InputLogProp[input] = IG.getLogProp();
-                    }
-                }
+				after = null; // "after" no longer used
 
-                // if it is physical operator, plus the local cost
-                if (NewMExpr.getOp().isPhysical())
-                    LocalCost =
-                        ((PhysicalOp) NewMExpr.getOp()).findLocalCost(
-                            ssp.getCatalog(),
-                            InputLogProp);
-                else
-                    LocalCost = new Cost(0);
-                TotalCost.finalCost(LocalCost, InputCost);
-                element.cost = TotalCost;
+				// Give this expression the rule's mask
+				NewMExpr.setRuleMask(rule.getMask());
 
-                if (arity > 0) {
-                    InputCost = null;
-                    InputLogProp = null;
-                }
-                LocalCost = null;
-                AfterArray.add(element);
-            }
-            int num_afters = AfterArray.size();
-            // copy the array to static array
-            AFTERS[] Afters = new AFTERS[num_afters];
-            for (int array_index = 0;
-                array_index < num_afters;
-                array_index++) {
-                Afters[array_index].m_expr =
-                    ((AFTERS) AfterArray.get(array_index)).m_expr;
-                Afters[array_index].cost =
-                    ((AFTERS) AfterArray.get(array_index)).cost;
-            }
-            if (num_afters > 1) {
-                // order tasks by descending cost
-                Arrays.sort(Afters, 0, num_afters, new Comparator() {
-                    public int compare(Object o1, Object o2) {
-                        AFTERS m1 = (AFTERS) o1;
-                        AFTERS m2 = (AFTERS) o2;
-                        return -m1.compareTo(m2);
-                    }
-                });
-            }
-            // push tasks in the order of estimate cost, most expensive first
-            while (--num_afters >= 0) {
-                //Give this expression the rule's mask
-                Afters[num_afters].m_expr.setRuleMask(rule.getMask());
+				AFTERS element = new AFTERS();
+				element.m_expr = NewMExpr;
+				// calculate the estimate cost
+				Cost[] InputCost = null;
+				Cost TotalCost = new Cost(0);
+				Cost LocalCost;
+				LogicalProperty[] InputLogProp = null;
+				int arity = NewMExpr.getArity();
+				if (arity > 0) {
+					InputCost = new Cost[arity];
+					InputLogProp = new LogicalProperty[arity];
+					int input;
+					for (input = 0; input < arity; input++) {
+						Group IG = NewMExpr.getInput(input);
+						InputCost[input] = IG.getLowerBd();
+						InputLogProp[input] = IG.getLogProp();
+					}
+				}
 
-                //We need to handle this case for rules like project.null,
-                //by merging groups
-                assert(
-                    mexpr.getGrpID() == Afters[num_afters].m_expr.getGrpID());
+				// if it is physical operator, plus the local cost
+				if (NewMExpr.getOp().isPhysical())
+					LocalCost = ((PhysicalOp) NewMExpr.getOp()).findLocalCost(
+							ssp.getCatalog(), InputLogProp);
+				else
+					LocalCost = new Cost(0);
+				TotalCost.finalCost(LocalCost, InputCost);
+				element.cost = TotalCost;
 
-                boolean Flag = false;
-                if (last)
-                    // this's the last applied rule in the group,pass it to the new task
-                    {
-                    last = false;
-                    // turn off this, since it's no longer the last task
-                    Flag = true;
-                }
+				if (arity > 0) {
+					InputCost = null;
+					InputLogProp = null;
+				}
+				LocalCost = null;
+				AfterArray.add(element);
+			}
+			int num_afters = AfterArray.size();
+			// copy the array to static array
+			AFTERS[] Afters = new AFTERS[num_afters];
+			for (int array_index = 0; array_index < num_afters; array_index++) {
+				Afters[array_index].m_expr = ((AFTERS) AfterArray
+						.get(array_index)).m_expr;
+				Afters[array_index].cost = ((AFTERS) AfterArray
+						.get(array_index)).cost;
+			}
+			if (num_afters > 1) {
+				// order tasks by descending cost
+				Arrays.sort(Afters, 0, num_afters, new Comparator() {
+					public int compare(Object o1, Object o2) {
+						AFTERS m1 = (AFTERS) o1;
+						AFTERS m2 = (AFTERS) o2;
+						return -m1.compareTo(m2);
+					}
+				});
+			}
+			// push tasks in the order of estimate cost, most expensive first
+			while (--num_afters >= 0) {
+				// Give this expression the rule's mask
+				Afters[num_afters].m_expr.setRuleMask(rule.getMask());
 
-                // follow-on tasks
-                if (explore) // optimizer is exploring, the new mexpr must be logical expr
-                    {
-                    assert(
-                        ((AFTERS) AfterArray.get(num_afters))
-                            .m_expr
-                            .getOp()
-                            .isLogical());
-                    ssp.addTask(
-                        new O_EXPR(
-                            ssp,
-                            Afters[num_afters].m_expr,
-                            true,
-                            context,
-                            Flag));
+				// We need to handle this case for rules like project.null,
+				// by merging groups
+				assert (mexpr.getGrpID() == Afters[num_afters].m_expr
+						.getGrpID());
 
-                } // optimizer is exploring
-                else { // optimizer is optimizing
-                    // for a logical op, try further transformations
-                    if (Afters[num_afters].m_expr.getOp().isLogical()) {
-                        ssp.addTask(
-                            new O_EXPR(
-                                ssp,
-                                Afters[num_afters].m_expr,
-                                false,
-                                context,
-                                Flag));
-                    } // further transformations to optimize new expr
-                    else {
-                        // for a physical operator, optimize the inputs
-                        /* must be done even if op_arg.arity == 0 in order to calculate costs */
-                        assert(Afters[num_afters].m_expr.getOp().isPhysical());
+				boolean Flag = false;
+				if (last)
+				// this's the last applied rule in the group,pass it to the new
+				// task
+				{
+					last = false;
+					// turn off this, since it's no longer the last task
+					Flag = true;
+				}
 
-                        ssp.addTask(
-                            new O_INPUTS(
-                                Afters[num_afters].m_expr,
-                                context,
-                                Flag));
-                    } // for a physical operator, optimize the inputs
+				// follow-on tasks
+				if (explore) // optimizer is exploring, the new mexpr must be
+				// logical expr
+				{
+					assert (((AFTERS) AfterArray.get(num_afters)).m_expr
+							.getOp().isLogical());
+					ssp.addTask(new O_EXPR(ssp, Afters[num_afters].m_expr,
+							true, context, Flag));
 
-                } // optimizer is optimizing
+				} // optimizer is exploring
+				else { // optimizer is optimizing
+					// for a logical op, try further transformations
+					if (Afters[num_afters].m_expr.getOp().isLogical()) {
+						ssp.addTask(new O_EXPR(ssp, Afters[num_afters].m_expr,
+								false, context, Flag));
+					} // further transformations to optimize new expr
+					else {
+						// for a physical operator, optimize the inputs
+						/*
+						 * must be done even if op_arg.arity == 0 in order to
+						 * calculate costs
+						 */
+						assert (Afters[num_afters].m_expr.getOp().isPhysical());
 
-                Afters[num_afters].cost = null;
+						ssp.addTask(new O_INPUTS(Afters[num_afters].m_expr,
+								context, Flag));
+					} // for a physical operator, optimize the inputs
 
-            } // end while
-            Afters = null;
-        }
+				} // optimizer is optimizing
 
-        bindery = null;
+				Afters[num_afters].cost = null;
 
-        //        PTRACE("The rules was matched for %d times", rule_matched);
-        //        PTRACE("The rules was fired for %d times", rule_fired);
+			} // end while
+			Afters = null;
+		}
 
-        // Add before-mask to mexpr's RuleMask, to enable that firing this rule 
-        // will block certain other rules to be applied to this m-expr
-        // An example is that non-duplicating unnesting rules will block duplicating
-        // unnesting rules. 
-        // This seems to be the only place you need to modify to deactivate or activate 
-        // before_mask.    (Added 5/2000 Quan Wang)
-        if (rule_fired > 0) {
-            mexpr.addRuleMask(rule.getBeforeMask());
-        }
+		bindery = null;
 
-        //Mark rule vector to show that this rule has fired
-        mexpr.fire_rule(rule.getIndex());
+		// PTRACE("The rules was matched for %d times", rule_matched);
+		// PTRACE("The rules was fired for %d times", rule_fired);
 
-        delete();
-    } // perform
+		// Add before-mask to mexpr's RuleMask, to enable that firing this rule
+		// will block certain other rules to be applied to this m-expr
+		// An example is that non-duplicating unnesting rules will block
+		// duplicating
+		// unnesting rules.
+		// This seems to be the only place you need to modify to deactivate or
+		// activate
+		// before_mask. (Added 5/2000 Quan Wang)
+		if (rule_fired > 0) {
+			mexpr.addRuleMask(rule.getBeforeMask());
+		}
 
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Apply rule: ");
-        sb.append(rule);
-        sb.append(" to mexpr ");
-        sb.append(mexpr);
+		// Mark rule vector to show that this rule has fired
+		mexpr.fire_rule(rule.getIndex());
 
-        return sb.toString();
-    }
+		delete();
+	} // perform
 
-    /* Function to compare the cost of mexprs */
-    int compare_afters(AFTERS x, AFTERS y) {
-        int result = 0;
-        if (x.cost.lessThan(y.cost))
-            result = -1;
-        else if (x.cost.greaterThan(y.cost))
-            result = 1;
-        else
-            result = 0;
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("Apply rule: ");
+		sb.append(rule);
+		sb.append(" to mexpr ");
+		sb.append(mexpr);
 
-        return result;
-    } // compare_afters
+		return sb.toString();
+	}
+
+	/* Function to compare the cost of mexprs */
+	int compare_afters(AFTERS x, AFTERS y) {
+		int result = 0;
+		if (x.cost.lessThan(y.cost))
+			result = -1;
+		else if (x.cost.greaterThan(y.cost))
+			result = 1;
+		else
+			result = 0;
+
+		return result;
+	} // compare_afters
 
 }
 
 /**
- *  Pair of expr and cost value, used to sort expr according to their cost
+ * Pair of expr and cost value, used to sort expr according to their cost
  */
 class AFTERS {
-    public MExpr m_expr;
-    public Cost cost;
+	public MExpr m_expr;
+	public Cost cost;
 
-    public int compareTo(Object o) {
-        if (!(o instanceof AFTERS))
-            throw new ClassCastException(
-                "Expected AFTERS, got: " + o.getClass());
-        AFTERS other = (AFTERS) o;
-        if (cost.greaterThan(other.cost))
-            return 1;
-        if (cost.equals(other.cost))
-            return 0;
-        return -1;
-    }
+	public int compareTo(Object o) {
+		if (!(o instanceof AFTERS))
+			throw new ClassCastException("Expected AFTERS, got: "
+					+ o.getClass());
+		AFTERS other = (AFTERS) o;
+		if (cost.greaterThan(other.cost))
+			return 1;
+		if (cost.equals(other.cost))
+			return 0;
+		return -1;
+	}
 }

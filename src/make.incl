@@ -1,5 +1,4 @@
 #######################################################################
-#  $Id: make.incl,v 1.10 2003/03/08 02:24:54 vpapad Exp $
 #
 #  Make include file - for common constant info
 #  Added 1-17-02 by Kristin Tufte - remove the fact that some 

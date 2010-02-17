@@ -1,9 +1,8 @@
 package niagara.firehose;
 
-import java.lang.Exception;
-
+@SuppressWarnings("serial")
 class ShutdownSystemException extends Exception {
-    public ShutdownSystemException() {
-	super();
-    } 
+	public ShutdownSystemException() {
+		super();
+	}
 }

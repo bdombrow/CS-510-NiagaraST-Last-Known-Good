@@ -1,5 +1,4 @@
 // Event handlers for browser events.
-// $Id: ajax.js,v 1.3 2007/05/29 17:08:17 vpapad Exp $
 
 var req;
 var timeoutWatch;

@@ -1,30 +1,6 @@
+package niagara.xmlql_parser;
 
-/**********************************************************************
-  $Id: schemaAttribute.java,v 1.2 2006/11/28 05:26:30 jinli Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
-**********************************************************************/
-
+import niagara.utils.CUtil;
 
 /** 
  * This is analogous to attributes of schema in the relational world. 
@@ -45,30 +21,26 @@
  * schemaAttribute for $a will contain 2 as the attrNumber.
  *
  */
-package niagara.xmlql_parser;
-
-
-import niagara.utils.CUtil;
-
 public class schemaAttribute {
-        int attrNumber;     // position of the SchemaUnit in the Schema
-	int streamid;       // by default it is 0, but in case of join
-			    //   the schemaAttribute for right stream will
-			    //   have one as its value
-        regExp path;        // regular expression for this attribute from the
-			    //   the root
+	int attrNumber; // position of the SchemaUnit in the Schema
+	int streamid; // by default it is 0, but in case of join
+	// the schemaAttribute for right stream will
+	// have one as its value
+	regExp path; // regular expression for this attribute from the
+	// the root
 
-	int type;           // CONTENT_VAR,ELEMENT_VAR,TAG_VAR
-	
+	int type; // CONTENT_VAR,ELEMENT_VAR,TAG_VAR
+
 	String name;
 
 	/**
 	 * Constructor
-	 *
-	 * @param the position of the SchemaUnit
+	 * 
+	 * @param the
+	 *            position of the SchemaUnit
 	 */
 
-	public schemaAttribute (int num, String tagName) {
+	public schemaAttribute(int num, String tagName) {
 		attrNumber = num;
 		path = null;
 		type = varType.CONTENT_VAR;
@@ -78,8 +50,9 @@ public class schemaAttribute {
 
 	/**
 	 * Constructor
-	 *
-	 * @param schemaAttribute to clone
+	 * 
+	 * @param schemaAttribute
+	 *            to clone
 	 */
 
 	public schemaAttribute(schemaAttribute sa) {
@@ -91,28 +64,32 @@ public class schemaAttribute {
 
 	/**
 	 * Constructor
-	 *
-	 * @param position of the SchemaUnit
-	 * @param type of the variable which represents this schemaAttribute
+	 * 
+	 * @param position
+	 *            of the SchemaUnit
+	 * @param type
+	 *            of the variable which represents this schemaAttribute
 	 */
 
-	public schemaAttribute (int num, int _type, String tagName) {
+	public schemaAttribute(int num, int _type, String tagName) {
 		attrNumber = num;
 		path = null;
 		type = _type;
 		streamid = 0;
 		name = tagName;
 	}
-	
+
 	/**
 	 * Constructor
-	 *
-	 * @param the position of SchemaUnit
-	 * @param regular expression that represents the path to this 
-	 *        element from the root
+	 * 
+	 * @param the
+	 *            position of SchemaUnit
+	 * @param regular
+	 *            expression that represents the path to this element from the
+	 *            root
 	 */
 
-	public schemaAttribute (int num, regExp re, String tagName) {
+	public schemaAttribute(int num, regExp re, String tagName) {
 		attrNumber = num;
 		path = re;
 		streamid = 0;
@@ -120,11 +97,12 @@ public class schemaAttribute {
 	}
 
 	/**
-	 * shift the position of SchemaUnit. Used when two Schemas are merged
-	 * and all the schemaAttributes for the second Schema needs to shifted
-	 * by the length of the first Schema
-	 *
-	 * @param the length by which the attribute number has to be increased
+	 * shift the position of SchemaUnit. Used when two Schemas are merged and
+	 * all the schemaAttributes for the second Schema needs to shifted by the
+	 * length of the first Schema
+	 * 
+	 * @param the
+	 *            length by which the attribute number has to be increased
 	 */
 
 	public void shift(int dist) {
@@ -156,7 +134,8 @@ public class schemaAttribute {
 	}
 
 	/**
-	 * @param the stream number
+	 * @param the
+	 *            stream number
 	 */
 
 	public void setStreamId(int id) {
@@ -164,8 +143,8 @@ public class schemaAttribute {
 	}
 
 	/**
-	 * @return the regular expression that represents the path to this
-	 *         element from the root
+	 * @return the regular expression that represents the path to this element
+	 *         from the root
 	 */
 
 	public regExp getPath() {
@@ -191,13 +170,15 @@ public class schemaAttribute {
 	/**
 	 * @return the name of the variable that represents this schemaAttribute
 	 */
-	public String getName () {
+	public String getName() {
 		return name;
 	}
+
 	/**
 	 * prints to the standard output
-	 *
-	 * @param number of tabs at the beginning of each line
+	 * 
+	 * @param number
+	 *            of tabs at the beginning of each line
 	 */
 
 	public void dump(int depth) {
@@ -210,14 +191,12 @@ public class schemaAttribute {
 	 */
 
 	public void dump() {
-		System.out.print("Stream id: " + streamid + 
-		                 "Attr number: $" + attrNumber + 
-				 "Type: " + type + 
-				 "Path:  ");
-                if(path != null) {
-	            path.dump(0);
+		System.out.print("Stream id: " + streamid + "Attr number: $"
+				+ attrNumber + "Type: " + type + "Path:  ");
+		if (path != null) {
+			path.dump(0);
 		} else {
-                  System.out.print("null");
+			System.out.print("null");
 		}
 		System.out.println();
 	}

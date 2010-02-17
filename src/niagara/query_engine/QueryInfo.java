@@ -1,45 +1,20 @@
-
-/**********************************************************************
-  $Id: QueryInfo.java,v 1.9 2007/04/30 19:24:09 vpapad Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
- **********************************************************************/
-
-
 package niagara.query_engine;
 
 import java.util.Date;
 
 import niagara.connection_server.NiagraServer;
-import niagara.utils.*;
+import niagara.utils.ControlFlag;
+import niagara.utils.PEException;
+import niagara.utils.PageStream;
+import niagara.utils.ShutdownException;
+import niagara.utils.SourceTupleStream;
 
 /**
- *  The QueryInfo class stores all data associated with a query and
- *  provides access to that data.  It is stored internal to the 
- *  query engine.
- *
+ * The QueryInfo class stores all data associated with a query and provides
+ * access to that data. It is stored internal to the query engine.
+ * 
  * @version 1.0
- *
+ * 
  */
 
 public class QueryInfo {
@@ -69,7 +44,8 @@ public class QueryInfo {
 	// The head operator thread of the query
 	private Thread headOperatorThread;
 
-	// Flag to indicate whether this query should be removed by the physical head op.
+	// Flag to indicate whether this query should be removed by the physical
+	// head op.
 	//
 	private boolean removeFromActive;
 
@@ -78,22 +54,25 @@ public class QueryInfo {
 
 	/**
 	 * Constructor for QueryInfo objects.
-	 *
-	 * @param queryString the query as a string
-	 * @param queryId a unique query id
-	 * @param outputPageStream the output stream of the query
-	 * @param activeQueryList the active query list the query info is to
-	 *                        be part of
-	 *
-	 * @exception ActiveQueryList.QueryIdAlreadyPresentException if the
-	 *            query id for the query is already present in activeQueryList
+	 * 
+	 * @param queryString
+	 *            the query as a string
+	 * @param queryId
+	 *            a unique query id
+	 * @param outputPageStream
+	 *            the output stream of the query
+	 * @param activeQueryList
+	 *            the active query list the query info is to be part of
+	 * 
+	 * @exception ActiveQueryList.QueryIdAlreadyPresentException
+	 *                if the query id for the query is already present in
+	 *                activeQueryList
 	 */
 
-	public QueryInfo (String queryString, int queryId,
-			PageStream outputPageStream,
-			ActiveQueryList activeQueryList,
-			boolean remove) 
-	throws ActiveQueryList.QueryIdAlreadyPresentException {
+	public QueryInfo(String queryString, int queryId,
+			PageStream outputPageStream, ActiveQueryList activeQueryList,
+			boolean remove)
+			throws ActiveQueryList.QueryIdAlreadyPresentException {
 
 		this.removeFromActive = remove;
 		this.queryString = queryString;
@@ -119,21 +98,20 @@ public class QueryInfo {
 		headOperatorThread = null;
 	}
 
-
 	/**
 	 * Returns the query string of this query object
 	 * 
 	 * @return the query string
 	 */
 
-	public String getQueryString () {
+	public String getQueryString() {
 		return queryString;
 	}
 
 	/**
 	 * Returns the query string of this query object
 	 * 
-	 * @return flag indicating if the physical head operator should remove this 
+	 * @return flag indicating if the physical head operator should remove this
 	 *         query info object from the active query list when done;
 	 */
 
@@ -142,17 +120,15 @@ public class QueryInfo {
 		return removeFromActive;
 	}
 
-
 	/**
 	 * Returns the time the query entered the system
 	 * 
 	 * @return the time the query entered the system
 	 */
-	public long getRegisteredTime () { 
+	public long getRegisteredTime() {
 
 		return regTime;
 	}
-
 
 	/**
 	 * Returns the query id of this query object
@@ -160,31 +136,29 @@ public class QueryInfo {
 	 * @return query id issued to the query
 	 */
 
-	public int getQueryId () { 
+	public int getQueryId() {
 
 		return queryId;
 	}
 
-
 	/**
 	 * Returns the output stream of the query
-	 *
+	 * 
 	 * @return output stream of the query
 	 */
 	/*
-	 * this fcn is used to allow people to create a sink tuple stream for
-	 * the top operator in the tree - should feed into query 
-	 * result/query info - KT */
-	public PageStream getOutputPageStream () {
+	 * this fcn is used to allow people to create a sink tuple stream for the
+	 * top operator in the tree - should feed into query result/query info - KT
+	 */
+	public PageStream getOutputPageStream() {
 		return outputPageStream;
 	}
-
 
 	/**
 	 * Kills the query in the system by shutting down all the operators, if any.
 	 */
 
-	public synchronized void killQueryWithOperators () {
+	public synchronized void killQueryWithOperators() {
 
 		// If query is already dead, nothing to do. This test is important
 		// because the query may have already been completed when this is
@@ -207,13 +181,12 @@ public class QueryInfo {
 		}
 	}
 
-
 	/**
-	 * Kills the query in the system (before operators could have been
-	 * invoked for it)
+	 * Kills the query in the system (before operators could have been invoked
+	 * for it)
 	 */
 
-	public synchronized void killQueryWithoutOperators () {
+	public synchronized void killQueryWithoutOperators() {
 
 		// There should not be a test to do nothing if the state is dead.
 		// This is because a killQueryWithOperator may be invoked without
@@ -234,15 +207,14 @@ public class QueryInfo {
 		}
 	}
 
-
 	/**
-	 * This function sets the head operator thread associated with the
-	 * query
-	 *
-	 * @param headOperatorThread The head operator thread
+	 * This function sets the head operator thread associated with the query
+	 * 
+	 * @param headOperatorThread
+	 *            The head operator thread
 	 */
 
-	public synchronized void setHeadOperatorThread (Thread headOperatorThread) {
+	public synchronized void setHeadOperatorThread(Thread headOperatorThread) {
 
 		// First set the value
 		//
@@ -257,25 +229,22 @@ public class QueryInfo {
 		}
 	}
 
-
 	/**
 	 * Returns the state of the query, possible values are ACTIVE, DEAD
-	 *
+	 * 
 	 * @return queryState - the state of the query
 	 */
 
-	public synchronized int getState() { 
+	public synchronized int getState() {
 
 		return queryState;
 	}
 
-
 	/**
-	 * Removes the query info object from the active query list it is
-	 * part of
+	 * Removes the query info object from the active query list it is part of
 	 */
 
-	synchronized public void removeFromActiveQueryList () {
+	synchronized public void removeFromActiveQueryList() {
 
 		// Change state of query to dead. This is necessary because there
 		// could be other parts of the system trying to kill the query
@@ -287,12 +256,12 @@ public class QueryInfo {
 		// Remove query from active list
 		try {
 			activeQueryList.removeQueryInfo(queryId);
-		}
-		catch (ActiveQueryList.NoSuchQueryException e) {
-			throw new PEException("Query Info object for query id " + queryId + " not present in active query list");
+		} catch (ActiveQueryList.NoSuchQueryException e) {
+			throw new PEException("Query Info object for query id " + queryId
+					+ " not present in active query list");
 		}
 
-		System.out.println("KT: Query with id " + queryId 
+		System.out.println("KT: Query with id " + queryId
 				+ " removed from QueryEngine.activeQueries");
 
 		// If this query was "prepared", remove it from the catalog now that
@@ -300,16 +269,14 @@ public class QueryInfo {
 		if (planID != null)
 			NiagraServer.getCatalog().removePreparedPlan(planID);
 
-
 		// Clear the interrupted flag of this thread in case it was interrupted
 		// for this query - the function used did not do that and it
 		// seems you can't reset interrupted fla
 	}
 
-
 	/**
 	 * Returns a string representation of the QueryInfo object
-	 *
+	 * 
 	 * @return string representation of query object
 	 */
 
@@ -330,18 +297,7 @@ public class QueryInfo {
 		return retStr;
 	}
 
-
 	public void setPlanID(String planID) {
 		this.planID = planID;
 	}
 }
-
-
-
-
-
-
-
-
-
-

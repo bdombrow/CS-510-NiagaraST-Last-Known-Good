@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# $Id: runTests,v 1.5 2003/02/25 06:18:13 vpapad Exp $
 
 use File::Compare;
 

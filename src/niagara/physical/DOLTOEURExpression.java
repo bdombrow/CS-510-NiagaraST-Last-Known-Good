@@ -1,40 +1,42 @@
-/* $Id: DOLTOEURExpression.java,v 1.3 2006/12/07 00:08:26 jinli Exp $ */
 package niagara.physical;
 
-import niagara.utils.*;
-import niagara.logical.*;
-import niagara.ndom.*;
-import niagara.query_engine.*;
+import java.text.NumberFormat;
+import java.util.Locale;
 
-import org.w3c.dom.*;
-import java.util.*;
-import java.text.*;
+import niagara.logical.ExpressionIF;
+import niagara.query_engine.TupleSchema;
+import niagara.utils.BaseAttr;
+import niagara.utils.StringAttr;
+import niagara.utils.Tuple;
 
 /** Sample user-defined expression class */
 public class DOLTOEURExpression implements ExpressionIF {
-    private int pricePos;
-    private static Locale loc = new Locale("fr");
-    private static NumberFormat nf = NumberFormat.getCurrencyInstance(loc);
-	private Document doc = DOMFactory.newDocument();
+	private int pricePos;
+	private static Locale loc = new Locale("fr");
+	private static NumberFormat nf = NumberFormat.getCurrencyInstance(loc);
 
-    public BaseAttr processTuple(Tuple ste) {
-        //Node priceNode = ste.getAttribute(pricePos);
-    	BaseAttr priceNode = (BaseAttr)ste.getAttribute(pricePos);
-        if(priceNode == null)
-        	return null;
+	// private Document doc = DOMFactory.newDocument();
+
+	public BaseAttr processTuple(Tuple ste) {
+		// Node priceNode = ste.getAttribute(pricePos);
+		BaseAttr priceNode = (BaseAttr) ste.getAttribute(pricePos);
+		if (priceNode == null)
+			return null;
 		float priceNum;
-        try {
-            //priceNum = Float.parseFloat(priceNode.getFirstChild().getNodeValue());
-        	priceNum = Float.parseFloat(priceNode.toASCII());
-        } catch (NumberFormatException nfe) {
-	    priceNum = 0;
-        }
-        BaseAttr res = new StringAttr(nf.format(priceNum*1.08380));
-		//Element res = doc.createElement("bid");
-		//res.appendChild(doc.createTextNode(nf.format(priceNum*1.08380)));
+		try {
+			// priceNum =
+			// Float.parseFloat(priceNode.getFirstChild().getNodeValue());
+			priceNum = Float.parseFloat(priceNode.toASCII());
+		} catch (NumberFormatException nfe) {
+			priceNum = 0;
+		}
+		BaseAttr res = new StringAttr(nf.format(priceNum * 1.08380));
+		// Element res = doc.createElement("bid");
+		// res.appendChild(doc.createTextNode(nf.format(priceNum*1.08380)));
 		return res;
-    }
-    public void setupSchema(TupleSchema ts) {
-        pricePos = ts.getPosition("price");
-    }
+	}
+
+	public void setupSchema(TupleSchema ts) {
+		pricePos = ts.getPosition("price");
+	}
 }

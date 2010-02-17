@@ -1,90 +1,88 @@
-/**
- * $Id: XercesJParser.java,v 1.5 2003/07/18 01:04:43 tufte Exp $
- *
- */
-
 package niagara.ndom;
 
-import org.w3c.dom.Document;
 import java.io.IOException;
 
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * <code>XercesJParser</code> is a wrapper for org.apache.xerces.parsers.DOMParser;
+ * <code>XercesJParser</code> is a wrapper for
+ * org.apache.xerces.parsers.DOMParser;
  */
 public class XercesJParser implements niagara.ndom.DOMParser {
 
-    private org.apache.xerces.parsers.DOMParser parser;
-    private SimpleHandler sh;
+	private org.apache.xerces.parsers.DOMParser parser;
+	private SimpleHandler sh;
 
-    public XercesJParser() {
-        parser = new org.apache.xerces.parsers.DOMParser();
-        sh = new SimpleHandler();
-    }
+	public XercesJParser() {
+		parser = new org.apache.xerces.parsers.DOMParser();
+		sh = new SimpleHandler();
+	}
 
-    public void parse(InputSource is) throws SAXException, IOException {
-        sh.reset();
-        parser.setErrorHandler(sh);
-        parser.parse(is);
-    }
+	public void parse(InputSource is) throws SAXException, IOException {
+		sh.reset();
+		parser.setErrorHandler(sh);
+		parser.parse(is);
+	}
 
-    public Document getDocument() {
-        return parser.getDocument();
-    }
+	public Document getDocument() {
+		return parser.getDocument();
+	}
 
-    public boolean hasErrors() {
-        return sh.hasErrors();
-    }
-    
-    public boolean hasWarnings() {
-        return sh.hasWarnings();
-    }
+	public boolean hasErrors() {
+		return sh.hasErrors();
+	}
 
-    public boolean supportsStreaming() {
-	return false;
-    }
-    
-    /* 
-     * @see niagara.ndom.DOMParser#getErrorStrings()
-     */
-    public String getErrorStrings() {
-        return null;
-    }
+	public boolean hasWarnings() {
+		return sh.hasWarnings();
+	}
 
-    /* 
-     * @see niagara.ndom.DOMParser#getWarningStrings()
-     */
-    public String getWarningStrings() {
-        return null;
-    }
+	public boolean supportsStreaming() {
+		return false;
+	}
+
+	/*
+	 * @see niagara.ndom.DOMParser#getErrorStrings()
+	 */
+	public String getErrorStrings() {
+		return null;
+	}
+
+	/*
+	 * @see niagara.ndom.DOMParser#getWarningStrings()
+	 */
+	public String getWarningStrings() {
+		return null;
+	}
 }
 
 class SimpleHandler extends DefaultHandler {
-    private boolean hasErrors, hasWarnings;
+	private boolean hasErrors, hasWarnings;
 
-    public SimpleHandler() {
-        reset();
-    }
+	public SimpleHandler() {
+		reset();
+	}
 
-    public boolean hasWarnings() {
-        return hasWarnings;
-    }
+	public boolean hasWarnings() {
+		return hasWarnings;
+	}
 
-    public boolean hasErrors() {
-        return hasErrors;
-    }
+	public boolean hasErrors() {
+		return hasErrors;
+	}
 
-    public void reset() {
-        hasErrors = hasWarnings = false;
-    }
+	public void reset() {
+		hasErrors = hasWarnings = false;
+	}
 
-    public void error(SAXParseException e) {
-        hasErrors = true;
-    }
+	public void error(SAXParseException e) {
+		hasErrors = true;
+	}
 
-    public void warning(SAXParseException e) {
-        hasWarnings = true;
-    }
+	public void warning(SAXParseException e) {
+		hasWarnings = true;
+	}
 }

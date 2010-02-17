@@ -1,33 +1,7 @@
-/**********************************************************************
-  $Id: MagicNode.java,v 1.4 2004/02/10 00:59:20 vpapad Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
-**********************************************************************/
-
 package niagara.magic;
 
-import niagara.utils.Tuple;
 import niagara.utils.PEException;
+import niagara.utils.Tuple;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.CharacterData;
@@ -40,326 +14,302 @@ import org.w3c.dom.Text;
 import org.w3c.dom.TypeInfo;
 
 /**
- * <code>MagicNode</code> is an implementation of 
- * the Construct operator.
+ * <code>MagicNode</code> is an implementation of the Construct operator.
  */
 
-// extends org.apache.xerces.impl.xs.opti.ElementImpl
-// extends org.apache.xerces.dom.ElementImpl 
+public class MagicNode extends MagicBaseNode implements Node, Element, Attr,
+		Text {
 
-public class MagicNode extends MagicBaseNode 
-    implements Node, Element, Attr, Text {
+	protected final int attrIdx;
+	protected final short nodeType;
+	// protected Node myNode;
+	protected Element myEltNode;
 
-    protected final int attrIdx;
-    protected final short nodeType;
-    //protected Node myNode;
-    protected Element myEltNode;
-
-    public MagicNode(int attrIdx, MagicBaseNode root, short nodeType) {
-	super(root);
-	this.attrIdx = attrIdx;
-	this.nodeType = nodeType;
-	myEltNode = null;
-    }
-
-    public void setYourNode(Tuple cTuple) {
-	myEltNode = (Element)cTuple.getAttribute(attrIdx);
-    }
-
-    // NODE INTERFACE METHODS: 
-
-    public Node cloneNode(boolean deep) {
-	assert false : "don't want to do any cloning";
-	if(myEltNode != null)
-	    return myEltNode.cloneNode(deep);
-	else {
-	    System.out.println("KT WARNING MAGIC CLONE");
-	    return new MagicNode(this.attrIdx, this.root, this.nodeType);
+	public MagicNode(int attrIdx, MagicBaseNode root, short nodeType) {
+		super(root);
+		this.attrIdx = attrIdx;
+		this.nodeType = nodeType;
+		myEltNode = null;
 	}
-    }
 
-    public NamedNodeMap getAttributes() {
-        return myEltNode.getAttributes();
-    }
+	public void setYourNode(Tuple cTuple) {
+		myEltNode = (Element) cTuple.getAttribute(attrIdx);
+	}
 
-    public NodeList getChildNodes() {
-	return myEltNode.getChildNodes();
-    }
+	// NODE INTERFACE METHODS:
 
-    public Node getFirstChild() {
-        return myEltNode.getFirstChild();
-    }
+	public Node cloneNode(boolean deep) {
+		assert false : "don't want to do any cloning";
+		if (myEltNode != null)
+			return myEltNode.cloneNode(deep);
+		else {
+			System.out.println("KT WARNING MAGIC CLONE");
+			return new MagicNode(this.attrIdx, this.root, this.nodeType);
+		}
+	}
 
-    public Node getLastChild() {
-        return myEltNode.getLastChild();
-    }
+	public NamedNodeMap getAttributes() {
+		return myEltNode.getAttributes();
+	}
 
-    public String getLocalName() {
-        return myEltNode.getLocalName();
-    }
+	public NodeList getChildNodes() {
+		return myEltNode.getChildNodes();
+	}
 
-    public String getNamespaceURI() {
-        return myEltNode.getNamespaceURI();
-    }
+	public Node getFirstChild() {
+		return myEltNode.getFirstChild();
+	}
 
-    public Node getNextSibling() {
-        return null; //myEltNode.getNextSibling();
-    }
+	public Node getLastChild() {
+		return myEltNode.getLastChild();
+	}
 
-    public String getNodeName() {
-	return myEltNode.getNodeName();
-    }
-    
-    public short getNodeType() {
-	assert myEltNode == null ||
-	    myEltNode.getNodeType() == nodeType :
-	    "Bad node type!!";
-	return nodeType;
-    }
+	public String getLocalName() {
+		return myEltNode.getLocalName();
+	}
 
-    public String getNodeValue() throws DOMException {
-	return myEltNode.getNodeValue();
-    }
+	public String getNamespaceURI() {
+		return myEltNode.getNamespaceURI();
+	}
 
-    public String getPrefix() {
-        return myEltNode.getPrefix();
-    }
+	public Node getNextSibling() {
+		return null; // myEltNode.getNextSibling();
+	}
 
-    public Node getPreviousSibling() {
-        return null; //return myEltNode.getPreviousSibling();
-    }
+	public String getNodeName() {
+		return myEltNode.getNodeName();
+	}
 
-    public boolean hasAttributes() {
-        return myEltNode.hasAttributes();
-    }
+	public short getNodeType() {
+		assert myEltNode == null || myEltNode.getNodeType() == nodeType : "Bad node type!!";
+		return nodeType;
+	}
 
-    public boolean hasChildNodes() {
-        return myEltNode.hasChildNodes();
-    }
+	public String getNodeValue() throws DOMException {
+		return myEltNode.getNodeValue();
+	}
 
-    public boolean isSupported(String feature, String version) {
-	return myEltNode.isSupported(feature, version);
-    }
+	public String getPrefix() {
+		return myEltNode.getPrefix();
+	}
 
-    public void normalize() {
-       myEltNode.normalize();
-    }
+	public Node getPreviousSibling() {
+		return null; // return myEltNode.getPreviousSibling();
+	}
 
-    // ELEMENT INTERFACE METHODS
-    public String getAttribute(String name) {
-        return myEltNode.getAttribute(name);
-    }
+	public boolean hasAttributes() {
+		return myEltNode.hasAttributes();
+	}
 
-    public Attr getAttributeNode(String name) {
-        return myEltNode.getAttributeNode(name);
-    }
+	public boolean hasChildNodes() {
+		return myEltNode.hasChildNodes();
+	}
 
-    public Attr getAttributeNodeNS(String namespaceURI, String localName) {
-        return myEltNode.
-	    getAttributeNodeNS(namespaceURI, localName);
-    }
+	public boolean isSupported(String feature, String version) {
+		return myEltNode.isSupported(feature, version);
+	}
 
-    public String getAttributeNS(String namespaceURI, String localName) {
-        return myEltNode
-	    .getAttributeNS(namespaceURI, localName);
-    }
+	public void normalize() {
+		myEltNode.normalize();
+	}
 
-    public NodeList getElementsByTagName(String name) {
-        return myEltNode.getElementsByTagName(name);
-    }
+	// ELEMENT INTERFACE METHODS
+	public String getAttribute(String name) {
+		return myEltNode.getAttribute(name);
+	}
 
-    public NodeList getElementsByTagNameNS(String namespaceURI, 
-                                           String localName) {
-        return myEltNode
-	    .getElementsByTagNameNS(namespaceURI,
-				    localName);
-    }
+	public Attr getAttributeNode(String name) {
+		return myEltNode.getAttributeNode(name);
+	}
 
-    public String getTagName() {
-        return myEltNode.getTagName();
-    }
+	public Attr getAttributeNodeNS(String namespaceURI, String localName) {
+		return myEltNode.getAttributeNodeNS(namespaceURI, localName);
+	}
 
-    public boolean hasAttribute(String name) {
-        return myEltNode.hasAttribute(name);
-    }
+	public String getAttributeNS(String namespaceURI, String localName) {
+		return myEltNode.getAttributeNS(namespaceURI, localName);
+	}
 
-    public boolean hasAttributeNS(String namespaceURI, String localName) {
-        return myEltNode
-	    .hasAttributeNS(namespaceURI, localName);
-    }
+	public NodeList getElementsByTagName(String name) {
+		return myEltNode.getElementsByTagName(name);
+	}
 
-    public void removeAttribute(String name)
-        throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public NodeList getElementsByTagNameNS(String namespaceURI, String localName) {
+		return myEltNode.getElementsByTagNameNS(namespaceURI, localName);
+	}
 
-    public Attr removeAttributeNode(Attr oldAttr)
-        throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public String getTagName() {
+		return myEltNode.getTagName();
+	}
 
-    public void removeAttributeNS(String namespaceURI, String localName)
-        throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public boolean hasAttribute(String name) {
+		return myEltNode.hasAttribute(name);
+	}
 
-    public void setAttribute(String name, String value)
-        throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public boolean hasAttributeNS(String namespaceURI, String localName) {
+		return myEltNode.hasAttributeNS(namespaceURI, localName);
+	}
 
-    public Attr setAttributeNode(Attr newAttr)
-        throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public void removeAttribute(String name) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public Attr setAttributeNodeNS(Attr newAttr) throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public Attr removeAttributeNode(Attr oldAttr) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public void setAttributeNS(String namespaceURI, String qualifiedName, 
-                               String value)
-        throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public void removeAttributeNS(String namespaceURI, String localName)
+			throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    // ATTR INTERFACE METHODS 
-    public String getName() {
-        return ((Attr)myEltNode).getName();
-    }
+	public void setAttribute(String name, String value) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public Element getOwnerElement() throws DOMException {
-	assert false : "Get owner element not supported on Magic Nodes";
-	throw new DOMException(DOMException.NOT_SUPPORTED_ERR,
-		    "Get owner element not supported on Magic Nodes");
-    }
+	public Attr setAttributeNode(Attr newAttr) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public boolean getSpecified() {
-	return ((Attr)myEltNode).getSpecified();
-    }
+	public Attr setAttributeNodeNS(Attr newAttr) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public String getValue() {
-        return ((Attr)myEltNode).getValue();
-    }
+	public void setAttributeNS(String namespaceURI, String qualifiedName,
+			String value) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public void setValue(String value) throws DOMException {
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	// ATTR INTERFACE METHODS
+	public String getName() {
+		return ((Attr) myEltNode).getName();
+	}
 
-    // TEXT INTERFACE METHODS
-    public Text splitText(int offset) throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public Element getOwnerElement() throws DOMException {
+		assert false : "Get owner element not supported on Magic Nodes";
+		throw new DOMException(DOMException.NOT_SUPPORTED_ERR,
+				"Get owner element not supported on Magic Nodes");
+	}
 
-    // CHARACTER DATA INTERFACE METHODS
-    public void appendData(String arg) throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public boolean getSpecified() {
+		return ((Attr) myEltNode).getSpecified();
+	}
 
-    public void deleteData(int offset, int count) throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public String getValue() {
+		return ((Attr) myEltNode).getValue();
+	}
 
-    public String getData() throws DOMException {
-        return ((CharacterData)myEltNode).getData();
-    }
+	public void setValue(String value) throws DOMException {
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public int getLength() {
-        return ((CharacterData)myEltNode).getLength();
-    }
+	// TEXT INTERFACE METHODS
+	public Text splitText(int offset) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public void insertData(int offset, String arg) throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	// CHARACTER DATA INTERFACE METHODS
+	public void appendData(String arg) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public void replaceData(int offset, int count, String arg) 
-        throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public void deleteData(int offset, int count) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public void setData(String data) throws DOMException {
-	assert false : "Magic objects are read-only";
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public String getData() throws DOMException {
+		return ((CharacterData) myEltNode).getData();
+	}
 
-    public String substringData(int offset, int count) throws DOMException {
-	return ((CharacterData)myEltNode).substringData(offset,
-								 count);
-    }
+	public int getLength() {
+		return ((CharacterData) myEltNode).getLength();
+	}
 
+	public void insertData(int offset, String arg) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    // SUPPORT FUNCTIONS
-    /*
-    protected Node getNodeFromTuple() {
-	assert root != null : "KT: Root is null!!";
-	if(root.getCurrentTuple() == null)
-	    return null;
-	else
-	    return root.getCurrentTuple().getAttribute(attrIdx);
-	
-	    }*/
-    
-    public TypeInfo getSchemaTypeInfo() {
-        throw new PEException("Not implemented yet");
-    }
+	public void replaceData(int offset, int count, String arg)
+			throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public void setIdAttribute(String name, boolean isId) throws DOMException {
-        throw new PEException("Not implemented yet");
-    }
+	public void setData(String data) throws DOMException {
+		assert false : "Magic objects are read-only";
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public void setIdAttributeNode(Attr idAttr, boolean isId)
-        throws DOMException {
-        throw new PEException("Not implemented yet");
-    }
+	public String substringData(int offset, int count) throws DOMException {
+		return ((CharacterData) myEltNode).substringData(offset, count);
+	}
 
-    public void setIdAttributeNS(
-        String namespaceURI,
-        String localName,
-        boolean isId)
-        throws DOMException {
-        throw new PEException("Not implemented yet");
-    }
+	// SUPPORT FUNCTIONS
+	/*
+	 * protected Node getNodeFromTuple() { assert root != null :
+	 * "KT: Root is null!!"; if(root.getCurrentTuple() == null) return null;
+	 * else return root.getCurrentTuple().getAttribute(attrIdx);
+	 * 
+	 * }
+	 */
 
-    public boolean isId() {
-        throw new PEException("Not implemented yet");
-    }
+	public TypeInfo getSchemaTypeInfo() {
+		throw new PEException("Not implemented yet");
+	}
 
-    public String getWholeText() {
-        throw new PEException("Not implemented yet");
-    }
+	public void setIdAttribute(String name, boolean isId) throws DOMException {
+		throw new PEException("Not implemented yet");
+	}
 
-    public boolean isElementContentWhitespace() {
-        throw new PEException("Not implemented yet");
-    }
+	public void setIdAttributeNode(Attr idAttr, boolean isId)
+			throws DOMException {
+		throw new PEException("Not implemented yet");
+	}
 
-    public Text replaceWholeText(String content) throws DOMException {
-        throw new PEException("Not implemented yet");
-    }
+	public void setIdAttributeNS(String namespaceURI, String localName,
+			boolean isId) throws DOMException {
+		throw new PEException("Not implemented yet");
+	}
+
+	public boolean isId() {
+		throw new PEException("Not implemented yet");
+	}
+
+	public String getWholeText() {
+		throw new PEException("Not implemented yet");
+	}
+
+	public boolean isElementContentWhitespace() {
+		throw new PEException("Not implemented yet");
+	}
+
+	public Text replaceWholeText(String content) throws DOMException {
+		throw new PEException("Not implemented yet");
+	}
 
 }

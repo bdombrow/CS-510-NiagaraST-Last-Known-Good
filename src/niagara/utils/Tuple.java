@@ -1,37 +1,5 @@
-/**********************************************************************
-  $Id: Tuple.java,v 1.3 2006/11/28 05:23:34 jinli Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
-**********************************************************************/
-
 package niagara.utils;
 
-/**
- * This is the <code>Tuple</code> class that is the unit
- * of transfer of tuples across a stream. Tuples are arrays of Nodes.
- *
- * @see Stream
- */
 import niagara.magic.MagicBaseNode;
 
 import org.w3c.dom.Document;
@@ -39,6 +7,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
+/***
+ * 
+ * The <code>Tuple</code> class, which is the transfer unit between operators.
+ *
+ */
 public class Tuple {
     // Members to create an expandable array of attributes
 	protected Object tuple[];
@@ -48,7 +21,7 @@ public class Tuple {
     // a (potentially) partial result
     protected boolean partial;
 
-    /*
+    /***
      * Constructor that initializes a tuple
      *
      * @param partial If this is true, the tuple represents a partial result;
@@ -60,7 +33,7 @@ public class Tuple {
         this.partial = partial;
     }
 
-    /*
+    /***
      * The constructor that initializes the tuple with initial capacity
      *
      * @param partial If this is true, the tuple represents a partial result;

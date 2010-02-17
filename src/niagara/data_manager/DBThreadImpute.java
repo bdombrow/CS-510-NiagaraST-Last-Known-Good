@@ -1,49 +1,53 @@
-/* $Id: DBThreadImpute.java,v 1.1 2008/10/21 23:11:35 rfernand Exp $ */
-
 package niagara.data_manager;
 
-/**
- * Data Streams Final Project changes: This version of DBThread is trimmed down 
- * (no "latte demo" * support is left), and it is tweaked to respond to the imputation
- * mechanism proposed for class.  --RJFM
- * 
- * 
- * Niagra DataManager DBThread - an input thread to connect to a database,
- * execute a query and put the results into a stream of tuples that can be
- * processed by the database
- */
-
 import java.lang.reflect.Array;
-import org.w3c.dom.*;
-import javax.xml.parsers.*;
-
-import niagara.logical.DBScanImpute;
-import niagara.logical.DBScanSpec;
-import niagara.optimizer.colombia.*;
-import niagara.query_engine.TupleSchema;
-import niagara.utils.*;
-import niagara.utils.BaseAttr.Type;
-import niagara.logical.SimilaritySpec;
-import niagara.logical.PrefetchSpec;
-import niagara.connection_server.NiagraServer;
-
-// for jdbc
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Properties;
-import java.sql.Time;
 import java.util.StringTokenizer;
 
-/**
+import niagara.connection_server.NiagraServer;
+import niagara.logical.DBScanImpute;
+import niagara.logical.DBScanSpec;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Attrs;
+import niagara.optimizer.colombia.Cost;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
+import niagara.query_engine.TupleSchema;
+import niagara.utils.BaseAttr;
+import niagara.utils.ControlFlag;
+import niagara.utils.IntegerAttr;
+import niagara.utils.JProf;
+import niagara.utils.LongAttr;
+import niagara.utils.PEException;
+import niagara.utils.ShutdownException;
+import niagara.utils.SinkTupleStream;
+import niagara.utils.StringAttr;
+import niagara.utils.TSAttr;
+import niagara.utils.Tuple;
+import niagara.utils.XMLAttr;
+
+/***
+ * Data Streams Final Project changes: This version of DBThread is trimmed down
+ * (no "latte demo" * support is left), and it is tweaked to respond to the
+ * imputation mechanism proposed for class. --RJFM
+ * 
+ * 
+ * Niagra DataManager DBThread - an input thread to connect to a database,
+ * execute a query and put the results into a stream of tuples that can be
+ * processed by the database
+ * 
+ * 
  * DBThread provides a SourceThread compatible interface to fetch data from a
  * rdbms via jdbc
  */
+@SuppressWarnings("unchecked")
 public class DBThreadImpute extends SourceThread {
 	// some truth we all know;
 
@@ -80,7 +84,6 @@ public class DBThreadImpute extends SourceThread {
 	enum Status {
 		FUTURE, DONE, PROGRESS
 	};
-
 
 	public DBThreadImpute() {
 		newQueries = new ArrayList();
@@ -174,7 +177,6 @@ public class DBThreadImpute extends SourceThread {
 		if (niagara.connection_server.NiagraServer.RUNNING_NIPROF)
 			JProf.registerThreadName(this.getName());
 
-
 		// steps
 		// connect to the database
 		// execute the query
@@ -196,28 +198,27 @@ public class DBThreadImpute extends SourceThread {
 			// one time db query;
 			if (dbScanSpec.oneTime()) {
 				qs = dbScanSpec.getQueryString();
-				//System.out.println("query string: " + qs);
+				// System.out.println("query string: " + qs);
 				// qs = qs.replace("FOO", "loopdata"); // This is just to test
 				// whether replace works.
 
-				//System.out.println("DB Query is:" + qs);
-				//System.out.println("Attempting to execute one-time query.");
+				// System.out.println("DB Query is:" + qs);
+				// System.out.println("Attempting to execute one-time query.");
 
-				//Query q;
+				// Query q;
 
 				rs = stmt.executeQuery(qs);
-				//System.out.println("Executed.");
+				// System.out.println("Executed.");
 
 				// Now do something with the ResultSet ....
 				int numAttrs = dbScanSpec.getNumAttrs();
-				//System.out.println("Num Attrs: " + numAttrs);
+				// System.out.println("Num Attrs: " + numAttrs);
 
-				//putResults(rs, numAttrs);
-				putResults(rs,numAttrs);
+				// putResults(rs, numAttrs);
+				putResults(rs, numAttrs);
 				outputStream.endOfStream();
 
-				//System.out.println("I put the results...");
-
+				// System.out.println("I put the results...");
 
 			} else
 				do { // continuous db scan
@@ -226,7 +227,7 @@ public class DBThreadImpute extends SourceThread {
 					 */
 					if (shutdown) {
 						outputStream.putCtrlMsg(ControlFlag.SHUTDOWN,
-						"bouncing back SHUTDOWN msg");
+								"bouncing back SHUTDOWN msg");
 
 						break;
 					}
@@ -247,19 +248,19 @@ public class DBThreadImpute extends SourceThread {
 						}
 					}
 
-					//System.err.println("***DID NOT GO THERE;");
+					// System.err.println("***DID NOT GO THERE;");
 
 					stmt = conn.createStatement();
 					if (NiagraServer.DEBUG)
 						System.out
-						.println("Attempting to execute continuous query.");
+								.println("Attempting to execute continuous query.");
 
 					Query curQuery = (Query) newQueries.remove(0);
 					if (NiagraServer.DEBUG)
 						System.err.println(curQuery.queryStr);
 
 					rs = stmt.executeQuery(curQuery.queryStr);
-					//System.out.println("Executed query");
+					// System.out.println("Executed query");
 					checkAllSinkCtrlMsg();
 					// Now do something with the ResultSet ....
 					int numAttrs = dbScanSpec.getNumAttrs();
@@ -326,7 +327,7 @@ public class DBThreadImpute extends SourceThread {
 	} // end of run method
 
 	private void putResults(ResultSet rs, int numAttrs) throws SQLException,
-	ShutdownException, InterruptedException {
+			ShutdownException, InterruptedException {
 
 		while (rs.next()) {
 			Tuple newtuple = new Tuple(false, numAttrs);
@@ -378,8 +379,8 @@ public class DBThreadImpute extends SourceThread {
 	}
 
 	public void checkForSinkCtrlMsg(int timeout)
-	throws java.lang.InterruptedException, ShutdownException,
-	SQLException {
+			throws java.lang.InterruptedException, ShutdownException,
+			SQLException {
 		// Loop over all sink streams, checking for control elements
 		ArrayList ctrl;
 
@@ -396,7 +397,7 @@ public class DBThreadImpute extends SourceThread {
 	}
 
 	private void checkAllSinkCtrlMsg() throws java.lang.InterruptedException,
-	ShutdownException, SQLException {
+			ShutdownException, SQLException {
 
 		ArrayList ctrlMsgList = new ArrayList();
 
@@ -420,11 +421,10 @@ public class DBThreadImpute extends SourceThread {
 	 * RJFM: Modified
 	 * 
 	 * Presumably this method schedules a new query to be executed...
-	 * 
 	 */
 
 	public void processCtrlMsgFromSink(ArrayList ctrl) throws SQLException,
-	ShutdownException, InterruptedException {
+			ShutdownException, InterruptedException {
 		if (ctrl == null) {
 			System.err.println("I am null :-(");
 			return;
@@ -438,21 +438,24 @@ public class DBThreadImpute extends SourceThread {
 			newQueries.add("SELECT 1,1,impute_value,1 FROM impute_value(1,1)");
 			break;
 		case MESSAGE:
-			//System.err.println("I am " + this.getName() + " and I received this message: " + ctrl.get(1));
-			//if (newQueries.size() < 30){
-			//CASE B newQueries = new ArrayList();
+			// System.err.println("I am " + this.getName() +
+			// " and I received this message: " + ctrl.get(1));
+			// if (newQueries.size() < 30){
+			// CASE B newQueries = new ArrayList();
 			break;
 		case CHANGE_QUERY:
 
 			/*
 			 * XXX RJFM: We perform all query processing here.
 			 * 
-			 * First, upon receiving a CHANGE_QUERY flag, we extract the relevant features from the tokenized control message created from PunctQC.
-			 * Second, we rewrite the query substituting the appropriate parameters.
-			 * Third, add the newly constructed query to the queue.
+			 * First, upon receiving a CHANGE_QUERY flag, we extract the
+			 * relevant features from the tokenized control message created from
+			 * PunctQC. Second, we rewrite the query substituting the
+			 * appropriate parameters. Third, add the newly constructed query to
+			 * the queue.
 			 */
 
-			//System.err.println("Received Imputation Flag");
+			// System.err.println("Received Imputation Flag");
 
 			// XXX Extract values
 			// var[0] = timestamp
@@ -461,19 +464,23 @@ public class DBThreadImpute extends SourceThread {
 			String[] var;
 			var = new String[5];
 			int i = 0;
-			StringTokenizer token = new StringTokenizer(ctrlMsg,"#");
-			while(token.hasMoreTokens()) {
+			StringTokenizer token = new StringTokenizer(ctrlMsg, "#");
+			while (token.hasMoreTokens()) {
 				var[i] = token.nextElement().toString();
-				//System.out.println("var["+i+"]-> "+var[i]);
+				// System.out.println("var["+i+"]-> "+var[i]);
 				i++;
 			}
 
 			Query q = new Query(dbScanSpec.getQueryString());
-			q.queryStr = (q.queryStr).replace("DATA", "'" + var[0] + "', " + var[1] + ", imputed_value, " + var[3]);
-			//q.queryStr = (q.queryStr).replace("DATA", "'" + var[0] + "', " + var[1] + ", imputed_value2, " + var[3]);
-			q.queryStr = (q.queryStr).replace("SOURCE", "imputed_value( " + var[1] + "," + var[3] + ")");
-			//q.queryStr = (q.queryStr).replace("SOURCE", "imputed_value2( " + var[1] + "," + var[3] + ",10)");
-			//System.err.println("query:" + q.queryStr);
+			q.queryStr = (q.queryStr).replace("DATA", "'" + var[0] + "', "
+					+ var[1] + ", imputed_value, " + var[3]);
+			// q.queryStr = (q.queryStr).replace("DATA", "'" + var[0] + "', " +
+			// var[1] + ", imputed_value2, " + var[3]);
+			q.queryStr = (q.queryStr).replace("SOURCE", "imputed_value( "
+					+ var[1] + "," + var[3] + ")");
+			// q.queryStr = (q.queryStr).replace("SOURCE", "imputed_value2( " +
+			// var[1] + "," + var[3] + ",10)");
+			// System.err.println("query:" + q.queryStr);
 			newQueries.add(q);
 			break;
 		case READY_TO_FINISH:
@@ -485,10 +492,10 @@ public class DBThreadImpute extends SourceThread {
 			shutdown = true;
 			break;
 		default:
-			assert false : "KT unexpected control message from source " + ctrlFlag.flagName();
+			assert false : "KT unexpected control message from source "
+					+ ctrlFlag.flagName();
 		}
 	}
-
 
 	/**
 	 * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)
@@ -496,6 +503,5 @@ public class DBThreadImpute extends SourceThread {
 	public void dumpChildrenInXML(StringBuffer sb) {
 		;
 	}
-
 
 }

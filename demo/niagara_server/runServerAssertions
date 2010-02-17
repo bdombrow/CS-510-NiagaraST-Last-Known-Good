@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: runServerAssertions,v 1.2 2004/02/10 03:25:44 vpapad Exp $
+
 system("rm -rf SYS/*");
 system("rm -rf CACHE/*");
 

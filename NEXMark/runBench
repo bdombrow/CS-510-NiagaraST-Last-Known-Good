@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-# $Id: runBench,v 1.1 2003/02/22 08:01:22 tufte Exp $
 
 $temp = "tempresults";
 if(-e $temp) {

@@ -1,306 +1,276 @@
-/**********************************************************************
-  $Id: QueryEngine.java,v 1.18 2007/04/30 19:24:09 vpapad Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
-**********************************************************************/
-
 package niagara.query_engine;
 
 import java.util.Vector;
-import niagara.data_manager.*;
-import niagara.utils.*;
+
 import niagara.connection_server.NiagraServer;
 import niagara.connection_server.ResultTransmitter;
 import niagara.connection_server.ServerQueryInfo;
+import niagara.data_manager.DataManager;
+import niagara.utils.PageStream;
+import niagara.utils.ShutdownException;
 
 /**
- *  The QueryEngine class executes queries written in XML-QL and returns
- *  an XML result.  It has the public function <code>executeQuery(string)</code>
- *  for executing queries.  This function returns an object of type QueryResult
- *  to the caller, which is used for subsequent interactions between the caller 
- *  and the query.  A QueryThread object runs each query (each of which uses 
- *  multiple PhysicalOperatorThreads)
- *
- *  @version 1.0
- *
- *
- *  @see QueryResult
- *  @see QueryThread
- *  @see PhysicalOperatorThread
+ * The QueryEngine class executes queries written in XML-QL and returns an XML
+ * result. It has the public function <code>executeQuery(string)</code> for
+ * executing queries. This function returns an object of type QueryResult to the
+ * caller, which is used for subsequent interactions between the caller and the
+ * query. A QueryThread object runs each query (each of which uses multiple
+ * PhysicalOperatorThreads)
+ * 
+ * @version 1.0
+ * 
+ * 
+ * @see QueryResult
+ * @see QueryThread
+ * @see PhysicalOperatorThread
  */
-
+@SuppressWarnings("unchecked")
 public class QueryEngine {
-    // The data manager associated with the query engine
-    private DataManager dataManager;
+	// The data manager associated with the query engine
+	private DataManager dataManager;
 
-    // The queue of queries to be run. Query Threads block on get()
-    private QueryQueue queryQueue;
+	// The queue of queries to be run. Query Threads block on get()
+	private QueryQueue queryQueue;
 
-    // The queue of operators
-    private PhysicalOperatorQueue opQueue;
+	// The queue of operators
+	private PhysicalOperatorQueue opQueue;
 
-    // A hashtable of active queries
-    private ActiveQueryList activeQueries;
+	// A hashtable of active queries
+	private ActiveQueryList activeQueries;
 
-    // Group of threads waiting for queries to enter the system
-    private Vector queryThreads;
+	// Group of threads waiting for queries to enter the system
+	private Vector queryThreads;
 
-    // Group of operator threads waiting to process operators
-    private Vector opThreads;
+	// Group of operator threads waiting to process operators
+	private Vector opThreads;
 
-    // The execution scheduler that schedules operators
-    private ExecutionScheduler scheduler;
+	// The execution scheduler that schedules operators
+	private ExecutionScheduler scheduler;
 
-    // A query id counter, accessed by a synchronized method 
-    private int lastQueryId;
+	// A query id counter, accessed by a synchronized method
+	private int lastQueryId;
 
-    private NiagraServer server;
+	// private NiagraServer server;
 
-    /**
-     * Constructor() - Create the query engine.  Initialize all thread queues
-     *                 and other query engine data members
-     *
-     * @param server the niagara server we're running in
-     * @param maxOperators the maximum number of operator threads
-     * @param maxQueries the maximum number of query threads
-     * @param useConnectionManager flag to allow connection/no connection mngr
-     */
-    public QueryEngine(NiagraServer server, int maxQueries, int maxOperators) {
+	/**
+	 * Constructor() - Create the query engine. Initialize all thread queues and
+	 * other query engine data members
+	 * 
+	 * @param server
+	 *            the niagara server we're running in
+	 * @param maxOperators
+	 *            the maximum number of operator threads
+	 * @param maxQueries
+	 *            the maximum number of query threads
+	 * @param useConnectionManager
+	 *            flag to allow connection/no connection mngr
+	 */
+	public QueryEngine(NiagraServer server, int maxQueries, int maxOperators) {
 
-        System.out.println("Query engine starts with " + maxQueries + 
-                " query threads and " + maxOperators + " operator threads");
+		System.out.println("Query engine starts with " + maxQueries
+				+ " query threads and " + maxOperators + " operator threads");
 
-        this.server = server;
+		// this.server = server;
 
-        // Initialize the data manager
-        //
-            dataManager = new DataManager(server.getCatalog(),
-                ".", // Path for temp files
-                10000, // Disk space
+		// Initialize the data manager
+		//
+		// server.getCatalog() -> NiagaraServer.getCatalog()
+		dataManager = new DataManager(NiagraServer.getCatalog(), ".", // Path
+																		// for
+																		// temp
+				// files
+				10000, // Disk space
 				0, //
 				10, // Fetch threads
 				5); // URL Threads
 
-        // Create a vector for operators scheduled for execution
-        opQueue = new PhysicalOperatorQueue(maxOperators);
+		// Create a vector for operators scheduled for execution
+		opQueue = new PhysicalOperatorQueue(maxOperators);
 
-        // Create operator thread vector and fill it with operator threads
-        opThreads = new Vector(maxOperators);
+		// Create operator thread vector and fill it with operator threads
+		opThreads = new Vector(maxOperators);
 
-        for (int opthread = 0; opthread < maxOperators; ++opthread) {
-            opThreads.addElement(new PhysicalOperatorThread(opQueue));
-        }
+		for (int opthread = 0; opthread < maxOperators; ++opthread) {
+			opThreads.addElement(new PhysicalOperatorThread(opQueue));
+		}
 
-        // Create the query scheduler
-        //
-        scheduler = new ExecutionScheduler(server, dataManager, opQueue);
+		// Create the query scheduler
+		//
+		scheduler = new ExecutionScheduler(server, dataManager, opQueue);
 
-        // Create the active query list
-        activeQueries = new ActiveQueryList();
+		// Create the active query list
+		activeQueries = new ActiveQueryList();
 
-        // Create the query queue
-        queryQueue = new QueryQueue(maxQueries);
+		// Create the query queue
+		queryQueue = new QueryQueue(maxQueries);
 
-        // Create query thread vector and fill it with query threads
-        queryThreads = new Vector(maxQueries);
+		// Create query thread vector and fill it with query threads
+		queryThreads = new Vector(maxQueries);
 
-        for (int qthread = 0; qthread < maxQueries; ++qthread) {
-            queryThreads.addElement(
-                new QueryThread(dataManager, queryQueue, scheduler));
-        }
+		for (int qthread = 0; qthread < maxQueries; ++qthread) {
+			queryThreads.addElement(new QueryThread(dataManager, queryQueue,
+					scheduler));
+		}
 
-        // Inform that Query Engine is ready for processing queries
-        System.out.println("Query Engine Ready");
-    }
+		// Inform that Query Engine is ready for processing queries
+		System.out.println("Query Engine Ready");
+	}
 
-    /**
-     *  The function called by all clients of the query engine who want to 
-     *  run a query.  A new query information object is created, entered into
-     *  the query queue and active query list, and wrapped in a query result
-     *  object which is returned to the client 
-     * 
-     *  @param query the query to execute
-     *
-     *  @return qid a query id or a negative err code 
-     */
-    public synchronized void executeQuery(
-        ResultTransmitter transmitter,
-        ServerQueryInfo sqi,
-        String query) {
-        // Get the next qid
-        int qid = getNextQueryId();
+	/**
+	 * The function called by all clients of the query engine who want to run a
+	 * query. A new query information object is created, entered into the query
+	 * queue and active query list, and wrapped in a query result object which
+	 * is returned to the client
+	 * 
+	 * @param query
+	 *            the query to execute
+	 * 
+	 * @return qid a query id or a negative err code
+	 */
+	public synchronized void executeQuery(ResultTransmitter transmitter,
+			ServerQueryInfo sqi, String query) {
+		// Get the next qid
+		int qid = getNextQueryId();
 
-        // Generate the output stream
-        PageStream resultStream = new PageStream("To QueryResult");
+		// Generate the output stream
+		PageStream resultStream = new PageStream("To QueryResult");
 
-        // Create a query information object
-        QueryInfo queryInfo;
+		// Create a query information object
+		QueryInfo queryInfo;
 
-        try {
-            queryInfo =
-                new QueryInfo(query, qid, resultStream, activeQueries, true);
-        } catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
-            System.err.println("Error in Assigning Unique Query Ids!");
-            return;
-        }
+		try {
+			queryInfo = new QueryInfo(query, qid, resultStream, activeQueries,
+					true);
+		} catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
+			System.err.println("Error in Assigning Unique Query Ids!");
+			return;
+		}
 
-        // Add it to the query queue  FIX:: May have to make this non-blocking
-        /* Note, this puts the query info in a queue for a QueryThread
-         * to pick up.  The Query Thread takes care of the parsing
-         * and scheduling of this query
-         */
-        queryQueue.addQuery(queryInfo);
+		// Add it to the query queue FIX:: May have to make this non-blocking
+		/*
+		 * Note, this puts the query info in a queue for a QueryThread to pick
+		 * up. The Query Thread takes care of the parsing and scheduling of this
+		 * query
+		 */
+		queryQueue.addQuery(queryInfo);
 
-        sqi.setQueryResult(new QueryResult(qid, resultStream));
+		sqi.setQueryResult(new QueryResult(qid, resultStream));
 
-        // Get the result transmitter going
-        opQueue.putOperator(transmitter);
-    }
+		// Get the result transmitter going
+		opQueue.putOperator(transmitter);
+	}
 
-    /**
-     *  Originally from trigger code. Used by query plan queries now.
-     *  A new query information object is created, entered into
-     *  the query queue and active query list, and wrapped in a query result
-     *  object which is returned  
-     * 
-     *  This interface is used to run a already optimized plan
-     *  @param optimized logicalPlan root
-     *
-     *  @return QueryResult
-     */
+	/**
+	 * Originally from trigger code. Used by query plan queries now. A new query
+	 * information object is created, entered into the query queue and active
+	 * query list, and wrapped in a query result object which is returned
+	 * 
+	 * This interface is used to run a already optimized plan
+	 * 
+	 * @param optimized
+	 *            logicalPlan root
+	 * 
+	 * @return QueryResult
+	 */
 
-    // KT broke executeOptimizedQuery into two functions, this
-    // function MUST return the queryResult object quickly
-    // otherwise short queries will be killed before queryInfo.transmitter
-    // is set
-    public synchronized QueryResult getNewQueryResult()
-        throws ShutdownException {
+	// KT broke executeOptimizedQuery into two functions, this
+	// function MUST return the queryResult object quickly
+	// otherwise short queries will be killed before queryInfo.transmitter
+	// is set
+	public synchronized QueryResult getNewQueryResult()
+			throws ShutdownException {
 
-        // Get the next qid
-        int qid = getNextQueryId();
+		// Get the next qid
+		int qid = getNextQueryId();
 
-        // Generate the output streams for each query root
-        PageStream resultStream = new PageStream("To Query Result");
+		// Generate the output streams for each query root
+		PageStream resultStream = new PageStream("To Query Result");
 
-        // Create the query result object to return to the caller
-        QueryResult queryResult = new QueryResult(qid, resultStream);
-        return queryResult;
-    }
+		// Create the query result object to return to the caller
+		QueryResult queryResult = new QueryResult(qid, resultStream);
+		return queryResult;
+	}
 
-    public synchronized void execOptimizedQuery(
-        ResultTransmitter transmitter,
-        SchedulablePlan planRoot,
-        QueryResult queryResult)
-        throws ShutdownException {
+	public synchronized void execOptimizedQuery(ResultTransmitter transmitter,
+			SchedulablePlan planRoot, QueryResult queryResult)
+			throws ShutdownException {
 
-        try {
-            // Get the result transmitter going
-            opQueue.putOperator(transmitter);
+		try {
+			// Get the result transmitter going
+			opQueue.putOperator(transmitter);
 
-            // Create a query information object
-            QueryInfo queryInfo;
+			// Create a query information object
+			QueryInfo queryInfo;
 
-            queryInfo =
-                new QueryInfo(
-                    "",
-                    queryResult.getQueryId(),
-                    queryResult.getOutputPageStream(),
-                    activeQueries,
-                    true);
+			queryInfo = new QueryInfo("", queryResult.getQueryId(), queryResult
+					.getOutputPageStream(), activeQueries, true);
 
-            if (planRoot.getPlanID() != null)
-                queryInfo.setPlanID(planRoot.getPlanID());
-            
-            //call Execution Scheduler to generate the physical
-            //plan and execute the group plan.
-            scheduler.executeOperators(planRoot, queryInfo);
+			if (planRoot.getPlanID() != null)
+				queryInfo.setPlanID(planRoot.getPlanID());
 
-        } catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
-            assert false : "Error in Assigning Unique Query Ids!";
-        }
-    }
+			// call Execution Scheduler to generate the physical
+			// plan and execute the group plan.
+			scheduler.executeOperators(planRoot, queryInfo);
 
-    /**
-     *  Dumps the query engine and its components as a string for debugging 
-     *
-     *  @return a string representation of the query engine
-     */
+		} catch (ActiveQueryList.QueryIdAlreadyPresentException e) {
+			assert false : "Error in Assigning Unique Query Ids!";
+		}
+	}
 
-    public synchronized String toString() {
+	/**
+	 * Dumps the query engine and its components as a string for debugging
+	 * 
+	 * @return a string representation of the query engine
+	 */
 
-        String retStr =
-            new String("\n**********************************************************************\n");
-        retStr
-            += "**    Q u e r y      E n g i n e      D u m p                       **\n";
-        retStr
-            += "**********************************************************************\n";
-        retStr += "lastQueryId: " + lastQueryId + "\n";
-        retStr
-            += "+++++++++++++++ Waiting Queries ++++++++++++++++++++++++++++++++++++++\n";
-        retStr += queryQueue.toString() + "\n\n";
-        retStr
-            += "+++++++++++++++ Active Queries +++++++++++++++++++++++++++++++++++++++\n";
-        retStr += activeQueries.toString() + "\n";
-        retStr
-            += "+++++++++++++++ Threads ++++++++++++++++++++++++++++++++++++++++++++++\n\n";
-        retStr += queryThreads.toString() + "\n\n";
-        retStr += opThreads.toString() + "\n\n";
-        retStr
-            += "+++++++++++++++ Operators ++++++++++++++++++++++++++++++++++++++++++++\n";
-        retStr += opQueue.toString() + "\n";
-        retStr
-            += "+++++++++++++++ Scheduler ++++++++++++++++++++++++++++++++++++++++++++\n";
-        retStr += scheduler.toString() + "\n";
-        retStr
-            += "**********************************************************************\n";
+	public synchronized String toString() {
 
-        return retStr;
-    }
+		String retStr = new String(
+				"\n**********************************************************************\n");
+		retStr += "**    Q u e r y      E n g i n e      D u m p                       **\n";
+		retStr += "**********************************************************************\n";
+		retStr += "lastQueryId: " + lastQueryId + "\n";
+		retStr += "+++++++++++++++ Waiting Queries ++++++++++++++++++++++++++++++++++++++\n";
+		retStr += queryQueue.toString() + "\n\n";
+		retStr += "+++++++++++++++ Active Queries +++++++++++++++++++++++++++++++++++++++\n";
+		retStr += activeQueries.toString() + "\n";
+		retStr += "+++++++++++++++ Threads ++++++++++++++++++++++++++++++++++++++++++++++\n\n";
+		retStr += queryThreads.toString() + "\n\n";
+		retStr += opThreads.toString() + "\n\n";
+		retStr += "+++++++++++++++ Operators ++++++++++++++++++++++++++++++++++++++++++++\n";
+		retStr += opQueue.toString() + "\n";
+		retStr += "+++++++++++++++ Scheduler ++++++++++++++++++++++++++++++++++++++++++++\n";
+		retStr += scheduler.toString() + "\n";
+		retStr += "**********************************************************************\n";
 
-    /**
-     *  Gracefully shutdown the query engine.
-     *
-     */
-    public void shutdown() {
-        dataManager.shutdown();
-    }
+		return retStr;
+	}
 
-    /**
-     *  return the dataManager instance in the query engine.
-     */
-    public DataManager getDataManager() {
-        return dataManager;
-    }
+	/**
+	 * Gracefully shutdown the query engine.
+	 * 
+	 */
+	public void shutdown() {
+		dataManager.shutdown();
+	}
 
-    public ExecutionScheduler getScheduler() {
-        return scheduler;
-    }
+	/**
+	 * return the dataManager instance in the query engine.
+	 */
+	public DataManager getDataManager() {
+		return dataManager;
+	}
 
-    /**
-     *  getNextQueryId() - Increments and returns the next unique queryId
-     *  @return int - the next query id
-     */
-    private int getNextQueryId() { 
-        return lastQueryId++; 
-    }
+	public ExecutionScheduler getScheduler() {
+		return scheduler;
+	}
+
+	/**
+	 * getNextQueryId() - Increments and returns the next unique queryId
+	 * 
+	 * @return int - the next query id
+	 */
+	private int getNextQueryId() {
+		return lastQueryId++;
+	}
 }

@@ -1,296 +1,245 @@
-/* $Id: O_EXPR.java,v 1.8 2003/09/16 04:45:29 vpapad Exp $
-   Colombia -- Java version of the Columbia Database Optimization Framework
-
-   Copyright (c)    Dept. of Computer Science , Portland State
-   University and Dept. of  Computer Science & Engineering,
-   OGI School of Science & Engineering, OHSU. All Rights Reserved.
-
-   Permission to use, copy, modify, and distribute this software and
-   its documentation is hereby granted, provided that both the
-   copyright notice and this permission notice appear in all copies
-   of the software, derivative works or modified versions, and any
-   portions thereof, and that both notices appear in supporting
-   documentation.
-
-   THE AUTHORS, THE DEPT. OF COMPUTER SCIENCE DEPT. OF PORTLAND STATE
-   UNIVERSITY AND DEPT. OF COMPUTER SCIENCE & ENGINEERING AT OHSU ALLOW
-   USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION, AND THEY DISCLAIM ANY
-   LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE
-   USE OF THIS SOFTWARE.
-
-   This software was developed with support of NSF grants IRI-9118360,
-   IRI-9119446, IRI-9509955, IRI-9610013, IRI-9619977, IIS 0086002,
-   and DARPA (ARPA order #8230, CECOM contract DAAB07-91-C-Q518).
-*/
 package niagara.optimizer.colombia;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
-/*
-   ============================================================
-   O_EXPR - Task to Optimize a multi-expression
-   ============================================================ 
-   This task is needed only if we implement O_GROUP in the original way.
-   This task fires all rules for the expression, in order of promise.
-   when it is used for exploring, fire only transformation rules to prepare for a transform
-*/
+/***
+ * ============================================================ O_EXPR - Task to
+ * Optimize a multi-expression
+ * ============================================================ This task is
+ * needed only if we implement O_GROUP in the original way. This task fires all
+ * rules for the expression, in order of promise. when it is used for exploring,
+ * fire only transformation rules to prepare for a transform
+ */
+@SuppressWarnings("unchecked")
 public class O_EXPR extends Task {
 
-    private MExpr mExpr; //Which expression to optimize
-    private boolean explore;
-    // if this task is for exploring  Should not happen - see E_GROUP
-    private boolean Last; // if this task is the last task for the group
-    Cost EpsBound;
-    // if global eps pruning is on, this is the eps bound of this task
-    // else it is zero
+	private MExpr mExpr; // Which expression to optimize
+	private boolean explore;
+	// if this task is for exploring Should not happen - see E_GROUP
+	private boolean Last; // if this task is the last task for the group
+	Cost EpsBound;
 
-    // XXX vpapad: was destructor
-    public void delete() {
-        if (Last) {
-            Group Group = mExpr.getGroup();
-            if (!explore) {
-                Context localContext = context;
-                //What prop is required of
-                PhysicalProperty LocalReqdProp = localContext.getPhysProp();
-                Winner Winner = Group.getWinner(LocalReqdProp);
+	// if global eps pruning is on, this is the eps bound of this task
+	// else it is zero
 
-                // mark the winner as done
-                if (Winner != null)
-                    assert(!Winner.getDone());
+	// XXX vpapad: was destructor
+	public void delete() {
+		if (Last) {
+			Group Group = mExpr.getGroup();
+			if (!explore) {
+				Context localContext = context;
+				// What prop is required of
+				PhysicalProperty LocalReqdProp = localContext.getPhysProp();
+				Winner Winner = Group.getWinner(LocalReqdProp);
 
-                Winner.setDone();
-                // this's still the last applied rule in the group, 
-                // so mark the group with completed optimizing
-                Group.setOptimized(true);
-            } else
-                Group.setExplored(true);
-        }
-    }
+				// mark the winner as done
+				if (Winner != null)
+					assert (!Winner.getDone());
 
-    public O_EXPR(
-        SSP ssp,
-        MExpr mexpr,
-        boolean isExplore,
-        Context context,
-        boolean last,
-    // default is false
-    Cost bound // default is null
-    ) {
-        super(ssp, context);
-        mExpr = mexpr;
-        explore = isExplore;
-        Last = last;
-        EpsBound = bound;
-    }; //O_EXPR
+				Winner.setDone();
+				// this's still the last applied rule in the group,
+				// so mark the group with completed optimizing
+				Group.setOptimized(true);
+			} else
+				Group.setExplored(true);
+		}
+	}
 
-    public O_EXPR(
-        SSP ssp,
-        MExpr mexpr,
-        boolean explore,
-        Context context,
-        boolean last) {
-        this(ssp, mexpr, explore, context, last, null);
-    }
+	public O_EXPR(SSP ssp, MExpr mexpr, boolean isExplore, Context context,
+			boolean last,
+			// default is false
+			Cost bound // default is null
+	) {
+		super(ssp, context);
+		mExpr = mexpr;
+		explore = isExplore;
+		Last = last;
+		EpsBound = bound;
+	}; // O_EXPR
 
-    public void perform() {
-        //        PTRACE2(
-        //            "O_EXPR performing, %s mexpr: %s ",
-        //            explore ? "exploring" : "optimizing",
-        //            (const char *) MExpr.Dump());
-            //        PTRACE2 ("Context ID: %d , %s", ContextID, 
-            //                         (const char *) Context::vc[ContextID].Dump());
-        //        PTRACE ("Last flag is %d", Last);
+	public O_EXPR(SSP ssp, MExpr mexpr, boolean explore, Context context,
+			boolean last) {
+		this(ssp, mexpr, explore, context, last, null);
+	}
 
-        if (explore)
-            //explore is only for logical expression
-            assert mExpr.getOp().isLogical();
+	public void perform() {
+		// PTRACE2(
+		// "O_EXPR performing, %s mexpr: %s ",
+		// explore ? "exploring" : "optimizing",
+		// (const char *) MExpr.Dump());
+		// PTRACE2 ("Context ID: %d , %s", ContextID,
+		// (const char *) Context::vc[ContextID].Dump());
+		// PTRACE ("Last flag is %d", Last);
 
-        if (mExpr.getOp().is_item()) {
-            //PTRACE("%s", "expression is an item_op");
-            //push the O_INPUT for this item_expr
-            if (ssp.GlobepsPruning) {
-                Cost eps_bound = new Cost(EpsBound);
-                ssp.addTask(new O_INPUTS(mExpr, context, true, eps_bound));
-            } else
-                ssp.addTask(new O_INPUTS(mExpr, context, true));
-            delete();
-            return;
-        }
+		if (explore)
+			// explore is only for logical expression
+			assert mExpr.getOp().isLogical();
 
-        // identify valid and promising rules
-        Op top = mExpr.getOp();
-        ArrayList possibleMatches = ssp.getRuleSet().topMatch(top);
-        int sz = possibleMatches.size();
-        Move[] move = new Move[sz];
-        int moves = 0; // # of moves already collected
-        for (int i = 0; i < sz; i++) {
-            Rule rule = (Rule) possibleMatches.get(i);
+		if (mExpr.getOp().is_item()) {
+			// PTRACE("%s", "expression is an item_op");
+			// push the O_INPUT for this item_expr
+			if (ssp.GlobepsPruning) {
+				Cost eps_bound = new Cost(EpsBound);
+				ssp.addTask(new O_INPUTS(mExpr, context, true, eps_bound));
+			} else
+				ssp.addTask(new O_INPUTS(mExpr, context, true));
+			delete();
+			return;
+		}
 
-            if (!rule.canFire(mExpr)) { // rule has already fired
-                ssp.getTracer().ruleMasked(rule, mExpr);
-                continue; 
-            }
+		// identify valid and promising rules
+		Op top = mExpr.getOp();
+		ArrayList possibleMatches = ssp.getRuleSet().topMatch(top);
+		int sz = possibleMatches.size();
+		Move[] move = new Move[sz];
+		int moves = 0; // # of moves already collected
+		for (int i = 0; i < sz; i++) {
+			Rule rule = (Rule) possibleMatches.get(i);
 
-            if (explore && rule.isLogicalToPhysical()) {
-                //  only fire transformation rule when exploring                
-                //            PTRACE(
-                //                "Rejected rule %d, only fire logical rules ",
-                //                Rule.get_index());
-                continue; 
-            }
+			if (!rule.canFire(mExpr)) { // rule has already fired
+				ssp.getTracer().ruleMasked(rule, mExpr);
+				continue;
+			}
 
-            double promise;
+			if (explore && rule.isLogicalToPhysical()) {
+				// only fire transformation rule when exploring
+				// PTRACE(
+				// "Rejected rule %d, only fire logical rules ",
+				// Rule.get_index());
+				continue;
+			}
 
-            
-            // insert a valid and promising move into the array
-            if ((promise = rule.promise(top, context)) > 0) {
-                move[moves] = new Move(promise, rule);
-                moves++;
-            }
-        }
+			double promise;
 
-        //    PTRACE("%d promising moves", moves);
+			// insert a valid and promising move into the array
+			if ((promise = rule.promise(top, context)) > 0) {
+				move[moves] = new Move(promise, rule);
+				moves++;
+			}
+		}
 
-        /* XXX vpapad: Reported by Chris Dillard
-         * There's a bug in the interaction between
-         * E_GROUP and O_GROUP. When a group is just
-         * explored, logical multiexpressions may be added
-         * to it, but no physical multiexpressions are
-         * generated. When this group is subsequently
-         * optimized, the logical multiexpressions 
-         * generated by E_GROUP will not be generated
-         * again (they'd be duplicates), and thus no
-         * implementation rules will ever be applied to
-         * them.
-         * 
-         * One workaround is to make an O_EXPR push
-         * O_EXPRs on the following multiexpressions.
-         * This may be the same issue that Quan talks
-         * about below.
-         */
-         
-        // HACK: do not know why 
-        // When no move for the first mexpr, the next one will not be optimized,
-        // SO add this
-        if ((moves == 0) && (mExpr.getNextMExpr() != null)) {
-            //PTRACE0("push O_EXPR " + MExpr.GetNextMExpr().Dump());
-            ssp.addTask(
-                new O_EXPR(
-                    ssp,
-                    mExpr.getNextMExpr(),
-                    explore,
-                    context,
-                    true));
-            // XXX vpapad: Should there be a call to delete() here?
-            return;
-        }
+		// PTRACE("%d promising moves", moves);
 
+		/*
+		 * XXX vpapad: Reported by Chris Dillard There's a bug in the
+		 * interaction between E_GROUP and O_GROUP. When a group is just
+		 * explored, logical multiexpressions may be added to it, but no
+		 * physical multiexpressions are generated. When this group is
+		 * subsequently optimized, the logical multiexpressions generated by
+		 * E_GROUP will not be generated again (they'd be duplicates), and thus
+		 * no implementation rules will ever be applied to them.
+		 * 
+		 * One workaround is to make an O_EXPR push O_EXPRs on the following
+		 * multiexpressions. This may be the same issue that Quan talks about
+		 * below.
+		 */
 
-        // order the valid and promising moves by their promise, descending
-        Arrays.sort(move, 0, moves, new Comparator() {
-            public int compare(Object o1, Object o2) {
-                Move m1 = (Move) o1;
-                Move m2 = (Move) o2;
-                return -m1.compareTo(m2);
-            }
-        });
-        // optimize the rest rules in order of promise
-        while (--moves >= 0) {
-            boolean Flag = false;
-            if (Last)
-                // this's the last task in the group,pass it to the new task
-                {
-                Last = false;
-                // turn off this, since it's no longer the last task
-                Flag = true;
-            }
+		// HACK: do not know why
+		// When no move for the first mexpr, the next one will not be optimized,
+		// SO add this
+		if ((moves == 0) && (mExpr.getNextMExpr() != null)) {
+			// PTRACE0("push O_EXPR " + MExpr.GetNextMExpr().Dump());
+			ssp.addTask(new O_EXPR(ssp, mExpr.getNextMExpr(), explore, context,
+					true));
+			// XXX vpapad: Should there be a call to delete() here?
+			return;
+		}
 
-            // push future tasks in reverse order (due to LIFO stack)
-            Rule Rule = move[moves].rule;
-            //PTRACE("pushing rule `%s'", (const char *) Rule.GetName());
+		// order the valid and promising moves by their promise, descending
+		Arrays.sort(move, 0, moves, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				Move m1 = (Move) o1;
+				Move m2 = (Move) o2;
+				return -m1.compareTo(m2);
+			}
+		});
+		// optimize the rest rules in order of promise
+		while (--moves >= 0) {
+			boolean Flag = false;
+			if (Last)
+			// this's the last task in the group,pass it to the new task
+			{
+				Last = false;
+				// turn off this, since it's no longer the last task
+				Flag = true;
+			}
 
-            // apply the rule
-            if (ssp.GlobepsPruning) {
-                Cost eps_bound = new Cost(EpsBound);
-                ssp.addTask(
-                    new ApplyRule(
-                        ssp,
-                        Rule,
-                        mExpr,
-                        explore,
-                        context,
-                        Flag,
-                        eps_bound));
-            } else
-                ssp.addTask(
-                    new ApplyRule(ssp, Rule, mExpr, explore, context, Flag));
+			// push future tasks in reverse order (due to LIFO stack)
+			Rule Rule = move[moves].rule;
+			// PTRACE("pushing rule `%s'", (const char *) Rule.GetName());
 
-            // for enforcer and expansion rules, don't explore patterns
-            Expr pattern = Rule.getPattern();
-            if (pattern.getOp().isLeaf())
-                continue;
+			// apply the rule
+			if (ssp.GlobepsPruning) {
+				Cost eps_bound = new Cost(EpsBound);
+				ssp.addTask(new ApplyRule(ssp, Rule, mExpr, explore, context,
+						Flag, eps_bound));
+			} else
+				ssp.addTask(new ApplyRule(ssp, Rule, mExpr, explore, context,
+						Flag));
 
-            // earlier tasks: explore all inputs to match the pattern    
-            for (int input_no = pattern.getArity(); --input_no >= 0;) {
-                // only explore the input with arity > 0
-                if (pattern.getInput(input_no).getArity() > 0) {
-                    // If not yet explored, schedule a task with new context
-                    Group g = mExpr.getInput(input_no);
-                    if (g.needsExploring()) {
-                        //E_GROUP can not be the last task for the group
-                        if (ssp.GlobepsPruning) {
-                            Cost eps_bound = new Cost(EpsBound);
-                            ssp.addTask(
-                                new E_GROUP(
-                                    ssp,
-                                    g,
-                                    context,
-                                    false,
-                                    eps_bound));
-                        } else
-                            ssp.addTask(new E_GROUP(ssp, g, context));
-                    }
-                }
-            } // earlier tasks: explore all inputs to match the pattern
+			// for enforcer and expansion rules, don't explore patterns
+			Expr pattern = Rule.getPattern();
+			if (pattern.getOp().isLeaf())
+				continue;
 
-        } // optimize in order of promise
-        delete();
-    } //perform
+			// earlier tasks: explore all inputs to match the pattern
+			for (int input_no = pattern.getArity(); --input_no >= 0;) {
+				// only explore the input with arity > 0
+				if (pattern.getInput(input_no).getArity() > 0) {
+					// If not yet explored, schedule a task with new context
+					Group g = mExpr.getInput(input_no);
+					if (g.needsExploring()) {
+						// E_GROUP can not be the last task for the group
+						if (ssp.GlobepsPruning) {
+							Cost eps_bound = new Cost(EpsBound);
+							ssp.addTask(new E_GROUP(ssp, g, context, false,
+									eps_bound));
+						} else
+							ssp.addTask(new E_GROUP(ssp, g, context));
+					}
+				}
+			} // earlier tasks: explore all inputs to match the pattern
 
-    /**
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-        return "Optimizing " + mExpr;
-    }
+		} // optimize in order of promise
+		delete();
+	} // perform
+
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return "Optimizing " + mExpr;
+	}
 
 }
 
-/** 
-A Move is a pair of rule and promise, used to sort rules according to their promise
-*/
+/**
+ * A Move is a pair of rule and promise, used to sort rules according to their
+ * promise
+ */
+@SuppressWarnings("unchecked")
 class Move implements Comparable {
-    // An uninteresting move
-    public static Move NO_PROMISE = new Move(0, null);
+	// An uninteresting move
+	public static Move NO_PROMISE = new Move(0, null);
 
-    public double promise;
-    Rule rule;
+	public double promise;
+	Rule rule;
 
-    public Move(double promise, Rule rule) {
-        this.promise = promise;
-        this.rule = rule;
-    }
+	public Move(double promise, Rule rule) {
+		this.promise = promise;
+		this.rule = rule;
+	}
 
-    public int compareTo(Object o) {
-        if (!(o instanceof Move))
-            throw new ClassCastException("Expected Move, got: " + o.getClass());
-        Move other = (Move) o;
-        if (promise > other.promise)
-            return 1;
-        if (promise == other.promise)
-            return 0;
-        return -1;
-    }
+	public int compareTo(Object o) {
+		if (!(o instanceof Move))
+			throw new ClassCastException("Expected Move, got: " + o.getClass());
+		Move other = (Move) o;
+		if (promise > other.promise)
+			return 1;
+		if (promise == other.promise)
+			return 0;
+		return -1;
+	}
 }

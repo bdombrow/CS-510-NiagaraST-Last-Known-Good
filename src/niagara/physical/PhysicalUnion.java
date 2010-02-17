@@ -1,45 +1,27 @@
-/**********************************************************************
-  $Id: PhysicalUnion.java,v 1.2 2008/10/21 23:11:47 rfernand Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
-**********************************************************************/
-
 package niagara.physical;
 
-import java.util.ArrayList;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 import niagara.logical.Union;
-import niagara.optimizer.colombia.*;
-import niagara.query_engine.*;
-import niagara.utils.*;
+import niagara.optimizer.colombia.Attribute;
+import niagara.optimizer.colombia.Attrs;
+import niagara.optimizer.colombia.Cost;
+import niagara.optimizer.colombia.ICatalog;
+import niagara.optimizer.colombia.LogicalOp;
+import niagara.optimizer.colombia.LogicalProperty;
+import niagara.optimizer.colombia.Op;
+import niagara.query_engine.TupleSchema;
+import niagara.utils.Punctuation;
+import niagara.utils.ShutdownException;
+import niagara.utils.Tuple;
 
 /**
- * <code>PhysicalUnion</code> implements a union of a set 
- * of incoming streams;
- *
+ * <code>PhysicalUnion</code> implements a union of a set of incoming streams;
+ * 
  * @see PhysicalOperator
  */
+@SuppressWarnings("unchecked")
 public class PhysicalUnion extends PhysicalOperator {
 	private ArrayList[] rgPunct;
 	private int[] rgnRemove;
@@ -49,13 +31,13 @@ public class PhysicalUnion extends PhysicalOperator {
 	private int outSize;
 
 	private int tupleCounter = 0;
-	private int leftCounter = 0;
-	private int rightCounter = 0;
+	// private int leftCounter = 0;
+	// private int rightCounter = 0;
 	boolean slowStream = true;
-	
+
 	public PhysicalUnion() {
 		// XXX vpapad: here we have to initialize blockingSourceStreams
-		// but we don't know how many input streams we have yet. 
+		// but we don't know how many input streams we have yet.
 		// We postpone it until initFrom - is that too late?
 		// KT - I think that should be ok, blockingSourceStreams
 		// isn't used until execution - I think...
@@ -63,7 +45,7 @@ public class PhysicalUnion extends PhysicalOperator {
 
 	public PhysicalUnion(int arity) {
 		setBlockingSourceStreams(new boolean[arity]);
-		//setBlockingSourceStreams(false false);
+		// setBlockingSourceStreams(false false);
 	}
 
 	public void opInitFrom(LogicalOp logicalOperator) {
@@ -75,9 +57,7 @@ public class PhysicalUnion extends PhysicalOperator {
 			hasMappings = true;
 		inputAttrs = logicalOp.getInputAttrs();
 
-		assert logicalOp.getArity()
-			== Array.getLength(
-				inputAttrs) : "Arity doesn't match num input attrs ";
+		assert logicalOp.getArity() == Array.getLength(inputAttrs) : "Arity doesn't match num input attrs ";
 	}
 
 	public void opInitialize() {
@@ -91,144 +71,108 @@ public class PhysicalUnion extends PhysicalOperator {
 	}
 
 	/**
-	 * This function processes a tuple element read from a source stream
-	 * when the operator is non-blocking. This over-rides the corresponding
-	 * function in the base class.
-	 *
-	 * @param inputTuple The tuple element read from a source stream
-	 * @param streamId The source stream from which the tuple was read
-	 *
-	 * @exception ShutdownException query shutdown by user or execution error
-	 */
-	
-	/* This is Case B
+	 * This function processes a tuple element read from a source stream when
+	 * the operator is non-blocking. This over-rides the corresponding function
+	 * in the base class.
 	 * 
-	protected void processTuple(Tuple inputTuple, int streamId)
-			throws ShutdownException, InterruptedException {
-
-		if (streamId == 0)
-			leftCounter++;
-		else
-			rightCounter++;
-
-		//tupleCounter++;
-
-			if ((leftCounter - rightCounter) == 61) {
-				// send message
-				sendCtrlMsgUpStream(CtrlFlags.MESSAGE, "From Union, With Love", 1);
-				// reset counters
-				leftCounter = 0;
-				rightCounter = 0;
-				//System.err.println("UNION sent the message");
-				//Thread.sleep(100);
-			}
-
-			tupleCounter++;
-			long time = System.currentTimeMillis();
-			System.out.println(tupleCounter + "," + time);
-			if (hasMappings) { // We need to move some attributes
-				putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
-			} else {
-				// just send the original tuple along
-				putTuple(inputTuple, 0);
-			}
-	}
-	*/
+	 * @param inputTuple
+	 *            The tuple element read from a source stream
+	 * @param streamId
+	 *            The source stream from which the tuple was read
+	 * 
+	 * @exception ShutdownException
+	 *                query shutdown by user or execution error
+	 */
 
 	/*
-	 *  This is case A
-	 *  
-	 * 	protected void processTuple(Tuple inputTuple, int streamId)
+	 * This is Case B
+	 * 
+	 * protected void processTuple(Tuple inputTuple, int streamId) throws
+	 * ShutdownException, InterruptedException {
+	 * 
+	 * if (streamId == 0) leftCounter++; else rightCounter++;
+	 * 
+	 * //tupleCounter++;
+	 * 
+	 * if ((leftCounter - rightCounter) == 61) { // send message
+	 * sendCtrlMsgUpStream(CtrlFlags.MESSAGE, "From Union, With Love", 1); //
+	 * reset counters leftCounter = 0; rightCounter = 0;
+	 * //System.err.println("UNION sent the message"); //Thread.sleep(100); }
+	 * 
+	 * tupleCounter++; long time = System.currentTimeMillis();
+	 * System.out.println(tupleCounter + "," + time); if (hasMappings) { // We
+	 * need to move some attributes putTuple(inputTuple.copy(outSize,
+	 * attributeMaps[streamId]), 0); } else { // just send the original tuple
+	 * along putTuple(inputTuple, 0); } }
+	 */
+
+	/*
+	 * This is case A
+	 * 
+	 * protected void processTuple(Tuple inputTuple, int streamId) throws
+	 * ShutdownException, InterruptedException {
+	 * 
+	 * if (streamId == 0) leftCounter++; else rightCounter++;
+	 * 
+	 * //tupleCounter++;
+	 * 
+	 * if (slowStream) { if ((leftCounter - rightCounter) == 61) { slowStream =
+	 * false; } }
+	 * 
+	 * if (streamId == 0) { tupleCounter++; long time =
+	 * System.currentTimeMillis(); System.out.println(tupleCounter + "," +
+	 * time); if (hasMappings) { // We need to move some attributes
+	 * putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0); } else {
+	 * // just send the original tuple along putTuple(inputTuple, 0); } }
+	 * 
+	 * else if (slowStream) { tupleCounter++; long time =
+	 * System.currentTimeMillis(); System.out.println(tupleCounter + "," +
+	 * time); if (hasMappings) { // We need to move some attributes
+	 * putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0); } else {
+	 * // just send the original tuple along putTuple(inputTuple, 0); } } }
+	 */
+
+	/* This is the code that generated the first output (with timers, etc.) */
+	protected void processTuple(Tuple inputTuple, int streamId)
 			throws ShutdownException, InterruptedException {
+		// XXX: RJFM
+		tupleCounter++;
+		long time = System.currentTimeMillis();
+		System.out.println(tupleCounter + "," + time);
+		if (hasMappings) { // We need to move some attributes
+			putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
+		} else {
+			// just send the original tuple along
+			putTuple(inputTuple, 0);
 
-		if (streamId == 0)
-			leftCounter++;
-		else
-			rightCounter++;
-
-		//tupleCounter++;
-
-		if (slowStream) {
-			if ((leftCounter - rightCounter) == 61) {
-				slowStream = false;
-			}
-		}
-
-		if (streamId == 0) {
-			tupleCounter++;
-			long time = System.currentTimeMillis();
-			System.out.println(tupleCounter + "," + time);
-			if (hasMappings) { // We need to move some attributes
-				putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
-			} else {
-				// just send the original tuple along
-				putTuple(inputTuple, 0);
-			}
-		}
-
-		else if (slowStream) {
-			tupleCounter++;
-			long time = System.currentTimeMillis();
-			System.out.println(tupleCounter + "," + time);
-			if (hasMappings) { // We need to move some attributes
-				putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
-			} else {
-				// just send the original tuple along
-				putTuple(inputTuple, 0);
-			}
 		}
 	}
 
+	/**
+	 * This function handles punctuations for the given operator. For Union, we
+	 * have to make sure all inputs have reported equal punctuation before
+	 * outputting a punctuation.
+	 * 
+	 * @param tuple
+	 *            The current input tuple to examine.
+	 * @param streamId
+	 *            The id of the source streams the partial result of which are
+	 *            to be removed.
 	 * 
 	 */
-	
-/* This is the code that generated the first output (with timers, etc.) */
-	protected void processTuple(
-			Tuple inputTuple,
-			int streamId)
+
+	protected void processPunctuation(Punctuation tuple, int streamId)
 			throws ShutdownException, InterruptedException {
-	// XXX: RJFM
-			tupleCounter++;		
-			long time = System.currentTimeMillis();
-			System.out.println( tupleCounter + "," + time );
-			if (hasMappings) { // We need to move some attributes
-				putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
-			} else {
-				// just send the original tuple along
-				putTuple(inputTuple, 0);
-
-			}
-		}
-	
-	/**
-	 * This function handles punctuations for the given operator. For
-	 * Union, we have to make sure all inputs have reported equal
-	 * punctuation before outputting a punctuation.
-	 *
-	 * @param tuple The current input tuple to examine.
-	 * @param streamId The id of the source streams the partial result of
-	 *                 which are to be removed.
-	 *
-	 */
-
-	protected void processPunctuation(
-		Punctuation tuple,
-		int streamId)
-		throws ShutdownException, InterruptedException {
 
 		boolean fAllMatch = true, fFound;
 
-		//First, check to see if this punctuation matches a punctuation
+		// First, check to see if this punctuation matches a punctuation
 		// from all other inputs
 		for (int i = 0; i < rgPunct.length && fAllMatch == true; i++) {
 			if (i != streamId) {
 				fFound = false;
-				for (int j = 0;
-					j < rgPunct[i].size() && fFound == false;
-					j++) {
-					fFound =
-						tuple.equals(
-							(Punctuation) rgPunct[i].get(j));
+				for (int j = 0; j < rgPunct[i].size() && fFound == false; j++) {
+					fFound = tuple.equals((Punctuation) rgPunct[i].get(j));
 					if (fFound)
 						rgnRemove[i] = j;
 				}
@@ -237,9 +181,9 @@ public class PhysicalUnion extends PhysicalOperator {
 		}
 
 		if (fAllMatch) {
-			//Output the punctuation
+			// Output the punctuation
 			putTuple(tuple, 0);
-			//Remove the other punctuations, since they are no longer needed
+			// Remove the other punctuations, since they are no longer needed
 			for (int i = 0; i < rgPunct.length; i++) {
 				if (i != streamId)
 					rgPunct[i].remove(rgnRemove[i]);
@@ -254,11 +198,10 @@ public class PhysicalUnion extends PhysicalOperator {
 	}
 
 	/**
-	 * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(LogicalProperty, LogicalProperty[])
+	 * @see niagara.optimizer.colombia.PhysicalOp#FindLocalCost(LogicalProperty,
+	 *      LogicalProperty[])
 	 */
-	public Cost findLocalCost(
-		ICatalog catalog,
-		LogicalProperty[] inputLogProp) {
+	public Cost findLocalCost(ICatalog catalog, LogicalProperty[] inputLogProp) {
 		double trc = catalog.getDouble("tuple_reading_cost");
 		double sumCards = 0;
 		for (int i = 0; i < inputLogProp.length; i++)
@@ -287,7 +230,7 @@ public class PhysicalUnion extends PhysicalOperator {
 		if (o.getClass() != PhysicalUnion.class)
 			return o.equals(this);
 		return getArity() == ((PhysicalUnion) o).getArity()
-			&& inputAttrs.equals(((PhysicalUnion) o).inputAttrs);
+				&& inputAttrs.equals(((PhysicalUnion) o).inputAttrs);
 	}
 
 	public int hashCode() {
@@ -306,9 +249,7 @@ public class PhysicalUnion extends PhysicalOperator {
 		if (hasMappings) {
 			int inputArity = Array.getLength(inputAttrs);
 
-			assert inputArity
-				== Array.getLength(
-					inputSchemas) : " input arity not equal to number of input schemas";
+			assert inputArity == Array.getLength(inputSchemas) : " input arity not equal to number of input schemas";
 
 			attributeMaps = new int[inputArity][];
 			for (int i = 0; i < inputArity; i++) {
@@ -318,11 +259,11 @@ public class PhysicalUnion extends PhysicalOperator {
 						attributeMaps[i][j] = -1;
 					} else {
 						Attribute a = inputAttrs[i].GetAt(j);
-						if( a == null) {
+						if (a == null) {
 							attributeMaps[i][j] = -1;
-						} else { 
-							attributeMaps[i][j] =
-								inputSchemas[i].getPosition(a.getName());
+						} else {
+							attributeMaps[i][j] = inputSchemas[i].getPosition(a
+									.getName());
 						}
 					}
 				}

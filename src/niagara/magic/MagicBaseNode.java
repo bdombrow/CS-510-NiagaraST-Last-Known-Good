@@ -1,199 +1,181 @@
-/**********************************************************************
-  $Id: MagicBaseNode.java,v 1.3 2004/02/10 00:59:20 vpapad Exp $
-
-
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
-**********************************************************************/
-
 package niagara.magic;
 
-import org.w3c.dom.*;
-
-import niagara.utils.Tuple;
 import niagara.utils.PEException;
+import niagara.utils.Tuple;
+
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.UserDataHandler;
 
 /**
- * <code>MagicRoot</code> DOM element - but has a pointer to
- * tuple...
+ * <code>MagicRoot</code> DOM element - but has a pointer to tuple...
  */
 
-public abstract class MagicBaseNode implements Node { 
+public abstract class MagicBaseNode implements Node {
 
-    protected MagicBaseNode root;
-    private Document doc; // MAJOR HACK !! avoids writing a TextImpl
+	protected MagicBaseNode root;
+	private Document doc; // MAJOR HACK !! avoids writing a TextImpl
 
-    protected MagicBaseNode(MagicBaseNode root) {
-	this.root = root;
-    }
-    
-    public void youAreTheRoot(Document doc) {
-	this.root = this;
-	this.doc = doc;
-    }
+	protected MagicBaseNode(MagicBaseNode root) {
+		this.root = root;
+	}
 
-    protected Document getDoc() {
-	return doc;
-    }
+	public void youAreTheRoot(Document doc) {
+		this.root = this;
+		this.doc = doc;
+	}
 
-    public void setTuple(Tuple cTuple) {
-	root.setYourNode(cTuple);
-    }
+	protected Document getDoc() {
+		return doc;
+	}
 
-    public abstract void setYourNode(Tuple cTuple);
+	public void setTuple(Tuple cTuple) {
+		root.setYourNode(cTuple);
+	}
 
-    /*
-    public StreamTupleElement getCurrentTuple() {
-	return currentTuple;
-    }
-    */
+	public abstract void setYourNode(Tuple cTuple);
 
-    public void setNextSibling(Node next) throws DOMException {
-	assert false : "Calling on wrong class - not supported";
-	throw new PEException("Calling on wrong class - not supported");
-    }
+	/*
+	 * public StreamTupleElement getCurrentTuple() { return currentTuple; }
+	 */
 
-    public void appendChildDNS(MagicBaseNode newChild) {
-	// assert doesn't work here
-	assert false : "test0";
-	throw new PEException("Calling on wrong class - not supported");
-    }
+	public void setNextSibling(Node next) throws DOMException {
+		assert false : "Calling on wrong class - not supported";
+		throw new PEException("Calling on wrong class - not supported");
+	}
 
-    // NODE interface fcns
-    public Document getOwnerDocument() throws DOMException {
-	return root.getDoc(); 
-    }
+	public void appendChildDNS(MagicBaseNode newChild) {
+		// assert doesn't work here
+		assert false : "test0";
+		throw new PEException("Calling on wrong class - not supported");
+	}
 
-    // NODE INTERFACE METHODS: 
+	// NODE interface fcns
+	public Document getOwnerDocument() throws DOMException {
+		return root.getDoc();
+	}
 
-    public Node appendChild(Node newChild) throws DOMException {
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	// NODE INTERFACE METHODS:
 
-    public abstract Node cloneNode(boolean deep);
-    public abstract NamedNodeMap getAttributes();
-    public abstract NodeList getChildNodes();
-    public abstract Node getFirstChild();
-    public abstract Node getLastChild();
+	public Node appendChild(Node newChild) throws DOMException {
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public abstract String getLocalName();
-    public abstract String getNamespaceURI();
-    public abstract Node getNextSibling();
+	public abstract Node cloneNode(boolean deep);
 
-    public abstract String getNodeName();
-    public abstract short getNodeType();
-    public abstract String getNodeValue() throws DOMException;
+	public abstract NamedNodeMap getAttributes();
 
-    public Node getParentNode() {
-        throw new DOMException(DOMException.NOT_SUPPORTED_ERR,
-                               "getParentNode unsupported on MagicNode");
-    }
-    
-    public abstract String getPrefix();
-    public abstract Node getPreviousSibling();
-    public abstract boolean hasAttributes();
-    public abstract boolean hasChildNodes();
+	public abstract NodeList getChildNodes();
 
-    public Node insertBefore(Node newChild, Node refChild)
-        throws DOMException {
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public abstract Node getFirstChild();
 
-    public boolean isSupported(String feature, String version) {
-	return false; // HACK! (stolen from Vassilis...)
-    }
+	public abstract Node getLastChild();
 
-    public abstract void normalize();
+	public abstract String getLocalName();
 
-    public Node removeChild(Node oldChild) throws DOMException {
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public abstract String getNamespaceURI();
 
-    public Node replaceChild(Node newChild, Node oldChild) 
-        throws DOMException {
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public abstract Node getNextSibling();
 
-    public void setNodeValue(String nodeValue) throws DOMException {
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public abstract String getNodeName();
 
-    public void setPrefix(String prefix) throws DOMException {
-        throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
-                               "Magic objects are read-only.");
-    }
+	public abstract short getNodeType();
 
-    public short compareDocumentPosition(Node other) throws DOMException {
-        throw new PEException("Not implemented yet");
-    }
+	public abstract String getNodeValue() throws DOMException;
 
-    public String getBaseURI() {
-        throw new PEException("Not implemented yet");
-    }
+	public Node getParentNode() {
+		throw new DOMException(DOMException.NOT_SUPPORTED_ERR,
+				"getParentNode unsupported on MagicNode");
+	}
 
-    public Object getFeature(String feature, String version) {
-        throw new PEException("Not implemented yet");
-    }
+	public abstract String getPrefix();
 
-    public String getTextContent() throws DOMException {
-        throw new PEException("Not implemented yet");
-    }
+	public abstract Node getPreviousSibling();
 
-    public Object getUserData(String key) {
-        throw new PEException("Not implemented yet");
-    }
+	public abstract boolean hasAttributes();
 
-    public boolean isDefaultNamespace(String namespaceURI) {
-        throw new PEException("Not implemented yet");
-    }
+	public abstract boolean hasChildNodes();
 
-    public boolean isEqualNode(Node arg) {
-        throw new PEException("Not implemented yet");
-    }
+	public Node insertBefore(Node newChild, Node refChild) throws DOMException {
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public boolean isSameNode(Node other) {
-        throw new PEException("Not implemented yet");
-    }
+	public boolean isSupported(String feature, String version) {
+		return false; // HACK! (stolen from Vassilis...)
+	}
 
-    public String lookupNamespaceURI(String prefix) {
-        throw new PEException("Not implemented yet");
-    }
+	public abstract void normalize();
 
-    public String lookupPrefix(String namespaceURI) {
-        throw new PEException("Not implemented yet");
-    }
+	public Node removeChild(Node oldChild) throws DOMException {
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public void setTextContent(String textContent) throws DOMException {
-        throw new PEException("Not implemented yet");
-    }
+	public Node replaceChild(Node newChild, Node oldChild) throws DOMException {
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
 
-    public Object setUserData(
-        String key,
-        Object data,
-        UserDataHandler handler) {
-        throw new PEException("Not implemented yet");
-    }
+	public void setNodeValue(String nodeValue) throws DOMException {
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
+
+	public void setPrefix(String prefix) throws DOMException {
+		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR,
+				"Magic objects are read-only.");
+	}
+
+	public short compareDocumentPosition(Node other) throws DOMException {
+		throw new PEException("Not implemented yet");
+	}
+
+	public String getBaseURI() {
+		throw new PEException("Not implemented yet");
+	}
+
+	public Object getFeature(String feature, String version) {
+		throw new PEException("Not implemented yet");
+	}
+
+	public String getTextContent() throws DOMException {
+		throw new PEException("Not implemented yet");
+	}
+
+	public Object getUserData(String key) {
+		throw new PEException("Not implemented yet");
+	}
+
+	public boolean isDefaultNamespace(String namespaceURI) {
+		throw new PEException("Not implemented yet");
+	}
+
+	public boolean isEqualNode(Node arg) {
+		throw new PEException("Not implemented yet");
+	}
+
+	public boolean isSameNode(Node other) {
+		throw new PEException("Not implemented yet");
+	}
+
+	public String lookupNamespaceURI(String prefix) {
+		throw new PEException("Not implemented yet");
+	}
+
+	public String lookupPrefix(String namespaceURI) {
+		throw new PEException("Not implemented yet");
+	}
+
+	public void setTextContent(String textContent) throws DOMException {
+		throw new PEException("Not implemented yet");
+	}
+
+	public Object setUserData(String key, Object data, UserDataHandler handler) {
+		throw new PEException("Not implemented yet");
+	}
 }

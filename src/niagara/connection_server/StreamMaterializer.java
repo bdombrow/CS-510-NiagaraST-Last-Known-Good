@@ -1,15 +1,18 @@
-/**
- * $Id: StreamMaterializer.java,v 1.5 2003/12/24 02:16:38 vpapad Exp $
- */
-
 package niagara.connection_server;
 
-import org.w3c.dom.*;
+import java.util.Hashtable;
 
-import niagara.utils.*;
+import niagara.utils.ControlFlag;
+import niagara.utils.ShutdownException;
+import niagara.utils.SourceTupleStream;
+import niagara.utils.Tuple;
 
-import java.util.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
+@SuppressWarnings("unchecked")
 public class StreamMaterializer extends Thread {
 	int number;
 	MQPHandler handler;
@@ -23,7 +26,7 @@ public class StreamMaterializer extends Thread {
 			while (true) {
 				Tuple ste = inputStream.getTuple(500);
 				if (ste == null) {
-					if(inputStream.getCtrlFlag() == ControlFlag.EOS) {
+					if (inputStream.getCtrlFlag() == ControlFlag.EOS) {
 						break;
 					} else {
 						// if we time out or get a control flag other than
@@ -66,17 +69,16 @@ public class StreamMaterializer extends Thread {
 		// XXX we don't handle attributes
 		if (o == null)
 			return;
-		if (o instanceof Text) 
+		if (o instanceof Text)
 			output.append(((Text) o).getData());
 
 		else if (o instanceof Element) {
 			if (elements.containsKey(o)) {
 				output.append("<eltref eid='" + elements.get(o) + "'/>");
-			}
-			else {
+			} else {
 				String eid = nextId();
-				output.append("<" + ((Element) o).getTagName() 
-						+ " eid='" + eid + "'>");
+				output.append("<" + ((Element) o).getTagName() + " eid='" + eid
+						+ "'>");
 				NodeList nl = ((Element) o).getChildNodes();
 				for (int i = 0; i < nl.getLength(); i++) {
 					serialize(nl.item(i));
@@ -84,9 +86,9 @@ public class StreamMaterializer extends Thread {
 				output.append("</" + ((Element) o).getTagName() + ">");
 				elements.put(o, eid);
 			}
-		}
-		else {
-			System.out.println("XXX ignoring attribute of type: " + o.getClass());
+		} else {
+			System.out.println("XXX ignoring attribute of type: "
+					+ o.getClass());
 		}
 	}
 
@@ -107,7 +109,7 @@ public class StreamMaterializer extends Thread {
 		elements = new Hashtable();
 	}
 
-	public StreamMaterializer(int number, MQPHandler handler, 
+	public StreamMaterializer(int number, MQPHandler handler,
 			SourceTupleStream inputStream) {
 		this();
 		this.number = number;

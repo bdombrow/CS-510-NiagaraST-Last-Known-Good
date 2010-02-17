@@ -1,5 +1,4 @@
 #######################################################################
-# $Id: Makefile,v 1.18 2003/07/17 23:21:53 tufte Exp $
 #
 #  Makefile to build query engine related stuff
 #

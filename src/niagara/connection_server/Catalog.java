@@ -1,25 +1,24 @@
-/*
- * $Id: Catalog.java,v 1.20 2007/05/22 22:18:08 vpapad Exp $
- *  
- */
-
 package niagara.connection_server;
-import java.util.*;
-import java.io.*;
 
-import org.w3c.dom.*;
-import org.xml.sax.InputSource;
-
-import org.apache.xml.serialize.XMLSerializer;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Stack;
+import java.util.Vector;
 
 import niagara.logical.DoubleDomain;
 import niagara.logical.FileScanSpec;
 import niagara.logical.IntDomain;
 import niagara.logical.NodeDomain;
 import niagara.logical.Variable;
-import niagara.ndom.*;
-import niagara.utils.*;
-
+import niagara.ndom.DOMFactory;
 import niagara.optimizer.Plan;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.ICatalog;
@@ -28,13 +27,22 @@ import niagara.optimizer.rules.ConstructedRule;
 import niagara.optimizer.rules.CustomRule;
 import niagara.optimizer.rules.SimpleRule;
 import niagara.query_engine.Instrumentable;
+import niagara.utils.PEException;
 
+import org.apache.xml.serialize.XMLSerializer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+@SuppressWarnings("unchecked")
 public class Catalog implements ICatalog {
     // This primitive Catalog maintains a mapping from URNs to URLs,
     // or location of servers that know to resolve the URNs
     
     /** Configuration parameters */
-    private HashMap configParams;
+	private HashMap configParams;
 
     /** All the known resource names */
     private HashSet resourceNames;

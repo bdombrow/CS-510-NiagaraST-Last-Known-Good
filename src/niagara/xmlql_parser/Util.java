@@ -1,42 +1,18 @@
+package niagara.xmlql_parser;
 
-/**********************************************************************
-  $Id: Util.java,v 1.1 2003/12/24 01:19:53 vpapad Exp $
+import java.util.Vector;
 
-
-  NIAGARA -- Net Data Management System                                 
-                                                                        
-  Copyright (c)    Computer Sciences Department, University of          
-                       Wisconsin -- Madison                             
-  All Rights Reserved.                                                  
-                                                                        
-  Permission to use, copy, modify and distribute this software and      
-  its documentation is hereby granted, provided that both the           
-  copyright notice and this permission notice appear in all copies      
-  of the software, derivative works or modified versions, and any       
-  portions thereof, and that both notices appear in supporting          
-  documentation.                                                        
-                                                                        
-  THE AUTHORS AND THE COMPUTER SCIENCES DEPARTMENT OF THE UNIVERSITY    
-  OF WISCONSIN - MADISON ALLOW FREE USE OF THIS SOFTWARE IN ITS "        
-  AS IS" CONDITION, AND THEY DISCLAIM ANY LIABILITY OF ANY KIND         
-  FOR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THIS SOFTWARE.   
-                                                                        
-  This software was developed with support by DARPA through             
-   Rome Research Laboratory Contract No. F30602-97-2-0247.  
-**********************************************************************/
-
+import niagara.logical.OldVariable;
+import niagara.logical.predicates.And;
+import niagara.logical.predicates.Atom;
+import niagara.logical.predicates.Comparison;
+import niagara.logical.predicates.Predicate;
 
 /**
  * This class has some static methods which are used in the generation
  * of the logical plan
  *
  */
-package niagara.xmlql_parser;
-
-import java.util.*;
-
-import niagara.logical.*;
-import niagara.logical.predicates.*;
 
 public class Util {
 
@@ -54,6 +30,7 @@ public class Util {
          * @return an equivalent regular expression
 	 */
 
+	@SuppressWarnings("unchecked")
 	public static regExp getEquivRegExp(Vector v) {
 		regExp currRegExp = new regExpDataNode((data)v.elementAt(0));
 		regExpDataNode reDnode;
@@ -75,7 +52,8 @@ public class Util {
 	 * @return a vector with the elements and parent index
 	 */
 
-	public static Vector bft(pattern _pat) {
+	@SuppressWarnings("unchecked")
+	public static Vector<pnode> bft(pattern _pat) {
 		pnode currpnode, newpnode;
 		pattern currpat;
 		Vector patternList;
@@ -84,12 +62,12 @@ public class Util {
 		regExp newregexp;
 		attr curattr;
 
-		Vector listOfpnodes = new Vector();
+		Vector<pnode> listOfpnodes = new Vector<pnode>();
 		pnode firstnode = new pnode(_pat,-1);
 		listOfpnodes.addElement(firstnode);
 		
 		for(int i=0;i<listOfpnodes.size();i++) {
-			currpnode = (pnode)listOfpnodes.elementAt(i);
+			currpnode = listOfpnodes.elementAt(i);
 			currpat = currpnode.getPattern();
 			if(currpat instanceof patternInternalNode) {
 				patternList = ((patternInternalNode)currpat).getPatternList();
@@ -118,6 +96,7 @@ public class Util {
 	 * @return predicate resulting from ANDing multiple predicates
 	 */
 
+	@SuppressWarnings("unchecked")
 	public static Predicate andPredicates(Vector preds) {
 		Predicate curpred = (Predicate) preds.elementAt(0);	
 		for(int i=1;i<preds.size();i++) 
@@ -170,6 +149,7 @@ public class Util {
 	 * @return var table produced by joining the two input var table
 	 */
 
+	@SuppressWarnings("unchecked")
 	public static varTbl mergeVarTbl(varTbl leftVarTbl, varTbl rightVarTbl, int leftRelSize) {
 
 		String var;
@@ -201,6 +181,7 @@ public class Util {
 	 * @return predicate that represent this join condition
 	 */
 
+	@SuppressWarnings("unchecked")
 	public static Predicate makePredicate(Vector leftJoinAttr, Vector rightJoinAttr) {
 		
 		Predicate newPred, rightChild;
@@ -251,6 +232,7 @@ public class Util {
 	 * @return true if variables are contained in the union, false otherwise
 	 */
 
+	@SuppressWarnings("unchecked")
 	public static boolean unionContains(varTbl leftTbl, varTbl rightTbl, Vector variables) {
 	   String var;
 	   for(int i=0;i<variables.size();i++) {

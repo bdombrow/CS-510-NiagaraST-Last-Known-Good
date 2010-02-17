@@ -1,7 +1,3 @@
-/*
- * $Id: CommunicationServlet.java,v 1.9 2007/05/19 16:57:05 vpapad Exp $
- */
-
 package niagara.connection_server;
 
 import java.io.IOException;
@@ -18,8 +14,9 @@ import niagara.optimizer.Optimizer;
 import niagara.physical.PhysicalSend;
 import niagara.utils.UnrecoverableException;
 
+@SuppressWarnings({ "unchecked", "serial", "unused" })
 public class CommunicationServlet extends HttpServlet {
-    private NiagraServer server;
+	private NiagraServer server;
     private Optimizer optimizer;
     private int id;
 
