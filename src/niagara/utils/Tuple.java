@@ -267,4 +267,6 @@ public class Tuple {
             }
         }
     }
+    
+    // TODO: Add method to return schemata
 }

@@ -24,6 +24,8 @@ public abstract class BaseAttr {
 	public abstract boolean gt(BaseAttr other);
 	public abstract boolean lt(BaseAttr other);
 
+	public Object attrVal(){ return attrVal; }
+	
 	public static BaseAttr.Type getDataTypeFromString(String typeName) {
 		BaseAttr.Type dataType;
         if (typeName.equalsIgnoreCase("string"))
@@ -101,5 +103,7 @@ public abstract class BaseAttr {
 		// punct is true when the attrVal of a BaseAttr contrains a "*"
 		punct = true;
 	}
+	
+	
 
 }

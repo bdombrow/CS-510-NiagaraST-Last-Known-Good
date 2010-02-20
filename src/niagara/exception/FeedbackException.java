@@ -9,7 +9,7 @@ package niagara.exception;
  */
 public class FeedbackException extends Exception {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2164820565818609498L;
 
 	/***
 	 * 
