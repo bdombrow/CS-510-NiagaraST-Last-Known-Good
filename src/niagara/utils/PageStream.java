@@ -35,9 +35,7 @@ public class PageStream {
 	private boolean shutdown;
 	private String shutdownMsg;
 
-	private final int STREAM_CAPACITY = 1; // RJFM - I assume this is the number
-											// of Tuple Pages in the
-											// inter-operator buffer?
+	private final int STREAM_CAPACITY = 5; // Number of inter-operator tuples
 	public static int MAX_DELAY = 1000;
 
 	// keep extra pages around that can be reused

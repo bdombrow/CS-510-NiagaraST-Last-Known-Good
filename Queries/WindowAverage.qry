@@ -23,13 +23,12 @@
 
 <bucket id="bucket" wintype="1" winattr="$time_t" range="60000" slide="60000" input="speed" propagate="no"/>
 
-<windowAverage id="agg" groupby="$detector_id $segment_id" avgattr="$speed" input="bucket" propagate="no"/>
+<windowAverage id="agg" groupby="$segment_id" avgattr="$speed" input="bucket" propagate="no"/>
 
 <construct id="cons" input="agg">
 <![CDATA[
 <result>
  $wid_from_bucket
- $detector_id
  $segment_id
  $agg
 </result>

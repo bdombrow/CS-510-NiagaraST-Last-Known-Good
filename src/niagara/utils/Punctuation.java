@@ -13,7 +13,7 @@ import java.util.StringTokenizer;
  * @see Stream
  */
 
-public final class Punctuation extends Tuple {
+public class Punctuation extends Tuple {
 
 	/***
 	 * 
