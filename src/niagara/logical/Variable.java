@@ -83,6 +83,10 @@ public class Variable implements Atom, Attribute {
 	public String getName() {
 		return name;
 	}
+	
+	public void setName(String n) {
+		this.name = n;
+	}
 
 	public SimpleAtomicEvaluator getSimpleEvaluator() {
 		return new SimpleAtomicEvaluator(name);
@@ -167,4 +171,6 @@ public class Variable implements Atom, Attribute {
 		// return new Variable(newName, dataType);
 		return new Variable(newName, dataType, domain);
 	}
+
+
 }

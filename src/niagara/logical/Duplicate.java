@@ -50,7 +50,7 @@ public class Duplicate extends UnaryOperator {
 		if (obj == null || !(obj instanceof Duplicate))
 			return false;
 		if (obj.getClass() != Duplicate.class)
-			return obj.equals(this);
+			return obj.equals(this); 
 		Duplicate other = (Duplicate) obj;
 		return numDestinationStreams == other.numDestinationStreams;
 	}

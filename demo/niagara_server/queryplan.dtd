@@ -18,7 +18,7 @@
 		    accumulate | nest | magic_construct |
 		    windowCount | windowMax | windowAverage  | windowJoin | impute |
         showTunables | collectInstrumentation |
-		    store | load | xmlscan | dbscan | dbscanimpute | punctqc | present)+>
+		    store | load | xmlscan | dbscan | dbscanimpute | rename | punctqc | present)+>
 
 <!ATTLIST plan top IDREF        #REQUIRED
                planID CDATA     ""
@@ -79,6 +79,12 @@
 <!ATTLIST avg
 	  groupby  CDATA	       #REQUIRED
 	  avgattr  CDATA	       #REQUIRED
+	  %StandardAttributes;>
+
+<!ELEMENT rename     EMPTY>
+<!ATTLIST rename
+	  source  CDATA	       #REQUIRED
+	  dest  CDATA	       #REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT windowAverage    EMPTY>

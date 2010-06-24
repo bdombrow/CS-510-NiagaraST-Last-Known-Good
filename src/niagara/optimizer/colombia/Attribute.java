@@ -5,6 +5,8 @@ import niagara.utils.BaseAttr;
 /** Tuple attributes */
 public interface Attribute {
 	String getName();
+	
+	void setName(String name);
 
 	Domain getDomain();
 

@@ -49,6 +49,9 @@
   <operators>
   	<!-- Logical and physical operators, name to class mappings, and
   	     logical-to-physical mappings for unoptimized query plans. -->
+  	<logical class="niagara.logical.Rename" name="rename">
+            <physical class="niagara.physical.PhysicalRename" name="PhysicalRename"/>
+  	</logical>
     <logical class="niagara.logical.DTDScan" name="dtdscan">
             <physical class="niagara.data_manager.DTDThread" name="DTDThread"/>
     </logical>
@@ -211,6 +214,10 @@
   		<before><logical name="select"/></before>
  		<after><op name="PhysicalSelect"/></after>
   	</rule> 
+  	<rule name="rename to PhysicalRename" type="simple">
+  		<before><logical name="rename"/></before>
+ 		<after><op name="PhysicalRename"/></after>
+  	</rule>
  	<rule name="select to PhysicalMagic" type="simple">
   		<before><logical name="magic"/></before>
  		<after><op name="PhysicalMagic"/></after>
