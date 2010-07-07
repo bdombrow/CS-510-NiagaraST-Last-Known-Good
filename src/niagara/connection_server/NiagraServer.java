@@ -1,5 +1,8 @@
 package niagara.connection_server;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.InetAddress;
 
 import niagara.ndom.DOMFactory;
@@ -61,6 +64,9 @@ public class NiagraServer {
 	public static boolean DEBUG = false;
 	public static boolean DEBUG2 = false;
 
+	// logging options
+	public static boolean LOGGING = true;
+
 	public NiagraServer() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
@@ -69,6 +75,7 @@ public class NiagraServer {
 		});
 
 		try {
+
 			// Read the catalog
 			catalog = new Catalog(catalogFileName);
 

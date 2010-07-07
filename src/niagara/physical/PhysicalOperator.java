@@ -1,5 +1,6 @@
 package niagara.physical;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import niagara.connection_server.NiagraServer;
@@ -17,6 +18,7 @@ import niagara.query_engine.SchemaProducer;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.CPUTimer;
 import niagara.utils.ControlFlag;
+import niagara.utils.Log;
 import niagara.utils.MailboxFlag;
 import niagara.utils.OperatorDoneException;
 import niagara.utils.PageStream;
@@ -117,6 +119,11 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	/** Object to receive notifications on */
 	private MailboxFlag notifyMe;
 
+	/* For logging*/
+	protected Boolean logging = false;
+	protected Log log;
+
+	
 	/**
 	 * This class is used to store the result of a read operation from a set of
 	 * source streams. There are two components (a) the stream element read and
@@ -698,6 +705,12 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 				// input streams are either synchronized or closed.
 				updatePartialResultCreation();
 			}
+			// Print out the log
+			if(logging) {
+				// should go to a log file per query instead of stdout
+				System.out.println(log.ToString());
+			}
+
 			return;
 
 		default:
