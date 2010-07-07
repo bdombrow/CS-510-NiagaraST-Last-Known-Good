@@ -17,7 +17,7 @@
 		    bucket | partitionavg | partitionmax |
 		    accumulate | nest | magic_construct |
 		    windowCount | windowMax | windowAverage  | windowJoin | impute |
-        showTunables | collectInstrumentation |
+        showTunables | collectInstrumentation | expensive |
 		    store | load | xmlscan | dbscan | dbscanimpute | rename | punctqc | present)+>
 
 <!ATTLIST plan top IDREF        #REQUIRED
@@ -85,6 +85,11 @@
 <!ATTLIST rename
 	  source  CDATA	       #REQUIRED
 	  dest  CDATA	       #REQUIRED
+	  %StandardAttributes;>
+
+<!ELEMENT expensive     EMPTY>
+<!ATTLIST expensive
+	  cost  CDATA	       #REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT windowAverage    EMPTY>

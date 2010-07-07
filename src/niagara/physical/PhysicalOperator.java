@@ -1,6 +1,5 @@
 package niagara.physical;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import niagara.connection_server.NiagraServer;

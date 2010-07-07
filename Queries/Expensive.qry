@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- Simple Expensive -->
+
+<plan top="cons">
+
+<!-- Internalize stream -->
+
+<filescan id ="data" isstream="yes" delay="0" filename="G:\niagarast\Streams\trafficDataStreamSmall.xml"/>
+
+<unnest id="detectors" regexp="detectors" datatype="XML" input="data"/>
+<unnest id="time_t" regexp="time_t" datatype="TS" input="detectors"/>
+<unnest id="time_s" regexp="time_s" root="$detectors" datatype="String" input="time_t"/>
+<unnest id="detector" regexp="detector" root="$detectors" datatype="XML" input="time_s"/>
+<unnest id="detector_id" regexp="detector_id" root="$detector" datatype="Integer" input="detector"/>
+<unnest id="segment_id" regexp="segment_id" root="$detector" datatype="Integer" input="detector_id"/>
+<unnest id="volume" regexp="volume" root="$detector" datatype="Integer" input="segment_id"/>
+<unnest id="speed" regexp="speed" root="$detector" datatype="Integer" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$detector" datatype="Integer" input="speed"/>
+
+<expensive id="ex" input="occupancy" cost="10000000" />
+
+<select id="se2" input="ex">
+<pred op="gt">
+       <var value="$speed"></var><number value ="30"></number>
+</pred>
+</select>
+
+<construct id="cons" input="se2">
+<![CDATA[
+<result>
+ $segment_id
+ $detector_id
+ $speed
+</result>
+]]>
+
+
+</construct>
+</plan>
