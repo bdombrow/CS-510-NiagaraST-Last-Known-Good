@@ -19,9 +19,9 @@
 <unnest id="speed" regexp="speed" root="$detector" datatype="Integer" input="volume"/>
 <unnest id="occupancy" regexp="occupancy" root="$detector" datatype="Integer" input="speed"/>
 
-<expensive id="ex" input="occupancy" cost="10000000" />
+<expensive id="ex" input="occupancy" cost="10000000" log="no"/>
 
-<select id="se2" input="ex">
+<select id="se2" input="ex" log="yes">
 <pred op="gt">
        <var value="$speed"></var><number value ="30"></number>
 </pred>

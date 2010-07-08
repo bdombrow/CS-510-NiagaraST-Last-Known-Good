@@ -24,6 +24,7 @@ public class Select extends UnaryOperator {
 
 	/** Number of tuples to allow through */
 	private Predicate pred;
+	private Boolean logging = false;
 
 	public Select() {
 	}
@@ -37,7 +38,10 @@ public class Select extends UnaryOperator {
 	}
 
 	public Op opCopy() {
-		return new Select(this);
+		Select op = new Select();
+		op.pred = this.pred;
+		op.logging = this.logging;
+		return op;
 	}
 
 	/**
@@ -74,8 +78,17 @@ public class Select extends UnaryOperator {
 			}
 		}
 		pred = Predicate.loadFromXML(predElt, inputProperties);
+
+		String l = e.getAttribute("log");
+		if(l.equals("yes"))
+			logging = true;
+		else logging = false;
 	}
 
+	public Boolean getLogging() {
+		return logging;
+	}
+	
 	public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
 		LogicalProperty result = input[0].copy();
 		result.setCardinality(result.getCardinality() * pred.selectivity());
@@ -96,6 +109,8 @@ public class Select extends UnaryOperator {
 	public boolean equals(Object o) {
 		if (o == null || !(o instanceof Select))
 			return false;
+		if(((Select)o).logging != logging)
+			return false;
 		if (o.getClass() != Select.class)
 			return o.equals(this);
 		Select s = (Select) o;
@@ -103,7 +118,7 @@ public class Select extends UnaryOperator {
 	}
 
 	public int hashCode() {
-		return pred.hashCode();
+		return pred.hashCode();// + logging.hashCode();
 	}
 
 	public Predicate getPredicate() {

@@ -411,7 +411,7 @@
 
   	<rule class="niagara.optimizer.rules.SelectIntoJoin" name="SelectIntoJoin" type="custom"/>
   	<rule class="niagara.optimizer.rules.PushJoinPredicates" name="PushJoinPredicates" type="custom"/>
-  	<rule class="niagara.optimizer.rules.SelectThruUnnest" name="SelectThruUnnest" type="custom"/> 
+  	<!--<rule class="niagara.optimizer.rules.SelectThruUnnest" name="SelectThruUnnest" type="custom"/> --> 
   	<rule name="EmptySelectToNoOp" type="simple">
   		<before><logical condition="isEmpty" name="select"/></before>
   		<after><op name="noop"/></after>

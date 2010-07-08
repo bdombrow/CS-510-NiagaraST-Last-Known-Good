@@ -18,9 +18,11 @@ import org.w3c.dom.Element;
 public class Expensive extends UnaryOperator {
 
 	private long cost;
+	private Boolean logging;
 
 	public Expensive() {
 		cost = 0;
+		logging = false;
 	}
 
 	public long getCost() {
@@ -30,6 +32,10 @@ public class Expensive extends UnaryOperator {
 
 	public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog) throws InvalidPlanException {
 		cost = Long.parseLong(e.getAttribute("cost"));
+		String l = e.getAttribute("log").toString();
+		if(l.equals("yes"))
+			logging = true;
+		else logging = false;
 	}
 
 
@@ -37,6 +43,8 @@ public class Expensive extends UnaryOperator {
 	public boolean equals(Object other) {
 
 		if(other == null || !(other instanceof Expensive))
+			return false;
+		if(((Expensive)other).logging != this.logging)
 			return false;
 		if(other.getClass() != Expensive.class)
 			return other.equals(this);
@@ -50,6 +58,10 @@ public class Expensive extends UnaryOperator {
 
 	}
 
+	public Boolean getLogging(){
+		return logging;
+	}
+	
 	public void dump() {
 		System.out.println("Expensive :");
 		System.out.println("Cost: " + String.valueOf(cost));
@@ -68,6 +80,7 @@ public class Expensive extends UnaryOperator {
 	public Op opCopy() {
 		Expensive op = new Expensive();
 		op.cost = cost;
+		op.logging = this.logging;
 		return op;	
 	}
 

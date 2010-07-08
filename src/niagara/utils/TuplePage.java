@@ -25,6 +25,8 @@ public class TuplePage {
 
 	private ControlFlag flag;
 	private String ctrlMsg;
+	
+	private FeedbackPunctuation fp;
 
 	// the page has "getMode" for when you are reading from the page
 	// and "putMode" for filling the page - this flag keeps track of
@@ -79,6 +81,14 @@ public class TuplePage {
 		return ctrlMsg;
 	}
 
+	public void setFeedbackPunctuation(FeedbackPunctuation fp) {
+		this.fp = fp;
+	}
+	
+	public FeedbackPunctuation getFeedbackPunctuation() {
+		return fp;
+	}
+	
 	/**
 	 * Sets the currentPosition pointer appropriately, must be called before
 	 * putting any tuples in the page

@@ -28,10 +28,10 @@
      For all operators, an "id" attribute is required, so that other
      operators may reference them.
 -->
-<!ENTITY % StandardAttributes "id ID   #REQUIRED
-	 input     IDREF               #REQUIRED
-         location  CDATA               #IMPLIED
-	 %PositionAttributes;">
+<!ENTITY % StandardAttributes "id        ID                  #REQUIRED
+	                             input     IDREF               #REQUIRED
+                               location  CDATA               #IMPLIED
+	                             %PositionAttributes;">
 
 <!--
      type : Whether we want the element itself, its content, or its tag name
@@ -90,6 +90,7 @@
 <!ELEMENT expensive     EMPTY>
 <!ATTLIST expensive
 	  cost  CDATA	       #REQUIRED
+    log   (yes|no)     "no"
 	  %StandardAttributes;>
 
 <!ELEMENT windowAverage    EMPTY>
@@ -199,6 +200,7 @@
 
 <!ELEMENT select  (and | or | not | true | false | pred)>
 <!ATTLIST select
+    log  (yes | no)  "no"
 	  %StandardAttributes;>
 
 <!ELEMENT magic  (and | or | not | true | false | pred)>

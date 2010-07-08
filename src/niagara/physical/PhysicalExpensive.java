@@ -32,8 +32,6 @@ public class PhysicalExpensive extends PhysicalOperator {
 	public PhysicalExpensive() {
 		setBlockingSourceStreams(blockingSourceStreams);
 		cost = 0;
-		logging = true;
-		outCount = 0;
 	}
 
 	@Override
@@ -44,8 +42,10 @@ public class PhysicalExpensive extends PhysicalOperator {
 	@Override
 	protected void opInitFrom(LogicalOp op) {
 		cost = ((Expensive) op).getCost();
+		logging = ((Expensive)op).getLogging();
 		if(logging) {
 			log = new Log(this.getName());
+			outCount = 0;
 		}
 	}
 
@@ -74,7 +74,7 @@ public class PhysicalExpensive extends PhysicalOperator {
 
 	@Override
 	public int hashCode() {
-		return String.valueOf(cost).hashCode();
+		return String.valueOf(cost).hashCode() ^ logging.hashCode();
 	}
 
 	@Override
@@ -82,6 +82,7 @@ public class PhysicalExpensive extends PhysicalOperator {
 		PhysicalExpensive pr = new PhysicalExpensive();
 		pr.cost = cost;
 		pr.log = log;
+		pr.logging = logging;
 		return pr;
 	}
 

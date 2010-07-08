@@ -2,7 +2,6 @@ package niagara.physical;
 
 import java.util.ArrayList;
 
-import niagara.connection_server.NiagraServer;
 import niagara.logical.Select;
 import niagara.logical.predicates.Predicate;
 import niagara.optimizer.colombia.Cost;
@@ -14,7 +13,6 @@ import niagara.optimizer.colombia.PhysicalProperty;
 import niagara.physical.predicates.PredicateImpl;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.ControlFlag;
-import niagara.utils.IntegerAttr;
 import niagara.utils.Log;
 import niagara.utils.Punctuation;
 import niagara.utils.ShutdownException;
@@ -40,12 +38,13 @@ public class PhysicalSelect extends PhysicalOperator {
 	public PhysicalSelect() {
 		setBlockingSourceStreams(blockingSourceStreams);
 		// logging test
-		logging = NiagraServer.LOGGING;
+		//logging = NiagraServer.LOGGING;
 	}
 
 	public void opInitFrom(LogicalOp logicalOperator) {
 		pred = ((Select) logicalOperator).getPredicate();
 		predEval = pred.getImplementation();
+		logging = ((Select) logicalOperator).getLogging();
 		if(logging) {
 			log = new Log(this.getName());
 		}
@@ -105,12 +104,16 @@ public class PhysicalSelect extends PhysicalOperator {
 
 		if (predEval.evaluate(inputTuple, null)) {
 			putTuple(inputTuple, 0);
+			if(logging){
 			tupleOut++;
 			log.Update("TupleOut", String.valueOf(tupleOut));
+			}
 		}
 		else {
+			if(logging){
 			tupleDrop++;
 			log.Update("TupleDrop", String.valueOf(tupleDrop));
+			}
 		}	
 	}		
 
@@ -163,7 +166,7 @@ public class PhysicalSelect extends PhysicalOperator {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return pred.hashCode();
+		return pred.hashCode() ^ logging.hashCode();
 	}
 
 	/**
