@@ -23,11 +23,11 @@ public final class FeedbackPunctuation extends Punctuation {
 		return _schema;
 	}
 	
-	public FeedbackPunctuation(FeedbackType type, TupleSchema schema, Object[] tuple) {
+	public FeedbackPunctuation(FeedbackType type, TupleSchema schema, Tuple tuple) {
 		super(false);
 		this._type = type;
 		this._schema = schema;
-		this.tuple = tuple;
+		this.tuple = tuple.getTuple();
 	}
 
 	public String toString() {

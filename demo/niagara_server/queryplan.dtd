@@ -18,7 +18,7 @@
 		    accumulate | nest | magic_construct |
 		    windowCount | windowMax | windowAverage  | windowJoin | impute |
         showTunables | collectInstrumentation | expensive |
-		    store | load | xmlscan | dbscan | dbscanimpute | rename | punctqc | present)+>
+		    store | load | xmlscan | dbscan | dbscanimpute | rename | punctqc | present | instrument)+>
 
 <!ATTLIST plan top IDREF        #REQUIRED
                planID CDATA     ""
@@ -92,6 +92,14 @@
 	  cost  CDATA	       #REQUIRED
     log   (yes|no)     "no"
 	  %StandardAttributes;>
+
+<!ELEMENT instrument     EMPTY>
+<!ATTLIST instrument
+	  interval  CDATA	 #REQUIRED
+    log       (yes|no) "no"
+    propagate (yes|no) "no"
+	  %StandardAttributes;>
+
 
 <!ELEMENT windowAverage    EMPTY>
 <!ATTLIST windowAverage

@@ -17,6 +17,7 @@ import niagara.query_engine.SchemaProducer;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.CPUTimer;
 import niagara.utils.ControlFlag;
+import niagara.utils.FeedbackPunctuation;
 import niagara.utils.Log;
 import niagara.utils.MailboxFlag;
 import niagara.utils.OperatorDoneException;
@@ -955,7 +956,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 * @exception ShutdownException
 	 *                query shutdown by user or execution error
 	 */
-	private void sendCtrlMsgToSource(ControlFlag ctrlFlag, String ctrlMsg,
+	protected void sendCtrlMsgToSource(ControlFlag ctrlFlag, String ctrlMsg,
 			int streamId) throws ShutdownException, InterruptedException {
 		ControlFlag retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag,
 				ctrlMsg);
@@ -971,6 +972,11 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 		return;
 	}
 
+	protected void sendFeedbackToSource(FeedbackPunctuation fp, int streamId) throws ShutdownException, InterruptedException {
+         
+		sendCtrlMsgToSource(ControlFlag.MESSAGE, "Feedback Punctuation", streamId);
+	}
+	
 	/**
 	 * This function puts a control element to all source streams
 	 * 

@@ -76,7 +76,7 @@ public class PhysicalSelect extends PhysicalOperator {
 			processGetPartialFromSink(streamId);
 			break;
 		case MESSAGE:
-
+			System.out.println(ctrl.get(1).toString());
 			break;
 		default:
 			assert false : "KT unexpected control message from sink "
