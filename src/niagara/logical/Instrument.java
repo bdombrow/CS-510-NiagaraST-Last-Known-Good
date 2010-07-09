@@ -2,6 +2,7 @@ package niagara.logical;
 
 import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
@@ -21,6 +22,9 @@ public class Instrument extends UnaryOperator {
 	private Boolean logging;
 	private Boolean propagate;
 
+	private Attribute tsAttr;
+	private Attribute idAttr;
+	
 	public Instrument() {
 		interval = 0;
 		logging = false;
@@ -39,6 +43,14 @@ public class Instrument extends UnaryOperator {
 		return propagate;
 	}
 	
+	public Attribute getTsAttr() {
+		return tsAttr;
+	}
+	
+	public Attribute getIdAttr() {
+		return idAttr;
+	}
+
 
 	public void loadFromXML(Element e, LogicalProperty[] inputProperties, Catalog catalog) throws InvalidPlanException {
 		interval = Long.parseLong(e.getAttribute("interval"));
@@ -52,6 +64,20 @@ public class Instrument extends UnaryOperator {
 		if(p.equals("yes"))
 			propagate = true;
 		else propagate = false;
+
+		String fAttrStr = e.getAttribute("fattrs");
+		if (fAttrStr.length() == 0)
+			throw new InvalidPlanException("Bad value for 'fattrs' for : "
+					+ id);
+
+		String[] punctAttrs = fAttrStr.split("[\t| ]+");
+		if (punctAttrs.length != 2)
+			throw new InvalidPlanException("Bad value for 'fattrs' for : "
+					+ id);
+
+		tsAttr = Variable.findVariable(inputProperties[0], punctAttrs[0]);
+		idAttr = Variable.findVariable(inputProperties[0], punctAttrs[1]);
+	
 	}
 
 
@@ -64,6 +90,11 @@ public class Instrument extends UnaryOperator {
 			return false;
 		if(((Instrument)other).propagate != this.propagate)
 			return false;
+		if(((Instrument)other).tsAttr != this.tsAttr)
+			return false;
+		if(((Instrument)other).idAttr != this.idAttr)
+			return false;
+		
 		if(other.getClass() != Instrument.class)
 			return other.equals(this);
 
@@ -90,7 +121,7 @@ public class Instrument extends UnaryOperator {
 
 	@Override
 	public int hashCode() {
-		return String.valueOf(interval).hashCode();
+		return String.valueOf(interval).hashCode() ^ tsAttr.hashCode() ^ idAttr.hashCode();
 	}
 
 	@Override
@@ -99,6 +130,8 @@ public class Instrument extends UnaryOperator {
 		op.interval = interval;
 		op.propagate = propagate;
 		op.logging = this.logging;
+		op.tsAttr = tsAttr;
+		op.idAttr = idAttr;
 		return op;	
 	}
 

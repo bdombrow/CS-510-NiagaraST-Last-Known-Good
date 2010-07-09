@@ -62,10 +62,11 @@ public class TuplePage {
 
 	// REFACTOR
 	public static TuplePage createControlPage(ControlFlag controlMsgId,
-			String ctrlMsgStr) {
+			String ctrlMsgStr, FeedbackPunctuation fp) {
 		TuplePage ret = new TuplePage(true);
 		ret.setFlag(controlMsgId);
 		ret.ctrlMsg = ctrlMsgStr;
+		ret.setFeedbackPunctuation(fp);
 		return ret;
 	}
 
@@ -73,6 +74,7 @@ public class TuplePage {
 		this.flag = flag;
 	}
 
+	
 	public void setCtrlMsg(String ctrlMsg) {
 		this.ctrlMsg = ctrlMsg;
 	}
@@ -164,6 +166,7 @@ public class TuplePage {
 	public ControlFlag getFlag() {
 		return flag;
 	}
+
 
 	public boolean hasTuples() {
 		if (tuples == null)

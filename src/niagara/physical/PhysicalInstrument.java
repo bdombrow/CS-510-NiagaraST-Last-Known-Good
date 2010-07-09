@@ -1,7 +1,9 @@
 package niagara.physical;
 
-import niagara.logical.Expensive;
+import java.util.HashMap;
+
 import niagara.logical.Instrument;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalOp;
@@ -33,11 +35,15 @@ public class PhysicalInstrument extends PhysicalOperator {
 	private long interval;
 	private Boolean propagate;
 	private int outCount;
+	private Attribute tsAttr;
+	private Attribute idAttr;
 
 	public PhysicalInstrument() {
 		setBlockingSourceStreams(blockingSourceStreams);
 		interval = 0;
 		propagate = false;
+		tsAttr = null;
+		idAttr = null;
 	}
 
 	@Override
@@ -54,6 +60,8 @@ public class PhysicalInstrument extends PhysicalOperator {
 			outCount = 0;
 		}
 		propagate = ((Instrument)op).getPropagate();
+		tsAttr = ((Instrument)op).getTsAttr();
+		idAttr = ((Instrument)op).getIdAttr();
 	}
 
 	@Override
@@ -77,13 +85,17 @@ public class PhysicalInstrument extends PhysicalOperator {
 			return false;
 		if(((PhysicalInstrument)other).propagate != this.propagate)
 			return false;
+		if(((PhysicalInstrument)other).tsAttr != this.tsAttr)
+			return false;
+		if(((PhysicalInstrument)other).idAttr != this.idAttr)
+			return false;
 
 		return true;
 	}
 
 	@Override
 	public int hashCode() {
-		return String.valueOf(interval).hashCode() ^ logging.hashCode() ^ propagate.hashCode();
+		return String.valueOf(interval).hashCode() ^ logging.hashCode() ^ propagate.hashCode() ^ idAttr.hashCode() ^ tsAttr.hashCode();
 	}
 
 	@Override
@@ -93,6 +105,8 @@ public class PhysicalInstrument extends PhysicalOperator {
 		pr.log = log;
 		pr.logging = logging;
 		pr.propagate = propagate;
+		pr.tsAttr = tsAttr;
+		pr.idAttr = idAttr;
 		return pr;
 	}
 
@@ -106,8 +120,12 @@ public class PhysicalInstrument extends PhysicalOperator {
 			log.Update("OutCount", String.valueOf(outCount));		
 		}
 		if(propagate){
-			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, outputTupleSchema, tuple);
-			sendCtrlMsgToSource(ControlFlag.MESSAGE, "Your message", 0);
+			
+			HashMap<String,Double> hm = new HashMap<String,Double>();
+			hm.put(tsAttr.getName(), new Double(100));
+
+			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, hm, FeedbackPunctuation.Comparator.LE);
+			sendFeedbackPunctuation(fp, 0);
 		}
 
 	}

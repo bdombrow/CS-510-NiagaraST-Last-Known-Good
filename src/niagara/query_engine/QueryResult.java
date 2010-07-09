@@ -160,7 +160,7 @@ public class QueryResult {
 		// May return EOS, throw ShutdonwnEx or return NULLFLAG
 		// Think I can ignore EOS...famous last words
 		ControlFlag ctrlFlag = outputStream.putCtrlMsg(ControlFlag.GET_PARTIAL,
-				null);
+				null, null);
 
 		assert (ctrlFlag == ControlFlag.EOS || ctrlFlag == ControlFlag.NULLFLAG) : "Unexpected control flag";
 
@@ -179,7 +179,7 @@ public class QueryResult {
 			// return from outputStream.putCtrlMsg could be:
 			// NULLFLAG, SHUTDOWN, SYNCH_PARTIAL, END_PARTIAL, EOS
 			// can ignore all of them
-			outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, "kill query");
+			outputStream.putCtrlMsg(ControlFlag.SHUTDOWN, "kill query", null);
 		} catch (ShutdownException e) {
 			// ignore since we are killing query...
 		}
@@ -192,7 +192,7 @@ public class QueryResult {
 	 * @returns a result status, similar to what is in resultObject.status
 	 */
 	public ControlFlag requestBufFlush() throws ShutdownException {
-		return outputStream.putCtrlMsg(ControlFlag.REQUEST_BUF_FLUSH, null);
+		return outputStream.putCtrlMsg(ControlFlag.REQUEST_BUF_FLUSH, null, null);
 	}
 
 	/**

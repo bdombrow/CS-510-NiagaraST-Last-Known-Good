@@ -19,17 +19,20 @@
 <unnest id="speed" regexp="speed" root="$detector" datatype="Integer" input="volume"/>
 <unnest id="occupancy" regexp="occupancy" root="$detector" datatype="Integer" input="speed"/>
 
-<instrument id="ex" input="occupancy" interval="10000000" log="no" propagate="yes"/>
 
-<select id="se2" input="ex" log="yes">
+<select id="se2" input="occupancy" log="yes">
 <pred op="gt">
        <var value="$speed"></var><number value ="30"></number>
 </pred>
 </select>
 
-<construct id="cons" input="se2">
+<instrument id="ex" input="se2" interval="10000000" log="no" propagate="yes" fattrs="time_t speed"/>
+
+
+<construct id="cons" input="ex">
 <![CDATA[
 <result>
+ $time_t
  $segment_id
  $detector_id
  $speed

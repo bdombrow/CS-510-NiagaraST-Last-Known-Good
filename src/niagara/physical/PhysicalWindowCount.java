@@ -71,7 +71,7 @@ public class PhysicalWindowCount extends PhysicalWindowAggregate {
 			fAttr = feedback[0];
 			guardOutput = feedback[1];
 			if (propagate) {
-				sendCtrlMsgUpStream(ctrlFlag, ctrl.get(1).toString(), 0);
+				sendCtrlMsgUpStream(ctrlFlag, ctrl.get(1).toString(), 0, null);
 			}
 			Punctuation feedbackPunctuation = createFeedbackPunctuation(fAttr,
 					guardOutput);

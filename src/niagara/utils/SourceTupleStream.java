@@ -145,11 +145,13 @@ public final class SourceTupleStream {
 	 * @return returns CtrlFlags.NULLFLAG on success, control flag otherwise
 	 */
 	// REFACTOR
-	public ControlFlag putCtrlMsg(ControlFlag ctrlMsgId, String ctrlMsg)
+	public ControlFlag putCtrlMsg(ControlFlag ctrlMsgId, String ctrlMsg, FeedbackPunctuation fp)
 			throws ShutdownException {
-		return pageStream.putCtrlMsgToSource(ctrlMsgId, ctrlMsg);
+		return pageStream.putCtrlMsgToSource(ctrlMsgId, ctrlMsg, fp);
 	}
 
+	//
+	
 	/**
 	 * Returns the controlFlag detected during previous getNextTuple call
 	 */

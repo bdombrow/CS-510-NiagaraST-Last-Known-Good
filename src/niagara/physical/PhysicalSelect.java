@@ -13,6 +13,7 @@ import niagara.optimizer.colombia.PhysicalProperty;
 import niagara.physical.predicates.PredicateImpl;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.ControlFlag;
+import niagara.utils.FeedbackPunctuation;
 import niagara.utils.Log;
 import niagara.utils.Punctuation;
 import niagara.utils.ShutdownException;
@@ -70,6 +71,7 @@ public class PhysicalSelect extends PhysicalOperator {
 			return;
 
 		ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
+		FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
 
 		switch (ctrlFlag) {
 		case GET_PARTIAL:
@@ -77,6 +79,7 @@ public class PhysicalSelect extends PhysicalOperator {
 			break;
 		case MESSAGE:
 			System.out.println(ctrl.get(1).toString());
+			System.out.println(fp.toString());
 			break;
 		default:
 			assert false : "KT unexpected control message from sink "

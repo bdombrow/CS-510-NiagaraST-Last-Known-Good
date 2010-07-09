@@ -96,6 +96,7 @@
 <!ELEMENT instrument     EMPTY>
 <!ATTLIST instrument
 	  interval  CDATA	 #REQUIRED
+    fattrs     CDATA  #REQUIRED
     log       (yes|no) "no"
     propagate (yes|no) "no"
 	  %StandardAttributes;>
