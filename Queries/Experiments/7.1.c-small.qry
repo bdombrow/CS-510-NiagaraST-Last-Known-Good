@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- 7.1.c-small -->
+
+<plan top="cons">
+
+<!-- Internalize streams -->
+
+<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-small-7-25-2010.xml"/>
+
+<unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
+<unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
+<unnest id="timestamp_text" regexp="timestamp_text" root="$sensor" datatype="String" input="timestamp"/>
+<unnest id="sensor_id" regexp="sensor_id" root="$sensor" datatype="Integer" input="timestamp_text"/>
+<unnest id="volume" regexp="volume" root="$sensor" datatype="Integer" input="sensor_id"/>
+<unnest id="speed" regexp="speed" root="$sensor" datatype="Integer" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="Integer" input="speed"/>
+
+
+<filescan id ="sensors2" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-small-7-25-2010.xml"/>
+
+<unnest id="sensor2" regexp="sensor" datatype="XML" input="sensors2"/>
+<unnest id="timestamp2" regexp="timestamp" datatype="TS" input="sensor2"/>
+<unnest id="timestamp_text2" regexp="timestamp_text" root="$sensor2" datatype="String" input="timestamp2"/>
+<unnest id="sensor_id2" regexp="sensor_id" root="$sensor2" datatype="Integer" input="timestamp_text2"/>
+<unnest id="volume2" regexp="volume" root="$sensor2" datatype="Integer" input="sensor_id2"/>
+<unnest id="speed2" regexp="speed" root="$sensor2" datatype="Integer" input="volume2"/>
+<unnest id="occupancy2" regexp="occupancy" root="$sensor2" datatype="Integer" input="speed2"/>
+
+
+
+<select id="select1" input="occupancy">
+<pred op="gt">
+       <var value="$speed"></var><number value ="-1"></number>
+</pred>
+</select>
+
+<select id="select2" input="occupancy2">
+<pred op="gt">
+       <var value="$speed"></var><number value ="-1"></number>
+</pred>
+</select>
+
+<union id="union" input="occupancy occupancy2">
+<mapping outputattr = "timestamp" inputattrs = "timestamp timestamp2"/>
+<mapping outputattr = "timestamp_text" inputattrs = "timestamp_text timestamp_text2"/>
+<mapping outputattr = "sensor_id" inputattrs = "sensor_id sensor_id2"/>
+<mapping outputattr = "volume" inputattrs = "volume volume2"/>
+<mapping outputattr = "speed" inputattrs = "speed speed2"/>
+<mapping outputattr = "occupancy" inputattrs = "occupancy occupancy2"/>
+</union>
+
+<construct id="cons" input="union">
+<![CDATA[
+<result>
+$timestamp
+$timestamp_text
+$sensor_id
+$volume
+$speed
+$occupancy
+</result>
+]]>
+</construct>
+
+</plan>
