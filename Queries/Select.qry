@@ -25,7 +25,7 @@
 </pred>
 </select>
 
-<select id="sel" input="se" log="yes">
+<select id="sel" input="se" log="no">
 <pred op="gt">
        <var value="$speed"></var><number value ="20"></number>
 </pred>

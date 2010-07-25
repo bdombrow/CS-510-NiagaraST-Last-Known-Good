@@ -38,8 +38,6 @@ public class PhysicalSelect extends PhysicalOperator {
 
 	public PhysicalSelect() {
 		setBlockingSourceStreams(blockingSourceStreams);
-		// logging test
-		//logging = NiagraServer.LOGGING;
 	}
 
 	public void opInitFrom(LogicalOp logicalOperator) {
