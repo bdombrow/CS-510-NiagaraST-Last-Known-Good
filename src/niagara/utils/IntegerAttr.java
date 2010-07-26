@@ -86,6 +86,10 @@ public class IntegerAttr extends BaseAttr implements Arithmetics{
 	public boolean eq(BaseAttr other) {
 		if (other.punct || punct) {
 			throw new PEException("JL: Don't know how to do comparison with punctuation");
+/*		Proposed fix?	
+ * String value = (String)other.attrVal;
+ * return value.equals(attrVal.toString());
+ * */
 		}
 
 		if (!(other instanceof IntegerAttr))

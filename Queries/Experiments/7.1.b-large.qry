@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 
-<!-- 7.1.b-small -->
+<!-- 7.1.b-large -->
 
 <plan top="cons">
 
 <!-- Internalize streams -->
 
-<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-small-7-25-2010.xml"/>
+<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-7-25-2010.xml"/>
 
 <unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
 <unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
@@ -17,7 +17,7 @@
 <unnest id="speed" regexp="speed" root="$sensor" datatype="Integer" input="volume"/>
 <unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="Integer" input="speed"/>
 
-<filescan id ="probes" isstream="yes" delay="0" filename="G:\Datasets\Files\probe-small-7-25-2010.xml"/>
+<filescan id ="probes" isstream="yes" delay="0" filename="G:\Datasets\Files\probe-large-7-25-2010.xml"/>
 <unnest id="probe" regexp="probe" datatype="XML" input="probes"/>
 <unnest id="timestamp2" regexp="timestamp" datatype="TS" input="probe"/>
 <unnest id="timestamp_text2" regexp="timestamp_text" root="$probe" datatype="String" input="timestamp2"/>

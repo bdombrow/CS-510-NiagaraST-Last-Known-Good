@@ -56,14 +56,15 @@ public class Punctuation extends Tuple {
 	public boolean equals(Punctuation punct) {
 		//Only compare the 'document' nodes
 
+
 		//return nodeEquals(this.getAttribute(0), punct.getAttribute(0));
 		boolean eq = true;
 		int pos = 0;
 		for (Object attr:tuple) {
-			if (attr instanceof Node)
+			if (attr instanceof Node) 
 				eq = eq && nodeEquals((Node)attr, (Node)punct.getAttribute(pos++));
 			else if (attr instanceof BaseAttr)
-				eq = eq && ((BaseAttr)attr).eq((BaseAttr) punct.getAttribute(pos++));
+			    eq = eq && ((BaseAttr)attr).eq((BaseAttr)punct.getAttribute(pos++));
 		}
 		return eq;
 	}

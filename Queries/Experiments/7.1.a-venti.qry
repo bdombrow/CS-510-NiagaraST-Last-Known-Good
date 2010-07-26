@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE plan SYSTEM "queryplan.dtd">
 
-<!-- 7.1.a-venti -->
+<!-- 7.1.a-small -->
 
 <plan top="cons">
 
@@ -23,27 +23,13 @@
 <unnest id="l_sensor_id" regexp="sensor_id" root="location" datatype="Integer" input="freeway_id"/>
 <unnest id="milepost" regexp="milepost" root="location" datatype="Integer" input="l_sensor_id"/>
 
+<!-- join the streams on sensor_id -->
 <join id="join1" input="occupancy milepost" left="sensor_id" right="l_sensor_id" />
 
+<!-- windowed max speed over 1 minute windows -->
 <!-- 1 minute = 600000000 -->
 <bucket id="bucket" wintype="1" winattr="timestamp" range="600000000" slide="600000000" input="join1" />
-
 <windowMax id="wmax" maxattr="speed" groupby="milepost" input="bucket" />
-
-<!--
-<construct id="cons" input="join1">
-<![CDATA[
-<result>
- $timestamp
- $timestamp_text
- $sensor_id
- $volume
- $speed
- $occupancy
- $freeway_id
- $milepost 
-</result>
-]]> -->
 
 
 <construct id="cons" input="wmax">
@@ -54,8 +40,7 @@
  $wmax
 </result>
 ]]>
-
-
 </construct>
+
 </plan>
 

@@ -77,7 +77,8 @@ public final class SinkTupleStream {
 			ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
 
 			if (ctrlFlag == ControlFlag.GET_PARTIAL
-					|| ctrlFlag == ControlFlag.REQUEST_BUF_FLUSH) {
+					|| ctrlFlag == ControlFlag.REQUEST_BUF_FLUSH
+					|| ctrlFlag == ControlFlag.MESSAGE) {
 				// ignore since we just sent eos
 			} else {
 				assert ctrlFlag == ControlFlag.NULLFLAG : "KT Unexpected ctrl flag "

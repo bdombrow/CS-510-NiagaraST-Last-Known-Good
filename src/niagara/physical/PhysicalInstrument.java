@@ -9,7 +9,6 @@ import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
-import niagara.utils.ControlFlag;
 import niagara.utils.FeedbackPunctuation;
 import niagara.utils.FeedbackType;
 import niagara.utils.Log;
@@ -23,8 +22,8 @@ import niagara.utils.Tuple;
  * @author rfernand
  * @version 1.0
  * 
- *          The <code>PhysicalRename</code> operator is essentially the identity
- *          but with a fixed cost per tuple.
+ *          The <code>PhysicalInstrument</code> operator is essentially the identity
+ *          but sends punctuation every n tuples.
  * 
  */
 

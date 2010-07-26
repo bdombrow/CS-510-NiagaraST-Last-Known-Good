@@ -32,6 +32,9 @@ public class PhysicalSelect extends PhysicalOperator {
 	private Predicate pred;
 	private PredicateImpl predEval;
 
+	// Propagate
+	Boolean propagate = false;
+	
 	// logging test
 	int tupleOut = 0;
 	int tupleDrop = 0;
@@ -47,6 +50,7 @@ public class PhysicalSelect extends PhysicalOperator {
 		if(logging) {
 			log = new Log(this.getName());
 		}
+		propagate = ((Select)logicalOperator).getPropagate();
 	}
 
 	public Op opCopy() {
@@ -55,6 +59,7 @@ public class PhysicalSelect extends PhysicalOperator {
 		p.predEval = predEval;
 		p.log = log;
 		p.logging = logging;
+		p.propagate = propagate;
 		return p;
 	}
 
@@ -69,15 +74,23 @@ public class PhysicalSelect extends PhysicalOperator {
 			return;
 
 		ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
-		FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
 
 		switch (ctrlFlag) {
 		case GET_PARTIAL:
 			processGetPartialFromSink(streamId);
 			break;
 		case MESSAGE:
+			if(ctrl.size() > 2) {
+			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+			System.err.println("Received FP");
+			
 			System.out.println(ctrl.get(1).toString());
 			System.out.println(fp.toString());
+			
+			if(propagate) {
+				sendFeedbackPunctuation(fp, streamId);
+			}
+			}			
 			break;
 		default:
 			assert false : "KT unexpected control message from sink "
