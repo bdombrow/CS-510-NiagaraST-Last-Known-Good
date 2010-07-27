@@ -21,6 +21,10 @@ public class Tuple {
     // a (potentially) partial result
     protected boolean partial;
 
+    public Object[] getTuple() {
+    	return tuple;
+    }
+    
     /***
      * Constructor that initializes a tuple
      *

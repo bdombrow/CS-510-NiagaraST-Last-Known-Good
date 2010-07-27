@@ -13,6 +13,7 @@ import niagara.optimizer.colombia.PhysicalProperty;
 import niagara.physical.predicates.PredicateImpl;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.ControlFlag;
+import niagara.utils.FeedbackPunctuation;
 import niagara.utils.Log;
 import niagara.utils.Punctuation;
 import niagara.utils.ShutdownException;
@@ -31,14 +32,15 @@ public class PhysicalSelect extends PhysicalOperator {
 	private Predicate pred;
 	private PredicateImpl predEval;
 
+	// Propagate
+	Boolean propagate = false;
+	
 	// logging test
 	int tupleOut = 0;
 	int tupleDrop = 0;
 
 	public PhysicalSelect() {
 		setBlockingSourceStreams(blockingSourceStreams);
-		// logging test
-		//logging = NiagraServer.LOGGING;
 	}
 
 	public void opInitFrom(LogicalOp logicalOperator) {
@@ -48,6 +50,7 @@ public class PhysicalSelect extends PhysicalOperator {
 		if(logging) {
 			log = new Log(this.getName());
 		}
+		propagate = ((Select)logicalOperator).getPropagate();
 	}
 
 	public Op opCopy() {
@@ -56,6 +59,7 @@ public class PhysicalSelect extends PhysicalOperator {
 		p.predEval = predEval;
 		p.log = log;
 		p.logging = logging;
+		p.propagate = propagate;
 		return p;
 	}
 
@@ -76,7 +80,17 @@ public class PhysicalSelect extends PhysicalOperator {
 			processGetPartialFromSink(streamId);
 			break;
 		case MESSAGE:
-
+			if(ctrl.size() > 2) {
+			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+			System.err.println("Received FP");
+			
+			System.out.println(ctrl.get(1).toString());
+			System.out.println(fp.toString());
+			
+			if(propagate) {
+				sendFeedbackPunctuation(fp, streamId);
+			}
+			}			
 			break;
 		default:
 			assert false : "KT unexpected control message from sink "

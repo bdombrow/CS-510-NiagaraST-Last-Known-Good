@@ -23,17 +23,12 @@ import niagara.utils.Tuple;
  */
 @SuppressWarnings("unchecked")
 public class PhysicalUnion extends PhysicalOperator {
-	private ArrayList[] rgPunct;
+	private ArrayList[] punctuationRegistry; // array of seen punctuations per input stream
 	private int[] rgnRemove;
 	private Attrs[] inputAttrs;
 	private int[][] attributeMaps;
 	private boolean hasMappings;
 	private int outSize;
-
-	private int tupleCounter = 0;
-	// private int leftCounter = 0;
-	// private int rightCounter = 0;
-	boolean slowStream = true;
 
 	public PhysicalUnion() {
 		// XXX vpapad: here we have to initialize blockingSourceStreams
@@ -45,7 +40,6 @@ public class PhysicalUnion extends PhysicalOperator {
 
 	public PhysicalUnion(int arity) {
 		setBlockingSourceStreams(new boolean[arity]);
-		// setBlockingSourceStreams(false false);
 	}
 
 	public void opInitFrom(LogicalOp logicalOperator) {
@@ -63,9 +57,9 @@ public class PhysicalUnion extends PhysicalOperator {
 	public void opInitialize() {
 		// XXX vpapad: really ugly...
 		setBlockingSourceStreams(new boolean[numSourceStreams]);
-		rgPunct = new ArrayList[getArity()];
-		for (int i = 0; i < rgPunct.length; i++)
-			rgPunct[i] = new ArrayList();
+		punctuationRegistry = new ArrayList[getArity()];
+		for (int i = 0; i < punctuationRegistry.length; i++)
+			punctuationRegistry[i] = new ArrayList();
 
 		rgnRemove = new int[getArity()];
 	}
@@ -84,61 +78,8 @@ public class PhysicalUnion extends PhysicalOperator {
 	 *                query shutdown by user or execution error
 	 */
 
-	/*
-	 * This is Case B
-	 * 
-	 * protected void processTuple(Tuple inputTuple, int streamId) throws
-	 * ShutdownException, InterruptedException {
-	 * 
-	 * if (streamId == 0) leftCounter++; else rightCounter++;
-	 * 
-	 * //tupleCounter++;
-	 * 
-	 * if ((leftCounter - rightCounter) == 61) { // send message
-	 * sendCtrlMsgUpStream(CtrlFlags.MESSAGE, "From Union, With Love", 1); //
-	 * reset counters leftCounter = 0; rightCounter = 0;
-	 * //System.err.println("UNION sent the message"); //Thread.sleep(100); }
-	 * 
-	 * tupleCounter++; long time = System.currentTimeMillis();
-	 * System.out.println(tupleCounter + "," + time); if (hasMappings) { // We
-	 * need to move some attributes putTuple(inputTuple.copy(outSize,
-	 * attributeMaps[streamId]), 0); } else { // just send the original tuple
-	 * along putTuple(inputTuple, 0); } }
-	 */
-
-	/*
-	 * This is case A
-	 * 
-	 * protected void processTuple(Tuple inputTuple, int streamId) throws
-	 * ShutdownException, InterruptedException {
-	 * 
-	 * if (streamId == 0) leftCounter++; else rightCounter++;
-	 * 
-	 * //tupleCounter++;
-	 * 
-	 * if (slowStream) { if ((leftCounter - rightCounter) == 61) { slowStream =
-	 * false; } }
-	 * 
-	 * if (streamId == 0) { tupleCounter++; long time =
-	 * System.currentTimeMillis(); System.out.println(tupleCounter + "," +
-	 * time); if (hasMappings) { // We need to move some attributes
-	 * putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0); } else {
-	 * // just send the original tuple along putTuple(inputTuple, 0); } }
-	 * 
-	 * else if (slowStream) { tupleCounter++; long time =
-	 * System.currentTimeMillis(); System.out.println(tupleCounter + "," +
-	 * time); if (hasMappings) { // We need to move some attributes
-	 * putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0); } else {
-	 * // just send the original tuple along putTuple(inputTuple, 0); } } }
-	 */
-
-	/* This is the code that generated the first output (with timers, etc.) */
 	protected void processTuple(Tuple inputTuple, int streamId)
 			throws ShutdownException, InterruptedException {
-		// XXX: RJFM
-		tupleCounter++;
-		long time = System.currentTimeMillis();
-		System.out.println(tupleCounter + "," + time);
 		if (hasMappings) { // We need to move some attributes
 			putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
 		} else {
@@ -168,11 +109,11 @@ public class PhysicalUnion extends PhysicalOperator {
 
 		// First, check to see if this punctuation matches a punctuation
 		// from all other inputs
-		for (int i = 0; i < rgPunct.length && fAllMatch == true; i++) {
+		for (int i = 0; i < punctuationRegistry.length && fAllMatch == true; i++) {
 			if (i != streamId) {
 				fFound = false;
-				for (int j = 0; j < rgPunct[i].size() && fFound == false; j++) {
-					fFound = tuple.equals((Punctuation) rgPunct[i].get(j));
+				for (int j = 0; j < punctuationRegistry[i].size() && fFound == false; j++) {
+					fFound = tuple.equals((Punctuation) punctuationRegistry[i].get(j));
 					if (fFound)
 						rgnRemove[i] = j;
 				}
@@ -184,12 +125,12 @@ public class PhysicalUnion extends PhysicalOperator {
 			// Output the punctuation
 			putTuple(tuple, 0);
 			// Remove the other punctuations, since they are no longer needed
-			for (int i = 0; i < rgPunct.length; i++) {
+			for (int i = 0; i < punctuationRegistry.length; i++) {
 				if (i != streamId)
-					rgPunct[i].remove(rgnRemove[i]);
+					punctuationRegistry[i].remove(rgnRemove[i]);
 			}
 		} else {
-			rgPunct[streamId].add(tuple);
+			punctuationRegistry[streamId].add(tuple);
 		}
 	}
 

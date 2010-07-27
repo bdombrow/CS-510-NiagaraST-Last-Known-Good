@@ -92,7 +92,7 @@ public class PhysicalBucket extends PhysicalOperator {
 			guardOutput = feedback[1];
 
 			if (propagate) {
-				sendCtrlMsgUpStream(ctrlFlag, ctrl.get(1).toString(), 0);
+				sendCtrlMsgUpStream(ctrlFlag, ctrl.get(1).toString(), 0, null);
 				// System.err.println(this.getName() + "Sent message: "
 				// + ctrl.get(1));
 			}

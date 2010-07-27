@@ -201,7 +201,7 @@ public class QueryInfo {
 		// KT nice if this didn't need a source tuple stream
 		try {
 			// Send a shut down control message to the output stream
-			sourceTupleStream.putCtrlMsg(ControlFlag.SHUTDOWN, "Query Killed");
+			sourceTupleStream.putCtrlMsg(ControlFlag.SHUTDOWN, "Query Killed", null);
 		} catch (ShutdownException e) {
 			// ignore since we are shutting down anyway...
 		}

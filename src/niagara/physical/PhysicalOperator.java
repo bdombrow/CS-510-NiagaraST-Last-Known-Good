@@ -17,6 +17,7 @@ import niagara.query_engine.SchemaProducer;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.CPUTimer;
 import niagara.utils.ControlFlag;
+import niagara.utils.FeedbackPunctuation;
 import niagara.utils.Log;
 import niagara.utils.MailboxFlag;
 import niagara.utils.OperatorDoneException;
@@ -295,7 +296,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 										+ "Requesting buffer flush on stream "
 										+ sourceId);
 							ctrlFlag = sourceStreams[sourceId].putCtrlMsg(
-									ControlFlag.REQUEST_BUF_FLUSH, null);
+									ControlFlag.REQUEST_BUF_FLUSH, null, null);
 							if (ctrlFlag != ControlFlag.NULLFLAG) {
 								processCtrlMsgFromSource(ctrlFlag, sourceId);
 							}
@@ -393,7 +394,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 		for (int i = 0; i < numSourceStreams; i++) {
 			if (!sourceStreams[i].isClosed()) {
 				try {
-					sendCtrlMsgToSource(ControlFlag.SHUTDOWN, msg, i);
+					sendCtrlMsgToSource(ControlFlag.SHUTDOWN, msg, null, i);
 				} catch (ShutdownException e) {
 				} catch (InterruptedException e) {
 				}
@@ -424,7 +425,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 		for (int i = 0; i < numSourceStreams; i++) {
 			if (!sourceStreams[i].isClosed()) {
 				try {
-					sendCtrlMsgToSource(ControlFlag.SHUTDOWN, null, i);
+					sendCtrlMsgToSource(ControlFlag.SHUTDOWN, null, null, i);
 				} catch (ShutdownException e) {
 				} catch (InterruptedException e) {
 				}
@@ -951,14 +952,18 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 *            The id of the control message to be sent
 	 * @param streamId
 	 *            The source stream to which the control element is to be put
+	 * @param fp
+	 * 			  A feedback punctuation
+	 * @param ctrlMsg 
+	 * 			  A control message
 	 * 
 	 * @exception ShutdownException
 	 *                query shutdown by user or execution error
 	 */
-	private void sendCtrlMsgToSource(ControlFlag ctrlFlag, String ctrlMsg,
+	protected void sendCtrlMsgToSource(ControlFlag ctrlFlag, String ctrlMsg, FeedbackPunctuation fp,
 			int streamId) throws ShutdownException, InterruptedException {
 		ControlFlag retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag,
-				ctrlMsg);
+				ctrlMsg, fp);
 
 		if (retCtrlFlag == ControlFlag.EOS) {
 			processCtrlMsgFromSource(retCtrlFlag, streamId);
@@ -971,6 +976,21 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 		return;
 	}
 
+	/**
+	 * 
+	 * This function sends a Feedback Punctuation to a source stream.
+	 * 
+	 * @param fp 
+	 * 			feedback punctuation
+	 * @param streamId
+	 * 			stream destination id
+	 * @throws ShutdownException
+	 * @throws InterruptedException
+	 */
+	protected void sendFeedbackPunctuation(FeedbackPunctuation fp, int streamId) throws ShutdownException, InterruptedException {
+		sendCtrlMsgToSource(ControlFlag.MESSAGE, "Feedback Punctuation", fp, streamId);
+	}
+	
 	/**
 	 * This function puts a control element to all source streams
 	 * 
@@ -986,7 +1006,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 		// element in all open ones
 		for (int i = 0; i < numSourceStreams; i++) {
 			if (!sourceStreams[i].isClosed()) {
-				sendCtrlMsgToSource(ctrlFlag, ctrlMsg, i);
+				sendCtrlMsgToSource(ctrlFlag, ctrlMsg, null, i);
 			}
 		}
 	}
@@ -1000,14 +1020,14 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 */
 	// REFACTOR
 	protected void sendCtrlMsgUpStream(ControlFlag ctrlFlag, String ctrlMsg,
-			int streamId) throws ShutdownException, InterruptedException {
+			int streamId, FeedbackPunctuation fp) throws ShutdownException, InterruptedException {
 		if (NiagraServer.DEBUG)
 			System.err.println("sendCtrlMsgUpStream " + ctrlFlag.flagName());
 		if (sourceStreams[streamId].isClosed()) {
 			return;
 		}
 		ControlFlag retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag,
-				ctrlMsg);
+				ctrlMsg, fp);
 
 		if (retCtrlFlag == ControlFlag.EOS) {
 			processCtrlMsgFromSource(retCtrlFlag, streamId);

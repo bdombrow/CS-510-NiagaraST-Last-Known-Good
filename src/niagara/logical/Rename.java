@@ -3,15 +3,14 @@ package niagara.logical;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.w3c.dom.Element;
-
 import niagara.connection_server.Catalog;
 import niagara.connection_server.InvalidPlanException;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
-import niagara.xmlql_parser.skolem;
+
+import org.w3c.dom.Element;
 
 /**
  * @author rfernand

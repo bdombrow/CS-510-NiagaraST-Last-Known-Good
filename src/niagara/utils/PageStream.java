@@ -213,12 +213,12 @@ public class PageStream {
 	// just a wrapper with a better name for calling program
 	// REFACTOR
 	public ControlFlag putCtrlMsgToSource(ControlFlag ctrlMsgId,
-			String ctrlMsgStr) throws ShutdownException {
-		return consumerPutCtrlMsg(ctrlMsgId, ctrlMsgStr);
+			String ctrlMsgStr, FeedbackPunctuation fp) throws ShutdownException {
+		return consumerPutCtrlMsg(ctrlMsgId, ctrlMsgStr, fp);
 	}
 
 	private synchronized ControlFlag consumerPutCtrlMsg(ControlFlag ctrlMsgId,
-			String ctrlMsgStr) throws ShutdownException {
+			String ctrlMsgStr, FeedbackPunctuation fp) throws ShutdownException {
 
 		if (eos)
 			return ControlFlag.EOS;
@@ -240,7 +240,7 @@ public class PageStream {
 		// Thread.currentThread().getName() +
 		// " Putting to producer queue " + name + "  " +
 		// CtrlFlags.name[ctrlMsgId]);
-		toProducerQueue.put(getCtrlPage(ctrlMsgId, ctrlMsgStr));
+		toProducerQueue.put(getCtrlPage(ctrlMsgId, ctrlMsgStr, fp));
 
 		if (notify) {
 			if (NiagraServer.DEBUG2)
@@ -328,10 +328,12 @@ public class PageStream {
 		TuplePage ctrlPage = toProducerQueue.get();
 		ArrayList ctrl = null;
 		ControlFlag ctrlFlag = ctrlPage.getFlag();
+		FeedbackPunctuation fp = ctrlPage.getFeedbackPunctuation();
 		if (ctrlFlag != ControlFlag.NULLFLAG) {
 			ctrl = new ArrayList(2);
 			ctrl.add(ctrlFlag);
 			ctrl.add(ctrlPage.getCtrlMsg());
+			ctrl.add(fp);
 		}
 		returnCtrlPage(ctrlPage); // make page avail for reuse
 		return ctrl;
@@ -477,17 +479,18 @@ public class PageStream {
 		return new TuplePage();
 	}
 
-	private TuplePage getCtrlPage(ControlFlag ctrlMsgId, String ctrlMsgStr) {
+	private TuplePage getCtrlPage(ControlFlag ctrlMsgId, String ctrlMsgStr, FeedbackPunctuation fp) {
 		if (extraCtrlPage != null) {
 			TuplePage ret = extraCtrlPage;
 			extraCtrlPage = null;
 			ret.setFlag(ctrlMsgId);
 			ret.setCtrlMsg(ctrlMsgStr);
+			ret.setFeedbackPunctuation(fp);
 			// existingCtrlPagesUsed++;
 			return ret;
 		} else {
 			// ctrlPagesAllocd++;
-			return TuplePage.createControlPage(ctrlMsgId, ctrlMsgStr);
+			return TuplePage.createControlPage(ctrlMsgId, ctrlMsgStr, fp);
 		}
 	}
 

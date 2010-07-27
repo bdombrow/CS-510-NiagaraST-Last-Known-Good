@@ -25,6 +25,7 @@ public class Select extends UnaryOperator {
 	/** Number of tuples to allow through */
 	private Predicate pred;
 	private Boolean logging = false;
+	private Boolean propagate = false;
 
 	public Select() {
 	}
@@ -41,6 +42,7 @@ public class Select extends UnaryOperator {
 		Select op = new Select();
 		op.pred = this.pred;
 		op.logging = this.logging;
+		op.propagate = this.propagate;
 		return op;
 	}
 
@@ -83,10 +85,19 @@ public class Select extends UnaryOperator {
 		if(l.equals("yes"))
 			logging = true;
 		else logging = false;
+		
+		String p = e.getAttribute("propagate");
+		if(p.equals("yes"))
+			propagate = true;
+		else propagate = false;
 	}
 
 	public Boolean getLogging() {
 		return logging;
+	}
+	
+	public Boolean getPropagate(){
+		return propagate;
 	}
 	
 	public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
@@ -110,6 +121,8 @@ public class Select extends UnaryOperator {
 		if (o == null || !(o instanceof Select))
 			return false;
 		if(((Select)o).logging != logging)
+			return false;
+		if(((Select)o).propagate != propagate)
 			return false;
 		if (o.getClass() != Select.class)
 			return o.equals(this);

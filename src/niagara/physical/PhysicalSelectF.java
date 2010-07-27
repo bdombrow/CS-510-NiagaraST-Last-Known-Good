@@ -82,7 +82,7 @@ public class PhysicalSelectF extends PhysicalOperator {
 					System.err.println(this.getName()
 							+ " has sent a Control Message, flag is "
 							+ produceOutput);
-				sendCtrlMsgUpStream(ControlFlag.MESSAGE, ctrlMessage, 0);
+				sendCtrlMsgUpStream(ControlFlag.MESSAGE, ctrlMessage, 0, null);
 				Thread.sleep(500);
 				if (NiagraServer.RJFM)
 					System.err.println(this.getName()
