@@ -221,8 +221,14 @@ public class PageStream {
 	private synchronized ControlFlag consumerPutCtrlMsg(ControlFlag ctrlMsgId,
 			String ctrlMsgStr, FeedbackPunctuation fp) throws ShutdownException {
 
-		if (eos)
+		if (eos){
+			System.out.println(this.getName() + " Try to put msg when source closed");
 			return ControlFlag.EOS;
+		} else
+		{
+		System.out.println(this.getName()+" Putting control message when not closed");
+		
+		}
 		if (shutdown)
 			throw new ShutdownException(shutdownMsg);
 
@@ -329,9 +335,9 @@ public class PageStream {
 		TuplePage ctrlPage = toProducerQueue.get();
 		ArrayList ctrl = null;
 		ControlFlag ctrlFlag = ctrlPage.getFlag();
-		FeedbackPunctuation fp = ctrlPage.getFeedbackPunctuation();
-		if (ctrlFlag != ControlFlag.NULLFLAG) {
-			ctrl = new ArrayList(2);
+		if (ctrlFlag == ControlFlag.MESSAGE) { // RJFM
+			FeedbackPunctuation fp = ctrlPage.getFeedbackPunctuation();
+			ctrl = new ArrayList(3);
 			ctrl.add(ctrlFlag);
 			ctrl.add(ctrlPage.getCtrlMsg());
 			ctrl.add(fp);
@@ -396,11 +402,21 @@ public class PageStream {
 				returnCtrlPage(ctrlPage);
 				throw new ShutdownException(ctrlMsg);
 			} else {
+				if (ctrlFlag == ControlFlag.MESSAGE) { // RJFM
+					returnCtrlPage(ctrlPage);
+					FeedbackPunctuation fp = ctrlPage.getFeedbackPunctuation();
+					ArrayList ret = new ArrayList(3);
+					ret.add(ctrlFlag);
+					ret.add(ctrlPage.getCtrlMsg());
+					ret.add(fp);
+					return ret;
+				} else {
 				returnCtrlPage(ctrlPage);
 				ArrayList ret = new ArrayList(2);
 				ret.add(ctrlFlag);
 				ret.add(ctrlMsg);
 				return ret;
+				}				
 			}
 		} else {
 			// do SHUTDOWN check on put to make propagation of SHUTDOWN
@@ -447,6 +463,7 @@ public class PageStream {
 		// If the stream was previously closed, throw an exception
 		assert !eos : "KT end of stream received twice";
 		eos = true;
+        System.out.println(this.getName() + " set EOS");
 		notifySource();
 		if (NiagraServer.DEBUG2) {
 			System.out.println("PageStream: " + name + " results.");

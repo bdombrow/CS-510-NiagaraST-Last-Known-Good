@@ -91,7 +91,7 @@ public class PhysicalSelect extends PhysicalOperator {
 				sendFeedbackPunctuation(fp, streamId);
 			}
 			} else {
-				System.err.println("First bug: Why does the control page have a message with no FP?");
+				assert false : "Unexpected number of elements in MESSAGE.";
 			}
 			break;
 		default:

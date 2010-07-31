@@ -306,8 +306,7 @@ public final class SinkTupleStream {
 				return ctrl;
 			}
 		case MESSAGE:
-			//System.err.println("Why was I called?");
-			//return null;//ctrl;
+			return ctrl;
 		case CHANGE_QUERY:
 		case READY_TO_FINISH:
 			return ctrl;

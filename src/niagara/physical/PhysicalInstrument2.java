@@ -131,8 +131,8 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 			outCount++;
 			log.Update("OutCount", String.valueOf(outCount));		
 		}
-//		if(propagate && ((tupleCount % interval) == 0)){
-        if(sent < 2) {			
+		if(propagate && ((tupleCount % interval) == 0)){
+//        if(sent < 2) {			
 			HashMap<String,Double> hm = new HashMap<String,Double>();
 			hm.put(tsAttr.getName(), new Double(0));
 
