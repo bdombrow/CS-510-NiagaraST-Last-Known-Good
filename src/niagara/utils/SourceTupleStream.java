@@ -159,10 +159,6 @@ public final class SourceTupleStream {
 		return ctrlFlag;
 	}
 
-	/*
-	 * public int getCtrlFlag() { return ctrlFlag; }
-	 */
-
 	/**
 	 * Return a string representation of this stream
 	 * 

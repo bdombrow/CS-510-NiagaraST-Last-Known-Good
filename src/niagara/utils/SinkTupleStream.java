@@ -247,7 +247,7 @@ public final class SinkTupleStream {
 	 */
 	public ArrayList flushBuffer() throws ShutdownException,
 			InterruptedException {
-		if (buffer.isEmpty() && buffer.getFlag() == ControlFlag.NULLFLAG) {
+		if (buffer.isEmpty() && buffer.getFlag() == ControlFlag.NULLFLAG ) {
 			// don't flush an empty buffer...
 			return null;
 		} else {
@@ -260,6 +260,7 @@ public final class SinkTupleStream {
 				buffer.startPutMode();
 			} else {
 				ret = processCtrlFlag(ctrl);
+				
 			}
 			assert ret == null
 					|| (ControlFlag) ret.get(0) == ControlFlag.GET_PARTIAL
@@ -305,9 +306,8 @@ public final class SinkTupleStream {
 				return ctrl;
 			}
 		case MESSAGE:
-			// System.out.println(pageStream.getName() +
-			// "is returning a ctrl msg");
-			return ctrl;
+			//System.err.println("Why was I called?");
+			//return null;//ctrl;
 		case CHANGE_QUERY:
 		case READY_TO_FINISH:
 			return ctrl;

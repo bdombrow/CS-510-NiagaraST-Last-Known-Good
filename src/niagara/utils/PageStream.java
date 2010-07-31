@@ -35,7 +35,7 @@ public class PageStream {
 	private boolean shutdown;
 	private String shutdownMsg;
 
-	private final int STREAM_CAPACITY = 5; // Number of inter-operator tuples
+	private final int STREAM_CAPACITY = 1; // Number of inter-operator tuples
 	public static int MAX_DELAY = 1000;
 
 	// keep extra pages around that can be reused
@@ -215,6 +215,7 @@ public class PageStream {
 	public ControlFlag putCtrlMsgToSource(ControlFlag ctrlMsgId,
 			String ctrlMsgStr, FeedbackPunctuation fp) throws ShutdownException {
 		return consumerPutCtrlMsg(ctrlMsgId, ctrlMsgStr, fp);
+
 	}
 
 	private synchronized ControlFlag consumerPutCtrlMsg(ControlFlag ctrlMsgId,

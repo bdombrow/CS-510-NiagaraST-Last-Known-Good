@@ -90,7 +90,9 @@ public class PhysicalSelect extends PhysicalOperator {
 			if(propagate) {
 				sendFeedbackPunctuation(fp, streamId);
 			}
-			}			
+			} else {
+				System.err.println("First bug: Why does the control page have a message with no FP?");
+			}
 			break;
 		default:
 			assert false : "KT unexpected control message from sink "

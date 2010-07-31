@@ -109,7 +109,7 @@ public class PageQueue {
 
 	private boolean expandQueue() {
 		if (length >= 100)
-			return false; // refuse to expand
+			return false; // refuse to expand*/
 
 		TuplePage[] newQueue = new TuplePage[length * 2];
 

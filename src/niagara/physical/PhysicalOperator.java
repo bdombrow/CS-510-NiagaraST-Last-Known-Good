@@ -682,7 +682,6 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 			// Need to handle the creation of partial results
 			updatePartialResultCreation();
 			return;
-
 		case EOS:
 			// This is the end of stream, so mark the stream as closed
 			// and remove it from the list of streams to read from
@@ -964,7 +963,6 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 			int streamId) throws ShutdownException, InterruptedException {
 		ControlFlag retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag,
 				ctrlMsg, fp);
-
 		if (retCtrlFlag == ControlFlag.EOS) {
 			processCtrlMsgFromSource(retCtrlFlag, streamId);
 			return;
