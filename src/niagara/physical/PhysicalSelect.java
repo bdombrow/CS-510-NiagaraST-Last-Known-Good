@@ -80,18 +80,12 @@ public class PhysicalSelect extends PhysicalOperator {
 			processGetPartialFromSink(streamId);
 			break;
 		case MESSAGE:
-			if(ctrl.size() > 2) {
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
-			System.err.println("Received FP");
-			
-			System.out.println(ctrl.get(1).toString());
+			System.out.println("Received FP");
 			System.out.println(fp.toString());
 			
 			if(propagate) {
 				sendFeedbackPunctuation(fp, streamId);
-			}
-			} else {
-				assert false : "Unexpected number of elements in MESSAGE.";
 			}
 			break;
 		default:
@@ -120,6 +114,7 @@ public class PhysicalSelect extends PhysicalOperator {
 
 		if (predEval.evaluate(inputTuple, null)) {
 			putTuple(inputTuple, 0);
+
 			if(logging){
 			tupleOut++;
 			log.Update("TupleOut", String.valueOf(tupleOut));

@@ -73,19 +73,13 @@ public final class SinkTupleStream {
 		// pageStream sends an EOS up stream and sets an isClosed flag
 		status = Closed;
 		ArrayList ctrl = putCtrlMsg(ControlFlag.EOS, "End of Stream");
-		if (ctrl != null) {
-			ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
-
-			if (ctrlFlag == ControlFlag.GET_PARTIAL
-					|| ctrlFlag == ControlFlag.REQUEST_BUF_FLUSH
-					|| ctrlFlag == ControlFlag.MESSAGE) {
-				// ignore since we just sent eos
-			} else {
-				assert ctrlFlag == ControlFlag.NULLFLAG : "KT Unexpected ctrl flag "
-						+ ctrlFlag.flagName();
-			}
+		
+		// Ignore any remaining messages, i.e., keep putting an EOS.
+		while (ctrl != null) {
+			ctrl = putCtrlMsg(ControlFlag.EOS, "End of Stream");
 		}
 		pageStream.endOfStream();
+
 	}
 
 	/**
@@ -206,7 +200,6 @@ public final class SinkTupleStream {
 		// always reflect partials
 		assert ret == null : "KT Unexpected ctrl flag "
 				+ ((ControlFlag) ret.get(0)).flagName();
-		// REFACTOR
 	}
 
 	/**
@@ -321,26 +314,6 @@ public final class SinkTupleStream {
 		}
 	}
 
-	/*
-	 * private ArrayList processCtrlFlag(ArrayList ctrl) throws
-	 * ShutdownException, InterruptedException {
-	 * 
-	 * int ctrlFlag = (Integer) ctrl.get(0); switch(ctrlFlag) { case
-	 * CtrlFlags.REQUEST_BUF_FLUSH: if(PageStream.VERBOSE)
-	 * System.out.println(pageStream.getName() +
-	 * " received request for buffer flush ");
-	 * 
-	 * int val = flushBuffer(); if (val == CtrlFlags.NULLFLAG) return null; else
-	 * { ctrl.set(0, val); // returns NULLFLAG or GET_PARTIAL ctrl.set(1, null);
-	 * return ctrl; } case CtrlFlags.GET_PARTIAL: if(reflectPartial) {
-	 * reflectPartial(); // void //return CtrlFlags.NULLFLAG; return null; }
-	 * else { return ctrl; //return CtrlFlags.GET_PARTIAL; }
-	 * 
-	 * case CtrlFlags.NULLFLAG: return null; //return CtrlFlags.NULLFLAG;
-	 * 
-	 * default: assert false : "KT Unexpected control flag" +
-	 * CtrlFlags.name[ctrlFlag]; return null; //return CtrlFlags.NULLFLAG; } }
-	 */
 
 	/**
 	 * put a SYNC_PARTIAL into the sink stream (upstream). This function is
@@ -362,7 +335,6 @@ public final class SinkTupleStream {
 		ArrayList ctrl = putCtrlMsg(ControlFlag.SYNCH_PARTIAL, null);
 		assert ctrl == null : "KT Unexpected ctrl flag "
 				+ ((ControlFlag) ctrl.get(0)).flagName();
-		// REFACTOR
 	}
 
 	/**

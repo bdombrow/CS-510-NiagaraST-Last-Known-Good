@@ -593,6 +593,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 		// We cannot prevent this by holding the notifyMe lock in the loop
 		// above as that leads to deadlock. So we need to check for missed
 		// notifications in a separate step. Double ugh.
+		
 		notifyMe.waitOn();
 	}
 
@@ -657,7 +658,6 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 * @exception ShutdownException
 	 *                query shutdown by user or execution error
 	 */
-	// REFACTOR
 	private void processCtrlMsgFromSource(ControlFlag ctrlFlag, int streamId)
 			throws java.lang.InterruptedException, ShutdownException {
 		// upstream control messages are SYNCH_PARTIAL
@@ -964,6 +964,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 		ControlFlag retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag,
 				ctrlMsg, fp);
 		if (retCtrlFlag == ControlFlag.EOS) {
+			System.out.println(this.getName() + " got EOS in sendCtrlMsgToSource");
 			processCtrlMsgFromSource(retCtrlFlag, streamId);
 			return;
 		}
@@ -1016,7 +1017,6 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 * 
 	 * 
 	 */
-	// REFACTOR
 	protected void sendCtrlMsgUpStream(ControlFlag ctrlFlag, String ctrlMsg,
 			int streamId, FeedbackPunctuation fp) throws ShutdownException, InterruptedException {
 		if (NiagraServer.DEBUG)

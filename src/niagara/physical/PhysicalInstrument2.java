@@ -123,8 +123,8 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 	protected void processTuple(Tuple tuple, int streamId)
 			throws ShutdownException, InterruptedException,
 			OperatorDoneException {
-
 		putTuple(tuple, streamId);
+
 		tupleCount++;
 		
 		if(logging) {
@@ -132,14 +132,13 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 			log.Update("OutCount", String.valueOf(outCount));		
 		}
 		if(propagate && ((tupleCount % interval) == 0)){
-//        if(sent < 2) {			
 			HashMap<String,Double> hm = new HashMap<String,Double>();
 			hm.put(tsAttr.getName(), new Double(0));
 
 			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, hm, FeedbackPunctuation.Comparator.LE);
 			sendFeedbackPunctuation(fp, 0);
 			sent++;
-			System.err.println("Sent FP");
+			System.out.println("Sent FP");
 		}
 
 	}

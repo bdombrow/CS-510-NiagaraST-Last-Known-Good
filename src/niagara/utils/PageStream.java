@@ -222,15 +222,17 @@ public class PageStream {
 			String ctrlMsgStr, FeedbackPunctuation fp) throws ShutdownException {
 
 		if (eos){
-			System.out.println(this.getName() + " Try to put msg when source closed");
+			//System.out.println(this.getName() + " Try to put msg when source closed");
 			return ControlFlag.EOS;
 		} else
 		{
-		System.out.println(this.getName()+" Putting control message when not closed");
+		//System.out.println(this.getName()+" Putting control message when not closed");
 		
 		}
-		if (shutdown)
+		if (shutdown) {
+		//System.out.println(this.getName() + " Throw shutdown");
 			throw new ShutdownException(shutdownMsg);
+		}
 
 		// do SHUTDOWN check on put to make propagation of SHUTDOWN
 		// as fast as possible
@@ -463,8 +465,10 @@ public class PageStream {
 		// If the stream was previously closed, throw an exception
 		assert !eos : "KT end of stream received twice";
 		eos = true;
-        System.out.println(this.getName() + " set EOS");
+        //System.out.println(this.getName() + " set EOS");
 		notifySource();
+        //System.out.println(this.getName() + " source has been served!");
+	
 		if (NiagraServer.DEBUG2) {
 			System.out.println("PageStream: " + name + " results.");
 			System.out.println("   Timeouts: " + timeouts);
