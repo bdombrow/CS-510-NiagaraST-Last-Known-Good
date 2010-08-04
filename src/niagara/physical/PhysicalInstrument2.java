@@ -138,7 +138,7 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, hm, FeedbackPunctuation.Comparator.LE);
 			sendFeedbackPunctuation(fp, 0);
 			sent++;
-			System.out.println("Sent FP");
+			//System.out.println("Sent FP");
 		}
 
 	}

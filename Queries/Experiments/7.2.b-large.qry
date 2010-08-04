@@ -20,23 +20,23 @@
 <pred op="gt"><var value="$volume"/><string value="-1"/></pred>
 </select>
 
-<select id="select1" input="occupancy" propagate="yes">
+<select id="select2" input="select1" propagate="yes">
 <pred op="gt"><var value="$volume"/><string value="-1"/></pred>
 </select>
 
-<select id="select1" input="occupancy" propagate="yes">
+<select id="select3" input="select2" propagate="yes">
 <pred op="gt"><var value="$volume"/><string value="-1"/></pred>
 </select>
 
-<select id="select1" input="occupancy" propagate="yes">
+<select id="select4" input="select3" propagate="yes">
 <pred op="gt"><var value="$volume"/><string value="-1"/></pred>
 </select>
 
-<select id="select1" input="occupancy" propagate="no">
+<select id="select5" input="select4" propagate="no">
 <pred op="gt"><var value="$volume"/><string value="-1"/></pred>
 </select>
 
-<instrument2 id="instrument" input="select1" interval="1" log="no" propagate="yes" fattrs="timestamp sensor_id"/>
+<instrument2 id="instrument" input="select5" interval="1" log="no" propagate="yes" fattrs="timestamp sensor_id"/>
 
 <construct id="cons" input="instrument">
 <![CDATA[

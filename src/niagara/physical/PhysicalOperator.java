@@ -964,7 +964,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 		ControlFlag retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag,
 				ctrlMsg, fp);
 		if (retCtrlFlag == ControlFlag.EOS) {
-			System.out.println(this.getName() + " got EOS in sendCtrlMsgToSource");
+			//System.out.println(this.getName() + " got EOS in sendCtrlMsgToSource");
 			processCtrlMsgFromSource(retCtrlFlag, streamId);
 			return;
 		}

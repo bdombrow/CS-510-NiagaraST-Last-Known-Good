@@ -81,8 +81,8 @@ public class PhysicalSelect extends PhysicalOperator {
 			break;
 		case MESSAGE:
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
-			System.out.println("Received FP");
-			System.out.println(fp.toString());
+			//System.out.println("Received FP");
+			//System.out.println(fp.toString());
 			
 			if(propagate) {
 				sendFeedbackPunctuation(fp, streamId);
