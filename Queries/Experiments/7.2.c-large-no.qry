@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- 7.2.a-small -->
+
+<plan top="cons">
+
+<!-- Internalize stream -->
+
+<filescan id ="sensors" isstream="yes" delay="0" filename="\\CARAJILLO\Datasets\Files\sensor-small-7-25-2010.xml"/>
+<unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
+<unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
+<unnest id="timestamp_text" regexp="timestamp_text" root="$sensor" datatype="String" input="timestamp"/>
+<unnest id="sensor_id" regexp="sensor_id" root="$sensor" datatype="String" input="timestamp_text"/>
+<unnest id="volume" regexp="volume" root="$sensor" datatype="String" input="sensor_id"/>
+<unnest id="speed" regexp="speed" root="$sensor" datatype="String" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="String" input="speed"/>
+
+<select id="select1" input="occupancy" propagate="no">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="no">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="no">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="no">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="no">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="no">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="no">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="no">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="no">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="no">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<instrument2 id="instrument" input="select1" interval="1" log="no" propagate="no" fattrs="timestamp sensor_id"/>
+
+<construct id="cons" input="instrument">
+<![CDATA[
+<result>
+$timestamp
+$timestamp_text
+$sensor_id
+$volume
+$speed
+$occupancy
+</result>
+]]>
+</construct>
+
+
+</plan>

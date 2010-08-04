@@ -7,7 +7,7 @@
 
 <!-- Internalize stream -->
 
-<filescan id ="data" isstream="yes" delay="0" filename="G:\niagarast\Streams\trafficDataStream.xml"/>
+<filescan id ="data" isstream="yes" delay="0" filename="C:\RafaelTesting\LoggingEnabled\Streams\trafficDataStreamSmall.xml"/>
 
 <unnest id="detectors" regexp="detectors" datatype="XML" input="data"/>
 <unnest id="time_t" regexp="time_t" datatype="TS" input="detectors"/>
@@ -18,7 +18,6 @@
 <unnest id="volume" regexp="volume" root="$detector" datatype="Integer" input="segment_id"/>
 <unnest id="speed" regexp="speed" root="$detector" datatype="Integer" input="volume"/>
 <unnest id="occupancy" regexp="occupancy" root="$detector" datatype="Integer" input="speed"/>
-
 
 <rename id="r" input="occupancy" source="speed occupancy" dest="speedo ocupacion"/>
 

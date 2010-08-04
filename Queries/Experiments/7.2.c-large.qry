@@ -16,6 +16,42 @@
 <unnest id="speed" regexp="speed" root="$sensor" datatype="String" input="volume"/>
 <unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="String" input="speed"/>
 
+<select id="select1" input="occupancy" propagate="yes">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="yes">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="yes">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="yes">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="yes">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="yes">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="yes">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="yes">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
+<select id="select1" input="occupancy" propagate="yes">
+<pred op="gt"><var value="$volume"/><string value="-1"/></pred>
+</select>
+
 <select id="select1" input="occupancy" propagate="no">
 <pred op="gt"><var value="$volume"/><string value="-1"/></pred>
 </select>
