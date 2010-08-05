@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import niagara.logical.Select;
 import niagara.logical.predicates.Predicate;
+import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalOp;
@@ -14,6 +15,7 @@ import niagara.physical.predicates.PredicateImpl;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.ControlFlag;
 import niagara.utils.FeedbackPunctuation;
+import niagara.utils.Guard;
 import niagara.utils.Log;
 import niagara.utils.Punctuation;
 import niagara.utils.ShutdownException;
@@ -34,10 +36,16 @@ public class PhysicalSelect extends PhysicalOperator {
 
 	// Propagate
 	Boolean propagate = false;
-	
+
+	// Exploit
+	Boolean exploit = false;
+
 	// logging test
 	int tupleOut = 0;
 	int tupleDrop = 0;
+
+	// Feedback
+	private Guard outputGuard = new Guard();
 
 	public PhysicalSelect() {
 		setBlockingSourceStreams(blockingSourceStreams);
@@ -47,10 +55,11 @@ public class PhysicalSelect extends PhysicalOperator {
 		pred = ((Select) logicalOperator).getPredicate();
 		predEval = pred.getImplementation();
 		logging = ((Select) logicalOperator).getLogging();
-		if(logging) {
+		if (logging) {
 			log = new Log(this.getName());
 		}
-		propagate = ((Select)logicalOperator).getPropagate();
+		propagate = ((Select) logicalOperator).getPropagate();
+		exploit = ((Select) logicalOperator).getExploit();
 	}
 
 	public Op opCopy() {
@@ -60,11 +69,13 @@ public class PhysicalSelect extends PhysicalOperator {
 		p.log = log;
 		p.logging = logging;
 		p.propagate = propagate;
+		p.exploit = exploit;
+		p.outputGuard = outputGuard;
 		return p;
 	}
 
 	void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
-	throws java.lang.InterruptedException, ShutdownException {
+			throws java.lang.InterruptedException, ShutdownException {
 		// downstream control message is GET_PARTIAL
 		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
 		// REQ_BUF_FLUSH is handled inside SinkTupleStream
@@ -81,16 +92,17 @@ public class PhysicalSelect extends PhysicalOperator {
 			break;
 		case MESSAGE:
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
-			//System.out.println("Received FP");
-			//System.out.println(fp.toString());
-			
-			if(propagate) {
+			// System.out.println("Received FP");
+			// System.out.println(fp.toString());
+			outputGuard.add(fp);
+
+			if (propagate) {
 				sendFeedbackPunctuation(fp, streamId);
 			}
 			break;
 		default:
 			assert false : "KT unexpected control message from sink "
-				+ ctrlFlag.flagName();
+					+ ctrlFlag.flagName();
 		}
 	}
 
@@ -109,25 +121,48 @@ public class PhysicalSelect extends PhysicalOperator {
 	 */
 
 	protected void processTuple(Tuple inputTuple, int streamId)
-	throws ShutdownException, InterruptedException {
+			throws ShutdownException, InterruptedException {
 		// Evaluate the predicate on the desired attribute of the tuple
 
 		if (predEval.evaluate(inputTuple, null)) {
-			putTuple(inputTuple, 0);
 
-			if(logging){
-			tupleOut++;
-			log.Update("TupleOut", String.valueOf(tupleOut));
+			if (exploit) {
+
+				// get attribute positions from tuple to check against guards
+				int[] positions = new int[2];
+				String[] names = { "timestamp", "sensor_id" };
+
+				for (int i = 0; i < names.length; i++) {
+					positions[i] = inputTupleSchemas[0].getPosition(names[i]);
+				}
+
+				// check against guards
+				Boolean guardMatch = false;
+				for (FeedbackPunctuation fp : outputGuard.elements()) {
+					guardMatch = guardMatch
+							|| fp
+									.match(positions, names, inputTuple
+											.getTuple());
+				}
+
+				if (!guardMatch) {
+					putTuple(inputTuple, 0);
+				}
+			} else {
+				putTuple(inputTuple, 0);
+			}
+
+			if (logging) {
+				tupleOut++;
+				log.Update("TupleOut", String.valueOf(tupleOut));
+			}
+		} else {
+			if (logging) {
+				tupleDrop++;
+				log.Update("TupleDrop", String.valueOf(tupleDrop));
 			}
 		}
-		else {
-			if(logging){
-			tupleDrop++;
-			log.Update("TupleDrop", String.valueOf(tupleDrop));
-			}
-		}	
-	}		
-
+	}
 
 	/**
 	 * This function processes a punctuation element read from a source stream
@@ -145,7 +180,7 @@ public class PhysicalSelect extends PhysicalOperator {
 	 *                query shutdown by user or execution error
 	 */
 	protected void processPunctuation(Punctuation inputTuple, int streamId)
-	throws ShutdownException, InterruptedException {
+			throws ShutdownException, InterruptedException {
 		putTuple(inputTuple, 0);
 	}
 
@@ -170,6 +205,10 @@ public class PhysicalSelect extends PhysicalOperator {
 			return false;
 		if (o.getClass() != PhysicalSelect.class)
 			return o.equals(this);
+		if(((PhysicalSelect)o).exploit != exploit)
+			return false;
+		if(((PhysicalSelect)o).propagate != propagate)
+			return false;
 		return pred.equals(((PhysicalSelect) o).pred);
 	}
 

@@ -1,6 +1,6 @@
 package niagara.physical;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import niagara.logical.Instrument;
 import niagara.optimizer.colombia.Attribute;
@@ -119,12 +119,8 @@ public class PhysicalInstrument extends PhysicalOperator {
 			log.Update("OutCount", String.valueOf(outCount));		
 		}
 		if(propagate){
-			
-			HashMap<String,Double> hm = new HashMap<String,Double>();
-			hm.put(tsAttr.getName(), new Double(100));
 
-			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, hm, FeedbackPunctuation.Comparator.LE);
-			sendFeedbackPunctuation(fp, 0);
+			
 		}
 
 	}

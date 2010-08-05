@@ -25,6 +25,17 @@ public class Union extends LogicalOperator {
 	private Attrs[] inputAttrs;
 	private int numMappings;
 
+	private Boolean propagate = false;
+	private Boolean exploit = false;
+
+	public Boolean getPropagate(){
+		return propagate;
+	}
+	
+	public Boolean getExploit(){
+		return exploit;
+	}
+	
 	public void setArity(int arity) {
 		this.arity = arity;
 	}
@@ -69,6 +80,8 @@ public class Union extends LogicalOperator {
 		op.inputAttrs = inputAttrs;
 		op.outputAttrs = outputAttrs;
 		op.numMappings = numMappings;
+		op.propagate = propagate;
+		op.exploit = exploit;
 		return op;
 	}
 
@@ -112,6 +125,10 @@ public class Union extends LogicalOperator {
 			return false;
 		if (obj.getClass() != Union.class)
 			return obj.equals(this);
+		if(((Union)obj).propagate != propagate)
+			return false;
+		if(((Union)obj).exploit != exploit)
+			return false;
 		Union other = (Union) obj;
 		return arity == other.arity && numMappings == other.numMappings
 				&& outputAttrs.equals(other.outputAttrs)
@@ -141,6 +158,17 @@ public class Union extends LogicalOperator {
 		outputAttrs = new Attrs(); // len will be numMappings, if have mappings
 		inputAttrs = new Attrs[arity];
 
+		
+		String p = e.getAttribute("propagate");
+		if(p.equals("yes"))
+			propagate = true;
+		else propagate = false;
+
+		String ex = e.getAttribute("exploit");
+		if(ex.equals("yes"))
+			exploit = true;
+		else exploit = false;
+		
 		// get first child that is an element
 		Element mapping = DOMHelper.getFirstChildElement(e);
 

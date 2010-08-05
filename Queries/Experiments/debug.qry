@@ -20,7 +20,7 @@
 <pred op="gt"><var value="$volume"/><string value="-1"/></pred>
 </select>
 
-<instrument2 id="instrument" input="select1" interval="2" log="no" propagate="yes" fattrs="timestamp sensor_id"/>
+<instrument2 id="instrument" input="select1" interval="1" log="no" propagate="yes" fattrs="timestamp sensor_id"/>
 
 <construct id="cons" input="instrument">
 <![CDATA[

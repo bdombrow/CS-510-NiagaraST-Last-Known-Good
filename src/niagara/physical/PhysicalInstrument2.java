@@ -1,6 +1,6 @@
 package niagara.physical;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import niagara.logical.Instrument2;
 import niagara.optimizer.colombia.Attribute;
@@ -132,13 +132,26 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 			log.Update("OutCount", String.valueOf(outCount));		
 		}
 		if(propagate && ((tupleCount % interval) == 0)){
-			HashMap<String,Double> hm = new HashMap<String,Double>();
-			hm.put(tsAttr.getName(), new Double(0));
 
-			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, hm, FeedbackPunctuation.Comparator.LE);
+			// construct the FP element
+			ArrayList<String> vars = new ArrayList<String>();
+			ArrayList<FeedbackPunctuation.Comparator> comps = new ArrayList<FeedbackPunctuation.Comparator>();
+			ArrayList<String> vals = new ArrayList<String>();
+			
+			// Add elements
+			vars.add(tsAttr.getName());
+			comps.add(FeedbackPunctuation.Comparator.LE);
+			vals.add("634018212600000000");
+
+			vars.add(idAttr.getName());
+			comps.add(FeedbackPunctuation.Comparator.E);
+			vals.add("1001");
+
+			
+			// Send elements
+			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, vars, comps, vals);
 			sendFeedbackPunctuation(fp, 0);
 			sent++;
-			//System.out.println("Sent FP");
 		}
 
 	}

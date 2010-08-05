@@ -1,0 +1,17 @@
+Test name         | Description
+------------------+-----------------------------
+7.1.a-large       | The 7.1 family tests
+7.1.b-large       | overhead in the code
+7.1.c-large       | before and after feedback
+7.1.a-large-o     | was introduced to NiagaraST.
+7.1.b-large-o     | "-o" means before.
+7.1.c-large-o     | 
+------------------+------------------------------
+7.2.a-large       | The 7.2 family tests the
+7.2.a-large-no    | overhead of sending feedback
+7.2.b-large       | with 1-10 operators together.
+7.2.b-large-no    | "-no" means no feedback.
+7.2.c-large       |
+7.2.c-large-no    |
+------------------+------------------------------
+7.3.a-large       | Union query

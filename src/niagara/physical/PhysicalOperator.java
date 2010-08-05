@@ -832,9 +832,9 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 			processGetPartialFromSink(streamId);
 			break;
 		case MESSAGE:
-			System.err.println(this.getName() + "(unspecialized) Got message: "
-					+ ctrl.get(1));
-			break;
+			/*System.err.println(this.getName() + "(unspecialized) Got message: "
+					+ ctrl.get(1));*/
+			return; //break?
 		default:
 			assert false : "KT unexpected control message from sink "
 					+ ctrlFlag.flagName();
@@ -870,7 +870,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 			}
 			// Send the control element to all the open source streams
 			if (existsUnClosedSourceStream())
-				sendCtrlMsgToSources(ControlFlag.GET_PARTIAL, null);
+				sendCtrlMsgToSources(ControlFlag.GET_PARTIAL, null, null);
 			// else ignore GET_PARTIAL, final results are coming soon KT
 		} else {
 			// This is a duplicate control element
@@ -989,6 +989,11 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	protected void sendFeedbackPunctuation(FeedbackPunctuation fp, int streamId) throws ShutdownException, InterruptedException {
 		sendCtrlMsgToSource(ControlFlag.MESSAGE, "Feedback Punctuation", fp, streamId);
 	}
+
+	protected void sendFeedbackPunctuationToSources(FeedbackPunctuation fp) throws ShutdownException, InterruptedException {
+		sendCtrlMsgToSources(ControlFlag.MESSAGE, "Feedback Punctuation", fp);
+	}
+
 	
 	/**
 	 * This function puts a control element to all source streams
@@ -999,13 +1004,13 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 * @exception ShutdownException
 	 *                query shutdown by user or execution error
 	 */
-	private void sendCtrlMsgToSources(ControlFlag ctrlFlag, String ctrlMsg)
+	private void sendCtrlMsgToSources(ControlFlag ctrlFlag, String ctrlMsg, FeedbackPunctuation fp)
 			throws ShutdownException, InterruptedException {
 		// Loop over all source streams and put the control
 		// element in all open ones
 		for (int i = 0; i < numSourceStreams; i++) {
 			if (!sourceStreams[i].isClosed()) {
-				sendCtrlMsgToSource(ctrlFlag, ctrlMsg, null, i);
+				sendCtrlMsgToSource(ctrlFlag, ctrlMsg, fp, i);
 			}
 		}
 	}

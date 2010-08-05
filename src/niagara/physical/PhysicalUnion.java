@@ -12,6 +12,8 @@ import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
 import niagara.query_engine.TupleSchema;
+import niagara.utils.ControlFlag;
+import niagara.utils.FeedbackPunctuation;
 import niagara.utils.Punctuation;
 import niagara.utils.ShutdownException;
 import niagara.utils.Tuple;
@@ -29,6 +31,9 @@ public class PhysicalUnion extends PhysicalOperator {
 	private int[][] attributeMaps;
 	private boolean hasMappings;
 	private int outSize;
+	private boolean propagate;
+	private boolean exploit;
+	
 
 	public PhysicalUnion() {
 		// XXX vpapad: here we have to initialize blockingSourceStreams
@@ -45,6 +50,9 @@ public class PhysicalUnion extends PhysicalOperator {
 	public void opInitFrom(LogicalOp logicalOperator) {
 		Union logicalOp = (Union) logicalOperator;
 
+		exploit = logicalOp.getExploit();
+		propagate = logicalOp.getPropagate();
+		
 		setBlockingSourceStreams(new boolean[logicalOp.getArity()]);
 		hasMappings = false;
 		if (logicalOp.numMappings() > 0)
@@ -64,6 +72,40 @@ public class PhysicalUnion extends PhysicalOperator {
 		rgnRemove = new int[getArity()];
 	}
 
+	
+	void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
+	throws java.lang.InterruptedException, ShutdownException {
+		// downstream control message is GET_PARTIAL
+		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
+		// REQ_BUF_FLUSH is handled inside SinkTupleStream
+		// here (SHUTDOWN is handled with exceptions)
+
+		if (ctrl == null)
+			return;
+
+		ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
+
+		switch (ctrlFlag) {
+		case GET_PARTIAL:
+			processGetPartialFromSink(streamId);
+			break;
+		case MESSAGE:
+			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+			// System.out.println("Received FP");
+			///System.out.println(this.getName() + " " + fp.toString());
+			//outputGuard.add(fp);
+
+			if (propagate) {
+				sendFeedbackPunctuationToSources(fp);
+				System.out.println(this.getName() + "Sent FP");
+			}
+			break;
+		default:
+			assert false : "KT unexpected control message from sink "
+				+ ctrlFlag.flagName();
+		}
+	}
+	
 	/**
 	 * This function processes a tuple element read from a source stream when
 	 * the operator is non-blocking. This over-rides the corresponding function
@@ -159,6 +201,8 @@ public class PhysicalUnion extends PhysicalOperator {
 		newOp.attributeMaps = attributeMaps;
 		newOp.hasMappings = hasMappings;
 		newOp.outSize = outSize;
+		newOp.exploit = exploit;
+		newOp.propagate = propagate;
 		return newOp;
 	}
 
@@ -170,6 +214,10 @@ public class PhysicalUnion extends PhysicalOperator {
 			return false;
 		if (o.getClass() != PhysicalUnion.class)
 			return o.equals(this);
+		if(((PhysicalUnion)o).exploit != exploit)
+			return false;
+		if(((PhysicalUnion)o).propagate != propagate)
+			return false;
 		return getArity() == ((PhysicalUnion) o).getArity()
 				&& inputAttrs.equals(((PhysicalUnion) o).inputAttrs);
 	}

@@ -26,6 +26,7 @@ public class Select extends UnaryOperator {
 	private Predicate pred;
 	private Boolean logging = false;
 	private Boolean propagate = false;
+	private Boolean exploit = false;
 
 	public Select() {
 	}
@@ -43,6 +44,7 @@ public class Select extends UnaryOperator {
 		op.pred = this.pred;
 		op.logging = this.logging;
 		op.propagate = this.propagate;
+		op.exploit = this.exploit;
 		return op;
 	}
 
@@ -90,6 +92,13 @@ public class Select extends UnaryOperator {
 		if(p.equals("yes"))
 			propagate = true;
 		else propagate = false;
+
+		String ex = e.getAttribute("exploit");
+		if(ex.equals("yes"))
+			exploit = true;
+		else exploit = false;
+
+		
 	}
 
 	public Boolean getLogging() {
@@ -98,6 +107,10 @@ public class Select extends UnaryOperator {
 	
 	public Boolean getPropagate(){
 		return propagate;
+	}
+	
+	public Boolean getExploit(){
+		return exploit;
 	}
 	
 	public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
@@ -123,6 +136,8 @@ public class Select extends UnaryOperator {
 		if(((Select)o).logging != logging)
 			return false;
 		if(((Select)o).propagate != propagate)
+			return false;
+		if(((Select)o).exploit != exploit)
 			return false;
 		if (o.getClass() != Select.class)
 			return o.equals(this);

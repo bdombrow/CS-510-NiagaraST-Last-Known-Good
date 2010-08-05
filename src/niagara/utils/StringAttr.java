@@ -48,6 +48,11 @@ public class StringAttr extends BaseAttr {
 	public String toASCII() {
 		return (String)attrVal;
 	}
+
+	public String toString() {
+		return (String)attrVal;
+	}
+
 	
 	public boolean eq(BaseAttr other) {
 		if (!(other instanceof StringAttr))

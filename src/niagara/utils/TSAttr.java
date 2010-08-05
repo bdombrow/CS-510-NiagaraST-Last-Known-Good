@@ -56,6 +56,13 @@ public class TSAttr extends BaseAttr {
 		return ((Long)attrVal).toString();
 	}
 	
+	public String toString() {
+		if (punct)
+			return (String) attrVal;
+		return ((Long)attrVal).toString();
+	}
+	
+	
 	/*
 	 * As we assume punctuation on time attribute, and thus we assume that wildstar 
 	 * won't appear in a TSAttr, even if it is a punctuation   

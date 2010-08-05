@@ -219,6 +219,7 @@
 <!ATTLIST select
     log       (yes | no) "no"
     propagate (yes | no) "no"
+    exploit   (yes | no) "no"
 	  %StandardAttributes;>
 
 <!ELEMENT magic  (and | or | not | true | false | pred)>
@@ -238,6 +239,8 @@
 <!ATTLIST union
          id ID                         #REQUIRED
          input    IDREFS               #REQUIRED
+         propagate (yes | no) "no"
+         explot    (yes | no) "no"
 	 %StandardAttributes;>
 
 <!-- outputattr is the name of the output attr to be

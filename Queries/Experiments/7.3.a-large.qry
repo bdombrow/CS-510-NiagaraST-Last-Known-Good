@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- 7.3.a-large -->
+<!-- DEBUG -->
+
+<plan top="cons">
+
+<!-- Internalize streams -->
+<!-- data types have to be strings, otherwise UNION fails when comparing punctuations. -->
+
+<!--<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-7-25-2010.xml"/>-->
+<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\debug.xml"/>
+
+<unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
+<unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
+<unnest id="timestamp_text" regexp="timestamp_text" root="$sensor" datatype="String" input="timestamp"/>
+<unnest id="sensor_id" regexp="sensor_id" root="$sensor" datatype="String" input="timestamp_text"/>
+<unnest id="volume" regexp="volume" root="$sensor" datatype="String" input="sensor_id"/>
+<unnest id="speed" regexp="speed" root="$sensor" datatype="String" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="String" input="speed"/>
+
+
+<!--<filescan id ="sensors2" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-7-25-2010.xml"/>-->
+<filescan id ="sensors2" isstream="yes" delay="0" filename="G:\Datasets\Files\debug.xml"/>
+
+<unnest id="sensor2" regexp="sensor" datatype="XML" input="sensors2"/>
+<unnest id="timestamp2" regexp="timestamp" datatype="TS" input="sensor2"/>
+<unnest id="timestamp_text2" regexp="timestamp_text" root="$sensor2" datatype="String" input="timestamp2"/>
+<unnest id="sensor_id2" regexp="sensor_id" root="$sensor2" datatype="String" input="timestamp_text2"/>
+<unnest id="volume2" regexp="volume" root="$sensor2" datatype="String" input="sensor_id2"/>
+<unnest id="speed2" regexp="speed" root="$sensor2" datatype="String" input="volume2"/>
+<unnest id="occupancy2" regexp="occupancy" root="$sensor2" datatype="String" input="speed2"/>
+
+<!-- Filter speeds -->
+<select id="select1" input="occupancy" exploit="yes">
+<pred op="gt">
+       <var value="$speed"/><string value ="0"/>
+</pred>
+</select>
+
+<!-- Filter speeds -->
+<select id="select2" input="occupancy2" exploit="no">
+<pred op="gt">
+       <var value="$speed2"/><string value ="0"/>
+</pred>
+</select>
+
+<!-- Union -->
+<union id="union" input="select1 select2" propagate="yes">
+</union>
+
+<!-- Instrument -->
+<instrument2 id="instrument" input="union" interval="1" log="no" propagate="yes" fattrs="timestamp sensor_id"/>
+
+<construct id="cons" input="instrument">
+<![CDATA[
+<result>
+$timestamp
+$timestamp_text
+$sensor_id
+$volume
+$speed
+$occupancy
+</result>
+]]>
+</construct>
+
+</plan>
