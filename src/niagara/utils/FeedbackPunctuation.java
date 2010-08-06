@@ -105,6 +105,12 @@ public final class FeedbackPunctuation  {
 		
 		return "[Feedback Type = '" + _type.Type() + "'].[" + punctuationContents + "]";
 	}
+	
+	public Boolean equals(FeedbackPunctuation other) {
+		return this.toString().equals(other.toString());
+	}
 
 }
+
+
 

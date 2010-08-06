@@ -35,7 +35,7 @@ public class PageStream {
 	private boolean shutdown;
 	private String shutdownMsg;
 
-	private final int STREAM_CAPACITY = 1; // Number of inter-operator pages of tuples
+	private final int STREAM_CAPACITY = 30; // Number of inter-operator pages of tuples
 	public static int MAX_DELAY = 1000;
 
 	// keep extra pages around that can be reused

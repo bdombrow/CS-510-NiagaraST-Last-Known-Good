@@ -126,6 +126,7 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 		putTuple(tuple, streamId);
 
 		tupleCount++;
+		//System.out.println(tupleCount);
 		
 		if(logging) {
 			outCount++;
@@ -141,7 +142,7 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 			// Add elements
 			vars.add(tsAttr.getName());
 			comps.add(FeedbackPunctuation.Comparator.LE);
-			vals.add("634018212600000000");
+			vals.add("63401821260000000"); //0
 
 			vars.add(idAttr.getName());
 			comps.add(FeedbackPunctuation.Comparator.E);

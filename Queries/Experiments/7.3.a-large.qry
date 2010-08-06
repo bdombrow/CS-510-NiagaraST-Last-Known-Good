@@ -9,8 +9,8 @@
 <!-- Internalize streams -->
 <!-- data types have to be strings, otherwise UNION fails when comparing punctuations. -->
 
-<!--<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-7-25-2010.xml"/>-->
-<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\debug.xml"/>
+<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-7-25-2010.xml"/>
+<!-- <filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\debug.xml"/> -->
 
 <unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
 <unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
@@ -21,8 +21,8 @@
 <unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="String" input="speed"/>
 
 
-<!--<filescan id ="sensors2" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-7-25-2010.xml"/>-->
-<filescan id ="sensors2" isstream="yes" delay="0" filename="G:\Datasets\Files\debug.xml"/>
+<filescan id ="sensors2" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-7-25-2010.xml"/>
+<!--<filescan id ="sensors2" isstream="yes" delay="0" filename="G:\Datasets\Files\debug.xml"/>-->
 
 <unnest id="sensor2" regexp="sensor" datatype="XML" input="sensors2"/>
 <unnest id="timestamp2" regexp="timestamp" datatype="TS" input="sensor2"/>
@@ -33,16 +33,16 @@
 <unnest id="occupancy2" regexp="occupancy" root="$sensor2" datatype="String" input="speed2"/>
 
 <!-- Filter speeds -->
-<select id="select1" input="occupancy" exploit="yes">
+<select id="select1" input="occupancy" exploit="no">
 <pred op="gt">
-       <var value="$speed"/><string value ="0"/>
+       <var value="$speed"/><string value ="-1"/>
 </pred>
 </select>
 
 <!-- Filter speeds -->
 <select id="select2" input="occupancy2" exploit="no">
 <pred op="gt">
-       <var value="$speed2"/><string value ="0"/>
+       <var value="$speed2"/><string value ="-1"/>
 </pred>
 </select>
 

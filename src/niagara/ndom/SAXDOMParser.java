@@ -234,16 +234,13 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 				}
 				if (delay > 0) {
 					try {
-						/* XXX: RJFM */
-						/*
-						 * String namespace =
-						 * doc.getDocumentElement().getNamespaceURI(); if
-						 * (namespace != null &&namespace.equals(
-						 * "http://www.cse.ogi.edu/dot/niagara/punct")){
-						 */
+						  String namespace =
+						  doc.getDocumentElement().getNamespaceURI();
+						  if (namespace != null &&namespace.equals("http://www.cse.ogi.edu/dot/niagara/punct")){
+						 
 						// System.out.println("delaying " + delay + " seconds");
 						Thread.sleep(delay); // sleep is in milliseconds
-						// }
+						 }
 					} catch (java.lang.InterruptedException ie) {
 						// do nothing...
 					}

@@ -961,17 +961,22 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 */
 	protected void sendCtrlMsgToSource(ControlFlag ctrlFlag, String ctrlMsg, FeedbackPunctuation fp,
 			int streamId) throws ShutdownException, InterruptedException {
+
 		ControlFlag retCtrlFlag = sourceStreams[streamId].putCtrlMsg(ctrlFlag,
 				ctrlMsg, fp);
+
+		// If you want to close as soon as you get EOS, process it here.
+		// This is potentially incorrect, as there may be tuples in the tuple buffer.
+		
+		/*
 		if (retCtrlFlag == ControlFlag.EOS) {
-			//System.out.println(this.getName() + " got EOS in sendCtrlMsgToSource");
 			processCtrlMsgFromSource(retCtrlFlag, streamId);
 			return;
 		}
+		*/
 
 		// only control flag putCtrlMsg may return is EOS
-		assert retCtrlFlag == ControlFlag.NULLFLAG : "Unexpected ctrl flag in sendCtrlMsgToSource "
-				+ retCtrlFlag.flagName();
+		//assert retCtrlFlag == ControlFlag.NULLFLAG : "Unexpected ctrl flag in sendCtrlMsgToSource " + retCtrlFlag.flagName();
 		return;
 	}
 

@@ -34,6 +34,7 @@ public class PhysicalUnion extends PhysicalOperator {
 	private boolean propagate;
 	private boolean exploit;
 	
+	private int tupleCount = 0;
 
 	public PhysicalUnion() {
 		// XXX vpapad: here we have to initialize blockingSourceStreams
@@ -96,8 +97,10 @@ public class PhysicalUnion extends PhysicalOperator {
 			//outputGuard.add(fp);
 
 			if (propagate) {
+				//sendFeedbackPunctuation(fp,0);
+				//sendFeedbackPunctuation(fp,1);
 				sendFeedbackPunctuationToSources(fp);
-				System.out.println(this.getName() + "Sent FP");
+				//System.out.println(this.getName() + "Sent FP");
 			}
 			break;
 		default:
@@ -127,6 +130,8 @@ public class PhysicalUnion extends PhysicalOperator {
 		} else {
 			// just send the original tuple along
 			putTuple(inputTuple, 0);
+			//System.out.println(tupleCount);
+			//tupleCount++;
 
 		}
 	}

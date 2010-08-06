@@ -25,7 +25,12 @@ public class Guard {
 	
 	// Methods
 	public void add(FeedbackPunctuation fp) {
-		if(!_guards.contains(fp)) {
+		boolean in = false;
+		for(FeedbackPunctuation f:_guards) {
+			in = in || fp.equals(f);
+		}
+		
+		if(!in) {
 			_guards.add(fp);
 		}
 	}

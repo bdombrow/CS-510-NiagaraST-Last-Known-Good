@@ -10,6 +10,8 @@ public class PageQueue {
 	// can tell the difference between full and empty
 	private int length;
 	private TuplePage[] queue;
+	int EXPANSE_LIMIT = 30;
+
 
 	// pointers to the head and rear of the queue, respectively
 	private int head = 0, tail = 0;
@@ -97,18 +99,20 @@ public class PageQueue {
 			if (expandQueue()) {
 				put(page);
 			} else {
-				System.err.println("Dropping control flag "
-						+ page.getFlag().flagName() + "on stream " + name);
-				System.err.println("length of the queue: " + length);
-				// queue to big, refused to expand
-				assert !page.hasTuples() : "KT - help dropping tuples";
+				// We drop a control message, the queue is too big and we shouldn't expand.
+				
+				//System.err.println("Dropping control flag "
+				//		+ page.getFlag().flagName() + "on stream " + name);
+				//System.err.println("length of the queue: " + length);
+				// queue too big, refused to expand
+				//assert !page.hasTuples() : "KT - help dropping tuples";
 
 			}
 		}
 	}
 
 	private boolean expandQueue() {
-		if (length >= 100)
+		if (length >= EXPANSE_LIMIT)
 			return false; // refuse to expand*/
 
 		TuplePage[] newQueue = new TuplePage[length * 2];
