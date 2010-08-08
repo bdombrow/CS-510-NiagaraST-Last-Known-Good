@@ -1,0 +1,14 @@
+﻿<Window x:Class="ContractsPrototype.ContractsDemo.Window1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Query plan analyzer (search for consistent accordance)" Height="142" Width="648" Loaded="Window_Loaded">
+    <Grid>
+        <Button Height="23" HorizontalAlignment="Right" Margin="0,18,12,0" Name="button1" VerticalAlignment="Top" Width="98" Click="button1_Click">Select Plan File</Button>
+        <TextBox Height="23" Margin="81,18,122,0" Name="textBox1" VerticalAlignment="Top" IsReadOnly="True" >
+            C:\Users\rfernand\Desktop\ContractsPrototype\ContractsDemo\Examples\SELECT.xml
+        </TextBox>
+        <Label Margin="9,16,0,0" Name="label1" Height="28" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60">Plan File:</Label>
+        <Button HorizontalAlignment="Left" Margin="81,0,0,25" Name="button2" Width="137" Height="23" VerticalAlignment="Bottom" Click="button2_Click">Analyze</Button>
+        <Button Height="23" Margin="0,0,12,25" Name="button3" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="button3_Click">About</Button>
+    </Grid>
+</Window>
