@@ -30,7 +30,6 @@
                     Offering offering = new Offering(inputArity, outputArity);
 
                     // input
-                    //XElement input = contract.Element("input");
                     foreach (XElement input in contract.Elements("input"))
                     {
                         Scheme si = new Scheme();
@@ -98,7 +97,6 @@
                     }
 
                     // feedback output
-
                     foreach (XElement feedbackOutput in contract.Elements("feedback.output"))
                     {
                         Scheme sfo = new Scheme();
@@ -133,7 +131,6 @@
                     opObj.AddOffering(offering);
                 }
                 #endregion
-                //plan.Graph.AddNode(opObj.Name, opObj);
                 plan.AddOperator(opObj);
             }
             #endregion
@@ -153,10 +150,6 @@
                         var sourceNode = plan.Operators.Find(e => e.Name.Equals(inputName));
                         var destinationNode = plan.Operators.Find(e => e.Name.Equals(name));
                         destinationNode.AddAntecedent(sourceNode, inputId-1);
-                        //var sourceNode = plan.Graph.Nodes[inputName];
-                        //var destinationNode = plan.Graph.Nodes[name];
-                        //plan.Graph.AddDirectedEdge(sourceNode, destinationNode);
-                        //plan.Graph.AddDirectedEdge(destinationNode, sourceNode);
                     }
                 }
             }

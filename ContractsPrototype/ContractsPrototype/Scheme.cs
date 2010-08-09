@@ -93,7 +93,7 @@
                 {
                     _representation = _representation + t.ToString() + ", ";
                 }
-                return _representation.Substring(0, _representation.Length - 2) + "}";
+                    return _representation.Substring(0, _representation.Length - 2) + "}";
             }
         }
 

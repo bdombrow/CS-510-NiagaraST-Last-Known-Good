@@ -71,7 +71,14 @@
             {
                 _representation = _representation + o.ToString() + ", ";
             }
-            return _representation.Substring(0, _representation.Length - 2) + "}";
+            if (_representation.Substring(_representation.Length-1,1) == "{")
+            {
+                return _representation += "}";
+            }
+            else
+            {
+                return _representation.Substring(0, _representation.Length - 2) + "}";
+            }
         }
 
         #region IComparable<Operator> Members
@@ -92,7 +99,6 @@
                     match(this.Antecedents[i], i);
                     this.Antecedents[i].Consistent();
                     match(this.Antecedents[i], i);
-                    //this.Antecedents[i].match(this, 0);
                 }
 
                 if (!(this.Subsequents[0] == null))
@@ -116,6 +122,12 @@
         {
 
             // do this op first
+
+            if (this.Offerings.Count == 0)
+            {
+                op2.Offerings.Clear();
+            }
+
             var OfferingsToRemove = new List<Offering>();
 
             foreach (Offering of1 in this.Offerings)
@@ -133,8 +145,16 @@
                 this.Offerings.Remove(of);
 
             // now do op2
+
             if (op2 != null)
             {
+
+                if (op2.Offerings.Count == 0)
+                {
+                    this.Offerings.Clear();
+                }
+
+
                 var OfferingsToRemove2 = new List<Offering>();
                 foreach (Offering of2 in op2.Offerings)
                 {

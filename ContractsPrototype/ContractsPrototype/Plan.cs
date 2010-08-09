@@ -8,10 +8,8 @@ namespace ContractsPrototype
     public class Plan : ICloneable
     {
         private List<Operator> _ops;
-        //private Graph _graph;
 
         public List<Operator> Operators { get { _ops.Sort(); return _ops; } }
-        //public Graph Graph { get { return _graph; } }
         public Operator Top
         {
             get
@@ -19,10 +17,7 @@ namespace ContractsPrototype
                 foreach (Operator op in Operators)
                 {
                     if (op.Subsequents[0] == null)
-                    {
                         return op;
-                    }
-
                 }
                 return null;
             }
@@ -32,7 +27,6 @@ namespace ContractsPrototype
         public Plan()
         {
             _ops = new List<Operator>();
-        //    _graph = new Graph();
         }
 
         public void AddOperator(Operator op) {
