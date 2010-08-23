@@ -7,7 +7,7 @@
 
 <!-- Internalize stream -->
 
-<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-7-25-2010.xml"/>
+<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-8-22-2010.xml"/>
 <unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
 <unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
 <unnest id="timestamp_text" regexp="timestamp_text" root="$sensor" datatype="String" input="timestamp"/>
