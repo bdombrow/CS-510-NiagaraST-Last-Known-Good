@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- location-large -->
+
+<plan top="cons">
+
+<!-- Internalize stream -->
+
+<filescan id ="locations" isstream="yes" delay="0" filename="G:\Datasets\Files\location-large-8-22-2010.xml"/>
+<unnest id="location" regexp="location" datatype="XML" input="locations"/>
+<unnest id="freeway_id" regexp="freeway_id" root="location" datatype="Integer" input="location"/>
+<unnest id="l_sensor_id" regexp="sensor_id" root="location" datatype="Integer" input="freeway_id"/>
+<unnest id="milepost" regexp="milepost" root="location" datatype="Integer" input="l_sensor_id"/>
+
+<construct id="cons" input="milepost">
+<![CDATA[
+<result>
+ $location
+ $freeway_id
+ $l_sensor_id
+ $milepost
+</result>
+]]>
+</construct>
+
+</plan>
+

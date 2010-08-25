@@ -7,7 +7,11 @@
 
 <!-- Internalize streams -->
 
+<<<<<<< HEAD
 <filescan id ="sensors" isstream="yes" delay="0" filename="C:\DATA_Rafael\sensor-small.xml"/>
+=======
+<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-small-8-22-2010.xml"/>
+>>>>>>> 9654aecaa9d5c399e044166ce3675cfd694ce261
 
 <unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
 <unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
@@ -17,7 +21,11 @@
 <unnest id="speed" regexp="speed" root="$sensor" datatype="Integer" input="volume"/>
 <unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="Integer" input="speed"/>
 
+<<<<<<< HEAD
 <filescan id ="locations" isstream="yes" delay="0" filename="C:\DATA_Rafael\location-small.xml"/>
+=======
+<filescan id ="locations" isstream="yes" delay="0" filename="G:\Datasets\Files\location-small-8-22-2010.xml"/>
+>>>>>>> 9654aecaa9d5c399e044166ce3675cfd694ce261
 <unnest id="location" regexp="location" datatype="XML" input="locations"/>
 <unnest id="freeway_id" regexp="freeway_id" root="location" datatype="Integer" input="location"/>
 <unnest id="l_sensor_id" regexp="sensor_id" root="location" datatype="Integer" input="freeway_id"/>

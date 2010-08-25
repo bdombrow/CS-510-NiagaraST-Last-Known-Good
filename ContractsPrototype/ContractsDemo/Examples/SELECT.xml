@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plan>
+  <operator id="SELECT1" inputArity="1" outputArity="1">
+    <class>SELECT</class>
+    <input id="1" source="SELECT2" />
+      <contract>
+        <input id="1">
+          <scheme>
+            <attribute name="a" mark="+" />
+            <attribute name="b" mark="-" />
+          </scheme>
+          <scheme>
+            <attribute name="a" mark="#" />
+            <attribute name="b" mark="-" />
+          </scheme>
+        </input>
+        <output id="1">
+          <scheme>
+            <attribute name="a" mark="+" />
+            <attribute name="b" mark="-" />
+          </scheme>
+        </output>
+        <feedback.input id="1">
+          <scheme>
+            <any />
+          </scheme>
+        </feedback.input>
+        <feedback.output id="1">
+          <scheme />
+        </feedback.output>
+      </contract>
+  </operator>
+  <operator id="SELECT2" inputArity="1" outputArity="1">
+    <class>SELECT</class>
+    <contract>
+      <input id="1">
+        <scheme>
+          <attribute name="a" mark="+" />
+          <attribute name="b" mark="-" />
+        </scheme>
+        <scheme>
+          <attribute name="a" mark="#" />
+          <attribute name="b" mark="-" />
+        </scheme>
+      </input>
+      <output id="1">
+        <scheme>
+          <attribute name="a" mark="+" />
+          <attribute name="b" mark="-" />
+        </scheme>
+      </output>
+      <feedback.input id="1">
+        <scheme />
+      </feedback.input>
+      <feedback.output id="1">
+        <scheme />
+      </feedback.output>
+    </contract>
+    <contract>
+      <input id="1">
+        <scheme>
+          <attribute name="a" mark="+" />
+          <attribute name="b" mark="-" />
+        </scheme>
+        <scheme>
+          <attribute name="a" mark="#" />
+          <attribute name="b" mark="-" />
+        </scheme>
+      </input>
+      <output id="1">
+        <scheme>
+          <attribute name="a" mark="+" />
+          <attribute name="b" mark="-" />
+        </scheme>
+      </output>
+      <feedback.input id="1">
+        <scheme>
+          <any />
+        </scheme>
+      </feedback.input>
+      <feedback.output id="1">
+        <scheme />
+      </feedback.output>
+    </contract>
+  </operator>
+</plan>
