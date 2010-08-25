@@ -42,14 +42,17 @@ public class PhysicalSelect extends PhysicalOperator {
 	String[] names;
 
 	// logging test
-	int tupleOut = 0;
-	int tupleDrop = 0;
+	int tupleOut;
+	int tupleDrop;
 
 	// Feedback
-	private Guard outputGuard = new Guard();
+	protected Guard outputGuard;
 
 	public PhysicalSelect() {
 		setBlockingSourceStreams(blockingSourceStreams);
+		outputGuard = new Guard();
+		tupleOut = 0;
+		tupleDrop = 0;
 	}
 
 	public void opInitFrom(LogicalOp logicalOperator) {
@@ -71,7 +74,7 @@ public class PhysicalSelect extends PhysicalOperator {
 		p.logging = logging;
 		p.propagate = propagate;
 		p.exploit = exploit;
-		p.outputGuard = outputGuard;
+		//p.outputGuard = outputGuard;
 		return p;
 	}
 
@@ -219,6 +222,10 @@ public class PhysicalSelect extends PhysicalOperator {
 		if(((PhysicalSelect)o).exploit != exploit)
 			return false;
 		if(((PhysicalSelect)o).propagate != propagate)
+			return false;
+		if(((PhysicalSelect)o).outputGuard != outputGuard)
+			return false;
+		if(((PhysicalSelect)o).log != log)
 			return false;
 		return pred.equals(((PhysicalSelect) o).pred);
 	}

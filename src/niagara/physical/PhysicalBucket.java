@@ -135,7 +135,8 @@ public class PhysicalBucket extends PhysicalOperator {
 	{
 		String corrTS="";
 		long start_ts = startSecond; //Long.parseLong("634018212000000000");
-		
+
+		// need to generalize
 		long ts = 0;
 		int widPos = 0; 
 		
@@ -148,7 +149,7 @@ public class PhysicalBucket extends PhysicalOperator {
 		
 		fpTrans.setValue(0,corrTS);
 		
-		fpTrans.setName(0,fAttr);
+		fpTrans.setName(0,windowAttribute.getName());
 		
 	}
 	
