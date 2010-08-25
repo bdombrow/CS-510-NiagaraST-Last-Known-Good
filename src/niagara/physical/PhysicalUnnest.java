@@ -140,8 +140,6 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
 		// putTuple(inputTuple, 0);
 		if (inputTuple != null) {
 			putTuple(inputTuple, 0);
-			// XXX: RJFM
-			// Thread.sleep(15);
 		} else {
 			putTuple(inputPunct, 0);
 		}
@@ -197,6 +195,7 @@ public class PhysicalUnnest extends PhysicalOperator implements NodeConsumer {
 	 * @see niagara.query_engine.PhysicalOperator#opInitialize()
 	 */
 	protected void opInitialize() {
+		//System.out.println(this.getName() + " # ");
 		scanField = inputTupleSchemas[0].getPosition(root.getName());
 		pev = new PathExprEvaluator(path);
 		elementList = new NodeVector();

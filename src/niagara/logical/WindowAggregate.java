@@ -19,14 +19,12 @@ import org.w3c.dom.Element;
 @SuppressWarnings("unchecked")
 public abstract class WindowAggregate extends WindowGroup {
 
+	//private Boolean logging = false;
 	// the attribute on which the aggregation function should
 	// be performed
 	protected ArrayList<Attribute> aggrAttr = new ArrayList();
 
 	protected abstract WindowAggregate getInstance();
-
-	// propagation flag
-	// protected boolean propagate = false;
 
 	protected void loadFromXML(Element e, LogicalProperty[] inputProperties,
 			ArrayList<String> aggrAttrName) throws InvalidPlanException {
@@ -35,8 +33,15 @@ public abstract class WindowAggregate extends WindowGroup {
 			String aggAttrStr = e.getAttribute(name);
 			aggrAttr.add(Variable.findVariable(inputProperties[0], aggAttrStr));
 		}
+		
 		loadGroupingAttrsFromXML(e, inputProperties[0], "groupby");
 		loadWindowAttrsFromXML(e, inputProperties[0]);
+		
+		String logAttribute = e.getAttribute("log");
+
+		if (logAttribute.equals("yes"))
+			logging = true;
+		
 	}
 
 	public ArrayList getAggrAttr() {
@@ -46,6 +51,15 @@ public abstract class WindowAggregate extends WindowGroup {
 	public boolean getPropagate() {
 		return propagate;
 	}
+	
+	public boolean getExploit() {
+		return exploit;
+	}
+
+	public Boolean getLogging() {
+		return logging;
+	}
+
 
 	protected void dump(String opName) {
 		System.out.println("opName");
@@ -66,16 +80,23 @@ public abstract class WindowAggregate extends WindowGroup {
 		op.aggrAttr = this.aggrAttr;
 		op.widName = widName;
 		op.propagate = propagate;
-
+		op.logging = logging;
+		op.exploit = exploit;
+		
 		return op;
 	}
 
 	public int hashCode() {
-		int p = 0;
+		int p = 0, l = 0, e =0;
 		if (propagate)
 			p = 1;
+		if (logging)
+			l = 1;
+		if (exploit)
+			e = 1;
+		
 		return groupingAttrs.hashCode() ^ aggrAttr.hashCode()
-				^ widName.hashCode() ^ p;
+				^ widName.hashCode() ^ p ^ l ^ e;
 	}
 
 	public boolean equals(Object obj) {
@@ -87,11 +108,12 @@ public abstract class WindowAggregate extends WindowGroup {
 			return obj.equals(this);
 
 		WindowAggregate other = (WindowAggregate) obj;
-		if (propagate == other.propagate) {
+		if (propagate == other.propagate && logging == other.logging && exploit == other.exploit) {
 			return groupingAttrs.equals(other.groupingAttrs)
 					&& aggrAttr.equals(other.aggrAttr)
 					&& widName.equals(other.widName);
 		}
 		return false;
 	}
+
 }

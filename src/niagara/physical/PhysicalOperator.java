@@ -217,6 +217,12 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 * 
 	 */
 	public final void run() {
+		
+//		if(this instanceof niagara.physical.PhysicalHashJoin)
+	//	{
+			//System.out.println(this.getName() + " is inside its run() loop. ");
+		//}
+		
 		if (niagara.connection_server.NiagraServer.TIME_OPERATORS) {
 			cpuTimer = new CPUTimer();
 			cpuTimer.start();
@@ -688,7 +694,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 			sourceStreams[streamId].setStatus(SourceTupleStream.Closed);
 			activeSourceStreams.remove(streamId);
 
-			// Let the operator now that one of its source stream is closed;
+			// Let the operator know that one of its source stream is closed;
 			streamClosed(streamId);
 
 			// If this causes the operator to become non-blocking, then
@@ -815,7 +821,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 * @exception ShutdownException
 	 *                query shutdown by user or execution error
 	 */
-	/* private */void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
+	void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
 			throws java.lang.InterruptedException, ShutdownException {
 		// downstream control message is GET_PARTIAL
 		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
@@ -832,9 +838,9 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 			processGetPartialFromSink(streamId);
 			break;
 		case MESSAGE:
-			/*System.err.println(this.getName() + "(unspecialized) Got message: "
-					+ ctrl.get(1));*/
-			return; //break?
+			System.err.println(this.getName() + "(unspecialized) Got message: "
+					+ ctrl.get(1));
+			break;//return; 
 		default:
 			assert false : "KT unexpected control message from sink "
 					+ ctrlFlag.flagName();
@@ -968,13 +974,12 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 		// If you want to close as soon as you get EOS, process it here.
 		// This is potentially incorrect, as there may be tuples in the tuple buffer.
 		
-		/*
+		
 		if (retCtrlFlag == ControlFlag.EOS) {
-			processCtrlMsgFromSource(retCtrlFlag, streamId);
+			//processCtrlMsgFromSource(retCtrlFlag, streamId);
 			return;
 		}
-		*/
-
+		
 		// only control flag putCtrlMsg may return is EOS
 		//assert retCtrlFlag == ControlFlag.NULLFLAG : "Unexpected ctrl flag in sendCtrlMsgToSource " + retCtrlFlag.flagName();
 		return;

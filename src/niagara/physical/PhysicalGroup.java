@@ -655,4 +655,5 @@ public abstract class PhysicalGroup extends PhysicalOperator {
 		cost += outputCard * catalog.getDouble("tuple_construction_cost");
 		return new Cost(cost);
 	}
+
 }

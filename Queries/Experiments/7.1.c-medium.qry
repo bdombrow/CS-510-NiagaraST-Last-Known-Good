@@ -8,7 +8,7 @@
 <!-- Internalize streams -->
 <!-- data types have to be strings, otherwise UNION fails when comparing punctuations. -->
 
-<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-medium-7-25-2010.xml"/>
+<filescan id ="sensors" isstream="yes" delay="0" filename="C:\DATA_Rafael\sensor-medium-8-22-2010.xml"/>
 <unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
 <unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
 <unnest id="timestamp_text" regexp="timestamp_text" root="$sensor" datatype="String" input="timestamp"/>
@@ -18,7 +18,7 @@
 <unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="String" input="speed"/>
 
 
-<filescan id ="sensors2" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-medium-7-25-2010.xml"/>
+<filescan id ="sensors2" isstream="yes" delay="0" filename="C:\DATA_Rafael\sensor-medium-8-22-2010.xml"/>
 <unnest id="sensor2" regexp="sensor" datatype="XML" input="sensors2"/>
 <unnest id="timestamp2" regexp="timestamp" datatype="TS" input="sensor2"/>
 <unnest id="timestamp_text2" regexp="timestamp_text" root="$sensor2" datatype="String" input="timestamp2"/>
@@ -28,21 +28,21 @@
 <unnest id="occupancy2" regexp="occupancy" root="$sensor2" datatype="String" input="speed2"/>
 
 <!-- Filter speeds -->
-<select id="select1" input="occupancy">
+<select id="select1" input="occupancy" log="yes" propagate="no" exploit="yes">
 <pred op="gt">
        <var value="$speed"/><string value ="10"/>
 </pred>
 </select>
 
 <!-- Filter speeds -->
-<select id="select2" input="occupancy2">
+<select id="select2" input="occupancy2" log="yes" propagate="no" exploit="yes">
 <pred op="gt">
        <var value="$speed2"/><string value ="10"/>
 </pred>
 </select>
 
 <!-- Union -->
-<union id="union" input="select1 select2">
+<union id="union" input="select1 select2" log="yes" propagate="yes" exploit="yes" fattrsL="speed occupancy" fattrsR="speed2 occupancy2" >
 <!-- mappings found harmful! -->
 <!-- 
 <mapping outputattr = "timestamp" inputattrs = "timestamp timestamp2"/>
@@ -54,7 +54,11 @@
 -->
 </union>
 
-<construct id="cons" input="union">
+<!-- Instrument -->
+<instrument2 id="instrument" input="union" interval="1" log="yes" propagate="yes" fattrs="speed occupancy" printpunct="yes"/>
+
+
+<construct id="cons" input="instrument">
 <![CDATA[
 <result>
 $timestamp

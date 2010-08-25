@@ -21,6 +21,7 @@ public class Instrument2 extends UnaryOperator {
 	private long interval;
 	private Boolean logging;
 	private Boolean propagate;
+	private Boolean passpunct;
 
 	private Attribute tsAttr;
 	private Attribute idAttr;
@@ -29,6 +30,7 @@ public class Instrument2 extends UnaryOperator {
 		interval = 0;
 		logging = false;
 		propagate = false;
+		passpunct = true;
 	}
 
 	public long getInterval(){
@@ -41,6 +43,11 @@ public class Instrument2 extends UnaryOperator {
 	
 	public Boolean getPropagate(){
 		return propagate;
+	}
+	
+	public Boolean getPrintPunct()
+	{
+		return passpunct;
 	}
 	
 	public Attribute getTsAttr() {
@@ -56,6 +63,7 @@ public class Instrument2 extends UnaryOperator {
 		interval = Long.parseLong(e.getAttribute("interval"));
 		String l = e.getAttribute("log").toString();
 		String p = e.getAttribute("propagate").toString();
+		String pp = e.getAttribute("printpunct").toString();
 		
 		if(l.equals("yes"))
 			logging = true;
@@ -65,6 +73,11 @@ public class Instrument2 extends UnaryOperator {
 			propagate = true;
 		else propagate = false;
 
+		if(pp.equals("yes"))
+			passpunct = true;
+		else passpunct = false;
+
+		
 		String fAttrStr = e.getAttribute("fattrs");
 		if (fAttrStr.length() == 0)
 			throw new InvalidPlanException("Bad value for 'fattrs' for : "
@@ -89,6 +102,8 @@ public class Instrument2 extends UnaryOperator {
 		if(((Instrument2)other).logging != this.logging)
 			return false;
 		if(((Instrument2)other).propagate != this.propagate)
+			return false;
+		if(((Instrument2)other).passpunct != this.passpunct)
 			return false;
 		if(((Instrument2)other).tsAttr != this.tsAttr)
 			return false;
@@ -129,6 +144,7 @@ public class Instrument2 extends UnaryOperator {
 		Instrument2 op = new Instrument2();
 		op.interval = interval;
 		op.propagate = propagate;
+		op.passpunct = passpunct;
 		op.logging = this.logging;
 		op.tsAttr = tsAttr;
 		op.idAttr = idAttr;

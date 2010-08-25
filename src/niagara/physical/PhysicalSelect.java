@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import niagara.logical.Select;
 import niagara.logical.predicates.Predicate;
-import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalOp;
@@ -39,6 +38,8 @@ public class PhysicalSelect extends PhysicalOperator {
 
 	// Exploit
 	Boolean exploit = false;
+	int[] positions;
+	String[] names;
 
 	// logging test
 	int tupleOut = 0;
@@ -92,12 +93,23 @@ public class PhysicalSelect extends PhysicalOperator {
 			break;
 		case MESSAGE:
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
-			// System.out.println("Received FP");
-			//System.out.println(fp.toString());
+			FeedbackPunctuation fpSend = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
+
+			// get attribute positions from tuple to check against guards
+			names = new String[fpSend.Variables().size()];
+			names = fpSend.Variables().toArray(names);
+
+			// get positions
+			positions = new int[fpSend.Variables().size()];
+			for (int i = 0; i < names.length; i++) {
+				positions[i] = outputTupleSchema.getPosition(names[i]);
+			}			
+			
+			if(exploit)
 				outputGuard.add(fp);
 
 			if (propagate) {
-				sendFeedbackPunctuation(fp, streamId);
+				sendFeedbackPunctuation(fpSend, streamId);
 			}
 			break;
 		default:
@@ -127,34 +139,32 @@ public class PhysicalSelect extends PhysicalOperator {
 		if (predEval.evaluate(inputTuple, null)) {
 
 			if (exploit) {
-
-				// get attribute positions from tuple to check against guards
-				int[] positions = new int[2];
-				String[] names = { "timestamp", "sensor_id" };
-
-				for (int i = 0; i < names.length; i++) {
-					positions[i] = inputTupleSchemas[0].getPosition(names[i]);
-				}
-
 				// check against guards
 				Boolean guardMatch = false;
 				for (FeedbackPunctuation fp : outputGuard.elements()) {
 					guardMatch = guardMatch
 							|| fp
-									.match(positions, names, inputTuple
+									.match(positions, inputTuple
 											.getTuple());
 				}
 
 				if (!guardMatch) {
 					putTuple(inputTuple, 0);
+					if (logging) {
+						tupleOut++;
+						log.Update("TupleOut", String.valueOf(tupleOut));
+					}
+					//System.out.println(this.getName() + tupleOut);
+
 				}
 			} else {
 				putTuple(inputTuple, 0);
+				if (logging) {
+					tupleOut++;
+					log.Update("TupleOut", String.valueOf(tupleOut));
+					//System.out.println(this.getName() + tupleOut);
 			}
 
-			if (logging) {
-				tupleOut++;
-				log.Update("TupleOut", String.valueOf(tupleOut));
 			}
 		} else {
 			if (logging) {
@@ -182,6 +192,7 @@ public class PhysicalSelect extends PhysicalOperator {
 	protected void processPunctuation(Punctuation inputTuple, int streamId)
 			throws ShutdownException, InterruptedException {
 		putTuple(inputTuple, 0);
+	//	System.out.println(this.getName() + "punctuation");
 	}
 
 	public boolean isStateful() {

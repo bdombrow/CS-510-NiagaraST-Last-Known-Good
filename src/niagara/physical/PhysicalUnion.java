@@ -2,6 +2,7 @@ package niagara.physical;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import niagara.logical.Union;
 import niagara.optimizer.colombia.Attribute;
@@ -14,9 +15,14 @@ import niagara.optimizer.colombia.Op;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.ControlFlag;
 import niagara.utils.FeedbackPunctuation;
+import niagara.utils.FeedbackType;
+import niagara.utils.Guard;
 import niagara.utils.Punctuation;
 import niagara.utils.ShutdownException;
 import niagara.utils.Tuple;
+
+import niagara.utils.Log;
+import niagara.utils.FeedbackPunctuation.Comparator;
 
 /**
  * <code>PhysicalUnion</code> implements a union of a set of incoming streams;
@@ -33,8 +39,19 @@ public class PhysicalUnion extends PhysicalOperator {
 	private int outSize;
 	private boolean propagate;
 	private boolean exploit;
+	//private boolean logging;
 	
-	private int tupleCount = 0;
+	//private int tupleCount = 0;
+	
+	// amit: adding the following line
+	private Guard outputGuard = new Guard();
+	int[] positions;
+	String[] names;
+	int tupleOut = 0;
+	
+	// FP attributes
+	private String fattrsL = "";
+	private String fattrsR = "";	
 
 	public PhysicalUnion() {
 		// XXX vpapad: here we have to initialize blockingSourceStreams
@@ -53,6 +70,16 @@ public class PhysicalUnion extends PhysicalOperator {
 
 		exploit = logicalOp.getExploit();
 		propagate = logicalOp.getPropagate();
+		
+		logging = logicalOp.getLogging();
+		
+		if (logging) {
+			log = new Log(this.getName());
+		}
+		
+		fattrsL = logicalOp.getFAttrsL();
+		fattrsR = logicalOp.getFAttrsR();
+
 		
 		setBlockingSourceStreams(new boolean[logicalOp.getArity()]);
 		hasMappings = false;
@@ -92,15 +119,45 @@ public class PhysicalUnion extends PhysicalOperator {
 			break;
 		case MESSAGE:
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+			FeedbackPunctuation fpSendL = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
+			FeedbackPunctuation fpSendR = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
+			
+			// get attribute positions from tuple to check against guards
+			names = new String[fp.Variables().size()];
+			names = fp.Variables().toArray(names);
+
+			// get positions
+			positions = new int[fp.Variables().size()];
+			for (int i = 0; i < names.length; i++) {
+				positions[i] = outputTupleSchema.getPosition(names[i]);
+			}
+
+			
+			
 			// System.out.println("Received FP");
 			///System.out.println(this.getName() + " " + fp.toString());
-			//outputGuard.add(fp);
+			
+			if(exploit)		
+				outputGuard.add(fp);
 
 			if (propagate) {
-				//sendFeedbackPunctuation(fp,0);
-				//sendFeedbackPunctuation(fp,1);
-				sendFeedbackPunctuationToSources(fp);
-				//System.out.println(this.getName() + "Sent FP");
+				
+				// amit: Logic similar to join; need to be tested.
+				FeedbackPunctuation fpSend0 = null; 
+				FeedbackPunctuation fpSend1 = null; 
+		
+								
+				fpSend0 = split(fp,fattrsL);
+				
+				fpSend1 = splitR(fp,fattrsL,fattrsR);
+			
+				
+			//	fpSend1.Variables().add(arg0)
+				
+				sendFeedbackPunctuation(fpSend0, 0);
+				
+				sendFeedbackPunctuation(fpSend1, 1);
+				
 			}
 			break;
 		default:
@@ -108,6 +165,95 @@ public class PhysicalUnion extends PhysicalOperator {
 				+ ctrlFlag.flagName();
 		}
 	}
+	
+	FeedbackPunctuation split(FeedbackPunctuation fp,String fattrsList)
+	{
+		 FeedbackType _type;
+		 ArrayList<String> _variables = new ArrayList<String>();
+		 ArrayList<Comparator> _comparators = new ArrayList<Comparator>();
+		 ArrayList<String> _values = new ArrayList<String>();
+					
+		Iterator<String> iter = fp.Variables().iterator();
+		
+		int posPointer = 0;
+		
+		String fattrNames[] = fattrsList.split(" ");
+		
+		while(iter.hasNext())
+		{
+			String var = iter.next();			
+			
+			for(String s:fattrNames)
+			{
+				if(var.equals(s))
+				{
+					_variables.add(var);
+					_comparators.add(fp.Comparators().get(posPointer));
+					_values.add(fp.getValue(posPointer));
+				}
+			}	
+			
+			posPointer++;			
+		}
+		
+		_variables.trimToSize();
+		_comparators.trimToSize();
+		_values.trimToSize();
+
+		return new FeedbackPunctuation(fp.Type(),_variables,_comparators,_values);	
+						
+	}
+	
+	FeedbackPunctuation splitR(FeedbackPunctuation fp,String fattrsListL, String fattrsListR)
+	{
+		 FeedbackType _type;
+		 ArrayList<String> _variables = new ArrayList<String>();
+		 ArrayList<Comparator> _comparators = new ArrayList<Comparator>();
+		 ArrayList<String> _values = new ArrayList<String>();
+					
+		Iterator<String> iter = fp.Variables().iterator();
+		
+		int posPointer = 0;
+		
+		String fattrNames[] = fattrsListL.split(" ");
+		
+		String fattrNamesR[] = fattrsListR.split(" ");
+		
+		int r_ptr = 0;
+		
+		while(iter.hasNext())
+		{
+			String var = iter.next();			
+			
+			for(String s:fattrNames)
+			{
+				if(var.equals(s))
+				{
+					// if var from L matches, grab next var from R and add it to the FP 
+					//_variables.add(var);
+					String var1 = fattrNamesR[r_ptr++];
+					_variables.add(var1);
+					_comparators.add(fp.Comparators().get(posPointer));
+					_values.add(fp.getValue(posPointer));
+				}
+			}	
+			
+			posPointer++;			
+		}
+		
+		_variables.trimToSize();
+		_comparators.trimToSize();
+		_values.trimToSize();
+
+		return new FeedbackPunctuation(fp.Type(),_variables,_comparators,_values);	
+						
+	}	
+	
+//	}
+//	
+//	if(fattrsList.contains(var + " ") || fattrsList.contains(" " + var) || (!fattrsList.contains(" ") && fattrsList.equals(var)))
+//	{
+	
 	
 	/**
 	 * This function processes a tuple element read from a source stream when
@@ -129,9 +275,38 @@ public class PhysicalUnion extends PhysicalOperator {
 			putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
 		} else {
 			// just send the original tuple along
-			putTuple(inputTuple, 0);
-			//System.out.println(tupleCount);
+			if (exploit) 
+			{
+
+				// check against guards
+				Boolean guardMatch = false;
+				for (FeedbackPunctuation fp : outputGuard.elements()) {
+					guardMatch = guardMatch
+							|| fp
+									.match(positions, inputTuple
+											.getTuple());
+				}
+
+				if (!guardMatch) {
+					putTuple(inputTuple, 0);
+					if (logging) {
+						tupleOut++;
+						log.Update("TupleOut", String.valueOf(tupleOut));
+					}
+				}
+			} 
+			else
+			{
+				putTuple(inputTuple, 0);
+				if (logging) {
+					tupleOut++;
+					log.Update("TupleOut", String.valueOf(tupleOut));
+				}
+				}
+			//putTuple(inputTuple, 0);
 			//tupleCount++;
+			//System.out.println(this.getName()+ tupleCount);
+			
 
 		}
 	}
@@ -208,6 +383,11 @@ public class PhysicalUnion extends PhysicalOperator {
 		newOp.outSize = outSize;
 		newOp.exploit = exploit;
 		newOp.propagate = propagate;
+		newOp.logging = logging;
+		newOp.log = new Log(this.getName());
+		newOp.fattrsL = fattrsL;
+		newOp.fattrsR = fattrsR;
+		
 		return newOp;
 	}
 
@@ -223,6 +403,14 @@ public class PhysicalUnion extends PhysicalOperator {
 			return false;
 		if(((PhysicalUnion)o).propagate != propagate)
 			return false;
+		if(((PhysicalUnion)o).logging != logging)
+			return false;
+		if(!((PhysicalJoin)o).fattrsL.equals(fattrsL))
+			return false;
+		if(!((PhysicalJoin)o).fattrsL.equals(fattrsL))
+			return false;
+		
+		
 		return getArity() == ((PhysicalUnion) o).getArity()
 				&& inputAttrs.equals(((PhysicalUnion) o).inputAttrs);
 	}

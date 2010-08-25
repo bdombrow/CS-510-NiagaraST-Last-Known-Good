@@ -25,12 +25,12 @@ public class Guard {
 	
 	// Methods
 	public void add(FeedbackPunctuation fp) {
-		boolean in = false;
+		boolean in = true;
 		for(FeedbackPunctuation f:_guards) {
-			in = in || fp.equals(f);
+			in = in && !fp.equals(f);
 		}
 		
-		if(!in) {
+		if(in) {
 			_guards.add(fp);
 		}
 	}

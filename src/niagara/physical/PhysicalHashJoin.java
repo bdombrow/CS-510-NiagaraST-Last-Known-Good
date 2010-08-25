@@ -319,6 +319,8 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	protected void processPunctuation(Punctuation tuple, int streamId)
 			throws ShutdownException, InterruptedException {
 
+		//System.out.println(this.getName() + "received punctuation");
+		
 		int otherStreamId = 1 - streamId;
 		Tuple left, right;
 		String punctVal;
@@ -463,6 +465,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	private void passOnPunct(Punctuation tuple, int streamId)
 			throws InterruptedException, ShutdownException {
 		putPunctuation(tuple, streamId);
+		//System.out.println(this.getName() + "put punctuation (passOn)");
 		/*
 		 * if (streamClose[1-streamId]) putPunctuation(tuple, streamId); else {
 		 * if (punctBuffer == null) punctBuffer = new ArrayList();
@@ -503,6 +506,8 @@ public class PhysicalHashJoin extends PhysicalJoin {
 
 		// Add the result to the output
 		putTuple(result, 0);
+	//	System.out.println(this.getName() + "put punctuation");
+
 	}
 
 	// private void purgeHashTable(DuplicateHashtable ht, int streamId,
@@ -640,6 +645,13 @@ public class PhysicalHashJoin extends PhysicalJoin {
 		op.ts = ts;
 		op.streamClose = streamClose;
 		op.punctAttrMatch = punctAttrMatch;
+		op.logging = logging;
+		op.log = log;
+		op.exploit = exploit;
+		op.propagate = propagate;
+		op.fattrsL = fattrsL;
+		op.fattrsR = fattrsR;
+		
 		return op;
 	}
 

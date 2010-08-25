@@ -108,7 +108,7 @@
       <physical class="niagara.physical.PhysicalMagic" name="PhysicalMagic"/>
     </logical>
     <logical class="niagara.logical.Join" name="join">
-      <physical class="niagara.physical.PhysicalNLJoin" name="NestedLoopsJoin"/>
+      <!-- <physical class="niagara.physical.PhysicalNLJoin" name="NestedLoopsJoin"/> -->
       <physical class="niagara.physical.PhysicalHashJoin" name="HashJoin"/>
     </logical>
     <logical class="niagara.logical.WindowJoin" name="windowJoin">
@@ -251,10 +251,10 @@
   		<before><logical condition="isEquiJoin" name="join"/></before>
  		<after><op name="HashJoin"/></after>
   	</rule> 
-  	<rule name="join to NestedLoopsJoin" type="simple">
+  	<!-- <rule name="join to NestedLoopsJoin" type="simple">
   		<before><logical name="join"/></before>
  		<after><op name="NestedLoopsJoin"/></after>
-  	</rule>
+  	</rule> -->
 	<rule name="windowJoin to WindowJoin" type="simple">
 		<before><logical name="windowJoin"/></before>
 		<after><op name="WindowJoin"/></after>

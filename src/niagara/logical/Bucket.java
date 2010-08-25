@@ -27,7 +27,10 @@ public class Bucket extends UnaryOperator {
 	private String name;
 	private long starttime;
 	private boolean propagate = false;
-
+	private Boolean exploit = false;
+	private Boolean logging = false;
+	private String fAttr = ""; 
+	
 	public void dump() {
 		System.out.println("BucketOp");
 	}
@@ -39,20 +42,31 @@ public class Bucket extends UnaryOperator {
 		op.range = range;
 		op.slide = slide;
 		op.starttime = starttime;
-		// op.attrInput = attrInput;
 		op.stInput = stInput;
 		op.name = name;
 		op.widName = widName;
 		op.propagate = propagate;
+		op.exploit = exploit;
+		op.logging = logging;
+		op.fAttr = fAttr;
+		
 		return op;
 	}
 
 	public int hashCode() {
 		int p = 0;
+		int e = 0;
+		int l = 0;
+		
 		if (propagate)
 			p = 1;
+		if(exploit)
+			e = 1;
+		if(logging)
+			l = 1;
+		
 		return range ^ slide ^ windowType ^ windowAttr.hashCode()
-				^ hashCodeNullsAllowed(stInput) ^ p;
+				^ hashCodeNullsAllowed(stInput) ^ p ^ e ^ l ^ fAttr.hashCode();
 	}
 
 	public boolean equals(Object obj) {
@@ -64,15 +78,20 @@ public class Bucket extends UnaryOperator {
 		if (windowAttr != null)
 			if (!windowAttr.equals(other.windowAttr))
 				return false;
-
+		if (fAttr.compareTo(((Bucket)obj).fAttr) != 0 )  
+			return false;
 		if (stInput != null)
 			if (!stInput.equals(other.stInput))
 				return false;
 		if (widName != null)
 			if (!widName.equals(other.widName))
 				return false;
-		if (!propagate)
+		if (propagate != other.propagate)
 			return false;
+		if(exploit != other.exploit)
+			return false;
+		
+		
 		return (windowType == other.windowType) && (range == other.range)
 				&& (slide == other.slide) && (starttime == other.starttime);
 	}
@@ -115,9 +134,21 @@ public class Bucket extends UnaryOperator {
 
 		if (propagateAttribute.equals("yes"))
 			propagate = true;
+		
+		String exploitAttribute = e.getAttribute("exploit");
 
+		if (exploitAttribute.equals("yes"))
+			exploit = true;
+
+		String logAttribute = e.getAttribute("log");
+
+		if (logAttribute.equals("yes"))
+			logging = true;
+		
+		fAttr = e.getAttribute("fattr");
 		name = e.getAttribute("id");
 		stInput = e.getAttribute("input");
+
 		if (e.getAttribute("start") != "")
 			starttime = Long.valueOf(e.getAttribute("start"));
 		else
@@ -129,10 +160,23 @@ public class Bucket extends UnaryOperator {
 		return windowAttr;
 	}
 
+	public String getFAttr()
+	{
+		return fAttr;
+	}
+	
 	public boolean getPropagate() {
 		return propagate;
 	}
 
+	public Boolean getExploit(){
+		return exploit;
+	}
+	
+	public Boolean getLogging() {
+		return logging;
+	}
+	
 	public int getWindowType() {
 		return windowType;
 	}

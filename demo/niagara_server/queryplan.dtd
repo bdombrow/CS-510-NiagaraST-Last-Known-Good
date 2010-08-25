@@ -107,6 +107,7 @@
     fattrs     CDATA  #REQUIRED
     log       (yes|no) "no"
     propagate (yes|no) "no"
+    printpunct (yes|no) "yes"
 	  %StandardAttributes;>
 
 
@@ -117,7 +118,9 @@
       sumattr  CDATA		#IMPLIED
       countattr CDATA		#IMPLIED
 	  wid	   CDATA		""
-	  propagate (yes | no) "yes"
+	  propagate (yes | no) 	"yes"
+	  log       (yes|no) 	"no"
+	  exploit 	(yes|no) 	"no"
 	  %StandardAttributes;>
 
 <!ELEMENT slidingAvg     EMPTY>
@@ -240,7 +243,10 @@
          id ID                         #REQUIRED
          input    IDREFS               #REQUIRED
          propagate (yes | no) "no"
-         explot    (yes | no) "no"
+         exploit    (yes | no) "no"
+         log 	   (yes | no) "no"
+         fattrsL  CDATA ""
+         fattrsR  CDATA ""
 	 %StandardAttributes;>
 
 <!-- outputattr is the name of the output attr to be
@@ -268,6 +274,11 @@
           input    IDREFS               #REQUIRED
 	  punctattr	CDATA		""
           extensionjoin (left | right | both | none)  "none"
+          log       (yes | no) "no"
+          propagate (yes | no) "no"          
+          exploit (yes | no) "no"
+          fattrsL  CDATA ""
+          fattrsR  CDATA ""          
 	  %PositionAttributes;>
 
 <!ELEMENT windowJoin (and | or | not | true | false | pred)? >
@@ -421,6 +432,9 @@ specify the db input first and the stream punct input second -->
 	  order    (yes|no)     "yes"
 	  start    CDATA        ""
 	  propagate (yes|no)    "no"
+	  log       (yes | no) "no"
+	  exploit   (yes | no) "no"
+	  fattr		CDATA	""
 	  %StandardAttributes;>
 
 <!ELEMENT describe EMPTY>

@@ -38,6 +38,9 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 	private Attribute tsAttr;
 	private Attribute idAttr;
 	private int tupleCount;
+	boolean sentOne = false;
+	boolean pass_punct = true;
+	
 
 	public PhysicalInstrument2() {
 		setBlockingSourceStreams(blockingSourceStreams);
@@ -62,7 +65,9 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 			log = new Log(this.getName());
 			outCount = 0;
 		}
+		
 		propagate = ((Instrument2)op).getPropagate();
+		pass_punct = ((Instrument2)op).getPrintPunct(); 
 		tsAttr = ((Instrument2)op).getTsAttr();
 		idAttr = ((Instrument2)op).getIdAttr();
 	}
@@ -87,6 +92,8 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 		if(((PhysicalInstrument2)other).log != this.log)
 			return false;
 		if(((PhysicalInstrument2)other).propagate != this.propagate)
+			return false;
+		if(((PhysicalInstrument2)other).pass_punct != this.pass_punct)
 			return false;
 		if(((PhysicalInstrument2)other).tsAttr != this.tsAttr)
 			return false;
@@ -113,6 +120,7 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 		pr.log = log;
 		pr.logging = logging;
 		pr.propagate = propagate;
+		pr.pass_punct = pass_punct;
 		pr.tsAttr = tsAttr;
 		pr.idAttr = idAttr;
 		pr.tupleCount = tupleCount;
@@ -126,14 +134,14 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 		putTuple(tuple, streamId);
 
 		tupleCount++;
-		//System.out.println(tupleCount);
+		//System.out.println(this.getName() + tupleCount);
 		
 		if(logging) {
 			outCount++;
 			log.Update("OutCount", String.valueOf(outCount));		
 		}
-		if(propagate && ((tupleCount % interval) == 0)){
-
+		if((!sentOne) && propagate && ((tupleCount % interval) == 0)){
+			sentOne = true;
 			// construct the FP element
 			ArrayList<String> vars = new ArrayList<String>();
 			ArrayList<FeedbackPunctuation.Comparator> comps = new ArrayList<FeedbackPunctuation.Comparator>();
@@ -142,16 +150,21 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 			// Add elements
 			vars.add(tsAttr.getName());
 			comps.add(FeedbackPunctuation.Comparator.LE);
-			vals.add("63401821260000000"); //0
+			//vals.add("63401821260000000"); //0
+			vals.add("1500");
+
+			//vars.add(idAttr.getName());
+			//comps.add(FeedbackPunctuation.Comparator.E);
+			//vals.add("1001");
 
 			vars.add(idAttr.getName());
-			comps.add(FeedbackPunctuation.Comparator.E);
-			vals.add("1001");
-
+			comps.add(FeedbackPunctuation.Comparator.LE);
+			vals.add("1500");			
 			
 			// Send elements
 			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, vars, comps, vals);
 			sendFeedbackPunctuation(fp, 0);
+			System.out.println(this.getName() + fp.toString());
 			sent++;
 		}
 
@@ -159,7 +172,8 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 
 	protected void processPunctuation(Punctuation tuple, int streamId)
 			throws ShutdownException, InterruptedException {
-		putTuple(tuple, streamId);
-	}
+		if(pass_punct)
+			putTuple(tuple, streamId);
+		}
 
 }

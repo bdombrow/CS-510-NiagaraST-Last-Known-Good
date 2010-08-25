@@ -10,7 +10,7 @@ public class PageQueue {
 	// can tell the difference between full and empty
 	private int length;
 	private TuplePage[] queue;
-	int EXPANSE_LIMIT = 30;
+	int EXPANSE_LIMIT = 100; 
 
 
 	// pointers to the head and rear of the queue, respectively
@@ -19,9 +19,6 @@ public class PageQueue {
 	// some queues can grow and never get full - this is for
 	// downstream control queues which should never grow large anyway
 	private boolean expandable;
-
-	// for debugging
-	private String name;
 
 	/**
 	 * This is the constructor for the Queue class
@@ -46,7 +43,6 @@ public class PageQueue {
 		length = len + 1;
 		queue = new TuplePage[length];
 		this.expandable = expandable;
-		this.name = name;
 	}
 
 	/**
@@ -112,8 +108,10 @@ public class PageQueue {
 	}
 
 	private boolean expandQueue() {
-		if (length >= EXPANSE_LIMIT)
+		if (length >= EXPANSE_LIMIT) {
+		System.out.println(this.toString() + "refuse to expand");
 			return false; // refuse to expand*/
+		}
 
 		TuplePage[] newQueue = new TuplePage[length * 2];
 
@@ -125,6 +123,8 @@ public class PageQueue {
 		tail = length - 1;
 		queue = newQueue;
 		length = length * 2;
+		System.out.println(this.toString() + " expanded");
+
 		return true;
 	}
 

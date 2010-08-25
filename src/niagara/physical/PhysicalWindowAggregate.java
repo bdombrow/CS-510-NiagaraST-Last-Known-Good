@@ -95,7 +95,12 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 		PhysicalWindowAggregate op = getInstance();
 		op.aggrAttr = this.aggrAttr;
 		op.widName = widName;
-		// op.propagate = propagate;
+		op.propagate = propagate;
+		op.fAttr = fAttr;
+		op.logging = logging;
+		op.log = log;
+		op.exploit = exploit;
+		
 		return op;
 	}
 

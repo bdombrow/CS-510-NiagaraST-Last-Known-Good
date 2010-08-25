@@ -44,7 +44,13 @@ public class Join extends BinaryOperator {
 	protected int extensionJoin;
 
 	private String[] punctAttrs = null;
-
+	
+	private Boolean propagate = false;	
+	private Boolean exploit = false;
+	private Boolean logging = false;
+	private String fattrsL = "";
+	private String fattrsR = "";
+	
 	public Join() {
 		extensionJoin = NONE; // default
 	}
@@ -181,9 +187,17 @@ public class Join extends BinaryOperator {
 	}
 
 	public Op opCopy() {
-		return new Join(pred, equiJoinPredicates,
+		Join op = new Join(pred, equiJoinPredicates,
 				(projectedAttrs == null) ? null : projectedAttrs.copy(),
 				extensionJoin, punctAttrs);
+		
+		op.logging = logging;
+		op.propagate = propagate;
+		op.exploit = exploit;
+		op.fattrsL = fattrsL;
+		op.fattrsR = fattrsR;
+		
+		return op;
 	}
 
 	public boolean equals(Object obj) {
@@ -191,8 +205,20 @@ public class Join extends BinaryOperator {
 			return false;
 		if (obj.getClass() != Join.class)
 			return obj.equals(this);
+		
 		Join other = (Join) obj;
-
+		if (propagate != other.propagate)
+			return false;
+		if(exploit != other.exploit)
+			return false;
+		if(fattrsL != other.fattrsL)
+			return false;
+		if(fattrsR != other.fattrsR)
+			return false;
+		if(logging != other.logging)
+			return false;
+		
+	
 		if ((punctAttrs == null) ^ (other.punctAttrs == null))
 			return false;
 
@@ -204,7 +230,7 @@ public class Join extends BinaryOperator {
 
 	public int hashCode() {
 		return equiJoinPredicates.hashCode() ^ pred.hashCode()
-				^ hashCodeNullsAllowed(projectedAttrs);
+				^ hashCodeNullsAllowed(projectedAttrs) ^ propagate.hashCode() ^ exploit.hashCode() ^ logging.hashCode() ^ fattrsR.hashCode() ^ fattrsL.hashCode();
 	}
 
 	public void projectedOutputAttributes(Attrs outputAttrs) {
@@ -316,10 +342,51 @@ public class Join extends BinaryOperator {
 					Variable.findVariable(inputProperties[i], punctAttrs[i]);
 			}
 		}
+		
+		String p = e.getAttribute("propagate");
+		if(p.equals("yes"))
+			propagate = true;
+		else propagate = false;
+		
+		String ex = e.getAttribute("exploit");
+		if(ex.equals("yes"))
+			exploit = true;
+		else exploit = false;
+		
+		
+		String l = e.getAttribute("log");
+		if(l.equals("yes"))
+			logging = true;
+		else logging = false;
+		
+		fattrsL = e.getAttribute("fattrsL");
+		fattrsR = e.getAttribute("fattrsR");
 	}
 
 	public String[] getPunctAttrs() {
 		return punctAttrs;
+	}
+	
+	public Boolean getPropagate(){
+		return propagate;
+	}
+	
+	public String getFAttrsL()
+	{
+		return fattrsL;
+	}
+	
+	public String getFAttrsR()
+	{
+		return fattrsR;
+	}
+	
+	public Boolean getExploit(){
+		return exploit;
+	}
+	
+	public Boolean getLogging() {
+		return logging;
 	}
 
 }

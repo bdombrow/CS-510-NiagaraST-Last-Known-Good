@@ -6,6 +6,8 @@ import niagara.logical.WindowAggregate;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.utils.BaseAttr;
 import niagara.utils.ControlFlag;
+import niagara.utils.FeedbackPunctuation;
+import niagara.utils.Log;
 import niagara.utils.ShutdownException;
 import niagara.utils.StringAttr;
 import niagara.utils.Tuple;
@@ -23,7 +25,7 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 
 	int totalCost = 0;
 	ArrayList values = new ArrayList();
-
+	
 	/**
 	 * This function updates the statistics with a value
 	 * 
@@ -34,6 +36,13 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 	protected void localInitFrom(LogicalOp logicalOperator) {
 		aggrAttr = ((WindowAggregate) logicalOperator).getAggrAttr();
 		widName = ((WindowAggregate) logicalOperator).getWid();
+		
+		logging = ((WindowAggregate) logicalOperator).getLogging();
+		if (logging) {
+			log = new Log(this.getName());
+		}
+		
+		exploit = ((WindowAggregate) logicalOperator).getExploit();
 	}
 
 	public void updateAggrResult(PhysicalWindowAggregate.AggrResult result,
@@ -76,17 +85,28 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 			processGetPartialFromSink(streamId);
 			break;
 		case MESSAGE:
-			System.err.println(this.getName() + "***Got message: "
-					+ ctrl.get(1) + " with propagate =  " + propagate);
+			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+			FeedbackPunctuation fpSend = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
+			
+			// get attribute positions from tuple to check against guards
+			names = new String[fpSend.Variables().size()];
+			names = fpSend.Variables().toArray(names);
 
-			String[] feedback = ctrl.get(1).toString().split("#");
-
-			fAttr = feedback[0];
-			guardOutput = feedback[1];
-
-			if (propagate) {
-				sendCtrlMsgUpStream(ctrlFlag, ctrl.get(1).toString(), 0, null);
+			// get positions
+			positions = new int[fpSend.Variables().size()];
+			for (int i = 0; i < names.length; i++) {
+				positions[i] = outputTupleSchema.getPosition(names[i]);
 			}
+			
+			if(exploit)
+				outputGuard.add(fp);
+			//System.out.println(this.getName() + "exploits" + fp.toString());
+			
+			if (propagate) {
+				sendFeedbackPunctuation(fpSend, streamId);
+				System.out.println(this.getName() + fp.toString());
+			}
+			
 			break;
 		default:
 			assert false : "KT unexpected control message from sink "
@@ -94,31 +114,6 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 		}
 	}
 
-	// void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
-	// throws java.lang.InterruptedException, ShutdownException {
-	// // downstream control message is GET_PARTIAL
-	// // We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
-	// // REQ_BUF_FLUSH is handled inside SinkTupleStream
-	// // here (SHUTDOWN is handled with exceptions)
-	//
-	// if (ctrl == null)
-	// return;
-	//    
-	// int ctrlFlag =(Integer) ctrl.get(0);
-	//
-	// switch (ctrlFlag) {
-	// /*case CtrlFlags.GET_PARTIAL:
-	// processGetPartialFromSink(streamId);
-	// break;*/
-	// case CtrlFlags.MESSAGE:
-	// System.err.println(this.getName() + " got message: " + ctrl.get(1));
-	// //sendCtrlMsgUpStream(CtrlFlags.MESSAGE, "From PunctQC, With Love", 0);
-	// break;
-	// default:
-	// assert false : "KT unexpected control message from sink "
-	// + CtrlFlags.name[ctrlFlag];
-	// }
-	// }
 
 	// //////////////////////////////////////////////////////////////////
 	// These are the private variables of the class //

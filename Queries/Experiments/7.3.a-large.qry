@@ -47,7 +47,7 @@
 </select>
 
 <!-- Union -->
-<union id="union" input="select1 select2" propagate="yes">
+<union id="union" input="select1 select2" propagate="yes" fattr="">
 </union>
 
 <!-- Instrument -->

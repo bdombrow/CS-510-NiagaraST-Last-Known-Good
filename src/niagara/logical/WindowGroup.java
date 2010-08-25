@@ -29,11 +29,16 @@ public abstract class WindowGroup extends Group {
 	protected int slide;
 	protected String widName;
 	protected boolean propagate = false;
-
+	protected boolean logging = false;
+	protected Boolean exploit = false;
+	
 	public boolean getPropagate() {
 		return propagate;
 	}
 
+	public boolean getExploit() {
+		return exploit;
+	}
 	/**
 	 * This function returns the skolem attributes associated with the group
 	 * operator
@@ -114,8 +119,6 @@ public abstract class WindowGroup extends Group {
 				+ widName);
 		groupbyAttrs.addElement(attr);
 		groupingAttrs = new skolem(id, groupbyAttrs);
-
-		// loadWindowAttrsFromXML(e, inputLogProp);
 	}
 
 	protected void loadWindowAttrsFromXML(Element e,
@@ -124,6 +127,11 @@ public abstract class WindowGroup extends Group {
 
 		if (propagateAttribute.equals("yes"))
 			propagate = true;
+		
+		String exploitAttribute = e.getAttribute("exploit");
+
+		if (exploitAttribute.equals("yes"))
+			exploit = true;
 
 		String windowAttribute = e.getAttribute("winattr");
 		String type = e.getAttribute("wintype");
@@ -150,33 +158,6 @@ public abstract class WindowGroup extends Group {
 		}
 	}
 
-	/*
-	 * protected void loadWindowAttrsFromXML(Element e, LogicalProperty
-	 * inputLogProp) throws InvalidPlanException { String windowAttribute =
-	 * e.getAttribute("winattr"); String type = e.getAttribute("wintype");
-	 * String windowRange = e.getAttribute("range"); String windowSlide =
-	 * e.getAttribute("slide");
-	 * 
-	 * if (windowAttribute.length() == 0) { range = 0; slide = 0; windowType =
-	 * -1; } else { range = new Integer(windowRange).intValue(); slide = new
-	 * Integer(windowSlide).intValue(); windowType = new
-	 * Integer(type).intValue(); windowAttr =
-	 * Variable.findVariable(inputLogProp, windowAttribute);
-	 * 
-	 * // Create a new physical bucket operator object PhysicalOperator
-	 * physicalOperator = new PhysicalBucketOperator();
-	 * 
-	 * physicalOperator.initFrom(this);
-	 * 
-	 * } }
-	 */
-
-	/*
-	 * protected void setWindowAttr(Attribute attr) { windowAttr = attr; }
-	 * protected void setWindowType(int type) { windowType = type; } protected
-	 * void setWindowRange(int range) { this.range = range; } protected void
-	 * setWindowSlide(int slide) { this.slide = slide; }
-	 */
 	public Attribute getWindowAttr() {
 		return windowAttr;
 	}
@@ -195,6 +176,10 @@ public abstract class WindowGroup extends Group {
 
 	public String getWid() {
 		return widName;
+	}
+	
+	public Boolean getLogging() {
+		return logging;
 	}
 
 }

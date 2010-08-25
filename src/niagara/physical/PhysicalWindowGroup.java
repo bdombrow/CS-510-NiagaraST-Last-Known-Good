@@ -17,6 +17,8 @@ import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
 import niagara.utils.BaseAttr;
+import niagara.utils.FeedbackPunctuation;
+import niagara.utils.Guard;
 import niagara.utils.IntegerAttr;
 import niagara.utils.LongAttr;
 import niagara.utils.Punctuation;
@@ -37,9 +39,17 @@ import org.w3c.dom.Document;
 public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
 	// Feedback Punctuation propagation
-	boolean propagate;
+	protected boolean propagate;
+	
+	protected boolean exploit;
+	
+//	 Feedback
+	protected Guard outputGuard = new Guard();
+	protected int[] positions;
+	protected String[] names;
+	
 	/* Guard */
-	String guardOutput = "*";
+	//String guardOutput = "*";
 	String fAttr;
 
 	// These are private nested classes used within the operator
@@ -199,6 +209,10 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 	protected Attribute windowAttr;
 	protected String widName;
 	SimpleAtomicEvaluator eaFrom, eaTo;
+	
+	int tupleOut = 0;
+	int tupleDrop = 0;
+	int count = 0;
 
 	// private int widFromPos, widToPos;
 
@@ -232,7 +246,9 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		windowAttr = ((WindowGroup) logicalOperator).getWindowAttr();
 		widName = ((WindowGroup) logicalOperator).getWid();
 		propagate = ((WindowGroup) logicalOperator).getPropagate();
-
+		logging = ((WindowGroup) logicalOperator).getLogging();
+		exploit = ((WindowGroup) logicalOperator).getExploit();
+		
 		// have subclass do initialization
 		localInitFrom(logicalOperator);
 	}
@@ -246,8 +262,12 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		op.groupAttributeList = groupAttributeList;
 		op.widName = widName;
 		op.propagate = propagate;
-		op.guardOutput = guardOutput;
+		//op.guardOutput = guardOutput;
 		op.fAttr = fAttr;
+		op.logging = logging;
+		op.log = log; 
+		op.exploit = exploit;
+		
 		return op;
 	}
 
@@ -265,10 +285,13 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 			return false;
 		if (((PhysicalWindowGroup) o).propagate != propagate)
 			return false;
-		if (!((PhysicalWindowGroup) o).guardOutput.equals(guardOutput))
-			return false;
+//		if (!((PhysicalWindowGroup) o).guardOutput.equals(guardOutput))
+//			return false;
 		if (!((PhysicalWindowGroup) o).fAttr.equals(fAttr))
 			return false;
+		if (((PhysicalWindowGroup) o).exploit != exploit)
+			return false;
+		
 		return localEquals(o);
 	}
 
@@ -428,6 +451,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		// Update hash entry for partial results
 		hashEntry.updatePartialResult(currPartialResultId);
 
+		
 		// Get the result object if at least partial or final
 		// result is not null
 		Object partialResult = hashEntry.getPartialResult();
@@ -441,36 +465,46 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
 		// If there is a non- empty result, then create tuple and add to
 		// result
-		if (resultNode != null) {
-			Tuple tupleElement = createTuple(resultNode, hashEntry
-					.getRepresentativeTuple(), partial);
+		if (resultNode != null) 
+		{
+			Tuple tupleElement = createTuple(resultNode, hashEntry.getRepresentativeTuple(), partial);
 
-			// putTuple(tupleElement,0);
+//				int pos = outputTupleSchema.getPosition(fAttr);
+//				IntegerAttr v = (IntegerAttr) tupleElement.getAttribute(pos);
+//				String tupleGuard = v.toASCII();
+				
+				if (exploit) 
+				{
+					// get attribute positions from tuple to check against guards
+					//int[] positions = new int[2];
+					//String[] names = ; //{ "wid_from_bucket", "milepost" };
 
-			if (guardOutput.equals("*")) {
-				putTuple(tupleElement, 0);
-			} else {
-				int pos = outputTupleSchema.getPosition(fAttr);
-				IntegerAttr v = (IntegerAttr) tupleElement.getAttribute(pos);
-				String tupleGuard = v.toASCII();
-				// System.err.println("Read: " + tupleGuard);
+//					for (int i = 0; i < names.length; i++) {
+	//					positions[i] = outputTupleSchema.getPosition(names[i]);
+		//			}
 
-				if (guardOutput.equals(tupleGuard)) {
-					putTuple(tupleElement, 0);
-					// System.err.println("Allowed production of tuple with value: "
-					// + tupleGuard);
-					// System.out.println(this.getName() + "produced a tuple.");
+					// check against guards
+					Boolean guardMatch = false;
+					for (FeedbackPunctuation fp : outputGuard.elements()) 
+					{
+						guardMatch = guardMatch	|| fp.match(positions, tupleElement.getTuple());
+					}
 
+					if (guardMatch) {
+						return;
+					}
+				} 
+				
+				
+				if (logging) {
+					tupleOut++;
+					log.Update("TupleOut", String.valueOf(tupleOut));
 				}
-				// else {
-				// putTuple(tupleElement,0);
-				// System.err.println("Avoided production of tuple with value: "
-				// + tupleGuard);
-				// System.err.println(this.getName() +
-				// "avoided sending a tuple.");
-				// }
 
-			}
+			//	System.out.println(this.getName() + tupleOut);
+				putTuple(tupleElement, 0);
+
+				
 		}
 	}
 
@@ -500,7 +534,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
 		int from = Integer.parseInt(eaFrom.getAtomicValue(tupleElement, null));
 		int to = Integer.parseInt(eaTo.getAtomicValue(tupleElement, null));
-
+		
 		HashEntry prevResult;
 
 		String key = hasher.hashKey(tupleElement);
@@ -509,6 +543,12 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
 		IntegerAttr wid;
 		String hashKey;
+		
+		// amit: if this tuple matches an FP in the guard, don't add it to the hashtable. Rather if there is a 
+		// matching hashtable entry also delete that entry
+		//System.out.println(this.getName() + count++);
+		
+		
 		// Probe hash table to see whether result for this hashcode
 		// already exist
 		for (int i = from; i <= to; i++) {
@@ -556,6 +596,8 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
 		}
 
+		
+		
 	}
 
 	/**

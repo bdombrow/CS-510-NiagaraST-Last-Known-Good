@@ -27,13 +27,29 @@ public class Union extends LogicalOperator {
 
 	private Boolean propagate = false;
 	private Boolean exploit = false;
+	private Boolean logging = false;
+	private String fattrsL = "";
+	private String fattrsR = "";
 
+	public String getFAttrsL() {
+		return fattrsL;
+	}
+
+	public String getFAttrsR() {
+		return fattrsR;
+	}
+
+	
 	public Boolean getPropagate(){
 		return propagate;
 	}
 	
 	public Boolean getExploit(){
 		return exploit;
+	}
+
+	public Boolean getLogging() {
+		return logging;
 	}
 	
 	public void setArity(int arity) {
@@ -82,6 +98,10 @@ public class Union extends LogicalOperator {
 		op.numMappings = numMappings;
 		op.propagate = propagate;
 		op.exploit = exploit;
+		op.logging = logging;
+		op.fattrsL = fattrsL;
+		op.fattrsR = fattrsR;
+		
 		return op;
 	}
 
@@ -129,6 +149,15 @@ public class Union extends LogicalOperator {
 			return false;
 		if(((Union)obj).exploit != exploit)
 			return false;
+		if(((Union)obj).logging != logging)
+			return false;
+		if(((Union)obj).fattrsR != fattrsR)
+			return false;
+		if(((Union)obj).logging != logging)
+			return false;
+		
+		
+		
 		Union other = (Union) obj;
 		return arity == other.arity && numMappings == other.numMappings
 				&& outputAttrs.equals(other.outputAttrs)
@@ -168,6 +197,14 @@ public class Union extends LogicalOperator {
 		if(ex.equals("yes"))
 			exploit = true;
 		else exploit = false;
+		
+		String l = e.getAttribute("log");
+		if(l.equals("yes"))
+			logging = true;
+		else logging = false;
+		
+		fattrsL = e.getAttribute("fattrsL");
+		fattrsR = e.getAttribute("fattrsR");
 		
 		// get first child that is an element
 		Element mapping = DOMHelper.getFirstChildElement(e);

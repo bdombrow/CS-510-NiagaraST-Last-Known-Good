@@ -16,7 +16,7 @@ public class TuplePage {
 	private Tuple tuples[];
 
 	// number of tuples in a page
-	private final static int PAGE_SIZE = 30;
+	private final static int PAGE_SIZE = 30; 
 
 	// pointer to the first open position in the tuple array
 	// tuples are filled in sequentially starting at position 0
@@ -60,7 +60,6 @@ public class TuplePage {
 		flag = ControlFlag.NULLFLAG;
 	}
 
-	// REFACTOR
 	public static TuplePage createControlPage(ControlFlag controlMsgId,
 			String ctrlMsgStr, FeedbackPunctuation fp) {
 		TuplePage ret = new TuplePage(true);

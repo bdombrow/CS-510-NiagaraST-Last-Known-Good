@@ -69,15 +69,15 @@ public class PhysicalWindowCount extends PhysicalWindowAggregate {
 					+ ctrl.get(1) + " with propagate =  " + propagate);
 			String[] feedback = ctrl.get(1).toString().split("#");
 			fAttr = feedback[0];
-			guardOutput = feedback[1];
+			//guardOutput = feedback[1];
 			if (propagate) {
 				sendCtrlMsgUpStream(ctrlFlag, ctrl.get(1).toString(), 0, null);
 			}
-			Punctuation feedbackPunctuation = createFeedbackPunctuation(fAttr,
-					guardOutput);
-			processFeedbackPunctuation(feedbackPunctuation);
-			System.out.println("Purged internal state for: " + fAttr
-					+ " with guard: " + guardOutput);
+//			Punctuation feedbackPunctuation = createFeedbackPunctuation(fAttr,
+//					guardOutput);
+			//processFeedbackPunctuation(feedbackPunctuation);
+//			System.out.println("Purged internal state for: " + fAttr
+//					+ " with guard: " + guardOutput);
 			break;
 		default:
 			assert false : "KT unexpected control message from sink "

@@ -7,7 +7,7 @@
 
 <!-- Internalize streams -->
 
-<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-7-25-2010.xml"/>
+<filescan id ="sensors" isstream="yes" delay="0" filename="C:\DATA_Rafael\sensor-large-7-25-2010.xml"/>
 
 <unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
 <unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
@@ -17,7 +17,7 @@
 <unnest id="speed" regexp="speed" root="$sensor" datatype="Integer" input="volume"/>
 <unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="Integer" input="speed"/>
 
-<filescan id ="probes" isstream="yes" delay="0" filename="G:\Datasets\Files\probe-large-7-25-2010.xml"/>
+<filescan id ="probes" isstream="yes" delay="0" filename="C:\DATA_Rafael\probe-small-7-25-2010.xml"/>
 <unnest id="probe" regexp="probe" datatype="XML" input="probes"/>
 <unnest id="timestamp2" regexp="timestamp" datatype="TS" input="probe"/>
 <unnest id="timestamp_text2" regexp="timestamp_text" root="$probe" datatype="String" input="timestamp2"/>
@@ -30,23 +30,26 @@
 <!-- Windowed max over 1 minute -->
 <!-- 1 minute = 600000000 -->
 <bucket id="bucket" wintype="1" winattr="timestamp" range="600000000" slide="600000000" input="occupancy" />
-<windowMax id="wmax" maxattr="speed" groupby="" input="bucket" />
+<!--<windowMax id="wmax" maxattr="speed" groupby="" input="bucket" /> -->
+<windowAverage id="wavg" avgattr="speed" groupby="" input="bucket" log="yes" propagate="no" exploit="no"/>
 
 <!-- Windowed max over 1 minute -->
 <!-- 1 minute = 600000000 -->
 <bucket id="bucket2" wintype="1" winattr="timestamp2" range="600000000" slide="600000000" input="speed2" />
-<windowMax id="wmax2" maxattr="speed2" groupby="" input="bucket2" />
+<!--<windowMax id="wmax2" maxattr="speed2" groupby="" input="bucket2" /> -->
+<windowAverage id="wavg2" avgattr="speed2" groupby="" input="bucket2" log="yes" propagate="no" exploit="no"/>
 
 <!-- Join the streams on window id -->
-<join id="join" input="wmax wmax2" left="wid_from_bucket" right="wid_from_bucket2" />
+<join id="join" input="wavg wavg2" left="wid_from_bucket" right="wid_from_bucket2" log="yes" propagate="no" exploit="yes" punctattr="wid_from_bucket wid_from_bucket2" fattrs="wid_from_bucket wid_from_bucket2"/>
 
 
 <construct id="cons" input="join">
 <![CDATA[
 <result>
  $wid_from_bucket
- $wmax
- $wmax2
+ $wid_from_bucket2
+ $wavg
+ $wavg2
 </result>
 ]]>
 </construct>

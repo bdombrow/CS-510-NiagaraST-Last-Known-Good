@@ -1,6 +1,7 @@
 package niagara.physical;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import niagara.connection_server.NiagraServer;
 import niagara.logical.Bucket;
@@ -14,7 +15,9 @@ import niagara.optimizer.colombia.PhysicalProperty;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.BaseAttr;
 import niagara.utils.ControlFlag;
-import niagara.utils.IntegerAttr;
+import niagara.utils.FeedbackPunctuation;
+import niagara.utils.Guard;
+import niagara.utils.Log;
 import niagara.utils.LongAttr;
 import niagara.utils.Punctuation;
 import niagara.utils.ShutdownException;
@@ -44,11 +47,24 @@ public class PhysicalBucket extends PhysicalOperator {
 	private long windowId_from = 0;
 	private long windowId_to = 0;
 	// private int windowCount = 0;
-	private boolean propagate;
+	private boolean propagate = false;
+	//	 Exploit
+	Boolean exploit = false;
+	int[] positions;
+	String[] names;
+	
+	//	 logging test
+	int tupleOut = 0;
+	int tupleDrop = 0;
+	
+	
 	String guardOutput = "*";
-	String fAttr;
+	String fAttr = "";
 
 	private Document doc;
+	
+	private boolean threadSleptOnce = false;
+	private Random rn = new Random();
 
 	// Data template for creating punctuation
 	// private String rgstDataChild[] = null;
@@ -60,6 +76,9 @@ public class PhysicalBucket extends PhysicalOperator {
 	private long start;
 
 	AtomicEvaluator ae;
+	
+	// Feedback
+	private Guard outputGuard = new Guard();
 
 	public PhysicalBucket() {
 		setBlockingSourceStreams(blockingSourceStreams);
@@ -82,20 +101,29 @@ public class PhysicalBucket extends PhysicalOperator {
 			processGetPartialFromSink(streamId);
 			break;
 		case MESSAGE:
-			// System.err.println(this.getName() + "***Got message: " +
-			// ctrl.get(1)
-			// + " with propagate =  " + propagate);
+					
+			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+			FeedbackPunctuation fpTrans = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
+			
+			// get attribute positions from tuple to check against guards
+			names = new String[fpTrans.Variables().size()];
+			names = fpTrans.Variables().toArray(names);
 
-			String[] feedback = ctrl.get(1).toString().split("#");
-
-			fAttr = feedback[0];
-			guardOutput = feedback[1];
+			// get positions
+			positions = new int[fpTrans.Variables().size()];
+			for (int i = 0; i < names.length; i++) {
+				positions[i] = outputTupleSchema.getPosition(names[i]);
+			}
+			
+			
+			if(exploit)
+				outputGuard.add(fp);
 
 			if (propagate) {
-				sendCtrlMsgUpStream(ctrlFlag, ctrl.get(1).toString(), 0, null);
-				// System.err.println(this.getName() + "Sent message: "
-				// + ctrl.get(1));
+				translateForBucket(fpTrans);
+				sendFeedbackPunctuation(fpTrans, streamId);
 			}
+						
 			break;
 		default:
 			assert false : "KT unexpected control message from sink "
@@ -103,6 +131,27 @@ public class PhysicalBucket extends PhysicalOperator {
 		}
 	}
 
+	protected void translateForBucket(FeedbackPunctuation fpTrans)
+	{
+		String corrTS="";
+		long start_ts = startSecond; //Long.parseLong("634018212000000000");
+		
+		long ts = 0;
+		int widPos = 0; 
+		
+		String bucketId = fpTrans.getValue(widPos);
+		long bucketIdNum = Integer.parseInt(bucketId);
+				
+		ts = start_ts + bucketIdNum * range; 
+		
+		corrTS = String.valueOf(ts);
+		
+		fpTrans.setValue(0,corrTS);
+		
+		fpTrans.setName(0,fAttr);
+		
+	}
+	
 	public void opInitFrom(LogicalOp logicalOperator) { // I think I should
 		// change the logical
 		// operator to groupOp
@@ -116,7 +165,13 @@ public class PhysicalBucket extends PhysicalOperator {
 		widName = ((Bucket) logicalOperator).getWid();
 		start = ((Bucket) logicalOperator).getStarttime();
 		ae = new AtomicEvaluator(windowAttribute.getName());
-
+		exploit = ((Bucket) logicalOperator).getExploit();
+		fAttr = ((Bucket) logicalOperator).getFAttr();		
+		
+		logging = ((Bucket) logicalOperator).getLogging();
+		if (logging) {
+			log = new Log(this.getName());
+		}		
 	}
 
 	public Op opCopy() {
@@ -129,7 +184,11 @@ public class PhysicalBucket extends PhysicalOperator {
 		p.start = start;
 		p.ae = ae;
 		p.propagate = propagate;
-
+		p.exploit = exploit;
+		p.logging = logging;
+		p.log = log;
+		p.fAttr = fAttr;
+		
 		return p;
 	}
 
@@ -162,31 +221,71 @@ public class PhysicalBucket extends PhysicalOperator {
 
 		count++;
 		result = appendWindowId(inputTuple, streamId);
-		if (guardOutput.equals("*")) {
-			putTuple(result, 0);
-		} else {
-			int pos = outputTupleSchema.getPosition(fAttr);
-			IntegerAttr v = (IntegerAttr) result.getAttribute(pos);
-			String tupleGuard = v.toASCII();
-			// System.err.println("Read: " + tupleGuard);
 
-			if (guardOutput.equals(tupleGuard)) {
+			if (exploit) 
+			{
+				// get attribute positions from tuple to check against guards
+//				int[] positions = new int[2];
+//				String[] names = { "wid_from_bucket", "milepost" };
+//	
+//				for (int i = 0; i < names.length; i++) {
+//					//positions[i] = inputTupleSchemas[0].getPosition(names[i]);
+//					positions[i] = outputTupleSchema.getPosition(names[i]);
+//				}
+	
+				// check against guards
+				Boolean guardMatch = false;
+				for (FeedbackPunctuation fp : outputGuard.elements()) {
+					guardMatch = guardMatch
+							|| fp
+									.match(positions, result
+											.getTuple());
+				}
+	
+				if (!guardMatch) {
+					putTuple(result, 0);
+					tupleOut++;
+				}
+			} 
+			else
+			{
 				putTuple(result, 0);
+				tupleOut++;
+			}
+				
+				//System.out.println(this.getName() + count);
+				
+				//Thread.yield();
+
 				// System.err.println("Allowed production of tuple with value: "
 				// + tupleGuard);
 				// System.out.println(this.getName() + "produced a tuple.");
-			} else {
+			//} else {
 				// putTuple(tupleElement,0);
 				// System.err.println("Avoided production of tuple with value: "
 				// + tupleGuard);
 				// System.err.println(this.getName() +
 				// "avoided sending a tuple.");
-			}
+			//}
+		//}
+			
+		if(rn.nextInt(10000) > 9998 && !threadSleptOnce)
+		{
+			//Thread.sleep(50000);
+			//threadSleptOnce = true;
+			//System.out.println("BUCKET FORCE-SLEEP - Tuple-count" + tupleOut);
 		}
+				
+				
 		if ((count % slide == 0) && (windowType == 0)) {
 			// output a punctuation to say windowId_from is completed
 			putTuple(createPunctuation(inputTuple, windowId_from), 0);
 
+		}
+		
+		if (logging) {
+			
+			log.Update("TupleOut", String.valueOf(tupleOut));
 		}
 	}
 
@@ -229,6 +328,18 @@ public class PhysicalBucket extends PhysicalOperator {
 		return inputTuple;
 	}
 
+	//amit: writing wid->ts method
+	/*
+	 * The formula to use is : ts_start = wid_from * range; ts_end = ts_start + range;
+	 * e.g ts_start = 0 * 10 = 0; ts_end = (0 + 1) * 30 = 30
+	 */
+	protected void getTimestamp(long wid_frm, long ts_start, long ts_end)
+	{
+		ts_start = wid_frm * slide;   
+		// ts_end = (wid_frm + 1) * range; // wrong
+		ts_end = ts_start + range;		
+	}
+		
 	/*
 	 * protected Tuple appendWindowId (Tuple inputTuple, int steamId) throws
 	 * ShutdownException, InterruptedException {
@@ -311,6 +422,7 @@ public class PhysicalBucket extends PhysicalOperator {
 	protected void processPunctuation(Punctuation inputTuple, int streamId)
 			throws ShutdownException, InterruptedException {
 
+		//System.out.println(this.getName() + "received punctuation");
 		long wid = 0;
 		long timestamp;
 
@@ -374,6 +486,8 @@ public class PhysicalBucket extends PhysicalOperator {
 		inputTuple.appendAttribute(to);
 
 		putTuple(inputTuple, streamId);
+		//System.out.println(this.getName() + "punctuation");
+
 	}
 
 	/**
@@ -455,7 +569,13 @@ public class PhysicalBucket extends PhysicalOperator {
 			return false;
 		if (o.getClass() != PhysicalBucket.class)
 			return false;
-
+		if(((PhysicalBucket)o).propagate != propagate)
+			return false;
+		if(((PhysicalBucket)o).exploit != exploit)
+			return false;
+		if(((PhysicalBucket)o).fAttr != fAttr)
+			return false;
+		
 		PhysicalBucket another = (PhysicalBucket) o;
 
 		boolean match = another.windowAttribute.equals(this.windowAttribute)

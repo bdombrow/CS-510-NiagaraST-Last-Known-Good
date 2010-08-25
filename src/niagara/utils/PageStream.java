@@ -35,7 +35,7 @@ public class PageStream {
 	private boolean shutdown;
 	private String shutdownMsg;
 
-	private final int STREAM_CAPACITY = 30; // Number of inter-operator pages of tuples
+	private final int STREAM_CAPACITY = 5; // Number of inter-operator pages of tuples
 	public static int MAX_DELAY = 1000;
 
 	// keep extra pages around that can be reused
@@ -330,6 +330,7 @@ public class PageStream {
 		else {
 			if (toProducerQueue.isEmpty())
 				return null;
+			//else wait(1000);
 		}
 
 		// !toProducerQueue.isEmpty() must be false;
@@ -389,7 +390,9 @@ public class PageStream {
 			// "below" that is if the producer gets a control message
 			// from the operator below it in the control tree, it
 			// will not wake up
+			//notifyAll();
 			wait();
+			//wait(1000);
 		}
 
 		// If there is a control element in the down stream buffer,
