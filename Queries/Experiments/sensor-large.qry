@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- sensor-large -->
+
+<plan top="cons">
+
+<!-- Internalize stream -->
+
+<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-8-22-2010.xml"/>
+
+<unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
+<unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
+<unnest id="timestamp_text" regexp="timestamp_text" root="$sensor" datatype="String" input="timestamp"/>
+<unnest id="sensor_id" regexp="sensor_id" root="$sensor" datatype="Integer" input="timestamp_text"/>
+<unnest id="volume" regexp="volume" root="$sensor" datatype="Integer" input="sensor_id"/>
+<unnest id="speed" regexp="speed" root="$sensor" datatype="Integer" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="Integer" input="speed"/>
+
+<construct id="cons" input="occupancy">
+<![CDATA[
+<result>
+ $timestamp
+ $timestamp_text
+ $sensor_id
+ $volume
+ $speed
+ $occupancy
+</result>
+]]>
+</construct>
+
+</plan>
+
