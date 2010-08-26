@@ -15,11 +15,16 @@ import java.util.*;
 public class Log {
 
 	private Hashtable<String, String> _log;
-	private String _message;
 	private String _operatorName;
 
+	@SuppressWarnings("unchecked")
+	public Log Copy(){
+		Log copy = new Log(this._operatorName);
+		copy._log = (Hashtable<String, String>) this._log.clone();
+		return copy;
+	}
+	
 	public Log(String operatorName){
-		_message = "";
 		_operatorName = operatorName;
 		_log = new Hashtable<String, String>();
 	}
@@ -38,6 +43,8 @@ public class Log {
 		Enumeration<String> keys = _log.keys();
 		String key;
 
+		String _message = "";
+		
 		_message+="<"+ _operatorName + ">\n";
 		
 		while(keys.hasMoreElements())

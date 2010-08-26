@@ -41,5 +41,12 @@ public class Guard {
 			_guards.remove(index);
 		}
 	}
+	
+	@SuppressWarnings("unchecked")
+	public Guard Copy(){
+		Guard copy = new Guard();
+		copy._guards = (ArrayList<FeedbackPunctuation>) this._guards.clone();
+		return copy;
+	}
 
 }

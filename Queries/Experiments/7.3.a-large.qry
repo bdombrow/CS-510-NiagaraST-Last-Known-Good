@@ -55,7 +55,7 @@
 </union>
 
 <!-- Instrument -->
-<instrument2 id="instrument" input="union" interval="1" log="yes" propagate="no" fattrs="speed occupancy" printpunct="yes"/>
+<instrument2 id="instrument" input="union" interval="1" log="yes" propagate="yes" fattrs="speed occupancy" printpunct="yes"/>
 
 
 <construct id="cons" input="instrument">

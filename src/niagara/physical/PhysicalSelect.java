@@ -70,11 +70,11 @@ public class PhysicalSelect extends PhysicalOperator {
 		PhysicalSelect p = new PhysicalSelect();
 		p.pred = pred;
 		p.predEval = predEval;
-		p.log = log;
+		p.log = log.Copy();
 		p.logging = logging;
 		p.propagate = propagate;
 		p.exploit = exploit;
-		//p.outputGuard = outputGuard;
+		p.outputGuard = outputGuard.Copy();
 		return p;
 	}
 
