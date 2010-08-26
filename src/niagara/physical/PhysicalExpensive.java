@@ -81,7 +81,7 @@ public class PhysicalExpensive extends PhysicalOperator {
 	public Op opCopy() {
 		PhysicalExpensive pr = new PhysicalExpensive();
 		pr.cost = cost;
-		pr.log = log.Copy();
+		pr.log = log;
 		pr.logging = logging;
 		return pr;
 	}
