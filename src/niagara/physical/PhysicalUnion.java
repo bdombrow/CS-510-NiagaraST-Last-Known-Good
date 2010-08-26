@@ -143,20 +143,22 @@ public class PhysicalUnion extends PhysicalOperator {
 			if (propagate) {
 				
 				// amit: Logic similar to join; need to be tested.
-				FeedbackPunctuation fpSend0 = null; 
-				FeedbackPunctuation fpSend1 = null; 
+				//FeedbackPunctuation fpSend0 = null; 
+				//FeedbackPunctuation fpSend1 = null; 
 		
 								
-				fpSend0 = split(fp,fattrsL);
+				fpSendL = split(fpSendL,fattrsL);
 				
-				fpSend1 = splitR(fp,fattrsL,fattrsR);
+				fpSendR = splitR(fpSendR,fattrsL,fattrsR);
 			
 				
 			//	fpSend1.Variables().add(arg0)
 				
-				sendFeedbackPunctuation(fpSend0, 0);
+				sendFeedbackPunctuation(fpSendL, 0);
+				System.out.println(this.getName() + "Left  -> " + fpSendL.toString());
 				
-				sendFeedbackPunctuation(fpSend1, 1);
+				sendFeedbackPunctuation(fpSendR, 1);
+				System.out.println(this.getName() + "Right -> " + fpSendR.toString());
 				
 			}
 			break;

@@ -312,6 +312,14 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 				}
 
 			} // end of while loop
+			
+			// Print out the log, if logging is enabled
+			if(logging) {
+				//XXX RJFM: Consider logging to a file per query vs. outputing to stdout.
+				System.out.println(log.ToString());
+			}
+
+			
 		} catch (InterruptedException e) {
 			shutDownOperator("Operator Interrupted");
 			internalCleanUp("interrupted");
@@ -710,12 +718,6 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 				// input streams are either synchronized or closed.
 				updatePartialResultCreation();
 			}
-			// Print out the log
-			if(logging) {
-				// should go to a log file per query instead of stdout
-				System.out.println(log.ToString());
-			}
-
 			return;
 
 		default:

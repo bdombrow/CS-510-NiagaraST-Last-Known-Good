@@ -117,7 +117,7 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 	public Op opCopy() {
 		PhysicalInstrument2 pr = new PhysicalInstrument2();
 		pr.interval = interval;
-		pr.log = log;
+		pr.log = log.Copy();
 		pr.logging = logging;
 		pr.propagate = propagate;
 		pr.pass_punct = pass_punct;

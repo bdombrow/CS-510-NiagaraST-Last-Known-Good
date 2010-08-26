@@ -646,7 +646,7 @@ public class PhysicalHashJoin extends PhysicalJoin {
 		op.streamClose = streamClose;
 		op.punctAttrMatch = punctAttrMatch;
 		op.logging = logging;
-		op.log = log;
+		op.log = log.Copy();
 		op.exploit = exploit;
 		op.propagate = propagate;
 		op.fattrsL = fattrsL;

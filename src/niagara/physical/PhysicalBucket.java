@@ -135,7 +135,8 @@ public class PhysicalBucket extends PhysicalOperator {
 	{
 		String corrTS="";
 		long start_ts = startSecond; //Long.parseLong("634018212000000000");
-		
+
+		// need to generalize
 		long ts = 0;
 		int widPos = 0; 
 		
@@ -186,8 +187,9 @@ public class PhysicalBucket extends PhysicalOperator {
 		p.propagate = propagate;
 		p.exploit = exploit;
 		p.logging = logging;
-		p.log = log;
+		p.log = log.Copy();
 		p.fAttr = fAttr;
+		p.outputGuard = outputGuard.Copy();
 		
 		return p;
 	}

@@ -15,3 +15,5 @@ Test name         | Description
 7.2.c-large-no    |
 ------------------+------------------------------
 7.3.a-large       | Union query
+7.3.b-large       | Join, then bucket
+7.3.c-large       | buckets joined
