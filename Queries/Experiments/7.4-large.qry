@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- 7.1.c-medium -->
+
+<plan top="cons">
+
+<!-- Internalize streams -->
+<!-- data types have to be strings, otherwise UNION fails when comparing punctuations. -->
+
+
+<filescan id ="sensors" isstream="yes" delay="0" filename="C:\DATA_Rafael\sensor-medium-8-22-2010.xml"/>
+
+<unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
+<unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
+<unnest id="timestamp_text" regexp="timestamp_text" root="$sensor" datatype="String" input="timestamp"/>
+<unnest id="sensor_id" regexp="sensor_id" root="$sensor" datatype="String" input="timestamp_text"/>
+<unnest id="volume" regexp="volume" root="$sensor" datatype="String" input="sensor_id"/>
+<unnest id="speed" regexp="speed" root="$sensor" datatype="String" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="String" input="speed"/>
+
+
+<filescan id ="sensors2" isstream="yes" delay="0" filename="C:\DATA_Rafael\sensor-medium-8-22-2010.xml"/>
+
+<unnest id="sensor2" regexp="sensor" datatype="XML" input="sensors2"/>
+<unnest id="timestamp2" regexp="timestamp" datatype="TS" input="sensor2"/>
+<unnest id="timestamp_text2" regexp="timestamp_text" root="$sensor2" datatype="String" input="timestamp2"/>
+<unnest id="sensor_id2" regexp="sensor_id" root="$sensor2" datatype="String" input="timestamp_text2"/>
+<unnest id="volume2" regexp="volume" root="$sensor2" datatype="String" input="sensor_id2"/>
+<unnest id="speed2" regexp="speed" root="$sensor2" datatype="String" input="volume2"/>
+<unnest id="occupancy2" regexp="occupancy" root="$sensor2" datatype="String" input="speed2"/>
+
+<bucket id="bucket" wintype="1" winattr="timestamp" range="600000000" slide="600000000" input="occupancy" log="yes" propagate="no" exploit="yes"/>
+
+<bucket id="bucket2" wintype="1" winattr="timestamp2" range="600000000" slide="600000000" input="occupancy2" log="yes" propagate="no" exploit="yes"/>
+
+<join id="join" input="bucket bucket2" left="wid_from_bucket" right="wid_from_bucket2" log="yes" propagate="yes" exploit="yes" punctattr="wid_from_bucket wid_from_bucket2" fattrsL="wid_from_bucket" fattrsR="wid_from_bucket2" extensionjoin="right"/>
+
+<bucket id="bucket3" wintype="1" winattr="wid_from_bucket" range="1" slide="1" input="join" log="yes" propagate="yes" exploit="yes"/>
+
+<windowAverage id="wavg" input="bucket3" avgattr="speed" groupby="" log="yes" propagate="yes" exploit="yes" fattrs="wid_from_bucket3"/>
+
+<!-- Instrument -->
+<!-- <instrument3 id="instrument" input="wavg" interval="1" log="yes" propagate="yes" fattrs="wid_from_bucket3 wavg" comparators="LE E" values="1500 1" printpunct="yes"/> -->
+
+<instrument3 id="instrument" input="wavg" interval="1" log="yes" propagate="yes" fattrs="wid_from_bucket3" comparators="LE" values="1500" printpunct="yes"/>
+
+<construct id="cons" input="instrument">
+<![CDATA[
+<result>
+$wid_from_bucket3
+$wavg
+</result>
+]]>
+</construct>
+
+</plan>
