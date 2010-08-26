@@ -18,7 +18,7 @@
 		    accumulate | nest | magic_construct |
 		    windowCount | windowMax | windowAverage  | windowJoin | impute |
         showTunables | collectInstrumentation | expensive |
-		    store | load | xmlscan | dbscan | dbscanimpute | rename | punctqc | present | instrument | instrument2)+>
+		    store | load | xmlscan | dbscan | dbscanimpute | rename | punctqc | present | instrument | instrument2 | instrument3)+>
 
 <!ATTLIST plan top IDREF        #REQUIRED
                planID CDATA     ""
@@ -110,6 +110,16 @@
     printpunct (yes|no) "yes"
 	  %StandardAttributes;>
 
+<!ELEMENT instrument3     EMPTY>
+<!ATTLIST instrument3
+	  interval  CDATA	 #REQUIRED
+    fattrs     CDATA  #REQUIRED
+    log       (yes|no) "no"
+    propagate (yes|no) "no"
+    printpunct (yes|no) "yes"
+    comparators CDATA  #REQUIRED
+    values CDATA  #REQUIRED
+	  %StandardAttributes;>
 
 <!ELEMENT windowAverage    EMPTY>
 <!ATTLIST windowAverage
@@ -121,6 +131,7 @@
 	  propagate (yes | no) 	"yes"
 	  log       (yes|no) 	"no"
 	  exploit 	(yes|no) 	"no"
+	  fattrs	CDATA		""
 	  %StandardAttributes;>
 
 <!ELEMENT slidingAvg     EMPTY>

@@ -1,11 +1,15 @@
 package niagara.physical;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import niagara.logical.WindowAggregate;
 import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.utils.BaseAttr;
+import niagara.utils.FeedbackPunctuation;
+import niagara.utils.FeedbackType;
+import niagara.utils.FeedbackPunctuation.Comparator;
 
 /**
  * This is the <code>PhysicalSumOperator</code> that extends the
@@ -128,4 +132,42 @@ public abstract class PhysicalWindowAggregate extends PhysicalWindowGroup {
 		int count;
 		double doubleVal;
 	}
+
+
+	protected FeedbackPunctuation translateForAggregate(FeedbackPunctuation fp)
+	{
+		FeedbackType _type;
+		 ArrayList<String> _variables = new ArrayList<String>();
+		 ArrayList<Comparator> _comparators = new ArrayList<Comparator>();
+		 ArrayList<String> _values = new ArrayList<String>();
+					
+		Iterator<String> iter = fp.Variables().iterator();
+		
+		int posPointer = 0;
+		
+		String fattrNames[] = fAttr.split(" ");
+		
+		while(iter.hasNext())
+		{
+			String var = iter.next();			
+			for(String s:fattrNames)
+			{
+				if(var.equals(s))
+				{
+					_variables.add(var);
+					_comparators.add(fp.Comparators().get(posPointer));
+					_values.add(fp.getValue(posPointer));
+				}
+			}	
+			
+			posPointer++;			
+		}
+		
+		_variables.trimToSize();
+		_comparators.trimToSize();
+		_values.trimToSize();
+
+		return new FeedbackPunctuation(fp.Type(),_variables,_comparators,_values);
+	}
+
 }

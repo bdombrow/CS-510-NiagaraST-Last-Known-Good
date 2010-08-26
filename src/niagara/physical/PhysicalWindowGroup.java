@@ -50,7 +50,9 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 	
 	/* Guard */
 	//String guardOutput = "*";
-	String fAttr;
+	//String fAttr;
+	
+	String fAttr = "";
 
 	// These are private nested classes used within the operator
 	// Copied from PhysicalGroup
@@ -248,6 +250,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		propagate = ((WindowGroup) logicalOperator).getPropagate();
 		logging = ((WindowGroup) logicalOperator).getLogging();
 		exploit = ((WindowGroup) logicalOperator).getExploit();
+		fAttr = ((WindowGroup) logicalOperator).getFAttr();
 		
 		// have subclass do initialization
 		localInitFrom(logicalOperator);

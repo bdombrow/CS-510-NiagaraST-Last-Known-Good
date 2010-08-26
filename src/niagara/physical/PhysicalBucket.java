@@ -148,7 +148,7 @@ public class PhysicalBucket extends PhysicalOperator {
 		
 		fpTrans.setValue(0,corrTS);
 		
-		fpTrans.setName(0,fAttr);
+		fpTrans.setName(0,windowAttribute.getName());
 		
 	}
 	
@@ -441,9 +441,9 @@ public class PhysicalBucket extends PhysicalOperator {
 		try {
 			timestamp = Long.parseLong(punctVal);
 		} catch (NumberFormatException e) {
-			System.err
+			/*System.err
 					.println(punctVal
-							+ " is not a long integer - Bucket cannot handle such a punctuating attribute");
+							+ " is not a long integer - Bucket cannot handle such a punctuating attribute");*/
 			return;
 		}
 

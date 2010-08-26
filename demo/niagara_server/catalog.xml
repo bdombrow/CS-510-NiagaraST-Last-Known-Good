@@ -59,6 +59,9 @@
   	<logical class="niagara.logical.Instrument2" name="instrument2">
             <physical class="niagara.physical.PhysicalInstrument2" name="PhysicalInstrument2"/>
   	</logical>
+  	<logical class="niagara.logical.Instrument3" name="instrument3">
+            <physical class="niagara.physical.PhysicalInstrument3" name="PhysicalInstrument3"/>
+  	</logical>
   	
   	<logical class="niagara.logical.Rename" name="rename">
             <physical class="niagara.physical.PhysicalRename" name="PhysicalRename"/>
@@ -242,7 +245,11 @@
   		<before><logical name="instrument2"/></before>
  		<after><op name="PhysicalInstrument2"/></after>
   	</rule> 
-  		
+  	<rule name="instrument3 to PhysicalInstrument3" type="simple">
+  		<before><logical name="instrument3"/></before>
+ 		<after><op name="PhysicalInstrument3"/></after>
+  	</rule>
+  	
  	<rule name="select to PhysicalMagic" type="simple">
   		<before><logical name="magic"/></before>
  		<after><op name="PhysicalMagic"/></after>

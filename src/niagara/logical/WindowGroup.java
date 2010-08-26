@@ -31,6 +31,7 @@ public abstract class WindowGroup extends Group {
 	protected boolean propagate = false;
 	protected boolean logging = false;
 	protected Boolean exploit = false;
+	protected String fAttr = "";
 	
 	public boolean getPropagate() {
 		return propagate;
@@ -133,6 +134,9 @@ public abstract class WindowGroup extends Group {
 		if (exploitAttribute.equals("yes"))
 			exploit = true;
 
+		fAttr = e.getAttribute("fatrrs");	
+		
+		
 		String windowAttribute = e.getAttribute("winattr");
 		String type = e.getAttribute("wintype");
 		String windowRange = e.getAttribute("range");
@@ -180,6 +184,11 @@ public abstract class WindowGroup extends Group {
 	
 	public Boolean getLogging() {
 		return logging;
+	}
+	
+	public String getFAttr()
+	{
+		return fAttr;
 	}
 
 }

@@ -42,6 +42,8 @@ public abstract class WindowAggregate extends WindowGroup {
 		if (logAttribute.equals("yes"))
 			logging = true;
 		
+		fAttr = e.getAttribute("fattrs");
+		
 	}
 
 	public ArrayList getAggrAttr() {
@@ -82,6 +84,7 @@ public abstract class WindowAggregate extends WindowGroup {
 		op.propagate = propagate;
 		op.logging = logging;
 		op.exploit = exploit;
+		op.fAttr = fAttr;
 		
 		return op;
 	}
