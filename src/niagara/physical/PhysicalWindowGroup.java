@@ -265,7 +265,7 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		//op.guardOutput = guardOutput;
 		op.fAttr = fAttr;
 		op.logging = logging;
-		op.log = log; 
+		op.log = log.Copy(); 
 		op.exploit = exploit;
 		
 		return op;

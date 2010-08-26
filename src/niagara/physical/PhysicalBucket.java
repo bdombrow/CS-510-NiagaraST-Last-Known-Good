@@ -187,8 +187,9 @@ public class PhysicalBucket extends PhysicalOperator {
 		p.propagate = propagate;
 		p.exploit = exploit;
 		p.logging = logging;
-		p.log = log;
+		p.log = log.Copy();
 		p.fAttr = fAttr;
+		p.outputGuard = outputGuard.Copy();
 		
 		return p;
 	}
