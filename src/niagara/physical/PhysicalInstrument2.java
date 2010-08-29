@@ -164,6 +164,11 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 			// Send elements
 			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, vars, comps, vals);
 			sendFeedbackPunctuation(fp, 0);
+			
+			if(logging){
+				log.Update(fp.toString(), String.valueOf(outCount));
+			}
+			
 			System.out.println(this.getName() + fp.toString());
 			sent++;
 		}
@@ -174,6 +179,11 @@ public class PhysicalInstrument2 extends PhysicalOperator {
 			throws ShutdownException, InterruptedException {
 		if(pass_punct)
 			putTuple(tuple, streamId);
+		
+			if(logging){
+				punctsOut++; // Count the input punctuations for this operator
+				log.Update("PunctsOut", String.valueOf(punctsOut));
+			}
 		}
 
 }

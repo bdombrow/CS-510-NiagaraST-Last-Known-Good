@@ -124,6 +124,11 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	protected Log log;
 
 	
+	private int tuplesIn = 0;
+	//private int tuplesOut = 0;
+	private int punctsIn = 0;
+	protected int punctsOut = 0;  // 'protected' because it needs to be updated at the specific operators
+	
 	/**
 	 * This class is used to store the result of a read operation from a set of
 	 * source streams. There are two components (a) the stream element read and
@@ -256,12 +261,24 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 					timedOut = false;
 					// If this is a punctuation, then handle it specially
 					if (sourceObject.tuple.isPunctuation())
+					{
+						if(logging){
+							punctsIn++; // Count the input punctuations to this operator
+							log.Update("PunctsIn", String.valueOf(punctsIn));
+						}
+						
 						processPunctuation((Punctuation) sourceObject.tuple,
 								sourceObject.streamId);
+					}
 
 					else {
 						// There was some tuple element read, so process it
 						// using the appropriate method
+						
+						if(logging){
+							tuplesIn++; // Count the input tuples to this operator
+							log.Update("TuplesIn", String.valueOf(tuplesIn));
+						}
 						if (isBlocking()) {
 							blockingProcessTuple(sourceObject.tuple,
 									sourceObject.streamId);

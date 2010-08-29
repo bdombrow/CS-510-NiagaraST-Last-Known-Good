@@ -119,6 +119,11 @@ public class PhysicalUnion extends PhysicalOperator {
 			break;
 		case MESSAGE:
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+			
+			if(logging){
+				log.Update(fp.toString(), String.valueOf(tupleOut));
+			}
+			
 			FeedbackPunctuation fpSendL = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
 			FeedbackPunctuation fpSendR = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
 			
@@ -348,6 +353,12 @@ public class PhysicalUnion extends PhysicalOperator {
 		if (fAllMatch) {
 			// Output the punctuation
 			putTuple(tuple, 0);
+			
+			
+			if(logging){
+				punctsOut++; // Count the input punctuations for this operator
+				log.Update("PunctsOut", String.valueOf(punctsOut));
+			}
 			// Remove the other punctuations, since they are no longer needed
 			for (int i = 0; i < punctuationRegistry.length; i++) {
 				if (i != streamId)

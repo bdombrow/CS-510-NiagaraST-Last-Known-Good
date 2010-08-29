@@ -103,6 +103,11 @@ public class PhysicalBucket extends PhysicalOperator {
 		case MESSAGE:
 					
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+			
+			if(logging){
+				log.Update(fp.toString(), String.valueOf(tupleOut));
+			}
+			
 			FeedbackPunctuation fpTrans = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
 			
 			// get attribute positions from tuple to check against guards
@@ -488,6 +493,11 @@ public class PhysicalBucket extends PhysicalOperator {
 		inputTuple.appendAttribute(to);
 
 		putTuple(inputTuple, streamId);
+		
+		if(logging){
+			punctsOut++; // Count the input punctuations for this operator
+			log.Update("PunctsOut", String.valueOf(punctsOut));
+		}
 		//System.out.println(this.getName() + "punctuation");
 
 	}

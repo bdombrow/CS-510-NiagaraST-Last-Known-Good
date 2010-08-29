@@ -465,6 +465,11 @@ public class PhysicalHashJoin extends PhysicalJoin {
 	private void passOnPunct(Punctuation tuple, int streamId)
 			throws InterruptedException, ShutdownException {
 		putPunctuation(tuple, streamId);
+		
+		if(logging){
+			punctsOut++; // Count the input punctuations for this operator
+			log.Update("PunctsOut", String.valueOf(punctsOut));
+		}
 		//System.out.println(this.getName() + "put punctuation (passOn)");
 		/*
 		 * if (streamClose[1-streamId]) putPunctuation(tuple, streamId); else {
@@ -506,6 +511,13 @@ public class PhysicalHashJoin extends PhysicalJoin {
 
 		// Add the result to the output
 		putTuple(result, 0);
+		
+		if(logging){
+			punctsOut++; // Count the input punctuations for this operator
+			log.Update("PunctsOut", String.valueOf(punctsOut));
+		}
+		
+		
 	//	System.out.println(this.getName() + "put punctuation");
 
 	}

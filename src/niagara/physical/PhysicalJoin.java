@@ -227,6 +227,11 @@ abstract public class PhysicalJoin extends PhysicalOperator {
 			break;
 		case MESSAGE:
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+			
+			if(logging){
+				log.Update(fp.toString(), String.valueOf(tupleOut));
+			}
+			
 			FeedbackPunctuation fpSend = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
 	
 //			 get attribute positions from tuple to check against guards

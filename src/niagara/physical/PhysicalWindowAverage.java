@@ -88,6 +88,10 @@ public class PhysicalWindowAverage extends PhysicalWindowAggregate {
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
 			//FeedbackPunctuation fpSend = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
 			
+			if(logging){
+				log.Update(fp.toString(), String.valueOf(tupleOut));
+			}
+			
 			FeedbackPunctuation fpSend = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
 			
 			fpSend = translateForAggregate(fpSend);

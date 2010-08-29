@@ -96,6 +96,12 @@ public class PhysicalSelect extends PhysicalOperator {
 			break;
 		case MESSAGE:
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+			
+			if(logging){
+				log.Update(fp.toString(), String.valueOf(tupleOut));
+			}
+			
+			
 			FeedbackPunctuation fpSend = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
 
 			// get attribute positions from tuple to check against guards
@@ -194,7 +200,13 @@ public class PhysicalSelect extends PhysicalOperator {
 	 */
 	protected void processPunctuation(Punctuation inputTuple, int streamId)
 			throws ShutdownException, InterruptedException {
+		
 		putTuple(inputTuple, 0);
+		
+		if(logging){
+			punctsOut++; // Count the input punctuations for this operator
+			log.Update("PunctsOut", String.valueOf(punctsOut));
+		}		
 	//	System.out.println(this.getName() + "punctuation");
 	}
 

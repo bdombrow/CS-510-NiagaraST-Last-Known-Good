@@ -445,6 +445,11 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 		}
 
 		putTuple(punct, 0);
+		
+		if(logging){
+			punctsOut++; // Count the input punctuations for this operator
+			log.Update("PunctsOut", String.valueOf(punctsOut));
+		}
 
 	}
 
