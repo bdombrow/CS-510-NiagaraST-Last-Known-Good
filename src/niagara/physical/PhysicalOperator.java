@@ -72,7 +72,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 
 	// Source streams and information about them
 	// blocking indicates if the operator blocks on that source stream or not
-	private SourceTupleStream[] sourceStreams;
+	protected SourceTupleStream[] sourceStreams;
 	private boolean[] blockingSourceStreams;
 	protected int numSourceStreams;
 
@@ -95,7 +95,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	// active means we are currently reading from that stream,
 	// note a stream can be open but not active - this is due
 	// to partial result processing
-	private StreamIdList activeSourceStreams;
+	protected StreamIdList activeSourceStreams;
 
 	// The index (in readInputStreams) of the last source stream read
 	private int lastReadSourceStream;
@@ -400,7 +400,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 * 
 	 * @return True if the operator is blocking and false otherwise
 	 */
-	private boolean isBlocking() {
+	protected boolean isBlocking() {
 		// If any blocking source stream is not closed, then return false
 		// else return true
 		for (int src = 0; src < numSourceStreams; src++) {
@@ -689,7 +689,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 * @exception ShutdownException
 	 *                query shutdown by user or execution error
 	 */
-	private void processCtrlMsgFromSource(ControlFlag ctrlFlag, int streamId)
+	/*private*/ protected void processCtrlMsgFromSource(ControlFlag ctrlFlag, int streamId)
 			throws java.lang.InterruptedException, ShutdownException {
 		// upstream control messages are SYNCH_PARTIAL
 		// END_PARTIAL and EOS. We should not get GET_PARTIAL,
@@ -751,7 +751,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 	 * @exception ShutdownException
 	 *                query shutdown by user or execution error
 	 */
-	private final void updatePartialResultCreation()
+	protected final void updatePartialResultCreation()
 			throws java.lang.InterruptedException, ShutdownException {
 
 		// If activeSourceStreams is not empty, then synchronization has not

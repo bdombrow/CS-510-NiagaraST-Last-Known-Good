@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- 7.3.b-large -->
+
+<plan top="cons">
+
+<!-- Internalize streams -->
+
+<filescan id ="sensors" isstream="yes" delay="0" filename="G:\Datasets\Files\sensor-large-8-22-2010.xml"/>
+
+<unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
+<unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
+<unnest id="timestamp_text" regexp="timestamp_text" root="$sensor" datatype="String" input="timestamp"/>
+<unnest id="sensor_id" regexp="sensor_id" root="$sensor" datatype="Integer" input="timestamp_text"/>
+<unnest id="volume" regexp="volume" root="$sensor" datatype="Integer" input="sensor_id"/>
+<unnest id="speed" regexp="speed" root="$sensor" datatype="Integer" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="Integer" input="speed"/>
+
+<filescan id ="locations" isstream="yes" delay="0" filename="G:\Datasets\Files\location-large-8-22-2010.xml"/>
+<unnest id="location" regexp="location" datatype="XML" input="locations"/>
+<unnest id="freeway_id" regexp="freeway_id" root="location" datatype="Integer" input="location"/>
+<unnest id="l_sensor_id" regexp="sensor_id" root="location" datatype="Integer" input="freeway_id"/>
+<unnest id="milepost" regexp="milepost" root="location" datatype="Integer" input="l_sensor_id"/>
+
+<!-- join the streams on sensor_id -->
+<join id="join1" input="occupancy milepost" left="sensor_id" right="l_sensor_id" log="yes" propagate="no" exploit="yes"/>
+
+<!-- windowed max speed over 1 minute windows -->
+<!-- 1 minute = 600000000 -->
+<bucket id="bucket" wintype="1" winattr="timestamp" range="600000000" slide="600000000" input="join1" log="yes" propagate="yes" exploit="yes"/>
+<windowAverage id="wavg" avgattr="speed" groupby="milepost" input="bucket" log="yes" propagate="yes" exploit="yes"/>
+
+<!-- Instrument -->
+<instrument2 id="instrument" input="wavg" interval="1" log="yes" propagate="yes" fattrs="wid_from_bucket milepost" printpunct="yes"/>
+
+<construct id="cons" input="instrument">
+<![CDATA[
+<result>
+ $wid_from_bucket
+ $milepost
+ $wavg
+</result>
+]]>
+</construct>
+
+</plan>
+
