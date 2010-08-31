@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- Simple Expensive -->
+
+<plan top="cons">
+
+<!-- Internalize stream -->
+
+<filescan id ="sensors" isstream="yes" delay="0" filename="C:\DATA_Rafael\sensor-small-8-22-2010.xml"/>
+
+<unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
+<unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
+<unnest id="timestamp_text" regexp="timestamp_text" root="$sensor" datatype="String" input="timestamp"/>
+<unnest id="sensor_id" regexp="sensor_id" root="$sensor" datatype="Integer" input="timestamp_text"/>
+<unnest id="volume" regexp="volume" root="$sensor" datatype="Integer" input="sensor_id"/>
+<unnest id="speed" regexp="speed" root="$sensor" datatype="Integer" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="Integer" input="speed"/>
+
+<expensive id="ex" input="occupancy" cost="50000000" log="yes" exploit="yes" propagate="no"/>
+
+<!-- Instrument -->
+<instrument3 id="instrument" input="ex" interval="1" log="yes" propagate="yes" fattrs="sensor_id" comparators="LE" values="1500" printpunct="yes"/>
+
+<construct id="cons" input="instrument">
+<![CDATA[
+<result>
+ $timestamp
+ $timestamp_text
+ $sensor_id
+ $volume
+ $speed
+ $occupancy
+</result>
+]]>
+
+
+</construct>
+</plan>

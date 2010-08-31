@@ -19,6 +19,8 @@ public class Expensive extends UnaryOperator {
 
 	private long cost;
 	private Boolean logging;
+	private Boolean propagate = false;
+	private Boolean exploit = false;
 
 	public Expensive() {
 		cost = 0;
@@ -36,6 +38,16 @@ public class Expensive extends UnaryOperator {
 		if(l.equals("yes"))
 			logging = true;
 		else logging = false;
+		
+		String p = e.getAttribute("propagate");
+		if(p.equals("yes"))
+			propagate = true;
+		else propagate = false;
+
+		String ex = e.getAttribute("exploit");
+		if(ex.equals("yes"))
+			exploit = true;
+		else exploit = false;
 	}
 
 
@@ -81,6 +93,8 @@ public class Expensive extends UnaryOperator {
 		Expensive op = new Expensive();
 		op.cost = cost;
 		op.logging = this.logging;
+		op.propagate = this.propagate;
+		op.exploit = this.exploit;
 		return op;	
 	}
 
@@ -88,4 +102,13 @@ public class Expensive extends UnaryOperator {
 	public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
 		return input[0].copy();
 	}
+	
+	public Boolean getPropagate(){
+		return propagate;
+	}
+	
+	public Boolean getExploit(){
+		return exploit;
+	}
+	
 }

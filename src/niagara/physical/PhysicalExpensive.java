@@ -2,12 +2,15 @@ package niagara.physical;
 
 import java.util.ArrayList;
 import niagara.logical.Expensive;
+import niagara.logical.Select;
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
 import niagara.utils.ControlFlag;
+import niagara.utils.FeedbackPunctuation;
+import niagara.utils.Guard;
 import niagara.utils.Log;
 import niagara.utils.Punctuation;
 import niagara.utils.ShutdownException;
@@ -36,13 +39,28 @@ public class PhysicalExpensive extends PhysicalOperator {
 	WorkerThread w;
 	boolean readyToFinish;
 	boolean started;
+	
+	/* Feedback */
+	
+	// Guard	
+	protected Guard outputGuard;
+	
+	// Propagate
+	Boolean propagate = false;
 
+	// Exploit
+	Boolean exploit = false;
+	int[] positions;
+	String[] names;
+	
 	public PhysicalExpensive() {
 		setBlockingSourceStreams(blockingSourceStreams);
 		cost = 0;
 		toDo = new ArrayList<Tuple>();
 		readyToFinish = false;
 		started = false;
+		
+		outputGuard = new Guard();
 	}
 
 	@Override
@@ -58,6 +76,8 @@ public class PhysicalExpensive extends PhysicalOperator {
 			log = new Log(this.getName());
 			outCount = 0;
 		}
+		propagate = ((Expensive) op).getPropagate();
+		exploit = ((Expensive) op).getExploit();
 	}
 
 	@Override
@@ -79,6 +99,13 @@ public class PhysicalExpensive extends PhysicalOperator {
 			return false;
 		if (((PhysicalExpensive) other).log != this.log)
 			return false;
+		if(((PhysicalExpensive)other).exploit != exploit)
+			return false;
+		if(((PhysicalExpensive)other).propagate != propagate)
+			return false;
+		if(((PhysicalExpensive)other).outputGuard != outputGuard)
+			return false;
+		
 
 		return true;
 	}
@@ -96,6 +123,12 @@ public class PhysicalExpensive extends PhysicalOperator {
 		pr.logging = logging;
 		pr.w = w;
 		pr.readyToFinish = readyToFinish;
+		
+		pr.propagate = propagate;
+		pr.exploit = exploit;
+		
+		pr.outputGuard = outputGuard.Copy();
+		
 		return pr;
 	}
 
@@ -194,6 +227,7 @@ public class PhysicalExpensive extends PhysicalOperator {
 			 * streams are either synchronized or closed.
 			 * updatePartialResultCreation(); } return;
 			 */
+		
 		default:
 			assert false : "KT unexpected control message from source "
 					+ ctrlFlag.flagName();
@@ -216,6 +250,56 @@ public class PhysicalExpensive extends PhysicalOperator {
 		w.stop();
 	}
 
+	void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
+			throws java.lang.InterruptedException, ShutdownException {
+		// downstream control message is GET_PARTIAL
+		// We should not get SYNCH_PARTIAL, END_PARTIAL, EOS or NULLFLAG
+		// REQ_BUF_FLUSH is handled inside SinkTupleStream
+		// here (SHUTDOWN is handled with exceptions)
+
+		if (ctrl == null)
+			return;
+
+		ControlFlag ctrlFlag = (ControlFlag) ctrl.get(0);
+
+		switch (ctrlFlag) {
+		case GET_PARTIAL:
+			processGetPartialFromSink(streamId);
+			break;
+		case MESSAGE:
+			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
+
+			if (logging) {
+				log.Update(fp.toString(), String.valueOf(outCount));
+			}
+
+			FeedbackPunctuation fpSend = new FeedbackPunctuation(fp.Type(), fp
+					.Variables(), fp.Comparators(), fp.Values());
+
+			// get attribute positions from tuple to check against guards
+			names = new String[fpSend.Variables().size()];
+			names = fpSend.Variables().toArray(names);
+
+			// get positions
+			positions = new int[fpSend.Variables().size()];			
+			for (int i = 0; i < names.length; i++) {
+				positions[i] = outputTupleSchema.getPosition(names[i]);
+			}
+
+			if (exploit)
+				outputGuard.add(fp);
+
+			if (propagate) {
+				sendFeedbackPunctuation(fpSend, streamId);
+			}
+			break;
+		default:
+			assert false : "KT unexpected control message from sink "
+					+ ctrlFlag.flagName();
+		}
+}
+	
+	
 	class WorkerThread extends Thread {
 		int out = 0;
 
@@ -240,17 +324,44 @@ public class PhysicalExpensive extends PhysicalOperator {
 								}
 
 							} else {
+							
+								
+								if (exploit && outputGuard != null) {
+									// check against guards
+									Boolean guardMatch = false;
+									
+									synchronized(outputGuard)
+									{
+										for (FeedbackPunctuation fp : outputGuard.elements()) {
+											guardMatch = guardMatch
+													|| fp
+															.match(positions, t
+																	.getTuple());
+										}
+									}
+									if (!guardMatch) {
+										for (int i = 0; i < cost; i++) {
+											// something expensive
+										}
+										putTuple(t, 0);
+										if (logging) {
+											outCount++;
+											log.Update("TupleOut", String.valueOf(outCount));
+										}
+										
+									}
+								} else {
+									for (int i = 0; i < cost; i++) {
+										// something expensive
+									}
+									putTuple(t, 0);
+									if (logging) {
+										outCount++;
+										log.Update("TupleOut", String.valueOf(outCount));
+										//System.out.println(this.getName() + tupleOut);
+									}
 
-								for (int i = 0; i < cost; i++) {
-									// something expensive
-								}
-								putTuple(t, 0);
-
-								if (logging) {
-									outCount++;
-									log.Update("TupleOut", String
-											.valueOf(outCount));
-								}
+								}								
 							}
 
 						} catch (InterruptedException e) {
