@@ -2,7 +2,6 @@ package niagara.physical;
 
 import java.util.ArrayList;
 import niagara.logical.Expensive;
-import niagara.logical.Select;
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
 import niagara.optimizer.colombia.LogicalOp;
@@ -286,8 +285,11 @@ public class PhysicalExpensive extends PhysicalOperator {
 				positions[i] = outputTupleSchema.getPosition(names[i]);
 			}
 
-			if (exploit)
-				outputGuard.add(fp);
+			if (exploit) {
+				synchronized (outputGuard) {
+					outputGuard.add(fp);
+				}
+			}
 
 			if (propagate) {
 				sendFeedbackPunctuation(fpSend, streamId);
