@@ -135,6 +135,9 @@
     <logical class="niagara.logical.Union" name="union">
       <physical class="niagara.physical.PhysicalUnion" name="PhysicalUnion"/>
     </logical>
+    <logical class="niagara.logical.Pace" name="pace">
+      <physical class="niagara.physical.PhysicalPace" name="PhysicalPace"/>
+    </logical>
     <logical class="niagara.logical.Display" name="display">
       <physical class="niagara.physical.PhysicalDisplay" name="PhysicalDisplay"/>
     </logical>
@@ -442,6 +445,7 @@
   		<after><op name="noop"/></after>
   	</rule>
   	<rule class="niagara.optimizer.rules.UnionToPhysicalUnion" name="UnionToPhysicalUnion" type="custom"/>
+  	<rule class="niagara.optimizer.rules.PaceToPhysicalPace" name="PaceToPhysicalPace" type="custom"/>
 	
 	<!-- To disable projection pushing, comment out this rule (and uncomment the next one) -->  	
   	<rule class="niagara.optimizer.rules.PushProjection" name="PushProjection" type="custom"/>
