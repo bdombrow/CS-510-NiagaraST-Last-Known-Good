@@ -7,7 +7,7 @@
 
 <!-- Internalize stream -->
 
-<filescan id ="data" isstream="yes" delay="0" filename="G:\niagarast\Streams\trafficDataStreamSmall.xml"/>
+<filescan id ="data" isstream="yes" delay="0" filename="C:\DATA_Rafael\trafficDataStreamSmall.xml"/>
 
 <unnest id="detectors" regexp="detectors" datatype="XML" input="data"/>
 <unnest id="time_t" regexp="time_t" datatype="TS" input="detectors"/>

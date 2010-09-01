@@ -31,7 +31,7 @@
 <bucket id="bucket" wintype="1" winattr="timestamp" range="600000000" slide="600000000" input="join1" log="yes" propagate="yes" exploit="yes"/>
 
 <!-- changing wmax to wavg for testing -->
-<windowAverage id="wavg" avgattr="speed" groupby="milepost" input="bucket" log="yes" propagate="yes" exploit="yes"/>
+<windowAverage id="wavg" avgattr="speed" groupby="milepost" input="bucket" log="yes" propagate="yes" exploit="yes" fattrs="wid_from_bucket"/>
 
 <!-- Instrument -->
 <instrument2 id="instrument" input="wavg" interval="1" log="yes" propagate="yes" fattrs="wid_from_bucket milepost" printpunct="yes"/>

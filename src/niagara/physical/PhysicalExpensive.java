@@ -1,6 +1,8 @@
 package niagara.physical;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+
 import niagara.logical.Expensive;
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
@@ -44,6 +46,9 @@ public class PhysicalExpensive extends PhysicalOperator {
 	// Guard	
 	protected Guard outputGuard;
 	
+	// Input Guard
+	protected Guard inputGuard;
+	
 	// Propagate
 	Boolean propagate = false;
 
@@ -60,6 +65,7 @@ public class PhysicalExpensive extends PhysicalOperator {
 		started = false;
 		
 		outputGuard = new Guard();
+		inputGuard = new Guard();
 	}
 
 	@Override
@@ -104,6 +110,8 @@ public class PhysicalExpensive extends PhysicalOperator {
 			return false;
 		if(((PhysicalExpensive)other).outputGuard != outputGuard)
 			return false;
+		if(((PhysicalExpensive)other).inputGuard != inputGuard)
+			return false;
 		
 
 		return true;
@@ -127,6 +135,7 @@ public class PhysicalExpensive extends PhysicalOperator {
 		pr.exploit = exploit;
 		
 		pr.outputGuard = outputGuard.Copy();
+		pr.inputGuard = inputGuard.Copy();
 		
 		return pr;
 	}
@@ -274,7 +283,7 @@ public class PhysicalExpensive extends PhysicalOperator {
 
 			FeedbackPunctuation fpSend = new FeedbackPunctuation(fp.Type(), fp
 					.Variables(), fp.Comparators(), fp.Values());
-
+			
 			// get attribute positions from tuple to check against guards
 			names = new String[fpSend.Variables().size()];
 			names = fpSend.Variables().toArray(names);
@@ -286,10 +295,16 @@ public class PhysicalExpensive extends PhysicalOperator {
 			}
 
 			if (exploit) {
-				synchronized (outputGuard) {
-					outputGuard.add(fp);
+				synchronized (inputGuard) {
+					//outputGuard.add(fp);
+					inputGuard.add(fp);
 				}
-			}
+					// cleanse toDo here
+						cleanse(fp);
+					
+					
+				}
+			
 
 			if (propagate) {
 				sendFeedbackPunctuation(fpSend, streamId);
@@ -300,6 +315,28 @@ public class PhysicalExpensive extends PhysicalOperator {
 					+ ctrlFlag.flagName();
 		}
 }
+	
+void cleanse(FeedbackPunctuation fp)
+{
+	ArrayList<Tuple> newToDo = new ArrayList<Tuple>();
+	
+	synchronized(toDo)
+	{
+		while(!toDo.isEmpty())
+		{
+			Tuple t = toDo.remove(0);
+			if(t.isPunctuation()) {
+				newToDo.add(t);
+			} else {
+			if(!(fp.match(positions, t.getTuple())))
+				newToDo.add(t);
+			}
+		}
+		toDo = newToDo;
+		//newToDo.clear();
+	}
+}
+	
 	
 	
 	class WorkerThread extends Thread {
@@ -326,8 +363,6 @@ public class PhysicalExpensive extends PhysicalOperator {
 								}
 
 							} else {
-							
-								
 								if (exploit && outputGuard != null) {
 									// check against guards
 									Boolean guardMatch = false;

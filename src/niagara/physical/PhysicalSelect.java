@@ -172,7 +172,7 @@ public class PhysicalSelect extends PhysicalOperator {
 					tupleOut++;
 					log.Update("TupleOut", String.valueOf(tupleOut));
 					//System.out.println(this.getName() + tupleOut);
-			}
+				}
 
 			}
 		} else {

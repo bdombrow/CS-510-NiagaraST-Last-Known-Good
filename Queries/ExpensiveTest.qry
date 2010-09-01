@@ -17,10 +17,10 @@
 <unnest id="speed" regexp="speed" root="$sensor" datatype="Integer" input="volume"/>
 <unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="Integer" input="speed"/>
 
-<expensive id="ex" input="occupancy" cost="50000000" log="yes" exploit="yes" propagate="no"/>
+<expensive id="ex" input="occupancy" cost="5000000" log="yes" exploit="yes" propagate="no"/>
 
 <!-- Instrument -->
-<instrument3 id="instrument" input="ex" interval="1" log="yes" propagate="yes" fattrs="sensor_id" comparators="LE" values="1500" printpunct="yes"/>
+<instrument3 id="instrument" input="ex" interval="1" log="yes" propagate="yes" fattrs="sensor_id" comparators="LE" values="15000" printpunct="yes"/>
 
 <construct id="cons" input="instrument">
 <![CDATA[
