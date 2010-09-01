@@ -90,7 +90,9 @@
 <!ELEMENT expensive     EMPTY>
 <!ATTLIST expensive
 	  cost  CDATA	       #REQUIRED
-    log   (yes|no)     "no"
+    log       (yes|no)     "no"
+    exploit   (yes|no)     "no"
+    propagate (yes|no)     "no"
 	  %StandardAttributes;>
 
 <!ELEMENT instrument     EMPTY>
