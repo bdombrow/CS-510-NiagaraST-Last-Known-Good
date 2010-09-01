@@ -10,7 +10,7 @@
 <!ELEMENT plan     (unnest | sort | expression | avg |
 		    slidingAvg | sum | slidingSum | max |
 		    slidingMax | count | slidingCount | incrmax |
-		    incravg | select | magic | dup | union | join |
+		    incravg | select | magic | dup | union | join | pace |
 		    dtdscan | resource | constant | timer |
 		    prefix | punctuate | send | display | topn |
 		    firehosescan | filescan | construct |
@@ -250,6 +250,18 @@
 <!ATTLIST dup
           branch   CDATA    #REQUIRED
 	  %StandardAttributes;>
+
+<!ELEMENT pace  (mapping*)>
+<!ATTLIST pace
+         id ID                         #REQUIRED
+         input    IDREFS               #REQUIRED
+         propagate (yes | no) "no"
+         exploit    (yes | no) "no"
+         log 	   (yes | no) "no"
+         fattrsL  CDATA ""
+         fattrsR  CDATA ""
+	 %StandardAttributes;>
+
 
 <!ELEMENT union  (mapping*)>
 <!ATTLIST union
