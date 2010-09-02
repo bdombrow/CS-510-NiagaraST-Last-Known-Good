@@ -51,7 +51,9 @@ public class PhysicalExpensive extends PhysicalOperator {
 	
 	// Propagate
 	Boolean propagate = false;
-
+	
+	
+	
 	// Exploit
 	Boolean exploit = false;
 	int[] positions;
@@ -83,6 +85,8 @@ public class PhysicalExpensive extends PhysicalOperator {
 		}
 		propagate = ((Expensive) op).getPropagate();
 		exploit = ((Expensive) op).getExploit();
+		
+		
 	}
 
 	@Override
@@ -107,7 +111,7 @@ public class PhysicalExpensive extends PhysicalOperator {
 		if(((PhysicalExpensive)other).exploit != exploit)
 			return false;
 		if(((PhysicalExpensive)other).propagate != propagate)
-			return false;
+			return false;		
 		if(((PhysicalExpensive)other).outputGuard != outputGuard)
 			return false;
 		if(((PhysicalExpensive)other).inputGuard != inputGuard)
@@ -303,8 +307,7 @@ public class PhysicalExpensive extends PhysicalOperator {
 						cleanse(fp);
 					
 					
-				}
-			
+				}		
 
 			if (propagate) {
 				sendFeedbackPunctuation(fpSend, streamId);
@@ -355,6 +358,7 @@ void cleanse(FeedbackPunctuation fp)
 							Tuple t = toDo.remove(0);
 
 							if (t.isPunctuation()) {
+								/*Need to make sure no IntegerAttrs survive */
 								putTuple(t, 0);
 								if (logging) {
 									PunctsOut++;

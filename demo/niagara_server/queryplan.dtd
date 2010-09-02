@@ -260,6 +260,8 @@
          log 	   (yes | no) "no"
          fattrsL  CDATA ""
          fattrsR  CDATA ""
+         monitor_attr CDATA ""
+         divergence CDATA ""
 	 %StandardAttributes;>
 
 

@@ -13,6 +13,7 @@ import niagara.optimizer.colombia.LogicalOp;
 import niagara.optimizer.colombia.LogicalProperty;
 import niagara.optimizer.colombia.Op;
 import niagara.query_engine.TupleSchema;
+import niagara.utils.BaseAttr;
 import niagara.utils.ControlFlag;
 import niagara.utils.FeedbackPunctuation;
 import niagara.utils.FeedbackType;
@@ -53,6 +54,20 @@ public class PhysicalPace extends PhysicalOperator {
 	// FP attributes
 	private String fattrsL = "";
 	private String fattrsR = "";	
+	
+	//	 maximum acceptable divergence 
+	String divergence;
+	
+	// attribute-pair to be monitored for divergence - String with two space-seperated values
+	String monitorAttr;
+	
+	// left and right high water marks
+	long hwmL = 0;
+	long hwmR = 0;
+	
+	// check variables to avoid repetitive sending of the same feedback
+	long previousFeedbackToLeft = 0;
+	long previousFeedbackToRight = 0;
 
 	public PhysicalPace() {
 		// XXX vpapad: here we have to initialize blockingSourceStreams
@@ -81,6 +96,8 @@ public class PhysicalPace extends PhysicalOperator {
 		fattrsL = logicalOp.getFAttrsL();
 		fattrsR = logicalOp.getFAttrsR();
 
+		divergence = ((Pace) logicalOp).getDivergence();
+		monitorAttr = ((Pace) logicalOp).getMonitorAttr();
 		
 		setBlockingSourceStreams(new boolean[logicalOp.getArity()]);
 		hasMappings = false;
@@ -279,6 +296,76 @@ public class PhysicalPace extends PhysicalOperator {
 
 	protected void processTuple(Tuple inputTuple, int streamId)
 			throws ShutdownException, InterruptedException {
+		
+		//System.out.println(streamId + " " + inputTuple.toString());
+		
+		String mValL = "";
+		String mValR = "";
+		
+		String[] mattArray = monitorAttr.split(" ");
+		
+		String monitorLeftName = mattArray[0];
+		String monitorRightName = mattArray[1];
+		
+		if(streamId == 0)
+		{		
+			mValL = ((BaseAttr)(inputTuple.getAttribute(inputTupleSchemas[0].getPosition(monitorLeftName)))).attrVal().toString();
+			// need an if check here for oop
+			hwmL = Long.parseLong(mValL); // update the left hight water mark
+		}
+		else // if streamId is 1 - i.e. right input
+		{
+			mValR = ((BaseAttr)(inputTuple.getAttribute(inputTupleSchemas[1].getPosition(monitorRightName)))).attrVal().toString();
+			// need an if check here for oop
+			hwmR = Long.parseLong(mValR); // update the right high water mark
+		}
+		
+		// send feedback if needed to right
+		if(hwmL - hwmR > Long.parseLong(divergence) && hwmL > previousFeedbackToRight)
+		{
+			ArrayList<String> vars = new ArrayList<String>();
+			ArrayList<FeedbackPunctuation.Comparator> comps = new ArrayList<FeedbackPunctuation.Comparator>();
+			ArrayList<String> vals = new ArrayList<String>();
+			
+			vars.add(monitorRightName);
+			comps.add(FeedbackPunctuation.Comparator.LT);
+			vals.add(String.valueOf(hwmL));
+			
+			previousFeedbackToRight = hwmL;
+			
+			vars.trimToSize();
+			vals.trimToSize();
+			comps.trimToSize();
+			
+			// Send elements
+			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, vars, comps, vals);
+			sendFeedbackPunctuation(fp, 1);  // send FP to the right input
+			System.out.println("Left -> " + fp.toString());
+		}	
+		
+		// send feedback if needed to left
+		if(hwmR - hwmL > Long.parseLong(divergence) && hwmR > previousFeedbackToLeft)
+		{
+			ArrayList<String> vars = new ArrayList<String>();
+			ArrayList<FeedbackPunctuation.Comparator> comps = new ArrayList<FeedbackPunctuation.Comparator>();
+			ArrayList<String> vals = new ArrayList<String>();
+			
+			vars.add(monitorLeftName);
+			comps.add(FeedbackPunctuation.Comparator.LT);
+			vals.add(String.valueOf(hwmR));
+			
+			previousFeedbackToLeft = hwmR;
+			
+			vars.trimToSize();
+			vals.trimToSize();
+			comps.trimToSize();
+			
+			// Send elements
+			FeedbackPunctuation fp = new FeedbackPunctuation(FeedbackType.ASSUMED, vars, comps, vals);
+			sendFeedbackPunctuation(fp, 0);  // send FP to the left input
+			System.out.println("Right -> " + fp.toString());
+		}	
+		
 		if (hasMappings) { // We need to move some attributes
 			putTuple(inputTuple.copy(outSize, attributeMaps[streamId]), 0);
 		} else {
@@ -310,7 +397,7 @@ public class PhysicalPace extends PhysicalOperator {
 					tupleOut++;
 					log.Update("TupleOut", String.valueOf(tupleOut));
 				}
-				}
+			}
 			//putTuple(inputTuple, 0);
 			//tupleCount++;
 			//System.out.println(this.getName()+ tupleCount);
@@ -335,6 +422,9 @@ public class PhysicalPace extends PhysicalOperator {
 	protected void processPunctuation(Punctuation tuple, int streamId)
 			throws ShutdownException, InterruptedException {
 
+		//System.out.println(streamId + " " + tuple.toString());
+
+		
 		boolean fAllMatch = true, fFound;
 
 		// First, check to see if this punctuation matches a punctuation
@@ -401,6 +491,8 @@ public class PhysicalPace extends PhysicalOperator {
 		newOp.log = new Log(this.getName());
 		newOp.fattrsL = fattrsL;
 		newOp.fattrsR = fattrsR;
+		newOp.divergence = divergence;
+		newOp.monitorAttr = monitorAttr;
 		
 		return newOp;
 	}
@@ -419,11 +511,14 @@ public class PhysicalPace extends PhysicalOperator {
 			return false;
 		if(((PhysicalPace)o).logging != logging)
 			return false;
-		if(!((PhysicalJoin)o).fattrsL.equals(fattrsL))
+		if(!((PhysicalPace)o).fattrsL.equals(fattrsL))
 			return false;
-		if(!((PhysicalJoin)o).fattrsL.equals(fattrsL))
+		if(!((PhysicalPace)o).fattrsL.equals(fattrsL))
 			return false;
-		
+		if(!((PhysicalPace)o).divergence.equals(divergence))
+			return false;
+		if(!((PhysicalPace)o).monitorAttr.equals(monitorAttr))
+			return false;
 		
 		return getArity() == ((PhysicalPace) o).getArity()
 				&& inputAttrs.equals(((PhysicalPace) o).inputAttrs);

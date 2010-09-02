@@ -333,7 +333,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 			// Print out the log, if logging is enabled
 			if(logging) {
 				//XXX RJFM: Consider logging to a file per query vs. outputing to stdout.
-				System.out.println(log.ToString());
+				//System.out.println(log.ToString());
 			}
 
 			

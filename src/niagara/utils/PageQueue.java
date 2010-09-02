@@ -109,7 +109,7 @@ public class PageQueue {
 
 	private boolean expandQueue() {
 		if (length >= EXPANSE_LIMIT) {
-		System.out.println(this.toString() + "refuse to expand");
+		//System.out.println(this.toString() + "refuse to expand");
 			return false; // refuse to expand*/
 		}
 
@@ -123,7 +123,7 @@ public class PageQueue {
 		tail = length - 1;
 		queue = newQueue;
 		length = length * 2;
-		System.out.println(this.toString() + " expanded");
+		//System.out.println(this.toString() + " expanded");
 
 		return true;
 	}

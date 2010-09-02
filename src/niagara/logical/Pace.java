@@ -30,6 +30,8 @@ public class Pace extends LogicalOperator {
 	private Boolean logging = false;
 	private String fattrsL = "";
 	private String fattrsR = "";
+	private String divergence;
+	private String monitorAttr;
 
 	public String getFAttrsL() {
 		return fattrsL;
@@ -101,6 +103,8 @@ public class Pace extends LogicalOperator {
 		op.logging = logging;
 		op.fattrsL = fattrsL;
 		op.fattrsR = fattrsR;
+		op.divergence = this.divergence;
+		op.monitorAttr = this.monitorAttr;
 		
 		return op;
 	}
@@ -155,8 +159,10 @@ public class Pace extends LogicalOperator {
 			return false;
 		if(((Pace)obj).logging != logging)
 			return false;
-		
-		
+		if(((Pace)obj).monitorAttr != monitorAttr)
+			return false;
+		if(((Pace)obj).divergence != divergence)
+			return false;
 		
 		Pace other = (Pace) obj;
 		return arity == other.arity && numMappings == other.numMappings
@@ -205,6 +211,10 @@ public class Pace extends LogicalOperator {
 		
 		fattrsL = e.getAttribute("fattrsL");
 		fattrsR = e.getAttribute("fattrsR");
+		
+
+		divergence = e.getAttribute("divergence");
+		monitorAttr = e.getAttribute("monitor_attr");
 		
 		// get first child that is an element
 		Element mapping = DOMHelper.getFirstChildElement(e);
@@ -261,6 +271,14 @@ public class Pace extends LogicalOperator {
 				numMappings++;
 			}
 		}
+	}
+	
+	public String getDivergence(){
+		return divergence;
+	}
+	
+	public String getMonitorAttr(){
+		return monitorAttr;
 	}
 
 }
