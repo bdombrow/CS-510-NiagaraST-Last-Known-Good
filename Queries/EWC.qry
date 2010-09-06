@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- Test query for Early Window Closure -->
+
+<plan top="cons">
+
+<!-- Internalize streams -->
+
+<filescan id ="sensors" isstream="yes" delay="0" filename="C:\DATA_Rafael\sensor-medium-8-22-2010.xml"/>
+
+<unnest id="sensor" regexp="sensor" datatype="XML" input="sensors"/>
+<unnest id="timestamp" regexp="timestamp" datatype="TS" input="sensor"/>
+<unnest id="timestamp_text" regexp="timestamp_text" root="$sensor" datatype="String" input="timestamp"/>
+<unnest id="sensor_id" regexp="sensor_id" root="$sensor" datatype="Integer" input="timestamp_text"/>
+<unnest id="volume" regexp="volume" root="$sensor" datatype="Integer" input="sensor_id"/>
+<unnest id="speed" regexp="speed" root="$sensor" datatype="Integer" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$sensor" datatype="Integer" input="speed"/>
+
+<!-- Windowed Average (Early) over 1 minute, 1 minute = 600000000, Bucket->WindowAverageEarly -->
+
+<bucket id="bucket" wintype="1" winattr="timestamp" range="600000000" slide="600000000" input="occupancy" log="yes" propagate="no" exploit="yes"/>
+
+<!-- 
+	The feedback attribute will always be window-id, fattrs="wid_from_bucket" would be redundant specification.
+	After threshold_count tuples have been considered for calculating average for a given window, send an fp with the currect wid to the bucket, which the stops sending further tuples with that wid.
+ -->
+<windowAverageEarly id="wavg" avgattr="speed" groupby="" input="bucket" log="yes" propagate="yes" exploit="no" threshold_count="50"/>
+
+
+<construct id="cons" input="wavg">
+<![CDATA[
+<result>
+ $wid_from_bucket
+ $wavg
+</result>
+]]>
+</construct>
+
+</plan>
