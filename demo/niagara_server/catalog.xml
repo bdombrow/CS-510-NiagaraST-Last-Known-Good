@@ -166,6 +166,9 @@
     <logical class="niagara.logical.WindowAverage" name="windowAverage">
       <physical class="niagara.physical.PhysicalWindowAverage" name="PhysicalWindowAverage"/>
     </logical>
+    <logical class="niagara.logical.WindowAverageEarly" name="windowAverageEarly">
+      <physical class="niagara.physical.PhysicalWindowAverageEarly" name="PhysicalWindowAverageEarly"/>
+    </logical>
     <logical class="niagara.logical.Duplicate" name="dup">
       <physical class="niagara.physical.PhysicalDuplicate" name="PhysicalDup"/>
     </logical>
@@ -324,6 +327,10 @@
 	<rule name="windowAverage to PhysicalWindowAverage" type="simple">
 		<before><logical name="windowAverage"/></before>
 		<after><op name="PhysicalWindowAverage"/></after>
+	</rule>
+	<rule name="windowAverageEarly to PhysicalWindowAverageEarly" type="simple">
+		<before><logical name="windowAverageEarly"/></before>
+		<after><op name="PhysicalWindowAverageEarly"/></after>
 	</rule>
   	<rule name="sum to PhysicalSum" type="simple">
   		<before><logical name="sum"/></before>

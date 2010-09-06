@@ -215,6 +215,10 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 	int tupleOut = 0;
 	int tupleDrop = 0;
 	int count = 0;
+	
+	// Required for ECW
+	protected long curWidFrom;
+	
 
 	// private int widFromPos, widToPos;
 
@@ -542,6 +546,9 @@ public abstract class PhysicalWindowGroup extends PhysicalOperator {
 
 		int from = Integer.parseInt(eaFrom.getAtomicValue(tupleElement, null));
 		int to = Integer.parseInt(eaTo.getAtomicValue(tupleElement, null));
+		
+		// For ECW
+		curWidFrom = from;
 		
 		HashEntry prevResult;
 

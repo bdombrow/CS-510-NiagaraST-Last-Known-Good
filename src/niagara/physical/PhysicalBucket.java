@@ -105,7 +105,7 @@ public class PhysicalBucket extends PhysicalOperator {
 			FeedbackPunctuation fp = (FeedbackPunctuation) ctrl.get(2);
 			
 			if(logging){
-				log.Update(fp.toString(), String.valueOf(tupleOut));
+		//		log.Update(fp.toString(), String.valueOf(tupleOut));
 			}
 			
 			FeedbackPunctuation fpTrans = new FeedbackPunctuation(fp.Type(),fp.Variables(),fp.Comparators(),fp.Values());
