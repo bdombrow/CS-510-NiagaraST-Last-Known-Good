@@ -1,0 +1,460 @@
+////////////////////////////////////////////////////////////////////////
+//
+//  xmlql.cup
+//  NIAGRA Project
+//
+//  Naveen Prakash
+//
+//  This is a cup specification for the xml-ql. For time being nested queries
+//  have been omitted.
+//
+/////////////////////////////////////////////////////////////////////////
+
+package niagara.xmlql_parser;
+
+import niagara.logical.*;
+import niagara.logical.predicates.*;
+import niagara.connection_server.InvalidPlanException;
+
+import java.util.*;
+import java_cup.runtime.*;
+
+parser code {:
+  public void report_error(String message, Object info) 
+  {
+ 	StringBuffer m = new StringBuffer("Error");
+
+   	 if ( info instanceof java_cup.runtime.Symbol ) {
+        	java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol)info);
+       		if (s.left >= 0) {
+        	 m.append(" in line "+(s.left+1));
+         
+        	 if (s.right >= 0)
+          	 m.append(", column "+(s.right+1));
+                 if (s.value == null)
+                   m.append(", value NULL");
+                 else 
+		   m.append(", value "+s.value.toString());
+		 m.append(", sym "+s.sym);
+     	  }
+     	}
+     
+   	m.append(" : "+message);
+     	System.err.println(m);
+   }
+   
+   public void report_fatal_error(String message, Object info) throws Exception
+   {
+     report_error(message, info);
+     throw new InvalidPlanException("Irrecoverable Parse Error. Check query syntax");
+   }
+
+:};
+
+terminal LT;
+terminal GT;
+terminal EQ;
+terminal LEQ;
+terminal GEQ;
+terminal NEQ;
+
+terminal LPAREN;
+terminal RPAREN;
+terminal LBRACE;
+terminal RBRACE;
+terminal SLASH;
+terminal COMMA;
+terminal DOT;
+terminal QMARK;
+terminal PLUS;
+terminal STAR;
+terminal COLON;
+terminal BAR;
+terminal DOLLAR;
+
+terminal OR;
+terminal AND;
+terminal NOT;
+
+terminal IN;
+terminal WHERE;
+terminal CONSTRUCT;
+terminal ELEMENT_AS;
+terminal CONTENT_AS;
+terminal ORDERED_BY;
+terminal CONFORM_TO;
+
+terminal FUNCTION;
+terminal END;
+
+terminal ID;
+terminal IDEQ;
+
+terminal String IDEN;
+terminal String VAR;
+terminal String NUMBER;
+
+terminal String STRING;
+
+non terminal query  Xmlql;
+
+non terminal        FuncList;
+non terminal        Func;
+non terminal String ReturnType;
+non terminal Vector ArgList;
+non terminal arg    Arg;
+
+non terminal query     QueryBlock;
+non terminal           SubBlockList;
+non terminal           SubBlock;
+non terminal query     Query;
+
+non terminal Vector    WherePart;
+non terminal constructBaseNode       ConstructPart;
+non terminal constructBaseNode       QueryInConstruct;
+non terminal constructBaseNode       Element;
+
+non terminal Vector    QueryInConstructList;
+non terminal Vector    ConditionList;
+non terminal condition Condition;
+non terminal Vector    InClause;
+non terminal String    ConfirmToClause;
+non terminal pattern   Pattern;
+non terminal Vector    PatternList;
+non terminal Predicate Predicate;
+non terminal Vector    Sets;
+non terminal Vector    SetElemList;
+
+non terminal Atom      Expression;
+non terminal Predicate BoolExp;
+non terminal Integer   OpRel;
+non terminal data      BindingAs;
+non terminal stp       StartTagPattern;
+non terminal Vector    AttributeList;
+non terminal attr      Attribute;
+non terminal attr      Ids;
+non terminal regExp    RegularExpression;
+non terminal 	       EndTag;
+non terminal           OrderedBy;
+non terminal Vector    VarList;
+non terminal data      DataSource;
+non terminal Vector    DataSourceSet;
+non terminal Vector    DataSourceList;
+non terminal startTag  StartTag;
+non terminal Object    SkolemOrIdAttr;
+
+precedence left OR;
+precedence left AND;
+precedence right NOT;
+
+precedence left BAR;
+precedence left DOT;
+precedence left QMARK, STAR, PLUS;
+
+start with QueryInConstruct;
+
+Xmlql ::= FuncList QueryBlock:q
+		{: RESULT = q; :}
+	;
+
+FuncList ::= FuncList Func
+	   | 
+	   ;
+
+Func ::= FUNCTION IDEN LPAREN ArgList RPAREN ReturnType QueryBlock END
+       | FUNCTION IDEN LPAREN RPAREN ReturnType QueryBlock END
+       ;
+
+ReturnType ::= COLON STRING:s
+		    {: RESULT = s; :}
+	     |
+		    {: RESULT = null; :}
+	     ;
+
+ArgList ::= ArgList:al COMMA Arg:a
+		{: if(al.contains(a)) 
+			System.out.println("error");
+		   else {
+			al.addElement(a);
+			RESULT=al;
+		   }
+		:}
+	  | Arg:a
+		{: RESULT = new Vector(); RESULT.addElement(a); :}
+	  ;
+
+Arg ::= VAR:v COLON STRING:s
+	    {: RESULT = new arg(v,s); :}
+      ;
+
+QueryBlock ::= Query SubBlockList
+	     | SubBlockList
+	     | Query:q
+		{: RESULT = q; :}
+	     ;
+
+SubBlockList ::= SubBlockList SubBlock
+	       | SubBlock
+	       ;
+
+SubBlock ::= LBRACE QueryBlock RBRACE
+	   ;
+
+Query ::= WherePart:w ConstructPart:c 
+		{: RESULT = new query(w, c); :}
+	;
+
+WherePart ::= WHERE ConditionList:c
+		{: RESULT = c; :}
+	    ;
+
+ConstructPart ::= OrderedBy CONSTRUCT QueryInConstruct
+		| CONSTRUCT QueryInConstruct:q
+			{: RESULT = q; :}
+		;
+
+QueryInConstruct ::= Element:e 
+			{: RESULT = e; :}
+		   | VAR:v
+			{: RESULT = new constructLeafNode(new data(dataType.VAR,v)); :}
+		   | QueryBlock
+		   ;
+
+Element ::= StartTag:s QueryInConstructList:ql EndTag 
+		{: RESULT = new constructInternalNode(s, ql); :}
+	  | StartTag:s IDEN:i EndTag
+		{:
+			Vector v1 = new Vector();
+			v1.addElement(new constructLeafNode(new data(dataType.IDEN,i)));
+			RESULT = new constructInternalNode(s,v1);
+		:}
+	  | StartTag:s NUMBER:i EndTag
+		{:
+			Vector v1 = new Vector();
+			v1.addElement(new constructLeafNode(new data(dataType.STRING,i)));
+			RESULT = new constructInternalNode(s,v1);
+		:}
+	  | StartTag:s EndTag
+		{:
+			Vector v1 = new Vector();
+			RESULT = new constructInternalNode(s,v1);
+		:}
+	  ;
+
+QueryInConstructList ::= QueryInConstructList:ql QueryInConstruct:q
+				{: ql.addElement(q); RESULT = ql; :}
+		       | QueryInConstruct:q
+				{: RESULT = new Vector(); RESULT.addElement(q); :}
+		       ;
+
+ConditionList ::= ConditionList:cl COMMA Condition:c
+		       {: cl.addElement(c); RESULT = cl; :}
+		| Condition:c
+		       {: RESULT = new Vector(); RESULT.addElement(c); :}
+		;
+
+Condition ::= Pattern:p InClause:i ConfirmToClause:c
+		{: RESULT = new inClause(p, i, c); :}
+	    | Predicate:p
+		{: RESULT = p; :}
+	    | VAR:v IN Sets:s
+		{: RESULT = new set(v,s); :}
+	    ;
+
+InClause ::= IN DataSourceSet:d
+		{: RESULT = d; :}
+	   ;
+
+ConfirmToClause ::= CONFORM_TO STRING:s
+			{: RESULT = s; :}
+		  |
+			{: RESULT = null; :}
+		  ;
+
+Pattern ::= StartTagPattern:s PatternList:pl EndTag BindingAs:b
+		{: RESULT = new patternInternalNode(s.getRegExp(), s.getAttrList(), pl, b); :}
+	  | StartTagPattern:s Expression:e EndTag BindingAs:b
+		{: RESULT = new patternLeafNode(s.getRegExp(), s.getAttrList(), e, b); :}
+	  | StartTagPattern:s EndTag BindingAs:b
+		{: RESULT = new patternLeafNode(s.getRegExp(), s.getAttrList(), b); :}
+	  ;
+
+PatternList ::= PatternList:pl Pattern:p
+		   {: pl.addElement(p); RESULT = pl; :}
+	      | Pattern:p
+		   {: RESULT = new Vector(); RESULT.addElement(p); :}
+	      ;
+
+Sets ::= LBRACE SetElemList:sl RBRACE
+		{: RESULT = sl; :}
+       ;
+
+SetElemList ::= SetElemList:sl COMMA IDEN:i
+		   {: sl.addElement(new data(dataType.IDEN,i)); RESULT = sl; :}
+              | IDEN:i
+		   {: RESULT = new Vector(); RESULT.addElement(new data(dataType.IDEN,i)); :}
+	      ;
+
+Predicate ::= Predicate:p1 AND Predicate:p2
+		{: RESULT = new And(p1, p2); :}
+	    | Predicate:p1 OR Predicate:p2
+		{: RESULT = new Or(p1, p2); :}
+	    | NOT Predicate:p
+		{: RESULT = new Not(p); :}
+	    | LPAREN Predicate:p RPAREN
+		{: RESULT = p; :}
+	    | BoolExp:b
+		{: RESULT = b; :}
+	    ;
+
+BoolExp ::= Expression:e1 OpRel:o Expression:e2
+		{:  RESULT = Comparison.newComparison(o.intValue(), e1, e2); :}
+          ;
+
+Expression ::= NUMBER:n 
+		  {: RESULT = new NumericConstant(n); :}
+	     | IDEN:i
+		  {: RESULT = new StringConstant(i); :}
+	     | VAR:v
+		  {: RESULT = new OldVariable(v); :}
+	     | STRING:s
+		  {: RESULT = new StringConstant(s); :}
+	     ;
+
+OpRel ::= LT
+	   {: RESULT = new Integer(opType.LT); :}
+	| GT
+	   {: RESULT = new Integer(opType.GT); :}
+	| LEQ
+	   {: RESULT = new Integer(opType.LEQ); :}
+	| GEQ
+	   {: RESULT = new Integer(opType.GEQ); :}
+	| NEQ
+	   {: RESULT = new Integer(opType.NEQ); :}
+	| EQ
+	   {: RESULT = new Integer(opType.EQ); :}
+	;
+
+BindingAs ::= ELEMENT_AS VAR:v
+		{: RESULT = new data(dataType.ELEMENT_AS, v); :}
+	    | CONTENT_AS VAR:v
+		{: RESULT = new data(dataType.CONTENT_AS, v); :}
+	    |
+		{: RESULT = null; :}
+	    ;
+
+StartTagPattern ::= LT RegularExpression:r Ids:i AttributeList:al GT
+			{: if(i != null)
+		              al.addElement(i);	
+			   RESULT = new stp(r, al); :}
+		  | LT VAR:v Ids:i AttributeList:al GT
+			{: if(i != null)
+		              al.addElement(i);	
+			   RESULT = new stp(new regExpDataNode(new data(dataType.VAR, v)), al); :}
+		  ;
+
+Ids ::= IDEQ STRING:s
+	  {: RESULT = new attr(new String("ID"),new data(dataType.STRING,s)); :}
+      | IDEQ VAR:v
+	  {: RESULT = new attr(new String("ID"),new data(dataType.VAR,v)); :}
+      |
+	  {: RESULT = null; :}
+      ;
+
+AttributeList ::= AttributeList:al Attribute:a
+		      {: al.addElement(a); RESULT=al; :} 
+		| 
+		      {: RESULT = new Vector(); :}
+		;
+
+Attribute ::= IDEN:i EQ STRING:s
+		  {: RESULT = new attr(i,new data(dataType.STRING,s)); :}
+	    | IDEN:i EQ VAR:v
+		  {: RESULT = new attr(i,new data(dataType.VAR,v)); :}
+       | IDEQ STRING:s
+		  {: RESULT = new attr("id",new data(dataType.STRING,s)); :}
+       | IDEQ VAR:v
+		  {: RESULT = new attr("id",new data(dataType.VAR,v)); :}		  
+	    ;
+
+RegularExpression ::= RegularExpression:r STAR
+			  {: RESULT = new regExpOpNode(opType.STAR, r); :}
+		    | RegularExpression:r PLUS
+			  {: RESULT = new regExpOpNode(opType.PLUS, r); :}
+		    | RegularExpression:r QMARK
+			  {: RESULT = new regExpOpNode(opType.QMARK, r); :}
+		    | RegularExpression:r1 DOT RegularExpression:r2
+			  {: RESULT = new regExpOpNode(opType.DOT, r1, r2); :}
+		    | RegularExpression:r1 BAR RegularExpression:r2
+			  {: RESULT = new regExpOpNode(opType.BAR, r1, r2); :}
+		    | LPAREN RegularExpression:r RPAREN
+			  {: RESULT = r; :}
+		    | IDEN:i   
+			  {: RESULT = new regExpDataNode(new data(dataType.IDEN,i)); :}
+		    | END
+			  {: RESULT = new regExpDataNode(new data(dataType.IDEN,"end")); :}
+		    | ID   
+		          {: RESULT = new regExpDataNode(new data(dataType.IDEN,"id")); :}
+		    | DOLLAR 
+			  {: RESULT = new regExpOpNode(opType.DOLLAR); :}
+		    ;
+
+EndTag ::= LT SLASH GT 
+	 | LT SLASH IDEN GT
+	 ;
+
+OrderedBy ::= ORDERED_BY VarList
+	    ;
+
+VarList ::= VarList:vl COMMA VAR:v
+	      {: vl.addElement(v); RESULT = vl; :}
+	  | VAR:v
+	      {: RESULT = new Vector(); RESULT.addElement(v); :}
+	  ;
+
+DataSourceSet ::= LBRACE DataSourceList:dl RBRACE
+			{: RESULT = dl; :}
+		| DataSource:d
+			{: RESULT = new Vector(); RESULT.addElement(d); :}
+		;
+
+DataSourceList ::= DataSourceList:dl COMMA DataSource:d
+			{: dl.addElement(d); RESULT = dl; :}
+		 | DataSource:d
+			{: RESULT = new Vector(); RESULT.addElement(d); :}
+		 ;
+
+DataSource ::= VAR:v
+		   {: RESULT = new data(dataType.VAR, v); :}
+	     | STRING:s
+		   {: RESULT = new data(dataType.STRING, s); :}
+	     | IDEN LPAREN DataSourceList RPAREN
+	     | IDEN LPAREN RPAREN
+	     ;
+
+StartTag ::= LT IDEN:i IDEQ SkolemOrIdAttr:s AttributeList:al GT 
+		{: if (!(s instanceof skolem)) { 
+		      al.insertElementAt(s, 0); s = null;
+		   }
+		   RESULT = new startTag(new data(dataType.IDEN, i), (skolem) s, al); :}
+	   | LT VAR:v IDEQ SkolemOrIdAttr:s AttributeList:al GT
+		{: if (!(s instanceof skolem)) { 
+		      al.insertElementAt(s, 0); s = null;
+		   }
+           RESULT = new startTag(new data(dataType.VAR, v), (skolem) s, al); :}
+       | LT IDEN:i AttributeList:al GT 
+		{: RESULT = new startTag(new data(dataType.IDEN, i), null, al); :}
+	   | LT VAR:v AttributeList:al GT
+		{: RESULT = new startTag(new data(dataType.VAR, v), null, al); :}		
+	   ;
+
+SkolemOrIdAttr ::= IDEN:s LPAREN VarList:vl RPAREN
+		{: RESULT = new skolem(s, vl); :}
+	   | IDEN:s LPAREN RPAREN
+		{: RESULT = new skolem(s, new Vector()); :}
+       | STRING:s 
+		  {: RESULT = new attr("id",new data(dataType.STRING,s)); :}
+       | VAR:v
+		  {: RESULT = new attr("id",new data(dataType.VAR,v)); :}		  
+	   ;
+

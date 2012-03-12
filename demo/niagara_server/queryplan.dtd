@@ -10,7 +10,7 @@
 <!ELEMENT plan     (unnest | sort | expression | avg |
 		    slidingAvg | sum | slidingSum | max |
 		    slidingMax | count | slidingCount | incrmax |
-		    incravg | select | magic | dup | union | join | pace |
+		    incravg | select | lastknowngood | magic | dup | union | join | pace |
 		    dtdscan | resource | constant | timer |
 		    prefix | punctuate | send | display | topn |
 		    firehosescan | filescan | construct |
@@ -18,7 +18,7 @@
 		    accumulate | nest | magic_construct |
 		    windowCount | windowMax | windowAverage  | windowJoin | impute |
         showTunables | collectInstrumentation | expensive |
-		    store | load | xmlscan | dbscan | dbscanimpute | rename | punctqc | present | instrument | instrument2 | instrument3 | windowAverageEarly)+>
+		    store | load | xmlscan | dbscan | dbscanimpute | rename | punctqc | present | instrument | instrument2 | instrument3 | windowAverageEarly | csvstream)+>
 
 <!ATTLIST plan top IDREF        #REQUIRED
                planID CDATA     ""
@@ -250,6 +250,14 @@
     log       (yes | no) "no"
     propagate (yes | no) "no"
     exploit   (yes | no) "no"
+	  %StandardAttributes;>
+
+<!ELEMENT lastknowngood  (and | or | not | true | false | pred | groupby)>
+<!ATTLIST lastknowngood
+    log       (yes | no) "no"
+    propagate (yes | no) "no"
+    exploit   (yes | no) "no"
+    groupby CDATA			#REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT magic  (and | or | not | true | false | pred)>
@@ -663,3 +671,15 @@ specify the db input first and the stream punct input second -->
          operators     CDATA           #REQUIRED
          period        CDATA           #REQUIRED
           %PositionAttributes;>
+
+          <!ELEMENT csvstream  EMPTY>
+<!ATTLIST csvstream
+          id       ID           #REQUIRED
+          attr_types   CDATA    #REQUIRED
+          attr_names   CDATA    #REQUIRED
+          file_name CDATA    #REQUIRED
+
+          similarity CDATA  #IMPLIED
+          prefetch CDATA        #IMPLIED
+    type    CDATA "continuous"
+    %PositionAttributes;>

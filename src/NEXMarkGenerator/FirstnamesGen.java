@@ -1,3 +1,5 @@
+package NEXMarkGenerator;
+
 /*  
    NEXMark Generator -- Niagara Extension to XMark Data Generator
 

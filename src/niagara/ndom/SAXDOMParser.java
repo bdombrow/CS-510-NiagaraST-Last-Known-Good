@@ -59,8 +59,7 @@ public class SAXDOMParser extends DefaultHandler implements DOMParser {
 	public SAXDOMParser() {
 		try {
 			SAXParserFactory factory = SAXParserFactory.newInstance();
-			factory.setFeature("http://xml.org/sax/features/string-interning",
-					true);
+			//factory.setFeature("http://xml.org/sax/features/string-interning",true);
 			factory.setFeature("http://xml.org/sax/features/namespaces", true);
 			parser = factory.newSAXParser();
 		} catch (FactoryConfigurationError e) {

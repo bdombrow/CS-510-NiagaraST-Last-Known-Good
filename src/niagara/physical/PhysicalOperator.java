@@ -182,7 +182,7 @@ public abstract class PhysicalOperator extends PhysicalOp implements
 		}
 
 		if (isSendImmediate) {
-			assert numSinkStreams == 1 : "KT - Is it OK if there is more than one sink?";
+			assert numSinkStreams == 1 : "KT - Is it OK if there is more than one sink? # Sink Streams = " + numSinkStreams;
 			for (int i = 0; i < numSinkStreams; i++) {
 				sinkStreams[i].setSendImmediate();
 			}
