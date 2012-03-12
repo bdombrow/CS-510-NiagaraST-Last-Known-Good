@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- very simple query to scan over the database dumped to csv converted to xml -->
+
+<plan top="cons">
+
+<csvstream id="csvstream"
+        file_name="../../tests/data/windowsampledata_ts2.csv"
+        attr_names="time packetloss" 
+        attr_types="TS long"
+/>
+
+<bucket id="bucket" 
+        range="60000" 
+        slide="60000" 
+        wintype="1" 
+        winattr="$time" 
+        input="csvstream"/>
+   
+<construct id="cons" input="bucket">
+<![CDATA[
+<output>
+  $wid_from_bucket
+  $packetloss
+</output>
+]]>
+</construct>
+
+</plan>

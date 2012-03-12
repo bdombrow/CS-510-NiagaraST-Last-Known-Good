@@ -1,0 +1,78 @@
+Data <- read.table("FocalLen35Film.csv")
+Data <- read.table("~brent/FocalLen35Film.csv")
+Data <- read.table("~brent/FocalLen35Film.csv", header=false)
+test <- read.table("/Users/brent/FocalLen35mmFilm.csv")
+test
+test <- read.table("/Users/brent/FocalLen35mmFilm.csv", sep=",")
+test
+test[5]
+test
+library(RSQLite)
+drv <- dbDriver("SQLite")
+con <- dbConnect(drv, dbname="~brent/Properties.apdb")
+dbListTables(con)
+dbGetQuery(con, "SELECT * FROM RKExifNumberProperty WHERE propertyKey = 'FocalLenIn35mmFilm'")
+data <- dbGetQuery(con, "SELECT * FROM RKExifNumberProperty WHERE propertyKey = 'FocalLenIn35mmFilm'")
+data
+data[value]
+data
+data[v4]
+data[4]
+historgarm(data[4])
+histogram
+hist(data[4])
+data[4]
+cast(data[4])
+hist(data[4])
+hist(as.numeric(data[4]))
+data <- dbGetQuery(con, "SELECT numberProperty FROM RKExifNumberProperty WHERE propertyKey = 'FocalLenIn35mmFilm'")
+data
+hist(data)
+as.numeric(data)
+as.numeric(data(i))
+data[1]
+data[2]
+data[1]
+as.numeric(data.[1])
+as.numeric(data[1])
+data.1
+data
+data[1]
+as.numeric(data[1])
+data[,1]
+as.numeric(data[,1])
+hist(data[,1])
+hist(data[,1], breaks=10)
+hist(data[,1], breaks=20)
+hist(data[,1], breaks=40)
+hist(data[,1], breaks=(35,70,80,105,200,300.400))
+hist(data[,1], breaks=c(35,70,80,105,200,300.400))
+hist(data[,1], breaks=c(35,70,80,105,200,300,400))
+hist(data[,1], breaks=c(35,70,80,105,200,300,405))
+hist(data[,1], breaks=c(0,35,70,80,105,200,300,405))
+hist(data[,1], breaks=c(0,35,70,80,105,200,300,400,900))
+hist(data[,1], breaks=c(0,35,70,80,105,200,300,400,500))
+hist(data[,1], breaks=c(0,35,80,105,200,300,400,500))
+hist(data[,1], breaks=c(0,35,80,105,200,500))
+hist(data[,1], breaks=c(0,35,80,105,500))
+hist(data[,1], breaks=40)
+hist(data[,1], breaks=c(0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,300,400,500))
+quit()
+library(XML)
+setwd("Current Quarter/CS-510-Streams/Project/NiagaraST/Results")
+stupp <- xmlToDataFrame("bad-test1.xml", homogeneous = TRUE, stringAsFactor = FALSE)
+stupp <- xmlToDataFrame("bad-test1.xml", homogeneous = TRUE, stringsAsFactor = FALSE)
+stupp
+stupp <- xmlToDataFrame("bad-test1.xml", homogeneous = TRUE, stringsAsFactor = FALSE)
+stupp
+stupp <- xmlToDataFrame("bad-test1.xml", homogeneous = TRUE, stringsAsFactor = FALSE)
+stupp
+stupp <- xmlToDataFrame("bad-test1.xml", homogeneous = TRUE, stringsAsFactor = FALSE)
+stupp
+stupp <- xmlToDataFrame("bad-test1.xml", homogeneous = TRUE, stringsAsFactor = FALSE)
+length(stupp)
+help(length)
+length(stupp$date_part)
+stupp <- xmlToDataFrame("good-test1.xml", homogeneous = TRUE, stringsAsFactor = FALSE)
+length(stupp$date_part)
+quit()

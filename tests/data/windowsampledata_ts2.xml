@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:stream xmlns:niagara="http://www.cse.ogi.edu/dot/niagara" xmlns:punct="http://www.cse.ogi.edu/dot/niagara/punct">
+<update>
+	<time>1281337200000</time>
+	<packetloss>1</packetloss>
+</update>
+<update>
+	<time>1281337220000</time>
+	<packetloss>9</packetloss>
+</update>
+<update>
+	<time>1281337240000</time>
+	<packetloss>5</packetloss>
+</update>
+<update>
+	<time>1281337260000</time>
+	<packetloss>5</packetloss>
+</update>
+<update>
+	<time>1281337280000</time>
+	<packetloss>9</packetloss>
+</update>
+<update>
+	<time>1281337320000</time>
+	<packetloss>7</packetloss>
+</update>
+<update>
+	<time>1281337340000</time>
+	<packetloss>2</packetloss>
+</update>
+<update>
+	<time>1281337360000</time>
+	<packetloss>2</packetloss>
+</update>
+<update>
+	<time>1281337380000</time>
+	<packetloss>9</packetloss>
+</update>
+</niagara:stream>

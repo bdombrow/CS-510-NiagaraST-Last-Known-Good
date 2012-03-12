@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- Simple select -->
+
+<plan top="data">
+
+<!-- Internalize stream -->
+
+<filescan id ="data" attrs="detectorid, starttime, volume, speed, occupancy, countreadings, vmt, vht, delay, traveltime" isstream="no" delay="0" filename="../../FreewayData/freeway_loopdata1hr.csv" />
+
+<construct id="cons" input="data">
+<![CDATA[
+<result>
+ $detectorid
+ $speed
+</result>
+]]>
+
+
+</construct>
+</plan>

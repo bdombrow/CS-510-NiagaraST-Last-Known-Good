@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- very simple query to scan over the database dumped to csv converted to xml -->
+
+<plan top="cons">
+
+<csvstream id="csvstream"
+        file_name="../../tests/data/windowsampledata_ts.csv"
+        attr_names="time packetloss" 
+        attr_types="TS integer"
+/>
+
+
+<bucket id="bucket" 
+        range="60000" 
+        slide="60000" 
+        wintype="1" 
+        winattr="$time" 
+        input="csvstream"/>
+
+<max id="max" groupby="$wid_from_bucket" maxattr="$packetloss" input="bucket"/>
+
+<construct id="cons" input="max">
+<![CDATA[
+<output>
+  $wid_from_bucket
+  $max
+</output>
+]]>
+</construct>
+
+
+
+</plan>

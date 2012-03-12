@@ -1,0 +1,835 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagararesults>
+
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>54</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>39</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>52</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>50</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>45</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>58</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>47</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>46</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>48</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>45</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>49</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>36</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>45</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>43</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>39</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>49</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>34</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>42</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>32</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>43</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>40</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>45</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>53</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>31</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>51</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>44</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>34</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>54</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>56</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>40</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>39</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>50</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>37</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>48</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>35</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>35</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>40</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>48</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>36</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>47</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>58</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>50</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>46</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>40</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>40</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>56</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>44</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>51</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>59</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>62</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>42</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>43</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>44</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>31</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>59</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>56</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>63</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>49</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>60</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>45</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>42</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>63</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>44</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>63</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>31</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>60</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>48</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>49</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>33</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>45</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>52</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>54</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>41</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>37</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>36</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>39</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>60</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>60</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>38</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>64</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>33</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>31</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>44</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>50</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>48</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>38</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>51</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>62</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>61</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>55</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>36</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>49</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>43</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>63</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>40</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>51</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>40</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>40</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>41</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>60</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>60</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>41</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>59</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>31</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>31</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>32</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>59</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>61</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>56</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>34</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>33</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>52</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>42</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>35</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>37</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>52</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>41</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>61</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>45</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>31</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>49</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>38</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>33</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>52</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>55</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>45</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>32</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>63</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>51</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>52</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>58</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>45</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>33</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>64</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>64</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>35</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>52</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>37</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>38</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>47</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>43</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>57</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>61</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>44</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>32</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>48</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>34</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>36</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>37</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>41</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>56</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>43</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>56</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>53</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1000</detector_id>
+   <speed>44</speed>
+</result>
+<result>
+   <segment_id>1</segment_id>
+   <detector_id>1001</detector_id>
+   <speed>31</speed>
+</result>
+
+</niagararesults>

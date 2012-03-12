@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- Simple select -->
+
+<plan top="cons">
+
+<!-- Internalize stream -->
+
+<filescan id ="data" isstream="yes" delay="0" filename="../../Streams/trafficDataStreamSmall.xml"/>
+
+<unnest id="detectors" regexp="detectors" datatype="XML" input="data"/>
+<unnest id="ts" regexp="time_t" datatype="TS" input="detectors"/>
+<unnest id="starttime" regexp="time_s" root="$detectors" datatype="String" input="ts"/>
+<unnest id="detector" regexp="detector" root="$detectors" datatype="XML" input="starttime"/>
+<unnest id="detectorid" regexp="detector_id" root="$detector" datatype="Integer" input="detector"/>
+<unnest id="segmentid" regexp="segment_id" root="$detector" datatype="Integer" input="detectorid"/>
+<unnest id="volume" regexp="volume" root="$detector" datatype="Integer" input="segmentid"/>
+<unnest id="speed" regexp="speed" root="$detector" datatype="Integer" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$detector" datatype="Integer" input="speed"/>
+
+<select id="end" input="occupancy">
+	<pred op="gt">
+		<var value="$speed"/><number value= "60"/>
+	</pred>
+</select>
+
+<count id="cons" input="end" groupby="detectorid" countattr="speed"></count>
+</plan>

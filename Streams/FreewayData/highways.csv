@@ -1,0 +1,13 @@
+highwayid,shortdirection,direction,highwayname
+1,N,NORTH,I-5
+2,S,SOUTH,I-5
+3,N,NORTH,I-205
+4,S,SOUTH,I-205
+5,N,NORTH,I-405
+6,S,SOUTH,I-405
+7,E,EAST,I-84
+8,W,WEST,I-84
+9,N,NORTH,OR 217
+10,S,SOUTH,OR 217
+11,E,EAST,US 26
+12,W,WEST,US 26

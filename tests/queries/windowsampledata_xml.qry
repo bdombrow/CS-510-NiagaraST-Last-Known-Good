@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- very simple query to scan over the database dumped to csv converted to xml -->
+
+<plan top="cons">
+
+<filescan id="filescan" 
+         filename="../../tests/data/windowsampledata_ts.xml" />
+
+<unnest id="update" regexp="update" 
+        datatype="XML" 
+        input="filescan"/>
+        
+<unnest id="time" regexp="time" 
+        datatype="TS" root="$update" 
+        input="update"/>
+        
+<unnest id="packetloss" regexp="packetloss" 
+        datatype="Integer" root="$update" 
+        input="time"/>
+
+<bucket id="bucket" 
+        range="60000" 
+        slide="60000" 
+        wintype="1" 
+        winattr="$time" 
+        input="packetloss"/>
+
+<construct id="cons" input="bucket">
+<![CDATA[
+<output>
+  $wid_from_bucket
+  $packetloss
+</output>
+]]>
+</construct>
+
+</plan>

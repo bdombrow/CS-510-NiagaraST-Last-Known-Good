@@ -1,0 +1,35 @@
+digraph tree {
+rankdir="LR"
+node [shape=record];
+node [style=rounded];
+"top" [label="OP: plan | {ID: top}"];
+"loopdata" [label="OP: csvstream | {ID: loopdata}"];
+"detectors" [label="OP: csvstream | {ID: detectors}"];
+"detectors_r" [label="OP: rename | {ID: detectors_r}"];
+"dup1" [label="OP: dup | {ID: dup1}"];
+"occupancy_or_speed_gt" [label="OP: select | {ID: occupancy_or_speed_gt}"];
+"speed_0_and_volume_not_0" [label="OP: select | {ID: speed_0_and_volume_not_0}"];
+"volume_0_and_speed_not_0" [label="OP: select | {ID: volume_0_and_speed_not_0}"];
+"volume_0_and_occupancy_not_0" [label="OP: select | {ID: volume_0_and_occupancy_not_0}"];
+"bad" [label="OP: union | {ID: bad}"];
+"join_bad_detectors" [label="OP: join | {ID: join_bad_detectors}"];
+"project_bad" [label="OP: construct | {ID: project_bad}"];
+"bad_to_join" [label="OP: rename | {ID: bad_to_join}"];
+"cons" [label="OP: construct | {ID: cons}"];
+"cons" -> "top";
+"detectors" -> "detectors_r";
+"loopdata" -> "dup1";
+"dup1" -> "occupancy_or_speed_gt";
+"dup1" -> "speed_0_and_volume_not_0";
+"dup1" -> "volume_0_and_speed_not_0";
+"dup1" -> "volume_0_and_occupancy_not_0";
+"occupancy_or_speed_gt" -> "bad";
+"speed_0_and_volume_not_0" -> "bad";
+"volume_0_and_speed_not_0" -> "bad";
+"volume_0_and_occupancy_not_0" -> "bad";
+"bad" -> "join_bad_detectors";
+"detectors_r" -> "join_bad_detectors";
+"join_bad_detectors" -> "project_bad";
+"project_bad" -> "bad_to_join";
+"bad_to_join" -> "cons";
+}

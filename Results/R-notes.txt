@@ -1,0 +1,2 @@
+library(XML)
+test <- xmlToDataFrame("test.xml", homogeneous = TRUE, stringsAsFactors = FALSE)

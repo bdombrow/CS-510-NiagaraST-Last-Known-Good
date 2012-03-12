@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<niagara:stream xmlns:niagara="http://www.cse.ogi.edu/dot/niagara" xmlns:punct="http://www.cse.ogi.edu/dot/niagara/punct">
+<update>
+	<time>1281337200000</time>
+	<packetloss>10</packetloss>
+</update>
+<update>
+	<time>1281337220000</time>
+	<packetloss>9</packetloss>
+</update>
+<update>
+	<time>1281337240000</time>
+	<packetloss>5</packetloss>
+</update>
+<update>
+	<time>1281337260000</time>
+	<packetloss>15</packetloss>
+</update>
+<update>
+	<time>1281337280000</time>
+	<packetloss>9</packetloss>
+</update>
+<update>
+	<time>1281337320000</time>
+	<packetloss>7</packetloss>
+</update>
+<update>
+	<time>1281337340000</time>
+	<packetloss>12</packetloss>
+</update>
+<update>
+	<time>1281337360000</time>
+	<packetloss>2</packetloss>
+</update>
+<update>
+	<time>1281337380000</time>
+	<packetloss>9</packetloss>
+</update>
+<update>
+	<time>1281337400000</time>
+	<packetloss>5</packetloss>
+</update>
+<update>
+	<time>1281337420000</time>
+	<packetloss>10</packetloss>
+</update>
+<update>
+	<time>1281337440000</time>
+	<packetloss>9</packetloss>
+</update>
+	
+<update>
+	<time>1281337460000</time>
+	<packetloss>15</packetloss>
+</update>
+<update>
+	<time>1281337480000</time>
+	<packetloss>13</packetloss>
+</update>
+<update>
+	<time>1281337500000</time>
+	<packetloss>7</packetloss>
+</update>
+<update>
+	<time>1281337520000</time>
+	<packetloss>12</packetloss>
+</update>
+<update>
+	<time>1281337540000</time>
+	<packetloss>2</packetloss>
+</update>
+<update>
+	<time>1281337560000</time>
+	<packetloss>9</packetloss>
+</update>
+<update>
+	<time>1281337580000</time>
+	<packetloss>5</packetloss>
+</update>
+<update>
+	<time>1281337600000</time>
+	<packetloss>6</packetloss>
+</update>
+<update>
+	<time>1281337620000</time>
+	<packetloss>6</packetloss>
+</update>
+<update>
+	<time>1281337640000</time>
+	<packetloss>6</packetloss>
+</update>
+<update>
+	<time>1281337660000</time>
+	<packetloss>10</packetloss>
+</update>
+<update>
+	<time>1281337680000</time>
+	<packetloss>20</packetloss>
+</update>
+<update>
+	<time>1281337700000</time>
+	<packetloss>11</packetloss>
+</update>
+<update>
+	<time>1281337720000</time>
+	<packetloss>2</packetloss>
+</update>
+<update>
+	<time>1281337740000</time>
+	<packetloss>4</packetloss>
+</update>
+<update>
+	<time>1281337760000</time>
+	<packetloss>8</packetloss>
+</update>
+<update>
+	<time>1281337780000</time>
+	<packetloss>1</packetloss>
+</update>
+</niagara:stream>

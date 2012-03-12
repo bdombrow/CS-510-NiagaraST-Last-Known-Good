@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!-- Simple select -->
+
+<plan top="cons">
+
+<!-- Internalize stream -->
+
+<filescan id ="data" isstream="yes" delay="0" filename="../../Streams/trafficDataStreamSmall.xml"/>
+
+<unnest id="detectors" regexp="detectors" datatype="XML" input="data"/>
+<unnest id="time_t" regexp="time_t" datatype="TS" input="detectors"/>
+<unnest id="time_s" regexp="time_s" root="$detectors" datatype="String" input="time_t"/>
+<unnest id="detector" regexp="detector" root="$detectors" datatype="XML" input="time_s"/>
+<unnest id="detector_id" regexp="detector_id" root="$detector" datatype="Integer" input="detector"/>
+<unnest id="segment_id" regexp="segment_id" root="$detector" datatype="Integer" input="detector_id"/>
+<unnest id="volume" regexp="volume" root="$detector" datatype="Integer" input="segment_id"/>
+<unnest id="speed" regexp="speed" root="$detector" datatype="Integer" input="volume"/>
+<unnest id="occupancy" regexp="occupancy" root="$detector" datatype="Integer" input="speed"/>
+
+<selecto id="se" input="occupancy" log="yes">
+<pred op="lt">
+       <var value="$speed"></var><number value ="17"></number>
+</pred>
+</selecto>
+
+<selecto id="sel" input="se" log="no">
+<pred op="lt">
+       <var value="$speed"></var><number value ="100"></number>
+</pred>
+</selecto>
+
+<selecto id="se2" input="sel" log="yes">
+<pred op="gt">
+       <var value="$speed"></var><number value ="5"></number>
+</pred>
+</selecto>
+
+
+<construct id="cons" input="se2">
+<![CDATA[
+<result>
+ $segment_id
+ $detector_id
+ $speed
+</result>
+]]>
+
+
+</construct>
+</plan>

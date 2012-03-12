@@ -1,0 +1,265 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!--
+
+	Highway traffic data.
+	Select the sensor readings that do not meet the qualifications for good.
+
+-->
+
+<plan top="result">
+
+<!--
+
+	Read in the input stream in csv format.
+	
+	The CSV reader seems to be not very good at this point.
+	Attribute names need to match the ones in the header of the CSV file.
+	Attribute types seem to be very week at this point. Setting everything to string for now.
+
+-->
+<csvstream id="loopdata"
+        file_name="../../Streams/FreewayData/freeway_loopdata_6hr.csv"
+        attr_names="ts starttime detectorid volume speed occupancy status dqflags" 
+        attr_types="TS string string long long long long long"
+/>
+
+<csvstream id="detectors"
+		file_name="../../Streams/FreewayData/freeway_detectors.csv"
+		attr_names="detectorid highwayid milepost locationtext detectorclass lanenumber stationid"
+		attr_types="string string string string string string string"
+/>
+
+<!--
+	Duplicate the loopdata stream.
+	
+	NOTE: branch is the number of duplicates. If you have more duplicates than streams reading from
+	this op, the system seems to go into an infinite loop.
+
+-->
+
+<dup id="dup1" input="loopdata" branch="4"></dup>
+
+<!--
+	Rename detectorid to id so we can use it in a join.
+	NiagaraST does not like duplicate names in a join.
+-->
+<rename id="detectors_a" input="detectors" source="detectorid" dest="did"/>
+<dup id="detectors_r" input="detectors_a" branch="1"/>
+<!--
+	Good Query
+-->
+
+
+<!--
+	Filter results where the speed is > 100 or the occupancy is > 95
+-->
+<select id="occupancy_or_speed" input="dup1" log="no">
+	<not>
+	<or>
+		<pred op="gt">
+			<var value="$occupancy"></var><number value="95"></number>
+		</pred>
+		<pred op="gt">
+			<var value="$speed"></var><number value="100"></number>
+		</pred>
+	</or>
+	</not>
+</select>
+
+<!--
+	Filter the results where the volume is > 0 and the speed is 0
+-->
+<select id="speed_and_volume_ok_1" input="occupancy_or_speed" log="no">
+	<not>
+		<and>
+			<pred op="eq">
+				<var value="$speed"></var><number value="0"></number>
+			</pred>
+			<pred op="gt">
+				<var value="$volume"></var><number value="0"></number>
+			</pred>
+		</and>
+	</not>
+</select>
+
+<!--
+	Filter the results where the speed is > 0 and the volume is 0
+-->
+<select id="speed_and_volume_ok_2" input="speed_and_volume_ok_1" log="no">
+	<not>
+		<and>
+			<pred op="gt">
+				<var value="$speed"></var><number value="0"></number>
+			</pred>
+			<pred op="eq">
+				<var value="$volume"></var><number value="0"></number>
+			</pred>
+		</and>
+	</not>
+</select>
+
+
+<!--
+	Filter the results where the occupancy is > 0 and the volume is 0
+-->		
+<select id="good" input="speed_and_volume_ok_2" log="no">
+	<not>
+		<and>
+			<pred op="gt">
+				<var value="$occupancy"></var><number value="0"></number>
+			</pred>
+			<pred op="eq">
+				<var value="$volume"></var><number value="0"></number>
+			</pred>
+		</and>
+	</not>
+</select>
+
+<!--
+	Get the station id for the detector
+-->
+<join id="join_good" input="good detectors_r" left="detectorid" right="did"></join>
+<dup id="join_good_dup" input="join_good" branch="3"/>
+
+<!--
+	Bucket the data
+-->
+<bucket id="good_speed_bucket" input="join_good_dup" wintype="1" winattr="$ts" range="20" slide="20"/>
+<bucket id="good_volume_bucket" input="join_good_dup" wintype="1" winattr="$ts" range="20" slide="20"/>
+<bucket id="good_occupancy_bucket" input="join_good_dup" wintype="1" winattr="$ts" range="20" slide="20"/>
+
+<!--
+	Get averages for each attribute of interest
+-->
+<windowAverage id="speed_avg" input="good_speed_bucket" groupby="$stationid" avgattr="$speed"/>
+<windowAverage id="volume_avg" input="good_volume_bucket" groupby="$stationid" avgattr="$speed"/>
+<windowAverage id="occupancy_avg" input="good_occupancy_bucket" groupby="stationid" avgattr="$occupancy"/>
+
+<rename id="speed_avg_r" input="speed_avg" source="stationid wid_from_good_speed_bucket speed_avg" dest="sid_speed bucket_speed speed"/>
+<rename id="volume_avg_r" input="volume_avg" source="stationid wid_from_good_volume_bucket volume_avg" dest="sid_volume bucket_volume volume"/>
+<rename id="occupancy_avg_r" input="occupancy_avg" source="stationid wid_from_good_occupancy_bucket occupancy_avg" dest="sid_occupancy bucket_occupancy occupancy"/>
+
+<!--
+	Things work up to this point.
+	
+	Current issues:
+		1) Dupping a bucket stream does not seem to work, I don't know why
+		3) Joining or unioning the results does not work. Seems to think there are attributes with the same name (sink error)
+		4) Window join needs attributes that I don't know. Looks like it wants a timestamp attribute.
+-->
+<!--
+	Join the averages back together
+-->
+
+<join id="join_speed_volume_avg" input="speed_avg_r volume_avg_r" left="bucket_speed" right="bucket_volume">
+		<pred op="eq">
+			<var value="$sid_speed"/><var value="$sid_volume"/>
+		</pred>
+</join>
+
+<join id="substitute" input="join_speed_volume_avg occupancy_avg_r" left="bucket_volume" right="bucket_occupancy">
+	<pred op="eq">
+		<var value="$sid_volume"/><var value="sid_occupancy"/>
+	</pred>
+</join>
+
+
+<!--
+	Bad Query
+-->
+
+<!--
+	Select results where the speed is > 100 or the occupancy is > 95
+-->
+<select id="occupancy_or_speed_gt" input="dup1" log="no">
+	<or>
+		<pred op="gt">
+			<var value="$occupancy"></var><number value="95"></number>
+		</pred>
+		<pred op="gt">
+			<var value="$speed"></var><number value="100"></number>
+		</pred>
+	</or>
+</select>
+
+<!--
+	Select the results where the volume is > 0 and the speed is 0
+-->
+<select id="speed_0_and_volume_not_0" input="dup1" log="no">
+		<and>
+			<pred op="eq">
+				<var value="$speed"></var><number value="0"></number>
+			</pred>
+			<pred op="gt">
+				<var value="$volume"></var><number value="0"></number>
+			</pred>
+		</and>
+</select>
+
+<!--
+	Select the results where the speed is > 0 and the volume is 0
+-->
+<select id="volume_0_and_speed_not_0" input="dup1" log="no">
+		<and>
+			<pred op="gt">
+				<var value="$speed"></var><number value="0"></number>
+			</pred>
+			<pred op="eq">
+				<var value="$volume"></var><number value="0"></number>
+			</pred>
+		</and>
+</select>
+
+
+<!--
+	Select the results where the occupancy is > 0 and the volume is 0
+-->		
+<select id="volume_0_and_occupancy_not_0" input="dup1" log="no">
+		<and>
+			<pred op="gt">
+				<var value="$occupancy"></var><number value="0"></number>
+			</pred>
+			<pred op="eq">
+				<var value="$volume"></var><number value="0"></number>
+			</pred>
+		</and>
+</select>
+
+<!--
+	Union all the bad results together.
+-->
+<union id="bad" input="occupancy_or_speed_gt speed_0_and_volume_not_0 volume_0_and_speed_not_0 volume_0_and_occupancy_not_0"></union>
+
+<!--
+<count id="count" input="bad" groupby="detectorid" countattr="starttime"></count>
+-->
+
+<join id="join_bad_detectors" input="bad detectors_r" left="detectorid" right="did"/>
+
+<construct id="project_bad" input="join_bad_detectors">
+<![CDATA[
+<output>
+ $ts
+ $stationid
+</output>]]>
+
+</construct>
+
+<rename id="bad_to_join" input="project_bad" source="ts stationid" dest="ts_b sid"/>
+
+<!--
+	Pull the results together
+-->
+
+<join id="replacement" input="bad_to_join substitute" "left="ts" right="bucket">
+	<pred op="eq">
+		<var value="$sid"/><var value="$stationid"/>
+	</pred>
+</join>
+
+<union id="result" input="replacement good">
+
+
+</plan>

@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!--
+
+	Highway traffic data.
+	Select the sensor readings that do not meet the qualifications for good.
+
+-->
+
+<plan top="good">
+
+<!--
+
+	Read in the input stream in csv format.
+	
+	The CSV reader seems to be not very good at this point.
+	Attribute names need to match the ones in the header of the CSV file.
+	Attribute types seem to be very week at this point. Setting everything to string for now.
+
+-->
+<csvstream id="loopdata"
+        file_name="../../Streams/FreewayData/freeway_loopdata_6hr.csv"
+        attr_names="ts starttime detectorid volume speed occupancy status dqflags" 
+        attr_types="TS string string long long long long long"
+/>
+
+<!--
+	Duplicate the loopdata stream.
+	
+	NOTE: branch is the number of duplicates. If you have more duplicates than streams reading from
+	this op, the system seems to go into an infinite loop.
+
+-->
+
+<dup id="dup1" input="loopdata" branch="1"></dup>
+
+
+<!--
+	Filter results where the speed is > 100 or the occupancy is > 95
+-->
+<select id="occupancy_or_speed" input="dup1" log="no">
+	<not>
+	<or>
+		<pred op="gt">
+			<var value="$occupancy"></var><number value="95"></number>
+		</pred>
+		<pred op="gt">
+			<var value="$speed"></var><number value="100"></number>
+		</pred>
+	</or>
+	</not>
+</select>
+
+<!--
+	Filter the results where the volume is > 0 and the speed is 0
+-->
+<select id="speed_and_volume_ok_1" input="occupancy_or_speed" log="no">
+	<not>
+		<and>
+			<pred op="eq">
+				<var value="$speed"></var><number value="0"></number>
+			</pred>
+			<pred op="gt">
+				<var value="$volume"></var><number value="0"></number>
+			</pred>
+		</and>
+	</not>
+</select>
+
+<!--
+	Filter the results where the speed is > 0 and the volume is 0
+-->
+<select id="speed_and_volume_ok_2" input="speed_and_volume_ok_1" log="no">
+	<not>
+		<and>
+			<pred op="gt">
+				<var value="$speed"></var><number value="0"></number>
+			</pred>
+			<pred op="eq">
+				<var value="$volume"></var><number value="0"></number>
+			</pred>
+		</and>
+	</not>
+</select>
+
+
+<!--
+	Filter the results where the occupancy is > 0 and the volume is 0
+-->		
+<select id="good" input="speed_and_volume_ok_2" log="no">
+	<not>
+		<and>
+			<pred op="gt">
+				<var value="$occupancy"></var><number value="0"></number>
+			</pred>
+			<pred op="eq">
+				<var value="$volume"></var><number value="0"></number>
+			</pred>
+		</and>
+	</not>
+</select>
+
+<!--
+	Shift the time by -20
+-->
+
+<construct id="good_shifted" input="good">
+	<![CDATA[
+		<output>
+		$ts
+		$starttime
+		$detectorid
+		$speed
+		$volume
+		$occupancy
+		</output>
+	]]>
+</construct>
+</plan>

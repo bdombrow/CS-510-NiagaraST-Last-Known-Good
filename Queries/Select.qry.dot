@@ -1,0 +1,34 @@
+digraph tree {
+rankdir="LR"
+node [shape=record];
+node [style=rounded];
+"top" [label="OP: plan | {ID: top}"];
+"data" [label="OP: filescan | {ID: data}"];
+"detectors" [label="OP: unnest | {ID: detectors}"];
+"time_t" [label="OP: unnest | {ID: time_t}"];
+"time_s" [label="OP: unnest | {ID: time_s}"];
+"detector" [label="OP: unnest | {ID: detector}"];
+"detector_id" [label="OP: unnest | {ID: detector_id}"];
+"segment_id" [label="OP: unnest | {ID: segment_id}"];
+"volume" [label="OP: unnest | {ID: volume}"];
+"speed" [label="OP: unnest | {ID: speed}"];
+"occupancy" [label="OP: unnest | {ID: occupancy}"];
+"se" [label="OP: select | {ID: se}"];
+"sel" [label="OP: select | {ID: sel}"];
+"se2" [label="OP: select | {ID: se2}"];
+"cons" [label="OP: construct | {ID: cons}"];
+"cons" -> "top";
+"data" -> "detectors";
+"detectors" -> "time_t";
+"time_t" -> "time_s";
+"time_s" -> "detector";
+"detector" -> "detector_id";
+"detector_id" -> "segment_id";
+"segment_id" -> "volume";
+"volume" -> "speed";
+"speed" -> "occupancy";
+"occupancy" -> "se";
+"se" -> "sel";
+"sel" -> "se2";
+"se2" -> "cons";
+}
