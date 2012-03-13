@@ -8,7 +8,7 @@
 
 -->
 
-<plan top="good_shifted">
+<plan top="cons">
 
 <!--
 
@@ -26,20 +26,9 @@
 />
 
 <!--
-	Duplicate the loopdata stream.
-	
-	NOTE: branch is the number of duplicates. If you have more duplicates than streams reading from
-	this op, the system seems to go into an infinite loop.
-
--->
-
-<dup id="dup1" input="loopdata" branch="1"></dup>
-
-
-<!--
 	Filter results where the speed is > 100 or the occupancy is > 95
 -->
-<select id="occupancy_or_speed" input="dup1" log="no">
+<lastknowngood id="occupancy_or_speed" input="loopdata" groupby="detectorid">
 	<not>
 	<or>
 		<pred op="gt">
@@ -50,12 +39,12 @@
 		</pred>
 	</or>
 	</not>
-</select>
+</lastknowngood>
 
 <!--
 	Filter the results where the volume is > 0 and the speed is 0
 -->
-<select id="speed_and_volume_ok_1" input="occupancy_or_speed" log="no">
+<lastknowngood id="speed_and_volume_ok_1" input="occupancy_or_speed" groupby="detectorid">
 	<not>
 		<and>
 			<pred op="eq">
@@ -66,12 +55,12 @@
 			</pred>
 		</and>
 	</not>
-</select>
+</lastknowngood>
 
 <!--
 	Filter the results where the speed is > 0 and the volume is 0
 -->
-<select id="speed_and_volume_ok_2" input="speed_and_volume_ok_1" log="no">
+<lastknowngood id="speed_and_volume_ok_2" input="speed_and_volume_ok_1" groupby="detectorid">
 	<not>
 		<and>
 			<pred op="gt">
@@ -82,13 +71,13 @@
 			</pred>
 		</and>
 	</not>
-</select>
+</lastknowngood>
 
 
 <!--
 	Filter the results where the occupancy is > 0 and the volume is 0
 -->		
-<select id="good" input="speed_and_volume_ok_2" log="no">
+<lastknowngood id="good" input="speed_and_volume_ok_2" groupby="detectorid">
 	<not>
 		<and>
 			<pred op="gt">
@@ -99,16 +88,13 @@
 			</pred>
 		</and>
 	</not>
-</select>
+</lastknowngood>
 
-<!--
-	Shift the time by -20
--->
-<expression id="shifted" variables="ts" expression="result = ts - 20" input="good"/>
-<construct id="good_shifted" input="shifted">
+
+<construct id="cons" input="good">
 	<![CDATA[
 		<output>
-		$shifted
+		$ts
 		$starttime
 		$detectorid
 		$speed

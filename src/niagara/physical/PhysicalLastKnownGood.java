@@ -53,6 +53,7 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 	// logging test
 	int tupleOut;
 	int tupleDrop;
+	int tupleReplaced;
 
 	// Feedback
 	protected Guard outputGuard;
@@ -96,8 +97,9 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 		outputGuard = new Guard();
 		tupleOut = 0;
 		tupleDrop = 0;
+		tupleReplaced = 0;
 		hasher = new Hasher(groupByAttrs);
-		hashtable = new Hashtable();
+		hashtable = new Hashtable<String, Tuple>();
 	}
 	
 	void processCtrlMsgFromSink(ArrayList ctrl, int streamId)
@@ -201,14 +203,18 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 			}
 		} else {															// Predicate is false
 			String key = hasher.hashKey(inputTuple);
-			if (key == null) {
-				System.out.print("Key is null\n");
-			} else {
+			if (key != null) {
 				if (hashtable.containsKey(key) ) {
 					putTuple(hashtable.get(key), 0);
-					System.out.print("Sent replacement tuple for key " + key + "\n");
+					if (logging) {
+						++tupleReplaced;
+						log.Update("TupleReplaced", String.valueOf(tupleReplaced));
+					}
 				} else {
-					System.out.print("Did not find replacement tuple for key " + key + "\n");
+					if (logging) {
+						tupleDrop++;
+						log.Update("TupleDrop", String.valueOf(tupleDrop));
+					}
 				}
 			}
 			if (logging) {

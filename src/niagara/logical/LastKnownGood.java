@@ -30,7 +30,7 @@ public class LastKnownGood extends UnaryOperator {
 	private Boolean propagate = false;
 	private Boolean exploit = false;
 	private String groupBy;
-	private Vector groupByAttrs;
+	private Vector<Attribute> groupByAttrs;
 
 	public LastKnownGood() {
 	}
@@ -92,7 +92,7 @@ public class LastKnownGood extends UnaryOperator {
 		}
 		pred = Predicate.loadFromXML(predElt, inputProperties);
 		
-		groupByAttrs = new Vector();
+		groupByAttrs = new Vector<Attribute>();
 		StringTokenizer st = new StringTokenizer(groupBy);
 		while (st.hasMoreTokens()) {
 			String varName = st.nextToken();
