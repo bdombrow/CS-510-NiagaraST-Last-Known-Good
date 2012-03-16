@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import niagara.logical.LastKnownGood;
 import niagara.logical.predicates.Predicate;
+import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
@@ -16,7 +17,6 @@ import niagara.optimizer.colombia.PhysicalProperty;
 import niagara.physical.predicates.PredicateImpl;
 import niagara.query_engine.TupleSchema;
 import niagara.utils.ControlFlag;
-import niagara.utils.DuplicateHashtable;
 import niagara.utils.FeedbackPunctuation;
 import niagara.utils.Guard;
 import niagara.utils.Log;
@@ -34,7 +34,8 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 	private static final boolean[] blockingSourceStreams = { false };
 		
 	// Group By attribute
-	private Vector groupByAttrs;
+	private Vector<Attribute> groupByAttrs;
+	private Attrs tsAttrs;
 	private Hasher hasher;
 	private Hashtable<String,Tuple> hashtable;
 
@@ -73,6 +74,7 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 		propagate = ((LastKnownGood) logicalOperator).getPropagate();
 		exploit = ((LastKnownGood) logicalOperator).getExploit();
 		groupByAttrs = ((LastKnownGood) logicalOperator).getGroupByAttrs();
+		tsAttrs = ((LastKnownGood) logicalOperator).getTSAttr();
 		hasher = new Hasher(groupByAttrs);
 	}
 
@@ -86,6 +88,7 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 		p.exploit = exploit;
 		p.outputGuard = outputGuard.Copy();
 		p.groupByAttrs = groupByAttrs;
+		p.tsAttrs = tsAttrs;
 		return p;
 	}
 	
@@ -202,26 +205,48 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 
 			}
 		} else {															// Predicate is false
-			String key = hasher.hashKey(inputTuple);
-			if (key != null) {
-				if (hashtable.containsKey(key) ) {
-					putTuple(hashtable.get(key), 0);
-					if (logging) {
-						++tupleReplaced;
-						log.Update("TupleReplaced", String.valueOf(tupleReplaced));
-					}
-				} else {
-					if (logging) {
-						tupleDrop++;
-						log.Update("TupleDrop", String.valueOf(tupleDrop));
-					}
+			Tuple replacementTuple = getReplacement(inputTuple);
+			if (replacementTuple != null) {
+				putTuple(replacementTuple, 0);
+				if (logging) {
+					++tupleReplaced;
+					log.Update("TupleReplaced", String.valueOf(tupleReplaced));
+				}
+			} else {
+				if (logging) {
+					tupleDrop++;
+					log.Update("TupleDrop", String.valueOf(tupleDrop));
 				}
 			}
-			if (logging) {
-				tupleDrop++;
-				log.Update("TupleDrop", String.valueOf(tupleDrop));
+		}
+	}
+	
+	/**
+	 * This function will supply a replacement tuple for a bad tuple.
+	 * Null is return if there isn't a suitable replacement
+	 * 
+	 * @param badTuple
+	 * 			The tuple that needs to be replaced
+	 * 
+	 * 
+	 */
+	private Tuple getReplacement(Tuple badTuple) {
+		int[] tsmap;
+		
+		TupleSchema tsSchema = inputTupleSchemas[0].project(tsAttrs);
+		tsmap = inputTupleSchemas[0].mapPositions(tsSchema);
+		
+		String key = hasher.hashKey(badTuple);
+		if (key != null) {
+			if (hashtable.containsKey(key)) {
+				Tuple result = hashtable.get(key);
+				badTuple.copyInto(result, 0, tsmap);
+				return result;
 			}
 		}
+		return null;
+		
+		
 	}
 
 	/**
@@ -304,8 +329,6 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 		inputTupleSchemas = inputSchemas;
 		outputTupleSchema = inputTupleSchemas[0];
 	}
-
-
 
 	/**
 	 * @see niagara.utils.SerializableToXML#dumpChildrenInXML(StringBuffer)

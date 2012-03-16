@@ -252,12 +252,13 @@
     exploit   (yes | no) "no"
 	  %StandardAttributes;>
 
-<!ELEMENT lastknowngood  (and | or | not | true | false | pred | groupby)>
+<!ELEMENT lastknowngood  (and | or | not | true | false | pred | groupby | tsattr)>
 <!ATTLIST lastknowngood
     log       (yes | no) "no"
     propagate (yes | no) "no"
     exploit   (yes | no) "no"
     groupby CDATA			#REQUIRED
+    tsattr CDATA			#REQUIRED
 	  %StandardAttributes;>
 
 <!ELEMENT magic  (and | or | not | true | false | pred)>

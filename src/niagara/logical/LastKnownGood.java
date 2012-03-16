@@ -30,7 +30,9 @@ public class LastKnownGood extends UnaryOperator {
 	private Boolean propagate = false;
 	private Boolean exploit = false;
 	private String groupBy;
+	private String ts;
 	private Vector<Attribute> groupByAttrs;
+	private Attrs tsAttrs;
 
 	public LastKnownGood() {
 	}
@@ -52,6 +54,7 @@ public class LastKnownGood extends UnaryOperator {
 		op.logging = this.logging;
 		op.propagate = this.propagate;
 		op.exploit = this.exploit;
+		op.tsAttrs = tsAttrs;
 		return op;
 	}
 
@@ -82,6 +85,8 @@ public class LastKnownGood extends UnaryOperator {
 		
 		groupBy = e.getAttribute("groupby");
 		
+		ts = e.getAttribute("tsattr");
+		
 		NodeList children = e.getChildNodes();
 		Element predElt = null;
 		for (int i = 0; i < children.getLength(); i++) {
@@ -99,6 +104,15 @@ public class LastKnownGood extends UnaryOperator {
 			Attribute attr = Variable.findVariable(inputProperties, varName);
 			groupByAttrs.addElement(attr);
 		}
+		
+		tsAttrs = new Attrs();
+		StringTokenizer stts = new StringTokenizer(ts);
+		while (stts.hasMoreTokens()) {
+			String varName = stts.nextToken();
+			Attribute attr = Variable.findVariable(inputProperties, varName);
+			tsAttrs.add(attr);
+		}
+		
 
 		String l = e.getAttribute("log");
 		if(l.equals("yes"))
@@ -130,9 +144,14 @@ public class LastKnownGood extends UnaryOperator {
 		return exploit;
 	}
 	
-	public Vector getGroupByAttrs(){
+	public Vector<Attribute> getGroupByAttrs(){
 		return groupByAttrs;
 	}
+	
+	public Attrs getTSAttr() {
+		return tsAttrs;
+	}
+	
 	
 	public LogicalProperty findLogProp(ICatalog catalog, LogicalProperty[] input) {
 		LogicalProperty result = input[0].copy();
