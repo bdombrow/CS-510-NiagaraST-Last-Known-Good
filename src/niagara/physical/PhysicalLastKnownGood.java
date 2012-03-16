@@ -173,7 +173,8 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 		// Evaluate the predicate on the desired attribute of the tuple
 
 		if (predEval.evaluate(inputTuple, null)) { 							// Predicate is true
-
+			String key;
+			
 			if (exploit) {
 				// check against guards
 				Boolean guardMatch = false;
@@ -185,8 +186,10 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 				}
 
 				if (!guardMatch) {
+					key = hasher.hashKey(inputTuple);
+					hashtable.put(key, inputTuple);
 					putTuple(inputTuple, 0);
-					hashtable.put(hasher.hashKey(inputTuple), inputTuple);
+
 					if (logging) {
 						tupleOut++;
 						log.Update("TupleOut", String.valueOf(tupleOut));
@@ -195,8 +198,10 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 
 				}
 			} else {
+				key = hasher.hashKey(inputTuple);
+				hashtable.put(key,inputTuple);
 				putTuple(inputTuple, 0);
-				hashtable.put(hasher.hashKey(inputTuple),inputTuple);
+
 				if (logging) {
 					tupleOut++;
 					log.Update("TupleOut", String.valueOf(tupleOut));
@@ -232,15 +237,18 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 	 */
 	private Tuple getReplacement(Tuple badTuple) {
 		int[] tsmap;
+		Tuple result = new Tuple(true);
 		
 		TupleSchema tsSchema = inputTupleSchemas[0].project(tsAttrs);
 		tsmap = inputTupleSchemas[0].mapPositions(tsSchema);
 		
 		String key = hasher.hashKey(badTuple);
 		if (key != null) {
-			if (hashtable.containsKey(key)) {
-				Tuple result = hashtable.get(key);
-				badTuple.copyInto(result, 0, tsmap);
+			if (hashtable.containsKey(key)) {				
+				result.appendTuple(hashtable.get(key));
+				for (int i = 0; i < tsmap.length; ++i) {
+					result.setAttribute(tsmap[i], badTuple.getAttribute(tsmap[i]));					
+				}
 				return result;
 			}
 		}

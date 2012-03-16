@@ -54,7 +54,7 @@ public class LastKnownGood extends UnaryOperator {
 		op.logging = this.logging;
 		op.propagate = this.propagate;
 		op.exploit = this.exploit;
-		op.tsAttrs = tsAttrs;
+		op.tsAttrs = this.tsAttrs;
 		return op;
 	}
 
