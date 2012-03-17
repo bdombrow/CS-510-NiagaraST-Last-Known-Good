@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE plan SYSTEM "queryplan.dtd">
+
+<!--
+
+	Highway traffic data.
+	Select the sensor readings that do not meet the qualifications for good.
+
+-->
+
+<plan top="cons">
+
+<!--
+
+	Read in the input stream in csv format.
+	
+	The CSV reader seems to be not very good at this point.
+	Attribute names need to match the ones in the header of the CSV file.
+	Attribute types seem to be very week at this point. Setting everything to string for now.
+
+-->
+<csvstream id="data"
+        file_name="../../Streams/test.csv"
+        attr_names="ts a b c" 
+        attr_types="long string string long"
+/>
+
+<!--
+	Filter results where the speed is > 100 or the occupancy is > 95
+-->
+<lastknowngood id="lkg" input="data" groupby="a" tsattr="ts">
+		<pred op="lt">
+			<var value="$c"></var><number value="50"></number>
+		</pred>
+</lastknowngood>
+
+<construct id="cons" input="lkg">
+	<![CDATA[
+		<result>
+		$ts
+		$a
+		$b
+		$c
+		</result>
+	]]>
+</construct>
+
+</plan>

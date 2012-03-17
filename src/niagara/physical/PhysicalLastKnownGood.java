@@ -16,6 +16,7 @@ import niagara.optimizer.colombia.Op;
 import niagara.optimizer.colombia.PhysicalProperty;
 import niagara.physical.predicates.PredicateImpl;
 import niagara.query_engine.TupleSchema;
+import niagara.utils.BaseAttr;
 import niagara.utils.ControlFlag;
 import niagara.utils.FeedbackPunctuation;
 import niagara.utils.Guard;
@@ -34,9 +35,8 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 	private static final boolean[] blockingSourceStreams = { false };
 		
 	// Group By attribute
-	private Vector<Attribute> groupByAttrs;
+	private Attrs groupByAttrs;
 	private Attrs tsAttrs;
-	private Hasher hasher;
 	private Hashtable<String,Tuple> hashtable;
 
 	// The is the predicate to apply to the tuples
@@ -75,7 +75,6 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 		exploit = ((LastKnownGood) logicalOperator).getExploit();
 		groupByAttrs = ((LastKnownGood) logicalOperator).getGroupByAttrs();
 		tsAttrs = ((LastKnownGood) logicalOperator).getTSAttr();
-		hasher = new Hasher(groupByAttrs);
 	}
 
 	public Op opCopy() {
@@ -101,7 +100,6 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 		tupleOut = 0;
 		tupleDrop = 0;
 		tupleReplaced = 0;
-		hasher = new Hasher(groupByAttrs);
 		hashtable = new Hashtable<String, Tuple>();
 	}
 	
@@ -186,7 +184,7 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 				}
 
 				if (!guardMatch) {
-					key = hasher.hashKey(inputTuple);
+					key = getKey(inputTuple);
 					hashtable.put(key, inputTuple);
 					putTuple(inputTuple, 0);
 
@@ -198,7 +196,7 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 
 				}
 			} else {
-				key = hasher.hashKey(inputTuple);
+				key = getKey(inputTuple);
 				hashtable.put(key,inputTuple);
 				putTuple(inputTuple, 0);
 
@@ -236,18 +234,17 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 	 * 
 	 */
 	private Tuple getReplacement(Tuple badTuple) {
-		int[] tsmap;
+		int[] tsMap;
 		Tuple result = new Tuple(true);
 		
-		TupleSchema tsSchema = inputTupleSchemas[0].project(tsAttrs);
-		tsmap = inputTupleSchemas[0].mapPositions(tsSchema);
+		tsMap = inputTupleSchemas[0].mapPositions(inputTupleSchemas[0].project(tsAttrs));
 		
-		String key = hasher.hashKey(badTuple);
+		String key = getKey(badTuple);
 		if (key != null) {
 			if (hashtable.containsKey(key)) {				
 				result.appendTuple(hashtable.get(key));
-				for (int i = 0; i < tsmap.length; ++i) {
-					result.setAttribute(tsmap[i], badTuple.getAttribute(tsmap[i]));					
+				for (int i = 0; i < tsMap.length; ++i) {
+					result.setAttribute(tsMap[i], badTuple.getAttribute(tsMap[i]));					
 				}
 				return result;
 			}
@@ -255,6 +252,17 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 		return null;
 		
 		
+	}
+	
+	private String getKey(Tuple tuple) {
+		int [] groupMap;
+		String key = "";
+		
+		groupMap = inputTupleSchemas[0].mapPositions(inputTupleSchemas[0].project(groupByAttrs));
+		for (int i = 0; i < groupMap.length; ++i) {
+			key = key + ((BaseAttr)tuple.getAttribute(groupMap[i])).toASCII();
+		}
+		return key;
 	}
 
 	/**

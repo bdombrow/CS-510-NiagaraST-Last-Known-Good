@@ -1,0 +1,11 @@
+ts,a,b,c
+1,a,good,10
+2,b,good,10
+3,a,bad,100
+4,b,bad,100
+5,c,bad,100
+6,c,good,10
+7,c,bad,100
+8,a,bad,100
+9,c,good,10
+10,b,bad,100

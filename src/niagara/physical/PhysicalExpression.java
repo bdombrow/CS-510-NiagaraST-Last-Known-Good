@@ -69,8 +69,7 @@ public class PhysicalExpression extends PhysicalOperator {
 					source += " double "
 							+ varname
 							// + " = XMLUtils.getInt(ste, "
-							+ " = Double.parseDouble( ((BaseAttr)ste.getAttribute("
-							+ attrpos + ")).toASCII());\n";
+							+ " = Double.parseDouble( ((BaseAttr)ste.getAttribute(" + attrpos + ")).toASCII());\n";
 				}
 				// source += "int result; " + expression;
 				source += "double result; " + expression;

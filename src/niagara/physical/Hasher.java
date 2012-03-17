@@ -30,8 +30,7 @@ public class Hasher {
 		values = new ArrayList[attributeList.size()];
 
 		for (int i = 0; i < attributeList.size(); i++) {
-			evaluators[i] = new AtomicEvaluator(((Attribute) attributeList
-					.get(i)).getName());
+			evaluators[i] = new AtomicEvaluator(((Attribute) attributeList.get(i)).getName());
 			values[i] = new ArrayList(1);
 		}
 	}
