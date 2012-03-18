@@ -20,7 +20,7 @@
 
 -->
 <csvstream id="loopdata"
-        file_name="../../Streams/FreewayData/freeway_loopdata_6hr.csv"
+        file_name="../../Streams/FreewayData/freeway_loopdata_2hr.csv"
         attr_names="ts starttime detectorid volume speed occupancy status dqflags" 
         attr_types="TS string string long long long long long"
 />
@@ -108,28 +108,15 @@
 -->
 <union id="bad" input="occupancy_or_speed_gt speed_0_and_volume_not_0 volume_0_and_speed_not_0 volume_0_and_occupancy_not_0"></union>
 
-<!--
-<count id="count" input="bad" groupby="detectorid" countattr="starttime"></count>
--->
-
-<join id="join_bad_detectors" input="bad detectors_r" left="detectorid" right="did"/>
-
-<construct id="project_bad" input="join_bad_detectors">
-<![CDATA[
-<output>
- $ts
- $stationid
-</output>]]>
-
-</construct>
-
-<rename id="bad_to_join" input="project_bad" source="ts stationid" dest="ts_b sid"/>
-
-<construct id="cons" input="bad_to_join">
+<construct id="cons" input="bad">
 <![CDATA[
 <result>
- $ts_b
- $sid
+		$ts
+		$starttime
+		$detectorid
+		$speed
+		$volume
+		$occupancy
 </result>
 ]]>
 </construct>

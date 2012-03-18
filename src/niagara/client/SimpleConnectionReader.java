@@ -71,7 +71,7 @@ class SimpleConnectionReader extends AbstractConnectionReader implements
 						ui.errorMessage(local_id, line + "\n");
 					}
 					if (line.indexOf("\"end_result\">") != -1) {
-						addResult("\n</niagara:results>");
+						addResult("\n</niagararesults>");
 						ui.notifyNew(local_id);
 						ui.notifyFinalResult(local_id);
 						end = true;
@@ -87,7 +87,7 @@ class SimpleConnectionReader extends AbstractConnectionReader implements
 					// KT - HERE IS WHERE CLIENT RESULTS ARE PRODUCED
 					addResult(line);
 					if (line.indexOf("<?xml") != -1)
-						addResult("\n<niagara:results>\n");
+						addResult("\n<niagararesults>\n");
 					ui.notifyNew(local_id);
 				}
 				line = br.readLine();

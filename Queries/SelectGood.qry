@@ -8,7 +8,7 @@
 
 -->
 
-<plan top="good_shifted">
+<plan top="cons">
 
 <!--
 
@@ -20,7 +20,7 @@
 
 -->
 <csvstream id="loopdata"
-        file_name="../../Streams/FreewayData/freeway_loopdata_6hr.csv"
+        file_name="../../Streams/FreewayData/freeway_loopdata_2hr.csv"
         attr_names="ts starttime detectorid volume speed occupancy status dqflags" 
         attr_types="TS string string long long long long long"
 />
@@ -104,17 +104,16 @@
 <!--
 	Shift the time by -20
 -->
-<expression id="shifted" variables="ts" expression="result = ts - 20" input="good"/>
-<construct id="good_shifted" input="shifted">
+<construct id="cons" input="good">
 	<![CDATA[
-		<output>
-		$shifted
+		<result>
+		$ts
 		$starttime
 		$detectorid
 		$speed
 		$volume
 		$occupancy
-		</output>
+		</result>
 	]]>
 </construct>
 </plan>

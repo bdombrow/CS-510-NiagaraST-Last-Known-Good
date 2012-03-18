@@ -17,7 +17,7 @@ public class DisplayServlet extends HttpServlet {
 		BufferedReader in = new BufferedReader(new InputStreamReader(req
 				.getInputStream()));
 		if (!MQPClient.quiet)
-			System.out.println("<niagara:results query_id='" + in.readLine()
+			System.out.println("<niagararesults query_id='" + in.readLine()
 					+ "'>");
 		String input = null;
 		while ((input = in.readLine()) != null) {
@@ -25,7 +25,7 @@ public class DisplayServlet extends HttpServlet {
 				System.out.println(input);
 		}
 		if (!MQPClient.quiet)
-			System.out.println("</niagara:results>");
+			System.out.println("</niagararesults>");
 		res.getOutputStream().close();
 		MQPClient.getMQPClient().queryDone();
 	}
