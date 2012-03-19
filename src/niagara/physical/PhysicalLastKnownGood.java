@@ -2,11 +2,9 @@ package niagara.physical;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Vector;
 
 import niagara.logical.LastKnownGood;
 import niagara.logical.predicates.Predicate;
-import niagara.optimizer.colombia.Attribute;
 import niagara.optimizer.colombia.Attrs;
 import niagara.optimizer.colombia.Cost;
 import niagara.optimizer.colombia.ICatalog;
@@ -34,9 +32,11 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 	// No blocking source streams
 	private static final boolean[] blockingSourceStreams = { false };
 		
-	// Group By attribute
+	// Group By attributes
 	private Attrs groupByAttrs;
+	// Timestamp attributes (what to keep from the bad tuple)
 	private Attrs tsAttrs;
+	// Hash table to buffer the last known good values
 	private Hashtable<String,Tuple> hashtable;
 
 	// The is the predicate to apply to the tuples
@@ -177,15 +177,14 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 				// check against guards
 				Boolean guardMatch = false;
 				for (FeedbackPunctuation fp : outputGuard.elements()) {
-					guardMatch = guardMatch
-							|| fp
-									.match(positions, inputTuple
-											.getTuple());
+					guardMatch = guardMatch || fp.match(positions, inputTuple.getTuple());
 				}
 
 				if (!guardMatch) {
+					// Update the last known good
 					key = getKey(inputTuple);
 					hashtable.put(key, inputTuple);
+					
 					putTuple(inputTuple, 0);
 
 					if (logging) {
@@ -196,8 +195,10 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 
 				}
 			} else {
+				// Update last known good
 				key = getKey(inputTuple);
 				hashtable.put(key,inputTuple);
+				
 				putTuple(inputTuple, 0);
 
 				if (logging) {
@@ -208,9 +209,12 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 
 			}
 		} else {															// Predicate is false
+			// Get the replacement tuple
 			Tuple replacementTuple = getReplacement(inputTuple);
+			// Use the replacement if it exists
 			if (replacementTuple != null) {
 				putTuple(replacementTuple, 0);
+				// Update logging stats
 				if (logging) {
 					++tupleReplaced;
 					log.Update("TupleReplaced", String.valueOf(tupleReplaced));
@@ -230,19 +234,22 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 	 * 
 	 * @param badTuple
 	 * 			The tuple that needs to be replaced
-	 * 
-	 * 
+	 * @return Tuple
+	 * 			The replacement tuple or null
 	 */
 	private Tuple getReplacement(Tuple badTuple) {
 		int[] tsMap;
 		Tuple result = new Tuple(true);
-		
+		// Get the map for the attributes to swap out
 		tsMap = inputTupleSchemas[0].mapPositions(inputTupleSchemas[0].project(tsAttrs));
 		
 		String key = getKey(badTuple);
+		
 		if (key != null) {
-			if (hashtable.containsKey(key)) {				
+			if (hashtable.containsKey(key)) {
+				// Append the good tuple attributes and values
 				result.appendTuple(hashtable.get(key));
+				// Keep the bad tuple attributes in tsMap
 				for (int i = 0; i < tsMap.length; ++i) {
 					result.setAttribute(tsMap[i], badTuple.getAttribute(tsMap[i]));					
 				}
@@ -253,7 +260,15 @@ public class PhysicalLastKnownGood extends PhysicalOperator {
 		
 		
 	}
-	
+	/**
+	 * This function will supply a key suitable for grouping.
+	 * The key is formed my concatenating the group by attribute values in string form.
+	 * 
+	 * @param tuple
+	 * 		The tuple to get the key of
+	 * @return String
+	 * 		A string value for the key
+	 */
 	private String getKey(Tuple tuple) {
 		int [] groupMap;
 		String key = "";

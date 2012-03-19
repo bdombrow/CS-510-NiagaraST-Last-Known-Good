@@ -18,8 +18,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * The <code>Select</code> operator does a selection - so much for useful
- * comments!
+ * The <code>LastKnownGood</code> operator.
+ * This operator is a select that will use the last known good value if the predicate is false.
+ * If a good value has not been seen, it will drop the tuple in the same manner as select.
+ * 
  */
 @SuppressWarnings("unchecked")
 public class LastKnownGood extends UnaryOperator {

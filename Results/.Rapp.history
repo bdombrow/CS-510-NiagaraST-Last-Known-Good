@@ -1,67 +1,90 @@
-Data <- read.table("FocalLen35Film.csv")
-Data <- read.table("~brent/FocalLen35Film.csv")
-Data <- read.table("~brent/FocalLen35Film.csv", header=false)
-test <- read.table("/Users/brent/FocalLen35mmFilm.csv")
-test
-test <- read.table("/Users/brent/FocalLen35mmFilm.csv", sep=",")
-test
-test[5]
-test
-library(RSQLite)
-drv <- dbDriver("SQLite")
-con <- dbConnect(drv, dbname="~brent/Properties.apdb")
-dbListTables(con)
-dbGetQuery(con, "SELECT * FROM RKExifNumberProperty WHERE propertyKey = 'FocalLenIn35mmFilm'")
-data <- dbGetQuery(con, "SELECT * FROM RKExifNumberProperty WHERE propertyKey = 'FocalLenIn35mmFilm'")
-data
-data[value]
-data
-data[v4]
-data[4]
-historgarm(data[4])
-histogram
-hist(data[4])
-data[4]
-cast(data[4])
-hist(data[4])
-hist(as.numeric(data[4]))
-data <- dbGetQuery(con, "SELECT numberProperty FROM RKExifNumberProperty WHERE propertyKey = 'FocalLenIn35mmFilm'")
-data
-hist(data)
-as.numeric(data)
-as.numeric(data(i))
-data[1]
-data[2]
-data[1]
-as.numeric(data.[1])
-as.numeric(data[1])
-data.1
-data
-data[1]
-as.numeric(data[1])
-data[,1]
-as.numeric(data[,1])
-hist(data[,1])
-hist(data[,1], breaks=10)
-hist(data[,1], breaks=20)
-hist(data[,1], breaks=40)
-hist(data[,1], breaks=(35,70,80,105,200,300.400))
-hist(data[,1], breaks=c(35,70,80,105,200,300.400))
-hist(data[,1], breaks=c(35,70,80,105,200,300,400))
-hist(data[,1], breaks=c(35,70,80,105,200,300,405))
-hist(data[,1], breaks=c(0,35,70,80,105,200,300,405))
-hist(data[,1], breaks=c(0,35,70,80,105,200,300,400,900))
-hist(data[,1], breaks=c(0,35,70,80,105,200,300,400,500))
-hist(data[,1], breaks=c(0,35,80,105,200,300,400,500))
-hist(data[,1], breaks=c(0,35,80,105,200,500))
-hist(data[,1], breaks=c(0,35,80,105,500))
-hist(data[,1], breaks=40)
-hist(data[,1], breaks=c(0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,300,400,500))
+exit
+exit()
 quit()
+lcd ~bdombrow
+lcd 'Current Quarter'
+lcd "Current Quarter"
+lcd Current Quarter
+source("/Users/brent/Documents/Education/PSU/Grad School/2012 Winter/CS-545 Machine/Homeworks/HW2/spam.preditions")
+predictions <- source("/Users/brent/Documents/Education/PSU/Grad School/2012 Winter/CS-545 Machine/Homeworks/HW2/spam.preditions")
+sum source
+help load
+predicted <- read.table("~bdombrow/Current Quarter/CS-545 Machine/Homeworks/HW2/spam.preditions")
+predicted <- read.table("~brent/Current Quarter/CS-545 Machine/Homeworks/HW2/spam.preditions")
+max(predicted)
+stdev(predicted)
+raw <- read.table("~brent/Current Quarter/CS-545 Machine/Homeworks/HW2/spam.predictions",header=FALSE)
+actual <- read.table("~brent/Current Quarter/CS-545 Machine/Homeworks/HW2/spam.test.class",header=FALSE)
+sum raw
+max(raw)
+max(actual)
+min(raw)
+min(actual)
+q()
+help std_dev
+help
+std_dev
+stdev
+stddev
+max
+deviation
+dev
+quit
+q()
+library (XML)
+quit()
+help("INSTALL")
+ls()
+cd("Downloads")
+lcd("Downloads")
+getwd()
+setwd("/Users/brent/Downloads")
+getwd()
+R CMD INSTALL XML_3.9-4.tgz
+install
+INSTALL
+install.packages
+install.packages(XML_3.9-4.tgz)
+install.packages("XML_3.9-4.tgz")
+install.packages("XML")
 library(XML)
+setwd("../")
+getwd()
 setwd("Current Quarter/CS-510-Streams/Project/NiagaraST/Results")
+library(XML)
+good <- xmlToDataFrame("SelectGood.xml", homogeneous = TRUE, strigsAsFactors = FALSE)
 good <- xmlToDataFrame("SelectGood.xml", homogeneous = TRUE, stringsAsFactors = FALSE)
-good <- xmlToDataFrame("SelectGood.xml", homogeneous = TRUE, stringsAsFactors = FALSE)
-#
+bad <- xmlToDataFrame("SelectBad.xml", homogeneous = TRUE, stringsAsFactors = FALSE)
+lkg <- xmlToDataFrame("SelectLKG.xml", homogeneous = TRUE, stringsAsFactors = FALSE)
+lkg <- xmlToDataFrame("SelectLKG.xml", homogeneous = TRUE, stringsAsFactors = FALSE)
 good
+plot(good$ts)
+plot(good$ts, good$speed)
+plot(good$ts, bad$speed)
+plot(bad$ts, bad$speed)
+plot(lkg$ts, lkg$speed)
+bad
+count(bad)
+length(bad)
+length(bad$ts)
+length(good$ts)
+length(lkg$ts)
+plot(good$ts, good$speed, good$volume)
+22966 - (18595 + 4513)
+average(good)
+avg(good)
+mean(good)
+colMeans(good)
+mean(good$speed)
+mean(3)
+colMean(ts$speed)
+colMeann(ts$speed)
+colMeans(ts$speed)
+colMeans(good$speed)
+moan(goo$speed)
+mean(good$speed)
+good$speed
+good$ts
+[1,2,3]
+(1,3,3)
 q()

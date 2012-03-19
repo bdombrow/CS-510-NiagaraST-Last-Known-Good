@@ -21,16 +21,16 @@
 -->
 <csvstream id="data"
         file_name="../../Streams/test.csv"
-        attr_names="ts a b c" 
-        attr_types="long string string long"
+        attr_names="ts a b c d" 
+        attr_types="long string string string long"
 />
 
 <!--
 	Filter results where the speed is > 100 or the occupancy is > 95
 -->
-<lastknowngood id="lkg" input="data" groupby="a" tsattr="ts">
+<lastknowngood id="lkg" input="data" groupby="a b" tsattr="ts">
 		<pred op="lt">
-			<var value="$c"></var><number value="50"></number>
+			<var value="$d"></var><number value="50"></number>
 		</pred>
 </lastknowngood>
 
@@ -41,6 +41,7 @@
 		$a
 		$b
 		$c
+		$d
 		</result>
 	]]>
 </construct>
